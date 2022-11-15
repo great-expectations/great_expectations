@@ -4,14 +4,12 @@ from unittest import mock
 import pytest
 
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
-from great_expectations.data_context.types.base import DataContextConfig, GeCloudConfig
-from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
+from great_expectations.data_context.types.base import DataContextConfig, GXCloudConfig
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.exceptions.exceptions import DataContextError
 from tests.data_context.conftest import MockResponse
 
@@ -202,7 +200,7 @@ def mock_expectations_store_has_key() -> mock.MagicMock:
 @pytest.mark.cloud
 def test_list_expectation_suites(
     empty_ge_cloud_data_context_config: DataContextConfig,
-    ge_cloud_config: GeCloudConfig,
+    ge_cloud_config: GXCloudConfig,
     suite_1: SuiteIdentifierTuple,
     suite_2: SuiteIdentifierTuple,
     mock_get_all_suites_json: dict,
@@ -223,13 +221,13 @@ def test_list_expectation_suites(
         suites = context.list_expectation_suites()
 
     assert suites == [
-        GeCloudIdentifier(
-            resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
+        GXCloudIdentifier(
+            resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             ge_cloud_id=suite_1.id,
             resource_name=suite_1.name,
         ),
-        GeCloudIdentifier(
-            resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
+        GXCloudIdentifier(
+            resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             ge_cloud_id=suite_2.id,
             resource_name=suite_2.name,
         ),
@@ -276,8 +274,8 @@ def test_create_expectation_suite_overwrites_existing_suite(
     ):
         mock_list_expectation_suite_names.return_value = existing_suite_names
         mock_list_expectation_suites.return_value = [
-            GeCloudIdentifier(
-                resource_type=GeCloudRESTResource.EXPECTATION,
+            GXCloudIdentifier(
+                resource_type=GXCloudRESTResource.EXPECTATION,
                 ge_cloud_id=suite_id,
                 resource_name=suite_name,
             )
@@ -322,11 +320,11 @@ def test_delete_expectation_suite_deletes_suite_in_cloud(
         context.delete_expectation_suite(ge_cloud_id=suite_id)
 
     mock_expectations_store_has_key.assert_called_once_with(
-        GeCloudIdentifier(GeCloudRESTResource.EXPECTATION_SUITE, ge_cloud_id=suite_id)
+        GXCloudIdentifier(GXCloudRESTResource.EXPECTATION_SUITE, ge_cloud_id=suite_id)
     )
     assert mock_delete.call_args[1]["json"] == {
         "data": {
-            "type": GeCloudRESTResource.EXPECTATION_SUITE,
+            "type": GXCloudRESTResource.EXPECTATION_SUITE,
             "id": suite_id,
             "attributes": {"deleted": True},
         }
@@ -348,7 +346,7 @@ def test_delete_expectation_suite_nonexistent_suite_raises_error(
         context.delete_expectation_suite(ge_cloud_id=suite_id)
 
     mock_expectations_store_has_key.assert_called_once_with(
-        GeCloudIdentifier(GeCloudRESTResource.EXPECTATION_SUITE, ge_cloud_id=suite_id)
+        GXCloudIdentifier(GXCloudRESTResource.EXPECTATION_SUITE, ge_cloud_id=suite_id)
     )
     assert f"expectation_suite with id {suite_id} does not exist" in str(e.value)
 
@@ -371,7 +369,7 @@ def test_get_expectation_suite_retrieves_suite_from_cloud(
         suite = context.get_expectation_suite(ge_cloud_id=suite_id)
 
     mock_expectations_store_has_key.assert_called_once_with(
-        GeCloudIdentifier(GeCloudRESTResource.EXPECTATION_SUITE, ge_cloud_id=suite_id)
+        GXCloudIdentifier(GXCloudRESTResource.EXPECTATION_SUITE, ge_cloud_id=suite_id)
     )
     assert str(suite.ge_cloud_id) == str(suite_id)
 
@@ -391,7 +389,7 @@ def test_get_expectation_suite_nonexistent_suite_raises_error(
         context.get_expectation_suite(ge_cloud_id=suite_id)
 
     mock_expectations_store_has_key.assert_called_once_with(
-        GeCloudIdentifier(GeCloudRESTResource.EXPECTATION_SUITE, ge_cloud_id=suite_id)
+        GXCloudIdentifier(GXCloudRESTResource.EXPECTATION_SUITE, ge_cloud_id=suite_id)
     )
     assert f"expectation_suite with id {suite_id} not found" in str(e.value)
 
@@ -497,8 +495,8 @@ def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
         )
 
     mock_expectations_store_has_key.assert_called_once_with(
-        GeCloudIdentifier(
-            GeCloudRESTResource.EXPECTATION_SUITE,
+        GXCloudIdentifier(
+            GXCloudRESTResource.EXPECTATION_SUITE,
             ge_cloud_id=suite_id,
             resource_name=suite_name,
         )

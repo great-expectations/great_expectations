@@ -253,7 +253,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                     metric_configuration=partition_metric_configuration,
                 )
 
-                resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
+                resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
                 # updates graph with aborted metrics
                 aborted_metrics_info: Dict[

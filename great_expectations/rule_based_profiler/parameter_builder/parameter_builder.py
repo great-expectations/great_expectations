@@ -17,8 +17,6 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
     AttributedResolvedMetrics,
-    MetricValue,
-    MetricValues,
 )
 from great_expectations.rule_based_profiler.builder import Builder
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
@@ -37,6 +35,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
     MetricComputationResult,
+    MetricValues,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
     PARAMETER_KEY,
@@ -47,6 +46,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.types.attributes import Attributes
 from great_expectations.util import is_parseable_date
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
@@ -462,13 +462,15 @@ specified (empty "metric_name" value detected)."""
             parameters=parameters,
         )
 
-        resolved_metrics: Dict[Tuple[str, str, str], Any] = validator.compute_metrics(
+        resolved_metrics: Dict[
+            Tuple[str, str, str], MetricValue
+        ] = validator.compute_metrics(
             metric_configurations=metrics_to_resolve,
         )
 
         # Step-6: Sort resolved metrics according to same sort order as was applied to "MetricConfiguration" directives.
 
-        resolved_metrics_sorted: Dict[Tuple[str, str, str], Any] = {}
+        resolved_metrics_sorted: Dict[Tuple[str, str, str], MetricValue] = {}
 
         metric_configuration: MetricConfiguration
 

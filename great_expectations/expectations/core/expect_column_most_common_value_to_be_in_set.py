@@ -17,7 +17,7 @@ from great_expectations.render.util import (
 
 
 class ExpectColumnMostCommonValueToBeInSet(ColumnExpectation):
-    """Expect the most common value to be within the designated value set
+    """Expect the most common value to be within the designated value set.
 
             expect_column_most_common_value_to_be_in_set is a \
             :func:`column_aggregate_expectation

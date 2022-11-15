@@ -1,28 +1,25 @@
 import json
 import logging
 from abc import ABCMeta
-from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 from urllib.parse import urljoin
 
 import requests
+from typing_extensions import TypedDict
 
 from great_expectations.core.http import create_session
-from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
+from great_expectations.data_context.cloud_constants import (
+    CLOUD_DEFAULT_BASE_URL,
+    SUPPORT_EMAIL,
+    GXCloudRESTResource,
+)
 from great_expectations.data_context.store.store_backend import StoreBackend
-from great_expectations.data_context.types.refs import GeCloudResourceRef
-from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
+from great_expectations.data_context.types.refs import GXCloudResourceRef
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.exceptions import StoreBackendError
 from great_expectations.util import bidict, filter_properties_dict, hyphen
 
-try:
-    from typing import TypedDict
-except ImportError:
-    from typing_extensions import TypedDict
-
 logger = logging.getLogger(__name__)
-
-SUPPORT_EMAIL = "support@greatexpectations.io"
 
 
 class ErrorDetail(TypedDict):
@@ -107,51 +104,23 @@ def get_user_friendly_error_message(
     return " ".join(support_message)
 
 
-class GeCloudRESTResource(str, Enum):
-    BATCH = "batch"
-    CHECKPOINT = "checkpoint"
-    # Chetan - 20220811 - CONTRACT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
-    CONTRACT = "contract"
-    DATASOURCE = "datasource"
-    DATA_ASSET = "data_asset"
-    DATA_CONTEXT = "data_context"
-    DATA_CONTEXT_VARIABLES = "data_context_variables"
-    EXPECTATION = "expectation"
-    EXPECTATION_SUITE = "expectation_suite"
-    EXPECTATION_VALIDATION_RESULT = "expectation_validation_result"
-    PROFILER = "profiler"
-    RENDERED_DATA_DOC = "rendered_data_doc"
-    # Chetan - 20220812 - SUITE_VALIDATION_RESULT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
-    SUITE_VALIDATION_RESULT = "suite_validation_result"
-    VALIDATION_RESULT = "validation_result"
-
-
 class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
-    PAYLOAD_ATTRIBUTES_KEYS: Dict[GeCloudRESTResource, str] = {
-        GeCloudRESTResource.CHECKPOINT: "checkpoint_config",
-        # Chetan - 20220811 - CONTRACT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
-        GeCloudRESTResource.CONTRACT: "checkpoint_config",
-        GeCloudRESTResource.DATASOURCE: "datasource_config",
-        GeCloudRESTResource.DATA_CONTEXT: "data_context_config",
-        GeCloudRESTResource.DATA_CONTEXT_VARIABLES: "data_context_variables",
-        GeCloudRESTResource.EXPECTATION_SUITE: "suite",
-        GeCloudRESTResource.EXPECTATION_VALIDATION_RESULT: "result",
-        GeCloudRESTResource.PROFILER: "profiler",
-        GeCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_doc",
-        # Chetan - 20220812 - SUITE_VALIDATION_RESULT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
-        GeCloudRESTResource.SUITE_VALIDATION_RESULT: "result",
-        GeCloudRESTResource.VALIDATION_RESULT: "result",
+    PAYLOAD_ATTRIBUTES_KEYS: Dict[GXCloudRESTResource, str] = {
+        GXCloudRESTResource.CHECKPOINT: "checkpoint_config",
+        GXCloudRESTResource.DATASOURCE: "datasource_config",
+        GXCloudRESTResource.DATA_CONTEXT: "data_context_config",
+        GXCloudRESTResource.DATA_CONTEXT_VARIABLES: "data_context_variables",
+        GXCloudRESTResource.EXPECTATION_SUITE: "suite",
+        GXCloudRESTResource.EXPECTATION_VALIDATION_RESULT: "result",
+        GXCloudRESTResource.PROFILER: "profiler",
+        GXCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_doc",
+        GXCloudRESTResource.VALIDATION_RESULT: "result",
     }
 
-    ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE: Dict[GeCloudRESTResource, Set[str]] = {
-        GeCloudRESTResource.EXPECTATION_SUITE: {"clause_id"},
-        GeCloudRESTResource.RENDERED_DATA_DOC: {"source_type", "source_id"},
-        # Chetan - 20220812 - SUITE_VALIDATION_RESULT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
-        GeCloudRESTResource.SUITE_VALIDATION_RESULT: {
-            "checkpoint_id",
-            "expectation_suite_id",
-        },
-        GeCloudRESTResource.VALIDATION_RESULT: {
+    ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE: Dict[GXCloudRESTResource, Set[str]] = {
+        GXCloudRESTResource.EXPECTATION_SUITE: {"clause_id"},
+        GXCloudRESTResource.RENDERED_DATA_DOC: {"source_type", "source_id"},
+        GXCloudRESTResource.VALIDATION_RESULT: {
             "checkpoint_id",
             "expectation_suite_id",
         },
@@ -159,21 +128,17 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     RESOURCE_PLURALITY_LOOKUP_DICT: bidict = bidict(  # type: ignore[misc] # Keywords must be str
         **{  # type: ignore[arg-type]
-            GeCloudRESTResource.BATCH: "batches",
-            GeCloudRESTResource.CHECKPOINT: "checkpoints",
-            # Chetan - 20220811 - CONTRACT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
-            GeCloudRESTResource.CONTRACT: "contracts",
-            GeCloudRESTResource.DATA_ASSET: "data_assets",
-            GeCloudRESTResource.DATA_CONTEXT_VARIABLES: "data_context_variables",
-            GeCloudRESTResource.DATASOURCE: "datasources",
-            GeCloudRESTResource.EXPECTATION: "expectations",
-            GeCloudRESTResource.EXPECTATION_SUITE: "expectation_suites",
-            GeCloudRESTResource.EXPECTATION_VALIDATION_RESULT: "expectation_validation_results",
-            GeCloudRESTResource.PROFILER: "profilers",
-            GeCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_docs",
-            # Chetan - 20220812 - SUITE_VALIDATION_RESULT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
-            GeCloudRESTResource.SUITE_VALIDATION_RESULT: "suite_validation_results",
-            GeCloudRESTResource.VALIDATION_RESULT: "validation_results",
+            GXCloudRESTResource.BATCH: "batches",
+            GXCloudRESTResource.CHECKPOINT: "checkpoints",
+            GXCloudRESTResource.DATA_ASSET: "data_assets",
+            GXCloudRESTResource.DATA_CONTEXT_VARIABLES: "data_context_variables",
+            GXCloudRESTResource.DATASOURCE: "datasources",
+            GXCloudRESTResource.EXPECTATION: "expectations",
+            GXCloudRESTResource.EXPECTATION_SUITE: "expectation_suites",
+            GXCloudRESTResource.EXPECTATION_VALIDATION_RESULT: "expectation_validation_results",
+            GXCloudRESTResource.PROFILER: "profilers",
+            GXCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_docs",
+            GXCloudRESTResource.VALIDATION_RESULT: "validation_results",
         }
     )
 
@@ -181,7 +146,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         self,
         ge_cloud_credentials: Dict,
         ge_cloud_base_url: str = CLOUD_DEFAULT_BASE_URL,
-        ge_cloud_resource_type: Optional[Union[str, GeCloudRESTResource]] = None,
+        ge_cloud_resource_type: Optional[Union[str, GXCloudRESTResource]] = None,
         ge_cloud_resource_name: Optional[str] = None,
         suppress_store_backend_id: bool = True,
         manually_initialize_store_backend_id: str = "",
@@ -208,7 +173,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         # as strings and require manual casting.
         if ge_cloud_resource_type and isinstance(ge_cloud_resource_type, str):
             ge_cloud_resource_type = ge_cloud_resource_type.upper()
-            ge_cloud_resource_type = GeCloudRESTResource[ge_cloud_resource_type]
+            ge_cloud_resource_type = GXCloudRESTResource[ge_cloud_resource_type]
 
         self._ge_cloud_resource_type = (
             ge_cloud_resource_type
@@ -309,7 +274,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             # ensure that legacy PATCH behavior is supported.
             if (
                 response_status_code == 405
-                and resource_type is GeCloudRESTResource.EXPECTATION_SUITE
+                and resource_type is GXCloudRESTResource.EXPECTATION_SUITE
             ):
                 response = self._session.patch(url, json=data)
                 response_status_code = response.status_code
@@ -351,20 +316,21 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def _set(  # type: ignore[override]
         self,
-        key: Tuple[GeCloudRESTResource, ...],
+        key: Tuple[GXCloudRESTResource, ...],
         value: Any,
         **kwargs: dict,
-    ) -> Union[bool, GeCloudResourceRef]:
+    ) -> Union[bool, GXCloudResourceRef]:
         # Each resource type has corresponding attribute key to include in POST body
         ge_cloud_resource = key[0]
         ge_cloud_id: str = key[1]
 
         # if key has ge_cloud_id, perform _update instead
+
         # Chetan - 20220713 - DataContextVariables are a special edge case for the Cloud product
         # and always necessitate a PUT.
         if (
             ge_cloud_id
-            or ge_cloud_resource is GeCloudRESTResource.DATA_CONTEXT_VARIABLES
+            or ge_cloud_resource is GXCloudRESTResource.DATA_CONTEXT_VARIABLES
         ):
             return self._update(ge_cloud_id=ge_cloud_id, value=value)
 
@@ -396,7 +362,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
             object_id = response_json["data"]["id"]
             object_url = self.get_url_for_key((self.ge_cloud_resource_type, object_id))
-            return GeCloudResourceRef(
+            return GXCloudResourceRef(
                 resource_type=resource_type,
                 ge_cloud_id=object_id,
                 url=object_url,
@@ -425,14 +391,14 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         return self._ge_cloud_resource_name
 
     @property
-    def ge_cloud_resource_type(self) -> GeCloudRESTResource:
+    def ge_cloud_resource_type(self) -> GXCloudRESTResource:
         return self._ge_cloud_resource_type  # type: ignore[return-value]
 
     @property
     def ge_cloud_credentials(self) -> dict:
         return self._ge_cloud_credentials
 
-    def list_keys(self, prefix: Tuple = ()) -> List[Tuple[GeCloudRESTResource, str, Optional[str]]]:  # type: ignore[override]
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple[GXCloudRESTResource, str, Optional[str]]]:  # type: ignore[override]
         url = construct_url(
             base_url=self.ge_cloud_base_url,
             organization_id=self.ge_cloud_credentials["organization_id"],
@@ -450,7 +416,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             # Chetan - 20220824 - Explicit fork due to ExpectationSuite using a different name field.
             # Once 'expectation_suite_name' is renamed, this can be removed.
             name_attr: str
-            if resource_type is GeCloudRESTResource.EXPECTATION_SUITE:
+            if resource_type is GXCloudRESTResource.EXPECTATION_SUITE:
                 name_attr = "expectation_suite_name"
             else:
                 name_attr = "name"
@@ -551,9 +517,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         self,
         id: Optional[str] = None,
         name: Optional[str] = None,
-    ) -> GeCloudIdentifier:
+    ) -> GXCloudIdentifier:
         """Get the store backend specific implementation of the key. ignore resource_type since it is defined when initializing the cloud store backend."""
-        return GeCloudIdentifier(
+        return GXCloudIdentifier(
             resource_type=self.ge_cloud_resource_type,
             ge_cloud_id=id,
             resource_name=name,

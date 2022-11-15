@@ -9,10 +9,8 @@ import great_expectations as gx
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import CloudMigrator
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.migrator.cloud_migrator import MigrationResponse
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
 from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
 from tests.data_context.migrator.conftest import StubBaseDataContext
 
@@ -183,7 +181,7 @@ def test__send_validation_results_sends_valid_http_request(
         f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/expectation-validation-results",
         json={
             "data": {
-                "type": GeCloudRESTResource.EXPECTATION_VALIDATION_RESULT,
+                "type": GXCloudRESTResource.EXPECTATION_VALIDATION_RESULT,
                 "attributes": {
                     "organization_id": ge_cloud_organization_id,
                     "result": validation_results[keys[0]],

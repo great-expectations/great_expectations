@@ -37,6 +37,7 @@ from great_expectations.expectations.row_conditions import (
     RowConditionParserType,
 )
 from great_expectations.util import filter_properties_dict
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
@@ -307,9 +308,9 @@ class ExecutionEngine(ABC):
     def resolve_metrics(  # noqa: C901 - 16
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Optional[Dict[Tuple[str, str, str], MetricConfiguration]] = None,
+        metrics: Optional[Dict[Tuple[str, str, str], MetricValue]] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> Dict[Tuple[str, str, str], Any]:
+    ) -> Dict[Tuple[str, str, str], MetricValue]:
         """resolve_metrics is the main entrypoint for an execution engine. The execution engine will compute the value
         of the provided metrics.
 
@@ -324,7 +325,7 @@ class ExecutionEngine(ABC):
         if metrics is None:
             metrics = {}
 
-        resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
         metric_fn_bundle: List[BundledMetricConfiguration] = []
 
@@ -335,16 +336,16 @@ class ExecutionEngine(ABC):
         accessor_domain_kwargs: dict
         metric_provider_kwargs: dict
         metric_to_resolve: MetricConfiguration
-        metric_dependencies: dict
+        resolved_metrics_by_metric_name: Dict[str, Any]
         k: str
         v: MetricConfiguration
         for metric_to_resolve in metrics_to_resolve:
-            metric_dependencies = {}
+            resolved_metrics_by_metric_name = {}
             for k, v in metric_to_resolve.metric_dependencies.items():
                 if v.id in metrics:
-                    metric_dependencies[k] = metrics[v.id]
+                    resolved_metrics_by_metric_name[k] = metrics[v.id]
                 elif self._caching and v.id in self._metric_cache:  # type: ignore[operator] # TODO: update NoOpDict
-                    metric_dependencies[k] = self._metric_cache[v.id]
+                    resolved_metrics_by_metric_name[k] = self._metric_cache[v.id]
                 else:
                     raise ge_exceptions.MetricError(
                         message=f'Missing metric dependency: {str(k)} for metric "{metric_to_resolve.metric_name}".'
@@ -358,7 +359,7 @@ class ExecutionEngine(ABC):
                 "execution_engine": self,
                 "metric_domain_kwargs": metric_to_resolve.metric_domain_kwargs,
                 "metric_value_kwargs": metric_to_resolve.metric_value_kwargs,
-                "metrics": metric_dependencies,
+                "metrics": resolved_metrics_by_metric_name,
                 "runtime_configuration": runtime_configuration,
             }
             if metric_fn is None:
@@ -367,7 +368,7 @@ class ExecutionEngine(ABC):
                         metric_fn,
                         compute_domain_kwargs,
                         accessor_domain_kwargs,
-                    ) = metric_dependencies.pop("metric_partial_fn")
+                    ) = resolved_metrics_by_metric_name.pop("metric_partial_fn")
                 except KeyError as e:
                     raise ge_exceptions.MetricError(
                         message=f'Missing metric dependency: {str(e)} for metric "{metric_to_resolve.metric_name}".'
@@ -417,7 +418,7 @@ class ExecutionEngine(ABC):
                 # an engine-specific way of computing metrics together
                 # NOTE: DH 20220328: This is where we can introduce the Batch Metrics Store (BMS)
                 new_resolved: Dict[
-                    Tuple[str, str, str], Any
+                    Tuple[str, str, str], MetricValue
                 ] = self.resolve_metric_bundle(metric_fn_bundle)
                 resolved_metrics.update(new_resolved)
             except Exception as e:
@@ -433,7 +434,7 @@ class ExecutionEngine(ABC):
 
     def resolve_metric_bundle(
         self, metric_fn_bundle
-    ) -> Dict[Tuple[str, str, str], Any]:
+    ) -> Dict[Tuple[str, str, str], MetricValue]:
         """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
         raise NotImplementedError
 

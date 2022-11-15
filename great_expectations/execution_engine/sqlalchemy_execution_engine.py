@@ -41,6 +41,7 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sample
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
+from great_expectations.validator.computed_metric import MetricValue
 
 del get_versions  # isort:skip
 
@@ -788,11 +789,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             SqlAlchemy column
         """
-        selectable = self.get_domain_records(domain_kwargs)
-
-        split_domain_kwargs = self._split_domain_kwargs(
+        split_domain_kwargs: SplitDomainKwargs = self._split_domain_kwargs(
             domain_kwargs, domain_type, accessor_keys
         )
+
+        selectable: Selectable = self.get_domain_records(domain_kwargs=domain_kwargs)
 
         return selectable, split_domain_kwargs.compute, split_domain_kwargs.accessor
 
@@ -928,7 +929,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def resolve_metric_bundle(
         self,
         metric_fn_bundle: Iterable[BundledMetricConfiguration],
-    ) -> Dict[Tuple[str, str, str], Any]:
+    ) -> Dict[Tuple[str, str, str], MetricValue]:
         """For every metric in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds
         bundles of the metrics into one large query dictionary so that they are all executed simultaneously. Will fail
         if bundling the metrics together is not possible.
@@ -942,7 +943,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             Returns:
                 A dictionary of "MetricConfiguration" IDs and their corresponding now-queried (fully resolved) values.
         """
-        resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
         res: List[Row]
 
@@ -993,8 +994,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         for query in queries.values():
             domain_kwargs: dict = query["domain_kwargs"]
-            selectable: Any = self.get_domain_records(
-                domain_kwargs=domain_kwargs,
+            selectable: Selectable = self.get_domain_records(
+                domain_kwargs=domain_kwargs
             )
 
             assert len(query["select"]) == len(query["ids"])

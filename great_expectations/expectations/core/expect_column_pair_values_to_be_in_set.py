@@ -9,7 +9,7 @@ from great_expectations.expectations.expectation import (
 
 class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
     """
-    Expect paired values from columns A and B to belong to a set of valid pairs.
+    Expect the paired values from columns A and B to belong to a set of valid pairs.
 
         For example:
         ::

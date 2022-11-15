@@ -38,14 +38,12 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
 )
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointValidationConfig,
 )
-from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
     substitute_all_config_variables,
@@ -398,8 +396,8 @@ class BaseCheckpoint(ConfigPeer):
             )
             checkpoint_identifier = None
             if self.data_context.ge_cloud_mode:
-                checkpoint_identifier = GeCloudIdentifier(
-                    resource_type=GeCloudRESTResource.CHECKPOINT,
+                checkpoint_identifier = GXCloudIdentifier(
+                    resource_type=GXCloudRESTResource.CHECKPOINT,
                     ge_cloud_id=str(self.ge_cloud_id),
                 )
 

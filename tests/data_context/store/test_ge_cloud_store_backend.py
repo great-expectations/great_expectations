@@ -16,9 +16,11 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
+from great_expectations.data_context.cloud_constants import (
+    CLOUD_DEFAULT_BASE_URL,
+    GXCloudRESTResource,
+)
 from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
     GeCloudStoreBackend,
     construct_json_payload,
     construct_url,
@@ -29,8 +31,8 @@ from great_expectations.data_context.types.base import CheckpointConfig
 @pytest.fixture
 def construct_ge_cloud_store_backend(
     ge_cloud_access_token: str,
-) -> Callable[[GeCloudRESTResource], GeCloudStoreBackend]:
-    def _closure(resource_type: GeCloudRESTResource) -> GeCloudStoreBackend:
+) -> Callable[[GXCloudRESTResource], GeCloudStoreBackend]:
+    def _closure(resource_type: GXCloudRESTResource) -> GeCloudStoreBackend:
         ge_cloud_base_url = CLOUD_DEFAULT_BASE_URL
         ge_cloud_credentials = {
             "access_token": ge_cloud_access_token,
@@ -208,10 +210,10 @@ def test_construct_json_payload(
 @pytest.mark.unit
 def test_set(
     construct_ge_cloud_store_backend: Callable[
-        [GeCloudRESTResource], GeCloudStoreBackend
+        [GXCloudRESTResource], GeCloudStoreBackend
     ],
 ) -> None:
-    store_backend = construct_ge_cloud_store_backend(GeCloudRESTResource.CHECKPOINT)
+    store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
 
     my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
@@ -263,10 +265,10 @@ def test_set(
 @pytest.mark.unit
 def test_list_keys(
     construct_ge_cloud_store_backend: Callable[
-        [GeCloudRESTResource], GeCloudStoreBackend
+        [GXCloudRESTResource], GeCloudStoreBackend
     ],
 ) -> None:
-    store_backend = construct_ge_cloud_store_backend(GeCloudRESTResource.CHECKPOINT)
+    store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
 
     with mock.patch("requests.Session.get", autospec=True) as mock_get:
         store_backend.list_keys()
@@ -280,10 +282,10 @@ def test_list_keys(
 @pytest.mark.unit
 def test_remove_key(
     construct_ge_cloud_store_backend: Callable[
-        [GeCloudRESTResource], GeCloudStoreBackend
+        [GXCloudRESTResource], GeCloudStoreBackend
     ],
 ) -> None:
-    store_backend = construct_ge_cloud_store_backend(GeCloudRESTResource.CHECKPOINT)
+    store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
 
     with mock.patch("requests.Session.delete", autospec=True) as mock_delete:
         mock_response = mock_delete.return_value
@@ -314,24 +316,24 @@ def test_remove_key(
 @pytest.mark.unit
 def test_appropriate_casting_of_str_resource_type_to_GeCloudRESTResource(
     construct_ge_cloud_store_backend: Callable[
-        [GeCloudRESTResource], GeCloudStoreBackend
+        [GXCloudRESTResource], GeCloudStoreBackend
     ],
 ) -> None:
-    store_backend = construct_ge_cloud_store_backend(GeCloudRESTResource.CHECKPOINT)
+    store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
 
-    assert store_backend.ge_cloud_resource_type is GeCloudRESTResource.CHECKPOINT
+    assert store_backend.ge_cloud_resource_type is GXCloudRESTResource.CHECKPOINT
 
 
 @pytest.mark.parametrize(
     "resource_type,expected_set_kwargs",
     [
         pytest.param(
-            GeCloudRESTResource.VALIDATION_RESULT,
+            GXCloudRESTResource.VALIDATION_RESULT,
             {"checkpoint_id", "expectation_suite_id"},
             id="resource_with_allowed_set_kwargs",
         ),
         pytest.param(
-            GeCloudRESTResource.CHECKPOINT,
+            GXCloudRESTResource.CHECKPOINT,
             set(),
             id="resource_without_allowed_set_kwargs",
         ),
@@ -340,10 +342,10 @@ def test_appropriate_casting_of_str_resource_type_to_GeCloudRESTResource(
 @pytest.mark.cloud
 @pytest.mark.unit
 def test_allowed_set_kwargs(
-    resource_type: GeCloudRESTResource,
+    resource_type: GXCloudRESTResource,
     expected_set_kwargs: Set[str],
     construct_ge_cloud_store_backend: Callable[
-        [GeCloudRESTResource], GeCloudStoreBackend
+        [GXCloudRESTResource], GeCloudStoreBackend
     ],
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(resource_type)
@@ -383,11 +385,11 @@ def test_validate_set_kwargs(
     kwargs: dict,
     expected: Union[bool, None],
     construct_ge_cloud_store_backend: Callable[
-        [GeCloudRESTResource], GeCloudStoreBackend
+        [GXCloudRESTResource], GeCloudStoreBackend
     ],
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(
-        GeCloudRESTResource.VALIDATION_RESULT
+        GXCloudRESTResource.VALIDATION_RESULT
     )
     store_backend.validate_set_kwargs(kwargs) == expected
 
@@ -396,16 +398,16 @@ def test_validate_set_kwargs(
 @pytest.mark.unit
 def test_config_property_and_defaults(
     construct_ge_cloud_store_backend: Callable[
-        [GeCloudRESTResource], GeCloudStoreBackend
+        [GXCloudRESTResource], GeCloudStoreBackend
     ],
 ) -> None:
-    store_backend = construct_ge_cloud_store_backend(GeCloudRESTResource.CHECKPOINT)
+    store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
 
     assert store_backend.config == {
         "class_name": "GeCloudStoreBackend",
         "fixed_length_key": True,
         "ge_cloud_base_url": CLOUD_DEFAULT_BASE_URL,
-        "ge_cloud_resource_type": GeCloudRESTResource.CHECKPOINT,
+        "ge_cloud_resource_type": GXCloudRESTResource.CHECKPOINT,
         "manually_initialize_store_backend_id": "",
         "module_name": "great_expectations.data_context.store.ge_cloud_store_backend",
         "suppress_store_backend_id": True,
