@@ -16,7 +16,7 @@ p = pytest.param
 
 ZEP_TEST_DIR = pathlib.Path(__file__).parent
 
-PG_CONFIG_YAML_FILE = ZEP_TEST_DIR / "pg_config.yaml"
+PG_CONFIG_YAML_FILE = ZEP_TEST_DIR / "config.yaml"
 SIMPLE_DS_DICT = {
     "datasources": {
         "my_ds": {
