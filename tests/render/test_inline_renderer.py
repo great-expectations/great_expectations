@@ -41,7 +41,7 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "expectation_configuration,result,expected_serialized_expectation_configuration_prescriptive_rendered_atomic_content,expected_serialized_expectation_validation_result_diagnostic_rendered_atomic_content",
+    "expectation_configuration,result,expected_serialized_expectation_validation_result_prescriptive_rendered_atomic_content,expected_serialized_expectation_validation_result_diagnostic_rendered_atomic_content",
     [
         pytest.param(
             ExpectationConfiguration(
@@ -525,10 +525,10 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
         ),
     ],
 )
-def test_inline_renderer_rendered_content_return_value(
+def test_inline_renderer_expectation_validation_result_serialization(
     expectation_configuration: ExpectationConfiguration,
     result: dict,
-    expected_serialized_expectation_configuration_prescriptive_rendered_atomic_content: dict,
+    expected_serialized_expectation_validation_result_prescriptive_rendered_atomic_content: dict,
     expected_serialized_expectation_validation_result_diagnostic_rendered_atomic_content: dict,
 ):
 
@@ -570,7 +570,7 @@ def test_inline_renderer_rendered_content_return_value(
 
     assert (
         actual_serialized_expectation_configuration_rendered_atomic_content
-        == expected_serialized_expectation_configuration_prescriptive_rendered_atomic_content
+        == expected_serialized_expectation_validation_result_prescriptive_rendered_atomic_content
     )
 
     actual_serialized_expectation_validation_result_rendered_atomic_content: List[
