@@ -4,18 +4,18 @@ import logging
 from collections import OrderedDict
 from typing import TYPE_CHECKING, Dict, List, Optional
 
-from great_expectations.zep.interfaces import Batch as ZepBatch
 from great_expectations.core.batch import (
     Batch,
     BatchData,
+    BatchDataType,
     BatchDefinition,
     BatchMarkers,
 )
-
+from great_expectations.zep.interfaces import Batch as ZepBatch
 
 if TYPE_CHECKING:
-    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.core.id_dict import BatchSpec
+    from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -167,7 +167,7 @@ class BatchManager:
             # that has been loaded.  Hence, the final active_batch_id will be that of the final BatchData loaded.
             self._active_batch_id = batch.id
 
-    def save_batch_data(self, batch_id: str, batch_data: BatchData) -> None:
+    def save_batch_data(self, batch_id: str, batch_data: BatchDataType) -> None:
         """
         Updates the data for the specified Batch in the cache
         """

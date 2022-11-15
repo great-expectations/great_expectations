@@ -34,7 +34,6 @@ from great_expectations.datasource.new_datasource import BaseDatasource
 from great_expectations.zep.context import _SourceFactories
 from great_expectations.zep.interfaces import Datasource as ZepDatasource
 
-
 logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -268,7 +267,8 @@ class DataContext(BaseDataContext):
         if datasource.name in self.datasources:
             raise ge_exceptions.DataContextError(
                 f"Can not write the ZEP datasource {datasource.name} because a datasource of that "
-                "name already exists in the data context.")
+                "name already exists in the data context."
+            )
         self.datasources[datasource.name] = datasource
 
     @property

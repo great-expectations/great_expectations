@@ -29,7 +29,9 @@ class BatchRequestAnonymizer(BaseAnonymizer):
 
         self._aggregate_anonymizer = aggregate_anonymizer
 
-    def anonymize(self, obj: Optional[object] = None, **kwargs) -> Dict[str, Union[dict, List[str]]]:
+    def anonymize(
+        self, obj: Optional[object] = None, **kwargs
+    ) -> Dict[str, Union[dict, List[str]]]:
         # BDIRKS: file ticket that this is broken for zep datasources
         anonymized_batch_request_properties_dict: Dict[str, Union[dict, List[str]]] = {}
 

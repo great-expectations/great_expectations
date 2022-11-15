@@ -4,7 +4,7 @@ import dataclasses
 import itertools
 from datetime import datetime
 from pprint import pformat as pf
-from typing import Dict, Iterable, List, Optional, Type, TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Type, cast
 
 import dateutil.tz
 from pydantic import Field
@@ -38,7 +38,9 @@ def get_execution_engine() -> Optional[Type[SqlAlchemyExecutionEngine]]:
     return _EXECUTION_ENGINE
 
 
-def set_execution_engine(execution_engine: Optional[Type[SqlAlchemyExecutionEngine]]) -> Optional[Type[SqlAlchemyExecutionEngine]]:
+def set_execution_engine(
+    execution_engine: Optional[Type[SqlAlchemyExecutionEngine]],
+) -> Optional[Type[SqlAlchemyExecutionEngine]]:
     global _EXECUTION_ENGINE
     _EXECUTION_ENGINE = execution_engine
     return _EXECUTION_ENGINE
