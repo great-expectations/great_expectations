@@ -88,7 +88,7 @@ stages:
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - script: |
-          pip install --requirements reqs/requirements-dev-contrib.txt
+          pip install --requirement reqs/requirements-dev-contrib.txt
         name: InstallDependencies
 
     - job: type_hint_checker
