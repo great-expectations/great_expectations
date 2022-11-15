@@ -93,7 +93,7 @@ Replace the Expectation class name
 ```
 
 with your real Expectation class name, in upper camel case:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L100
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L99
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
@@ -101,7 +101,7 @@ You can also go ahead and write a new one-line docstring, replacing
 ```
 
 with something like:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L103
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L102
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
@@ -109,7 +109,7 @@ You'll also need to change the class name at the bottom of the file, by replacin
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L227
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L226
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -138,7 +138,7 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L109-L149
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L108-L148
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -235,7 +235,7 @@ Second, in the Expectation class, replace
 
 with
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L153
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L152
 ```
 
 It's essential to make sure to use matching Metric Identifier strings across your Metric class and Expectation class. This is how the Expectation knows which Metric to use for its internal logic.
@@ -274,7 +274,7 @@ and performs a simple validation against your success keys (i.e. important thres
 To do so, we'll be accessing our success keys, as well as the result of our previously-calculated Metrics.
 For example, here is the definition of a `_validate(...)` method to validate the results of our `table.columns.unique` Metric against our success keys:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L192-L213
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L191-L212
 ```
 
 Running your diagnostic checklist at this point should return something like this:
@@ -338,7 +338,7 @@ If you plan to contribute your Expectation to the public open source project, yo
 
 would become
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L218-L221
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L217-L220
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
