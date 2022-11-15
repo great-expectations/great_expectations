@@ -1,7 +1,7 @@
 import logging
 import string
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import pytest
 from marshmallow import INCLUDE, Schema, fields, validates_schema
@@ -342,7 +342,8 @@ def test_determine_key_constructs_key(
 )
 @pytest.mark.unit
 def test_determine_key_raises_error_with_conflicting_args(
-    name: Union[str, None], ge_cloud_id: Optional[str]
+    name: Union[str, None],
+    ge_cloud_id: Union[str, None],
 ) -> None:
     with pytest.raises(AssertionError) as e:
         ConfigurationStore.determine_key(name=name, ge_cloud_id=ge_cloud_id)

@@ -152,7 +152,8 @@ class ConfigurationStore(Store):
 
     @staticmethod
     def determine_key(
-        name: Union[str, None], ge_cloud_id: Optional[str]
+        name: Union[str, None],
+        ge_cloud_id: Union[str, None],
     ) -> Union[GeCloudIdentifier, ConfigurationIdentifier]:
         assert bool(name) ^ bool(
             ge_cloud_id
