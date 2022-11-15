@@ -70,7 +70,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context.types.base import DataContextConfig
 
 try:
-    from typing import TypeGuard  # type: ignore[attr-defined]
+    from typing import TypeGuard
 except ImportError:
     from typing_extensions import TypeGuard
 
@@ -365,7 +365,7 @@ def verify_dynamic_loading_support(
     """
     try:
         # noinspection PyUnresolvedReferences
-        module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(  # type: ignore[attr-defined]
+        module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(  # type: ignore[assignment]
             module_name, package=package_name
         )
     except ModuleNotFoundError:
