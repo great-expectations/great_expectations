@@ -6,8 +6,10 @@ from great_expectations.expectations.set_based_column_map_expectation import (
 # <snippet>
 class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
     # </snippet>
+    # <snippet>
     """Values in this column should be valid members of the Solfege scale: do, re, mi, etc."""
-
+    # </snippet>
+    # <snippet>
     set_ = [
         "do",
         "re",
@@ -31,9 +33,13 @@ class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
         "LA",
         "TI",
     ]
-    set_camel_name = "SolfegeScale"
-    set_semantic_name = "the Solfege scale"
 
+    set_camel_name = "SolfegeScale"
+    # </snippet>
+    # <snippet>
+    set_semantic_name = "the Solfege scale"
+    # </snippet>
+    # <snippet>
     examples = [
         {
             "data": {
@@ -115,21 +121,24 @@ class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
             ],
         }
     ]
-
+    # </snippet>
     map_metric = SetBasedColumnMapExpectation.register_metric(
         set_camel_name=set_camel_name,
         set_=set_,
     )
-
+    # <snippet>
     library_metadata = {
         "tags": ["set-based"],
         "contributors": ["@joegargery"],
     }
 
 
-# </snippet>
+#     </snippet>
+
 if __name__ == "__main__":
+    # <snippet>
     ExpectColumnValuesToBeInSolfegeScaleSet().print_diagnostic_checklist()
+#     </snippet>
 
 # Note to users: code below this line is only for integration testing -- ignore!
 
