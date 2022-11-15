@@ -8,10 +8,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
       - name: Set up Python 3.7
         uses: actions/setup-python@v4
         with:
           python-version: 3.7
+
+      - name: Update pip
+        run: |
+          python -m pip install --upgrade pip==21.3.1
+
       - name: Install GX dependencies
         run: |
           pip install .
@@ -19,9 +25,11 @@ jobs:
           for file in reqs/*;
             pip install --requirement $file
           done
+
       - name: Install pipdeptree
         run: |
           pip install pipdeptree
+
       - name: Run pipdeptree
         run: |
           pipdeptree --json-tree
