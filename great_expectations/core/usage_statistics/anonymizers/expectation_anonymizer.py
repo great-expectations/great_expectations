@@ -1,21 +1,25 @@
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
+
+if TYPE_CHECKING:
+    from great_expectations.core import ExpectationSuite
+    from great_expectations.core.usage_statistics.anonymizers.anonymizer import (
+        Anonymizer,
+    )
 
 
 class ExpectationSuiteAnonymizer(BaseAnonymizer):
     def __init__(
         self,
-        aggregate_anonymizer: "Anonymizer",  # noqa: F821
+        aggregate_anonymizer: Anonymizer,
         salt: Optional[str] = None,
     ) -> None:
         super().__init__(salt=salt)
 
         self._aggregate_anonymizer = aggregate_anonymizer
 
-    def anonymize(
-        self, obj: Optional["ExpectationSuite"] = None, **kwargs  # noqa: F821
-    ) -> dict:
+    def anonymize(self, obj: Optional[ExpectationSuite] = None, **kwargs) -> dict:
         expectation_suite = obj
         anonymized_info_dict = {}
         anonymized_expectation_counts = list()
