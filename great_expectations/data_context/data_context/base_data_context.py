@@ -20,6 +20,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
 )
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
@@ -29,20 +30,17 @@ from great_expectations.data_context.data_context.ephemeral_data_context import 
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
     DatasourceConfig,
-    GeCloudConfig,
+    GXCloudConfig,
 )
-from great_expectations.data_context.types.refs import GeCloudResourceRef
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
 )
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
@@ -205,7 +203,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         context_root_dir: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
         ge_cloud_mode: bool = False,
-        ge_cloud_config: Optional[GeCloudConfig] = None,
+        ge_cloud_config: Optional[GXCloudConfig] = None,
     ) -> None:
         """DataContext constructor
 
@@ -290,7 +288,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 )
 
     @property
-    def ge_cloud_config(self) -> Optional[GeCloudConfig]:
+    def ge_cloud_config(self) -> Optional[GXCloudConfig]:
         return self._ge_cloud_config
 
     @property
@@ -1074,16 +1072,16 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         name = profiler.name
         ge_cloud_id = profiler.ge_cloud_id
 
-        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+        key: Union[GXCloudIdentifier, ConfigurationIdentifier]
         if self.ge_cloud_mode:
-            key = GeCloudIdentifier(
-                resource_type=GeCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
+            key = GXCloudIdentifier(
+                resource_type=GXCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
             )
         else:
             key = ConfigurationIdentifier(configuration_key=name)
 
         response = self.profiler_store.set(key=key, value=profiler.config)  # type: ignore[func-returns-value]
-        if isinstance(response, GeCloudResourceRef):
+        if isinstance(response, GXCloudResourceRef):
             ge_cloud_id = response.ge_cloud_id
 
         # If an id is present, we want to prioritize that as our key for object retrieval
@@ -1105,7 +1103,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     def list_expectation_suites(
         self,
-    ) -> Optional[Union[List[str], List[GeCloudIdentifier]]]:
+    ) -> Optional[Union[List[str], List[GXCloudIdentifier]]]:
         """
         See parent 'AbstractDataContext.list_expectation_suites()` for more information.
         """
