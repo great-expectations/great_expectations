@@ -70,7 +70,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context.types.base import DataContextConfig
 
 try:
-    from typing import TypeGuard
+    from typing import TypeGuard  # type: ignore[attr-defined]
 except ImportError:
     from typing_extensions import TypeGuard
 

@@ -101,9 +101,9 @@ class GEExecutionEnvironment:
         if not self._all_installed_packages:
             # Only retrieve once
             self._all_installed_packages = [
-                item.metadata.get("Name")  # type: ignore[attr-defined]
+                item.metadata.get("Name")
                 for item in metadata.distributions()
-                if item.metadata.get("Name") is not None  # type: ignore[attr-defined]
+                if item.metadata.get("Name") is not None
             ]
         return self._all_installed_packages
 
