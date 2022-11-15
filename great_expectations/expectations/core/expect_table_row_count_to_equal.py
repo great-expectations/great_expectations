@@ -7,9 +7,8 @@ from great_expectations.expectations.expectation import (
     TableExpectation,
     render_evaluation_parameter_string,
 )
-from great_expectations.render import LegacyRendererType
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import substitute_none_for_missing
 
 
@@ -171,8 +170,8 @@ class ExpectTableRowCountToEqual(TableExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         expected_table_row_count = self.get_success_kwargs().get("value")
         actual_table_row_count = metrics.get("table.row_count")

@@ -29,6 +29,7 @@ from great_expectations.core.configuration import AbstractConfig
 from great_expectations.core.http import create_session
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.data_context.cloud_constants import GeCloudRESTResource
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
@@ -41,7 +42,6 @@ from great_expectations.data_context.migrator.configuration_bundle import (
     ConfigurationBundleSchema,
 )
 from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
     GeCloudStoreBackend,
     construct_json_payload,
     construct_url,

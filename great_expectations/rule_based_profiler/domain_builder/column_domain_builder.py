@@ -1,4 +1,6 @@
-from typing import Iterable, List, Optional, Set, Tuple, Union, cast
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Iterable, List, Optional, Set, Tuple, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -16,6 +18,12 @@ from great_expectations.rule_based_profiler.semantic_type_filter import (
     SemanticTypeFilter,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+    from great_expectations.validator.validator import Validator
 
 
 class ColumnDomainBuilder(DomainBuilder):
@@ -37,7 +45,7 @@ class ColumnDomainBuilder(DomainBuilder):
         exclude_semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         A semantic type is distinguished from the structured column type;
@@ -54,7 +62,7 @@ class ColumnDomainBuilder(DomainBuilder):
             to be included
             exclude_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
             to be excluded
-            data_context: BaseDataContext associated with this DomainBuilder
+            data_context: AbstractDataContext associated with this DomainBuilder
 
         Inclusion/Exclusion Logic:
         (include_column_names|table_columns - exclude_column_names) + (include_semantic_types - exclude_semantic_types)
@@ -177,7 +185,7 @@ class ColumnDomainBuilder(DomainBuilder):
     def get_effective_column_names(
         self,
         batch_ids: Optional[List[str]] = None,
-        validator: Optional["Validator"] = None,  # noqa: F821
+        validator: Optional[Validator] = None,
         variables: Optional[ParameterContainer] = None,
     ) -> List[str]:
         """
@@ -205,7 +213,6 @@ class ColumnDomainBuilder(DomainBuilder):
                     "batch_id": batch_ids[-1],  # active_batch_id
                 },
                 metric_value_kwargs=None,
-                metric_dependencies=None,
             )
         )
 
@@ -372,7 +379,7 @@ class ColumnDomainBuilder(DomainBuilder):
         """
         batch_ids: List[str] = self.get_batch_ids(variables=variables)
 
-        validator: "Validator" = self.get_validator(variables=variables)  # noqa: F821
+        validator: Validator = self.get_validator(variables=variables)
 
         effective_column_names: List[str] = self.get_effective_column_names(
             batch_ids=batch_ids,

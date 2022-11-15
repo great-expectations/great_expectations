@@ -68,6 +68,7 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
 )
 from great_expectations.types import ClassConfig
 from great_expectations.util import load_class, verify_dynamic_loading_support
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.metrics_calculator import MetricsCalculator
@@ -297,7 +298,7 @@ class Validator:
     def compute_metrics(
         self,
         metric_configurations: List[MetricConfiguration],
-    ) -> Dict[Tuple[str, str, str], Any]:
+    ) -> Dict[Tuple[str, str, str], MetricValue]:
         """
         Convenience method that computes requested metrics (specified as elements of "MetricConfiguration" list).
 
@@ -916,7 +917,7 @@ class Validator:
     def graph_validate(
         self,
         configurations: List[ExpectationConfiguration],
-        metrics: Optional[Dict[Tuple[str, str, str], Any]] = None,
+        metrics: Optional[Dict[Tuple[str, str, str], MetricValue]] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[ExpectationValidationResult]:
         """Obtains validation dependencies for each metric using the implementation of their associated expectation,
@@ -979,8 +980,8 @@ class Validator:
                 processed_configurations=processed_configurations,
             )
         except Exception as err:
-            # If a general Exception occurs during the execution of "Validator.resolve_validation_graph()", then all
-            # expectations in the suite are impacted, because it is impossible to attribute the failure to a metric.
+            # If a general Exception occurs during the execution of "ValidationGraph.resolve_validation_graph()", then
+            # all expectations in the suite are impacted, because it is impossible to attribute the failure to a metric.
             if catch_exceptions:
                 exception_traceback: str = traceback.format_exc()
                 evrs = self._catch_exceptions_in_failing_expectation_validations(
@@ -1055,12 +1056,14 @@ class Validator:
 
             try:
                 expectation_validation_graph: ExpectationValidationGraph = (
-                    ExpectationValidationGraph(configuration=evaluated_config)
+                    ExpectationValidationGraph(
+                        execution_engine=self._execution_engine,
+                        configuration=evaluated_config,
+                    )
                 )
                 for metric_configuration in validation_dependencies.values():
-                    graph = ValidationGraph()
-                    self._metrics_calculator.build_metric_dependency_graph(
-                        graph=graph,
+                    graph = ValidationGraph(execution_engine=self._execution_engine)
+                    graph.build_metric_dependency_graph(
                         metric_configuration=metric_configuration,
                         runtime_configuration=runtime_configuration,
                     )
@@ -1086,8 +1089,8 @@ class Validator:
 
         return evrs, processed_configurations
 
-    @staticmethod
     def _generate_suite_level_graph_from_expectation_level_sub_graphs(
+        self,
         expectation_validation_graphs: List[ExpectationValidationGraph],
     ) -> ValidationGraph:
         # Collect edges from all expectation-level sub-graphs and incorporate them under common suite-level graph.
@@ -1100,13 +1103,15 @@ class Validator:
                 ]
             )
         )
-        validation_graph = ValidationGraph(edges=edges)
+        validation_graph = ValidationGraph(
+            execution_engine=self._execution_engine, edges=edges
+        )
         return validation_graph
 
+    @staticmethod
     def _resolve_suite_level_graph_and_process_metric_evaluation_errors(
-        self,
         validation_graph: ValidationGraph,
-        metrics: Dict[Tuple[str, str, str], Any],
+        metrics: Dict[Tuple[str, str, str], MetricValue],
         runtime_configuration: dict,
         expectation_validation_graphs: List[ExpectationValidationGraph],
         evrs: List[ExpectationValidationResult],
@@ -1116,8 +1121,7 @@ class Validator:
         aborted_metrics_info: Dict[
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ] = self._metrics_calculator.resolve_validation_graph(
-            graph=validation_graph,
+        ] = validation_graph.resolve_validation_graph(
             metrics=metrics,
             runtime_configuration=runtime_configuration,
         )
@@ -1867,7 +1871,7 @@ class Validator:
     @staticmethod
     def _parse_validation_graph(
         validation_graph: ValidationGraph,
-        metrics: Dict[Tuple[str, str, str], Any],
+        metrics: Dict[Tuple[str, str, str], MetricValue],
     ) -> Tuple[Set[MetricConfiguration], Set[MetricConfiguration]]:
         """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
         validation graph (a graph structure of metric ids) edges"""
@@ -1891,8 +1895,8 @@ class Validator:
 
     def _initialize_expectations(
         self,
-        expectation_suite: ExpectationSuite = None,
-        expectation_suite_name: str = None,
+        expectation_suite: Optional[ExpectationSuite] = None,
+        expectation_suite_name: Optional[str] = None,
     ) -> None:
         """Instantiates `_expectation_suite` as empty by default or with a specified expectation `config`.
         In addition, this always sets the `default_expectation_args` to:
@@ -1933,7 +1937,7 @@ class Validator:
                     **expectation_suite_dict, data_context=self._data_context
                 )
             else:
-                expectation_suite: ExpectationSuite = copy.deepcopy(expectation_suite)
+                expectation_suite = copy.deepcopy(expectation_suite)
             self._expectation_suite = expectation_suite
 
             if expectation_suite_name is not None:

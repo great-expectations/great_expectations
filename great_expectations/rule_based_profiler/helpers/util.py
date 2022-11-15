@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import itertools
@@ -6,7 +8,7 @@ import re
 import uuid
 import warnings
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import scipy.stats as stats
@@ -45,7 +47,14 @@ from great_expectations.util import (
     convert_ndarray_to_datetime_dtype_best_effort,
     numpy_quantile,
 )
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+    from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -68,14 +77,14 @@ RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS: set = {
 def get_validator(
     purpose: str,
     *,
-    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+    data_context: Optional[AbstractDataContext] = None,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
-) -> Optional["Validator"]:  # noqa: F821
-    validator: Optional["Validator"]  # noqa: F821
+) -> Optional[Validator]:
+    validator: Optional[Validator]
 
     expectation_suite_name: str = f"tmp.{purpose}"
     if domain is None:
@@ -123,7 +132,7 @@ def get_validator(
 
 
 def get_batch_ids(
-    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+    data_context: Optional[AbstractDataContext] = None,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     limit: Optional[int] = None,
@@ -299,9 +308,9 @@ def get_parameter_value(
 
 
 def get_resolved_metrics_by_key(
-    validator: "Validator",  # noqa: F821
+    validator: Validator,
     metric_configurations_by_key: Dict[str, List[MetricConfiguration]],
-) -> Dict[str, Dict[Tuple[str, str, str], Any]]:
+) -> Dict[str, Dict[Tuple[str, str, str], MetricValue]]:
     """
     Compute (resolve) metrics for every column name supplied on input.
 
@@ -314,7 +323,7 @@ def get_resolved_metrics_by_key(
 
     Returns:
         Dictionary of the form {
-            "my_key": Dict[Tuple[str, str, str], Any],
+            "my_key": Dict[Tuple[str, str, str], MetricValue],
         }
     """
     key: str
@@ -323,7 +332,9 @@ def get_resolved_metrics_by_key(
 
     # Step 1: Gather "MetricConfiguration" objects corresponding to all possible key values/combinations.
     # and compute all metric values (resolve "MetricConfiguration" objects ) using a single method call.
-    resolved_metrics: Dict[Tuple[str, str, str], Any] = validator.compute_metrics(
+    resolved_metrics: Dict[
+        Tuple[str, str, str], MetricValue
+    ] = validator.compute_metrics(
         metric_configurations=[
             metric_configuration
             for key, metric_configurations_for_key in metric_configurations_by_key.items()
@@ -378,7 +389,7 @@ def get_resolved_metrics_by_key(
         )
     ]
 
-    resolved_metrics_by_key: Dict[str, Dict[Tuple[str, str, str], Any]] = {
+    resolved_metrics_by_key: Dict[str, Dict[Tuple[str, str, str], MetricValue]] = {
         key: {
             metric_configuration.id: resolved_metrics[metric_configuration.id]
             for metric_configuration in metric_configurations_by_key[key]
@@ -938,14 +949,14 @@ def convert_metric_values_to_float_dtype_best_effort(
 
 
 def get_validator_with_expectation_suite(
-    data_context: "BaseDataContext",  # noqa: F821
+    data_context: AbstractDataContext,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-    expectation_suite: Optional["ExpectationSuite"] = None,  # noqa: F821
+    expectation_suite: Optional[ExpectationSuite] = None,
     expectation_suite_name: Optional[str] = None,
     component_name: str = "test",
     persist: bool = False,
-) -> "Validator":  # noqa: F821
+) -> Validator:
     """
     Instantiates and returns "Validator" using "data_context", "batch_list" or "batch_request", and other information.
     Use "expectation_suite" if provided; otherwise, if "expectation_suite_name" is specified, then create
@@ -962,7 +973,7 @@ def get_validator_with_expectation_suite(
         persist=persist,
     )
     batch_request = materialize_batch_request(batch_request=batch_request)
-    validator: "Validator" = data_context.get_validator(  # noqa: F821
+    validator: Validator = data_context.get_validator(
         batch_list=batch_list,
         batch_request=batch_request,
         expectation_suite=expectation_suite,
@@ -972,12 +983,12 @@ def get_validator_with_expectation_suite(
 
 
 def get_or_create_expectation_suite(
-    data_context: "BaseDataContext",  # noqa: F821
-    expectation_suite: Optional["ExpectationSuite"] = None,  # noqa: F821
+    data_context: Optional[AbstractDataContext],
+    expectation_suite: Optional[ExpectationSuite] = None,
     expectation_suite_name: Optional[str] = None,
     component_name: Optional[str] = None,
     persist: bool = False,
-) -> "ExpectationSuite":  # noqa: F821
+) -> ExpectationSuite:
     """
     Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
     "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".

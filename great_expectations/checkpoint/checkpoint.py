@@ -5,7 +5,7 @@ import datetime
 import json
 import logging
 import os
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
@@ -37,11 +37,8 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     get_checkpoint_run_usage_statistics,
     usage_statistics_enabled_method,
 )
-from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
+from great_expectations.data_context.cloud_constants import GeCloudRESTResource
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointValidationConfig,
@@ -61,6 +58,9 @@ from great_expectations.validation_operators.types.validation_operator_result im
 )
 from great_expectations.validator.validator import Validator
 
+if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext, DataContext
+
 logger = logging.getLogger(__name__)
 
 
@@ -73,7 +73,7 @@ class BaseCheckpoint(ConfigPeer):
     def __init__(
         self,
         checkpoint_config: CheckpointConfig,
-        data_context: "DataContext",  # noqa: F821
+        data_context: DataContext,
     ) -> None:
         from great_expectations.data_context.data_context.abstract_data_context import (
             AbstractDataContext,
@@ -124,6 +124,10 @@ class BaseCheckpoint(ConfigPeer):
         run_time = run_time or datetime.datetime.now()
         runtime_configuration = runtime_configuration or {}
         result_format = result_format or runtime_configuration.get("result_format")
+        _result_format_types = (type(None), str, dict)
+        assert isinstance(
+            result_format, _result_format_types
+        ), f"result_format should be of type - {' '.join(str(t) for t in _result_format_types)}"
 
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
         validations = get_validations_with_batch_request_as_dict(
@@ -158,9 +162,7 @@ class BaseCheckpoint(ConfigPeer):
             )
 
         if run_name is None and run_name_template is not None:
-            run_name = get_datetime_string_from_strftime_format(
-                format_str=run_name_template, datetime_obj=run_time
-            )
+            run_name = run_time.strftime(run_name_template)
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 
@@ -517,7 +519,7 @@ is run), with each validation having its own defined "action_list" attribute.
             return None
 
     @property
-    def data_context(self) -> "DataContext":  # noqa: F821
+    def data_context(self) -> DataContext:
         return self._data_context
 
     def __repr__(self) -> str:
@@ -548,7 +550,7 @@ class Checkpoint(BaseCheckpoint):
     def __init__(
         self,
         name: str,
-        data_context: "DataContext",  # noqa: F821
+        data_context: AbstractDataContext,
         config_version: Optional[Union[int, float]] = None,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
@@ -568,14 +570,14 @@ class Checkpoint(BaseCheckpoint):
         # Only primitive types are allowed as constructor arguments; data frames are supplied to "run()" as arguments.
         if batch_request_contains_batch_data(batch_request=batch_request):
             raise ValueError(
-                f"""Error: batch_data found in batch_request -- only primitive types are allowed as Checkpoint \
+                """Error: batch_data found in batch_request -- only primitive types are allowed as Checkpoint \
 constructor arguments.
 """
             )
 
         if batch_request_in_validations_contains_batch_data(validations=validations):
             raise ValueError(
-                f"""Error: batch_data found in batch_request -- only primitive types are allowed as Checkpoint \
+                """Error: batch_data found in batch_request -- only primitive types are allowed as Checkpoint \
 constructor arguments.
 """
             )
@@ -680,7 +682,7 @@ constructor arguments.
 
     @staticmethod
     def construct_from_config_args(
-        data_context: "DataContext",  # noqa: F821
+        data_context: AbstractDataContext,
         checkpoint_store_name: str,
         name: str,
         config_version: Optional[Union[int, float]] = None,
@@ -773,7 +775,7 @@ constructor arguments.
     @staticmethod
     def instantiate_from_config_with_runtime_args(
         checkpoint_config: CheckpointConfig,
-        data_context: "DataContext",  # noqa: F821
+        data_context: AbstractDataContext,
         **runtime_kwargs,
     ) -> Checkpoint:
         config: dict = checkpoint_config.to_json_dict()

@@ -55,7 +55,7 @@ class DataContextVariableSchema(str, enum.Enum):
         return value in cls._value2member_map_
 
 
-@dataclass  # type: ignore[misc]
+@dataclass
 class DataContextVariables(ABC):
     """
     Wrapper object around data context variables set in the `great_expectations.yml` config file.
@@ -366,11 +366,9 @@ class CloudDataContextVariables(DataContextVariables):
             )
 
     def _init_store(self) -> DataContextStore:
+        from great_expectations.data_context.cloud_constants import GeCloudRESTResource
         from great_expectations.data_context.store.data_context_store import (
             DataContextStore,
-        )
-        from great_expectations.data_context.store.ge_cloud_store_backend import (
-            GeCloudRESTResource,
         )
 
         store_backend: dict = {

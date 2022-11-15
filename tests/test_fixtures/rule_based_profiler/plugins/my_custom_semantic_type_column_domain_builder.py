@@ -74,7 +74,6 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
                     "batch_id": batch_ids[-1],  # active_batch_id
                 },
                 metric_value_kwargs=None,
-                metric_dependencies=None,
             )
         )
 

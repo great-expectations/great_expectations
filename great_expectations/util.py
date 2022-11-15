@@ -36,6 +36,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Mapping,
     Optional,
     Set,
     Tuple,
@@ -76,7 +77,7 @@ except ImportError:
 try:
     import black
 except ImportError:
-    black = None  # type: ignore[assignment]
+    black = None
 
 try:
     # This library moved in python 3.8
@@ -364,7 +365,7 @@ def verify_dynamic_loading_support(
     """
     try:
         # noinspection PyUnresolvedReferences
-        module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(  # type: ignore[assignment,attr-defined]
+        module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(  # type: ignore[attr-defined]
             module_name, package=package_name
         )
     except ModuleNotFoundError:
@@ -1514,8 +1515,8 @@ def isclose(
     return cast(
         bool,
         np.isclose(
-            a=np.float64(operand_a),  # type: ignore[arg-type]
-            b=np.float64(operand_b),  # type: ignore[arg-type]
+            a=np.float64(operand_a),
+            b=np.float64(operand_b),
             rtol=rtol,
             atol=atol,
             equal_nan=equal_nan,
@@ -1668,7 +1669,7 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
 
 
 def get_context(
-    project_config: Optional[Union["DataContextConfig", dict]] = None,
+    project_config: Optional[Union["DataContextConfig", Mapping]] = None,
     context_root_dir: Optional[str] = None,
     runtime_environment: Optional[dict] = None,
     ge_cloud_base_url: Optional[str] = None,
@@ -1926,14 +1927,14 @@ def numpy_quantile(
     """
     quantile: np.ndarray
     if version.parse(np.__version__) >= version.parse("1.22.0"):
-        quantile = np.quantile(  # type: ignore[call-arg,call-overload]
+        quantile = np.quantile(
             a=a,
             q=q,
             axis=axis,
             method=method,
         )
     else:
-        quantile = np.quantile(  # type: ignore[call-overload]
+        quantile = np.quantile(
             a=a,
             q=q,
             axis=axis,

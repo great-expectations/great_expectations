@@ -5,9 +5,8 @@ from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
     render_evaluation_parameter_string,
 )
-from great_expectations.render import LegacyRendererType
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -16,6 +15,8 @@ from great_expectations.render.util import (
 
 
 class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
+    """Expect the compound columns to be unique."""
+
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
@@ -28,7 +29,7 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
         ],
         "requirements": [],
         "has_full_test_suite": True,
-        "manually_reviewed_code": False,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "compound_columns.unique"
@@ -111,11 +112,9 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
-            template_str = f"Values for given compound columns must be unique together, at least $mostly_pct % of the time: "
+            template_str = "Values for given compound columns must be unique together, at least $mostly_pct % of the time: "
         else:
-            template_str = (
-                f"Values for given compound columns must be unique together: "
-            )
+            template_str = "Values for given compound columns must be unique together: "
 
         column_list = params.get("column_list") if params.get("column_list") else []
 
@@ -176,11 +175,9 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
             params["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
-            template_str = f"Values for given compound columns must be unique together, at least $mostly_pct % of the time: "
+            template_str = "Values for given compound columns must be unique together, at least $mostly_pct % of the time: "
         else:
-            template_str = (
-                f"Values for given compound columns must be unique together: "
-            )
+            template_str = "Values for given compound columns must be unique together: "
 
         for idx in range(len(params["column_list"]) - 1):
             template_str += f"$column_list_{str(idx)}, "

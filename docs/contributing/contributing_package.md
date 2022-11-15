@@ -13,6 +13,13 @@ This guide demonstrates how to bundle your own custom Expectations, Metrics, and
 
 ## Steps
 
+### 0. Reach out to our Developer Relations Team
+
+Before you embark on this journey, drop by and introduce yourself in the [`#integrations` channel of our Great Expectations Slack Community](https://greatexpectationstalk.slack.com/archives/C037YCYNF1Q) to let us know. 
+We would love to discuss your Custom Expectations Package, support your development, and help you navigate the publication and maintenance process.
+
+We're big believers in building strong relationships with our community and our ecosystem partners. Opening communication channels early in the process is essential to developing the best possible tools together.
+
 ### 1. Install the `great_expectations_contrib` CLI Tool
 
 To streamline the process of contributing a package to Great Expectations, we've developed a CLI tool to

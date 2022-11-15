@@ -12,6 +12,8 @@ from great_expectations.render.util import substitute_none_for_missing
 
 
 class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
+    """Expect the column entries to be strings that match any of a provided list of like pattern expressions."""
+
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
@@ -20,7 +22,7 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
         ],
         "requirements": [],
         "has_full_test_suite": True,
-        "manually_reviewed_code": False,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.match_like_pattern_list"

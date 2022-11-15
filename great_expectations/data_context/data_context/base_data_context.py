@@ -4,14 +4,12 @@ import datetime
 import logging
 import os
 from collections import OrderedDict
-from typing import Any, Callable, List, Mapping, Optional, Union
+from typing import Any, List, Mapping, Optional, Union
 
-from marshmallow import ValidationError
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint
-from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
@@ -40,7 +38,6 @@ from great_expectations.data_context.types.base import (
     DataContextConfigDefaults,
     DatasourceConfig,
     GeCloudConfig,
-    dataContextConfigSchema,
 )
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
@@ -199,16 +196,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     _data_context = None
 
-    @classmethod
-    def validate_config(cls, project_config: Union[DataContextConfig, Mapping]) -> bool:
-        if isinstance(project_config, DataContextConfig):
-            return True
-        try:
-            dataContextConfigSchema.load(project_config)
-        except ValidationError:
-            raise
-        return True
-
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT___INIT__,
     )
@@ -232,10 +219,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             None
         """
-        if not BaseDataContext.validate_config(project_config):
-            raise ge_exceptions.InvalidConfigError(
-                "Your project_config is not valid. Try using the CLI check-config command."
-            )
+
+        project_data_context_config: DataContextConfig = (
+            BaseDataContext.get_or_create_data_context_config(project_config)
+        )
+
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = ge_cloud_config
         if context_root_dir is not None:
@@ -252,30 +240,34 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 ge_cloud_access_token = ge_cloud_config.access_token
                 ge_cloud_organization_id = ge_cloud_config.organization_id
             self._data_context = CloudDataContext(
-                project_config=project_config,
+                project_config=project_data_context_config,
                 runtime_environment=runtime_environment,
-                context_root_dir=context_root_dir,  # type: ignore[arg-type]
+                context_root_dir=context_root_dir,
                 ge_cloud_base_url=ge_cloud_base_url,
                 ge_cloud_access_token=ge_cloud_access_token,
                 ge_cloud_organization_id=ge_cloud_organization_id,
             )
         elif self._context_root_directory:
             self._data_context = FileDataContext(  # type: ignore[assignment]
-                project_config=project_config,
+                project_config=project_data_context_config,
                 context_root_dir=context_root_dir,  # type: ignore[arg-type]
                 runtime_environment=runtime_environment,
             )
         else:
             self._data_context = EphemeralDataContext(  # type: ignore[assignment]
-                project_config=project_config, runtime_environment=runtime_environment
+                project_config=project_data_context_config,
+                runtime_environment=runtime_environment,
             )
 
+        assert self._data_context is not None
+
         # NOTE: <DataContextRefactor> This will ensure that parameters set in _data_context are persisted to self.
-        # It is rather clunkly and we should explore other ways of ensuring that BaseDataContext has all of the
+        # It is rather clunky and we should explore other ways of ensuring that BaseDataContext has all of the
         # necessary properties / overrides
         self._synchronize_self_with_underlying_data_context()
 
-        self._variables = self._data_context.variables  # type: ignore[assignment,union-attr]
+        self._config_provider = self._data_context._config_provider
+        self._variables = self._data_context.variables  # type: ignore[assignment]
 
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
@@ -316,22 +308,25 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         # NOTE: <DataContextRefactor> This remains a rather clunky way of ensuring that all necessary parameters and
         # values from self._data_context are persisted to self.
-        self._project_config = self._data_context._project_config  # type: ignore[union-attr]
-        self.runtime_environment = self._data_context.runtime_environment or {}  # type: ignore[union-attr]
-        self._config_variables = self._data_context.config_variables  # type: ignore[union-attr]
-        self._in_memory_instance_id = self._data_context._in_memory_instance_id  # type: ignore[union-attr]
-        self._stores = self._data_context._stores  # type: ignore[union-attr]
-        self._datasource_store = self._data_context._datasource_store  # type: ignore[union-attr]
-        self._data_context_id = self._data_context._data_context_id  # type: ignore[union-attr]
-        self._usage_statistics_handler = self._data_context._usage_statistics_handler  # type: ignore[union-attr]
-        self._cached_datasources = self._data_context._cached_datasources  # type: ignore[union-attr]
+
+        assert self._data_context is not None
+
+        self._project_config = self._data_context._project_config
+        self.runtime_environment = self._data_context.runtime_environment or {}
+        self._config_variables = self._data_context.config_variables
+        self._in_memory_instance_id = self._data_context._in_memory_instance_id
+        self._stores = self._data_context._stores
+        self._datasource_store = self._data_context._datasource_store
+        self._data_context_id = self._data_context._data_context_id
+        self._usage_statistics_handler = self._data_context._usage_statistics_handler
+        self._cached_datasources = self._data_context._cached_datasources
         self._evaluation_parameter_dependencies_compiled = (
-            self._data_context._evaluation_parameter_dependencies_compiled  # type: ignore[union-attr]
+            self._data_context._evaluation_parameter_dependencies_compiled
         )
         self._evaluation_parameter_dependencies = (
-            self._data_context._evaluation_parameter_dependencies  # type: ignore[union-attr]
+            self._data_context._evaluation_parameter_dependencies
         )
-        self._assistants = self._data_context._assistants  # type: ignore[union-attr]
+        self._assistants = self._data_context._assistants
 
     def _save_project_config(self) -> None:
         """Save the current project to disk."""
@@ -449,7 +444,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             yaml.dump(config_variables, config_variables_file)
 
     def delete_datasource(  # type: ignore[override]
-        self, datasource_name: str, save_changes: bool = False
+        self, datasource_name: str, save_changes: Optional[bool] = None
     ) -> None:
         """Delete a data source
         Args:
@@ -540,99 +535,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 **kwargs,
             )
 
-    def get_batch_list(
-        self,
-        datasource_name: Optional[str] = None,
-        data_connector_name: Optional[str] = None,
-        data_asset_name: Optional[str] = None,
-        batch_request: Optional[BatchRequestBase] = None,
-        batch_data: Optional[Any] = None,
-        data_connector_query: Optional[dict] = None,
-        batch_identifiers: Optional[dict] = None,
-        limit: Optional[int] = None,
-        index: Optional[Union[int, list, tuple, slice, str]] = None,
-        custom_filter_function: Optional[Callable] = None,
-        sampling_method: Optional[str] = None,
-        sampling_kwargs: Optional[dict] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[dict] = None,
-        runtime_parameters: Optional[dict] = None,
-        query: Optional[str] = None,
-        path: Optional[str] = None,
-        batch_filter_parameters: Optional[dict] = None,
-        batch_spec_passthrough: Optional[dict] = None,
-        **kwargs,
-    ) -> List[Batch]:
-        """Get the list of zero or more batches, based on a variety of flexible input types.
-        This method applies only to the new (V3) Datasource schema.
-
-        Args:
-            batch_request
-
-            datasource_name
-            data_connector_name
-            data_asset_name
-
-            batch_request
-            batch_data
-            query
-            path
-            runtime_parameters
-            data_connector_query
-            batch_identifiers
-            batch_filter_parameters
-
-            limit
-            index
-            custom_filter_function
-
-            sampling_method
-            sampling_kwargs
-
-            splitter_method
-            splitter_kwargs
-
-            batch_spec_passthrough
-
-            **kwargs
-
-        Returns:
-            (Batch) The requested batch
-
-        `get_batch` is the main user-facing API for getting batches.
-        In contrast to virtually all other methods in the class, it does not require typed or nested inputs.
-        Instead, this method is intended to help the user pick the right parameters
-
-        This method attempts to return any number of batches, including an empty list.
-        """
-        return super().get_batch_list(
-            datasource_name=datasource_name,
-            data_connector_name=data_connector_name,
-            data_asset_name=data_asset_name,
-            batch_request=batch_request,
-            batch_data=batch_data,
-            data_connector_query=data_connector_query,
-            batch_identifiers=batch_identifiers,
-            limit=limit,
-            index=index,
-            custom_filter_function=custom_filter_function,
-            sampling_method=sampling_method,
-            sampling_kwargs=sampling_kwargs,
-            splitter_method=splitter_method,
-            splitter_kwargs=splitter_kwargs,
-            runtime_parameters=runtime_parameters,
-            query=query,
-            path=path,
-            batch_filter_parameters=batch_filter_parameters,
-            batch_spec_passthrough=batch_spec_passthrough,
-            **kwargs,
-        )
-
     def add_datasource(
         self,
         name: str,
         initialize: bool = True,
-        save_changes: bool = False,
+        save_changes: Optional[bool] = None,
         **kwargs: dict,
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         """
@@ -645,7 +552,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             name (str): Name of Datasource
             initialize (bool): Should GE add and initialize the Datasource? If true then current
                 method will return initialized Datasource
-            save_changes (bool): should GE save the Datasource config?
+            save_changes (Optional[bool]): should GE save the Datasource config?
             **kwargs Optional[dict]: Additional kwargs that define Datasource initialization kwargs
 
         Returns:
@@ -725,7 +632,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
         return res
 
-    def delete_expectation_suite(  # type: ignore[override]
+    def delete_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
@@ -1196,7 +1103,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             ge_cloud_mode=self.ge_cloud_mode,
         )
 
-    def list_expectation_suites(self) -> Optional[List[str]]:
+    def list_expectation_suites(
+        self,
+    ) -> Optional[Union[List[str], List[GeCloudIdentifier]]]:
         """
         See parent 'AbstractDataContext.list_expectation_suites()` for more information.
         """
@@ -1211,8 +1120,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def _instantiate_datasource_from_config_and_update_project_config(
         self,
         config: DatasourceConfig,
-        initialize: bool = True,
-        save_changes: bool = False,
+        initialize: bool,
+        save_changes: bool,
     ) -> Optional[Datasource]:
         """Instantiate datasource and optionally persist datasource config to store and/or initialize datasource for use.
 
@@ -1224,7 +1133,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             If initialize=True return an instantiated Datasource object, else None.
         """
-        datasource: Datasource = self._data_context._instantiate_datasource_from_config_and_update_project_config(  # type: ignore[assignment,union-attr,arg-type]
+        datasource: Datasource = self._data_context._instantiate_datasource_from_config_and_update_project_config(  # type: ignore[assignment,union-attr]
             config=config,
             initialize=initialize,
             save_changes=save_changes,

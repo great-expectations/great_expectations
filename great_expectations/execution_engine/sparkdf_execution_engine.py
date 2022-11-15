@@ -36,6 +36,7 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.bundled_metric_configuration import (
     BundledMetricConfiguration,
 )
+from great_expectations.execution_engine.execution_engine import SplitDomainKwargs
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.split_and_sample.sparkdf_data_sampler import (
     SparkDataSampler,
@@ -48,6 +49,7 @@ from great_expectations.expectations.row_conditions import (
     RowConditionParserType,
     parse_condition_to_spark,
 )
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -614,15 +616,15 @@ illegal.  Please check your config."""
               - a dictionary of accessor_domain_kwargs, describing any accessors needed to
                 identify the domain within the compute domain
         """
-        data = self.get_domain_records(domain_kwargs)
-
-        table = domain_kwargs.get("table", None)
+        table: str = domain_kwargs.get("table", None)
         if table:
             raise ValueError(
                 "SparkDFExecutionEngine does not currently support multiple named tables."
             )
 
-        split_domain_kwargs = self._split_domain_kwargs(
+        data: DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
+
+        split_domain_kwargs: SplitDomainKwargs = self._split_domain_kwargs(
             domain_kwargs, domain_type, accessor_keys
         )
 
@@ -668,7 +670,7 @@ illegal.  Please check your config."""
     def resolve_metric_bundle(
         self,
         metric_fn_bundle: Iterable[BundledMetricConfiguration],
-    ) -> Dict[Tuple[str, str, str], Any]:
+    ) -> Dict[Tuple[str, str, str], MetricValue]:
         """For every metric in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds
         bundles of the metrics into one large query dictionary so that they are all executed simultaneously. Will fail
         if bundling the metrics together is not possible.
@@ -682,7 +684,7 @@ illegal.  Please check your config."""
             Returns:
                 A dictionary of "MetricConfiguration" IDs and their corresponding fully resolved values for domains.
         """
-        resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
         res: List[Row]
 
@@ -721,9 +723,7 @@ illegal.  Please check your config."""
 
         for aggregate in aggregates.values():
             domain_kwargs: dict = aggregate["domain_kwargs"]
-            df: Optional[DataFrame] = self.get_domain_records(
-                domain_kwargs=domain_kwargs,
-            )
+            df: DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
 
             assert len(aggregate["column_aggregates"]) == len(aggregate["ids"])
 

@@ -12,9 +12,8 @@ from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
 from great_expectations.expectations.metrics.util import parse_value_set
-from great_expectations.render import LegacyRendererType
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
@@ -22,6 +21,7 @@ from great_expectations.render.util import (
 
 
 class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
+    """Expect the set of distinct column values to contain a given set."""
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -30,7 +30,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
         "contributors": ["@great_expectations"],
         "requirements": [],
         "has_full_test_suite": True,
-        "manually_reviewed_code": False,
+        "manually_reviewed_code": True,
     }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
@@ -223,8 +223,8 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         parse_strings_as_datetimes = self.get_success_kwargs(configuration).get(
             "parse_strings_as_datetimes"

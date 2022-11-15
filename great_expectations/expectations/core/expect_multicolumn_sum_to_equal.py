@@ -11,7 +11,7 @@ from great_expectations.render.renderer.renderer import renderer
 
 class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
     """
-    Expects that the sum of row values is the same for each row, summing only values in columns specified in
+    Expect that the sum of row values is the same for each row, summing only values in columns specified in \
     column_list, and equal to the specific value, sum_total.
 
     Args:
