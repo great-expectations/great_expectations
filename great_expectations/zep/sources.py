@@ -96,6 +96,8 @@ class _SourceFactories:
                 datasource_type_lookup=type_lookup,
             )
 
+            # NOTE: this is order dependent.
+            # Once the type_lookup is namespaced this should the same as `type_lookup` as above
             cls._register_engine(
                 ds_type,
                 type_lookup_name=ds_type_name,
