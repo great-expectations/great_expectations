@@ -124,9 +124,8 @@ class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
         "tags": ["regex"],
         "contributors": ["@joegargery"],
     }
+    # </snippet>
 
-
-# </snippet>
 
 if __name__ == "__main__":
     # <snippet>

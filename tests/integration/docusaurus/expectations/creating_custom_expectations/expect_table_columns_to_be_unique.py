@@ -55,8 +55,7 @@ class TableColumnsUnique(TableMetricProvider):
         unique_columns = set(df.T.drop_duplicates().T.columns)
 
         return unique_columns
-
-    # </snippet>
+        # </snippet>
 
     # @metric_value(engine=SqlAlchemyExecutionEngine)
     # def _sqlalchemy(

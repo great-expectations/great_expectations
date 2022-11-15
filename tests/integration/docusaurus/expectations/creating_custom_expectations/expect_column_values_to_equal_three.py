@@ -48,8 +48,8 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         return column == 3
+        # </snippet>
 
-    # </snippet>
     # <snippet>
     @metric_partial(
         engine=SparkDFExecutionEngine,
@@ -382,9 +382,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
         "tags": ["extremely basic math"],
         "contributors": ["@joegargery"],
     }
-
-
-#     </snippet>
+    # </snippet>
 
 
 if __name__ == "__main__":
