@@ -115,9 +115,11 @@ class TypeLookup(
         >>> t = TypeLookup()
         >>> with t.transaction():
         ...     t["my_type"] = tuple
-        ...     print(tuple in t)
-        ...     assert True is False
-        True
+        ...     assert tuple in t, "Should not fail"
+        ...     assert True is False, "Should fail"
+        Traceback (most recent call last):
+        ...
+        AssertionError: Should fail
         >>> print(tuple in t)
         False
         """
