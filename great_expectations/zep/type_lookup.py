@@ -72,13 +72,9 @@ class TypeLookup(
 
     def __setitem__(self, key: ValidTypes, value: ValidTypes):
         if key is None:
-            raise TypeLookupError(
-                f"`{type(key).__name__}` for {value} is not allowed - bad key"
-            )
+            raise TypeLookupError(f"`NoneType` for {value} is not allowed - bad key")
         if value is None:
-            raise TypeLookupError(
-                f"`{type(value).__name__}` for {key} is not allowed - bad value"
-            )
+            raise TypeLookupError(f"`NoneType` for {key} is not allowed - bad value")
         if key in self:
             raise TypeLookupError(f"`{key}` already set - bad key")
         if value in self:
