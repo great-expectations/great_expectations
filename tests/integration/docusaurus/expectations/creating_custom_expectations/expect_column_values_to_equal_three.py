@@ -83,7 +83,6 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
         return (query, compute_domain_kwargs, accessor_domain_kwargs)
         # </snippet>
 
-
     # <snippet>
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, **kwargs):
