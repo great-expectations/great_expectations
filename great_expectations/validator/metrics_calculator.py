@@ -11,6 +11,7 @@ from great_expectations.execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.registry import get_metric_provider
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validation_graph import ValidationGraph
@@ -131,7 +132,9 @@ class MetricsCalculator:
         Returns:
             Return Dictionary with requested metrics resolved, with metric_name as key and computed metric as value.
         """
-        resolved_metrics: Dict[Tuple[str, str, str], Any] = self.compute_metrics(
+        resolved_metrics: Dict[
+            Tuple[str, str, str], MetricValue
+        ] = self.compute_metrics(
             metric_configurations=list(metrics.values()),
         )
 
@@ -143,7 +146,7 @@ class MetricsCalculator:
     def compute_metrics(
         self,
         metric_configurations: List[MetricConfiguration],
-    ) -> Dict[Tuple[str, str, str], Any]:
+    ) -> Dict[Tuple[str, str, str], MetricValue]:
         """
         Args:
             metric_configurations: List of desired MetricConfiguration objects to be resolved.
@@ -175,7 +178,7 @@ class MetricsCalculator:
                 runtime_configuration=None,
             )
 
-        resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
         # updates graph with aborted metrics
         aborted_metrics_info: Dict[
