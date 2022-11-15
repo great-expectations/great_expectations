@@ -1,20 +1,33 @@
+from __future__ import annotations
+
 import pathlib
 import shutil
-from typing import Dict, List, Literal, Optional, Type, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
 
 from pydantic import FilePath, ValidationError
-from typing_extensions import ClassVar
+from typing_extensions import ClassVar, Literal
 
 from great_expectations.zep.config import GxConfig
 from great_expectations.zep.fakes import sqlachemy_execution_engine_mock
+
+if TYPE_CHECKING:
+    from great_expectations.zep.postgres_datasource import (
+        PostgresDatasource,
+        TableAsset,
+    )
+
 
 try:
     from devtools import debug as pp
 except ImportError:
     from pprint import pprint as pp  # type: ignore[assignment]
 
+GX_ROOT = pathlib.Path(__file__).parent.parent
+SAMPLE_CONFIG_FILE = GX_ROOT.joinpath("..", "tests", "zep", "config.yaml").resolve()
+
 TERM_WIDTH = shutil.get_terminal_size()[1]
 SEPARATOR = "-" * TERM_WIDTH
+
 
 if __name__ == "__main__":
     # don't setup the logger unless being run as a script
@@ -141,20 +154,20 @@ def add_real_asset() -> None:
 
 def from_yaml_config() -> None:
     print(f"\n  Load from a yaml config file\n{SEPARATOR}")
-    root_dir = pathlib.Path(__file__).parent
+    root_dir = SAMPLE_CONFIG_FILE.parent
     context = get_context(context_root_dir=root_dir)
     print(f"\n  Context loaded from {root_dir}")
 
-    my_ds: PandasDatasource = context.get_datasource("my_demo_pd_datasource")  # type: ignore[assignment]
+    my_ds: PostgresDatasource = context.get_datasource("my_pg_ds")  # type: ignore[assignment]
     print(f"\n  Retrieved '{my_ds.name}'->")
     pp(my_ds)
     assert my_ds
 
-    my_asset: FileAsset = my_ds.get_asset("my_demo_file_asset")  # type: ignore[assignment]
+    my_asset: TableAsset = my_ds.get_asset("with_splitters")  # type: ignore[assignment]
 
     print(f"\n Retrieved '{my_asset.name}'->")
     pp(my_asset)
-    assert my_asset.file_path.exists()
+    assert my_asset.column_splitter.method_name  # type: ignore[union-attr] # could be none
 
 
 def pg_ds_nested_within_asset() -> None:
@@ -162,9 +175,7 @@ def pg_ds_nested_within_asset() -> None:
         f"\n  Postgres datasource asset with nested datasource (from config)\n{SEPARATOR}"
     )
 
-    yaml_file = pathlib.Path(__file__).parent / "config.yaml"
-
-    config = GxConfig.parse_yaml(yaml_file, debug_=True)
+    config = GxConfig.parse_yaml(SAMPLE_CONFIG_FILE)
 
     my_ds = config.datasources["my_pg_ds"]
     pp(my_ds)
