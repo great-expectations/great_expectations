@@ -1323,7 +1323,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         df: pd.DataFrame,
         sanitized_metric_names: Set[str],
         sequential: bool,
-        subtitle: Optional[str],
+        subtitle: Union[str, None],
     ) -> Union[alt.Chart, alt.LayerChart]:
         """
         Args:
@@ -3314,7 +3314,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         metric_names: Tuple[str],
         plot_mode: PlotMode,
         sequential: bool,
-        subtitle: Optional[str],
+        subtitle: Union[str, None],
     ) -> Optional[alt.Chart]:
         sanitized_metric_names: Set[
             str
@@ -3344,7 +3344,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                     pd.DataFrame,
                     Set[str],
                     bool,
-                    Optional[str],
+                    Union[str, None],
                 ],
                 Union[alt.Chart, alt.LayerChart],
             ]
@@ -3387,7 +3387,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                     pd.DataFrame,
                     Set[str],
                     bool,
-                    Optional[str],
+                    Union[str, None],
                 ],
                 Union[alt.Chart, alt.LayerChart],
             ]
@@ -4011,7 +4011,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         df: pd.DataFrame,
         sanitized_metric_names: Set[str],
         sequential: bool,
-        subtitle: Optional[str],
+        subtitle: Union[str, None],
     ) -> alt.Chart:
         return DataAssistantResult._get_expect_domain_values_to_be_between_chart(
             expectation_type=expectation_type,
@@ -4027,7 +4027,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         df: pd.DataFrame,
         sanitized_metric_names: Set[str],
         sequential: bool,
-        subtitle: Optional[str],
+        subtitle: Union[str, None],
     ) -> alt.Chart:
         return DataAssistantResult._get_expect_domain_values_to_be_between_chart(
             expectation_type=expectation_type,
@@ -4042,7 +4042,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         df: pd.DataFrame,
         sanitized_metric_names: Set[str],
         sequential: bool,
-        subtitle: Optional[str],
+        subtitle: Union[str, None],
     ) -> alt.LayerChart:
         return DataAssistantResult._get_quantitative_metrics_chart(
             df=df,
@@ -4056,7 +4056,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         df: pd.DataFrame,
         sanitized_metric_names: Set[str],
         sequential: bool,
-        subtitle: Optional[str],
+        subtitle: Union[str, None],
     ) -> alt.LayerChart:
         return DataAssistantResult._get_quantitative_metrics_chart(
             df=df,

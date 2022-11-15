@@ -424,7 +424,7 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
     def _sort_batch_definition_list(
         self,
         batch_definition_list: List[BatchDefinition],
-        splitter_method_name: Optional[str],
+        splitter_method_name: Union[str, None],
         splitter_kwargs: Optional[Dict[str, Union[str, dict, None]]],
         sorters: Optional[dict],
     ) -> List[BatchDefinition]:

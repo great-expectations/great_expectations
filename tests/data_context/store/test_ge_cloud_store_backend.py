@@ -76,7 +76,7 @@ def test_construct_url(
     base_url: str,
     organization_id: str,
     resource_name: str,
-    id: Optional[str],
+    id: Union[str, None],
     expected: str,
 ) -> None:
     assert (

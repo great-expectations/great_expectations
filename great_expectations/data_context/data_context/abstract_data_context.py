@@ -1078,7 +1078,7 @@ class AbstractDataContext(ABC):
         return datasources
 
     def delete_datasource(
-        self, datasource_name: Optional[str], save_changes: Optional[bool] = None
+        self, datasource_name: Union[str, None], save_changes: Optional[bool] = None
     ) -> None:
         """Delete a datasource
         Args:

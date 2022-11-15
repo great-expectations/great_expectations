@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 
@@ -40,7 +40,7 @@ class ExpectationSuiteAnonymizer(BaseAnonymizer):
         return anonymized_info_dict
 
     def _anonymize_expectation(
-        self, expectation_type: Optional[str], info_dict: dict
+        self, expectation_type: Union[str, None], info_dict: dict
     ) -> None:
         """Anonymize Expectation objs from 'great_expectations.expectations'.
 

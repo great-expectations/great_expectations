@@ -321,7 +321,7 @@ class LinkChecker:
 )
 @click.option("--skip-external", is_flag=True)
 def scan_docs(
-    path: str, docs_root: Optional[str], site_prefix: str, skip_external: bool
+    path: str, docs_root: Union[str, None], site_prefix: str, skip_external: bool
 ) -> None:
     if docs_root is None:
         docs_root = path

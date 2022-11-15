@@ -122,11 +122,11 @@ Assumes --interactive flag.
 @click.pass_context
 def suite_new(
     ctx: click.Context,
-    expectation_suite: Optional[str],
+    expectation_suite: Union[str, None],
     interactive_flag: bool,
     manual_flag: bool,
-    profiler_name: Optional[str],
-    batch_request: Optional[str],
+    profiler_name: Union[str, None],
+    batch_request: Union[str, None],
     no_jupyter: bool,
 ) -> None:
     """
@@ -222,10 +222,10 @@ def _process_suite_new_flags_and_prompt(
 
 def _suite_new_workflow(
     context: DataContext,
-    expectation_suite_name: Optional[str],
+    expectation_suite_name: Union[str, None],
     interactive_mode: CLISuiteInteractiveFlagCombinations,
     profile: bool,
-    profiler_name: Optional[str],
+    profiler_name: Union[str, None],
     no_jupyter: bool,
     usage_event: str,
     batch_request: Optional[
@@ -363,7 +363,7 @@ def _suite_convert_flags_to_interactive_mode(
 def _suite_new_process_profile_and_batch_request_flags(
     interactive_mode: CLISuiteInteractiveFlagCombinations,
     profile: bool,
-    batch_request: Optional[str],
+    batch_request: Union[str, None],
 ) -> CLISuiteInteractiveFlagCombinations:
 
     # Explicit check for boolean or None for `interactive_flag` is necessary: None indicates user did not supply flag.
@@ -410,7 +410,7 @@ def _suite_new_process_profile_and_batch_request_flags(
 
 
 def _exit_early_if_error(
-    error_message: Optional[str],
+    error_message: Union[str, None],
     context: DataContext,
     usage_event_end: str,
     interactive_mode: CLISuiteInteractiveFlagCombinations,
@@ -429,7 +429,7 @@ def _exit_early_if_error(
 def _suite_new_user_provided_any_flag(
     interactive_mode: CLISuiteInteractiveFlagCombinations,
     profile: bool,
-    batch_request: Optional[str],
+    batch_request: Union[str, None],
 ) -> bool:
     user_provided_any_flag_skip_prompt: bool = any(
         (
@@ -529,8 +529,8 @@ def suite_edit(
     expectation_suite: str,
     interactive_flag: bool,
     manual_flag: bool,
-    datasource_name: Optional[str],
-    batch_request: Optional[str],
+    datasource_name: Union[str, None],
+    batch_request: Union[str, None],
     no_jupyter: bool,
 ) -> None:
     """
@@ -706,7 +706,7 @@ def _suite_edit_workflow(
     context: DataContext,
     expectation_suite_name: str,
     profile: bool,
-    profiler_name: Optional[str],
+    profiler_name: Union[str, None],
     usage_event: str,
     interactive_mode: CLISuiteInteractiveFlagCombinations,
     no_jupyter: bool,

@@ -676,7 +676,7 @@ numeric-valued and datetime-valued metrics (value {metric_value} of type "{str(t
     def _get_best_candidate_above_threshold(
         candidate_ratio_dict: Dict[str, float],
         threshold: float,
-    ) -> Tuple[Optional[str], float]:
+    ) -> Tuple[Union[str, None], float]:
         """
         Helper method to calculate which candidate strings or patterns are the best match (ie. highest ratio),
         provided they are also above the threshold.

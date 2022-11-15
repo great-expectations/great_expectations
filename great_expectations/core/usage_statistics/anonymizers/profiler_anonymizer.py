@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
@@ -222,7 +222,7 @@ class ProfilerAnonymizer(BaseAnonymizer):
         return anonymized_expectation_configuration_builder
 
     def _anonymize_expectation(
-        self, expectation_type: Optional[str], info_dict: dict
+        self, expectation_type: Union[str, None], info_dict: dict
     ) -> None:
         """Anonymize Expectation objs from 'great_expectations.expectations'.
 

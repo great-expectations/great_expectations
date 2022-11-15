@@ -262,9 +262,9 @@ class DataContext(BaseDataContext):
     def _init_ge_cloud_config(
         self,
         ge_cloud_mode: bool,
-        ge_cloud_base_url: Optional[str],
-        ge_cloud_access_token: Optional[str],
-        ge_cloud_organization_id: Optional[str],
+        ge_cloud_base_url: Union[str, None],
+        ge_cloud_access_token: Union[str, None],
+        ge_cloud_organization_id: Union[str, None],
     ) -> Optional[GeCloudConfig]:
         if not ge_cloud_mode:
             return None

@@ -390,7 +390,7 @@ class _YamlConfigValidator:
             raise e
 
     def _test_instantiation_of_store_from_yaml_config(
-        self, name: Optional[str], class_name: str, config: CommentedMap
+        self, name: Union[str, None], class_name: str, config: CommentedMap
     ) -> Tuple[Store, dict]:
         """
         Helper to create store instance and update usage stats payload.
@@ -415,7 +415,7 @@ class _YamlConfigValidator:
         return instantiated_class, usage_stats_event_payload
 
     def _test_instantiation_of_datasource_from_yaml_config(
-        self, name: Optional[str], class_name: str, config: CommentedMap
+        self, name: Union[str, None], class_name: str, config: CommentedMap
     ) -> Tuple[Datasource, dict]:
         """
         Helper to create datasource instance and update usage stats payload.
@@ -453,7 +453,7 @@ class _YamlConfigValidator:
         return instantiated_class, usage_stats_event_payload
 
     def _test_instantiation_of_checkpoint_from_yaml_config(
-        self, name: Optional[str], class_name: str, config: CommentedMap
+        self, name: Union[str, None], class_name: str, config: CommentedMap
     ) -> Tuple[Checkpoint, dict]:
         """
         Helper to create checkpoint instance and update usage stats payload.
@@ -496,7 +496,7 @@ class _YamlConfigValidator:
 
     def _test_instantiation_of_data_connector_from_yaml_config(
         self,
-        name: Optional[str],
+        name: Union[str, None],
         class_name: str,
         config: CommentedMap,
         runtime_environment: dict,
@@ -528,7 +528,7 @@ class _YamlConfigValidator:
         return instantiated_class, usage_stats_event_payload
 
     def _test_instantiation_of_profiler_from_yaml_config(
-        self, name: Optional[str], class_name: str, config: CommentedMap
+        self, name: Union[str, None], class_name: str, config: CommentedMap
     ) -> Tuple[RuleBasedProfiler, dict]:
         """
         Helper to create profiler instance and update usage stats payload.
@@ -563,7 +563,7 @@ class _YamlConfigValidator:
 
     def _test_instantiation_of_misc_class_from_yaml_config(
         self,
-        name: Optional[str],
+        name: Union[str, None],
         config: CommentedMap,
         runtime_environment: dict,
         usage_stats_event_payload: dict,

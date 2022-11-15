@@ -96,7 +96,7 @@ class DataAssistantDispatcher:
     @classmethod
     def _get_data_assistant_impl(
         cls,
-        name: Optional[str],
+        name: Union[str, None],
     ) -> Optional[Type[DataAssistant]]:
         """
         This method obtains (previously registered) "DataAssistant" class from DataAssistant Registry.

@@ -323,7 +323,7 @@ def test_self_check(capsys) -> None:
 )
 @pytest.mark.unit
 def test_determine_key_constructs_key(
-    name: Optional[str], ge_cloud_id: Optional[str], expected_key: DataContextKey
+    name: Union[str, None], ge_cloud_id: Union[str, None], expected_key: DataContextKey
 ) -> None:
     actual_key = ConfigurationStore.determine_key(name=name, ge_cloud_id=ge_cloud_id)
     assert actual_key == expected_key
@@ -342,7 +342,7 @@ def test_determine_key_constructs_key(
 )
 @pytest.mark.unit
 def test_determine_key_raises_error_with_conflicting_args(
-    name: Optional[str], ge_cloud_id: Optional[str]
+    name: Union[str, None], ge_cloud_id: Optional[str]
 ) -> None:
     with pytest.raises(AssertionError) as e:
         ConfigurationStore.determine_key(name=name, ge_cloud_id=ge_cloud_id)

@@ -152,7 +152,7 @@ def cli(
     ctx: click.Context,
     v3_api: bool,
     verbose: bool,
-    config_file_location: Optional[str],
+    config_file_location: Union[str, None],
     assume_yes: bool,
 ) -> None:
     """
