@@ -34,16 +34,23 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
+# <snippet>
 class ColumnValuesEqualThree(ColumnMapMetricProvider):
+    # </snippet>
 
     # This is the id string that will be used to reference your metric.
+    # <snippet>
     condition_metric_name = "column_values.equal_three"
+    # </snippet>
 
     # This method implements the core logic for the PandasExecutionEngine
+    # <snippet>
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         return column == 3
 
+    # </snippet>
+    # <snippet>
     @metric_partial(
         engine=SparkDFExecutionEngine,
         partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_FN,
@@ -72,9 +79,13 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 
         return (query, compute_domain_kwargs, accessor_domain_kwargs)
 
+    # </snippet>
+    # <snippet>
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, **kwargs):
         return column.in_([3])
+
+    # </snippet>
 
     @classmethod
     def _get_evaluation_dependencies(
@@ -108,11 +119,15 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
+# <snippet>
 class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
+    # </snippet>
+    # <snippet>
     """Expect values in this column to equal 3."""
-
+    # </snippet>
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
+    # <snippet>
     examples = [
         {
             "data": {
@@ -141,10 +156,13 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
             ],
         }
     ]
+    # </snippet>
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
+    # <snippet>
     map_metric = "column_values.equal_three"
+    # </snippet>
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/expectations.html#expectation-concepts-domain-and-success-keys
@@ -359,14 +377,20 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
         return unexpected_table_content_block
 
     # This dictionary contains metadata for display in the public gallery
+    # <snippet>
     library_metadata = {
         "tags": ["extremely basic math"],
         "contributors": ["@joegargery"],
     }
 
 
+#     </snippet>
+
+
 if __name__ == "__main__":
+    # <snippet>
     ExpectColumnValuesToEqualThree().print_diagnostic_checklist()
+#     </snippet>
 
 # Note to users: code below this line is only for integration testing -- ignore!
 
