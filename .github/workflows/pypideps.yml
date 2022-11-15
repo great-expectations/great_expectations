@@ -20,11 +20,13 @@ jobs:
 
       - name: Install GX dependencies
         run: |
-          pip install .
-          pip install --requirement requirements-dev.txt --constraint constraints-dev.txt
-          for file in reqs/*;
-            pip install --requirement $file
-          done
+          pip install . \
+            --requirement requirements.text \
+            --requirement requirements-dev.txt \
+            --requirement reqs/requirements-dev-test.txt \
+            --requirement reqs/requirements-dev-spark.txt \
+            --requirement reqs/requirements-dev-sqlalchemy.txt \
+            --constraint constraints-dev.txt
 
       - name: Install pipdeptree
         run: |
