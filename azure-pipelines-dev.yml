@@ -110,17 +110,22 @@ stages:
       vmImage: 'ubuntu-latest'
 
     jobs:
+    - job: install_dependencies
+      steps:
+      - script: |
+          pip install --requirements reqs/requirements-dev-contrib.txt
+          invoke type-coverage
+        name: TypeHintChecker
+
     - job: type_hint_checker
       steps:
       - script: |
-          pip install mypy invoke # Prereq for type hint script
           invoke type-coverage
         name: TypeHintChecker
 
     - job: static_type_check
       steps:
       - script: |
-          pip install mypy invoke
           invoke type-check --install-types --warn-unused-ignores --pretty
         name: StaticTypeCheck
 
@@ -132,7 +137,6 @@ stages:
     - job: unused_import_checker
       steps:
       - script: |
-          pip install flake8
           # https://www.flake8rules.com/rules/F401.html
           flake8 --select F401 great_expectations tests
         name: UnusedImportChecker
