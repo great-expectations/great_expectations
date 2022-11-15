@@ -121,7 +121,7 @@ stages:
       steps:
       - script: |
           pip install mypy invoke
-          invoke type-check --install-types --warn-unused-ignores --pretty --clear-cache
+          invoke type-check --install-types --warn-unused-ignores --pretty
         name: StaticTypeCheck
 
     - job: docstring_checker
