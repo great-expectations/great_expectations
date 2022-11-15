@@ -138,7 +138,7 @@ This guide will help you create Expectations that span multiple :ref:`Batches <r
 
             .. warning::
 
-                In general, the development loop for testing and debugging URN and Evaluation Parameters is not very user-friendly. We plan to simplify this workflow in the future. In the meantime, we welcome questions in the `Great Expectations discussion forum <https://discuss.great_expectations.io>`_ and `Slack channel <https://great_expectations.io/slack>`_.
+                In general, the development loop for testing and debugging URN and Evaluation Parameters is not very user-friendly. We plan to simplify this workflow in the future. In the meantime, we welcome questions in the `Great Expectations discussion forum <https://github.com/great-expectations/great_expectations/discussions/>`_ and `Slack channel <https://great_expectations.io/slack>`_.
 
     .. tab-container:: tab1
         :title: Show Docs for V3 (Batch Request) API
@@ -277,7 +277,7 @@ This guide will help you create Expectations that span multiple :ref:`Batches <r
 
             .. warning::
 
-                In general, the development loop for testing and debugging URN and Evaluation Parameters is not very user-friendly. We plan to simplify this workflow in the future. In the meantime, we welcome questions in the `Great Expectations discussion forum <https://discuss.great_expectations.io>`_ and `Slack channel <https://great_expectations.io/slack>`_.
+                In general, the development loop for testing and debugging URN and Evaluation Parameters is not very user-friendly. We plan to simplify this workflow in the future. In the meantime, we welcome questions in the `Great Expectations discussion forum <https://github.com/great-expectations/great_expectations/discussions/>`_ and `Slack channel <https://great_expectations.io/slack>`_.
 
 Comments
 --------

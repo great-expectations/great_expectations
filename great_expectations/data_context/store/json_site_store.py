@@ -3,7 +3,7 @@ from typing import Dict
 
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.util import load_class
-from great_expectations.render.types import RenderedDocumentContent
+from great_expectations.render import RenderedDocumentContent
 from great_expectations.util import (
     filter_properties_dict,
     verify_dynamic_loading_support,
@@ -28,9 +28,8 @@ class JsonSiteStore(Store):
                 "class_name", "InMemoryStoreBackend"
             )
             verify_dynamic_loading_support(module_name=store_backend_module_name)
-            store_backend_class = load_class(
-                store_backend_class_name, store_backend_module_name
-            )
+            # TODO: GG 20220815 loaded store_backend_class is not used remove this if not needed
+            _ = load_class(store_backend_class_name, store_backend_module_name)
 
         super().__init__(
             store_backend=store_backend,
@@ -60,10 +59,10 @@ class JsonSiteStore(Store):
 
         return json_site_dict
 
-    def serialize(self, key, value):
+    def serialize(self, value):
         return value.to_json_dict()
 
-    def deserialize(self, key, value):
+    def deserialize(self, value):
         return RenderedDocumentContent(**loads(value))
 
     def self_check(self, pretty_print) -> None:

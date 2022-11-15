@@ -1,0 +1,32 @@
+    IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'integration')
+  BEGIN
+    CREATE DATABASE [integration]
+    END
+    GO
+           USE [integration]
+    GO
+
+    IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='taxi_data' and xtype='U')
+BEGIN
+    CREATE TABLE taxi_data (
+    vendor_id double precision,
+    pickup_datetime text,
+    dropoff_datetime text,
+    passenger_count double precision,
+    trip_distance double precision,
+    rate_code_id double precision,
+    store_and_fwd_flag text,
+    pickup_location_id bigint,
+    dropoff_location_id bigint,
+    payment_type double precision,
+    fare_amount double precision,
+    extra double precision,
+    mta_tax double precision,
+    tip_amount double precision,
+    tolls_amount double precision,
+    improvement_surcharge double precision,
+    total_amount double precision,
+    congestion_surcharge double precision
+);
+END
+GO

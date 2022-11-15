@@ -5,10 +5,10 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     InvalidExpectationConfigurationError,
+    render_evaluation_parameter_string,
 )
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -18,7 +18,7 @@ from great_expectations.rule_based_profiler.config.base import (
     ParameterBuilderConfig,
     RuleBasedProfilerConfig,
 )
-from great_expectations.rule_based_profiler.types.parameter_container import (
+from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
@@ -29,7 +29,7 @@ from great_expectations.rule_based_profiler.types.parameter_container import (
 
 
 class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
-    """Expect column entries to be strings representing a date or time with a given format.
+    """Expect the column entries to be strings representing a date or time with a given format.
 
     expect_column_values_to_match_strftime_format is a \
     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine
@@ -95,13 +95,12 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=None,
-            json_serialize=True,
         )
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         date_format_string_parameter_builder_config
     ]
-    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+    default_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_values_to_match_strftime_format",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
         variables={},
@@ -250,7 +249,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,

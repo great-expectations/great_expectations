@@ -4,13 +4,11 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     InvalidExpectationConfigurationError,
-)
-from great_expectations.expectations.util import (
     add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -19,8 +17,9 @@ from great_expectations.render.util import (
 
 
 class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
-    """Expect the column entries to be strings that can be matched to either any of or all of a list of regular
-    expressions. Matches can be anywhere in the string.
+    """Expect the column entries to be strings that can be matched to either any of or all of a list of regular expressions.
+
+    Matches can be anywhere in the string.
 
     expect_column_values_to_match_regex_list is a \
     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine
@@ -225,7 +224,7 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,

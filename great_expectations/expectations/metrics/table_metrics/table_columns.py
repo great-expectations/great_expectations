@@ -81,6 +81,5 @@ class TableColumns(TableMetricProvider):
             metric_value_kwargs={
                 "include_nested": True,
             },
-            metric_dependencies=None,
         )
         return dependencies

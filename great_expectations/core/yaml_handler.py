@@ -22,17 +22,17 @@ class YAMLHandler:
             class_name: test_class
             module_name: test.test_class
         \"""
-        yaml_handler: YAMLHandler = YAMLHandler()
+        yaml_handler = YAMLHandler()
         res: dict = yaml_handler.load(simple_yaml)
 
         example_dict: dict = dict(abc=1)
-        yaml_handler: YAMLHandler = YAMLHandler()
+        yaml_handler = YAMLHandler()
         yaml_handler.dump(example_dict)
 
     """
 
     def __init__(self) -> None:
-        self._handler: YAML = YAML(typ="safe")
+        self._handler = YAML(typ="safe")
         # TODO: ensure this does not break all usage of ruamel in GE codebase.
         self._handler.indent(mapping=2, sequence=4, offset=2)
         self._handler.default_flow_style = False
@@ -69,7 +69,7 @@ class YAMLHandler:
             Otherwise, None as the _handler.dump() works in place and will exercise the handler accordingly.
         """
         if stream:
-            return self._dump(data=data, stream=stream, **kwargs)
+            return self._dump(data=data, stream=stream, **kwargs)  # type: ignore[func-returns-value]
         return self._dump_and_return_value(data=data, **kwargs)
 
     def _dump(self, data: dict, stream, **kwargs) -> None:

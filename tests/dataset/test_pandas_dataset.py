@@ -610,7 +610,7 @@ def test_ge_pandas_sampling(empty_data_context):
             ],
         }
     )
-    exp1: ExpectationSuite = ExpectationSuite(**exp1_dict, data_context=context)
+    exp1 = ExpectationSuite(**exp1_dict, data_context=context)
     assert (
         samp1.get_expectation_suite(discard_failed_expectations=False).expectations
         == exp1.expectations

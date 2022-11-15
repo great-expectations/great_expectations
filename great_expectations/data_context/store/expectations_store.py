@@ -4,6 +4,7 @@ from typing import Dict
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_suite import ExpectationSuiteSchema
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
@@ -11,7 +12,7 @@ from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
 )
 from great_expectations.data_context.util import load_class
 from great_expectations.util import (
@@ -172,18 +173,18 @@ class ExpectationsStore(Store):
         return expectation_suite_dict
 
     def get(self, key) -> ExpectationSuite:
-        return super().get(key)
+        return super().get(key)  # type: ignore[return-value]
 
     def remove_key(self, key):
         return self.store_backend.remove_key(key)
 
-    def serialize(self, key, value):
+    def serialize(self, value):
         if self.ge_cloud_mode:
             # GeCloudStoreBackend expects a json str
             return self._expectationSuiteSchema.dump(value)
         return self._expectationSuiteSchema.dumps(value, indent=2, sort_keys=True)
 
-    def deserialize(self, key, value):
+    def deserialize(self, value):
         if isinstance(value, dict):
             return self._expectationSuiteSchema.load(value)
         else:
@@ -214,8 +215,9 @@ class ExpectationsStore(Store):
             [random.choice(list("0123456789ABCDEF")) for i in range(20)]
         )
         if self.ge_cloud_mode:
-            test_key: GeCloudIdentifier = self.key_class(
-                resource_type="contract", ge_cloud_id=str(uuid.uuid4())
+            test_key: GXCloudIdentifier = self.key_class(
+                resource_type=GXCloudRESTResource.CHECKPOINT,
+                ge_cloud_id=str(uuid.uuid4()),
             )
         else:
             test_key: ExpectationSuiteIdentifier = self.key_class(test_key_name)

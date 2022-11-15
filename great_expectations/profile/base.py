@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import abc
 import logging
 import time
 import warnings
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 
 from dateutil.parser import parse
 
@@ -53,7 +55,7 @@ class OrderedProfilerCardinality(OrderedEnum):
     @classmethod
     def get_basic_column_cardinality(
         cls, num_unique=0, pct_unique=0
-    ) -> "OrderedProfilerCardinality":  # noqa: F821
+    ) -> OrderedProfilerCardinality:
         """
         Takes the number and percentage of unique values in a column and returns the column cardinality.
         If you are unexpectedly returning a cardinality of "None", ensure that you are passing in values for both
@@ -144,20 +146,22 @@ class Profiler(metaclass=abc.ABCMeta):
       kind of object. You should raise an appropriate Exception if the object is not valid.
     """
 
-    def __init__(self, configuration: dict = None) -> None:
+    def __init__(self, configuration: Optional[dict] = None) -> None:
         self.configuration = configuration
 
     def validate(self, item_to_validate: Any) -> None:
         pass
 
-    def profile(self, item_to_profile: Any, suite_name: str = None) -> ExpectationSuite:
+    def profile(
+        self, item_to_profile: Any, suite_name: Optional[str] = None
+    ) -> ExpectationSuite:
         self.validate(item_to_profile)
         expectation_suite = self._profile(item_to_profile, suite_name=suite_name)
         return expectation_suite
 
     @abc.abstractmethod
     def _profile(
-        self, item_to_profile: Any, suite_name: str = None
+        self, item_to_profile: Any, suite_name: Optional[str] = None
     ) -> ExpectationSuite:
         pass
 

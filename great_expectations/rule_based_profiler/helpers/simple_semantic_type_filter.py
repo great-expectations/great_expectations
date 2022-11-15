@@ -1,13 +1,20 @@
-from typing import Any, Dict, List, Optional, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.domain import (
     InferredSemanticDomainType,
     SemanticDomainTypes,
+)
+from great_expectations.rule_based_profiler.semantic_type_filter import (
     SemanticTypeFilter,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
+
+if TYPE_CHECKING:
+    from great_expectations.validator.validator import Validator
 
 
 class SimpleSemanticTypeFilter(SemanticTypeFilter):
@@ -18,7 +25,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
     def __init__(
         self,
         batch_ids: Optional[List[str]] = None,
-        validator: Optional["Validator"] = None,  # noqa: F821
+        validator: Optional[Validator] = None,
         column_names: Optional[List[str]] = None,
     ) -> None:
         self._build_table_column_name_to_inferred_semantic_domain_type_map(
@@ -78,7 +85,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
     def _build_table_column_name_to_inferred_semantic_domain_type_map(
         self,
         batch_ids: List[str],
-        validator: "Validator",  # noqa: F821
+        validator: Validator,
         column_names: List[str],
     ) -> None:
         column_types_dict_list: List[Dict[str, Any]] = validator.get_metric(
@@ -90,7 +97,6 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
                 metric_value_kwargs={
                     "include_nested": True,
                 },
-                metric_dependencies=None,
             )
         )
 
@@ -125,9 +131,12 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         column_type: str = str(column_types_dict_list[0]["type"]).upper()
 
         semantic_column_type: SemanticDomainTypes
-        if column_type in (
-            {type_name.upper() for type_name in ProfilerTypeMapping.INT_TYPE_NAMES}
-            | {type_name.upper() for type_name in ProfilerTypeMapping.FLOAT_TYPE_NAMES}
+        if any(
+            map(
+                lambda type_name: column_type.startswith(type_name.upper()),
+                ProfilerTypeMapping.INT_TYPE_NAMES
+                + ProfilerTypeMapping.FLOAT_TYPE_NAMES,
+            )
         ):
             semantic_column_type = SemanticDomainTypes.NUMERIC
         elif column_type in {
@@ -138,9 +147,12 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
             type_name.upper() for type_name in ProfilerTypeMapping.BOOLEAN_TYPE_NAMES
         }:
             semantic_column_type = SemanticDomainTypes.LOGIC
-        elif column_type in {
-            type_name.upper() for type_name in ProfilerTypeMapping.DATETIME_TYPE_NAMES
-        }:
+        elif any(
+            map(
+                lambda type_name: column_type.startswith(type_name.upper()),
+                ProfilerTypeMapping.DATETIME_TYPE_NAMES,
+            )
+        ):
             semantic_column_type = SemanticDomainTypes.DATETIME
         elif column_type in {
             type_name.upper() for type_name in ProfilerTypeMapping.BINARY_TYPE_NAMES

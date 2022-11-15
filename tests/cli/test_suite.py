@@ -24,11 +24,38 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
 )
 from great_expectations.util import deep_filter_properties_iterable, lint_code
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+from tests.render.renderer.v3.test_suite_profile_notebook_renderer import (
+    EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT,
+)
 from tests.render.test_util import (
     find_code_in_notebook,
     load_notebook_from_path,
     run_notebook,
 )
+
+PROFILER_CODE_CELL_USER_CONFIGURABLE_PROFILER: str = """\
+profiler = UserConfigurableProfiler(
+    profile_dataset=validator,
+    excluded_expectations=None,
+    ignored_columns=exclude_column_names,
+    not_null_only=False,
+    primary_or_compound_key=None,
+    semantic_types_dict=None,
+    table_expectations_only=False,
+    value_set_threshold="MANY",
+)
+suite = profiler.build_suite()
+validator.expectation_suite = suite
+"""
+PROFILER_CODE_CELL_ONBOARDING_DATA_ASSISTANT: str = """\
+result = context.assistants.onboarding.run(
+    batch_request=batch_request,
+    exclude_column_names=exclude_column_names,
+)
+validator.expectation_suite = result.get_expectation_suite(
+    expectation_suite_name=expectation_suite_name
+)
+"""
 
 
 def test_suite_help_output(caplog):
@@ -121,6 +148,7 @@ def test_suite_demo_deprecation_message(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 6.81s
 def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_notebook_opens_jupyter(
     mock_webbrowser,
     mock_subprocess,
@@ -235,6 +263,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_noteboo
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 6.87s
 def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook_opens_jupyter(
     mock_webbrowser,
     mock_subprocess,
@@ -349,6 +378,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 6.83s
 def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_opens_jupyter(
     mock_webbrowser,
     mock_subprocess,
@@ -461,6 +491,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_open
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 6.72s
 def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_no_jupyter(
     mock_webbrowser,
     mock_subprocess,
@@ -737,6 +768,7 @@ def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 8.75s
 def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_runs_notebook_no_jupyter(
     mock_webbrowser,
     mock_subprocess,
@@ -1171,6 +1203,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 9.03s
 def test_suite_edit_multiple_datasources_with_no_additional_args_without_citations_runs_notebook_opens_jupyter(
     mock_webbrowser,
     mock_subprocess,
@@ -1428,6 +1461,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 9.08s
 def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_runs_notebook_opens_jupyter(
     mock_webbrowser,
     mock_subprocess,
@@ -3003,6 +3037,7 @@ def test_suite_new_profile_on_existing_suite_raises_error(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 9.08s
 def test_suite_new_profile_runs_notebook_no_jupyter(
     mock_webbrowser,
     mock_subprocess,
@@ -3113,19 +3148,9 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
     )
     assert len(cells_of_interest_dict) == 1
 
-    profiler_code_cell: str = """\
-profiler = UserConfigurableProfiler(
-    profile_dataset=validator,
-    excluded_expectations=None,
-    ignored_columns=ignored_columns,
-    not_null_only=False,
-    primary_or_compound_key=False,
-    semantic_types_dict=None,
-    table_expectations_only=False,
-    value_set_threshold="MANY",
-)
-suite = profiler.build_suite()"""
-    profiler_code_cell = lint_code(code=profiler_code_cell).rstrip("\n")
+    profiler_code_cell: str = lint_code(
+        code=PROFILER_CODE_CELL_ONBOARDING_DATA_ASSISTANT
+    ).rstrip("\n")
 
     cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
         nb=load_notebook_from_path(notebook_path=expected_notebook_path),
@@ -3143,35 +3168,28 @@ suite = profiler.build_suite()"""
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
 
+    expected_expectation_configurations: List[
+        ExpectationConfiguration
+    ] = EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT
+
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
-    assert suite.expectations == [
-        ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_table_columns_to_match_ordered_list",
-                "kwargs": {
-                    "column_list": [
-                        "Unnamed: 0",
-                        "Name",
-                        "PClass",
-                        "Age",
-                        "Sex",
-                        "Survived",
-                        "SexCode",
-                    ]
-                },
-                "meta": {},
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_table_row_count_to_be_between",
-                "kwargs": {"max_value": 1313, "min_value": 1313},
-                "meta": {},
-            }
-        ),
-    ]
+
+    expectation_configurations: List[ExpectationConfiguration] = []
+    expectation_configuration: ExpectationConfiguration
+    for expectation_configuration in suite.expectations:
+        kwargs: dict = expectation_configuration.kwargs
+        key: str
+        value: Any
+        kwargs = {
+            key: sorted(value) if isinstance(value, (list, set, tuple)) else value
+            for key, value in kwargs.items()
+        }
+        expectation_configuration.kwargs = kwargs
+        expectation_configurations.append(expectation_configuration)
+
+    assert expectation_configurations == expected_expectation_configurations
 
     assert mock_subprocess.call_count == 0
 
@@ -3248,6 +3266,7 @@ suite = profiler.build_suite()"""
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 9.29s
 def test_suite_new_profile_runs_notebook_opens_jupyter(
     mock_webbrowser,
     mock_subprocess,
@@ -3354,19 +3373,9 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
     )
     assert len(cells_of_interest_dict) == 1
 
-    profiler_code_cell: str = """\
-profiler = UserConfigurableProfiler(
-    profile_dataset=validator,
-    excluded_expectations=None,
-    ignored_columns=ignored_columns,
-    not_null_only=False,
-    primary_or_compound_key=False,
-    semantic_types_dict=None,
-    table_expectations_only=False,
-    value_set_threshold="MANY",
-)
-suite = profiler.build_suite()"""
-    profiler_code_cell = lint_code(code=profiler_code_cell).rstrip("\n")
+    profiler_code_cell: str = lint_code(
+        code=PROFILER_CODE_CELL_ONBOARDING_DATA_ASSISTANT
+    ).rstrip("\n")
 
     cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
         nb=load_notebook_from_path(notebook_path=expected_notebook_path),
@@ -3384,35 +3393,28 @@ suite = profiler.build_suite()"""
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
 
+    expected_expectation_configurations: List[
+        ExpectationConfiguration
+    ] = EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT
+
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
-    assert suite.expectations == [
-        ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_table_columns_to_match_ordered_list",
-                "kwargs": {
-                    "column_list": [
-                        "Unnamed: 0",
-                        "Name",
-                        "PClass",
-                        "Age",
-                        "Sex",
-                        "Survived",
-                        "SexCode",
-                    ]
-                },
-                "meta": {},
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_table_row_count_to_be_between",
-                "kwargs": {"max_value": 1313, "min_value": 1313},
-                "meta": {},
-            }
-        ),
-    ]
+
+    expectation_configurations: List[ExpectationConfiguration] = []
+    expectation_configuration: ExpectationConfiguration
+    for expectation_configuration in suite.expectations:
+        kwargs: dict = expectation_configuration.kwargs
+        key: str
+        value: Any
+        kwargs = {
+            key: sorted(value) if isinstance(value, (list, set, tuple)) else value
+            for key, value in kwargs.items()
+        }
+        expectation_configuration.kwargs = kwargs
+        expectation_configurations.append(expectation_configuration)
+
+    assert expectation_configurations == expected_expectation_configurations
 
     assert mock_subprocess.call_count == 1
     call_args: List[str] = mock_subprocess.call_args[0][0]
@@ -3604,9 +3606,12 @@ def test_suite_new_profile_with_named_arg_runs_notebook_no_jupyter(
     assert len(cells_of_interest_dict) == 1
 
     profiler_code_cell: str = f"""\
-suite = context.run_profiler_with_dynamic_arguments(
+result = context.run_profiler_with_dynamic_arguments(
     name="{profiler_name}",
-    expectation_suite=validator.expectation_suite
+    batch_request=batch_request,
+)
+validator.expectation_suite = result.get_expectation_suite(
+    expectation_suite_name=expectation_suite_name
 )
 """
     profiler_code_cell = lint_code(code=profiler_code_cell).rstrip("\n")
@@ -3728,9 +3733,12 @@ def test_suite_new_profile_with_named_arg_runs_notebook_opens_jupyter(
     assert len(cells_of_interest_dict) == 1
 
     profiler_code_cell: str = f"""\
-suite = context.run_profiler_with_dynamic_arguments(
+result = context.run_profiler_with_dynamic_arguments(
     name="{profiler_name}",
-    expectation_suite=validator.expectation_suite
+    batch_request=batch_request,
+)
+validator.expectation_suite = result.get_expectation_suite(
+    expectation_suite_name=expectation_suite_name
 )
 """
     profiler_code_cell = lint_code(code=profiler_code_cell).rstrip("\n")
@@ -3752,9 +3760,9 @@ def suite_new_messages():
         "warning_batch_request": "Warning: Ignoring the --manual flag and entering interactive mode since you passed the --batch-request flag",
         "happy_path_prompt_call": """
 How would you like to create your Expectation Suite?
-    1. Manually, without interacting with a sample batch of data (default)
-    2. Interactively, with a sample batch of data
-    3. Automatically, using a profiler
+    1. Manually, without interacting with a sample Batch of data (default)
+    2. Interactively, with a sample Batch of data
+    3. Automatically, using a Data Assistant
 """,
         "error_both_interactive_flags": "Please choose either --interactive or --manual, you may not choose both.",
     }
@@ -4019,6 +4027,7 @@ How would you like to create your Expectation Suite?
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 8.82s
 def test__process_suite_new_flags_and_prompt(
     mock_emit,
     mock_prompt,
@@ -4381,6 +4390,7 @@ options can be used.
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 7.90s
 def test__process_suite_edit_flags_and_prompt(
     mock_emit,
     mock_prompt,

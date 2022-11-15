@@ -98,7 +98,7 @@ class DictDot:
             return self.__getitem__(item=key)
         return self.__dict__.get(key, default_value)
 
-    def to_raw_dict(self):
+    def to_raw_dict(self) -> dict:
         """Convert this object into a standard dictionary, recursively.
 
         This is often convenient for serialization, and in cases where an untyped version of the object is required.

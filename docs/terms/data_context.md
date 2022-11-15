@@ -9,6 +9,7 @@ import ConnectHeader from '/docs/images/universal_map/_um_connect_header.mdx';
 import CreateHeader from '/docs/images/universal_map/_um_create_header.mdx';
 import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
 import TechnicalTag from '../term_tags/_tag.mdx';
+import RelevantApiLinks from './data_context__api_links.mdx'
 
 <UniversalMap setup='active' connect='active' create='active' validate='active'/> 
 
@@ -139,6 +140,10 @@ Running `test_yaml_config()` will show some feedback on the configuration. The h
 from the "self check" of an artifact produced using that configuration.  You should note, however, that `test_yaml_config()` never overwrites the underlying configuration.  If you make edits in the course of your work, you will have to explicitly save the configuration before running `test_yaml_config()`.
 
 For more detailed guidance on using the `test_yaml_config()` method, please see our guide on [how to configure DataContext components using test_yaml_config](../guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md).
+
+### Relevant API documentation (links)
+
+<RelevantApiLinks/>
 
 ## More details
 

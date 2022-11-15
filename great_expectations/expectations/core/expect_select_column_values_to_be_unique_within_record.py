@@ -1,13 +1,13 @@
 from typing import Optional
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.expectations.expectation import MulticolumnMapExpectation
-from great_expectations.expectations.util import (
+from great_expectations.expectations.expectation import (
+    MulticolumnMapExpectation,
     add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -64,7 +64,6 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
     }
 
     map_metric = "select_column_values.unique.within_record"
-    success_keys = ()
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
@@ -148,9 +147,9 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
-            template_str = f"Values must be unique across columns, at least $mostly_pct % of the time: "
+            template_str = "Values must be unique across columns, at least $mostly_pct % of the time: "
         else:
-            template_str = f"Values must always be unique across columns: "
+            template_str = "Values must always be unique across columns: "
 
         column_list = params.get("column_list") if params.get("column_list") else []
         if len(column_list) > 0:
@@ -187,7 +186,7 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
@@ -219,9 +218,9 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
-            template_str = f"Values must be unique across columns, at least $mostly_pct % of the time: "
+            template_str = "Values must be unique across columns, at least $mostly_pct % of the time: "
         else:
-            template_str = f"Values must always be unique across columns: "
+            template_str = "Values must always be unique across columns: "
 
         for idx in range(len(params["column_list"]) - 1):
             template_str += f"$column_list_{str(idx)}, "

@@ -16,7 +16,7 @@ your data at various levels of granularity:
 <Prerequisites>
 
 - [Configured and loaded a Data Context](../../../tutorials/getting_started/tutorial_setup.md)
-- [Configured a Datasource and Data Connector](../../../reference/datasources.md)
+- [Configured a Datasource and Data Connector](../../../terms/datasource.md)
 - Reviewed [How to configure a DataConnector to introspect and partition a file system or blob store](../how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store.md)
 
 </Prerequisites>
@@ -117,17 +117,19 @@ Note: Splitter methods can be specified with or without a preceding underscore.
 | split_on_mod_integer            | `column_name='col', mod=<int>, batch_identifiers={ 'col': matching_mod_value }`                               | Rows where value of column_name divided (using modular division) by the given mod are equal to matching_mod_value provided for the column_name specified                                                                          |
 | split_on_multi_column_values    | `column_names='<list[col]>', batch_identifiers={ 'col_0': value_0, 'col_1': value_1, 'col_2': value_2, ... }` | Rows where values of column_names are equal to values corresponding to each column name as specified                                                                                                                              |
 | split_on_converted_datetime     | `column_name='col', date_format_string=<'%Y-%m-%d'>, batch_identifiers={ 'col': matching_string }`            | Rows where value of column_name converted to datetime using the given date_format_string are equal to matching string provided for the column_name specified                                                                      |
-| split_on_hashed_column          | `column_name='col', hash_digits=<int>, hash_function_name=<'md5'> batch_identifiers={ 'hash_value': value }`  | Rows where value of column_name hashed (using specified has_function_name) and retaining the stated number of hash_digits are equal to hash_value provided for the column_name specified                                          |
+| split_on_hashed_column          | `column_name='col', hash_digits=<int>, hash_function_name=<'md5'> batch_identifiers={ 'hash_value': value }`  | Rows where value of column_name hashed (using specified hash_function_name) and retaining the stated number of hash_digits are equal to hash_value provided for the column_name specified                                          |
 
 
 Available `Sampling` methods and their configuration parameters:
 
+Note: Sampling methods can be specified with or without a preceding underscore.
+
 | Method               | Parameters                                                                           | Returned Batch Data                                                                                                         |
 |----------------------|--------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
-| _sample_using_random | `p=fraction`                                                                         | Rows selected at random, whose number amounts to selected fraction of total number of rows in batch                         |
-| _sample_using_mod    | `column_name='col', mod=<int>`                                                       | Take the mod of named column, and only keep rows that match the given value                                                 |
-| _sample_using_a_list | `column_name='col', value_list=<list[val]>`                                          | Match the values in the named column against value_list, and only keep the matches                                          |
-| _sample_using_hash   | `column_name='col', hash_digits=<int>, hash_value=<str>, hash_function_name=<'md5'>` | Hash the values in the named column (using specified has_function_name), and only keep rows that match the given hash_value |
+| sample_using_random | `p=fraction`                                                                         | Rows selected at random, whose number amounts to selected fraction of total number of rows in batch                         |
+| sample_using_mod    | `column_name='col', mod=<int>`                                                       | Take the mod of named column, and only keep rows that match the given value                                                 |
+| sample_using_a_list | `column_name='col', value_list=<list[val]>`                                          | Match the values in the named column against value_list, and only keep the matches                                          |
+| sample_using_hash   | `column_name='col', hash_digits=<int>, hash_value=<str>, hash_function_name=<'md5'>` | Hash the values in the named column (using specified hash_function_name), and only keep rows that match the given hash_value |
 
 
 

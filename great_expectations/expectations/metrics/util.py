@@ -1,4 +1,5 @@
 import logging
+import re
 import warnings
 from typing import Any, Dict, List, Optional
 
@@ -6,6 +7,7 @@ import numpy as np
 from dateutil.parser import parse
 from packaging import version
 
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 from great_expectations.execution_engine.util import check_sql_engine_dialect
 from great_expectations.util import get_sqlalchemy_inspector
 
@@ -65,6 +67,11 @@ try:
     registry.register("dremio", "sqlalchemy_dremio.pyodbc", "dialect")
 except ImportError:
     sqlalchemy_dremio = None
+
+try:
+    import trino
+except ImportError:
+    trino = None
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
@@ -126,7 +133,9 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
     try:
         # redshift
         # noinspection PyUnresolvedReferences
-        if issubclass(dialect.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
+        if hasattr(dialect, "RedshiftDialect") or issubclass(
+            dialect.dialect, sqlalchemy_redshift.dialect.RedshiftDialect
+        ):
             if positive:
                 return BinaryExpression(column, literal(regex), custom_op("~"))
             else:
@@ -178,6 +187,19 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
             "Unable to load BigQueryDialect dialect while running get_dialect_regex_expression in expectations.metrics.util",
             exc_info=True,
         )
+        pass
+
+    try:
+        # Trino
+        if isinstance(dialect, trino.sqlalchemy.dialect.TrinoDialect):
+            if positive:
+                return sa.func.regexp_like(column, literal(regex))
+            else:
+                return sa.not_(sa.func.regexp_like(column, literal(regex)))
+    except (
+        AttributeError,
+        TypeError,
+    ):  # TypeError can occur if the driver was not installed and so is None
         pass
 
     try:
@@ -314,7 +336,10 @@ def get_sqlalchemy_column_metadata(
         try:
             # if a custom query was passed
             if isinstance(table_selectable, TextClause):
-                columns = table_selectable.selected_columns.columns
+                if hasattr(table_selectable, "selected_columns"):
+                    columns = table_selectable.selected_columns.columns
+                else:
+                    columns = table_selectable.columns().columns
             else:
                 columns = inspector.get_columns(
                     table_selectable,
@@ -473,6 +498,12 @@ def column_reflection_fallback(
             table_name = selectable.name
         except AttributeError:
             table_name = selectable
+            if str(table_name).lower().startswith("select"):
+                rx = re.compile(r"^.* from ([\S]+)", re.I)
+                match = rx.match(str(table_name).replace("\n", ""))
+                if match:
+                    table_name = match.group(1)
+        schema_name = sqlalchemy_engine.dialect.default_schema_name
 
         tables_table: sa.Table = sa.Table(
             "tables",
@@ -526,7 +557,14 @@ def column_reflection_fallback(
                     right=columns_table_query, onclause=conditions, isouter=False
                 )
             )
-            .where(tables_table_query.c.table_name == table_name)
+            .where(
+                sa.and_(
+                    *(
+                        tables_table_query.c.table_name == table_name,
+                        tables_table_query.c.schema_name == schema_name,
+                    )
+                )
+            )
             .order_by(
                 tables_table_query.c.schema_name.asc(),
                 tables_table_query.c.table_name.asc(),
@@ -550,7 +588,15 @@ def column_reflection_fallback(
         if isinstance(selectable, TextClause):
             query: TextClause = selectable
         else:
-            query: Select = sa.select([sa.text("*")]).select_from(selectable).limit(1)
+            if dialect.name.lower() == GESqlDialect.REDSHIFT:
+                # Redshift needs temp tables to be declared as text
+                query: Select = (
+                    sa.select([sa.text("*")]).select_from(sa.text(selectable)).limit(1)
+                )
+            else:
+                query: Select = (
+                    sa.select([sa.text("*")]).select_from(selectable).limit(1)
+                )
         result_object = sqlalchemy_engine.execute(query)
         # noinspection PyProtectedMember
         col_names: List[str] = result_object._metadata.keys
@@ -578,16 +624,23 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
     ):  # TypeError can occur if the driver was not installed and so is None
         pass
 
-    if issubclass(
-        dialect.dialect,
-        (
-            sa.dialects.sqlite.dialect,
-            sa.dialects.postgresql.dialect,
-            sa.dialects.mysql.dialect,
-            sa.dialects.mssql.dialect,
-        ),
-    ):
-        dialect_supported = True
+    if hasattr(dialect, "dialect"):
+        if issubclass(
+            dialect.dialect,
+            (
+                sa.dialects.sqlite.dialect,
+                sa.dialects.postgresql.dialect,
+                sa.dialects.mysql.dialect,
+                sa.dialects.mssql.dialect,
+            ),
+        ):
+            dialect_supported = True
+
+    try:
+        if hasattr(dialect, "RedshiftDialect"):
+            dialect_supported = True
+    except (AttributeError, TypeError):
+        pass
 
     try:
         # noinspection PyUnresolvedReferences
@@ -595,6 +648,20 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
             dialect_supported = True
     except (AttributeError, TypeError):
         pass
+
+    try:
+        # noinspection PyUnresolvedReferences
+        if isinstance(dialect, trino.sqlalchemy.dialect.TrinoDialect):
+            dialect_supported = True
+    except (AttributeError, TypeError):
+        pass
+
+    try:
+        if hasattr(dialect, "SnowflakeDialect"):
+            dialect_supported = True
+    except (AttributeError, TypeError):
+        pass
+
     try:
         if hasattr(dialect, "DremioDialect"):
             dialect_supported = True

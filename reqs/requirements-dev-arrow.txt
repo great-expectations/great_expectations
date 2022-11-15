@@ -1,0 +1,2 @@
+feather-format>=0.4.1
+pyarrow

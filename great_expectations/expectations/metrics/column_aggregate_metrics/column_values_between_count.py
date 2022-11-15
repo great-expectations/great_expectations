@@ -2,13 +2,13 @@ from typing import Any, Dict
 
 import numpy as np
 
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import get_sql_dialect_floating_point_infinity_value
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,

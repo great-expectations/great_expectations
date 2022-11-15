@@ -43,6 +43,7 @@ from great_expectations.exceptions import (
     BatchKwargsError,
     DatasourceInitializationError,
 )
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 from great_expectations.validator.validator import BridgeValidator
 
 logger = logging.getLogger(__name__)
@@ -1367,7 +1368,7 @@ Would you like to continue?"""
     temp_table_kwargs = {}
     datasource = context.get_datasource(datasource_name)
 
-    if datasource.engine.dialect.name.lower() == "bigquery":
+    if datasource.engine.dialect.name.lower() == GESqlDialect.BIGQUERY:
         # bigquery table needs to contain the project id if it differs from the credentials project
         if len(data_asset_name.split(".")) < 3:
             project_id, _, _, _, _, _ = parse_bigquery_url(datasource.engine.url)

@@ -1,6 +1,7 @@
 import datetime
 import logging
 from itertools import chain
+from typing import Dict
 
 import ipywidgets as widgets
 
@@ -9,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class ExpectationExplorer:
     def __init__(self) -> None:
-        self.state = {"data_assets": {}}
+        self.state: Dict[str, Dict] = {"data_assets": {}}
         self.expectation_kwarg_field_names = {
             "expect_column_values_to_be_unique": ["mostly"],
             "expect_column_unique_value_count_to_be_between": [
@@ -243,9 +244,9 @@ class ExpectationExplorer:
     def set_expectation_state(self, data_asset, expectation_state, column=None) -> None:
         data_asset_name = data_asset.data_asset_name
         expectation_type = expectation_state.get("expectation_type")
-        data_asset_state = self.state["data_assets"].get(data_asset_name)
+        data_asset_state: Dict = self.state["data_assets"][data_asset_name]
 
-        data_asset_expectations = data_asset_state.get("expectations")
+        data_asset_expectations = data_asset_state.get("expectations", {})
 
         if column:
             column_expectations = data_asset_expectations.get(column, {})
@@ -1003,7 +1004,7 @@ class ExpectationExplorer:
         **expectation_kwargs,
     ):
         data_asset_name = expectation_state["data_asset_name"]
-        data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
+        data_asset = self.state["data_assets"][data_asset_name]["data_asset"]
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
         expectation_type = expectation_state["expectation_type"]
         min_max_type_widget_dict = expectation_state["kwargs"].get("min_max_type", {})

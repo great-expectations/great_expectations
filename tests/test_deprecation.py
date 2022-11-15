@@ -17,9 +17,6 @@ def regex_for_deprecation_comments() -> Pattern:
 @pytest.fixture
 def files_with_deprecation_warnings() -> List[str]:
     files: List[str] = glob.glob("great_expectations/**/*.py", recursive=True)
-    # Filter out parts of the codebase that aren't written by the GE team
-    files = list(filter(lambda f: "marshmallow__shade" not in f, files))
-
     return files
 
 

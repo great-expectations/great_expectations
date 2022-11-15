@@ -381,7 +381,9 @@ def load_checkpoint(
         exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}</red>")
 
 
-def select_datasource(context: DataContext, datasource_name: str = None) -> Datasource:
+def select_datasource(
+    context: DataContext, datasource_name: Optional[str] = None
+) -> Datasource:
     """Select a datasource interactively."""
     # TODO consolidate all the myriad CLI tests into this
     data_source = None
@@ -421,7 +423,7 @@ def load_data_context_with_error_handling(
 ) -> DataContext:
     """Return a DataContext with good error handling and exit codes."""
     try:
-        context: DataContext = DataContext(context_root_dir=directory)
+        context = DataContext(context_root_dir=directory)
         ge_config_version: int = context.get_config().config_version
         if (
             from_cli_upgrade_command

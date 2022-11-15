@@ -43,7 +43,7 @@ data_connectors:
 context.test_yaml_config(datasource_yaml)
 context.add_datasource(**yaml.load(datasource_yaml))
 
-# clean db
+# clean db to prepare for test
 clean_athena_db(connection_string, ATHENA_DB_NAME, "taxitable")
 
 # Test 1 : temp_table is not created (default)

@@ -1,6 +1,6 @@
 import os
 import shutil
-from typing import Any, Dict, List, Set, Tuple, Union
+from typing import Any, Dict, List, Set, Union
 from unittest import mock
 from uuid import UUID
 
@@ -11,35 +11,24 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
-    Batch,
     BatchDefinition,
     BatchMarkers,
     BatchRequest,
-    IDDict,
     RuntimeBatchRequest,
 )
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.data_context.types.base import ProgressBarsConfig
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
 )
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.core.expect_column_value_z_scores_to_be_less_than import (
-    ExpectColumnValueZScoresToBeLessThan,
-)
-from great_expectations.expectations.registry import get_expectation_impl
-from great_expectations.validator.exception_info import ExceptionInfo
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.render import RenderedAtomicContent
 from great_expectations.validator.validation_graph import ValidationGraph
-from great_expectations.validator.validator import (
-    MAX_METRIC_COMPUTATION_RETRIES,
-    Validator,
-)
+from great_expectations.validator.validator import Validator
 
 
 @pytest.fixture()
@@ -124,454 +113,13 @@ def yellow_trip_pandas_data_context(
         ),
     )
 
-    context: DataContext = DataContext(context_root_dir=context_path)
+    context = DataContext(context_root_dir=context_path)
     assert context.root_directory == context_path
 
     return context
 
 
-def test_parse_validation_graph():
-    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={
-            "column": "a",
-            "mostly": 0.9,
-            "threshold": 4,
-            "double_sided": True,
-        },
-    )
-    # noinspection PyUnusedLocal
-    expectation = ExpectColumnValueZScoresToBeLessThan(expectation_configuration)
-    # noinspection PyUnusedLocal
-    batch = Batch(data=df)
-    graph = ValidationGraph()
-    engine = PandasExecutionEngine()
-    for configuration in [expectation_configuration]:
-        expectation_impl = get_expectation_impl(
-            "expect_column_value_z_scores_to_be_less_than"
-        )
-        validation_dependencies = expectation_impl(
-            configuration
-        ).get_validation_dependencies(configuration, engine)
-
-        for metric_configuration in validation_dependencies["metrics"].values():
-            Validator(execution_engine=engine).build_metric_dependency_graph(
-                graph=graph,
-                execution_engine=engine,
-                metric_configuration=metric_configuration,
-                configuration=configuration,
-            )
-    ready_metrics, needed_metrics = Validator(engine)._parse_validation_graph(
-        validation_graph=graph, metrics=dict()
-    )
-    assert len(ready_metrics) == 2 and len(needed_metrics) == 9
-
-
-# Should be passing tests even if given incorrect MetricProvider data
-def test_parse_validation_graph_with_bad_metrics_args():
-    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={
-            "column": "a",
-            "mostly": 0.9,
-            "threshold": 4,
-            "double_sided": True,
-        },
-    )
-    graph = ValidationGraph()
-    engine = PandasExecutionEngine()
-    validator = Validator(execution_engine=engine)
-    for configuration in [expectation_configuration]:
-        expectation_impl = get_expectation_impl(
-            "expect_column_value_z_scores_to_be_less_than"
-        )
-        validation_dependencies = expectation_impl(
-            configuration
-        ).get_validation_dependencies(
-            configuration,
-            execution_engine=engine,
-        )
-
-        for metric_configuration in validation_dependencies["metrics"].values():
-            validator.build_metric_dependency_graph(
-                graph=graph,
-                execution_engine=engine,
-                metric_configuration=metric_configuration,
-                configuration=configuration,
-            )
-    ready_metrics, needed_metrics = validator._parse_validation_graph(
-        validation_graph=graph, metrics=("nonexistent", "NONE")
-    )
-    assert len(ready_metrics) == 2 and len(needed_metrics) == 9
-
-
-def test_populate_dependencies():
-    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={
-            "column": "a",
-            "mostly": 0.9,
-            "threshold": 4,
-            "double_sided": True,
-        },
-    )
-    # noinspection PyUnusedLocal
-    expectation = ExpectColumnValueZScoresToBeLessThan(expectation_configuration)
-    # noinspection PyUnusedLocal
-    batch = Batch(data=df)
-    graph = ValidationGraph()
-    engine = PandasExecutionEngine()
-    for configuration in [expectation_configuration]:
-        expectation_impl = get_expectation_impl(
-            "expect_column_value_z_scores_to_be_less_than"
-        )
-        validation_dependencies = expectation_impl(
-            configuration
-        ).get_validation_dependencies(
-            configuration,
-            engine,
-        )
-
-        for metric_configuration in validation_dependencies["metrics"].values():
-            Validator(execution_engine=engine).build_metric_dependency_graph(
-                graph=graph,
-                execution_engine=engine,
-                metric_configuration=metric_configuration,
-                configuration=configuration,
-            )
-    assert len(graph.edges) == 33
-
-
-def test_populate_dependencies_with_incorrect_metric_name():
-    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={
-            "column": "a",
-            "mostly": 0.9,
-            "threshold": 4,
-            "double_sided": True,
-        },
-    )
-    # noinspection PyUnusedLocal
-    expectation = ExpectColumnValueZScoresToBeLessThan(expectation_configuration)
-    # noinspection PyUnusedLocal
-    batch = Batch(data=df)
-    graph = ValidationGraph()
-    engine = PandasExecutionEngine()
-    for configuration in [expectation_configuration]:
-        expectation_impl = get_expectation_impl(
-            "expect_column_value_z_scores_to_be_less_than"
-        )
-        validation_dependencies = expectation_impl(
-            configuration
-        ).get_validation_dependencies(
-            configuration,
-            engine,
-        )
-
-        try:
-            Validator(execution_engine=engine).build_metric_dependency_graph(
-                graph=graph,
-                execution_engine=engine,
-                metric_configuration=MetricConfiguration(
-                    "column_values.not_a_metric", IDDict()
-                ),
-                configuration=configuration,
-            )
-        except ge_exceptions.MetricProviderError as e:
-            graph = e
-
-    assert isinstance(graph, ge_exceptions.MetricProviderError)
-
-
-def test_graph_validate(basic_datasource):
-    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
-
-    batch = basic_datasource.get_single_batch_from_batch_request(
-        RuntimeBatchRequest(
-            **{
-                "datasource_name": "my_datasource",
-                "data_connector_name": "test_runtime_data_connector",
-                "data_asset_name": "IN_MEMORY_DATA_ASSET",
-                "runtime_parameters": {
-                    "batch_data": df,
-                },
-                "batch_identifiers": {
-                    "pipeline_stage_name": 0,
-                    "airflow_run_id": 0,
-                    "custom_key_0": 0,
-                },
-            }
-        )
-    )
-
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={
-            "column": "b",
-            "mostly": 0.9,
-            "threshold": 4,
-            "double_sided": True,
-        },
-    )
-    result = Validator(
-        execution_engine=PandasExecutionEngine(), batches=[batch]
-    ).graph_validate(configurations=[expectation_configuration])
-    assert result == [
-        ExpectationValidationResult(
-            success=True,
-            expectation_config=None,
-            meta={},
-            result={
-                "element_count": 6,
-                "unexpected_count": 0,
-                "unexpected_percent": 0.0,
-                "partial_unexpected_list": [],
-                "missing_count": 1,
-                "missing_percent": 16.666666666666664,
-                "unexpected_percent_nonmissing": 0.0,
-            },
-            exception_info=None,
-        )
-    ]
-
-
-def test_graph_validate_with_exception(basic_datasource):
-    def mock_error(*args, **kwargs):
-        raise Exception("Mock Error")
-
-    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
-
-    batch = basic_datasource.get_single_batch_from_batch_request(
-        RuntimeBatchRequest(
-            **{
-                "datasource_name": "my_datasource",
-                "data_connector_name": "test_runtime_data_connector",
-                "data_asset_name": "IN_MEMORY_DATA_ASSET",
-                "runtime_parameters": {
-                    "batch_data": df,
-                },
-                "batch_identifiers": {
-                    "pipeline_stage_name": 0,
-                    "airflow_run_id": 0,
-                    "custom_key_0": 0,
-                },
-            }
-        )
-    )
-
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={
-            "column": "b",
-            "mostly": 0.9,
-            "threshold": 4,
-            "double_sided": True,
-        },
-    )
-
-    validator = Validator(execution_engine=PandasExecutionEngine(), batches=[batch])
-    validator.build_metric_dependency_graph = mock_error
-
-    result = validator.graph_validate(configurations=[expectation_configuration])
-
-    assert len(result) == 1
-    assert result[0].expectation_config is not None
-
-
-def test_graph_validate_with_bad_config_catch_exceptions_false(basic_datasource):
-    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
-
-    batch = basic_datasource.get_single_batch_from_batch_request(
-        RuntimeBatchRequest(
-            **{
-                "datasource_name": "my_datasource",
-                "data_connector_name": "test_runtime_data_connector",
-                "data_asset_name": "IN_MEMORY_DATA_ASSET",
-                "runtime_parameters": {
-                    "batch_data": df,
-                },
-                "batch_identifiers": {
-                    "pipeline_stage_name": 0,
-                    "airflow_run_id": 0,
-                    "custom_key_0": 0,
-                },
-            }
-        )
-    )
-
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_max_to_be_between",
-        kwargs={"column": "not_in_table", "min_value": 1, "max_value": 29},
-    )
-    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
-        # noinspection PyUnusedLocal
-        result = Validator(
-            execution_engine=PandasExecutionEngine(), batches=[batch]
-        ).graph_validate(
-            configurations=[expectation_configuration],
-            runtime_configuration={
-                "catch_exceptions": False,
-                "result_format": {"result_format": "BASIC"},
-            },
-        )
-    assert (
-        str(eee.value)
-        == 'Error: The column "not_in_table" in BatchData does not exist.'
-    )
-
-
-def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
-    basic_datasource,
-):
-    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
-
-    batch = basic_datasource.get_single_batch_from_batch_request(
-        RuntimeBatchRequest(
-            **{
-                "datasource_name": "my_datasource",
-                "data_connector_name": "test_runtime_data_connector",
-                "data_asset_name": "IN_MEMORY_DATA_ASSET",
-                "runtime_parameters": {
-                    "batch_data": df,
-                },
-                "batch_identifiers": {
-                    "pipeline_stage_name": 0,
-                    "airflow_run_id": 0,
-                    "custom_key_0": 0,
-                },
-            }
-        )
-    )
-
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_max_to_be_between",
-        kwargs={"column": "not_in_table", "min_value": 1, "max_value": 29},
-    )
-
-    runtime_configuration = {
-        "catch_exceptions": True,
-        "result_format": {"result_format": "BASIC"},
-    }
-
-    execution_engine = PandasExecutionEngine()
-
-    validator = Validator(execution_engine=execution_engine, batches=[batch])
-
-    expectation_impl = get_expectation_impl(expectation_configuration.expectation_type)
-    validation_dependencies = expectation_impl().get_validation_dependencies(
-        expectation_configuration, execution_engine, runtime_configuration
-    )["metrics"]
-
-    graph = ValidationGraph()
-
-    for metric_configuration in validation_dependencies.values():
-        validator.build_metric_dependency_graph(
-            graph=graph,
-            execution_engine=execution_engine,
-            metric_configuration=metric_configuration,
-            configuration=expectation_configuration,
-            runtime_configuration=runtime_configuration,
-        )
-
-    metrics: Dict[Tuple[str, str, str], Any] = {}
-    aborted_metrics_info: Dict[
-        Tuple[str, str, str],
-        Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-    ] = validator.resolve_validation_graph(
-        graph=graph,
-        metrics=metrics,
-        runtime_configuration=runtime_configuration,
-    )
-
-    assert len(aborted_metrics_info) == 1
-
-    aborted_metric_info_item = list(aborted_metrics_info.values())[0]
-    assert aborted_metric_info_item["num_failures"] == MAX_METRIC_COMPUTATION_RETRIES
-
-    assert len(aborted_metric_info_item["exception_info"]) == 1
-
-    exception_info = next(iter(aborted_metric_info_item["exception_info"]))
-    assert (
-        exception_info["exception_message"]
-        == 'Error: The column "not_in_table" in BatchData does not exist.'
-    )
-
-
-# Tests that runtime configuration actually works during graph validation
-def test_graph_validate_with_runtime_config(basic_datasource):
-    df = pd.DataFrame(
-        {"a": [1, 5, 22, 3, 5, 10, 2, 3], "b": [97, 332, 3, 4, 5, 6, 7, None]}
-    )
-
-    batch = basic_datasource.get_single_batch_from_batch_request(
-        RuntimeBatchRequest(
-            **{
-                "datasource_name": "my_datasource",
-                "data_connector_name": "test_runtime_data_connector",
-                "data_asset_name": "IN_MEMORY_DATA_ASSET",
-                "runtime_parameters": {
-                    "batch_data": df,
-                },
-                "batch_identifiers": {
-                    "pipeline_stage_name": 0,
-                    "airflow_run_id": 0,
-                    "custom_key_0": 0,
-                },
-            }
-        )
-    )
-
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "b", "mostly": 1, "threshold": 2, "double_sided": True},
-    )
-    try:
-        result = Validator(
-            execution_engine=PandasExecutionEngine(), batches=(batch,)
-        ).graph_validate(
-            configurations=[expectation_configuration],
-            runtime_configuration={"result_format": "COMPLETE"},
-        )
-    except AssertionError as e:
-        result = e
-    assert result == [
-        ExpectationValidationResult(
-            success=False,
-            meta={},
-            result={
-                "element_count": 8,
-                "unexpected_count": 1,
-                "unexpected_percent": 14.285714285714285,
-                "partial_unexpected_list": [332.0],
-                "missing_count": 1,
-                "missing_percent": 12.5,
-                "unexpected_percent_total": 12.5,
-                "unexpected_percent_nonmissing": 14.285714285714285,
-                "partial_unexpected_index_list": [1],
-                "partial_unexpected_counts": [{"value": 332.0, "count": 1}],
-                "unexpected_list": [332.0],
-                "unexpected_index_list": [1],
-            },
-            expectation_config={
-                "expectation_type": "expect_column_value_z_scores_to_be_less_than",
-                "kwargs": {
-                    "column": "b",
-                    "mostly": 1,
-                    "threshold": 2,
-                    "double_sided": True,
-                },
-                "meta": {},
-            },
-            exception_info=None,
-        )
-    ]
-
-
+@pytest.mark.integration
 def test_validator_default_expectation_args__pandas(basic_datasource):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
 
@@ -598,6 +146,7 @@ def test_validator_default_expectation_args__pandas(basic_datasource):
     print(my_validator.get_default_expectation_arguments())
 
 
+@pytest.mark.integration
 def test_validator_default_expectation_args__sql(
     data_context_with_simple_sql_datasource_for_testing_get_batch,
 ):
@@ -636,6 +185,7 @@ def test_validator_default_expectation_args__sql(
         )
 
 
+@pytest.mark.integration
 def test_columns(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
@@ -663,6 +213,7 @@ def test_columns(
     assert columns == expected
 
 
+@pytest.mark.integration
 def test_head(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
@@ -725,7 +276,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
     context: DataContext = yellow_trip_pandas_data_context
     context._ge_cloud_mode = True
 
-    suite: ExpectationSuite = ExpectationSuite(
+    suite = ExpectationSuite(
         expectation_suite_name="validating_taxi_data",
         expectations=[
             ExpectationConfiguration(
@@ -767,6 +318,8 @@ def multi_batch_taxi_validator_ge_cloud_mode(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.cloud
+@pytest.mark.integration
 def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     mock_emit,
     mock_context_get_suite,
@@ -816,6 +369,7 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     assert mock_emit.call_args_list == []
 
 
+@pytest.mark.integration
 def test_validator_can_instantiate_with_a_multi_batch_request(
     multi_batch_taxi_validator,
 ):
@@ -837,6 +391,27 @@ def test_validator_can_instantiate_with_a_multi_batch_request(
     ]
 
 
+@pytest.mark.integration
+def test_validator_with_bad_batchrequest(
+    yellow_trip_pandas_data_context,
+):
+    context: DataContext = yellow_trip_pandas_data_context
+
+    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+
+    multi_batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_pandas",
+        data_connector_name="monthly",
+        data_asset_name="i_dont_exist",
+        data_connector_query={"batch_filter_parameters": {"year": "2019"}},
+    )
+    with pytest.raises(ge_exceptions.InvalidBatchRequestError):
+        validator_multi_batch: Validator = context.get_validator(
+            batch_request=multi_batch_request, expectation_suite=suite
+        )
+
+
+@pytest.mark.integration
 def test_validator_batch_filter(
     multi_batch_taxi_validator,
 ):
@@ -926,6 +501,7 @@ def test_validator_batch_filter(
     )
 
 
+@pytest.mark.integration
 def test_custom_filter_function(
     multi_batch_taxi_validator,
 ):
@@ -958,6 +534,7 @@ def test_custom_filter_function(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.integration
 def test_adding_expectation_to_validator_not_send_usage_message(
     mock_emit, multi_batch_taxi_validator
 ):
@@ -976,34 +553,7 @@ def test_adding_expectation_to_validator_not_send_usage_message(
     assert mock_emit.call_args_list == []
 
 
-def test_validator_set_active_batch(
-    multi_batch_taxi_validator,
-):
-    jan_min_date = "2019-01-01"
-    mar_min_date = "2019-03-01"
-    assert (
-        multi_batch_taxi_validator.active_batch_id == "90bb41c1fbd7c71c05dbc8695320af71"
-    )
-    with pytest.deprecated_call():  # parse_strings_as_datetimes is deprecated in V3
-        assert multi_batch_taxi_validator.expect_column_values_to_be_between(
-            "pickup_datetime", min_value=mar_min_date, parse_strings_as_datetimes=True
-        ).success
-
-    multi_batch_taxi_validator.active_batch_id = "0327cfb13205ec8512e1c28e438ab43b"
-
-    assert (
-        multi_batch_taxi_validator.active_batch_id == "0327cfb13205ec8512e1c28e438ab43b"
-    )
-    with pytest.deprecated_call():  # parse_strings_as_datetimes is deprecated in V3
-        assert not multi_batch_taxi_validator.expect_column_values_to_be_between(
-            "pickup_datetime", min_value=mar_min_date, parse_strings_as_datetimes=True
-        ).success
-    with pytest.deprecated_call():  # parse_strings_as_datetimes is deprecated in V3
-        assert multi_batch_taxi_validator.expect_column_values_to_be_between(
-            "pickup_datetime", min_value=jan_min_date, parse_strings_as_datetimes=True
-        ).success
-
-
+@pytest.mark.integration
 def test_validator_load_additional_batch_to_validator(
     yellow_trip_pandas_data_context,
 ):
@@ -1052,6 +602,7 @@ def test_validator_load_additional_batch_to_validator(
     assert first_batch_markers != updated_batch_markers
 
 
+@pytest.mark.integration
 def test_instantiate_validator_with_a_list_of_batch_requests(
     yellow_trip_pandas_data_context,
 ):
@@ -1105,11 +656,229 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
             batch_request_list=[jan_batch_request, feb_batch_request],
             expectation_suite=suite,
         )
+
     assert ve.value.args == (
         "No more than one of batch, batch_list, batch_request, or batch_request_list can be specified",
     )
 
 
+@pytest.mark.integration
+def test_graph_validate(basic_datasource):
+    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
+
+    batch = basic_datasource.get_single_batch_from_batch_request(
+        RuntimeBatchRequest(
+            **{
+                "datasource_name": "my_datasource",
+                "data_connector_name": "test_runtime_data_connector",
+                "data_asset_name": "IN_MEMORY_DATA_ASSET",
+                "runtime_parameters": {
+                    "batch_data": df,
+                },
+                "batch_identifiers": {
+                    "pipeline_stage_name": 0,
+                    "airflow_run_id": 0,
+                    "custom_key_0": 0,
+                },
+            }
+        )
+    )
+
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_value_z_scores_to_be_less_than",
+        kwargs={
+            "column": "b",
+            "mostly": 0.9,
+            "threshold": 4,
+            "double_sided": True,
+        },
+    )
+    result = Validator(
+        execution_engine=PandasExecutionEngine(), batches=[batch]
+    ).graph_validate(configurations=[expectation_configuration])
+    assert result == [
+        ExpectationValidationResult(
+            success=True,
+            expectation_config=None,
+            meta={},
+            result={
+                "element_count": 6,
+                "unexpected_count": 0,
+                "unexpected_percent": 0.0,
+                "partial_unexpected_list": [],
+                "missing_count": 1,
+                "missing_percent": 16.666666666666664,
+                "unexpected_percent_nonmissing": 0.0,
+            },
+            exception_info=None,
+        )
+    ]
+
+
+# Tests that runtime configuration actually works during graph validation
+@pytest.mark.integration
+def test_graph_validate_with_runtime_config(basic_datasource):
+    df = pd.DataFrame(
+        {"a": [1, 5, 22, 3, 5, 10, 2, 3], "b": [97, 332, 3, 4, 5, 6, 7, None]}
+    )
+
+    batch = basic_datasource.get_single_batch_from_batch_request(
+        RuntimeBatchRequest(
+            **{
+                "datasource_name": "my_datasource",
+                "data_connector_name": "test_runtime_data_connector",
+                "data_asset_name": "IN_MEMORY_DATA_ASSET",
+                "runtime_parameters": {
+                    "batch_data": df,
+                },
+                "batch_identifiers": {
+                    "pipeline_stage_name": 0,
+                    "airflow_run_id": 0,
+                    "custom_key_0": 0,
+                },
+            }
+        )
+    )
+
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_value_z_scores_to_be_less_than",
+        kwargs={"column": "b", "mostly": 1, "threshold": 2, "double_sided": True},
+    )
+    try:
+        # noinspection PyTypeChecker
+        result = Validator(
+            execution_engine=PandasExecutionEngine(), batches=(batch,)
+        ).graph_validate(
+            configurations=[expectation_configuration],
+            runtime_configuration={"result_format": "COMPLETE"},
+        )
+    except AssertionError as e:
+        result = e
+
+    assert result == [
+        ExpectationValidationResult(
+            success=False,
+            meta={},
+            result={
+                "element_count": 8,
+                "unexpected_count": 1,
+                "unexpected_percent": 14.285714285714285,
+                "partial_unexpected_list": [332.0],
+                "missing_count": 1,
+                "missing_percent": 12.5,
+                "unexpected_percent_total": 12.5,
+                "unexpected_percent_nonmissing": 14.285714285714285,
+                "partial_unexpected_index_list": [1],
+                "partial_unexpected_counts": [{"value": 332.0, "count": 1}],
+                "unexpected_list": [332.0],
+                "unexpected_index_list": [1],
+            },
+            expectation_config={
+                "expectation_type": "expect_column_value_z_scores_to_be_less_than",
+                "kwargs": {
+                    "column": "b",
+                    "mostly": 1,
+                    "threshold": 2,
+                    "double_sided": True,
+                },
+                "meta": {},
+            },
+            exception_info=None,
+        )
+    ]
+
+
+@pytest.mark.integration
+def test_graph_validate_with_exception(basic_datasource):
+    # noinspection PyUnusedLocal
+    def mock_error(*args, **kwargs):
+        raise Exception("Mock Error")
+
+    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
+
+    batch = basic_datasource.get_single_batch_from_batch_request(
+        RuntimeBatchRequest(
+            **{
+                "datasource_name": "my_datasource",
+                "data_connector_name": "test_runtime_data_connector",
+                "data_asset_name": "IN_MEMORY_DATA_ASSET",
+                "runtime_parameters": {
+                    "batch_data": df,
+                },
+                "batch_identifiers": {
+                    "pipeline_stage_name": 0,
+                    "airflow_run_id": 0,
+                    "custom_key_0": 0,
+                },
+            }
+        )
+    )
+
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_value_z_scores_to_be_less_than",
+        kwargs={
+            "column": "b",
+            "mostly": 0.9,
+            "threshold": 4,
+            "double_sided": True,
+        },
+    )
+
+    execution_engine = PandasExecutionEngine()
+    validator = Validator(execution_engine=execution_engine, batches=[batch])
+    graph = ValidationGraph(execution_engine=execution_engine)
+    graph.build_metric_dependency_graph = mock_error
+
+    result = validator.graph_validate(configurations=[expectation_configuration])
+
+    assert len(result) == 1
+    assert result[0].expectation_config is not None
+
+
+@pytest.mark.integration
+def test_graph_validate_with_bad_config_catch_exceptions_false(basic_datasource):
+    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
+
+    batch = basic_datasource.get_single_batch_from_batch_request(
+        RuntimeBatchRequest(
+            **{
+                "datasource_name": "my_datasource",
+                "data_connector_name": "test_runtime_data_connector",
+                "data_asset_name": "IN_MEMORY_DATA_ASSET",
+                "runtime_parameters": {
+                    "batch_data": df,
+                },
+                "batch_identifiers": {
+                    "pipeline_stage_name": 0,
+                    "airflow_run_id": 0,
+                    "custom_key_0": 0,
+                },
+            }
+        )
+    )
+
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_max_to_be_between",
+        kwargs={"column": "not_in_table", "min_value": 1, "max_value": 29},
+    )
+    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
+        # noinspection PyUnusedLocal
+        result = Validator(
+            execution_engine=PandasExecutionEngine(), batches=[batch]
+        ).graph_validate(
+            configurations=[expectation_configuration],
+            runtime_configuration={
+                "catch_exceptions": False,
+                "result_format": {"result_format": "BASIC"},
+            },
+        )
+    assert (
+        str(eee.value)
+        == 'Error: The column "not_in_table" in BatchData does not exist.'
+    )
+
+
+@pytest.mark.integration
 def test_validate_expectation(multi_batch_taxi_validator):
     validator: Validator = multi_batch_taxi_validator
     expect_column_values_to_be_between_config = validator.validate_expectation(
@@ -1133,44 +902,7 @@ def test_validate_expectation(multi_batch_taxi_validator):
     }
 
 
-@mock.patch("great_expectations.data_context.data_context.DataContext")
-@mock.patch("great_expectations.validator.validation_graph.ValidationGraph")
-@mock.patch("great_expectations.validator.validator.tqdm")
-def test_validator_progress_bar_config_enabled(
-    mock_tqdm, mock_validation_graph, mock_data_context
-):
-    data_context = mock_data_context()
-    engine = PandasExecutionEngine()
-    validator = Validator(engine, data_context=data_context)
-
-    # ValidationGraph is a complex object that requires len > 3 to not trigger tqdm
-    mock_validation_graph.edges.__len__ = lambda _: 3
-    validator.resolve_validation_graph(mock_validation_graph, {})
-
-    # Still invoked but doesn't actually do anything due to `disabled`
-    assert mock_tqdm.called is True
-    assert mock_tqdm.call_args[1]["disable"] is False
-
-
-@mock.patch("great_expectations.data_context.data_context.DataContext")
-@mock.patch("great_expectations.validator.validation_graph.ValidationGraph")
-@mock.patch("great_expectations.validator.validator.tqdm")
-def test_validator_progress_bar_config_disabled(
-    mock_tqdm, mock_validation_graph, mock_data_context
-):
-    data_context = mock_data_context()
-    data_context.progress_bars = ProgressBarsConfig(metric_calculations=False)
-    engine = PandasExecutionEngine()
-    validator = Validator(engine, data_context=data_context)
-
-    # ValidationGraph is a complex object that requires len > 3 to not trigger tqdm
-    mock_validation_graph.edges.__len__ = lambda _: 3
-    validator.resolve_validation_graph(mock_validation_graph, {})
-
-    assert mock_tqdm.called is True
-    assert mock_tqdm.call_args[1]["disable"] is True
-
-
+@pytest.mark.integration
 def test_validator_docstrings(multi_batch_taxi_validator):
     expectation_impl = getattr(
         multi_batch_taxi_validator, "expect_column_values_to_be_in_set", None
@@ -1178,3 +910,177 @@ def test_validator_docstrings(multi_batch_taxi_validator):
     assert expectation_impl.__doc__.startswith(
         "Expect each column value to be in a given set"
     )
+
+
+@pytest.mark.integration
+def test_validator_include_rendered_content(
+    yellow_trip_pandas_data_context,
+):
+    context: DataContext = yellow_trip_pandas_data_context
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_pandas",
+        data_connector_name="monthly",
+        data_asset_name="my_reports",
+    )
+    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+
+    column: str = "fare_amount"
+    partition_object: Dict[str, List[float]] = {
+        "values": [1.0, 2.0],
+        "weights": [0.3, 0.7],
+    }
+
+    validator_exclude_rendered_content: Validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite=suite,
+    )
+    validation_result: ExpectationValidationResult = (
+        validator_exclude_rendered_content.expect_column_kl_divergence_to_be_less_than(
+            column=column,
+            partition_object=partition_object,
+        )
+    )
+    assert validation_result.expectation_config.rendered_content is None
+    assert validation_result.rendered_content is None
+
+    validator_include_rendered_content: Validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite=suite,
+        include_rendered_content=True,
+    )
+    validation_result: ExpectationValidationResult = (
+        validator_include_rendered_content.expect_column_kl_divergence_to_be_less_than(
+            column=column,
+            partition_object=partition_object,
+        )
+    )
+    assert len(validation_result.expectation_config.rendered_content) == 1
+    assert isinstance(
+        validation_result.expectation_config.rendered_content[0], RenderedAtomicContent
+    )
+    assert len(validation_result.rendered_content) == 1
+    assert isinstance(validation_result.rendered_content[0], RenderedAtomicContent)
+
+
+@pytest.mark.integration
+def test_validator_include_rendered_content_evaluation_parameters(
+    yellow_trip_pandas_data_context,
+):
+    context: DataContext = yellow_trip_pandas_data_context
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_pandas",
+        data_connector_name="monthly",
+        data_asset_name="my_reports",
+    )
+    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+
+    validator: Validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite=suite,
+        include_rendered_content=True,
+    )
+
+    validator.set_evaluation_parameter("upstream_row_count", 10000)
+
+    validation_result: ExpectationValidationResult = (
+        validator.expect_table_row_count_to_equal(
+            value={"$PARAMETER": "upstream_row_count"},
+            result_format={"result_format": "BOOLEAN_ONLY"},
+        )
+    )
+
+    assert (
+        validation_result.expectation_config.rendered_content[0].value.params["value"][
+            "value"
+        ]
+        == 10000
+    )
+
+    validator.set_evaluation_parameter("upstream_row_count", 8000)
+
+    validation_result: ExpectationValidationResult = (
+        validator.expect_table_row_count_to_equal(
+            value={"$PARAMETER": "upstream_row_count"},
+            result_format={"result_format": "BOOLEAN_ONLY"},
+        )
+    )
+
+    assert (
+        validation_result.expectation_config.rendered_content[0].value.params["value"][
+            "value"
+        ]
+        == 8000
+    )
+
+
+@pytest.fixture
+def validator_with_mock_execution_engine() -> Validator:
+    execution_engine = mock.MagicMock()
+    validator = Validator(execution_engine=execution_engine)
+    return validator
+
+
+@pytest.mark.unit
+def test___dir___contains_expectation_impls(
+    validator_with_mock_execution_engine: Validator,
+) -> None:
+    validator = validator_with_mock_execution_engine
+
+    attrs = validator.__dir__()
+    expectation_impls = list(filter(lambda a: a.startswith("expect_"), attrs))
+    assert len(expectation_impls) > 0
+
+
+@pytest.mark.unit
+def test_show_progress_bars_property_and_setter(
+    validator_with_mock_execution_engine: Validator,
+) -> None:
+    validator = validator_with_mock_execution_engine
+
+    assert validator.metrics_calculator.show_progress_bars is True
+    validator.metrics_calculator.show_progress_bars = False
+    assert validator.metrics_calculator.show_progress_bars is False
+
+
+@pytest.mark.unit
+def test_expose_dataframe_methods_property_and_setter(
+    validator_with_mock_execution_engine: Validator,
+) -> None:
+    validator = validator_with_mock_execution_engine
+
+    assert validator.expose_dataframe_methods is False
+    validator.expose_dataframe_methods = True
+    assert validator.expose_dataframe_methods is True
+
+
+@pytest.mark.unit
+def test___get_attr___retrieves_existing_expectation(
+    validator_with_mock_execution_engine: Validator,
+) -> None:
+    validator = validator_with_mock_execution_engine
+
+    # Does not raise error if properly registered
+    # Avoiding invocation to only test registration (and not actual expectation)
+    validator.expect_column_max_to_be_between
+
+
+@pytest.mark.unit
+def test__get_attr___raises_attribute_error_with_invalid_attr(
+    validator_with_mock_execution_engine: Validator,
+) -> None:
+    validator = validator_with_mock_execution_engine
+
+    with pytest.raises(AttributeError) as e:
+        validator.my_fake_attr
+
+    assert "'Validator'  object has no attribute 'my_fake_attr'" in str(e.value)
+
+
+@pytest.mark.unit
+def test_list_available_expectation_types(
+    validator_with_mock_execution_engine: Validator,
+) -> None:
+    validator = validator_with_mock_execution_engine
+
+    available = validator.list_available_expectation_types()
+    assert all(e.startswith("expect_") for e in available)

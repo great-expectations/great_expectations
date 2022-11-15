@@ -17,6 +17,7 @@ from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.dataset import Dataset
 from great_expectations.dataset.pandas_dataset import PandasDataset
+from great_expectations.dataset.util import validate_mostly
 
 logger = logging.getLogger(__name__)
 
@@ -288,7 +289,7 @@ class MetaSparkDFDataset(Dataset):
                     lit(False).alias("__null_val"),
                 )
             else:
-                raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
+                raise ValueError(f"Unknown value of ignore_row_if: {ignore_row_if}")
 
             # since pyspark guaranteed each columns selected has the same number of rows, no need to do assert as in pandas
             # assert series_A.count() == (
@@ -449,7 +450,9 @@ class MetaSparkDFDataset(Dataset):
                     [*eval_cols, lit(False).alias("__null_val")]
                 )
             else:
-                raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
+                raise ValueError(f"Unknown value of ignore_row_if: {ignore_row_if}")
+
+            validate_mostly(mostly)
 
             nonnull_df = boolean_mapped_skip_values.filter("__null_val = False")
             nonnull_count = nonnull_df.count()

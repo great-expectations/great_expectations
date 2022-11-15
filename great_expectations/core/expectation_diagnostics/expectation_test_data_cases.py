@@ -22,7 +22,7 @@ class Backend(Enum):
 @dataclass
 class TestBackend:
     backend: str
-    dialects: Optional[List[str]]
+    dialects: List[str]
 
     __test__ = False  # Tell pytest not to try to collect this class as a test
 

@@ -72,7 +72,7 @@ def test_cli_init_on_new_project(
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
     assert "Data Docs" in stdout
-    assert "Done generating example Expectation Suite" in stdout
+    assert "Done generating example Expectation Suite" in stdout
     assert "Great Expectations is now set up" in stdout
 
     assert os.path.isdir(os.path.join(project_dir, "great_expectations"))
@@ -176,6 +176,7 @@ def test_cli_init_on_new_project(
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 1.95s
 def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one(
     mock_webbrowser,
     capsys,
@@ -307,6 +308,7 @@ def initialized_project(mock_webbrowser, tmp_path_factory):
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 1.32s
 def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     mock_webbrowser, caplog, initialized_project, filesystem_csv_2
 ):
@@ -350,6 +352,7 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 1.20s
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_no(
     mock_webbrowser,
     caplog,
@@ -386,6 +389,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 1.66s
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_yes(
     mock_webbrowser,
     caplog,
@@ -428,6 +432,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 1.83s
 def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     mock_browser,
     caplog,

@@ -1,7 +1,10 @@
+import pytest
+
 from great_expectations.core.async_executor import AsyncExecutor
 from great_expectations.data_context.types.base import ConcurrencyConfig
 
 
+@pytest.mark.unit
 def test_async_executor_does_execute_concurrently_when_concurrency_enabled_with_multiple_max_workers():
     with AsyncExecutor(
         ConcurrencyConfig(enabled=True), max_workers=100
@@ -9,6 +12,7 @@ def test_async_executor_does_execute_concurrently_when_concurrency_enabled_with_
         assert async_executor.execute_concurrently
 
 
+@pytest.mark.unit
 def test_async_executor_does_not_execute_concurrently_when_concurrency_enabled_with_multiple_max_workers():
     with AsyncExecutor(
         ConcurrencyConfig(enabled=False), max_workers=100
@@ -16,6 +20,7 @@ def test_async_executor_does_not_execute_concurrently_when_concurrency_enabled_w
         assert not async_executor.execute_concurrently
 
 
+@pytest.mark.unit
 def test_async_executor_does_not_execute_concurrently_when_concurrency_enabled_with_single_max_workers():
     with AsyncExecutor(
         ConcurrencyConfig(enabled=True), max_workers=1

@@ -76,6 +76,11 @@ def construct_data_context_config():
                 "data_context_id": data_context_id,
                 "enabled": True,
             },
+            "include_rendered_content": {
+                "globally": False,
+                "expectation_suite": False,
+                "expectation_validation_result": False,
+            },
         }
 
     return _construct_data_context_config
@@ -156,7 +161,12 @@ def test_DataContextConfig_with_BaseStoreBackendDefaults_and_simple_defaults(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        DataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
 def test_DataContextConfig_with_S3StoreBackendDefaults(
@@ -257,7 +267,12 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        DataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
 def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
@@ -380,7 +395,12 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        DataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
 def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaults(
@@ -442,7 +462,12 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        DataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
 def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaults_no_root_directory(
@@ -486,7 +511,12 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        DataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
 def test_DataContextConfig_with_GCSStoreBackendDefaults(
@@ -600,7 +630,12 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        DataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
 def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
@@ -733,7 +768,12 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        DataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
 def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
@@ -869,7 +909,12 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        DataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
 def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameters(
@@ -1044,7 +1089,12 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        DataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
 def test_override_general_defaults(
@@ -1307,9 +1357,15 @@ def test_override_general_defaults(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        DataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
+@pytest.mark.slow  # 1.81s
 def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_variable_sub(
     monkeypatch, construct_data_context_config, default_pandas_datasource_config
 ):
@@ -1414,7 +1470,12 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        DataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
     data_context = BaseDataContext(project_config=data_context_config)
     assert (
@@ -1443,6 +1504,11 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
         "config_version": 3.0,
         "evaluation_parameter_store_name": "evaluation_parameter_store",
         "expectations_store_name": "expectations_store",
+        "include_rendered_content": {
+            "expectation_suite": False,
+            "expectation_validation_result": False,
+            "globally": False,
+        },
         "stores": {
             "checkpoint_store": {
                 "class_name": "CheckpointStore",
@@ -1473,4 +1539,9 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        DataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )

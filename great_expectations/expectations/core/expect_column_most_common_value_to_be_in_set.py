@@ -5,13 +5,11 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnExpectation,
     InvalidExpectationConfigurationError,
-)
-from great_expectations.expectations.util import (
     add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
@@ -19,7 +17,7 @@ from great_expectations.render.util import (
 
 
 class ExpectColumnMostCommonValueToBeInSet(ColumnExpectation):
-    """Expect the most common value to be within the designated value set
+    """Expect the most common value to be within the designated value set.
 
             expect_column_most_common_value_to_be_in_set is a \
             :func:`column_aggregate_expectation
@@ -195,7 +193,7 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnExpectation):
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
@@ -259,8 +257,8 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         most_common_value = metrics.get("column.most_common_value")
         value_set = configuration.kwargs.get("value_set") or []

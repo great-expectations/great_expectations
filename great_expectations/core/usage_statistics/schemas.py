@@ -4,10 +4,12 @@
 ###
 
 
-# An anonymized string *must* be an md5 hash, so must have exactly 32 characters
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
+
+# An anonymized string *must* be an md5 hash, so must have exactly 32 characters
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.execution_environment import (
     InstallEnvironment,
 )
@@ -516,9 +518,9 @@ anonymized_validations_list_schema = {
     "items": {"$ref": "#/definitions/anonymized_validation"},
 }
 
-anonymized_save_or_edit_expectation_suite_payload_schema = {
+anonymized_get_or_edit_or_save_expectation_suite_payload_schema = {
     "$schema": SCHEMA,
-    "title": "anonymized-save-or-edit-expectation-suite-payload",
+    "title": "anonymized-get-or-edit-or-save-expectation-suite-payload",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "type": "object",
     "properties": {
@@ -906,6 +908,17 @@ anonymized_rule_based_profiler_run_schema = {
     ],
 }
 
+cloud_migrate_schema = {
+    "$schema": SCHEMA,
+    "title": "cloud-migrate",
+    "type": "object",
+    "properties": {
+        "organization_id": {"type": "string", "maxLength": 256},
+    },
+    "required": ["organization_id"],
+    "additionalProperties": False,
+}
+
 anonymized_usage_statistics_record_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-usage-statistics-record",
@@ -925,7 +938,7 @@ anonymized_usage_statistics_record_schema = {
         "anonymized_batch_request": anonymized_batch_request_schema,
         "anonymized_batch": anonymized_batch_schema,
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
-        "anonymized_save_or_edit_expectation_suite_payload": anonymized_save_or_edit_expectation_suite_payload_schema,
+        "anonymized_get_or_edit_or_save_expectation_suite_payload": anonymized_get_or_edit_or_save_expectation_suite_payload_schema,
         "anonymized_cli_suite_expectation_suite_payload": anonymized_cli_suite_expectation_suite_payload_schema,
         "anonymized_cli_suite_new_expectation_suite_payload": anonymized_cli_suite_new_expectation_suite_payload_schema,
         "anonymized_cli_suite_edit_expectation_suite_payload": anonymized_cli_suite_edit_expectation_suite_payload_schema,
@@ -943,6 +956,7 @@ anonymized_usage_statistics_record_schema = {
         "anonymized_rule": anonymized_rule_schema,
         "anonymized_rule_based_profiler_run": anonymized_rule_based_profiler_run_schema,
         "package_info": package_info_schema,
+        "cloud_migrate": cloud_migrate_schema,
     },
     "type": "object",
     "properties": {
@@ -961,15 +975,6 @@ anonymized_usage_statistics_record_schema = {
             "properties": {
                 "event": {"enum": ["data_context.__init__"]},
                 "event_payload": {"$ref": "#/definitions/anonymized_init_payload"},
-            },
-        },
-        {
-            "type": "object",
-            "properties": {
-                "event": {"enum": ["data_context.save_expectation_suite"]},
-                "event_payload": {
-                    "$ref": "#/definitions/anonymized_save_or_edit_expectation_suite_payload"
-                },
             },
         },
         {
@@ -1045,6 +1050,21 @@ anonymized_usage_statistics_record_schema = {
             "type": "object",
             "properties": {
                 "event": {
+                    "enum": [
+                        "data_context.save_expectation_suite",
+                        "profiler.result.get_expectation_suite",
+                        "data_assistant.result.get_expectation_suite",
+                    ],
+                },
+                "event_payload": {
+                    "$ref": "#/definitions/anonymized_get_or_edit_or_save_expectation_suite_payload"
+                },
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {
                     "enum": ["data_context.test_yaml_config"],
                 },
                 "event_payload": {
@@ -1111,6 +1131,13 @@ anonymized_usage_statistics_record_schema = {
                 "event_payload": {
                     "$ref": "#/definitions/anonymized_rule_based_profiler_run"
                 },
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {"enum": [UsageStatsEvents.CLOUD_MIGRATE]},
+                "event_payload": {"$ref": "#/definitions/cloud_migrate"},
             },
         },
         {

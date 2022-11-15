@@ -61,6 +61,7 @@ def test_parse_row_condition_string_pandas_engine():
 
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
+@pytest.mark.slow  # 1.52s
 def test_all_expectations_using_test_definitions():
     # Chetan - 20220129 - During v0.14.4, it was revealed that this test was broken.
     # The `glob` statement did not pick up any relevant tests, resulting in `test_files` being empty.
@@ -80,7 +81,7 @@ def test_all_expectations_using_test_definitions():
 
     # Historically, collecting all the JSON tests was an issue - this step ensures we actually have test data.
     assert (
-        len(test_files) == 56
+        len(test_files) == 60
     ), "Something went wrong when collecting JSON Expectation test fixtures"
 
     # The following do not work with this parameterized test due to incomplete render methods.

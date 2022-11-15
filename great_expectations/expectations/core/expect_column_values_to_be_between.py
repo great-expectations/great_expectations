@@ -1,10 +1,12 @@
 from typing import List, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.expectations.expectation import ColumnMapExpectation
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    render_evaluation_parameter_string,
+)
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     handle_strict_min_max,
     num_to_str,
@@ -15,7 +17,7 @@ from great_expectations.rule_based_profiler.config import (
     ParameterBuilderConfig,
     RuleBasedProfilerConfig,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
@@ -26,7 +28,7 @@ from great_expectations.rule_based_profiler.types import (
 
 
 class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
-    """Expect column entries to be between a minimum value and a maximum value (inclusive).
+    """Expect the column entries to be between a minimum value and a maximum value (inclusive).
 
     expect_column_values_to_be_between is a \
     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine
@@ -108,53 +110,57 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "profiler_config",
     )
 
-    column_min_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    column_min_range_estimator_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="column_min_range_estimator",
         metric_name="column.min",
+        metric_multi_batch_parameter_builder_name=None,
         metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
         enforce_numeric_metric=True,
         replace_nan_with_zero=True,
         reduce_scalar_metric=True,
         false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
-        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
         estimator=f"{VARIABLES_KEY}estimator",
         n_resamples=f"{VARIABLES_KEY}n_resamples",
         random_seed=f"{VARIABLES_KEY}random_seed",
+        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+        quantile_bias_correction=f"{VARIABLES_KEY}quantile_bias_correction",
+        quantile_bias_std_error_ratio_threshold=f"{VARIABLES_KEY}quantile_bias_std_error_ratio_threshold",
         include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
         truncate_values=f"{VARIABLES_KEY}truncate_values",
         round_decimals=f"{VARIABLES_KEY}round_decimals",
         evaluation_parameter_builder_configs=None,
-        json_serialize=True,
     )
-    column_max_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    column_max_range_estimator_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="column_max_range_estimator",
         metric_name="column.max",
+        metric_multi_batch_parameter_builder_name=None,
         metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
         enforce_numeric_metric=True,
         replace_nan_with_zero=True,
         reduce_scalar_metric=True,
         false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
-        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
         estimator=f"{VARIABLES_KEY}estimator",
         n_resamples=f"{VARIABLES_KEY}n_resamples",
         random_seed=f"{VARIABLES_KEY}random_seed",
+        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+        quantile_bias_correction=f"{VARIABLES_KEY}quantile_bias_correction",
+        quantile_bias_std_error_ratio_threshold=f"{VARIABLES_KEY}quantile_bias_std_error_ratio_threshold",
         include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
         truncate_values=f"{VARIABLES_KEY}truncate_values",
         round_decimals=f"{VARIABLES_KEY}round_decimals",
         evaluation_parameter_builder_configs=None,
-        json_serialize=True,
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         column_min_range_estimator_parameter_builder_config,
         column_max_range_estimator_parameter_builder_config,
     ]
-    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+    default_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
         variables={},
@@ -164,17 +170,13 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                     "mostly": 1.0,
                     "strict_min": False,
                     "strict_max": False,
-                    "false_positive_rate": 0.05,
-                    "quantile_statistic_interpolation_method": "auto",
-                    "estimator": "bootstrap",
-                    "n_resamples": 9999,
-                    "random_seed": None,
+                    "estimator": "exact",
                     "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {
                         "lower_bound": None,
                         "upper_bound": None,
                     },
-                    "round_decimals": 1,
+                    "round_decimals": None,
                 },
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
@@ -359,7 +361,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
 
     # NOTE: This method is a pretty good example of good usage of `params`.
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,

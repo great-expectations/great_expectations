@@ -5,6 +5,7 @@ datasources:
 
 plugins_directory: plugins/
 
+profiler_store_name: profiler_store
 checkpoint_store_name: checkpoint_store
 evaluation_parameter_store_name: evaluation_parameter_store
 validations_store_name: validations_store
@@ -32,6 +33,13 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: checkpoints/
+
+  profiler_store:
+    class_name: ProfilerStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      suppress_store_backend_id: true
+      base_directory: profilers/
 
 data_docs_sites:
   local_site:  # this is a user-selected name - you may select your own

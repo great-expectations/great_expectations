@@ -1,4 +1,6 @@
-from typing import Any, Dict, List, Optional, Set, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union
 
 from pyparsing import Combine
 from pyparsing import Optional as ppOptional
@@ -18,19 +20,28 @@ from pyparsing import (
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
+from great_expectations.rule_based_profiler.parameter_container import (
+    ParameterContainer,
+)
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
 
 text = Suppress("'") + Word(alphas, alphanums) + Suppress("'")
 integer = Word(nums).setParseAction(lambda t: int(t[0]))
 var = Combine(Word("$" + alphas, alphanums + "_.") + ppOptional("[" + integer + "]"))
 comparison_operator = oneOf(">= <= != > < ==")
-binary_operator = oneOf("~ & |")
+binary_operator = oneOf("& |")
 operand = text | integer | var
 
 expr = infixNotation(
@@ -70,7 +81,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         validation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
         **kwargs,
     ) -> None:
         """
@@ -82,7 +93,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             validation_parameter_builder_configs: ParameterBuilder configurations, having whose outputs available (as
             fully-qualified parameter names) is pre-requisite for present ExpectationConfigurationBuilder instance
             These "ParameterBuilder" configurations help build kwargs needed for this "ExpectationConfigurationBuilder"
-            data_context: BaseDataContext associated with this ExpectationConfigurationBuilder
+            data_context: AbstractDataContext associated with this ExpectationConfigurationBuilder
             kwargs: additional arguments
         """
 

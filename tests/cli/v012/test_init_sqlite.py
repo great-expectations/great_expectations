@@ -304,6 +304,7 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 2.03s
 def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one(
     mock_webbrowser, caplog, initialized_sqlite_project, titanic_sqlite_db_file, sa
 ):
@@ -475,6 +476,7 @@ def initialized_sqlite_project(
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 1.32s
 def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     mock_webbrowser,
     caplog,
@@ -521,6 +523,7 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 1.19s
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_no(
     mock_webbrowser,
     caplog,
@@ -557,6 +560,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 1.66s
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_yes(
     mock_webbrowser,
     caplog,
@@ -599,6 +603,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 3.05s
 def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     mock_webbrowser, caplog, initialized_sqlite_project, sa
 ):

@@ -1,11 +1,12 @@
+from __future__ import annotations
+
 import logging
 import math
-from typing import Callable, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union, cast
 
 from dateutil.parser import parse
 from tqdm.auto import tqdm
 
-from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -30,6 +31,9 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context import AbstractDataContext
 
 
 class UserConfigurableProfiler:
@@ -107,11 +111,11 @@ class UserConfigurableProfiler:
                         one of "one", "two", "very_few" or "few". The default value is "many". For the purposes of
                         comparing whether two tables are identical, it might make the most sense to set this to "unique"
         """
-        self.column_info = {}
+        self.column_info: Dict = {}
         self.profile_dataset = profile_dataset
         assert isinstance(self.profile_dataset, (Batch, Dataset, Validator))
 
-        context: Optional["DataContext"] = None
+        context: Optional[AbstractDataContext] = None
         if isinstance(self.profile_dataset, Batch):
             context = self.profile_dataset.data_context
             self.profile_dataset = Validator(
@@ -220,12 +224,13 @@ class UserConfigurableProfiler:
 
         """
         expectation_suite: ExpectationSuite
-        if len(self.profile_dataset.get_expectation_suite().expectations) > 0:
+        if len(self.profile_dataset.get_expectation_suite().expectations) > 0:  # type: ignore[union-attr]
+            # Only `Validator`` has `get_expectation_suite()`
             # noinspection PyProtectedMember
             suite_name: str = (
-                self.profile_dataset._expectation_suite.expectation_suite_name
+                self.profile_dataset._expectation_suite.expectation_suite_name  # type: ignore[union-attr]
             )
-            self.profile_dataset._expectation_suite = ExpectationSuite(
+            self.profile_dataset._expectation_suite = ExpectationSuite(  # type: ignore[union-attr]
                 expectation_suite_name=suite_name, data_context=None
             )
 
@@ -276,7 +281,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
         }
         send_usage_message(
             data_context=self.profile_dataset._data_context,
-            event=UsageStatsEvents.LEGACY_PROFILER_BUILD_SUITE.value,
+            event=UsageStatsEvents.LEGACY_PROFILER_BUILD_SUITE,
             event_payload=event_payload,
             api_version="v2",
             success=True,
@@ -644,8 +649,8 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 num_unique, pct_unique
             )
         )
-
-        return cardinality.name
+        # Return type mypy issue can be fixed by adding a str mixin to `OrderedProfilerCardinality`
+        return cardinality.name  # type: ignore[return-value]
 
     def _add_semantic_types_by_column_from_config_to_column_info(self, column_name):
         """
@@ -673,6 +678,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
             for semantic_type, column_list in self.semantic_types_dict.items():
                 if column_name in column_list:
                     semantic_types.append(semantic_type.upper())
+
             column_info_entry["semantic_types"] = semantic_types
             if all(
                 i in column_info_entry.get("semantic_types")
@@ -813,7 +819,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
 
         return profile_dataset
 
-    def _build_expectations_numeric(self, profile_dataset, column):
+    def _build_expectations_numeric(self, profile_dataset, column):  # noqa: C901 - 17
         """
         Adds a set of numeric expectations for a given column
         Args:
@@ -1191,7 +1197,7 @@ nan: {pct_unique}
                 )
 
         if "expect_column_values_to_be_in_type_list" not in self.excluded_expectations:
-            col_type = self.column_info.get(column).get("type")
+            col_type = self.column_info.get(column, {}).get("type")
             if col_type != "UNKNOWN":
                 type_list = profiler_data_types_with_mapping.get(col_type)
                 profile_dataset.expect_column_values_to_be_in_type_list(

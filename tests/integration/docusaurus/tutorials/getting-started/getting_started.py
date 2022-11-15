@@ -19,18 +19,14 @@ context = ge.get_context()
 assert context
 
 # First configure a new Datasource and add to DataContext
+
+# <snippet>
 datasource_yaml = f"""
 name: getting_started_datasource
 class_name: Datasource
-module_name: great_expectations.datasource
 execution_engine:
-  module_name: great_expectations.execution_engine
   class_name: PandasExecutionEngine
 data_connectors:
-    default_runtime_data_connector_name:
-        class_name: RuntimeDataConnector
-        batch_identifiers:
-            - default_identifier_name
     default_inferred_data_connector_name:
         class_name: InferredAssetFilesystemDataConnector
         base_directory: ../data/
@@ -38,7 +34,14 @@ data_connectors:
           group_names:
             - data_asset_name
           pattern: (.*)
+    default_runtime_data_connector_name:
+        class_name: RuntimeDataConnector
+        assets:
+            my_runtime_asset_name:
+              batch_identifiers:
+                - runtime_batch_identifier_name
 """
+# </snippet>
 
 # Note : this override is for internal GE purposes, and is intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users.
@@ -81,9 +84,9 @@ validator = context.get_validator(
 # NOTE: The following assertion is only for testing and can be ignored by users.
 assert isinstance(validator, Validator)
 
-# Profile the data with the UserConfigurableProfiler and save resulting ExpectationSuite
 # <snippet>
-ignored_columns = [
+# Profile the data with the UserConfigurableProfiler and save resulting ExpectationSuite
+exclude_column_names = [
     "vendor_id",
     "pickup_datetime",
     "dropoff_datetime",
@@ -108,14 +111,15 @@ ignored_columns = [
 profiler = UserConfigurableProfiler(
     profile_dataset=validator,
     excluded_expectations=None,
-    ignored_columns=ignored_columns,
+    ignored_columns=exclude_column_names,
     not_null_only=False,
-    primary_or_compound_key=False,
+    primary_or_compound_key=None,
     semantic_types_dict=None,
     table_expectations_only=False,
     value_set_threshold="MANY",
 )
 suite = profiler.build_suite()
+validator.expectation_suite = suite
 validator.save_expectation_suite(discard_failed_expectations=False)
 
 # Create first checkpoint on yellow_tripdata_sample_2019-01.csv

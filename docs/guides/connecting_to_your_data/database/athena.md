@@ -52,4 +52,3 @@ The Jupyter Notebook will guide you through the remaining steps of creating a Da
 ## Additional notes
 
 Environment variables can be used to store the SQLAlchemy URL instead of the file, if preferred - search documentation for "Managing Environment and Secrets".
-

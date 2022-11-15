@@ -560,6 +560,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
 )
+@pytest.mark.slow  # 1.65s
 def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
     mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
@@ -1004,7 +1005,7 @@ def test_return_all_batch_definitions_returns_specified_partition(
 
     assert len(my_batch_definition_list) == 1
     my_batch_definition = my_batch_definition_list[0]
-    expected_batch_definition: BatchDefinition = BatchDefinition(
+    expected_batch_definition = BatchDefinition(
         datasource_name="test_environment",
         data_connector_name="general_gcs_data_connector",
         data_asset_name="TestFiles",

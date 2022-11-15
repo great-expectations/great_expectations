@@ -5,6 +5,7 @@ parameters:
 jobs:
   - ${{ each pythonVersion in parameters.pythonVersion }}:
     - job:
+      timeoutInMinutes: 120
       displayName: full${{ pythonVersion }}
       steps:
         - task: UsePythonVersion@0
@@ -38,6 +39,7 @@ jobs:
             reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
     - job:
+      timeoutInMinutes: 120
       displayName: lightweight${{ pythonVersion }}
       steps:
         - task: UsePythonVersion@0
@@ -49,7 +51,12 @@ jobs:
           displayName: 'Update pip'
 
         - script: |
-            pip install --requirement requirements.txt --requirement requirements-dev-contrib.txt --requirement requirements-dev-lite.txt --constraint constraints-dev.txt -e .
+            pip install \
+              --requirement requirements.txt \
+              --requirement reqs/requirements-dev-contrib.txt \
+              --requirement reqs/requirements-dev-lite.txt \
+              --constraint constraints-dev.txt \
+              --editable .
           displayName: 'Install dependencies'
 
         - script: |

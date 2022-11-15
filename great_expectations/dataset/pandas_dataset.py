@@ -21,6 +21,7 @@ from great_expectations.dataset.util import (
     _scipy_distribution_positional_args_from_dict,
     is_valid_continuous_partition_object,
     validate_distribution_parameters,
+    validate_mostly,
 )
 
 logger = logging.getLogger(__name__)
@@ -213,7 +214,7 @@ class MetaPandasDataset(Dataset):
                 """
                 boolean_mapped_null_values = series_A.map(lambda x: False)
             else:
-                raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
+                raise ValueError(f"Unknown value of ignore_row_if: {ignore_row_if}")
 
             assert len(series_A) == len(
                 series_B
@@ -316,7 +317,9 @@ class MetaPandasDataset(Dataset):
             elif ignore_row_if == "never":
                 boolean_mapped_skip_values = pd.Series([False] * len(test_df))
             else:
-                raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
+                raise ValueError(f"Unknown value of ignore_row_if: {ignore_row_if}")
+
+            validate_mostly(mostly)
 
             boolean_mapped_success_values = func(
                 self, test_df[boolean_mapped_skip_values == False], *args, **kwargs

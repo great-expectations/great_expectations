@@ -9,14 +9,10 @@ import os
 from typing import List
 
 import pip
+from great_expectations_contrib.commands import read_package_from_file, sync_package
+from great_expectations_contrib.package import GreatExpectationsContribPackageManifest
 
-from contrib.cli.great_expectations_contrib.commands import (
-    read_package_from_file,
-    sync_package,
-)
-from contrib.cli.great_expectations_contrib.package import (
-    GreatExpectationsContribPackageManifest,
-)
+from great_expectations.core.util import convert_to_json_serializable
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -96,7 +92,8 @@ def write_results_to_disk(path: str, package_manifests: List[dict]) -> None:
         package_manifest: A list of dictionaries that represents contributor package manifests
     """
     with open(path, "w") as outfile:
-        json.dump(package_manifests, outfile, indent=4)
+        package_manifests_serialized = convert_to_json_serializable(package_manifests)
+        json.dump(package_manifests_serialized, outfile, indent=4)
         logger.info(f"Successfully wrote package manifests to {path}")
 
 

@@ -1,3 +1,4 @@
+[![PyPI](https://img.shields.io/pypi/v/great_expectations)](https://pypi.org/project/great-expectations/#history)
 [![Build Status](https://dev.azure.com/great-expectations/great_expectations/_apis/build/status/great_expectations?branchName=develop&stageName=required)](https://dev.azure.com/great-expectations/great_expectations/_build/latest?definitionId=1&branchName=develop)
 ![Coverage](https://img.shields.io/azure-devops/coverage/great-expectations/great_expectations/1/main)
 [![Documentation Status](https://readthedocs.org/projects/great-expectations/badge/?version=latest)](http://great-expectations.readthedocs.io/en/latest/?badge=latest)
@@ -7,7 +8,7 @@
 
 
 
-<img align="right" src="./generic_dickens_protagonist.png">
+<img align="right" src="./static/img/generic_dickens_protagonist.png">
 
 Great Expectations
 ================================================================================
@@ -21,7 +22,7 @@ Great Expectations helps data teams eliminate pipeline debt, through data testin
 
 Software developers have long known that testing and documentation are essential for managing complex codebases. Great Expectations brings the same confidence, integrity, and acceleration to data science and data engineering teams.
 
-See [Down with Pipeline Debt!](https://medium.com/@expectgreatdata/down-with-pipeline-debt-introducing-great-expectations-862ddc46782a) for an introduction to the philosophy of pipeline testing.
+See [Down with Pipeline Debt!](https://greatexpectations.io/blog/down-with-pipeline-debt-introducing-great-expectations/) for an introduction to the philosophy of pipeline testing.
 
 
 <!--
@@ -140,9 +141,9 @@ great_expectations init
 
 (We recommend deploying within a virtual environment. If you’re not familiar with pip, virtual environments, notebooks, or git, you may want to check out the [Supporting Resources](https://docs.greatexpectations.io/docs/reference/supporting_resources), which will teach you how to get up and running in minutes.)
 
-For full documentation, visit [Great Expectations on readthedocs.io](https://docs.greatexpectations.io/docs/).
+For full documentation, visit [https://docs.greatexpectations.io/](https://docs.greatexpectations.io/).
 
-If you need help, hop into our [Slack channel](https://greatexpectations.io/slack)&mdash;there are always contributors and other users there.
+If you need help, hop into our [Slack channel](https://greatexpectations.io/slack)&mdash;there are always contributors and other users there. You can also use our [GitHub Discussions](https://github.com/great-expectations/great_expectations/discussions)
 
 <!--
 -------------------------------------------------------------
@@ -177,6 +178,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://www.sqlalchemy.org/img/sqla_logo.png" />                                         </td><td style="width: 200px;">Other SQL Relational DBs </td><td>Most RDBMS are supported via SQLalchemy</td></tr>
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://jupyter.org/assets/logos/rectanglelogo-greytext-orangebody-greymoons.svg" />                                             </td><td style="width: 200px;">Jupyter Notebooks        </td><td>The best way to build Expectations</td></tr>
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://cdn.brandfolder.io/5H442O3W/as/pl546j-7le8zk-5guop3/Slack_RGB.png" />            </td><td style="width: 200px;">Slack                    </td><td> Get automatic data quality notifications!</td></tr>
+		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://github.com/zenml-io/zenml/raw/main/docs/book/assets/zenml_logo.png" />            </td><td style="width: 200px;">ZenML                    </td><td> Tool agnostic, open-source ML pipeline framework.</td></tr>
 	</tbody>
 </table>
 
@@ -225,11 +227,9 @@ Great Expectations is under active development by James Campbell, Abe Gong, Euge
 What's the best way to get in touch with the Great Expectations team?
 --------------------------------------------------------------------------------
 
-If you have questions, comments, or just want to have a good old-fashioned chat about data pipelines, please hop on our public [Slack channel](https://greatexpectations.io/slack)
-
-If you'd like hands-on assistance setting up Great Expectations, establishing a healthy practice of data testing, or adding functionality to Great Expectations, please see options for consulting help [here](https://superconductive.com/).
+If you have questions, comments, or just want to have a good old-fashioned chat about data pipelines, please hop on our public [Slack channel](https://greatexpectations.io/slack) or post in our [GitHub Discussions](https://docs.greatexpectations.io/docs/contributing/index)
 
 Can I contribute to the library?
 --------------------------------------------------------------------------------
 
-Absolutely. Yes, please. Start [here](https://docs.greatexpectations.io/docs/contributing/contributing/) and please don't be shy with questions.
+Absolutely. Yes, please. Start [here](https://docs.greatexpectations.io/docs/contributing/index) and please don't be shy with questions.

@@ -98,7 +98,7 @@ class EmailRenderer(Renderer):
                 report_element = f"- <strong>Validation data asset</strong>: {dataset_reference}</br>"
                 html += report_element
 
-        documentation_url = "https://docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/set_up_data_docs.html"
+        documentation_url = "https://docs.greatexpectations.io/docs/terms/data_docs"
         footer_section = f'<p>Learn <a href="{documentation_url}">here</a> how to review validation results in Data Docs</p>'
         html += footer_section
         return title, html

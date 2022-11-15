@@ -6,7 +6,7 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 **`RegexBasedColumnMapExpectations`** are a sub-type of <TechnicalTag tag="expectation" text="ColumnMapExpectaion"/> that allow for highly-extensible, regex-powered validation of your data.
 
-They are evaluated for a single column and ask a yes/no, regex-based question for every row in that column. Based on the result, they then calculate the percentage of rows that gave a positive answer. If that percentage meets a specified threshold (100% by default), the Expectation considers that data valid. 
+They are evaluated for a single column and ask a yes/no, regex-based question for every row in that column. Based on the result, they then calculate the percentage of rows that gave a positive answer. If that percentage meets a specified threshold (100% by default), the Expectation considers that data valid.
 This threshold is configured via the `mostly` parameter, which can be passed as input to your Custom `RegexBasedColumnMapExpectation` as a `float` between 0 and 1.
 
 This guide will walk you through the process of creating a Custom `RegexBasedColumnMapExpectation`.
@@ -21,7 +21,7 @@ This guide will walk you through the process of creating a Custom `RegexBasedCol
 
 ### 1. Choose a name for your Expectation
 
-First, decide on a name for your own Expectation. By convention, all `ColumnMapExpectations`, including `RegexBasedColumnMapExpectations`, start with `expect_column_values_`. You can see other naming conventions in the [Expectations section](/docs/contributing/style_guides/code_style#expectations)  of the code Style Guide.
+First, decide on a name for your own Expectation. By convention, all `ColumnMapExpectations`, including `RegexBasedColumnMapExpectations`, start with `expect_column_values_`. You can see other naming conventions in the [Expectations section](../../../contributing/style_guides/code_style.md#expectations)  of the code Style Guide.
 
 Your Expectation will have two versions of the same name: a `CamelCaseName` and a `snake_case_name`. For example, this tutorial will use:
 
@@ -75,15 +75,15 @@ Completeness checklist for ExpectColumnValuesToMatchSomeRegex:
     Has a docstring, including a one-line short description
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
+    Passes all linting checks
     Has basic input validation and type checking
     Has both Statement Renderers: prescriptive and diagnostic
-    Has core logic that passes tests for all applicable Execution Engines
-    Passes all linting checks
+    Has core logic that passes tests for all applicable Execution Engines and SQL dialects
     Has a robust suite of tests, as determined by a code owner
     Has passed a manual review by a code owner for code standards and style guides
 ```
 
-When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it. This guide covers the first four steps on the checklist.
+When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it. This guide covers the first five steps on the checklist.
 
 ### 4. Change the Expectation class name and add a docstring
 
@@ -125,6 +125,7 @@ Completeness checklist for ExpectColumnValuesToOnlyContainVowels:
   ✔ Has a docstring, including a one-line short description
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
+    Passes all linting checks
 ...
 ```
 
@@ -154,7 +155,7 @@ Here's a quick overview of how to create test cases to populate `examples`. The 
 	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the Validation Result object - only the ones that are important to test.
 
 
-If you run your Expectation file again, you won't see any new checkmarks, as the logic for your Custom Expectation hasn't been implemented yet. 
+If you run your Expectation file again, you won't see any new checkmarks, as the logic for your Custom Expectation hasn't been implemented yet.
 However, you should see that the tests you've written are now being caught and reported in your checklist:
 
 ```
@@ -170,6 +171,7 @@ Completeness checklist for ExpectColumnValuesToOnlyContainVowels:
 		  Only 0 / 2 tests for sqlite are passing
 		  Failing: basic_positive_test, basic_negative_test
 ...
+	Passes all linting checks
 ```
 
 :::note
@@ -179,9 +181,9 @@ see our guide on [how to create example cases for a Custom Expectation](../featu
 
 ### 6. Define your regex and connect it to your Expectation
 
-This is the stage where you implement the actual business logic for your Expectation.   
+This is the stage where you implement the actual business logic for your Expectation.
 
-In the case of your Custom `RegexBasedColumnMapExpectation`, Great Expectations will handle the actual application of the regex to your data. 
+In the case of your Custom `RegexBasedColumnMapExpectation`, Great Expectations will handle the actual application of the regex to your data.
 
 To do this, we replace these:
 
@@ -193,7 +195,7 @@ with something like this:
 ```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L17-L18
 ```
 
-For more detail when rendering your Custom Expectation, you can optionally specify the plural form of a Semantic Type you're validating. 
+For more detail when rendering your Custom Expectation, you can optionally specify the plural form of a Semantic Type you're validating.
 
 For example:
 
@@ -230,13 +232,45 @@ Completeness checklist for ExpectColumnValuesToOnlyContainVowels:
   ✔ Has a docstring, including a one-line short description
   ✔ Has at least one positive and negative example case, and all test cases pass
   ✔ Has core logic and passes tests on at least one Execution Engine
+    Passes all linting checks
 ...
 ```
 
-<div style={{"text-align":"center"}}>  
-<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>  
-Congratulations!<br/>&#127881; You've just built your first Custom Regex-Based Column Map Expectation! &#127881;  
-</b></p>  
+### 7. Linting
+
+Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, `isort`, `flake8`, and `pyupgrade`.
+
+If you've [set up your dev environment](../../../contributing/contributing_setup.md) as recommended in the Prerequisites, these libraries will already be available to you, and can be invoked from your command line to automatically lint your code:
+
+```console
+black <PATH/TO/YOUR/EXPECTATION.py>
+isort <PATH/TO/YOUR/EXPECTATION.py>
+flake8 <PATH/TO/YOUR/EXPECTATION.py>
+pyupgrade <PATH/TO/YOUR/EXPECTATION.py> --py3-plus
+```
+
+:::info
+If desired, you can automate this to happen at commit time. See our [guidance on linting](../../../contributing/style_guides/code_style.md#linting) for more on this process.
+:::
+
+Once this is done, running your diagnostic checklist should now reflect your Custom Expectation as meeting our linting requirements:
+
+```
+$ python expect_column_values_to_only_contain_vowels.py
+
+Completeness checklist for ExpectColumnValuesToOnlyContainVowels:
+  ✔ Has a valid library_metadata object
+  ✔ Has a docstring, including a one-line short description
+  ✔ Has at least one positive and negative example case, and all test cases pass
+  ✔ Has core logic and passes tests on at least one Execution Engine
+  ✔ Passes all linting checks
+...
+```
+
+<div style={{"text-align":"center"}}>
+<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
+Congratulations!<br/>&#127881; You've just built your first Custom Regex-Based Column Map Expectation! &#127881;
+</b></p>
 </div>
 
 :::note
@@ -245,7 +279,7 @@ you may notice that we didn't explicitly implement a `_validate` method or Metri
 the `RegexBasedColumnMapExpectation` class handles Metric creation and result validation implicitly; no extra work needed!
 :::
 
-### 7. Contribution (Optional)
+### 8. Contribution (Optional)
 
 This guide will leave you with a Custom Expectation sufficient for [contribution](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
 
@@ -265,5 +299,5 @@ This is particularly important because ***we*** want to make sure that ***you***
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
 
 To view the full script used in this page, see it on GitHub:
-- [expect_column_values_to_only_contain_vowels.py](https://github.com/great-expectations/great_expectations/blob/hackathon-docs/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py)
+- [expect_column_values_to_only_contain_vowels.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py)
 :::

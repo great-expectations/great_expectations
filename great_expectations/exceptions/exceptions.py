@@ -2,8 +2,9 @@ import importlib
 import itertools
 import json
 from collections.abc import Iterable
+from typing import Any, Dict, List, Union
 
-from great_expectations.marshmallow__shade import ValidationError
+from marshmallow import ValidationError
 
 
 class GreatExpectationsError(Exception):
@@ -15,13 +16,13 @@ class GreatExpectationsError(Exception):
 class GreatExpectationsValidationError(ValidationError, GreatExpectationsError):
     def __init__(self, message, validation_error=None) -> None:
         self.message = message
-        self.messages = None
+        self.messages: Union[List[str], List[Any], Dict] = []
         if validation_error is not None:
             self.messages = validation_error.messages
 
     def __str__(self) -> str:
         if self.message is None:
-            return self.messages
+            return str(self.messages)
         return self.message
 
 
@@ -120,18 +121,34 @@ class ProfilerError(GreatExpectationsError):
 
 
 class ProfilerConfigurationError(ProfilerError):
-    """A configuration error for a profiler."""
+    """A configuration error for a "RuleBasedProfiler" class."""
 
     pass
 
 
 class ProfilerExecutionError(ProfilerError):
-    """A runtime error for a profiler."""
+    """A runtime error for a "RuleBasedProfiler" class."""
 
     pass
 
 
 class ProfilerNotFoundError(ProfilerError):
+    pass
+
+
+class DataAssistantError(ProfilerError):
+    pass
+
+
+class DataAssistantExecutionError(DataAssistantError):
+    """A runtime error for a "DataAssistant" class."""
+
+    pass
+
+
+class DataAssistantResultExecutionError(DataAssistantError):
+    """A runtime error for a "DataAssistantResult" class."""
+
     pass
 
 
@@ -166,6 +183,10 @@ class InvalidExpectationKwargsError(GreatExpectationsError):
 
 
 class InvalidExpectationConfigurationError(GreatExpectationsError):
+    pass
+
+
+class ExpectationNotFoundError(GreatExpectationsError):
     pass
 
 
@@ -376,6 +397,10 @@ class SorterError(DataContextError):
         super().__init__(self.message)
 
 
+class SamplerError(DataContextError):
+    pass
+
+
 class MetricError(GreatExpectationsError):
     pass
 
@@ -404,15 +429,21 @@ class MetricResolutionError(MetricError):
         self.failed_metrics = failed_metrics
 
 
-class GeCloudError(GreatExpectationsError):
+class GXCloudError(GreatExpectationsError):
     """
     Generic error used to provide additional context around Cloud-specific issues.
     """
 
-    pass
+
+class GXCloudConfigurationError(GreatExpectationsError):
+    """
+    Error finding and verifying the required configuration values when preparing to connect to GX Cloud
+    """
 
 
 class DatabaseConnectionError(GreatExpectationsError):
     """Error connecting to a database including during an integration test."""
 
-    pass
+
+class MigrationError(GreatExpectationsError):
+    """Error when using the migration tool."""

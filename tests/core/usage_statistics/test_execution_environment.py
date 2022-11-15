@@ -65,7 +65,7 @@ def test_get_installed_packages(
         "dev-package-2",
     ]
 
-    ge_execution_environment: GEExecutionEnvironment = GEExecutionEnvironment()
+    ge_execution_environment = GEExecutionEnvironment()
     expected_dependencies: List[PackageInfo] = [
         PackageInfo(
             package_name="req-package-1",

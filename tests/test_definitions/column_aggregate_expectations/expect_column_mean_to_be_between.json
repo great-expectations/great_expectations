@@ -167,7 +167,7 @@
             "success": true,
             "observed_value": 0.5
           },
-          "suppress_test_for": ["postgresql", "mssql", "spark", "bigquery", "trino"],
+          "suppress_test_for": ["postgresql", "mssql", "spark", "bigquery", "trino", "redshift", "snowflake"],
           "_comment": "postgresql, mssql, bigquery, and spark will not allow coercing the boolean type to an average"
         },
         {
@@ -182,7 +182,7 @@
             "success": true,
             "observed_value": 0.5
           },
-          "suppress_test_for": ["postgresql", "mssql", "bigquery", "spark", "trino"],
+          "suppress_test_for": ["postgresql", "mssql", "bigquery", "spark", "trino", "redshift", "snowflake"],
           "_comment": "postgresql, mssql, bigquery and spark will not allow coercing the boolean type to an average"
         },
         {

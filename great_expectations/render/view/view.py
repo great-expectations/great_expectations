@@ -11,12 +11,16 @@ from jinja2 import (
     Environment,
     FileSystemLoader,
     PackageLoader,
-    contextfilter,
     select_autoescape,
 )
 
+try:
+    from jinja2 import contextfilter
+except ImportError:
+    from jinja2 import pass_context as contextfilter
+
 from great_expectations import __version__ as ge_version
-from great_expectations.render.types import (
+from great_expectations.render import (
     RenderedComponentContent,
     RenderedContent,
     RenderedDocumentContent,

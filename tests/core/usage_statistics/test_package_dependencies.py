@@ -47,7 +47,7 @@ def test__get_dependency_names():
         "1",
         "-",
     ]
-    ge_dependencies: GEDependencies = GEDependencies()
+    ge_dependencies = GEDependencies()
     observed_dependencies = ge_dependencies._get_dependency_names(mock_dependencies)
     assert observed_dependencies == expected_dependendencies
 
@@ -58,7 +58,7 @@ def test_required_dependency_names_match_requirements_file():
 
     See GEDependencies for a utility to check for a mismatch.
     """
-    ge_dependencies: GEDependencies = GEDependencies()
+    ge_dependencies = GEDependencies()
     assert (
         ge_dependencies.get_required_dependency_names()
         == ge_dependencies.get_required_dependency_names_from_requirements_file()
@@ -71,7 +71,7 @@ def test_dev_dependency_names_match_requirements_file():
 
     See GEDependencies for a utility to check for a mismatch.
     """
-    ge_dependencies: GEDependencies = GEDependencies()
+    ge_dependencies = GEDependencies()
     assert ge_dependencies.get_dev_dependency_names() == set(
         ge_dependencies.get_dev_dependency_names_from_requirements_file()
     ) - set(GEDependencies.GE_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING)

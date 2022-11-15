@@ -1,9 +1,9 @@
 from typing import Dict
 
 import pytest
+from marshmallow.exceptions import ValidationError
 from ruamel.yaml.comments import CommentedMap
 
-from great_expectations.marshmallow__shade.exceptions import ValidationError
 from great_expectations.rule_based_profiler.config import (
     DomainBuilderConfig,
     DomainBuilderConfigSchema,
@@ -23,6 +23,7 @@ from great_expectations.rule_based_profiler.config.base import (
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 
+@pytest.mark.unit
 def test_not_null_schema_raises_error_with_improperly_implemented_subclass():
     class MySchema(NotNullSchema):
         pass
@@ -33,6 +34,7 @@ def test_not_null_schema_raises_error_with_improperly_implemented_subclass():
     assert "must define its own custom __config_class__" in str(e.value)
 
 
+@pytest.mark.unit
 def test_not_null_schema_removes_null_values_when_dumping():
     schema = DomainBuilderConfigSchema()
     config = DomainBuilderConfig(
@@ -47,6 +49,7 @@ def test_not_null_schema_removes_null_values_when_dumping():
     assert "batch_request" not in data
 
 
+@pytest.mark.unit
 def test_domain_builder_config_successfully_loads_with_required_args():
     data = {
         "class_name": "DomainBuilder",
@@ -58,6 +61,7 @@ def test_domain_builder_config_successfully_loads_with_required_args():
     assert config.module_name == "great_expectations.rule_based_profiler.domain_builder"
 
 
+@pytest.mark.unit
 def test_domain_builder_config_successfully_loads_with_optional_args():
     data = {
         "class_name": "DomainBuilder",
@@ -70,6 +74,7 @@ def test_domain_builder_config_successfully_loads_with_optional_args():
     assert all(getattr(config, k) == v for k, v in data.items())
 
 
+@pytest.mark.unit
 def test_parameter_builder_config_successfully_loads_with_required_args():
     data = {"class_name": "ParameterBuilder", "name": "my_parameter_builder"}
     schema = ParameterBuilderConfigSchema()
@@ -81,6 +86,7 @@ def test_parameter_builder_config_successfully_loads_with_required_args():
     )
 
 
+@pytest.mark.unit
 def test_parameter_builder_config_successfully_loads_with_optional_args():
     data = {
         "name": "my_parameter_builder",
@@ -94,6 +100,7 @@ def test_parameter_builder_config_successfully_loads_with_optional_args():
     assert all(getattr(config, k) == v for k, v in data.items())
 
 
+@pytest.mark.unit
 def test_parameter_builder_config_unsuccessfully_loads_with_missing_required_fields():
     data = {}
     schema = ParameterBuilderConfigSchema()
@@ -104,6 +111,7 @@ def test_parameter_builder_config_unsuccessfully_loads_with_missing_required_fie
     assert "'name': ['Missing data for required field.']" in str(e.value)
 
 
+@pytest.mark.unit
 def test_expectation_configuration_builder_config_successfully_loads_with_required_args():
     data = {
         "class_name": "ExpectationConfigurationBuilder",
@@ -119,6 +127,7 @@ def test_expectation_configuration_builder_config_successfully_loads_with_requir
     )
 
 
+@pytest.mark.unit
 def test_expectation_configuration_builder_config_successfully_loads_with_optional_args():
     data = {
         "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
@@ -133,6 +142,7 @@ def test_expectation_configuration_builder_config_successfully_loads_with_option
     assert all(getattr(config, k) == v for k, v in data.items())
 
 
+@pytest.mark.unit
 def test_expectation_configuration_builder_config_unsuccessfully_loads_with_missing_required_fields():
     data = {}
     schema = ExpectationConfigurationBuilderConfigSchema()
@@ -146,6 +156,7 @@ def test_expectation_configuration_builder_config_unsuccessfully_loads_with_miss
     )
 
 
+@pytest.mark.unit
 def test_rule_config_successfully_loads_with_required_args():
     data = {
         "domain_builder": {"class_name": "DomainBuilder"},
@@ -173,6 +184,7 @@ def test_rule_config_successfully_loads_with_required_args():
     )
 
 
+@pytest.mark.unit
 def test_rule_config_unsuccessfully_loads_with_missing_required_fields():
     data = {}
     schema = RuleConfigSchema()
@@ -185,6 +197,7 @@ def test_rule_config_unsuccessfully_loads_with_missing_required_fields():
     assert config.expectation_configuration_builders is None
 
 
+@pytest.mark.unit
 def test_rule_based_profiler_config_successfully_loads_with_required_args():
     data = {
         "name": "my_RBP",
@@ -212,6 +225,7 @@ def test_rule_based_profiler_config_successfully_loads_with_required_args():
     )
 
 
+@pytest.mark.unit
 def test_rule_based_profiler_config_successfully_loads_with_optional_args():
     data = {
         "name": "my_RBP",
@@ -238,6 +252,7 @@ def test_rule_based_profiler_config_successfully_loads_with_optional_args():
     assert data["variables"] == config["variables"]
 
 
+@pytest.mark.unit
 def test_rule_based_profiler_config_unsuccessfully_loads_with_missing_required_fields():
     data = {}
     schema = RuleBasedProfilerConfigSchema()
@@ -255,6 +270,7 @@ def test_rule_based_profiler_config_unsuccessfully_loads_with_missing_required_f
     )
 
 
+@pytest.mark.unit
 def test_rule_based_profiler_from_commented_map():
     data = {
         "name": "my_RBP",
@@ -280,6 +296,7 @@ def test_rule_based_profiler_from_commented_map():
     assert all(hasattr(config, k) for k in data)
 
 
+@pytest.mark.unit
 def test_resolve_config_using_acceptable_arguments(
     profiler_with_placeholder_args: RuleBasedProfiler,
 ) -> None:
@@ -315,6 +332,7 @@ def test_resolve_config_using_acceptable_arguments(
     )
 
 
+@pytest.mark.unit
 def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
     profiler_with_placeholder_args: RuleBasedProfiler,
 ) -> None:
@@ -365,6 +383,7 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
     assert len(config.rules) == 2 and runtime_override_rule_name in config.rules
 
 
+@pytest.mark.unit
 def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_batch_requests(
     profiler_with_placeholder_args: RuleBasedProfiler,
 ) -> None:
