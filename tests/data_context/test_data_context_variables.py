@@ -27,7 +27,7 @@ from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     ConcurrencyConfig,
     DataContextConfig,
-    GeCloudConfig,
+    GXCloudConfig,
     IncludeRenderedContentConfig,
     NotebookConfig,
     NotebookTemplateConfig,
@@ -153,7 +153,7 @@ def file_data_context(
 def cloud_data_context(
     tmp_path: pathlib.Path,
     data_context_config: DataContextConfig,
-    ge_cloud_config_e2e: GeCloudConfig,
+    ge_cloud_config_e2e: GXCloudConfig,
 ) -> CloudDataContext:
     project_path = tmp_path / "cloud_data_context"
     project_path.mkdir()

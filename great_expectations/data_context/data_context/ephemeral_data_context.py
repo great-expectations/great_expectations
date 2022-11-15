@@ -1,5 +1,5 @@
 import logging
-from typing import Mapping, Optional, Union
+from typing import Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
@@ -32,7 +32,7 @@ class EphemeralDataContext(AbstractDataContext):
 
     def __init__(
         self,
-        project_config: Union[DataContextConfig, Mapping],
+        project_config: DataContextConfig,
         runtime_environment: Optional[dict] = None,
     ) -> None:
         """EphemeralDataContext constructor

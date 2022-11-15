@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
+from typing_extensions import Literal
 
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
@@ -39,11 +40,6 @@ from great_expectations.util import filter_properties_dict
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
 
-try:
-    from typing import Literal
-except ImportError:
-    # Fallback for python < 3.8
-    from typing_extensions import Literal  # type: ignore[assignment]
 
 # TODO: check if this can be refactored to use YAMLHandler class
 yaml = YAML()

@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional, Type, cast
 
 from great_expectations.core.config_substitutor import ConfigurationSubstitutor
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.types.base import GeCloudConfig
+from great_expectations.data_context.types.base import GXCloudConfig
 
 yaml = YAMLHandler()
 
@@ -177,16 +177,16 @@ class CloudConfigurationProvider(AbstractConfigurationProvider):
     config provider when in a Cloud-backend environment.
     """
 
-    def __init__(self, cloud_config: GeCloudConfig) -> None:
+    def __init__(self, cloud_config: GXCloudConfig) -> None:
         self._cloud_config = cloud_config
 
     def get_values(self) -> Dict[str, str]:
         from great_expectations.data_context.cloud_constants import (
-            GECloudEnvironmentVariable,
+            GXCloudEnvironmentVariable,
         )
 
         return {
-            GECloudEnvironmentVariable.BASE_URL: self._cloud_config.base_url,
-            GECloudEnvironmentVariable.ACCESS_TOKEN: self._cloud_config.access_token,
-            GECloudEnvironmentVariable.ORGANIZATION_ID: self._cloud_config.organization_id,  # type: ignore[dict-item]
+            GXCloudEnvironmentVariable.BASE_URL: self._cloud_config.base_url,
+            GXCloudEnvironmentVariable.ACCESS_TOKEN: self._cloud_config.access_token,
+            GXCloudEnvironmentVariable.ORGANIZATION_ID: self._cloud_config.organization_id,  # type: ignore[dict-item]
         }

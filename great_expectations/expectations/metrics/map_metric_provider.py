@@ -1688,7 +1688,7 @@ def _pandas_map_condition_index(
     metric_value_kwargs: Dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> Union[List[int], List[Dict[str, Any]]]:
     (
         boolean_mapped_unexpected_values,
         compute_domain_kwargs,
@@ -1733,10 +1733,31 @@ def _pandas_map_condition_index(
 
     df = df[boolean_mapped_unexpected_values]
 
-    if result_format["result_format"] == "COMPLETE":
-        return list(df.index)
+    if "unexpected_index_column_names" in result_format:
 
-    return list(df.index[: result_format["partial_unexpected_count"]])
+        unexpected_index_list: Optional[List[Dict[str, Any]]] = []
+        unexpected_index_column_names: List[str] = result_format[
+            "unexpected_index_column_names"
+        ]
+        unexpected_indices: List[int] = list(df.index)
+        for index in unexpected_indices:
+            primary_key_dict: Dict[str, Any] = {}
+            for column_name in unexpected_index_column_names:
+                if column_name not in metrics["table.columns"]:
+                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                        message=f'Error: The unexpected_index_column: "{column_name}" in does not exist in Dataframe. '
+                        f"Please check your configuration and try again."
+                    )
+                primary_key_dict[column_name] = df.at[index, column_name]
+            unexpected_index_list.append(primary_key_dict)
+        if result_format["result_format"] == "COMPLETE":
+            return unexpected_index_list
+        return unexpected_index_list[: result_format["partial_unexpected_count"]]
+
+    else:
+        if result_format["result_format"] == "COMPLETE":
+            return list(df.index)
+        return list(df.index[: result_format["partial_unexpected_count"]])
 
 
 def _pandas_column_map_condition_value_counts(

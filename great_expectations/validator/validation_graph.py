@@ -1,6 +1,6 @@
 import logging
 import traceback
-from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Dict, List, Optional, Set, Tuple, Union, cast
 
 from tqdm.auto import tqdm
 
@@ -8,6 +8,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.registry import get_metric_provider
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -112,7 +113,7 @@ class ValidationGraph:
 
     def resolve_validation_graph(  # noqa: C901 - complexity 16
         self,
-        metrics: Dict[Tuple[str, str, str], Any],
+        metrics: Dict[Tuple[str, str, str], MetricValue],
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,  # Set to low number (e.g., 3) to suppress progress bar for small graphs.
         show_progress_bars: bool = True,
@@ -225,7 +226,7 @@ class ValidationGraph:
 
     def _parse(
         self,
-        metrics: Dict[Tuple[str, str, str], Any],
+        metrics: Dict[Tuple[str, str, str], MetricValue],
     ) -> Tuple[Set[MetricConfiguration], Set[MetricConfiguration]]:
         """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
         validation graph (a graph structure of metric ids) edges"""

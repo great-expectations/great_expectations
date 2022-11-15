@@ -19,6 +19,7 @@ function constructSnippetMap (dir) {
         `A snippet named ${name} has already been defined elsewhere`
       )
     }
+    delete snippet.name // Remove duplicate filename to clean up stdout
     snippetMap[name] = snippet
   }
 
@@ -152,5 +153,39 @@ function sanitizeText (text) {
     .join('\n')
     .trim()
 }
+
+/**
+ * Organize parsed snippets by source filename.
+ * If provided, input filenames will filter this output.
+ *
+ * Note that this is what is run if this file is invoked by Node.
+ * An alias `yarn snippet-check` is defined in `package.json` for convenience.
+ */
+function main() {
+  const snippets = parseDirectory(".")
+  const targetFiles = process.argv.slice(2)
+
+  let out = {}
+  for (const snippet of snippets) {
+    // If no explicit args are provided, default to all snippets
+    // Else, ensure that the snippet's source file was requested by the user
+    const file = snippet.file
+    if (targetFiles.length > 0 && !(targetFiles.includes(file))) {
+      continue
+    }
+    if (!(file in out)) {
+      out[file] = []
+    }
+    delete snippet.file // Remove duplicate filename to clean up stdout
+    out[file].push(snippet)
+  }
+  console.log(out)
+}
+
+
+if (require.main === module) {
+  main();
+}
+
 
 module.exports = constructSnippetMap
