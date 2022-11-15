@@ -3,7 +3,6 @@ import sys
 
 
 def init_logger(level: int = logging.WARNING):
-    print("setting up logger ...")
     try:
         from loguru import logger
 

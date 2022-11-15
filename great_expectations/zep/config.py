@@ -12,27 +12,20 @@ from ruamel.yaml import YAML
 from great_expectations.zep.interfaces import Datasource
 from great_expectations.zep.sources import _SourceFactories
 
-try:
-    from devtools import debug as pp
-except ImportError:
-    from pprint import pprint as pp  # type: ignore[assignment]
-
 yaml = YAML(typ="safe")
 
 
-LOGGER = logging.getLogger(__name__.lstrip("great_expectations."))
+LOGGER = logging.getLogger(__name__)
 
 
 class GxConfig(BaseModel):
     datasources: Dict[str, Datasource]
 
     @classmethod
-    def parse_yaml(cls, f: Union[pathlib.Path, str], debug_: bool = False) -> GxConfig:
+    def parse_yaml(cls, f: Union[pathlib.Path, str]) -> GxConfig:
         loaded = yaml.load(f)
         LOGGER.debug(f"loaded from yaml ->\n{pf(loaded, depth=3)}\n")
         config = cls(**loaded)
-        if debug_:
-            pp(config)
         return config
 
     @validator("datasources", pre=True)

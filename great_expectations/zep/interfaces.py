@@ -13,7 +13,7 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.zep.metadatasource import MetaDatasource
 from great_expectations.zep.sources import _SourceFactories
 
-LOGGER = logging.getLogger(__name__.lstrip("great_expectations."))
+LOGGER = logging.getLogger(__name__)
 
 # BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
 # Batches one wants returned. The keys represent dimensions one can slice the data along

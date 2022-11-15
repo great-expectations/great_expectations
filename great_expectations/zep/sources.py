@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 SourceFactoryFn = Callable[..., "Datasource"]
 
-LOGGER = logging.getLogger(__name__.lstrip("great_expectations."))
+LOGGER = logging.getLogger(__name__)
 
 
 class TypeRegistrationError(TypeError):

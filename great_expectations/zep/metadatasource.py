@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from great_expectations.zep.interfaces import Datasource
 
 
-LOGGER = logging.getLogger(__name__.lstrip("great_expectations."))
+LOGGER = logging.getLogger(__name__)
 
 
 class MetaDatasource(pydantic.main.ModelMetaclass):
