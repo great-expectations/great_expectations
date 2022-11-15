@@ -131,9 +131,6 @@ class TypeLookup(
             yield self
         except Exception as exc:
             txn_exc = exc
-            LOGGER.info(
-                f"{exc.__class__.__name__}:{exc} - encountered during TypeLookup transaction"
-            )
             raise
         finally:
             if txn_exc:
