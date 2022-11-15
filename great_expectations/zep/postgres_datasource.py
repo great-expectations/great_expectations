@@ -4,7 +4,7 @@ import dataclasses
 import itertools
 from datetime import datetime
 from pprint import pformat as pf
-from typing import Dict, Iterable, List, MutableMapping, Optional, Type, cast
+from typing import Dict, Iterable, List, Optional, Type, cast
 
 import dateutil.tz
 from pydantic import Field
