@@ -13,7 +13,7 @@ import requests
 from dateutil import parser
 
 PYPI_BASE_URL = "https://pypi.org/pypi"
-TIME_ELAPSED_THRESHOLD = 7
+SECONDS_IN_A_DAY = 24 * 60 * 60
 
 
 logger = logging.getLogger(__name__)
@@ -101,11 +101,12 @@ def _evaluate_pkg(
     return LatestReleaseInfo(version=version, timestamp=timestamp)
 
 
-def determine_time_elapsed_since_last_release(
+def determine_relevant_pkgs(
     pkgs: List[PyPIPackage],
-) -> Dict[int, Set[str]]:
-    diagnostics = defaultdict(set)
-    today = dt.datetime.today()
+) -> List[str]:
+    res = set()
+
+    now = dt.datetime.utcnow()
     stack = [pkg for pkg in pkgs]
     while stack:
         pkg = stack.pop()
@@ -118,28 +119,31 @@ def determine_time_elapsed_since_last_release(
             continue
 
         timestamp = parser.parse(timestamp_str)
-        days_elapsed = (today - timestamp).days
-        diagnostics[days_elapsed].add(name)
+        time_elapsed = now - timestamp
+        res.add((time_elapsed, name))
 
-    return diagnostics
+    pkgs_by_elapsed_time = sorted(res)
+    # Filter this list for all entries under a day
+
+    return []
 
 
-def print_results(pkgs: List[PyPIPackage], time_elapsed: Dict[int, Set[str]]) -> None:
-    print("===== Dependency Tree =====")
+def print_results(pkgs: List[PyPIPackage], relevant_pkgs: str) -> None:
+    print("========== Dependency Tree ==========")
     pprint.pprint(pkgs)
 
-    print("\n\n===== Packages of Interest =====")
-    for i in range(TIME_ELAPSED_THRESHOLD + 1):
-        deps = time_elapsed.get(i, [])
-        for dep in deps:
-            print(i, dep)
+    # print("\n\n========== Packages of Interest ==========")
+    # for i in range(2):
+    #     deps = time_elapsed.get(i, [])
+    #     for dep in deps:
+    #         print(pkgs[dep['key']])
 
 
 def main() -> None:
     pkgs = collect_pkgs()
     update_pkgs_with_latest_release_info(pkgs)
-    time_elapsed = determine_time_elapsed_since_last_release(pkgs)
-    print_results(pkgs=pkgs, time_elapsed=time_elapsed)
+    relevant_pkgs = determine_relevant_pkgs(pkgs)
+    print_results(pkgs=pkgs, relevant_pkgs=relevant_pkgs)
 
 
 if __name__ == "__main__":
