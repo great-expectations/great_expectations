@@ -21,7 +21,7 @@ jobs:
       - name: Install GX dependencies
         run: |
           pip install \
-            --requirement requirements.text \
+            --requirement requirements.txt \
             --requirement requirements-dev.txt \
             --requirement reqs/requirements-dev-test.txt \
             --requirement reqs/requirements-dev-spark.txt \
