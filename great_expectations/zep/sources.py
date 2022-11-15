@@ -166,37 +166,32 @@ class _SourceFactories:
     @classmethod
     def _register_assets(cls, ds_type: Type[Datasource], asset_type_lookup: TypeLookup):
         errored_on: Optional[Type[DataAsset]] = None
-        try:
-            asset_types: List[Type[DataAsset]] = ds_type.asset_types
 
-            if not asset_types:
-                LOGGER.warning(
-                    f"No `{ds_type.__name__}.asset_types` have be declared for the `Datasource`"
-                )
+        asset_types: List[Type[DataAsset]] = ds_type.asset_types
 
-            for t in asset_types:
-                try:
-                    asset_type_name = t.__fields__["type"].default
-                    if asset_type_name is None:
-                        raise TypeError(
-                            f"{t.__name__} `type` field must be assigned and cannot be `None`"
-                        )
-                    LOGGER.info(
-                        f"2b. Registering `DataAsset` `{t.__name__}` as {asset_type_name}"
-                    )
-                    asset_type_lookup[t] = asset_type_name
-                except (AttributeError, KeyError, TypeError) as bad_field_exc:
-                    errored_on = t
-                    LOGGER.warning(
-                        f"{bad_field_exc.__class__.__name__}:{bad_field_exc}"
-                    )
+        if not asset_types:
+            LOGGER.warning(
+                f"No `{ds_type.__name__}.asset_types` have be declared for the `Datasource`"
+            )
+
+        for t in asset_types:
+            try:
+                asset_type_name = t.__fields__["type"].default
+                if asset_type_name is None:
                     raise TypeError(
-                        f"No `type` field found for `{ds_type.__name__}.asset_types` -> `{t.__name__}` unable to register asset type"
-                    ) from bad_field_exc
-        except TypeError as exc:
-            raise TypeRegistrationError(
-                exc, type_=errored_on, field_name="asset_types"
-            ) from exc
+                        f"{t.__name__} `type` field must be assigned and cannot be `None`"
+                    )
+                LOGGER.info(
+                    f"2b. Registering `DataAsset` `{t.__name__}` as {asset_type_name}"
+                )
+                asset_type_lookup[t] = asset_type_name
+            except (AttributeError, KeyError, TypeError) as bad_field_exc:
+                errored_on = t
+                raise TypeRegistrationError(
+                    f"No `type` field found for `{ds_type.__name__}.asset_types` -> `{t.__name__}` unable to register asset type",
+                    type_=errored_on,
+                    field_name="type",
+                ) from bad_field_exc
 
     @property
     def factories(self) -> List[str]:
