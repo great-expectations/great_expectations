@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 import pytest
 
@@ -7,6 +9,7 @@ from great_expectations.core import (
 )
 from great_expectations.core.batch import Batch
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SqlAlchemyExecutionEngine,
@@ -52,6 +55,49 @@ def pandas_dataframe_for_unexpected_rows_with_index():
             ],
         }
     )
+
+
+@pytest.fixture
+def sqlite_table_for_unexpected_rows_with_index(test_backends):
+    # Create a small in-memory engine with two views, one of which is temporary
+    if "sqlite" in test_backends:
+        try:
+            import sqlalchemy as sa
+
+            sqlite_engine = sa.create_engine(f"sqlite:///")
+            df = pd.DataFrame(
+                {
+                    "pk_1": [0, 1, 2, 3, 4, 5],
+                    "pk_2": ["zero", "one", "two", "three", "four", "five"],
+                    "numbers_with_duplicates": [1, 5, 22, 3, 5, 10],
+                    "animal_names_no_duplicates": [
+                        "cat",
+                        "fish",
+                        "dog",
+                        "giraffe",
+                        "lion",
+                        "zebra",
+                    ],
+                }
+            )
+            sqlite_engine.execute(
+                """CREATE TEMPORARY TABLE test_temp(
+                   pk_1 INT,
+                   pk_2 TEXT,
+                   numbers_with_duplicates INT,
+                   animal_names_no_duplicates TEXT
+                );"""
+            )
+            sqlite_engine.execute("""CREATE INDEX index_name ON test_temp (pk_1);""")
+            # appending to temp table
+            df.to_sql(
+                name="test_temp", con=sqlite_engine, index=False, if_exists="append"
+            )
+            return sqlite_engine
+        except ImportError:
+            sa = None
+    else:
+        pytest.skip("SqlAlchemy tests disabled; not testing views")
 
 
 @pytest.fixture()
@@ -829,3 +875,55 @@ def test_include_unexpected_rows_without_explicit_result_format_raises_error(
     )
     with pytest.raises(ValueError):
         expectation.validate(validator)
+
+
+def test_sqlite_single_unexpected_index_column_names_complete_result_format(
+    sa, sqlite_table_for_unexpected_rows_with_index
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "numbers_with_duplicates",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["pk_1"],  # Single column
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    engine = SqlAlchemyExecutionEngine(connection_string="sqlite:///")
+
+    # result = expectation.validate(validator)
+    # assert convert_to_json_serializable(result.result) == {
+    #     "element_count": 6,
+    #     "unexpected_count": 2,
+    #     "unexpected_index_list": [
+    #         {
+    #             "pk_1": 3,
+    #         },
+    #         {
+    #             "pk_1": 5,
+    #         },
+    #     ],  # Dicts since a column was provided
+    #     "partial_unexpected_index_list": [
+    #         {
+    #             "pk_1": 3,
+    #         },
+    #         {
+    #             "pk_1": 5,
+    #         },
+    #     ],  # Dicts since a column was provided
+    #     "unexpected_percent": 33.33333333333333,
+    #     "partial_unexpected_list": [3, 10],
+    #     "unexpected_list": [3, 10],
+    #     "partial_unexpected_counts": [
+    #         {"value": 3, "count": 1},
+    #         {"value": 10, "count": 1},
+    #     ],
+    #     "missing_count": 0,
+    #     "missing_percent": 0.0,
+    #     "unexpected_percent_total": 33.33333333333333,
+    #     "unexpected_percent_nonmissing": 33.33333333333333,
+    # }
