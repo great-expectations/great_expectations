@@ -173,7 +173,9 @@ def section_7_configure_your_individual_data_connectors__inferred():
         },
         "data_connectors": {
             "name_of_my_inferred_data_connector": {
+                # <snippet name="inferred data connector define class_name as InferredAssetFilesystemDataConnector">
                 "class_name": "InferredAssetFilesystemDataConnector",
+                # </snippet>
                 "base_directory": "../data",
                 "default_regex": {},
                 "batch_spec_passthrough": {},
@@ -182,28 +184,6 @@ def section_7_configure_your_individual_data_connectors__inferred():
     }
     # </snippet>
 
-    smaller_snippets: dict = {
-        "name": "my_datasource_name",
-        "class_name": "Datasource",
-        "module_name": "great_expectations.datasource",
-        "execution_engine": {
-            "class_name": "SparkDFExecutionEngine",
-            "module_name": "great_expectations.execution_engine",
-        },
-        "data_connectors": {
-            "name_of_my_inferred_data_connector": {
-                # <snippet name="inferred data connector define class_name as InferredAssetFilesystemDataConnector">
-                "class_name": "InferredAssetFilesystemDataConnector",
-                # </snippet>
-                # <snippet name="inferred data connector define base_directory">
-                "base_directory": "../data",
-                # </snippet>
-                "default_regex": {},
-                "batch_spec_passthrough": {},
-            }
-        },
-    }
-    assert datasource_config == smaller_snippets
     is_subset(
         datasource_config, get_full_config_spark_inferred_datasource_single_batch()
     )
@@ -291,7 +271,9 @@ def section_7_configure_your_individual_data_connectors__configured():
         },
         "data_connectors": {
             "name_of_my_configured_data_connector": {
+                # <snippet name="configured data connector define class_name as ConfiguredAssetFilesystemDataConnector">
                 "class_name": "ConfiguredAssetFilesystemDataConnector",
+                # </snippet>
                 "base_directory": "../data",
                 "assets": {},
                 "batch_spec_passthrough": {},
@@ -300,28 +282,6 @@ def section_7_configure_your_individual_data_connectors__configured():
     }
     # </snippet>
 
-    smaller_snippets: dict = {
-        "name": "my_datasource_name",
-        "class_name": "Datasource",
-        "module_name": "great_expectations.datasource",
-        "execution_engine": {
-            "class_name": "SparkDFExecutionEngine",
-            "module_name": "great_expectations.execution_engine",
-        },
-        "data_connectors": {
-            "name_of_my_configured_data_connector": {
-                # <snippet name="configured data connector define class_name as ConfiguredAssetFilesystemDataConnector">
-                "class_name": "ConfiguredAssetFilesystemDataConnector",
-                # </snippet>
-                # <snippet name="configured data connector define base_directory">
-                "base_directory": "../data",
-                # </snippet>
-                "assets": {},
-                "batch_spec_passthrough": {},
-            }
-        },
-    }
-    assert datasource_config == smaller_snippets
     is_subset(
         datasource_config, get_full_config_spark_configured_datasource_single_batch()
     )
@@ -360,24 +320,6 @@ def section_7_configure_your_individual_data_connectors__runtime():
         },
         "data_connectors": {
             "name_of_my_runtime_data_connector": {
-                "class_name": "RuntimeDataConnector",
-                "batch_spec_passthrough": {},
-                "batch_identifiers": [],
-            }
-        },
-    }
-    # </snippet>
-
-    smaller_snippets: dict = {
-        "name": "my_datasource_name",
-        "class_name": "Datasource",
-        "module_name": "great_expectations.datasource",
-        "execution_engine": {
-            "class_name": "SparkDFExecutionEngine",
-            "module_name": "great_expectations.execution_engine",
-        },
-        "data_connectors": {
-            "name_of_my_runtime_data_connector": {
                 # <snippet name="runtime data connector define class_name as RuntimeDataConnector">
                 "class_name": "RuntimeDataConnector",
                 # </snippet>
@@ -386,7 +328,8 @@ def section_7_configure_your_individual_data_connectors__runtime():
             }
         },
     }
-    assert datasource_config == smaller_snippets
+    # </snippet>
+
     is_subset(datasource_config, get_full_config_spark_runtime_datasource())
 
 
