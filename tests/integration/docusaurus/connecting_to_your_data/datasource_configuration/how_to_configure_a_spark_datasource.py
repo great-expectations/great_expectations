@@ -233,6 +233,7 @@ def section_7_configure_your_individual_data_connectors__inferred():
     }
     is_subset(datasource_config, glob_directive)
 
+    # <snippet name="spark inferred datasource_config post glob_directive definition">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -251,6 +252,7 @@ def section_7_configure_your_individual_data_connectors__inferred():
             }
         },
     }
+    # </snippet>
     assert datasource_config == glob_directive
 
 
