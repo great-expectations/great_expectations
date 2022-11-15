@@ -64,6 +64,8 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
         metrics,
         runtime_configuration,
     ):
+        # </snippet>
+        # <snippet>
         (
             selectable,
             compute_domain_kwargs,
@@ -71,14 +73,15 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
         ) = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
-
+        # </snippet>
         column_name = accessor_domain_kwargs["column"]
         column = F.col(column_name)
-
+        # <snippet>
         query = F.when(column == 3, F.lit(False)).otherwise(F.lit(True))
 
         return (query, compute_domain_kwargs, accessor_domain_kwargs)
-        # </snippet>
+
+    # </snippet>
 
     # <snippet>
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
