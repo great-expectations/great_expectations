@@ -16,7 +16,7 @@ from great_expectations.data_context.store.inline_store_backend import (
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
-    GeCloudConfig,
+    GXCloudConfig,
 )
 from great_expectations.datasource import Datasource
 
@@ -52,7 +52,7 @@ def pandas_enabled_datasource_config() -> dict:
 def test_data_context_instantiates_ge_cloud_store_backend_with_cloud_config(
     tmp_path: pathlib,
     data_context_config_with_datasources: DataContextConfig,
-    ge_cloud_config: GeCloudConfig,
+    ge_cloud_config: GXCloudConfig,
 ) -> None:
     project_path = tmp_path / "my_data_context"
     project_path.mkdir()
