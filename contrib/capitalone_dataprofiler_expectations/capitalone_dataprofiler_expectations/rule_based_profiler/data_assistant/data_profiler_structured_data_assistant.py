@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Optional
 
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result.profile_report_based_columns_data_assistant_result import (
-    ProfileReportBasedColumnsDataAssistantResult,
+from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result.data_profiler_structured_data_assistant_result import (
+    DataProfilerStructuredDataAssistantResult,
 )
 
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
@@ -28,12 +28,12 @@ from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.validator.validator import Validator
 
 
-class ProfileReportBasedColumnsDataAssistant(DataAssistant):
+class DataProfilerStructuredDataAssistant(DataAssistant):
     """
     ProfileReportBasedColumnsDataAssistant provides dataset exploration and validation for columns of tabular data.
     """
 
-    __alias__: str = "profile_columns"
+    __alias__: str = "data_profiler"
 
     def __init__(
         self,
@@ -66,7 +66,7 @@ class ProfileReportBasedColumnsDataAssistant(DataAssistant):
     def _build_data_assistant_result(
         self, data_assistant_result: DataAssistantResult
     ) -> DataAssistantResult:
-        return ProfileReportBasedColumnsDataAssistantResult(
+        return DataProfilerStructuredDataAssistantResult(
             _batch_id_to_batch_identifier_display_name_map=data_assistant_result._batch_id_to_batch_identifier_display_name_map,
             profiler_config=data_assistant_result.profiler_config,
             profiler_execution_time=data_assistant_result.profiler_execution_time,

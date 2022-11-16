@@ -1,1 +1,1 @@
-from .profile_report_based_columns_data_assistant_result import ProfileReportBasedColumnsDataAssistantResult
+from .data_profiler_structured_data_assistant_result import DataProfilerStructuredDataAssistantResult
