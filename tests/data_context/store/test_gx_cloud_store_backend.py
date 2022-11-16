@@ -409,6 +409,6 @@ def test_config_property_and_defaults(
         "ge_cloud_base_url": CLOUD_DEFAULT_BASE_URL,
         "ge_cloud_resource_type": GXCloudRESTResource.CHECKPOINT,
         "manually_initialize_store_backend_id": "",
-        "module_name": GXCloudRESTResource.__module__,
+        "module_name": GXCloudStoreBackend.__module__,
         "suppress_store_backend_id": True,
     }
