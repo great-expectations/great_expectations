@@ -103,25 +103,27 @@ def get_renderer_names(expectation_or_metric_type: str) -> List[str]:
     return list(_registered_renderers.get(expectation_or_metric_type, {}).keys())
 
 
-def get_renderer_names_with_renderer_type(
+def get_renderer_names_with_renderer_types(
     expectation_or_metric_type: str,
-    renderer_type: AtomicRendererType,
+    renderer_types: List[AtomicRendererType],
 ) -> List[Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]]:
     """Gets renderer names of a given type, for a given Expectation or Metric.
 
     Args:
         expectation_or_metric_type: The type of an Expectation or Metric for which to get renderer names.
-        renderer_type: The type of the renderers for which to return names.
+        renderer_types: The type of the renderers for which to return names.
 
     Returns:
-        A list of renderer names for the given prefix and Expectation or Metric.
+        A list of renderer names for the given prefixes and Expectation or Metric.
     """
     return [
         renderer_name
         for renderer_name in get_renderer_names(
             expectation_or_metric_type=expectation_or_metric_type
         )
-        if renderer_name.startswith(renderer_type)
+        if any(
+            renderer_name.startswith(renderer_type) for renderer_type in renderer_types
+        )
     ]
 
 

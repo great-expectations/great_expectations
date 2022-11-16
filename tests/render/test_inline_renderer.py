@@ -41,7 +41,7 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "expectation_configuration,result,expected_serialized_expectation_validation_result_prescriptive_rendered_atomic_content,expected_serialized_expectation_validation_result_diagnostic_rendered_atomic_content",
+    "expectation_configuration,result,expected_serialized_expectation_validation_result_rendered_atomic_content",
     [
         pytest.param(
             ExpectationConfiguration(
@@ -50,6 +50,16 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
             ),
             {"observed_value": 3},
             [
+                {
+                    "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
+                    "value": {
+                        "header": None,
+                        "params": {},
+                        "schema": {"type": "com.superconductive.rendered.string"},
+                        "template": "3",
+                    },
+                    "value_type": "StringValueType",
+                },
                 {
                     "value_type": "StringValueType",
                     "name": AtomicPrescriptiveRendererType.SUMMARY,
@@ -61,21 +71,9 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                             "value": {"schema": {"type": "number"}, "value": 3},
                         },
                     },
-                }
+                },
             ],
-            [
-                {
-                    "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
-                    "value": {
-                        "header": None,
-                        "params": {},
-                        "schema": {"type": "com.superconductive.rendered.string"},
-                        "template": "3",
-                    },
-                    "value_type": "StringValueType",
-                }
-            ],
-            id="expect_table_row_count_to_equal",
+            id="equal",
         ),
         pytest.param(
             ExpectationConfiguration(
@@ -84,6 +82,16 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
             ),
             {"observed_value": 19},
             [
+                {
+                    "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
+                    "value": {
+                        "header": None,
+                        "params": {},
+                        "schema": {"type": "com.superconductive.rendered.string"},
+                        "template": "19",
+                    },
+                    "value_type": "StringValueType",
+                },
                 {
                     "name": AtomicPrescriptiveRendererType.SUMMARY,
                     "value": {
@@ -121,21 +129,9 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                         "to $min_value and less than or equal to $max_value.",
                     },
                     "value_type": "StringValueType",
-                }
+                },
             ],
-            [
-                {
-                    "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
-                    "value": {
-                        "header": None,
-                        "params": {},
-                        "schema": {"type": "com.superconductive.rendered.string"},
-                        "template": "19",
-                    },
-                    "value_type": "StringValueType",
-                }
-            ],
-            id="expect_column_min_to_be_between",
+            id="between",
         ),
         pytest.param(
             ExpectationConfiguration(
@@ -160,6 +156,32 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 "details": {"success_details": [True, True, True]},
             },
             [
+                {
+                    "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
+                    "value": {
+                        "header": None,
+                        "header_row": [
+                            {"schema": {"type": "string"}, "value": "Quantile"},
+                            {"schema": {"type": "string"}, "value": "Value"},
+                        ],
+                        "schema": {"type": "TableType"},
+                        "table": [
+                            [
+                                {"schema": {"type": "string"}, "value": "0.00"},
+                                {"schema": {"type": "number"}, "value": 397433},
+                            ],
+                            [
+                                {"schema": {"type": "string"}, "value": "Median"},
+                                {"schema": {"type": "number"}, "value": 2388055},
+                            ],
+                            [
+                                {"schema": {"type": "string"}, "value": "1.00"},
+                                {"schema": {"type": "number"}, "value": 9488404},
+                            ],
+                        ],
+                    },
+                    "value_type": "TableType",
+                },
                 {
                     "name": AtomicPrescriptiveRendererType.SUMMARY,
                     "value": {
@@ -213,37 +235,9 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                         ],
                     },
                     "value_type": "TableType",
-                }
+                },
             ],
-            [
-                {
-                    "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
-                    "value": {
-                        "header": None,
-                        "header_row": [
-                            {"schema": {"type": "string"}, "value": "Quantile"},
-                            {"schema": {"type": "string"}, "value": "Value"},
-                        ],
-                        "schema": {"type": "TableType"},
-                        "table": [
-                            [
-                                {"schema": {"type": "string"}, "value": "0.00"},
-                                {"schema": {"type": "number"}, "value": 397433},
-                            ],
-                            [
-                                {"schema": {"type": "string"}, "value": "Median"},
-                                {"schema": {"type": "number"}, "value": 2388055},
-                            ],
-                            [
-                                {"schema": {"type": "string"}, "value": "1.00"},
-                                {"schema": {"type": "number"}, "value": 9488404},
-                            ],
-                        ],
-                    },
-                    "value_type": "TableType",
-                }
-            ],
-            id="expect_column_quantile_values_to_be_between",
+            id="table",
         ),
         pytest.param(
             ExpectationConfiguration(
@@ -261,6 +255,16 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 "unexpected_percent_nonmissing": 0.0,
             },
             [
+                {
+                    "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
+                    "value": {
+                        "header": None,
+                        "params": {},
+                        "schema": {"type": "com.superconductive.rendered.string"},
+                        "template": "0% unexpected",
+                    },
+                    "value_type": "StringValueType",
+                },
                 {
                     "name": AtomicPrescriptiveRendererType.SUMMARY,
                     "value": {
@@ -297,21 +301,9 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                         "$v__2.",
                     },
                     "value_type": "StringValueType",
-                }
+                },
             ],
-            [
-                {
-                    "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
-                    "value": {
-                        "header": None,
-                        "params": {},
-                        "schema": {"type": "com.superconductive.rendered.string"},
-                        "template": "0% unexpected",
-                    },
-                    "value_type": "StringValueType",
-                }
-            ],
-            id="expect_column_values_to_be_in_set",
+            id="set",
         ),
         pytest.param(
             ExpectationConfiguration(
@@ -343,66 +335,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                     },
                 },
             },
-            [
-                {
-                    "name": AtomicPrescriptiveRendererType.SUMMARY,
-                    "value": {
-                        "graph": {
-                            "autosize": "fit",
-                            "config": {
-                                "view": {
-                                    "continuousHeight": 300,
-                                    "continuousWidth": 400,
-                                }
-                            },
-                            "encoding": {
-                                "tooltip": [
-                                    {"field": "values", "type": "quantitative"},
-                                    {"field": "fraction", "type": "quantitative"},
-                                ],
-                                "x": {"field": "values", "type": "nominal"},
-                                "y": {"field": "fraction", "type": "quantitative"},
-                            },
-                            "height": 400,
-                            "mark": "bar",
-                            "width": 250,
-                        },
-                        "header": {
-                            "schema": {"type": "StringValueType"},
-                            "value": {
-                                "params": {
-                                    "column": {
-                                        "schema": {"type": "string"},
-                                        "value": "user_id",
-                                    },
-                                    "condition_parser": {
-                                        "schema": {"type": "string"},
-                                        "value": None,
-                                    },
-                                    "mostly": {
-                                        "schema": {"type": "number"},
-                                        "value": None,
-                                    },
-                                    "row_condition": {
-                                        "schema": {"type": "string"},
-                                        "value": None,
-                                    },
-                                    "threshold": {
-                                        "schema": {"type": "number"},
-                                        "value": None,
-                                    },
-                                },
-                                "template": "$column Kullback-Leibler (KL) "
-                                "divergence with respect to the "
-                                "following distribution must be "
-                                "lower than $threshold.",
-                            },
-                        },
-                        "schema": {"type": "GraphType"},
-                    },
-                    "value_type": "GraphType",
-                }
-            ],
             [
                 {
                     "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
@@ -442,9 +374,67 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                         "schema": {"type": "GraphType"},
                     },
                     "value_type": "GraphType",
-                }
+                },
+                {
+                    "name": AtomicPrescriptiveRendererType.SUMMARY,
+                    "value": {
+                        "graph": {
+                            "autosize": "fit",
+                            "config": {
+                                "view": {
+                                    "continuousHeight": 300,
+                                    "continuousWidth": 400,
+                                }
+                            },
+                            "encoding": {
+                                "tooltip": [
+                                    {"field": "values", "type": "quantitative"},
+                                    {"field": "fraction", "type": "quantitative"},
+                                ],
+                                "x": {"field": "values", "type": "nominal"},
+                                "y": {"field": "fraction", "type": "quantitative"},
+                            },
+                            "height": 400,
+                            "mark": "bar",
+                            "width": 250,
+                        },
+                        "header": {
+                            "schema": {"type": "StringValueType"},
+                            "value": {
+                                "params": {
+                                    "column": {
+                                        "schema": {"type": "string"},
+                                        "value": "user_id",
+                                    },
+                                    "condition_parser": {
+                                        "schema": {"type": "string"},
+                                        "value": None,
+                                    },
+                                    "mostly": {
+                                        "schema": {"type": "number"},
+                                        "value": None,
+                                    },
+                                    "row_condition": {
+                                        "schema": {"type": "string"},
+                                        "value": None,
+                                    },
+                                    "threshold": {
+                                        "schema": {"type": "number"},
+                                        "value": None,
+                                    },
+                                },
+                                "template": "$column Kullback-Leibler (KL) "
+                                "divergence with respect to the "
+                                "following distribution must be "
+                                "lower than $threshold.",
+                            },
+                        },
+                        "schema": {"type": "GraphType"},
+                    },
+                    "value_type": "GraphType",
+                },
             ],
-            id="expect_column_kl_divergence_to_be_less_than",
+            id="graph",
         ),
         pytest.param(
             ExpectationConfiguration(
@@ -466,6 +456,16 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 "unexpected_percent_nonmissing": 0.0,
             },
             [
+                {
+                    "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
+                    "value": {
+                        "header": None,
+                        "params": {},
+                        "schema": {"type": "com.superconductive.rendered.string"},
+                        "template": "0% unexpected",
+                    },
+                    "value_type": "StringValueType",
+                },
                 {
                     "name": AtomicPrescriptiveRendererType.SUMMARY,
                     "value": {
@@ -507,29 +507,16 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                         "$min_value and less than or equal to $max_value.",
                     },
                     "value_type": "StringValueType",
-                }
+                },
             ],
-            [
-                {
-                    "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
-                    "value": {
-                        "header": None,
-                        "params": {},
-                        "schema": {"type": "com.superconductive.rendered.string"},
-                        "template": "0% unexpected",
-                    },
-                    "value_type": "StringValueType",
-                }
-            ],
-            id="expect_column_values_to_be_between_evaluation_parameters",
+            id="evaluation parameters",
         ),
     ],
 )
 def test_inline_renderer_expectation_validation_result_serialization(
     expectation_configuration: ExpectationConfiguration,
     result: dict,
-    expected_serialized_expectation_validation_result_prescriptive_rendered_atomic_content: dict,
-    expected_serialized_expectation_validation_result_diagnostic_rendered_atomic_content: dict,
+    expected_serialized_expectation_validation_result_rendered_atomic_content: dict,
 ):
 
     expectation_validation_result = ExpectationValidationResult(
@@ -551,28 +538,6 @@ def test_inline_renderer_expectation_validation_result_serialization(
         RenderedAtomicContent
     ] = inline_renderer.get_rendered_content()
 
-    inline_renderer: InlineRenderer = InlineRenderer(
-        render_object=expectation_validation_result.expectation_config
-    )
-
-    expectation_configuration_rendered_atomic_content: List[
-        RenderedAtomicContent
-    ] = inline_renderer.get_rendered_content()
-
-    actual_serialized_expectation_configuration_rendered_atomic_content: List[
-        dict
-    ] = clean_serialized_rendered_atomic_content_graphs(
-        serialized_rendered_atomic_content=[
-            rendered_atomic_content.to_json_dict()
-            for rendered_atomic_content in expectation_configuration_rendered_atomic_content
-        ]
-    )
-
-    assert (
-        actual_serialized_expectation_configuration_rendered_atomic_content
-        == expected_serialized_expectation_validation_result_prescriptive_rendered_atomic_content
-    )
-
     actual_serialized_expectation_validation_result_rendered_atomic_content: List[
         dict
     ] = clean_serialized_rendered_atomic_content_graphs(
@@ -584,13 +549,13 @@ def test_inline_renderer_expectation_validation_result_serialization(
 
     assert (
         actual_serialized_expectation_validation_result_rendered_atomic_content
-        == expected_serialized_expectation_validation_result_diagnostic_rendered_atomic_content
+        == expected_serialized_expectation_validation_result_rendered_atomic_content
     )
 
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "expectation_configuration,expected_serialized_expectation_configuration_prescriptive_rendered_atomic_content",
+    "expectation_configuration,expected_serialized_expectation_configuration_rendered_atomic_content",
     [
         pytest.param(
             ExpectationConfiguration(
@@ -611,7 +576,7 @@ def test_inline_renderer_expectation_validation_result_serialization(
                     },
                 }
             ],
-            id="expect_table_row_count_to_equal",
+            id="equal",
         ),
         pytest.param(
             ExpectationConfiguration(
@@ -658,7 +623,7 @@ def test_inline_renderer_expectation_validation_result_serialization(
                     "value_type": "StringValueType",
                 }
             ],
-            id="expect_column_min_to_be_between",
+            id="between",
         ),
         pytest.param(
             ExpectationConfiguration(
@@ -731,7 +696,7 @@ def test_inline_renderer_expectation_validation_result_serialization(
                     "value_type": "TableType",
                 }
             ],
-            id="expect_column_quantile_values_to_be_between",
+            id="table",
         ),
         pytest.param(
             ExpectationConfiguration(
@@ -777,7 +742,7 @@ def test_inline_renderer_expectation_validation_result_serialization(
                     "value_type": "StringValueType",
                 }
             ],
-            id="expect_column_values_to_be_in_set",
+            id="set",
         ),
         pytest.param(
             ExpectationConfiguration(
@@ -850,7 +815,7 @@ def test_inline_renderer_expectation_validation_result_serialization(
                     "value_type": "GraphType",
                 }
             ],
-            id="expect_column_kl_divergence_to_be_less_than",
+            id="graph",
         ),
         pytest.param(
             ExpectationConfiguration(
@@ -905,13 +870,13 @@ def test_inline_renderer_expectation_validation_result_serialization(
                     "value_type": "StringValueType",
                 }
             ],
-            id="expect_column_values_to_be_between_evaluation_parameters",
+            id="evaluation_parameters",
         ),
     ],
 )
 def test_inline_renderer_expectation_configuration_serialization(
     expectation_configuration: ExpectationConfiguration,
-    expected_serialized_expectation_configuration_prescriptive_rendered_atomic_content: dict,
+    expected_serialized_expectation_configuration_rendered_atomic_content: dict,
 ):
 
     inline_renderer: InlineRenderer = InlineRenderer(
@@ -933,5 +898,5 @@ def test_inline_renderer_expectation_configuration_serialization(
 
     assert (
         actual_serialized_expectation_configuration_rendered_atomic_content
-        == expected_serialized_expectation_configuration_prescriptive_rendered_atomic_content
+        == expected_serialized_expectation_configuration_rendered_atomic_content
     )
