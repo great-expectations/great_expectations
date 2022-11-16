@@ -16,7 +16,11 @@ datasources:
               method_name: foobar_it
               column_name: my_column
               name: my_splitter
-              template_params:
-                - alpha
-                - bravo
-                - charlie
+              param_defaults:
+                alpha:
+                  - fizz
+                  - bizz
+                bravo:
+                  - foo
+                  - bar
+
