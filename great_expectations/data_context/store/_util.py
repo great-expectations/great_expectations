@@ -11,6 +11,13 @@ if TYPE_CHECKING:
 
 
 def is_DataContextKey_backed_store_backend(store_backend: StoreBackend) -> bool:
+    """
+    Temporary util to determine whether or not a StoreBackend is compatible with
+    DataContextKey and its subclasses.
+
+    Note that the current support behavior is a conversion from key to tuple, which
+    results in us losing all valuable type information.
+    """
     from great_expectations.data_context.store.gx_cloud_store_backend import (
         GXCloudStoreBackend,
     )
