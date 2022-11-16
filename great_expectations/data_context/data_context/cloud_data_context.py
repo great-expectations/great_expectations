@@ -10,8 +10,8 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations import __version__
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.config_provider import (
-    CloudConfigurationProvider,
-    ConfigurationProvider,
+    _CloudConfigurationProvider,
+    _ConfigurationProvider,
 )
 from great_expectations.core.serializer import JsonConfigSerializer
 from great_expectations.data_context.cloud_constants import (
@@ -34,7 +34,6 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
-from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.exceptions.exceptions import DataContextError
 
 if TYPE_CHECKING:
@@ -90,12 +89,11 @@ class CloudDataContext(AbstractDataContext):
         self._project_config = self._apply_global_config_overrides(
             config=project_data_context_config
         )
-        self._variables = self._init_variables()
         super().__init__(
             runtime_environment=runtime_environment,
         )
 
-    def _register_providers(self, config_provider: ConfigurationProvider) -> None:
+    def _register_providers(self, config_provider: _ConfigurationProvider) -> None:
         """
         To ensure that Cloud credentials are accessible downstream, we want to ensure that
         we register a CloudConfigurationProvider.
@@ -104,7 +102,7 @@ class CloudDataContext(AbstractDataContext):
         """
         super()._register_providers(config_provider)
         config_provider.register_provider(
-            CloudConfigurationProvider(self._ge_cloud_config)
+            _CloudConfigurationProvider(self._ge_cloud_config)
         )
 
     @classmethod
@@ -331,6 +329,7 @@ class CloudDataContext(AbstractDataContext):
 
         variables = CloudDataContextVariables(
             config=self._project_config,
+            config_provider=self.config_provider,
             ge_cloud_base_url=ge_cloud_base_url,
             ge_cloud_organization_id=ge_cloud_organization_id,
             ge_cloud_access_token=ge_cloud_access_token,
@@ -360,7 +359,7 @@ class CloudDataContext(AbstractDataContext):
         if not config:
             config = self.config
 
-        substitutions: dict = self._determine_substitutions()
+        substitutions: dict = self.config_provider.get_values()
 
         ge_cloud_config_variable_defaults = {
             "plugins_directory": self._normalize_absolute_or_relative_path(
@@ -380,11 +379,7 @@ class CloudDataContext(AbstractDataContext):
                 )
                 substitutions[config_variable] = value
 
-        return DataContextConfig(
-            **substitute_all_config_variables(
-                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-            )
-        )
+        return DataContextConfig(**self.config_provider.substitute_config(config))
 
     def create_expectation_suite(
         self,

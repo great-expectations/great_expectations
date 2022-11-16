@@ -1,6 +1,6 @@
 import logging
 from functools import wraps
-from typing import Callable, Optional, Type, Union
+from typing import Callable, Optional, Tuple, Type, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
@@ -94,8 +94,8 @@ class MetricProvider(metaclass=MetaMetricProvider):
 
     """
 
-    domain_keys = tuple()
-    value_keys = tuple()
+    domain_keys: Tuple[str, ...] = tuple()
+    value_keys: Tuple[str, ...] = tuple()
     default_kwarg_values = {}
 
     @classmethod

@@ -6,6 +6,7 @@ import pytest
 from ruamel.yaml import YAML
 
 import great_expectations as ge
+from great_expectations.core.config_provider import _ConfigurationSubstitutor
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import (
     DataContextConfig,
@@ -13,11 +14,7 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     DatasourceConfigSchema,
 )
-from great_expectations.data_context.util import (
-    PasswordMasker,
-    file_relative_path,
-    substitute_config_variable,
-)
+from great_expectations.data_context.util import PasswordMasker, file_relative_path
 from great_expectations.exceptions import InvalidConfigError, MissingConfigVariableError
 from tests.data_context.conftest import create_data_context_files
 
@@ -148,6 +145,7 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
 
 
 def test_substitute_config_variable():
+    config_substitutor = _ConfigurationSubstitutor()
     config_variables_dict = {
         "arg0": "val_of_arg_0",
         "arg2": {"v1": 2},
@@ -155,67 +153,88 @@ def test_substitute_config_variable():
         "ARG4": "val_of_ARG_4",
     }
     assert (
-        substitute_config_variable("abc${arg0}", config_variables_dict)
+        config_substitutor.substitute_config_variable(
+            "abc${arg0}", config_variables_dict
+        )
         == "abcval_of_arg_0"
     )
     assert (
-        substitute_config_variable("abc$arg0", config_variables_dict)
+        config_substitutor.substitute_config_variable("abc$arg0", config_variables_dict)
         == "abcval_of_arg_0"
     )
     assert (
-        substitute_config_variable("${arg0}", config_variables_dict) == "val_of_arg_0"
+        config_substitutor.substitute_config_variable("${arg0}", config_variables_dict)
+        == "val_of_arg_0"
     )
-    assert substitute_config_variable("hhhhhhh", config_variables_dict) == "hhhhhhh"
+    assert (
+        config_substitutor.substitute_config_variable("hhhhhhh", config_variables_dict)
+        == "hhhhhhh"
+    )
     with pytest.raises(MissingConfigVariableError) as exc:
-        substitute_config_variable(
+        config_substitutor.substitute_config_variable(
             "abc${arg1} def${foo}", config_variables_dict
         )  # does NOT equal "abc${arg1}"
     assert (
-        """Unable to find a match for config substitution variable: `arg1`.
-Please add this missing variable to your `uncommitted/config_variables.yml` file or your environment variables.
-See https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials"""
+        "Unable to find a match for config substitution variable: `arg1`."
         in exc.value.message
     )
     assert (
-        substitute_config_variable("${arg2}", config_variables_dict)
+        config_substitutor.substitute_config_variable("${arg2}", config_variables_dict)
         == config_variables_dict["arg2"]
     )
     assert exc.value.missing_config_variable == "arg1"
 
     # Null cases
-    assert substitute_config_variable("", config_variables_dict) == ""
-    assert substitute_config_variable(None, config_variables_dict) == None
+    assert (
+        config_substitutor.substitute_config_variable("", config_variables_dict) == ""
+    )
+    assert (
+        config_substitutor.substitute_config_variable(None, config_variables_dict)
+        == None
+    )
 
     # Test with mixed case
     assert (
-        substitute_config_variable("prefix_${aRg3}_suffix", config_variables_dict)
+        config_substitutor.substitute_config_variable(
+            "prefix_${aRg3}_suffix", config_variables_dict
+        )
         == "prefix_val_of_aRg_3_suffix"
     )
     assert (
-        substitute_config_variable("${aRg3}", config_variables_dict) == "val_of_aRg_3"
+        config_substitutor.substitute_config_variable("${aRg3}", config_variables_dict)
+        == "val_of_aRg_3"
     )
     # Test with upper case
     assert (
-        substitute_config_variable("prefix_$ARG4/suffix", config_variables_dict)
+        config_substitutor.substitute_config_variable(
+            "prefix_$ARG4/suffix", config_variables_dict
+        )
         == "prefix_val_of_ARG_4/suffix"
     )
-    assert substitute_config_variable("$ARG4", config_variables_dict) == "val_of_ARG_4"
+    assert (
+        config_substitutor.substitute_config_variable("$ARG4", config_variables_dict)
+        == "val_of_ARG_4"
+    )
 
     # Test with multiple substitutions
     assert (
-        substitute_config_variable("prefix${arg0}$aRg3", config_variables_dict)
+        config_substitutor.substitute_config_variable(
+            "prefix${arg0}$aRg3", config_variables_dict
+        )
         == "prefixval_of_arg_0val_of_aRg_3"
     )
 
     # Escaped `$` (don't substitute, but return un-escaped string)
     assert (
-        substitute_config_variable(r"abc\${arg0}\$aRg3", config_variables_dict)
+        config_substitutor.substitute_config_variable(
+            r"abc\${arg0}\$aRg3", config_variables_dict
+        )
         == "abc${arg0}$aRg3"
     )
 
     # Multiple configurations together
     assert (
-        substitute_config_variable(
+        config_substitutor.substitute_config_variable(
             r"prefix$ARG4.$arg0/$aRg3:${ARG4}/\$dontsub${arg0}:${aRg3}.suffix",
             config_variables_dict,
         )

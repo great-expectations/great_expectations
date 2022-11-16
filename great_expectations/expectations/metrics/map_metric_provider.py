@@ -1,7 +1,7 @@
 import inspect
 import logging
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
 
@@ -2685,13 +2685,13 @@ def _spark_multicolumn_map_condition_filtered_row_count(
 
 
 class MapMetricProvider(MetricProvider):
-    condition_domain_keys = (
+    condition_domain_keys: Tuple[str, ...] = (
         "batch_id",
         "table",
         "row_condition",
         "condition_parser",
     )
-    function_domain_keys = (
+    function_domain_keys: Tuple[str, ...] = (
         "batch_id",
         "table",
         "row_condition",
@@ -3235,7 +3235,7 @@ class ColumnMapMetricProvider(MapMetricProvider):
 
 
 class ColumnPairMapMetricProvider(MapMetricProvider):
-    condition_domain_keys = (
+    condition_domain_keys: Tuple[str, ...] = (
         "batch_id",
         "table",
         "column_A",
@@ -3296,7 +3296,7 @@ class ColumnPairMapMetricProvider(MapMetricProvider):
 
 
 class MulticolumnMapMetricProvider(MapMetricProvider):
-    condition_domain_keys = (
+    condition_domain_keys: Tuple[str, ...] = (
         "batch_id",
         "table",
         "column_list",
