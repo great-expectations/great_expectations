@@ -326,7 +326,6 @@ class ExecutionEngine(ABC):
             metrics = {}
 
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
-
         metric_fn_bundle: List[BundledMetricConfiguration] = []
 
         metric_fn_type: MetricFunctionTypes
@@ -429,7 +428,8 @@ class ExecutionEngine(ABC):
 
         if self._caching:
             self._metric_cache.update(resolved_metrics)
-
+        # print("hello will")
+        # print(f"resolved_metrics: {resolved_metrics}")
         return resolved_metrics
 
     def resolve_metric_bundle(

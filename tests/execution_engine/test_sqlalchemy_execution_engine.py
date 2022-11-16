@@ -152,6 +152,33 @@ def test_instantiation_error_states(sa, test_db_connection_string):
         SqlAlchemyExecutionEngine()
 
 
+def test_sa_column_map_metrics(caplog, sa):
+    engine = build_sa_engine(
+        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
+    )
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    aggregate_fn_metric_1 = MetricConfiguration(
+        metric_name="column.max.aggregate_fn",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+    )
+    aggregate_fn_metric_1.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(aggregate_fn_metric_1,),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+
 # Testing batching of aggregate metrics
 def test_sa_batch_aggregate_metrics(caplog, sa):
     import datetime
@@ -969,3 +996,6 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     )
 
     validate_tmp_tables()
+
+
+# adding tests here
