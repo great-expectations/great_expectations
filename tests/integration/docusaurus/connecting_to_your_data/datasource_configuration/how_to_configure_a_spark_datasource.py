@@ -771,7 +771,7 @@ def section_9_configure_your_data_connectors_data_assets__runtime():
                         "inferSchema": True,
                     },
                 },
-                # <snippet name="runtime spark batch_identifiers"
+                # <snippet name="runtime spark batch_identifiers">
                 "batch_identifiers": ["batch_timestamp"],
                 # </snippet>
             }
