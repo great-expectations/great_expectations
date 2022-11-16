@@ -250,6 +250,12 @@ class SparkDFExecutionEngine(ExecutionEngine):
         """
 
         batch_data: Any
+        reader_method: str
+        reader_options: dict
+        path: str
+        schema: Optional[Union[pyspark.sql.types.StructType, dict, str]]
+        reader: DataFrameReader
+        reader_fn: Callable
         if isinstance(batch_spec, RuntimeDataBatchSpec):
             # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
             batch_data = batch_spec.batch_data
@@ -261,9 +267,9 @@ illegal.  Please check your config."""
             batch_spec.batch_data = "SparkDataFrame"
 
         elif isinstance(batch_spec, AzureBatchSpec):
-            reader_method: str = batch_spec.reader_method
-            reader_options: dict = batch_spec.reader_options or {}
-            path: str = batch_spec.path
+            reader_method = batch_spec.reader_method
+            reader_options = batch_spec.reader_options or {}
+            path = batch_spec.path
             azure_url = AzureUrl(path)
             # TODO <WILL> 202209 - Add `schema` definition to Azure like PathBatchSpec below (GREAT-1224)
             try:
@@ -277,8 +283,8 @@ illegal.  Please check your config."""
                     self.spark.conf.set(
                         f"fs.azure.account.key.{storage_account_url}", credential
                     )
-                reader: DataFrameReader = self.spark.read.options(**reader_options)
-                reader_fn: Callable = self._get_reader_fn(
+                reader = self.spark.read.options(**reader_options)
+                reader_fn = self._get_reader_fn(
                     reader=reader,
                     reader_method=reader_method,
                     path=path,
@@ -292,17 +298,15 @@ illegal.  Please check your config."""
                 )
 
         elif isinstance(batch_spec, (PathBatchSpec, GlueDataCatalogBatchSpec)):
-            reader_method: str = batch_spec.reader_method
-            reader_options: dict = batch_spec.reader_options or {}
-            path: str = batch_spec.path
-            schema: Optional[
-                Union[pyspark.sql.types.StructType, dict, str]
-            ] = reader_options.get("schema")
+            reader_method = batch_spec.reader_method
+            reader_options = batch_spec.reader_options or {}
+            path = batch_spec.path
+            schema = reader_options.get("schema")
 
             # schema can be a dict if it has been through serialization step,
             # either as part of the datasource configuration, or checkpoint config
             if isinstance(schema, dict):
-                schema: pyspark.sql.types.StructType = sparktypes.StructType.fromJson(
+                schema = pyspark.sql.types.StructType = sparktypes.StructType.fromJson(
                     schema
                 )
 
@@ -318,12 +322,10 @@ illegal.  Please check your config."""
             # noinspection PyUnresolvedReferences
             try:
                 if schema:
-                    reader: DataFrameReader = self.spark.read.schema(schema).options(
-                        **reader_options
-                    )
+                    reader = self.spark.read.schema(schema).options(**reader_options)
                 else:
-                    reader: DataFrameReader = self.spark.read.options(**reader_options)
-                reader_fn: Callable = self._get_reader_fn(
+                    reader = self.spark.read.options(**reader_options)
+                reader_fn = self._get_reader_fn(
                     reader=reader,
                     reader_method=reader_method,
                     path=path,
@@ -695,7 +697,6 @@ illegal.  Please check your config."""
 
         bundled_metric_configuration: BundledMetricConfiguration
         for bundled_metric_configuration in metric_fn_bundle:
-            bundled_metric_configuration: BundledMetricConfiguration
             metric_to_resolve: MetricConfiguration = (
                 bundled_metric_configuration.metric_configuration
             )
