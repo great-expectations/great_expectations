@@ -1934,7 +1934,7 @@ def numpy_quantile(
             method=method,
         )
     else:
-        quantile = np.quantile(  # type: ignore[call-overload]
+        quantile = np.quantile(
             a=a,
             q=q,
             axis=axis,
