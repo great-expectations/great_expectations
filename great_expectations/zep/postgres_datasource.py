@@ -7,7 +7,9 @@ from pprint import pformat as pf
 from typing import Dict, Iterable, List, Optional, Type, cast
 
 import dateutil.tz
-from typing_extensions import ClassVar
+from pydantic import Field
+from pydantic import dataclasses as pydantic_dc
+from typing_extensions import ClassVar, Literal
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
@@ -34,14 +36,14 @@ _DEFAULT_YEAR_RANGE = range(_CURRENT_YEAR - 1, _CURRENT_YEAR + 1)
 _DEFAULT_MONTH_RANGE = range(1, 13)
 
 
-@dataclasses.dataclass(frozen=True)
+@pydantic_dc.dataclass(frozen=True)
 class ColumnSplitter:
     method_name: str
     column_name: str
     # param_defaults is a Dict where the keys are the parameters of the splitter and the values are the default
     # values are the default values if a batch request using the splitter leaves the parameter unspecified.
     # template_params: List[str]
-    param_defaults: Dict[str, Iterable]
+    param_defaults: Dict[str, Iterable] = Field(default_factory=dict)
 
     @property
     def param_names(self) -> List[str]:
@@ -49,32 +51,11 @@ class ColumnSplitter:
 
 
 class TableAsset(DataAsset):
-    # Instance variables
+    # Instance fields
+    type: Literal["table"] = "table"
     table_name: str
-    column_splitter: Optional[ColumnSplitter]
-    _name: str
-    _datasource: Datasource
-
-    def __init__(
-        self,
-        name: str,
-        datasource: Datasource,
-        table_name: str,
-        column_splitter: Optional[ColumnSplitter] = None,
-    ) -> None:
-        super().__init__(name)
-        self.table_name = table_name
-        self._datasource = datasource
-        self._name = name
-        self.column_splitter: Optional[ColumnSplitter] = column_splitter
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @property
-    def datasource(self) -> Datasource:
-        return self._datasource
+    column_splitter: Optional[ColumnSplitter] = None
+    name: str
 
     def get_batch_request(
         self, options: Optional[BatchRequestOptions] = None
@@ -97,7 +78,7 @@ class TableAsset(DataAsset):
                 f"but actually has the form:\n{pf(options)}\n"
             )
         return BatchRequest(
-            datasource_name=self.datasource.name,
+            datasource_name=self._datasource.name,
             data_asset_name=self.name,
             options=options or {},
         )
@@ -228,19 +209,12 @@ class PostgresDatasource(Datasource):
     # class var definitions
     asset_types: ClassVar[List[Type[DataAsset]]] = [TableAsset]
 
-    def __init__(self, name: str, connection_str: str) -> None:
-        """Initializes the PostgresDatasource.
-
-        Args:
-            name: The name of this datasource.
-            connection_str: The SQLAlchemy connection string used to connect to the database.
-              For example: "postgresql+psycopg2://postgres:@localhost/test_database"
-        """
-        self.name = name
-        self.execution_engine = SqlAlchemyExecutionEngine(
-            connection_string=connection_str
-        )
-        self.assets: Dict[str, TableAsset] = {}
+    # right side of the operator determines the type name
+    # left side enforces the names on instance creation
+    type: Literal["postgres"] = "postgres"
+    connection_str: str
+    execution_engine: SqlAlchemyExecutionEngine
+    assets: Dict[str, TableAsset] = {}
 
     def add_table_asset(self, name: str, table_name: str) -> TableAsset:
         """Adds a table asset to this datasource.
@@ -252,18 +226,16 @@ class PostgresDatasource(Datasource):
         Returns:
             The TableAsset that is added to the datasource.
         """
-        asset = TableAsset(name=name, datasource=self, table_name=table_name)
+        asset = TableAsset(name=name, table_name=table_name)
+        # TODO (kilo59): custom init for `DataAsset` to accept datasource in constructor?
+        # Will most DataAssets require a `Datasource` attribute?
+        asset._datasource = self
         self.assets[name] = asset
         return asset
 
     def get_asset(self, asset_name: str) -> TableAsset:
         """Returns the TableAsset referred to by name"""
-        try:
-            return self.assets[asset_name]
-        except KeyError as e:
-            raise PostgresDatasourceError(
-                f"No table asset named {asset_name}. Available assets are {self.assets.keys()}"
-            ) from e
+        return super().get_asset(asset_name)  # type: ignore[return-value] # value is subclass
 
     # When we have multiple types of DataAssets on a datasource, the batch_request argument will be a Union type.
     # To differentiate we could use single dispatch or use an if/else (note pattern matching doesn't appear until

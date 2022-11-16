@@ -24,16 +24,10 @@ from typing import (
     cast,
 )
 
-from marshmallow import ValidationError
-
-try:
-    from typing import Literal
-except ImportError:
-    # Fallback for python < 3.8
-    from typing_extensions import Literal  # type: ignore[assignment]
-
 from dateutil.parser import parse
+from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
+from typing_extensions import Literal
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
@@ -85,7 +79,7 @@ from great_expectations.data_context.types.base import (
     dataContextConfigSchema,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.types.refs import GeCloudIdAwareRef
+from great_expectations.data_context.types.refs import GXCloudIDAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -94,7 +88,6 @@ from great_expectations.data_context.util import (
     PasswordMasker,
     build_store_from_config,
     instantiate_class_from_config,
-    substitute_all_config_variables,
 )
 from great_expectations.dataset.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
@@ -131,7 +124,7 @@ if TYPE_CHECKING:
         EvaluationParameterStore,
     )
     from great_expectations.data_context.types.resource_identifiers import (
-        GeCloudIdentifier,
+        GXCloudIdentifier,
     )
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.rule_based_profiler import RuleBasedProfilerResult
@@ -175,9 +168,7 @@ class AbstractDataContext(ABC):
 
         self._config_provider = self._init_config_provider()
         self._config_variables = self._load_config_variables()
-
-        # These attributes that are set downstream.
-        self._variables: Optional[DataContextVariables] = None
+        self._variables = self._init_variables()
 
         # Init plugin support
         if self.plugins_directory is not None and os.path.exists(
@@ -301,6 +292,10 @@ class AbstractDataContext(ABC):
         # NOTE: <DataContextRefactor> _project_config is currently only defined in child classes.
         # See if this can this be also defined in AbstractDataContext as abstract property
         return self.variables.config
+
+    @property
+    def config_provider(self) -> ConfigurationProvider:
+        return self._config_provider
 
     @property
     def root_directory(self) -> Optional[str]:
@@ -637,14 +632,7 @@ class AbstractDataContext(ABC):
         """
         if not config:
             config = self._project_config
-
-        substitutions: dict = self._determine_substitutions()
-
-        return DataContextConfig(
-            **substitute_all_config_variables(
-                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-            )
-        )
+        return DataContextConfig(**self.config_provider.substitute_config(config))
 
     def get_batch(
         self, arg1: Any = None, arg2: Any = None, arg3: Any = None, **kwargs
@@ -999,10 +987,7 @@ class AbstractDataContext(ABC):
         raw_config_dict: dict = dict(datasourceConfigSchema.dump(datasource_config))
         raw_config = datasourceConfigSchema.load(raw_config_dict)
 
-        substitutions: dict = self._determine_substitutions()
-        substituted_config = substitute_all_config_variables(
-            raw_config_dict, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-        )
+        substituted_config = self.config_provider.substitute_config(raw_config_dict)
 
         # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
         datasource_config = datasourceConfigSchema.load(substituted_config)
@@ -1026,14 +1011,10 @@ class AbstractDataContext(ABC):
         Returns:
             Dict of config with substitutions and sanitizations applied.
         """
-        substitutions: dict = self._determine_substitutions()
         datasource_dict: dict = serializer.serialize(datasource_config)
 
-        substituted_config: dict = cast(
-            dict,
-            substitute_all_config_variables(
-                datasource_dict, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-            ),
+        substituted_config = cast(
+            dict, self.config_provider.substitute_config(datasource_dict)
         )
         masked_config: dict = PasswordMasker.sanitize_config(substituted_config)
         return masked_config
@@ -1292,7 +1273,7 @@ class AbstractDataContext(ABC):
 
     def list_expectation_suites(
         self,
-    ) -> Optional[Union[List[str], List[GeCloudIdentifier]]]:
+    ) -> Optional[Union[List[str], List[GXCloudIdentifier]]]:
         """Return a list of available expectation suite keys."""
         try:
             keys = self.expectations_store.list_keys()
@@ -2017,7 +1998,7 @@ class AbstractDataContext(ABC):
             value=validation_results,
         )
 
-        if isinstance(validation_ref, GeCloudIdAwareRef):
+        if isinstance(validation_ref, GXCloudIDAwareRef):
             ge_cloud_id = validation_ref.ge_cloud_id
             validation_results.ge_cloud_id = uuid.UUID(ge_cloud_id)
 
@@ -2538,7 +2519,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return config_with_global_config_overrides
 
     def _load_config_variables(self) -> Dict:
-        config_var_provider = self._config_provider.get_provider(
+        config_var_provider = self.config_provider.get_provider(
             ConfigurationVariablesConfigurationProvider
         )
         if config_var_provider:
@@ -2653,12 +2634,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def variables(self) -> DataContextVariables:
         if self._variables is None:
             self._variables = self._init_variables()
-
-        # By always recalculating substitutions with each call, we ensure we stay up-to-date
-        # with the latest changes to env vars and config vars
-        substitutions: dict = self._determine_substitutions()
-        self._variables.substitutions = substitutions
-
         return self._variables
 
     @property
@@ -2722,9 +2697,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         self._config_variables = self._load_config_variables()
 
-    def _determine_substitutions(self) -> Dict:
-        return self._config_provider.get_values()
-
     def _initialize_usage_statistics(
         self, usage_statistics_config: AnonymizedUsageStatisticsConfig
     ) -> None:
@@ -2747,15 +2719,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             Dict[str, DatasourceConfig], config.datasources
         )
 
-        substitutions = self._determine_substitutions()
-
         for datasource_name, datasource_config in datasources.items():
             try:
                 config = copy.deepcopy(datasource_config)  # type: ignore[assignment]
 
                 raw_config_dict = dict(datasourceConfigSchema.dump(config))
-                substituted_config_dict: dict = substitute_all_config_variables(
-                    raw_config_dict, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+                substituted_config_dict: dict = self.config_provider.substitute_config(
+                    raw_config_dict
                 )
 
                 raw_datasource_config = datasourceConfigSchema.load(raw_config_dict)
@@ -2860,13 +2830,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Returns:
             Datasource Config with substitutions performed.
         """
-        substitutions: dict = self._determine_substitutions()
-
         substitution_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
         raw_config: dict = substitution_serializer.serialize(config)
 
-        substituted_config_dict: dict = substitute_all_config_variables(
-            raw_config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+        substituted_config_dict: dict = self.config_provider.substitute_config(
+            raw_config
         )
 
         substituted_config: DatasourceConfig = datasourceConfigSchema.load(

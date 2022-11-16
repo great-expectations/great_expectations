@@ -4,7 +4,7 @@ import pytest
 
 from great_expectations.data_context import BaseDataContext, DataContext
 from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
-from great_expectations.exceptions import DataContextError, GeCloudError
+from great_expectations.exceptions import DataContextError, GXCloudError
 
 
 @pytest.mark.cloud
@@ -59,7 +59,7 @@ def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_e
     # Ensure that the request fails
     mock_request.return_value.status_code = 401
 
-    with pytest.raises(GeCloudError):
+    with pytest.raises(GXCloudError):
         DataContext(
             ge_cloud_mode=True,
             ge_cloud_base_url=ge_cloud_runtime_base_url,

@@ -26,7 +26,7 @@ from great_expectations.data_context.types.base import (
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
-    GeCloudConfig,
+    GXCloudConfig,
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import LegacyDatasource
@@ -265,7 +265,7 @@ class DataContext(BaseDataContext):
         ge_cloud_base_url: Optional[str],
         ge_cloud_access_token: Optional[str],
         ge_cloud_organization_id: Optional[str],
-    ) -> Optional[GeCloudConfig]:
+    ) -> Optional[GXCloudConfig]:
         if not ge_cloud_mode:
             return None
 
@@ -282,7 +282,6 @@ class DataContext(BaseDataContext):
                 context_root_dir
             )
         else:
-            # Determine the "context root directory" - this is the parent of "great_expectations" dir
             context_root_dir = (
                 self.find_context_root_dir()
                 if context_root_dir is None
