@@ -4,58 +4,19 @@ from unittest import mock
 import pytest
 
 from great_expectations.core.config_substitutor import (
-    ConfigurationSubstitutor,
+    _ConfigurationSubstitutor,
     secretmanager,
 )
 
 
 @pytest.fixture
-def config_substitutor() -> ConfigurationSubstitutor:
-    return ConfigurationSubstitutor()
+def config_substitutor() -> _ConfigurationSubstitutor:
+    return _ConfigurationSubstitutor()
 
 
 @contextmanager
 def does_not_raise():
     yield
-
-
-@pytest.mark.parametrize(
-    "input_value,method_to_patch,return_value",
-    [
-        ("any_value", None, "any_value"),
-        ("secret|any_value", None, "secret|any_value"),
-        (
-            "secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my-secret",
-            "great_expectations.core.config_substitutor.ConfigurationSubstitutor.substitute_value_from_aws_secrets_manager",
-            "success",
-        ),
-        (
-            "secret|projects/project_id/secrets/my_secret",
-            "great_expectations.core.config_substitutor.ConfigurationSubstitutor.substitute_value_from_gcp_secret_manager",
-            "success",
-        ),
-        (
-            "secret|https://my-vault-name.vault.azure.net/secrets/my_secret",
-            "great_expectations.core.config_substitutor.ConfigurationSubstitutor.substitute_value_from_azure_keyvault",
-            "success",
-        ),
-    ],
-)
-@pytest.mark.unit
-def test_substitute_value_from_secret_store(
-    config_substitutor, input_value, method_to_patch, return_value
-):
-    if method_to_patch:
-        with mock.patch(method_to_patch, return_value=return_value):
-            assert (
-                config_substitutor.substitute_value_from_secret_store(value=input_value)
-                == return_value
-            )
-    else:
-        assert (
-            config_substitutor.substitute_value_from_secret_store(value=input_value)
-            == return_value
-        )
 
 
 class MockedBoto3Client:
@@ -127,9 +88,11 @@ def test_substitute_value_from_aws_secrets_manager(
             "great_expectations.core.config_substitutor.boto3.session.Session",
             return_value=MockedBoto3Session(secret_response),
         ):
+            # As we're testing the secret store and not the actual substitution logic,
+            # we deem the use of an empty config_variables_dict appropriate.
             assert (
-                config_substitutor.substitute_value_from_aws_secrets_manager(
-                    input_value
+                config_substitutor.substitute_config_variable(
+                    template_str=input_value, config_variables_dict={}
                 )
                 == expected
             )
@@ -196,8 +159,12 @@ def test_substitute_value_from_gcp_secret_manager(
             "great_expectations.core.config_substitutor.secretmanager.SecretManagerServiceClient",
             return_value=MockedSecretManagerServiceClient(secret_response),
         ):
+            # As we're testing the secret store and not the actual substitution logic,
+            # we deem the use of an empty config_variables_dict appropriate.
             assert (
-                config_substitutor.substitute_value_from_gcp_secret_manager(input_value)
+                config_substitutor.substitute_config_variable(
+                    template_str=input_value, config_variables_dict={}
+                )
                 == expected
             )
 
@@ -242,11 +209,12 @@ class MockedSecretClient:
             pytest.raises(ValueError),
             None,
         ),
+        # If the regex is not matched, we return the value as-is
         (
             "secret|https://my_vault_name.vault.azure.net/secrets/my-secret/A0000000000000000000000000000000|key",
             None,
-            pytest.raises(ValueError),
-            None,
+            does_not_raise(),
+            "secret|https://my_vault_name.vault.azure.net/secrets/my-secret/A0000000000000000000000000000000|key",
         ),
     ],
 )
@@ -259,7 +227,11 @@ def test_substitute_value_from_azure_keyvault(
             "great_expectations.core.config_substitutor.SecretClient",
             return_value=MockedSecretClient(secret_response),
         ):
+            # As we're testing the secret store and not the actual substitution logic,
+            # we deem the use of an empty config_variables_dict appropriate.
             assert (
-                config_substitutor.substitute_value_from_azure_keyvault(input_value)
+                config_substitutor.substitute_config_variable(
+                    template_str=input_value, config_variables_dict={}
+                )
                 == expected
             )

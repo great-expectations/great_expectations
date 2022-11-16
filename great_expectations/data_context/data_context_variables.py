@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Optional
 
-from great_expectations.core.config_provider import ConfigurationProvider
+from great_expectations.core.config_provider import _ConfigurationProvider
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
@@ -72,7 +72,7 @@ class DataContextVariables(ABC):
     """
 
     config: DataContextConfig
-    config_provider: ConfigurationProvider
+    config_provider: _ConfigurationProvider
     _store: Optional[DataContextStore] = None
 
     def __str__(self) -> str:
