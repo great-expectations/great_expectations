@@ -4,8 +4,8 @@ from typing import Callable
 
 import pytest
 
-from great_expectations.zep.config import GxConfig
-from great_expectations.zep.interfaces import Datasource
+from great_expectations.experimental.datasources.config import GxConfig
+from great_expectations.experimental.datasources.interfaces import Datasource
 
 try:
     from devtools import debug as pp
