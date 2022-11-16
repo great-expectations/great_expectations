@@ -8,8 +8,11 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Set, Type
 import pydantic
 from typing_extensions import ClassVar, TypeAlias
 
-from great_expectations.zep.metadatasource import MetaDatasource
-from great_expectations.zep.sources import _SourceFactories
+from great_expectations.core.batch import BatchDataType
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.experimental.datasources.metadatasource import MetaDatasource
+from great_expectations.experimental.datasources.sources import _SourceFactories
+
 
 LOGGER = logging.getLogger(__name__)
 
