@@ -192,7 +192,7 @@ class TestMisconfiguredMetaDatasource:
 
         with pytest.raises(
             TypeRegistrationError,
-            match=r".*'No `type` field found for `BadAssetDatasource.asset_types`",
+            match="No `type` field found for `BadAssetDatasource.asset_types` -> `MissingTypeAsset` unable to register asset type",
         ):
 
             class MissingTypeAsset(DataAsset):
