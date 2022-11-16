@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Type, Union
 
-from great_expectations.util import camel_to_snake
+from typing_extensions import ClassVar
+
 from great_expectations.zep.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
     from great_expectations.data_context import DataContext as GXDataContext
+    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.zep.context import DataContext
     from great_expectations.zep.interfaces import DataAsset, Datasource
 
@@ -16,20 +18,8 @@ SourceFactoryFn = Callable[..., "Datasource"]
 LOGGER = logging.getLogger(__name__)
 
 
-def _remove_suffix(s: str, suffix: str) -> str:
-    # NOTE: str.remove_suffix() added in python 3.9
-    if s.endswith(suffix):
-        s = s[: -len(suffix)]
-    return s
-
-
-def _get_simplified_name_from_type(
-    t: type, suffix_to_remove: Optional[str] = None
-) -> str:
-    result = camel_to_snake(t.__name__)
-    if suffix_to_remove:
-        return _remove_suffix(result, suffix_to_remove)
-    return result
+class TypeRegistrationError(TypeError):
+    pass
 
 
 class _SourceFactories:
@@ -40,84 +30,169 @@ class _SourceFactories:
     or `DataAsset` types and a simplified name for those types.
     """
 
-    type_lookup = TypeLookup()
-    __source_factories: Dict[str, SourceFactoryFn] = {}
+    # TODO (kilo59): split DataAsset & Datasource lookups
+    type_lookup: ClassVar = TypeLookup()
+    engine_lookup: ClassVar = TypeLookup()
+    __source_factories: ClassVar[Dict[str, SourceFactoryFn]] = {}
+
+    _data_context: Union[DataContext, GXDataContext]
 
     def __init__(self, data_context: Union[DataContext, GXDataContext]):
         self._data_context = data_context
 
     @classmethod
-    def register_factory(
+    def register_types_and_ds_factory(
         cls,
-        ds_type: type,
-        fn: SourceFactoryFn,
-        asset_types: List[Type[DataAsset]],
+        ds_type: Type[Datasource],
+        factory_fn: SourceFactoryFn,
     ) -> None:
         """
-        Add/Register a datasource factory function.
+        Add/Register a datasource factory function and all related `Datasource`,
+        `DataAsset` and `ExecutionEngine` types.
 
-        Derives a SIMPLIFIED_NAME from the provided `Datasource` type.
-        Attaches a method called `add_<SIMPLIFIED_NAME>()`.
+        Creates mapping table between the `DataSource`/`DataAsset` classes and their
+        declared `type` string.
 
-        Also registers related `DataAsset` types.
 
         Example
         -------
-        `class PandasDatasource` -> `add_pandas()`
-        """
-        simplified_name = _get_simplified_name_from_type(
-            ds_type, suffix_to_remove="_datasource"
-        )
 
-        method_name = f"add_{simplified_name}"
+        An `.add_pandas()` pandas factory method will be added to `context.sources`.
+
+        >>> class PandasDatasource(Datasource):
+        >>>     type: str = 'pandas'`
+        >>>     asset_types = [FileAsset]
+        >>>     execution_engine: PandasExecutionEngine
+        """
+
+        # TODO: check that the name is a valid python identifier (and maybe that it is snake_case?)
+        ds_type_name = ds_type.__fields__["type"].default
+        if not ds_type_name:
+            raise TypeRegistrationError(
+                f"`{ds_type.__name__}` is missing a `type` attribute with an assigned string value"
+            )
+
+        # rollback type registrations if exception occurs
+        with cls.type_lookup.transaction() as type_lookup:
+
+            # TODO: We should namespace the asset type to the datasource so different datasources can reuse asset types.
+            cls._register_assets(ds_type, asset_type_lookup=type_lookup)
+
+            cls._register_datasource_and_factory_method(
+                ds_type,
+                factory_fn=factory_fn,
+                ds_type_name=ds_type_name,
+                datasource_type_lookup=type_lookup,
+            )
+
+            # NOTE: this is order dependent.
+            # Once the type_lookup is namespaced this should the same as `type_lookup` as above
+            cls._register_engine(
+                ds_type,
+                type_lookup_name=ds_type_name,
+                engine_type_lookup=cls.engine_lookup,
+            )
+
+    @classmethod
+    def _register_datasource_and_factory_method(
+        cls,
+        ds_type: Type[Datasource],
+        factory_fn: SourceFactoryFn,
+        ds_type_name: str,
+        datasource_type_lookup: TypeLookup,
+    ) -> str:
+        """
+        Register the `Datasource` class and add a factory method for the class on `sources`.
+        The method name is pulled from the `Datasource.type` attribute.
+        """
+        method_name = f"add_{ds_type_name}"
         LOGGER.info(
-            f"2a. Registering {ds_type.__name__} as {simplified_name} with {method_name}() factory"
+            f"2a. Registering {ds_type.__name__} as {ds_type_name} with {method_name}() factory"
         )
 
         pre_existing = cls.__source_factories.get(method_name)
         if pre_existing:
-            raise ValueError(f"{simplified_name} factory already exists")
-
-        # TODO: simplify or extract the following datasource & asset type registration logic
-        asset_type_names = [
-            _get_simplified_name_from_type(t, suffix_to_remove="_asset")
-            for t in asset_types
-        ]
-
-        # TODO: We should namespace the asset type to the datasource so different datasources can reuse asset types.
-        already_registered_assets = set(asset_type_names).intersection(
-            cls.type_lookup.keys()
-        )
-        if already_registered_assets:
-            raise ValueError(
-                f"The following names already have a registered type - {already_registered_assets} "
+            raise TypeRegistrationError(
+                f"'{ds_type_name}' - `sources.{method_name}()` factory already exists",
             )
 
-        for type_, name in zip(asset_types, asset_type_names):
-            cls.type_lookup[type_] = name
-            LOGGER.debug(f"'{name}' added to `type_lookup`")
+        datasource_type_lookup[ds_type] = ds_type_name
+        LOGGER.info(f"'{ds_type_name}' added to `type_lookup`")
+        cls.__source_factories[method_name] = factory_fn
+        return ds_type_name
 
-        cls.type_lookup[ds_type] = simplified_name
-        LOGGER.debug(f"'{simplified_name}' added to `type_lookup`")
-        cls.__source_factories[method_name] = fn
+    @classmethod
+    def _register_engine(
+        cls,
+        ds_type: Type[Datasource],
+        type_lookup_name: str,
+        engine_type_lookup: TypeLookup,
+    ):
+        try:
+            exec_engine_type: Type[ExecutionEngine] = ds_type.__fields__[
+                "execution_engine"
+            ].type_
+        except (AttributeError, KeyError) as exc:
+            LOGGER.warning(f"{exc.__class__.__name__}:{exc}")
+            raise TypeError(
+                f"No `execution_engine` found for {ds_type.__name__} unable to register `ExecutionEngine` type"
+            ) from exc
+
+        eng_class_name: str = exec_engine_type.__name__
+        if eng_class_name == "ExecutionEngine":
+            raise TypeRegistrationError(
+                f"`{ds_type.__name__}.execution_engine` must be annotated with a concrete `ExecutionEngine`",
+            )
+
+        LOGGER.info(
+            f"2c. Registering `ExecutionEngine` type `{eng_class_name}` for '{type_lookup_name}'"
+        )
+        engine_type_lookup[type_lookup_name] = exec_engine_type
+        LOGGER.info(list(engine_type_lookup.keys()))
+
+    @classmethod
+    def _register_assets(cls, ds_type: Type[Datasource], asset_type_lookup: TypeLookup):
+
+        asset_types: List[Type[DataAsset]] = ds_type.asset_types
+
+        if not asset_types:
+            LOGGER.warning(
+                f"No `{ds_type.__name__}.asset_types` have be declared for the `Datasource`"
+            )
+
+        for t in asset_types:
+            try:
+                asset_type_name = t.__fields__["type"].default
+                if asset_type_name is None:
+                    raise TypeError(
+                        f"{t.__name__} `type` field must be assigned and cannot be `None`"
+                    )
+                LOGGER.info(
+                    f"2b. Registering `DataAsset` `{t.__name__}` as {asset_type_name}"
+                )
+                asset_type_lookup[t] = asset_type_name
+            except (AttributeError, KeyError, TypeError) as bad_field_exc:
+                raise TypeRegistrationError(
+                    f"No `type` field found for `{ds_type.__name__}.asset_types` -> `{t.__name__}` unable to register asset type",
+                ) from bad_field_exc
 
     @property
     def factories(self) -> List[str]:
         return list(self.__source_factories.keys())
 
-    def __getattr__(self, name):
+    def __getattr__(self, attr_name: str):
         try:
-            fn = self.__source_factories[name]
+            ds_constructor = self.__source_factories[attr_name]
 
-            def wrapped(*args, **kwargs):
-                datasource = fn(*args, **kwargs)
+            def wrapped(name: str, **kwargs):
+                datasource = ds_constructor(name=name, **kwargs)
                 # TODO (bdirks): _attach_datasource_to_context to the AbstractDataContext class
-                self._data_context._attach_datasource_to_context(datasource)
+                self._data_context._attach_datasource_to_context(datasource)  # type: ignore[union-attr]
                 return datasource
 
             return wrapped
         except KeyError:
-            raise AttributeError(f"No factory {name} in {self.factories}")
+            raise AttributeError(f"No factory {attr_name} in {self.factories}")
 
     def __dir__(self) -> List[str]:
         """Preserves autocompletion for dynamic attributes."""

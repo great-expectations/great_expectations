@@ -34,7 +34,6 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
-from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.exceptions.exceptions import DataContextError
 
 if TYPE_CHECKING:
@@ -90,7 +89,6 @@ class CloudDataContext(AbstractDataContext):
         self._project_config = self._apply_global_config_overrides(
             config=project_data_context_config
         )
-        self._variables = self._init_variables()
         super().__init__(
             runtime_environment=runtime_environment,
         )
@@ -331,6 +329,7 @@ class CloudDataContext(AbstractDataContext):
 
         variables = CloudDataContextVariables(
             config=self._project_config,
+            config_provider=self.config_provider,
             ge_cloud_base_url=ge_cloud_base_url,
             ge_cloud_organization_id=ge_cloud_organization_id,
             ge_cloud_access_token=ge_cloud_access_token,
@@ -360,7 +359,7 @@ class CloudDataContext(AbstractDataContext):
         if not config:
             config = self.config
 
-        substitutions: dict = self._determine_substitutions()
+        substitutions: dict = self.config_provider.get_values()
 
         ge_cloud_config_variable_defaults = {
             "plugins_directory": self._normalize_absolute_or_relative_path(
@@ -380,11 +379,7 @@ class CloudDataContext(AbstractDataContext):
                 )
                 substitutions[config_variable] = value
 
-        return DataContextConfig(
-            **substitute_all_config_variables(
-                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-            )
-        )
+        return DataContextConfig(**self.config_provider.substitute_config(config))
 
     def create_expectation_suite(
         self,
