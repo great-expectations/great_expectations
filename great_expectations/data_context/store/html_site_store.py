@@ -131,7 +131,7 @@ class HtmlSiteStore:
         # If several types are being written to overlapping directories, we could get collisions.
         module_name = "great_expectations.data_context.store"
         filepath_suffix = ".html"
-        is_ge_cloud_store = store_backend["class_name"] in {
+        is_gx_cloud_store = store_backend["class_name"] in {
             GeCloudStoreBackend.__name__,
             GXCloudStoreBackend.__name__,
         }
@@ -141,7 +141,7 @@ class HtmlSiteStore:
             "filepath_suffix": filepath_suffix,
             "suppress_store_backend_id": True,
         }
-        if is_ge_cloud_store:
+        if is_gx_cloud_store:
             expectation_config_defaults = {
                 "module_name": module_name,
                 "suppress_store_backend_id": True,
@@ -164,7 +164,7 @@ class HtmlSiteStore:
             "filepath_suffix": filepath_suffix,
             "suppress_store_backend_id": True,
         }
-        if is_ge_cloud_store:
+        if is_gx_cloud_store:
             validation_result_config_defaults = {
                 "module_name": module_name,
                 "suppress_store_backend_id": True,
@@ -188,7 +188,7 @@ class HtmlSiteStore:
             "filepath_template": filepath_template,
             "suppress_store_backend_id": True,
         }
-        if is_ge_cloud_store:
+        if is_gx_cloud_store:
             index_page_config_defaults = {
                 "module_name": module_name,
                 "suppress_store_backend_id": True,
@@ -211,7 +211,7 @@ class HtmlSiteStore:
             "filepath_template": None,
             "suppress_store_backend_id": True,
         }
-        if is_ge_cloud_store:
+        if is_gx_cloud_store:
             static_assets_config_defaults = {
                 "module_name": module_name,
                 "suppress_store_backend_id": True,
