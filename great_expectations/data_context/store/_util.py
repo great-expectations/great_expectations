@@ -2,7 +2,7 @@
 Chetan - 20221116 - This module is to be deleted after all Stores and StoreBackends have been
 refactored to work without `key_to_tuple()` conversion.
 """
-
+from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store.store_backend import StoreBackend
 
 
-def is_key_backed_store_backend(store_backend: StoreBackend) -> bool:
+def is_DataContextKey_backed_store_backend(store_backend: StoreBackend) -> bool:
     from great_expectations.data_context.store.gx_cloud_store_backend import (
         GXCloudStoreBackend,
     )

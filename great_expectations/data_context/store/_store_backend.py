@@ -6,7 +6,9 @@ from typing import Any, List, Optional, Union
 import pyparsing as pp
 
 from great_expectations.core.data_context_key import DataContextKey
-from great_expectations.data_context.store._util import is_key_backed_store_backend
+from great_expectations.data_context.store._util import (
+    is_DataContextKey_backed_store_backend,
+)
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 
 logger = logging.getLogger(__name__)
@@ -150,7 +152,7 @@ class StoreBackend(metaclass=ABCMeta):
 
     def _validate_key(self, key) -> None:
         # NOTE: This is a temporary fork while we move away from key_to_tuple conversion behavior
-        if is_key_backed_store_backend(self):
+        if is_DataContextKey_backed_store_backend(self):
             if not isinstance(key, DataContextKey):
                 raise TypeError(
                     f"Keys in {self.__class__.__name__} must be instances of {DataContextKey} not {type(key)}"

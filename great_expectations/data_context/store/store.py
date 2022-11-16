@@ -3,7 +3,9 @@ from typing import Any, Dict, List, Optional, Tuple, Type
 
 from great_expectations.core.configuration import AbstractConfig
 from great_expectations.core.data_context_key import DataContextKey
-from great_expectations.data_context.store._util import is_key_backed_store_backend
+from great_expectations.data_context.store._util import (
+    is_DataContextKey_backed_store_backend,
+)
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
@@ -168,9 +170,10 @@ class Store:
         self._validate_key(key)
 
         # NOTE: This is a temporary fork while we move away from key_to_tuple conversion behavior
-        if not is_key_backed_store_backend(self._store_backend):
-            key = self.key_to_tuple(key)
-
+        if not is_DataContextKey_backed_store_backend(self._store_backend):
+            return self._store_backend.set(
+                self.key_to_tuple(key), self.serialize(value), **kwargs
+            )
         return self._store_backend.set(key, self.serialize(value), **kwargs)
 
     def list_keys(self) -> List[DataContextKey]:
