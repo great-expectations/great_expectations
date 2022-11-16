@@ -74,7 +74,13 @@ exclude = [
     'expectations/core/expect_select_column_values_to_be_unique_within_record\.py', # 3
     'expectations/core/expect_table_column', # 25
     'expectations/core/expect_table_row_count_to', # 5
-    'expectations/metrics',  # 130
+    'expectations/metrics/column_aggregate_metrics/column_', # 21
+    'expectations/metrics/map_metric_provider\.py',  # 57
+    'expectations/metrics/metric_provider\.py',  # 12
+    'expectations/metrics/query_metrics/query_column_pair\.py', # 9
+    'expectations/metrics/query_metrics/query_column\.py', # 7
+    'expectations/metrics/query_metrics/query_table\.py',  # 3
+    'expectations/metrics/util\.py', # 11
     'expectations/regex_based_column_map_expectation\.py',  # 3
     'expectations/registry\.py',  # 19
     'expectations/row_conditions\.py',  # 4
@@ -97,7 +103,7 @@ exclude = [
     'render/renderer/v3/suite_edit_notebook_renderer\.py',  # 11
     'render/renderer/v3/suite_profile_notebook_renderer\.py',  # 4
     'render/util\.py',  # 2
-    'render/view',  # 11
+    'render/view/view\.py',  # 11
     'rule_based_profiler/attributed_resolved_metrics\.py',  # 4
     'rule_based_profiler/builder\.py',  # 4
     'rule_based_profiler/config/base\.py',  # 13
