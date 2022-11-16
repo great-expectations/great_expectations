@@ -1,38 +1,13 @@
-from contextlib import contextmanager
-from typing import Callable, Tuple
-
 import pytest
 
 import great_expectations.zep.postgres_datasource as postgres_datasource
-from great_expectations.core.batch import BatchData
-from great_expectations.core.batch_spec import (
-    BatchMarkers,
-    SqlAlchemyDatasourceBatchSpec,
-)
+from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.zep.fakes import sqlachemy_execution_engine_mock
 from great_expectations.zep.interfaces import BatchRequest, BatchRequestOptions
 
-
-@contextmanager
-def sqlachemy_execution_engine_mock(
-    validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None]
-):
-    class MockSqlAlchemyExecutionEngine(SqlAlchemyExecutionEngine):
-        def __init__(self, *args, **kwargs):
-            pass
-
-        def get_batch_data_and_markers(
-            self, batch_spec: SqlAlchemyDatasourceBatchSpec
-        ) -> Tuple[BatchData, BatchMarkers]:
-            validate_batch_spec(batch_spec)
-            return BatchData(self), BatchMarkers(ge_load_time=None)
-
-    original_engine = postgres_datasource.SqlAlchemyExecutionEngine
-    try:
-        postgres_datasource.SqlAlchemyExecutionEngine = MockSqlAlchemyExecutionEngine
-        yield postgres_datasource.SqlAlchemyExecutionEngine
-    finally:
-        postgres_datasource.SqlAlchemyExecutionEngine = original_engine
+# TODO (kilo59) simplify exec engine testing with fixture that makes type_engine lookup
+# always return a Execution engine Test Double (Fake/Stub/Mock)
 
 
 def _source() -> postgres_datasource.PostgresDatasource:
@@ -127,9 +102,8 @@ def test_add_table_asset_with_no_splitter():
 def test_construct_table_asset_directly_with_no_splitter():
     with sqlachemy_execution_engine_mock(lambda: None):
         source = _source()
-        asset = postgres_datasource.TableAsset(
-            name="my_asset", table_name="my_table", datasource=source
-        )
+        asset = postgres_datasource.TableAsset(name="my_asset", table_name="my_table")
+        asset._datasource = source
         assert_batch_request(asset.get_batch_request(), "my_datasource", "my_asset", {})
 
 
@@ -145,9 +119,10 @@ def test_construct_table_asset_directly_with_splitter():
         asset = postgres_datasource.TableAsset(
             name="my_asset",
             table_name="my_table",
-            datasource=source,
             column_splitter=splitter,
         )
+        # TODO: asset custom init
+        asset._datasource = source
         assert_table_asset(
             asset,
             "my_asset",
@@ -288,7 +263,7 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_request_options()
 def test_datasource_gets_nonexistent_asset():
     with sqlachemy_execution_engine_mock(lambda: None):
         source = _source()
-        with pytest.raises(postgres_datasource.PostgresDatasourceError):
+        with pytest.raises(LookupError):
             source.get_asset("my_asset")
 
 
@@ -319,7 +294,7 @@ def test_bad_batch_request_passed_into_get_batch_list_from_batch_request(
         with pytest.raises(
             (
                 postgres_datasource.BatchRequestError,
-                postgres_datasource.PostgresDatasourceError,
+                LookupError,
             )
         ):
             source.get_batch_list_from_batch_request(batch_request)

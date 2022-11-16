@@ -503,6 +503,7 @@ def column_reflection_fallback(
                 match = rx.match(str(table_name).replace("\n", ""))
                 if match:
                     table_name = match.group(1)
+        schema_name = sqlalchemy_engine.dialect.default_schema_name
 
         tables_table: sa.Table = sa.Table(
             "tables",
@@ -556,7 +557,14 @@ def column_reflection_fallback(
                     right=columns_table_query, onclause=conditions, isouter=False
                 )
             )
-            .where(tables_table_query.c.table_name == table_name)
+            .where(
+                sa.and_(
+                    *(
+                        tables_table_query.c.table_name == table_name,
+                        tables_table_query.c.schema_name == schema_name,
+                    )
+                )
+            )
             .order_by(
                 tables_table_query.c.schema_name.asc(),
                 tables_table_query.c.table_name.asc(),

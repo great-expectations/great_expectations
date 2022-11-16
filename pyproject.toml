@@ -13,6 +13,8 @@ skip_gitignore = true
 extend_skip_glob = ['venv/*', 'docs/*']
 
 [tool.mypy]
+python_version = "3.7"
+plugins = ["pydantic.mypy"]
 files = [
     "great_expectations",
     # "contrib" # ignore entire `contrib` package
@@ -143,6 +145,12 @@ exclude = [
     'validator/exception_info\.py', # 1
     'validator/validator\.py', # 54
 ]
+
+[tool.pydantic-mypy]
+# https://pydantic-docs.helpmanual.io/mypy_plugin/#plugin-settings
+init_typed = true
+warn_required_dynamic_aliases = true
+warn_untyped_fields = true
 
 [tool.pytest.ini_options]
 filterwarnings = [
