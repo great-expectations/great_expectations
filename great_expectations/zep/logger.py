@@ -24,6 +24,6 @@ def init_logger(level: int = logging.WARNING):
                     level, record.getMessage()
                 )
 
-        logging.basicConfig(handlers=[InterceptHandler()], level=level, force=True)
+        logging.basicConfig(handlers=[InterceptHandler()], level=level, force=True)  # type: ignore[call-arg]
     except ImportError:
         logging.basicConfig(level=level, format="%(levelname)s:%(name)s | %(message)s")
