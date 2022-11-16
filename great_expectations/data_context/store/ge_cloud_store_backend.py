@@ -21,6 +21,7 @@ class GeCloudStoreBackend(GXCloudStoreBackend):
         manually_initialize_store_backend_id: str = "",
         store_name: Optional[str] = None,
     ) -> None:
+        # deprecated-v0.15.33
         warnings.warn(
             f"Importing the class {self.__class__.__name__} from `great_expectations.data_context.store` is deprecated as of v0.15.33. "
             f"Please import class {GXCloudStoreBackend.__name__} from `great_expectations.data_context.store` moving forward.",

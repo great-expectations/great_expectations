@@ -368,7 +368,7 @@ class CloudDataContextVariables(DataContextVariables):
         )
 
         store_backend: dict = {
-            "class_name": "GeCloudStoreBackend",
+            "class_name": "GXCloudStoreBackend",
             "ge_cloud_base_url": self.ge_cloud_base_url,
             "ge_cloud_resource_type": GXCloudRESTResource.DATA_CONTEXT_VARIABLES,
             "ge_cloud_credentials": {
@@ -388,9 +388,7 @@ class CloudDataContextVariables(DataContextVariables):
         """
         Generates a GE Cloud-specific key for use with Stores. See parent "DataContextVariables.get_key" for more details.
         """
-        from great_expectations.data_context.store.ge_cloud_store_backend import (
-            GXCloudRESTResource,
-        )
+        from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.DATA_CONTEXT_VARIABLES

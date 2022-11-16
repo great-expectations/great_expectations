@@ -1,7 +1,7 @@
 """
-Test GeCloudStoreBackend behavior and adherence to StoreBackend contract.
+Test GXCloudStoreBackend behavior and adherence to StoreBackend contract.
 
-Since GeCloudStoreBackend relies on GE Cloud, we mock requests and assert the right calls
+Since GXCloudStoreBackend relies on GE Cloud, we mock requests and assert the right calls
 are made from the Store API (set, get, list, and remove_key).
 
 Note that although ge_cloud_access_token is provided (and is a valid UUID), no external
@@ -20,8 +20,8 @@ from great_expectations.data_context.cloud_constants import (
     CLOUD_DEFAULT_BASE_URL,
     GXCloudRESTResource,
 )
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudStoreBackend,
+from great_expectations.data_context.store.gx_cloud_store_backend import (
+    GXCloudStoreBackend,
     construct_json_payload,
     construct_url,
 )
@@ -31,15 +31,15 @@ from great_expectations.data_context.types.base import CheckpointConfig
 @pytest.fixture
 def construct_ge_cloud_store_backend(
     ge_cloud_access_token: str,
-) -> Callable[[GXCloudRESTResource], GeCloudStoreBackend]:
-    def _closure(resource_type: GXCloudRESTResource) -> GeCloudStoreBackend:
+) -> Callable[[GXCloudRESTResource], GXCloudStoreBackend]:
+    def _closure(resource_type: GXCloudRESTResource) -> GXCloudStoreBackend:
         ge_cloud_base_url = CLOUD_DEFAULT_BASE_URL
         ge_cloud_credentials = {
             "access_token": ge_cloud_access_token,
             "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
         }
 
-        store_backend = GeCloudStoreBackend(
+        store_backend = GXCloudStoreBackend(
             ge_cloud_base_url=ge_cloud_base_url,
             ge_cloud_credentials=ge_cloud_credentials,
             ge_cloud_resource_type=resource_type,
@@ -210,7 +210,7 @@ def test_construct_json_payload(
 @pytest.mark.unit
 def test_set(
     construct_ge_cloud_store_backend: Callable[
-        [GXCloudRESTResource], GeCloudStoreBackend
+        [GXCloudRESTResource], GXCloudStoreBackend
     ],
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
@@ -265,7 +265,7 @@ def test_set(
 @pytest.mark.unit
 def test_list_keys(
     construct_ge_cloud_store_backend: Callable[
-        [GXCloudRESTResource], GeCloudStoreBackend
+        [GXCloudRESTResource], GXCloudStoreBackend
     ],
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
@@ -282,7 +282,7 @@ def test_list_keys(
 @pytest.mark.unit
 def test_remove_key(
     construct_ge_cloud_store_backend: Callable[
-        [GXCloudRESTResource], GeCloudStoreBackend
+        [GXCloudRESTResource], GXCloudStoreBackend
     ],
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
@@ -314,9 +314,9 @@ def test_remove_key(
 
 @pytest.mark.cloud
 @pytest.mark.unit
-def test_appropriate_casting_of_str_resource_type_to_GeCloudRESTResource(
+def test_appropriate_casting_of_str_resource_type_to_GXCloudRESTResource(
     construct_ge_cloud_store_backend: Callable[
-        [GXCloudRESTResource], GeCloudStoreBackend
+        [GXCloudRESTResource], GXCloudStoreBackend
     ],
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
@@ -345,7 +345,7 @@ def test_allowed_set_kwargs(
     resource_type: GXCloudRESTResource,
     expected_set_kwargs: Set[str],
     construct_ge_cloud_store_backend: Callable[
-        [GXCloudRESTResource], GeCloudStoreBackend
+        [GXCloudRESTResource], GXCloudStoreBackend
     ],
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(resource_type)
@@ -385,7 +385,7 @@ def test_validate_set_kwargs(
     kwargs: dict,
     expected: Union[bool, None],
     construct_ge_cloud_store_backend: Callable[
-        [GXCloudRESTResource], GeCloudStoreBackend
+        [GXCloudRESTResource], GXCloudStoreBackend
     ],
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(
@@ -398,17 +398,17 @@ def test_validate_set_kwargs(
 @pytest.mark.unit
 def test_config_property_and_defaults(
     construct_ge_cloud_store_backend: Callable[
-        [GXCloudRESTResource], GeCloudStoreBackend
+        [GXCloudRESTResource], GXCloudStoreBackend
     ],
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
 
     assert store_backend.config == {
-        "class_name": "GeCloudStoreBackend",
+        "class_name": GXCloudStoreBackend.__name__,
         "fixed_length_key": True,
         "ge_cloud_base_url": CLOUD_DEFAULT_BASE_URL,
         "ge_cloud_resource_type": GXCloudRESTResource.CHECKPOINT,
         "manually_initialize_store_backend_id": "",
-        "module_name": "great_expectations.data_context.store.ge_cloud_store_backend",
+        "module_name": GXCloudRESTResource.__module__,
         "suppress_store_backend_id": True,
     }

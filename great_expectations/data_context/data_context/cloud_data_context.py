@@ -288,10 +288,13 @@ class CloudDataContext(AbstractDataContext):
         from great_expectations.data_context.store.datasource_store import (
             DatasourceStore,
         )
+        from great_expectations.data_context.store.gx_cloud_store_backend import (
+            GXCloudStoreBackend,
+        )
 
         store_name: str = "datasource_store"  # Never explicitly referenced but adheres
         # to the convention set by other internal Stores
-        store_backend: dict = {"class_name": "GeCloudStoreBackend"}
+        store_backend: dict = {"class_name": GXCloudStoreBackend.__name__}
         runtime_environment: dict = {
             "root_directory": self.root_directory,
             "ge_cloud_credentials": self.ge_cloud_config.to_dict(),  # type: ignore[union-attr]
