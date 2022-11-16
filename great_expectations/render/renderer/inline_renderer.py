@@ -8,6 +8,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.expectations.registry import (
+    RendererImpl,
     get_renderer_impl,
     get_renderer_names_with_renderer_types,
 )
@@ -157,12 +158,11 @@ class InlineRenderer(Renderer):
         expectation_type: str,
     ) -> RenderedAtomicContent:
         renderer_rendered_content: RenderedAtomicContent
-        renderer_tuple: Optional[tuple] = get_renderer_impl(
+        renderer_impl: RendererImpl = get_renderer_impl(
             object_name=expectation_type, renderer_type=renderer_name
         )
-        if renderer_tuple is not None:
-            # index 0 is expectation class-name and index 1 is implementation of renderer
-            renderer_fn: Callable = renderer_tuple[1]
+        if renderer_impl is not None:
+            renderer_fn: Callable = renderer_impl.renderer
             if isinstance(render_object, ExpectationConfiguration):
                 renderer_rendered_content = renderer_fn(configuration=render_object)
             else:
