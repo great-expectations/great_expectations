@@ -161,12 +161,11 @@ class InlineRenderer(Renderer):
         renderer_impl: RendererImpl = get_renderer_impl(
             object_name=expectation_type, renderer_type=renderer_name
         )
-        if renderer_impl is not None:
-            renderer_fn: Callable = renderer_impl.renderer
-            if isinstance(render_object, ExpectationConfiguration):
-                renderer_rendered_content = renderer_fn(configuration=render_object)
-            else:
-                renderer_rendered_content = renderer_fn(result=render_object)
+        renderer_fn: Callable = renderer_impl.renderer
+        if isinstance(render_object, ExpectationConfiguration):
+            renderer_rendered_content = renderer_fn(configuration=render_object)
+        else:
+            renderer_rendered_content = renderer_fn(result=render_object)
 
         return renderer_rendered_content
 

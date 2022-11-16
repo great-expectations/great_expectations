@@ -120,7 +120,7 @@ def render_evaluation_parameter_string(render_func) -> Callable:
             "\n - $eval_param = $eval_param_value (at time of validation)."
         )
         configuration: Optional[dict] = kwargs.get("configuration")
-        if configuration is not None:
+        if configuration:
             kwargs_dict: dict = configuration.get("kwargs", {})
             for key, value in kwargs_dict.items():
                 if isinstance(value, dict) and "$PARAMETER" in value.keys():
@@ -336,7 +336,7 @@ class Expectation(metaclass=MetaExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        configuration: ExpectationConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
@@ -352,13 +352,25 @@ class Expectation(metaclass=MetaExpectation):
 
         template_str = "$expectation_type(**$kwargs)"
 
-        params_with_json_schema = {
-            "expectation_type": {
-                "schema": {"type": "string"},
-                "value": configuration.expectation_type,
-            },
-            "kwargs": {"schema": {"type": "string"}, "value": configuration.kwargs},
-        }
+        if configuration:
+            params_with_json_schema = {
+                "expectation_type": {
+                    "schema": {"type": "string"},
+                    "value": configuration.expectation_type,
+                },
+                "kwargs": {"schema": {"type": "string"}, "value": configuration.kwargs},
+            }
+        elif result and result.expectation_config:
+            params_with_json_schema = {
+                "expectation_type": {
+                    "schema": {"type": "string"},
+                    "value": result.expectation_config.expectation_type,
+                },
+                "kwargs": {
+                    "schema": {"type": "string"},
+                    "value": result.expectation_config.kwargs,
+                },
+            }
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
@@ -366,7 +378,7 @@ class Expectation(metaclass=MetaExpectation):
     @render_evaluation_parameter_string
     def _prescriptive_summary(
         cls,
-        configuration: ExpectationConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
@@ -381,6 +393,7 @@ class Expectation(metaclass=MetaExpectation):
             styling,
         ) = cls._atomic_prescriptive_template(
             configuration=configuration,
+            result=result,
             runtime_configuration=runtime_configuration,
         )
         value_obj = renderedAtomicValueSchema.load(
