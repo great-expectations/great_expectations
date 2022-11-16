@@ -4,7 +4,7 @@ import logging
 import re
 from collections import OrderedDict
 from functools import lru_cache
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.types.base import BaseYamlConfig
@@ -48,8 +48,11 @@ class _ConfigurationSubstitutor:
         )
 
     def substitute_all_config_variables(
-        self, data, replace_variables_dict, dollar_sign_escape_string: str = r"\$"
-    ):
+        self,
+        data: Any,
+        replace_variables_dict: Dict[str, str],
+        dollar_sign_escape_string: str = r"\$",
+    ) -> Any:
         """
         Substitute all config variables of the form ${SOME_VARIABLE} in a dictionary-like
         config object for their values.
@@ -80,8 +83,8 @@ class _ConfigurationSubstitutor:
 
     def substitute_config_variable(
         self,
-        template_str,
-        config_variables_dict,
+        template_str: str,
+        config_variables_dict: Dict[str, str],
         dollar_sign_escape_string: str = r"\$",
     ) -> Optional[str]:
         """
@@ -145,7 +148,7 @@ class _ConfigurationSubstitutor:
         template_str = self.substitute_value_from_secret_store(template_str)
         return template_str
 
-    def substitute_value_from_secret_store(self, value):
+    def substitute_value_from_secret_store(self, value: str) -> str:
         """
         This method takes a value, tries to parse the value to fetch a secret from a secret manager
         and returns the secret's value only if the input value is a string and contains one of the following patterns:
@@ -182,7 +185,7 @@ class _ConfigurationSubstitutor:
                 return self.substitute_value_from_azure_keyvault(value)
         return value
 
-    def substitute_value_from_aws_secrets_manager(self, value):
+    def substitute_value_from_aws_secrets_manager(self, value: str) -> str:
         """
         This methods uses a boto3 client and the secretsmanager service to try to retrieve the secret value
         from the elements it is able to parse from the input value.
@@ -248,7 +251,7 @@ class _ConfigurationSubstitutor:
             secret = json.loads(secret)[secret_key]
         return secret
 
-    def substitute_value_from_gcp_secret_manager(self, value):
+    def substitute_value_from_gcp_secret_manager(self, value: str) -> str:
         """
         This methods uses a google.cloud.secretmanager.SecretManagerServiceClient to try to retrieve the secret value
         from the elements it is able to parse from the input value.
@@ -305,7 +308,7 @@ class _ConfigurationSubstitutor:
             secret = json.loads(secret)[secret_key]
         return secret
 
-    def substitute_value_from_azure_keyvault(self, value):
+    def substitute_value_from_azure_keyvault(self, value: str) -> str:
         """
         This methods uses a azure.identity.DefaultAzureCredential to authenticate to the Azure SDK for Python
         and a azure.keyvault.secrets.SecretClient to try to retrieve the secret value from the elements
