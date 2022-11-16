@@ -282,7 +282,6 @@ class DataContext(BaseDataContext):
                 context_root_dir
             )
         else:
-            # Determine the "context root directory" - this is the parent of "great_expectations" dir
             context_root_dir = (
                 self.find_context_root_dir()
                 if context_root_dir is None

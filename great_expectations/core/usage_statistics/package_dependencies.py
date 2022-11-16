@@ -48,6 +48,7 @@ class GEDependencies:
             "numpy",
             "packaging",
             "pandas",
+            "pydantic",
             "pyparsing",
             "python-dateutil",
             "pytz",
@@ -87,6 +88,7 @@ class GEDependencies:
             "openpyxl",
             "pre-commit",
             "psycopg2-binary",
+            "pydantic",  # dev dependency because of mypy plugin
             "pyarrow",
             "pyathena",
             "pyfakefs",
