@@ -15,5 +15,8 @@ def is_key_backed_store_backend(store_backend: StoreBackend) -> bool:
         GXCloudStoreBackend,
     )
 
-    key_backed_store_backends = {GXCloudStoreBackend}
+    # List will be populated over time
+    key_backed_store_backends = {
+        GXCloudStoreBackend,
+    }
     return store_backend.__class__ in key_backed_store_backends
