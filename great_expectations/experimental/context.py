@@ -7,11 +7,11 @@ from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Union
 
 from pydantic import DirectoryPath, validate_arguments
 
-from great_expectations.zep.config import GxConfig
-from great_expectations.zep.sources import _SourceFactories
+from great_expectations.experimental.datasources.config import GxConfig
+from great_expectations.experimental.datasources.sources import _SourceFactories
 
 if TYPE_CHECKING:
-    from great_expectations.zep.interfaces import Datasource
+    from great_expectations.experimental.datasources.interfaces import Datasource
 
 LOGGER = logging.getLogger(__name__)
 
