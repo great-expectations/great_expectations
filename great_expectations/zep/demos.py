@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 try:
     from devtools import debug as pp
 except ImportError:
-    from pprint import pprint as pp  # type: ignore[assignment]
+    from pprint import pprint as pp
 
 GX_ROOT = pathlib.Path(__file__).parent.parent
 SAMPLE_CONFIG_FILE = GX_ROOT.joinpath("..", "tests", "zep", "config.yaml").resolve()
@@ -163,7 +163,7 @@ def from_yaml_config() -> None:
     pp(my_ds)
     assert my_ds
 
-    my_asset: TableAsset = my_ds.get_asset("with_splitters")  # type: ignore[assignment]
+    my_asset: TableAsset = my_ds.get_asset("with_splitters")
 
     print(f"\n Retrieved '{my_asset.name}'->")
     pp(my_asset)

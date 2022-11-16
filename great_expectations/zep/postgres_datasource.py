@@ -229,7 +229,7 @@ class PostgresDatasource(Datasource):
         asset = TableAsset(name=name, table_name=table_name)
         # TODO (kilo59): custom init for `DataAsset` to accept datasource in constructor?
         # Will most DataAssets require a `Datasource` attribute?
-        asset._datasource = self  # type: ignore[misc] # setter defined on super class
+        asset._datasource = self
         self.assets[name] = asset
         return asset
 
