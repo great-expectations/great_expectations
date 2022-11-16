@@ -49,7 +49,6 @@ class TypeLookup(
         **kwargs: Hashable,
     ):
         __dict = __dict or {}
-        self._original_keys: Set[ValidTypes] = set()
         super().__init__(__dict, **kwargs)
 
     @overload
