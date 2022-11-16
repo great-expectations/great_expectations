@@ -184,7 +184,7 @@ class CheckpointStore(ConfigurationStore):
             checkpoint_config: Config containing the checkpoint name.
 
         Returns:
-            None unless using GeCloudStoreBackend and if so the GeCloudResourceRef which contains the id
+            None unless using GXCloudStoreBackend and if so the GeCloudResourceRef which contains the id
             which was used to create the config in the backend.
         """
         # CheckpointConfig not an AbstractConfig??

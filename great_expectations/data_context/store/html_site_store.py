@@ -9,6 +9,9 @@ from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudStoreBackend,
 )
+from great_expectations.data_context.store.gx_cloud_store_backend import (
+    GXCloudStoreBackend,
+)
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -111,9 +114,9 @@ class HtmlSiteStore:
         store_class = load_class(store_backend_class_name, store_backend_module_name)
 
         # Store Class was loaded successfully; verify that it is of a correct subclass.
-        if not issubclass(store_class, (TupleStoreBackend, GeCloudStoreBackend)):
+        if not issubclass(store_class, (TupleStoreBackend, GXCloudStoreBackend)):
             raise DataContextError(
-                "Invalid configuration: HtmlSiteStore needs a TupleStoreBackend or GeCloudStoreBackend"
+                f"Invalid configuration: HtmlSiteStore needs a {TupleStoreBackend.__name__} or {GXCloudStoreBackend.__name__}"
             )
         if "filepath_template" in store_backend or (
             "fixed_length_key" in store_backend
@@ -128,14 +131,17 @@ class HtmlSiteStore:
         # If several types are being written to overlapping directories, we could get collisions.
         module_name = "great_expectations.data_context.store"
         filepath_suffix = ".html"
-        is_ge_cloud_store = store_backend["class_name"] == "GeCloudStoreBackend"
+        is_gx_cloud_store = store_backend["class_name"] in {
+            GeCloudStoreBackend.__name__,
+            GXCloudStoreBackend.__name__,
+        }
         expectation_config_defaults = {
             "module_name": module_name,
             "filepath_prefix": "expectations",
             "filepath_suffix": filepath_suffix,
             "suppress_store_backend_id": True,
         }
-        if is_ge_cloud_store:
+        if is_gx_cloud_store:
             expectation_config_defaults = {
                 "module_name": module_name,
                 "suppress_store_backend_id": True,
@@ -158,7 +164,7 @@ class HtmlSiteStore:
             "filepath_suffix": filepath_suffix,
             "suppress_store_backend_id": True,
         }
-        if is_ge_cloud_store:
+        if is_gx_cloud_store:
             validation_result_config_defaults = {
                 "module_name": module_name,
                 "suppress_store_backend_id": True,
@@ -182,7 +188,7 @@ class HtmlSiteStore:
             "filepath_template": filepath_template,
             "suppress_store_backend_id": True,
         }
-        if is_ge_cloud_store:
+        if is_gx_cloud_store:
             index_page_config_defaults = {
                 "module_name": module_name,
                 "suppress_store_backend_id": True,
@@ -205,7 +211,7 @@ class HtmlSiteStore:
             "filepath_template": None,
             "suppress_store_backend_id": True,
         }
-        if is_ge_cloud_store:
+        if is_gx_cloud_store:
             static_assets_config_defaults = {
                 "module_name": module_name,
                 "suppress_store_backend_id": True,
@@ -428,7 +434,7 @@ class HtmlSiteStore:
                             content_type = "text/html; charset=utf8"
 
                     if not isinstance(
-                        self.store_backends["static_assets"], GeCloudStoreBackend
+                        self.store_backends["static_assets"], GXCloudStoreBackend
                     ):
                         self.store_backends["static_assets"].set(
                             store_key,
