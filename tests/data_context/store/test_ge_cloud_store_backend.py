@@ -20,11 +20,9 @@ def test_ge_cloud_store_backend_init_raises_deprecation_warning(
         "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
     }
 
-    with pytest.deprecated_call() as depr:
+    with pytest.deprecated_call():
         GeCloudStoreBackend(
             ge_cloud_base_url=ge_cloud_base_url,
             ge_cloud_credentials=ge_cloud_credentials,
             ge_cloud_resource_type=GXCloudRESTResource.CHECKPOINT,
         )
-
-    assert depr and isinstance(depr[0].message, DeprecationWarning)
