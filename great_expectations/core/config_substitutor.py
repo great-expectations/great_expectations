@@ -40,11 +40,17 @@ class _ConfigurationSubstitutor:
     should be defined herein.
     """
 
+    AWS_PATTERN = r"^secret\|arn:aws:secretsmanager:([a-z\-0-9]+):([0-9]{12}):secret:([a-zA-Z0-9\/_\+=\.@\-]+)"
+    GCP_PATTERN = (
+        r"^secret\|projects\/([a-z0-9\_\-]{6,30})\/secrets/([a-zA-Z\_\-]{1,255})"
+    )
+    AZURE_PATTERN = r"^secret\|(https:\/\/[a-zA-Z0-9\-]{3,24}\.vault\.azure\.net)\/secrets\/([0-9a-zA-Z-]+)"
+
     def __init__(self) -> None:
         # Using the @lru_cache decorator on method calls can create memory leaks - an attr is preferred here.
         # Ref: https://stackoverflow.com/a/68550238
         self._secret_store_cache = lru_cache(maxsize=None)(
-            self.substitute_value_from_secret_store
+            self._substitute_value_from_secret_store
         )
 
     def substitute_all_config_variables(
@@ -145,10 +151,10 @@ class _ConfigurationSubstitutor:
 
         # 2. Replace the "$"'s that had been escaped
         template_str = template_str.replace(dollar_sign_escape_string, "$")
-        template_str = self.substitute_value_from_secret_store(template_str)
+        template_str = self._substitute_value_from_secret_store(template_str)
         return template_str
 
-    def substitute_value_from_secret_store(self, value: str) -> str:
+    def _substitute_value_from_secret_store(self, value: str) -> str:
         """
         This method takes a value, tries to parse the value to fetch a secret from a secret manager
         and returns the secret's value only if the input value is a string and contains one of the following patterns:
@@ -172,20 +178,16 @@ class _ConfigurationSubstitutor:
         :return: a string with the value substituted by the secret from the secret store,
                 or the same object if value is not a string.
         """
-        if isinstance(value, str) and value.startswith("secret|"):
-            if value.startswith("secret|arn:aws:secretsmanager"):
-                return self.substitute_value_from_aws_secrets_manager(value)
-            elif re.compile(r"^secret\|projects\/[a-z0-9\_\-]{6,30}\/secrets").match(
-                value
-            ):
-                return self.substitute_value_from_gcp_secret_manager(value)
-            elif re.compile(
-                r"^secret\|https:\/\/[a-zA-Z0-9\-]{3,24}\.vault\.azure\.net"
-            ).match(value):
-                return self.substitute_value_from_azure_keyvault(value)
+        if isinstance(value, str):
+            if re.match(self.AWS_PATTERN, value):
+                return self._substitute_value_from_aws_secrets_manager(value)
+            elif re.match(self.GCP_PATTERN, value):
+                return self._substitute_value_from_gcp_secret_manager(value)
+            elif re.match(self.AZURE_PATTERN, value):
+                return self._substitute_value_from_azure_keyvault(value)
         return value
 
-    def substitute_value_from_aws_secrets_manager(self, value: str) -> str:
+    def _substitute_value_from_aws_secrets_manager(self, value: str) -> str:
         """
         This methods uses a boto3 client and the secretsmanager service to try to retrieve the secret value
         from the elements it is able to parse from the input value.
@@ -211,8 +213,7 @@ class _ConfigurationSubstitutor:
         :raises: ImportError, ValueError
         """
         regex = re.compile(
-            r"^secret\|arn:aws:secretsmanager:([a-z\-0-9]+):([0-9]{12}):secret:([a-zA-Z0-9\/_\+=\.@\-]+)"
-            r"(?:\:([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}))?(?:\|([^\|]+))?$"
+            rf"{self.AWS_PATTERN}(?:\:([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}))?(?:\|([^\|]+))?$"
         )
         if not boto3:
             logger.error(
@@ -251,7 +252,7 @@ class _ConfigurationSubstitutor:
             secret = json.loads(secret)[secret_key]
         return secret
 
-    def substitute_value_from_gcp_secret_manager(self, value: str) -> str:
+    def _substitute_value_from_gcp_secret_manager(self, value: str) -> str:
         """
         This methods uses a google.cloud.secretmanager.SecretManagerServiceClient to try to retrieve the secret value
         from the elements it is able to parse from the input value.
@@ -273,8 +274,7 @@ class _ConfigurationSubstitutor:
         :raises: ImportError, ValueError
         """
         regex = re.compile(
-            r"^secret\|projects\/([a-z0-9\_\-]{6,30})\/secrets/([a-zA-Z\_\-]{1,255})"
-            r"(?:\/versions\/([a-z0-9]+))?(?:\|([^\|]+))?$"
+            rf"{self.GCP_PATTERN}(?:\/versions\/([a-z0-9]+))?(?:\|([^\|]+))?$"
         )
         if not secretmanager:
             logger.error(
@@ -308,7 +308,7 @@ class _ConfigurationSubstitutor:
             secret = json.loads(secret)[secret_key]
         return secret
 
-    def substitute_value_from_azure_keyvault(self, value: str) -> str:
+    def _substitute_value_from_azure_keyvault(self, value: str) -> str:
         """
         This methods uses a azure.identity.DefaultAzureCredential to authenticate to the Azure SDK for Python
         and a azure.keyvault.secrets.SecretClient to try to retrieve the secret value from the elements
@@ -331,8 +331,7 @@ class _ConfigurationSubstitutor:
         :raises: ImportError, ValueError
         """
         regex = re.compile(
-            r"^secret\|(https:\/\/[a-zA-Z0-9\-]{3,24}\.vault\.azure\.net)\/secrets\/([0-9a-zA-Z-]+)"
-            r"(?:\/([a-f0-9]{32}))?(?:\|([^\|]+))?$"
+            rf"{self.AZURE_PATTERN}(?:\/([a-f0-9]{32}))?(?:\|([^\|]+))?$"
         )
         if not SecretClient:
             logger.error(
