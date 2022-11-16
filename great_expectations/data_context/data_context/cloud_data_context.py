@@ -10,8 +10,8 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations import __version__
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.config_provider import (
-    CloudConfigurationProvider,
-    ConfigurationProvider,
+    _CloudConfigurationProvider,
+    _ConfigurationProvider,
 )
 from great_expectations.core.serializer import JsonConfigSerializer
 from great_expectations.data_context.cloud_constants import (
@@ -93,7 +93,7 @@ class CloudDataContext(AbstractDataContext):
             runtime_environment=runtime_environment,
         )
 
-    def _register_providers(self, config_provider: ConfigurationProvider) -> None:
+    def _register_providers(self, config_provider: _ConfigurationProvider) -> None:
         """
         To ensure that Cloud credentials are accessible downstream, we want to ensure that
         we register a CloudConfigurationProvider.
@@ -102,7 +102,7 @@ class CloudDataContext(AbstractDataContext):
         """
         super()._register_providers(config_provider)
         config_provider.register_provider(
-            CloudConfigurationProvider(self._ge_cloud_config)
+            _CloudConfigurationProvider(self._ge_cloud_config)
         )
 
     @classmethod

@@ -31,7 +31,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class ConfigurationSubstitutor:
+class _ConfigurationSubstitutor:
     """
     Responsible for encapsulating all logic around $VARIABLE (or ${VARIABLE}) substitution.
 

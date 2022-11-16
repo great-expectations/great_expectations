@@ -4,14 +4,14 @@ from unittest import mock
 import pytest
 
 from great_expectations.core.config_substitutor import (
-    ConfigurationSubstitutor,
+    _ConfigurationSubstitutor,
     secretmanager,
 )
 
 
 @pytest.fixture
-def config_substitutor() -> ConfigurationSubstitutor:
-    return ConfigurationSubstitutor()
+def config_substitutor() -> _ConfigurationSubstitutor:
+    return _ConfigurationSubstitutor()
 
 
 @contextmanager
