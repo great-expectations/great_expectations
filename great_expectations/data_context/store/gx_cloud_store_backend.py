@@ -205,13 +205,13 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         }
         filter_properties_dict(properties=self._config, inplace=True)
 
-    def _get(self, key: Tuple[str, ...]) -> ResponsePayload:  # type: ignore[override]
+    def _get(self, key: GXCloudIdentifier) -> ResponsePayload:  # type: ignore[override]
         ge_cloud_url = self.get_url_for_key(key=key)
         params: Optional[dict] = None
         try:
             # if name is included in the key, add as a param
-            if len(key) > 2 and key[2]:
-                params = {"name": key[2]}
+            if key.resource_name:
+                params = {"name": key.resource_name}
                 ge_cloud_url = ge_cloud_url.rstrip("/")
 
             response = self._session.get(
@@ -316,13 +316,13 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def _set(  # type: ignore[override]
         self,
-        key: Tuple[GXCloudRESTResource, ...],
+        key: GXCloudIdentifier,
         value: Any,
         **kwargs: dict,
     ) -> Union[bool, GXCloudResourceRef]:
         # Each resource type has corresponding attribute key to include in POST body
-        ge_cloud_resource = key[0]
-        ge_cloud_id: str = key[1]
+        ge_cloud_resource = key.resource_type
+        ge_cloud_id: str = key.ge_cloud_id
 
         # if key has ge_cloud_id, perform _update instead
 
@@ -361,7 +361,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response_json = response.json()
 
             object_id = response_json["data"]["id"]
-            object_url = self.get_url_for_key((self.ge_cloud_resource_type, object_id))
+            key = GXCloudIdentifier(
+                resource_type=self.ge_cloud_resource_type, ge_cloud_id=object_id
+            )
+            object_url = self.get_url_for_key(key)
             return GXCloudResourceRef(
                 resource_type=resource_type,
                 ge_cloud_id=object_id,
@@ -441,9 +444,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
     def get_url_for_key(  # type: ignore[override]
-        self, key: Tuple[str, ...], protocol: Optional[Any] = None
+        self, key: GXCloudIdentifier, protocol: Optional[Any] = None
     ) -> str:
-        ge_cloud_id = key[1]
+        ge_cloud_id = key.ge_cloud_id
         url = construct_url(
             base_url=self.ge_cloud_base_url,
             organization_id=self.ge_cloud_credentials["organization_id"],
@@ -496,18 +499,8 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 f"Unable to delete object in GE Cloud Store Backend: {e}"
             )
 
-    def _has_key(self, key: Tuple[str, ...]) -> bool:
-        # Due to list_keys being inconsistently sized (due to the possible of resource names),
-        # we remove any resource names and assert against key ids.
-
-        def _shorten_key(key) -> Tuple[str, str]:
-            if len(key) > 2:
-                key = key[:2]
-            return key
-
-        key = _shorten_key(key)
-        all_keys = set(map(_shorten_key, self.list_keys()))
-        return key in all_keys
+    def _has_key(self, key: GXCloudIdentifier) -> bool:
+        return key in self.list_keys()
 
     @property
     def config(self) -> dict:

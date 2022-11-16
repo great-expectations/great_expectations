@@ -26,6 +26,7 @@ from great_expectations.data_context.store.gx_cloud_store_backend import (
     construct_url,
 )
 from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 
 
 @pytest.fixture
@@ -226,8 +227,9 @@ def test_set(
         )
     )
 
+    key = GXCloudIdentifier(resource_type=GXCloudRESTResource.CHECKPOINT)
     with mock.patch("requests.Session.post", autospec=True) as mock_post:
-        store_backend.set(("checkpoint", ""), my_simple_checkpoint_config_serialized)
+        store_backend.set(key, my_simple_checkpoint_config_serialized)
         mock_post.assert_called_with(
             mock.ANY,  # requests.Session object
             f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",

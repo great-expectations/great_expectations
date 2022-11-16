@@ -147,6 +147,13 @@ class StoreBackend(metaclass=ABCMeta):
         )
 
     def _validate_key(self, key) -> None:
+        from great_expectations.data_context.store.store import (
+            KEY_BACKED_STORE_BACKENDS,
+        )
+
+        if self.__class__.__name__ in KEY_BACKED_STORE_BACKENDS:
+            return
+
         if isinstance(key, tuple):
             for key_element in key:
                 if not isinstance(key_element, str):

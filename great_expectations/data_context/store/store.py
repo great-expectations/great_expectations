@@ -14,6 +14,9 @@ from great_expectations.exceptions import ClassInstantiationError, DataContextEr
 logger = logging.getLogger(__name__)
 
 
+KEY_BACKED_STORE_BACKENDS = ["GXCloudStoreBackend"]
+
+
 class Store:
     """A store is responsible for reading and writing Great Expectations objects
     to appropriate backends. It provides a generic API that the DataContext can
@@ -147,7 +150,7 @@ class Store:
             return self._store_backend.get(key)
         elif self.ge_cloud_mode:
             self._validate_key(key)
-            value = self._store_backend.get(self.key_to_tuple(key))
+            value = self._store_backend.get(key)
             # TODO [Robby] MER-285: Handle non-200 http errors
             if value:
                 value = self.ge_cloud_response_json_to_object_dict(response_json=value)
@@ -165,9 +168,11 @@ class Store:
             return self._store_backend.set(key, value, **kwargs)
 
         self._validate_key(key)
-        return self._store_backend.set(
-            self.key_to_tuple(key), self.serialize(value), **kwargs
-        )
+
+        if self._store_backend.__class__.__name__ not in KEY_BACKED_STORE_BACKENDS:
+            key = self.key_to_tuple(key)
+
+        return self._store_backend.set(key, self.serialize(value), **kwargs)
 
     def list_keys(self) -> List[DataContextKey]:
         keys_without_store_backend_id = [
