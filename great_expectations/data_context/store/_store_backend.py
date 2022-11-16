@@ -5,6 +5,7 @@ from typing import Any, List, Optional, Union
 
 import pyparsing as pp
 
+from great_expectations.data_context.store._util import is_key_backed_store_backend
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 
 logger = logging.getLogger(__name__)
@@ -147,11 +148,8 @@ class StoreBackend(metaclass=ABCMeta):
         )
 
     def _validate_key(self, key) -> None:
-        from great_expectations.data_context.store.store import (
-            KEY_BACKED_STORE_BACKENDS,
-        )
-
-        if self.__class__.__name__ in KEY_BACKED_STORE_BACKENDS:
+        # NOTE: This is a temporary fork while we move away from key_to_tuple conversion behavior
+        if is_key_backed_store_backend(self):
             return
 
         if isinstance(key, tuple):

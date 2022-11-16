@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple, Type
 
 from great_expectations.core.configuration import AbstractConfig
 from great_expectations.core.data_context_key import DataContextKey
+from great_expectations.data_context.store._util import is_key_backed_store_backend
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
@@ -12,9 +13,6 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
 
 logger = logging.getLogger(__name__)
-
-
-KEY_BACKED_STORE_BACKENDS = ["GXCloudStoreBackend"]
 
 
 class Store:
@@ -169,7 +167,8 @@ class Store:
 
         self._validate_key(key)
 
-        if self._store_backend.__class__.__name__ not in KEY_BACKED_STORE_BACKENDS:
+        # NOTE: This is a temporary fork while we move away from key_to_tuple conversion behavior
+        if not is_key_backed_store_backend(self._store_backend):
             key = self.key_to_tuple(key)
 
         return self._store_backend.set(key, self.serialize(value), **kwargs)
