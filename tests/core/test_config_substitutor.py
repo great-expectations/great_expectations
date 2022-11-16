@@ -41,6 +41,7 @@ def does_not_raise():
         ),
     ],
 )
+@pytest.mark.unit
 def test_substitute_value_from_secret_store(
     config_substitutor, input_value, method_to_patch, return_value
 ):
@@ -117,6 +118,7 @@ class MockedBoto3Session:
         ),
     ],
 )
+@pytest.mark.unit
 def test_substitute_value_from_aws_secrets_manager(
     config_substitutor, input_value, secret_response, raises, expected
 ):
@@ -185,6 +187,7 @@ class MockedSecretManagerServiceClient:
         ),
     ],
 )
+@pytest.mark.unit
 def test_substitute_value_from_gcp_secret_manager(
     config_substitutor, input_value, secret_response, raises, expected
 ):
@@ -247,6 +250,7 @@ class MockedSecretClient:
         ),
     ],
 )
+@pytest.mark.unit
 def test_substitute_value_from_azure_keyvault(
     config_substitutor, input_value, secret_response, raises, expected
 ):

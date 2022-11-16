@@ -1013,7 +1013,7 @@ class AbstractDataContext(ABC):
         """
         datasource_dict: dict = serializer.serialize(datasource_config)
 
-        substituted_config: dict = cast(
+        substituted_config = cast(
             dict, self.config_provider.substitute_config(datasource_dict)
         )
         masked_config: dict = PasswordMasker.sanitize_config(substituted_config)
