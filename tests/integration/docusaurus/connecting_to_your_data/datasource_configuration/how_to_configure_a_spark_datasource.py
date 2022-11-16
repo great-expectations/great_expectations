@@ -162,7 +162,7 @@ def section_7_configure_your_individual_data_connectors__inferred():
         datasource_config, get_full_config_spark_inferred_datasource_multi_batch()
     )
 
-    # </snippet name="inferred spark datasource_config up to adding empty default_regex and batch_spec_passthrough dictionaries">
+    # <snippet name="inferred spark datasource_config up to adding empty default_regex and batch_spec_passthrough dictionaries">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -260,7 +260,7 @@ def section_7_configure_your_individual_data_connectors__configured():
         datasource_config, get_full_config_spark_configured_datasource_multi_batch()
     )
 
-    # </snippet name="configured spark datasource_config up to adding empty assets and batch_spec_passthrough dictionaries">
+    # <snippet name="configured spark datasource_config up to adding empty assets and batch_spec_passthrough dictionaries">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -309,7 +309,7 @@ def section_7_configure_your_individual_data_connectors__runtime():
     # </snippet>
     is_subset(datasource_config, get_full_config_spark_runtime_datasource())
 
-    # </snippet name="runtime spark datasource_config up to adding empty batch_identifiers and batch_spec_passthrough dictionaries">
+    # <snippet name="runtime spark datasource_config up to adding empty batch_identifiers and batch_spec_passthrough dictionaries">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
