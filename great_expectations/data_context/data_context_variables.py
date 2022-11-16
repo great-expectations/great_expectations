@@ -366,9 +366,12 @@ class CloudDataContextVariables(DataContextVariables):
         from great_expectations.data_context.store.data_context_store import (
             DataContextStore,
         )
+        from great_expectations.data_context.store.gx_cloud_store_backend import (
+            GXCloudStoreBackend,
+        )
 
         store_backend: dict = {
-            "class_name": "GXCloudStoreBackend",
+            "class_name": GXCloudStoreBackend.__name__,
             "ge_cloud_base_url": self.ge_cloud_base_url,
             "ge_cloud_resource_type": GXCloudRESTResource.DATA_CONTEXT_VARIABLES,
             "ge_cloud_credentials": {
