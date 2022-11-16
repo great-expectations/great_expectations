@@ -120,7 +120,7 @@ def render_evaluation_parameter_string(render_func) -> Callable:
             "\n - $eval_param = $eval_param_value (at time of validation)."
         )
         configuration: Optional[dict] = kwargs.get("configuration")
-        if configuration is not None:
+        if configuration:
             kwargs_dict: dict = configuration.get("kwargs", {})
             for key, value in kwargs_dict.items():
                 if isinstance(value, dict) and "$PARAMETER" in value.keys():
@@ -250,7 +250,7 @@ class Expectation(metaclass=MetaExpectation):
     def __init__(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        if configuration is not None:
+        if configuration:
             self.validate_configuration(configuration=configuration)
 
         self._configuration = configuration
@@ -285,21 +285,33 @@ class Expectation(metaclass=MetaExpectation):
     @renderer(renderer_type=AtomicPrescriptiveRendererType.FAILED)
     def _atomic_prescriptive_failed(
         cls,
-        configuration: ExpectationConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
         **kwargs: dict,
     ) -> RenderedAtomicContent:
         """
         Default rendering function that is utilized by GE Cloud Front-end if an implemented atomic renderer fails
         """
-        template_str = "Rendering of Expectation Configuration failed for $expectation_type(**$kwargs)."
+        template_str = "Rendering failed for "
+
+        expectation_type: str
+        expectation_kwargs: dict
+        if configuration:
+            expectation_type = configuration.expectation_type
+            expectation_kwargs = configuration.kwargs
+        elif result and result.expectation_config:
+            expectation_type = result.expectation_config.expectation_type
+            expectation_kwargs = result.expectation_config.kwargs
 
         params_with_json_schema = {
             "expectation_type": {
                 "schema": {"type": "string"},
-                "value": configuration.expectation_type,
+                "value": expectation_type,
             },
-            "kwargs": {"schema": {"type": "string"}, "value": configuration.kwargs},
+            "kwargs": {"schema": {"type": "string"}, "value": expectation_kwargs},
         }
+        template_str += "$expectation_type(**$kwargs)."
+
         value_obj = renderedAtomicValueSchema.load(
             {
                 "template": template_str,
@@ -317,7 +329,7 @@ class Expectation(metaclass=MetaExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        configuration: ExpectationConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
@@ -331,23 +343,35 @@ class Expectation(metaclass=MetaExpectation):
 
         styling: Optional[dict] = runtime_configuration.get("styling")
 
-        template_str = "$expectation_type(**$kwargs)"
+        expectation_type: str
+        expectation_kwargs: dict
+        if configuration:
+            expectation_type = configuration.expectation_type
+            expectation_kwargs = configuration.kwargs
+        elif result and result.expectation_config:
+            expectation_type = result.expectation_config.expectation_type
+            expectation_kwargs = result.expectation_config.kwargs
 
         params_with_json_schema = {
             "expectation_type": {
                 "schema": {"type": "string"},
-                "value": configuration.expectation_type,
+                "value": expectation_type,
             },
-            "kwargs": {"schema": {"type": "string"}, "value": configuration.kwargs},
+            "kwargs": {
+                "schema": {"type": "string"},
+                "value": expectation_kwargs,
+            },
         }
-        return (template_str, params_with_json_schema, styling)
+        template_str = "$expectation_type(**$kwargs)"
+
+        return template_str, params_with_json_schema, styling
 
     @classmethod
     @renderer(renderer_type=AtomicPrescriptiveRendererType.SUMMARY)
     @render_evaluation_parameter_string
     def _prescriptive_summary(
         cls,
-        configuration: ExpectationConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
@@ -362,6 +386,7 @@ class Expectation(metaclass=MetaExpectation):
             styling,
         ) = cls._atomic_prescriptive_template(
             configuration=configuration,
+            result=result,
             runtime_configuration=runtime_configuration,
         )
         value_obj = renderedAtomicValueSchema.load(
@@ -382,12 +407,20 @@ class Expectation(metaclass=MetaExpectation):
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     def _prescriptive_renderer(
         cls,
-        configuration: ExpectationConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ):
+        expectation_type: str
+        expectation_kwargs: dict
+        if configuration:
+            expectation_type = configuration.expectation_type
+            expectation_kwargs = configuration.kwargs
+        elif result and result.expectation_config:
+            expectation_type = result.expectation_config.expectation_type
+            expectation_kwargs = result.expectation_config.expectation_type
         return [
             RenderedStringTemplateContent(
                 **{
@@ -396,8 +429,8 @@ class Expectation(metaclass=MetaExpectation):
                     "string_template": {
                         "template": "$expectation_type(**$kwargs)",
                         "params": {
-                            "expectation_type": configuration.expectation_type,
-                            "kwargs": configuration.kwargs,
+                            "expectation_type": expectation_type,
+                            "kwargs": expectation_kwargs,
                         },
                         "styling": {
                             "params": {
@@ -437,38 +470,34 @@ class Expectation(metaclass=MetaExpectation):
         Here the custom column will be added in data docs.
         """
 
-        if result is None:
+        if not result:
             return []
         custom_property_values = []
-        meta_properties_to_render: Optional[dict]
-        if result.expectation_config is not None:
+        if result and result.expectation_config:
             meta_properties_to_render = result.expectation_config.kwargs.get(
                 "meta_properties_to_render"
             )
-        else:
-            meta_properties_to_render = None
-        if meta_properties_to_render is not None:
+            meta: dict = result.expectation_config.meta
             for key in sorted(meta_properties_to_render.keys()):
                 meta_property = meta_properties_to_render[key]
-                if meta_property is not None:
-                    try:
-                        # Allow complex structure with . usage
-                        obj = result.expectation_config.meta["attributes"]
-                        keys = meta_property.split(".")
-                        for i in range(0, len(keys)):
-                            # Allow for keys with a . in the string like {"item.key": "1"}
-                            remaining_key = "".join(keys[i:])
-                            if remaining_key in obj:
-                                obj = obj[remaining_key]
-                                break
-                            else:
-                                obj = obj[keys[i]]
+                if meta_property:
+                    # Allow complex structure with . usage
+                    obj = meta["attributes"]
+                    keys = meta_property.split(".")
+                    for i in range(0, len(keys)):
+                        # Allow for keys with a . in the string like {"item.key": "1"}
+                        remaining_key = "".join(keys[i:])
+                        if remaining_key in obj:
+                            obj = obj[remaining_key]
+                            break
+                        else:
+                            obj = obj[keys[i]]
 
-                        custom_property_values.append([obj])
-                    except KeyError:
-                        custom_property_values.append(["N/A"])
+                    custom_property_values.append([obj])
                 else:
                     custom_property_values.append(["N/A"])
+            else:
+                custom_property_values.append(["N/A"])
         return custom_property_values
 
     @classmethod
@@ -769,21 +798,35 @@ class Expectation(metaclass=MetaExpectation):
     @renderer(renderer_type=AtomicDiagnosticRendererType.FAILED)
     def _atomic_diagnostic_failed(
         cls,
-        configuration: ExpectationConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
         **kwargs: dict,
     ) -> RenderedAtomicContent:
         """
         Rendering function that is utilized by GE Cloud Front-end
         """
-        template_str = "Rendering of Expectation Validation Result failed for $expectation_type(**$kwargs)."
+
+        expectation_type: str
+        expectation_kwargs: dict
+        if configuration:
+            expectation_type = configuration.expectation_type
+            expectation_kwargs = configuration.kwargs
+        elif result and result.expectation_config:
+            expectation_type = result.expectation_config.expectation_type
+            expectation_kwargs = result.expectation_config.kwargs
 
         params_with_json_schema = {
             "expectation_type": {
                 "schema": {"type": "string"},
-                "value": configuration.expectation_type,
+                "value": expectation_type,
             },
-            "kwargs": {"schema": {"type": "string"}, "value": configuration.kwargs},
+            "kwargs": {
+                "schema": {"type": "string"},
+                "value": expectation_kwargs,
+            },
         }
+        template_str = "Rendering failed for $expectation_type(**$kwargs)."
+
         value_obj = renderedAtomicValueSchema.load(
             {
                 "template": template_str,
@@ -857,7 +900,7 @@ class Expectation(metaclass=MetaExpectation):
         execution_engine: Optional[ExecutionEngine] = None,
         **kwargs: dict,
     ) -> ExpectationValidationResult:
-        if configuration is None:
+        if not configuration:
             configuration = self.configuration
 
         validation_dependencies: dict = self.get_validation_dependencies(
@@ -1007,9 +1050,9 @@ class Expectation(metaclass=MetaExpectation):
         return result_format
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        if configuration is None:
+        if not configuration:
             configuration = self.configuration
         try:
             assert (
@@ -1029,7 +1072,7 @@ class Expectation(metaclass=MetaExpectation):
     ) -> ExpectationValidationResult:
         include_rendered_content: bool = validator._include_rendered_content or False
 
-        if configuration is None:
+        if not configuration:
             configuration = deepcopy(self.configuration)
 
         configuration.process_evaluation_parameters(
@@ -1892,7 +1935,7 @@ class TableExpectation(Expectation, ABC):
     def validate_metric_value_between_configuration(
         configuration: Optional[ExpectationConfiguration] = None,
     ) -> bool:
-        if configuration is None:
+        if not configuration:
             return True
 
         # Validating that Minimum and Maximum values are of the proper format and type
@@ -2084,7 +2127,7 @@ class QueryExpectation(TableExpectation, ABC):
               UserWarning: If query is not parameterized, and/or row_condition is passed.
         """
         super().validate_configuration(configuration=configuration)
-        if configuration is None:
+        if not configuration:
             configuration = self.configuration
 
         query: Optional[Any] = configuration.kwargs.get(
@@ -2139,7 +2182,7 @@ class ColumnExpectation(TableExpectation, ABC):
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration=configuration)
-        if configuration is None:
+        if not configuration:
             configuration = self.configuration
         # Ensuring basic configuration parameters are properly set
         try:
@@ -2172,7 +2215,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration=configuration)
-        if configuration is None:
+        if not configuration:
             configuration = self.configuration
         try:
             assert (
@@ -2404,7 +2447,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration=configuration)
-        if configuration is None:
+        if not configuration:
             configuration = self.configuration
         try:
             assert (
@@ -2617,7 +2660,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration=configuration)
-        if configuration is None:
+        if not configuration:
             configuration = self.configuration
         try:
             assert (
