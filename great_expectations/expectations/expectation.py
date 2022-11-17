@@ -299,7 +299,21 @@ class Expectation(metaclass=MetaExpectation):
         if configuration:
             expectation_type = configuration.expectation_type
             expectation_kwargs = configuration.kwargs
-        elif result and result.expectation_config:
+        else:
+            assertion_failure_message_expectation_validation_result = (
+                "Renderer requires an ExpectationConfiguration or ExpectationValidationResult to be passed in via "
+                "configuration or result respectively."
+            )
+            assert isinstance(
+                result, ExpectationValidationResult
+            ), assertion_failure_message_expectation_validation_result
+            assertion_failure_message_expectation_configuration = (
+                "Renderer requires an ExpectationConfiguration to be passed via "
+                "configuration or result.expectation_config."
+            )
+            assert isinstance(
+                result.expectation_config, ExpectationConfiguration
+            ), assertion_failure_message_expectation_configuration
             expectation_type = result.expectation_config.expectation_type
             expectation_kwargs = result.expectation_config.kwargs
 
@@ -348,7 +362,21 @@ class Expectation(metaclass=MetaExpectation):
         if configuration:
             expectation_type = configuration.expectation_type
             expectation_kwargs = configuration.kwargs
-        elif result and result.expectation_config:
+        else:
+            assertion_failure_message_expectation_validation_result = (
+                "Renderer requires an ExpectationConfiguration or ExpectationValidationResult to be passed in via "
+                "configuration or result respectively."
+            )
+            assert isinstance(
+                result, ExpectationValidationResult
+            ), assertion_failure_message_expectation_validation_result
+            assertion_failure_message_expectation_configuration = (
+                "Renderer requires an ExpectationConfiguration to be passed via "
+                "configuration or result.expectation_config."
+            )
+            assert isinstance(
+                result.expectation_config, ExpectationConfiguration
+            ), assertion_failure_message_expectation_configuration
             expectation_type = result.expectation_config.expectation_type
             expectation_kwargs = result.expectation_config.kwargs
 
@@ -418,9 +446,23 @@ class Expectation(metaclass=MetaExpectation):
         if configuration:
             expectation_type = configuration.expectation_type
             expectation_kwargs = configuration.kwargs
-        elif result and result.expectation_config:
+        else:
+            assertion_failure_message_expectation_validation_result = (
+                "Renderer requires an ExpectationConfiguration or ExpectationValidationResult to be passed in via "
+                "configuration or result respectively."
+            )
+            assert isinstance(
+                result, ExpectationValidationResult
+            ), assertion_failure_message_expectation_validation_result
+            assertion_failure_message_expectation_configuration = (
+                "Renderer requires an ExpectationConfiguration to be passed via "
+                "configuration or result.expectation_config."
+            )
+            assert isinstance(
+                result.expectation_config, ExpectationConfiguration
+            ), assertion_failure_message_expectation_configuration
             expectation_type = result.expectation_config.expectation_type
-            expectation_kwargs = result.expectation_config.expectation_type
+            expectation_kwargs = result.expectation_config.kwargs
         return [
             RenderedStringTemplateContent(
                 **{
@@ -814,7 +856,21 @@ class Expectation(metaclass=MetaExpectation):
         if configuration:
             expectation_type = configuration.expectation_type
             expectation_kwargs = configuration.kwargs
-        elif result and result.expectation_config:
+        else:
+            assertion_failure_message_expectation_validation_result = (
+                "Renderer requires an ExpectationConfiguration or ExpectationValidationResult to be passed in via "
+                "configuration or result respectively."
+            )
+            assert isinstance(
+                result, ExpectationValidationResult
+            ), assertion_failure_message_expectation_validation_result
+            assertion_failure_message_expectation_configuration = (
+                "Renderer requires an ExpectationConfiguration to be passed via "
+                "configuration or result.expectation_config."
+            )
+            assert isinstance(
+                result.expectation_config, ExpectationConfiguration
+            ), assertion_failure_message_expectation_configuration
             expectation_type = result.expectation_config.expectation_type
             expectation_kwargs = result.expectation_config.kwargs
 
