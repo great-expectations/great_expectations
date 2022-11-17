@@ -652,8 +652,15 @@ class CloudDataContext(AbstractDataContext):
         return checkpoint
 
     def _init_site_builder_for_data_docs_site_creation(
-        self, site_config, site_name
+        self, site_name: str, site_config: dict
     ) -> SiteBuilder:
+        """
+        Note that this explicitly overriding the `AbstractDataContext` helper method called
+        in `self.build_data_docs()`.
+
+        The only difference here is the inclusion of `ge_cloud_mode` in the `runtime_environment`
+        used in `SiteBuilder` instantiation.
+        """
         site_builder: SiteBuilder = instantiate_class_from_config(
             config=site_config,
             runtime_environment={
