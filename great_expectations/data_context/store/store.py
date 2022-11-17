@@ -3,11 +3,11 @@ from typing import Any, Dict, List, Optional, Tuple, Type
 
 from great_expectations.core.configuration import AbstractConfig
 from great_expectations.core.data_context_key import DataContextKey
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudStoreBackend,
+from great_expectations.data_context.store.gx_cloud_store_backend import (
+    GXCloudStoreBackend,
 )
 from great_expectations.data_context.store.store_backend import StoreBackend
-from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
 
@@ -83,7 +83,7 @@ class Store:
 
     @property
     def ge_cloud_mode(self) -> bool:
-        return isinstance(self._store_backend, GeCloudStoreBackend)
+        return isinstance(self._store_backend, GXCloudStoreBackend)
 
     @property
     def store_backend(self) -> StoreBackend:
@@ -105,7 +105,7 @@ class Store:
     @property
     def key_class(self) -> Type[DataContextKey]:
         if self.ge_cloud_mode:
-            return GeCloudIdentifier
+            return GXCloudIdentifier
         return self._key_class
 
     @property

@@ -19,34 +19,30 @@ from typing import (
     List,
     Mapping,
     Optional,
+    Sequence,
     Tuple,
     Union,
     cast,
 )
 
-try:
-    from typing import Literal
-except ImportError:
-    # Fallback for python < 3.8
-    from typing_extensions import Literal  # type: ignore[assignment]
-
 from dateutil.parser import parse
+from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
+from typing_extensions import Literal
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
-    BatchDefinition,
     BatchRequestBase,
     IDDict,
     get_batch_request_from_acceptable_arguments,
 )
 from great_expectations.core.config_provider import (
-    ConfigurationProvider,
-    ConfigurationVariablesConfigurationProvider,
-    EnvironmentConfigurationProvider,
-    RuntimeEnvironmentConfigurationProvider,
+    _ConfigurationProvider,
+    _ConfigurationVariablesConfigurationProvider,
+    _EnvironmentConfigurationProvider,
+    _RuntimeEnvironmentConfigurationProvider,
 )
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
@@ -80,9 +76,10 @@ from great_expectations.data_context.types.base import (
     NotebookConfig,
     ProgressBarsConfig,
     anonymizedUsageStatisticsSchema,
+    dataContextConfigSchema,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.types.refs import GeCloudIdAwareRef
+from great_expectations.data_context.types.refs import GXCloudIDAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -91,7 +88,6 @@ from great_expectations.data_context.util import (
     PasswordMasker,
     build_store_from_config,
     instantiate_class_from_config,
-    substitute_all_config_variables,
 )
 from great_expectations.dataset.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
@@ -128,13 +124,15 @@ if TYPE_CHECKING:
         EvaluationParameterStore,
     )
     from great_expectations.data_context.types.resource_identifiers import (
-        GeCloudIdentifier,
+        GXCloudIdentifier,
     )
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.rule_based_profiler import RuleBasedProfilerResult
     from great_expectations.validation_operators.validation_operators import (
         ValidationOperator,
     )
+    from great_expectations.zep.interfaces import Batch as ZepBatch
+    from great_expectations.zep.interfaces import Datasource as ZepDatasource
 
 logger = logging.getLogger(__name__)
 yaml = YAMLHandler()
@@ -172,9 +170,7 @@ class AbstractDataContext(ABC):
 
         self._config_provider = self._init_config_provider()
         self._config_variables = self._load_config_variables()
-
-        # These attributes that are set downstream.
-        self._variables: Optional[DataContextVariables] = None
+        self._variables = self._init_variables()
 
         # Init plugin support
         if self.plugins_directory is not None and os.path.exists(
@@ -214,12 +210,12 @@ class AbstractDataContext(ABC):
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         self.validation_operators: dict = {}
 
-    def _init_config_provider(self) -> ConfigurationProvider:
-        config_provider = ConfigurationProvider()
+    def _init_config_provider(self) -> _ConfigurationProvider:
+        config_provider = _ConfigurationProvider()
         self._register_providers(config_provider)
         return config_provider
 
-    def _register_providers(self, config_provider: ConfigurationProvider) -> None:
+    def _register_providers(self, config_provider: _ConfigurationProvider) -> None:
         """
         Registers any relevant ConfigurationProvider instances to self._config_provider.
 
@@ -232,14 +228,14 @@ class AbstractDataContext(ABC):
         config_variables_file_path = self._project_config.config_variables_file_path
         if config_variables_file_path:
             config_provider.register_provider(
-                ConfigurationVariablesConfigurationProvider(
+                _ConfigurationVariablesConfigurationProvider(
                     config_variables_file_path=config_variables_file_path,
                     root_directory=self.root_directory,
                 )
             )
-        config_provider.register_provider(EnvironmentConfigurationProvider())
+        config_provider.register_provider(_EnvironmentConfigurationProvider())
         config_provider.register_provider(
-            RuntimeEnvironmentConfigurationProvider(self.runtime_environment)
+            _RuntimeEnvironmentConfigurationProvider(self.runtime_environment)
         )
 
     @abstractmethod
@@ -298,6 +294,10 @@ class AbstractDataContext(ABC):
         # NOTE: <DataContextRefactor> _project_config is currently only defined in child classes.
         # See if this can this be also defined in AbstractDataContext as abstract property
         return self.variables.config
+
+    @property
+    def config_provider(self) -> _ConfigurationProvider:
+        return self._config_provider
 
     @property
     def root_directory(self) -> Optional[str]:
@@ -634,14 +634,7 @@ class AbstractDataContext(ABC):
         """
         if not config:
             config = self._project_config
-
-        substitutions: dict = self._determine_substitutions()
-
-        return DataContextConfig(
-            **substitute_all_config_variables(
-                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-            )
-        )
+        return DataContextConfig(**self.config_provider.substitute_config(config))
 
     def get_batch(
         self, arg1: Any = None, arg2: Any = None, arg3: Any = None, **kwargs
@@ -996,10 +989,7 @@ class AbstractDataContext(ABC):
         raw_config_dict: dict = dict(datasourceConfigSchema.dump(datasource_config))
         raw_config = datasourceConfigSchema.load(raw_config_dict)
 
-        substitutions: dict = self._determine_substitutions()
-        substituted_config = substitute_all_config_variables(
-            raw_config_dict, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-        )
+        substituted_config = self.config_provider.substitute_config(raw_config_dict)
 
         # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
         datasource_config = datasourceConfigSchema.load(substituted_config)
@@ -1023,14 +1013,10 @@ class AbstractDataContext(ABC):
         Returns:
             Dict of config with substitutions and sanitizations applied.
         """
-        substitutions: dict = self._determine_substitutions()
         datasource_dict: dict = serializer.serialize(datasource_config)
 
-        substituted_config: dict = cast(
-            dict,
-            substitute_all_config_variables(
-                datasource_dict, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-            ),
+        substituted_config = cast(
+            dict, self.config_provider.substitute_config(datasource_dict)
         )
         masked_config: dict = PasswordMasker.sanitize_config(substituted_config)
         return masked_config
@@ -1290,7 +1276,7 @@ class AbstractDataContext(ABC):
 
     def list_expectation_suites(
         self,
-    ) -> Optional[Union[List[str], List[GeCloudIdentifier]]]:
+    ) -> Optional[Union[List[str], List[GXCloudIdentifier]]]:
         """Return a list of available expectation suite keys."""
         try:
             keys = self.expectations_store.list_keys()
@@ -1440,7 +1426,7 @@ class AbstractDataContext(ABC):
     def get_validator_using_batch_list(
         self,
         expectation_suite: ExpectationSuite,
-        batch_list: List[Batch],
+        batch_list: Sequence[Union[Batch, ZepBatch]],
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Validator:
@@ -1468,10 +1454,15 @@ class AbstractDataContext(ABC):
         )
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
-        batch_definition: BatchDefinition = batch_list[-1].batch_definition
-        execution_engine: ExecutionEngine = self.datasources[  # type: ignore[union-attr]
-            batch_definition.datasource_name
-        ].execution_engine
+        execution_engine: ExecutionEngine
+        if hasattr(batch_list[-1], "execution_engine"):
+            # ZEP batches are execution engine aware. We just checked for this attr so we ignore the following
+            # attr defined mypy error
+            execution_engine = batch_list[-1].execution_engine
+        else:
+            execution_engine = self.datasources[  # type: ignore[union-attr]
+                batch_list[-1].batch_definition.datasource_name
+            ].execution_engine
         validator = Validator(
             execution_engine=execution_engine,
             interactive_evaluation=True,
@@ -2015,7 +2006,7 @@ class AbstractDataContext(ABC):
             value=validation_results,
         )
 
-        if isinstance(validation_ref, GeCloudIdAwareRef):
+        if isinstance(validation_ref, GXCloudIDAwareRef):
             ge_cloud_id = validation_ref.ge_cloud_id
             validation_results.ge_cloud_id = uuid.UUID(ge_cloud_id)
 
@@ -2438,6 +2429,21 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         return metric_configurations_list
 
+    @classmethod
+    def get_or_create_data_context_config(
+        cls, project_config: Union[DataContextConfig, Mapping]
+    ) -> DataContextConfig:
+        if isinstance(project_config, DataContextConfig):
+            return project_config
+        try:
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+            project_config_dict = dataContextConfigSchema.dump(project_config)
+            project_config_dict = dataContextConfigSchema.load(project_config_dict)
+            context_config: DataContextConfig = DataContextConfig(**project_config_dict)
+            return context_config
+        except ValidationError:
+            raise
+
     def _normalize_absolute_or_relative_path(
         self, path: Optional[str]
     ) -> Optional[str]:
@@ -2452,7 +2458,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             return os.path.join(self.root_directory, path)  # type: ignore[arg-type]
 
     def _apply_global_config_overrides(
-        self, config: Union[DataContextConfig, Mapping]
+        self, config: DataContextConfig
     ) -> DataContextConfig:
 
         """
@@ -2468,12 +2474,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             DataContextConfig with the appropriate overrides
         """
         validation_errors: dict = {}
-        config_with_global_config_overrides: DataContextConfig = copy.deepcopy(config)  # type: ignore[assignment]
-        usage_stats_opted_out: bool = self._check_global_usage_statistics_opt_out()
-        # if usage_stats_opted_out then usage_statistics is false
-        # NOTE: <DataContextRefactor> 202207 Refactor so that this becomes usage_stats_enabled
-        # (and we don't have to flip a boolean in our minds)
-        if usage_stats_opted_out:
+        config_with_global_config_overrides: DataContextConfig = copy.deepcopy(config)
+        usage_stats_enabled: bool = self._is_usage_stats_enabled()
+        if not usage_stats_enabled:
             logger.info(
                 "Usage statistics is disabled globally. Applying override to project_config."
             )
@@ -2524,28 +2527,31 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return config_with_global_config_overrides
 
     def _load_config_variables(self) -> Dict:
-        config_var_provider = self._config_provider.get_provider(
-            ConfigurationVariablesConfigurationProvider
+        config_var_provider = self.config_provider.get_provider(
+            _ConfigurationVariablesConfigurationProvider
         )
         if config_var_provider:
             return config_var_provider.get_values()
         return {}
 
-    def _check_global_usage_statistics_opt_out(self) -> bool:
+    @staticmethod
+    def _is_usage_stats_enabled() -> bool:
         """
-        Method to retrieve config value.
-        This method can be overridden in child classes (like FileDataContext) when we need to look for
-        config values in other locations like config files.
+        Checks the following locations to see if usage_statistics is disabled in any of the following locations:
+            - GE_USAGE_STATS, which is an environment_variable
+            - GLOBAL_CONFIG_PATHS
+        If GE_USAGE_STATS exists AND its value is one of the FALSEY_STRINGS, usage_statistics is disabled (return False)
+        Also checks GLOBAL_CONFIG_PATHS to see if config file contains override for anonymous_usage_statistics
+        Returns True otherwise
 
         Returns:
-            bool that tells you whether usage_statistics is opted out
+            bool that tells you whether usage_statistics is on or off
         """
-        # NOTE: <DataContextRefactor> Refactor so that opt_out is no longer used, and we don't have to flip boolean in
-        # our minds.
+        usage_statistics_enabled: bool = True
         if os.environ.get("GE_USAGE_STATS", False):
             ge_usage_stats = os.environ.get("GE_USAGE_STATS")
             if ge_usage_stats in AbstractDataContext.FALSEY_STRINGS:
-                return True
+                usage_statistics_enabled = False
             else:
                 logger.warning(
                     "GE_USAGE_STATS environment variable must be one of: {}".format(
@@ -2563,12 +2569,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             config.BOOLEAN_STATES = states  # type: ignore[misc] # Cannot assign to class variable via instance
             config.read(config_path)
             try:
-                if config.getboolean("anonymous_usage_statistics", "enabled") is False:
-                    # If stats are disabled, then opt out is true
-                    return True
+                if not config.getboolean("anonymous_usage_statistics", "enabled"):
+                    usage_statistics_enabled = False
+
             except (ValueError, configparser.Error):
                 pass
-        return False
+        return usage_statistics_enabled
 
     def _get_data_context_id_override(self) -> Optional[str]:
         """
@@ -2636,12 +2642,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def variables(self) -> DataContextVariables:
         if self._variables is None:
             self._variables = self._init_variables()
-
-        # By always recalculating substitutions with each call, we ensure we stay up-to-date
-        # with the latest changes to env vars and config vars
-        substitutions: dict = self._determine_substitutions()
-        self._variables.substitutions = substitutions
-
         return self._variables
 
     @property
@@ -2665,7 +2665,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return self.variables.notebooks  # type: ignore[return-value]
 
     @property
-    def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
+    def datasources(
+        self,
+    ) -> Dict[str, Union[LegacyDatasource, BaseDatasource, ZepDatasource]]:
         """A single holder for all Datasources in this context"""
         return self._cached_datasources
 
@@ -2705,9 +2707,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         self._config_variables = self._load_config_variables()
 
-    def _determine_substitutions(self) -> Dict:
-        return self._config_provider.get_values()
-
     def _initialize_usage_statistics(
         self, usage_statistics_config: AnonymizedUsageStatisticsConfig
     ) -> None:
@@ -2730,15 +2729,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             Dict[str, DatasourceConfig], config.datasources
         )
 
-        substitutions = self._determine_substitutions()
-
         for datasource_name, datasource_config in datasources.items():
             try:
                 config = copy.deepcopy(datasource_config)  # type: ignore[assignment]
 
                 raw_config_dict = dict(datasourceConfigSchema.dump(config))
-                substituted_config_dict: dict = substitute_all_config_variables(
-                    raw_config_dict, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+                substituted_config_dict: dict = self.config_provider.substitute_config(
+                    raw_config_dict
                 )
 
                 raw_datasource_config = datasourceConfigSchema.load(raw_config_dict)
@@ -2843,13 +2840,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Returns:
             Datasource Config with substitutions performed.
         """
-        substitutions: dict = self._determine_substitutions()
-
         substitution_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
         raw_config: dict = substitution_serializer.serialize(config)
 
-        substituted_config_dict: dict = substitute_all_config_variables(
-            raw_config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+        substituted_config_dict: dict = self.config_provider.substitute_config(
+            raw_config
         )
 
         substituted_config: DatasourceConfig = datasourceConfigSchema.load(

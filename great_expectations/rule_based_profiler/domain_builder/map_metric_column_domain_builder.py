@@ -13,6 +13,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
 from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
@@ -299,10 +300,10 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             List of column names satisfying tolerance limits.
         """
         column_name: str
-        resolved_metrics: Dict[Tuple[str, str, str], Any]
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
 
         resolved_metrics_by_column_name: Dict[
-            str, Dict[Tuple[str, str, str], Any]
+            str, Dict[Tuple[str, str, str], MetricValue]
         ] = get_resolved_metrics_by_key(
             validator=validator,
             metric_configurations_by_key=metric_configurations_by_column_name,

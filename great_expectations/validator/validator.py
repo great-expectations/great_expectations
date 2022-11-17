@@ -10,7 +10,18 @@ import traceback
 import warnings
 from collections import defaultdict, namedtuple
 from collections.abc import Hashable
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Union,
+)
 
 from dateutil.parser import parse
 from marshmallow import ValidationError
@@ -68,6 +79,7 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
 )
 from great_expectations.types import ClassConfig
 from great_expectations.util import load_class, verify_dynamic_loading_support
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.metrics_calculator import MetricsCalculator
@@ -76,6 +88,7 @@ from great_expectations.validator.validation_graph import (
     MetricEdge,
     ValidationGraph,
 )
+from great_expectations.zep.interfaces import Batch as ZepBatch
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -120,7 +133,7 @@ class Validator:
         expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
         data_context: Optional[AbstractDataContext] = None,
-        batches: Optional[List[Batch]] = None,
+        batches: Optional[Sequence[Union[Batch, ZepBatch]]] = None,
         include_rendered_content: Optional[bool] = None,
         **kwargs,
     ) -> None:
@@ -213,7 +226,7 @@ class Validator:
         return self._execution_engine.batch_manager.batch_cache
 
     @property
-    def batches(self) -> Dict[str, Batch]:
+    def batches(self) -> Dict[str, Union[Batch, ZepBatch]]:
         """Getter for dictionary of Batch objects (alias convenience property, to be deprecated)"""
         return self.batch_cache
 
@@ -297,7 +310,7 @@ class Validator:
     def compute_metrics(
         self,
         metric_configurations: List[MetricConfiguration],
-    ) -> Dict[Tuple[str, str, str], Any]:
+    ) -> Dict[Tuple[str, str, str], MetricValue]:
         """
         Convenience method that computes requested metrics (specified as elements of "MetricConfiguration" list).
 
@@ -916,7 +929,7 @@ class Validator:
     def graph_validate(
         self,
         configurations: List[ExpectationConfiguration],
-        metrics: Optional[Dict[Tuple[str, str, str], Any]] = None,
+        metrics: Optional[Dict[Tuple[str, str, str], MetricValue]] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[ExpectationValidationResult]:
         """Obtains validation dependencies for each metric using the implementation of their associated expectation,
@@ -1110,7 +1123,7 @@ class Validator:
     @staticmethod
     def _resolve_suite_level_graph_and_process_metric_evaluation_errors(
         validation_graph: ValidationGraph,
-        metrics: Dict[Tuple[str, str, str], Any],
+        metrics: Dict[Tuple[str, str, str], MetricValue],
         runtime_configuration: dict,
         expectation_validation_graphs: List[ExpectationValidationGraph],
         evrs: List[ExpectationValidationResult],
@@ -1870,7 +1883,7 @@ class Validator:
     @staticmethod
     def _parse_validation_graph(
         validation_graph: ValidationGraph,
-        metrics: Dict[Tuple[str, str, str], Any],
+        metrics: Dict[Tuple[str, str, str], MetricValue],
     ) -> Tuple[Set[MetricConfiguration], Set[MetricConfiguration]]:
         """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
         validation graph (a graph structure of metric ids) edges"""

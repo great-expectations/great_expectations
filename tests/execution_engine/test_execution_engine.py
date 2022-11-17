@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Dict, Tuple
 
 import pandas as pd
 import pytest
@@ -10,9 +10,10 @@ from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
 )
-from great_expectations.validator.metric_configuration import MetricConfiguration
 
 # Testing ordinary process of adding column row condition
+from great_expectations.validator.computed_metric import MetricValue
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
 
@@ -174,10 +175,10 @@ def test_resolve_metrics_with_aggregates_and_column_map():
     df = pd.DataFrame({"a": [1, 2, 3, None]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
 
@@ -258,10 +259,10 @@ def test_resolve_metrics_with_extraneous_value_key():
     df = pd.DataFrame({"a": [1, 2, 3, None]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
 
