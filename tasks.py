@@ -362,11 +362,13 @@ def docker(
 @invoke.task(
     help={
         "clean": "Clean out existing documentation first. Defaults to True.",
+        "remove_html": "Remove temporary generated html. Defaults to True."
     }
 )
 def docs(
     ctx,
     clean=True,
+    remove_html=True,
 ):
     """Build documentation. Note: Currently only builds the sphinx based api docs, please build docusaurus docs separately."""
     filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
@@ -432,8 +434,8 @@ def docs(
                 fout.write(doc_str)
 
     # Remove temp build dir
-    temp_docs_build_dir = curdir / pathlib.Path(sphinx_api_docs_build_dir)
-    shutil.rmtree(temp_docs_build_dir)
+    if remove_html:
+        shutil.rmtree(temp_docs_build_dir)
 
     # Change back to the directory where the command was run
     os.chdir(curdir)
