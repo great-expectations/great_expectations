@@ -294,7 +294,7 @@ class PostgresDatasource(Datasource):
                 Batch(
                     datasource=self,
                     data_asset=data_asset,
-                    batch_request=batch_request,
+                    batch_request=request,
                     data=data,
                 )
             )
