@@ -1,21 +1,89 @@
+from __future__ import annotations
+
 import abc
 import logging
 import time
 import warnings
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 
 from dateutil.parser import parse
 
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
+from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_asset import DataAsset
+from great_expectations.dataset import Dataset
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.validator.validator import Validator
 
-from ..core.expectation_suite import ExpectationSuite
-from ..core.run_identifier import RunIdentifier
-from ..data_asset import DataAsset
-from ..dataset import Dataset
-
 logger = logging.getLogger(__name__)
+
+
+class OrderedEnum(Enum):
+    def __ge__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value >= other.value
+        return NotImplemented
+
+    def __gt__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value > other.value
+        return NotImplemented
+
+    def __le__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value <= other.value
+        return NotImplemented
+
+    def __lt__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value < other.value
+        return NotImplemented
+
+
+class OrderedProfilerCardinality(OrderedEnum):
+    NONE = 0
+    ONE = 1
+    TWO = 2
+    VERY_FEW = 3
+    FEW = 4
+    MANY = 5
+    VERY_MANY = 6
+    UNIQUE = 7
+
+    @classmethod
+    def get_basic_column_cardinality(
+        cls, num_unique=0, pct_unique=0
+    ) -> OrderedProfilerCardinality:
+        """
+        Takes the number and percentage of unique values in a column and returns the column cardinality.
+        If you are unexpectedly returning a cardinality of "None", ensure that you are passing in values for both
+        num_unique and pct_unique.
+        Args:
+            num_unique: The number of unique values in a column
+            pct_unique: The percentage of unique values in a column
+
+        Returns:
+            The column cardinality
+        """
+        if pct_unique == 1.0:
+            cardinality = cls.UNIQUE
+        elif num_unique == 1:
+            cardinality = cls.ONE
+        elif num_unique == 2:
+            cardinality = cls.TWO
+        elif 0 < num_unique < 20:
+            cardinality = cls.VERY_FEW
+        elif 0 < num_unique < 60:
+            cardinality = cls.FEW
+        elif num_unique is None or num_unique == 0 or pct_unique is None:
+            cardinality = cls.NONE
+        elif pct_unique > 0.1:
+            cardinality = cls.VERY_MANY
+        else:
+            cardinality = cls.MANY
+        return cardinality
 
 
 class ProfilerDataType(Enum):
@@ -23,6 +91,7 @@ class ProfilerDataType(Enum):
 
     INT = "int"
     FLOAT = "float"
+    NUMERIC = "numeric"
     STRING = "string"
     BOOLEAN = "boolean"
     DATETIME = "datetime"
@@ -42,105 +111,57 @@ class ProfilerCardinality(Enum):
     UNIQUE = "unique"
 
 
-class ProfilerTypeMapping:
-    """Useful backend type mapping for building profilers."""
+profiler_data_types_with_mapping = {
+    "INT": list(ProfilerTypeMapping.INT_TYPE_NAMES),
+    "FLOAT": list(ProfilerTypeMapping.FLOAT_TYPE_NAMES),
+    "NUMERIC": (
+        list(ProfilerTypeMapping.INT_TYPE_NAMES)
+        + list(ProfilerTypeMapping.FLOAT_TYPE_NAMES)
+    ),
+    "STRING": list(ProfilerTypeMapping.STRING_TYPE_NAMES),
+    "BOOLEAN": list(ProfilerTypeMapping.BOOLEAN_TYPE_NAMES),
+    "DATETIME": list(ProfilerTypeMapping.DATETIME_TYPE_NAMES),
+    "UNKNOWN": ["unknown"],
+}
 
-    # Future support possibility: JSON (RECORD)
-    # Future support possibility: BINARY (BYTES)
-    INT_TYPE_NAMES = [
-        "INTEGER",
-        "integer",
-        "int",
-        "int_",
-        "int8",
-        "int16",
-        "int32",
-        "int64",
-        "uint8",
-        "uint16",
-        "uint32",
-        "uint64",
-        "INT",
-        "TINYINT",
-        "BYTEINT",
-        "SMALLINT",
-        "BIGINT",
-        "IntegerType",
-        "LongType",
-        "DECIMAL",
-    ]
-    FLOAT_TYPE_NAMES = [
-        "FLOAT",
-        "DOUBLE",
-        "FLOAT4",
-        "FLOAT8",
-        "DOUBLE_PRECISION",
-        "NUMERIC",
-        "FloatType",
-        "DoubleType",
-        "float_",
-        "float16",
-        "float32",
-        "float64",
-        "number",
-    ]
-    STRING_TYPE_NAMES = [
-        "CHAR",
-        "VARCHAR",
-        "NVARCHAR",
-        "TEXT",
-        "STRING",
-        "StringType",
-        "string",
-        "str",
-    ]
-    BOOLEAN_TYPE_NAMES = [
-        "BOOLEAN",
-        "boolean",
-        "BOOL",
-        "TINYINT",
-        "BIT",
-        "bool",
-        "BooleanType",
-    ]
-    DATETIME_TYPE_NAMES = [
-        "DATETIME",
-        "DATE",
-        "TIME",
-        "TIMESTAMP",
-        "DateType",
-        "TimestampType",
-        "datetime64",
-        "Timestamp",
-    ]
+
+class ProfilerSemanticTypes(Enum):
+    DATETIME = "DATETIME"
+    NUMERIC = "NUMERIC"
+    STRING = "STRING"
+    VALUE_SET = "VALUE_SET"
+    BOOLEAN = "BOOLEAN"
+    OTHER = "OTHER"
 
 
 class Profiler(metaclass=abc.ABCMeta):
     """
-    Profilers creates suites from various sources of truth.
+    Profiler creates suites from various sources of truth.
 
     These sources of truth can be data or non-data sources such as DDLs.
 
     When implementing a Profiler ensure that you:
     - Implement a . _profile() method
     - Optionally implement .validate() method that verifies you are running on the right
-     kind of object. You should raise an appropriate Exception if the object is not valid.
+      kind of object. You should raise an appropriate Exception if the object is not valid.
     """
 
-    def __init__(self, configuration: dict = None):
+    def __init__(self, configuration: Optional[dict] = None) -> None:
         self.configuration = configuration
 
     def validate(self, item_to_validate: Any) -> None:
         pass
 
-    def profile(self, item_to_profile: Any, suite_name: str = None) -> ExpectationSuite:
+    def profile(
+        self, item_to_profile: Any, suite_name: Optional[str] = None
+    ) -> ExpectationSuite:
         self.validate(item_to_profile)
         expectation_suite = self._profile(item_to_profile, suite_name=suite_name)
         return expectation_suite
 
     @abc.abstractmethod
     def _profile(
-        self, item_to_profile: Any, suite_name: str = None
+        self, item_to_profile: Any, suite_name: Optional[str] = None
     ) -> ExpectationSuite:
         pass
 
@@ -202,8 +223,9 @@ class DatasetProfiler(DataAssetProfiler):
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
         if isinstance(run_id, str) and not run_name:
+            # deprecated-v0.11.0
             warnings.warn(
-                "String run_ids will be deprecated in the future. Please provide a run_id of type "
+                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
                 "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
                 "and run_time (both optional). Instead of providing a run_id, you may also provide"
                 "run_name and run_time separately.",
@@ -233,7 +255,7 @@ class DatasetProfiler(DataAssetProfiler):
             expectation_suite, run_id=run_id, result_format="SUMMARY"
         )
         expectation_suite.add_citation(
-            comment=str(cls.__name__) + " added a citation based on the current batch.",
+            comment=f"{str(cls.__name__)} added a citation based on the current batch.",
             batch_kwargs=data_asset.batch_kwargs,
             batch_markers=data_asset.batch_markers,
             batch_parameters=data_asset.batch_parameters,
@@ -241,5 +263,5 @@ class DatasetProfiler(DataAssetProfiler):
         return expectation_suite, validation_results
 
     @classmethod
-    def _profile(cls, dataset, configuration=None):
+    def _profile(cls, dataset, configuration=None) -> None:
         raise NotImplementedError

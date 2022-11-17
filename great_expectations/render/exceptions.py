@@ -1,4 +1,4 @@
-from ..exceptions import GreatExpectationsTypeError
+from great_expectations.exceptions import GreatExpectationsTypeError
 
 
 class InvalidRenderedContentError(GreatExpectationsTypeError):

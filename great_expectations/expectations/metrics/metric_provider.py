@@ -1,23 +1,22 @@
 import logging
 from functools import wraps
-from typing import Callable, Optional, Type, Union
+from typing import Callable, Optional, Tuple, Type, Union
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.util import nested_update
-from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import (
     MetricDomainTypes,
     MetricFunctionTypes,
     MetricPartialFunctionTypes,
 )
+from great_expectations.expectations.metrics import MetaMetricProvider
 from great_expectations.expectations.registry import (
-    get_metric_function_type,
     get_metric_provider,
     register_metric,
     register_renderer,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +24,9 @@ logger = logging.getLogger(__name__)
 def metric_value(
     engine: Type[ExecutionEngine],
     metric_fn_type: Union[str, MetricFunctionTypes] = MetricFunctionTypes.VALUE,
-    **kwargs
+    **kwargs,
 ):
-    """The metric decorator annotates a method """
+    """The metric decorator annotates a method"""
 
     def wrapper(metric_fn: Callable):
         @wraps(metric_fn)
@@ -46,9 +45,9 @@ def metric_partial(
     engine: Type[ExecutionEngine],
     partial_fn_type: Union[str, MetricPartialFunctionTypes],
     domain_type: Union[str, MetricDomainTypes],
-    **kwargs
+    **kwargs,
 ):
-    """The metric decorator annotates a method """
+    """The metric decorator annotates a method"""
 
     def wrapper(metric_fn: Callable):
         @wraps(metric_fn)
@@ -64,15 +63,6 @@ def metric_partial(
         return inner_func
 
     return wrapper
-
-
-class MetaMetricProvider(type):
-    """MetaMetricProvider registers metrics as they are defined."""
-
-    def __new__(cls, clsname, bases, attrs):
-        newclass = super().__new__(cls, clsname, bases, attrs)
-        newclass._register_metric_functions()
-        return newclass
 
 
 class MetricProvider(metaclass=MetaMetricProvider):
@@ -104,12 +94,12 @@ class MetricProvider(metaclass=MetaMetricProvider):
 
     """
 
-    domain_keys = tuple()
-    value_keys = tuple()
-    default_kwarg_values = dict()
+    domain_keys: Tuple[str, ...] = tuple()
+    value_keys: Tuple[str, ...] = tuple()
+    default_kwarg_values = {}
 
     @classmethod
-    def _register_metric_functions(cls):
+    def _register_metric_functions(cls) -> None:
         metric_name = getattr(cls, "metric_name", None)
         metric_domain_keys = cls.domain_keys
         metric_value_keys = cls.value_keys
@@ -127,12 +117,13 @@ class MetricProvider(metaclass=MetaMetricProvider):
                     raise ValueError(
                         "metric functions must be defined with an Execution Engine"
                     )
-                metric_fn = attr_obj
                 if metric_name is None:
                     # No metric name has been defined
                     continue
+
+                metric_fn = attr_obj
                 metric_definition_kwargs = getattr(
-                    metric_fn, "metric_definition_kwargs", dict()
+                    metric_fn, "metric_definition_kwargs", {}
                 )
                 declared_metric_name = metric_name + metric_definition_kwargs.get(
                     "metric_name_suffix", ""
@@ -198,7 +189,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                 execution_engine=execution_engine,
                 runtime_configuration=runtime_configuration,
             )
-            or dict()
+            or {}
         )
 
     @classmethod
@@ -210,19 +201,19 @@ class MetricProvider(metaclass=MetaMetricProvider):
         runtime_configuration: Optional[dict] = None,
     ):
         metric_name = metric.metric_name
-        dependencies = dict()
+        dependencies = {}
         for metric_fn_type in MetricPartialFunctionTypes:
-            metric_suffix = "." + metric_fn_type.metric_suffix
+            metric_suffix = f".{metric_fn_type.metric_suffix}"
             try:
                 _ = get_metric_provider(metric_name + metric_suffix, execution_engine)
                 has_aggregate_fn = True
-            except MetricProviderError:
+            except ge_exceptions.MetricProviderError:
                 has_aggregate_fn = False
             if has_aggregate_fn:
                 dependencies["metric_partial_fn"] = MetricConfiguration(
-                    metric_name + metric_suffix,
-                    metric.metric_domain_kwargs,
-                    metric.metric_value_kwargs,
+                    metric_name=metric_name + metric_suffix,
+                    metric_domain_kwargs=metric.metric_domain_kwargs,
+                    metric_value_kwargs=metric.metric_value_kwargs,
                 )
 
         return dependencies

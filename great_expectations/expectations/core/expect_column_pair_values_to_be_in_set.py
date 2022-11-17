@@ -1,43 +1,53 @@
-from typing import Dict, List, Optional, Union
+from typing import Optional
 
-import numpy as np
-import pandas as pd
-from dateutil.parser import parse
-
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
-
-from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import (
-    num_to_str,
-    parse_row_condition_string_pandas_engine,
-    substitute_none_for_missing,
-)
-from ..expectation import (
-    ColumnMapExpectation,
+from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
-    Expectation,
     InvalidExpectationConfigurationError,
-    TableExpectation,
-    _format_map_output,
 )
-from ..registry import extract_metrics, get_metric_kwargs
-
-try:
-    import sqlalchemy as sa
-except ImportError:
-    pass
 
 
 class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
     """
-    Expect paired values from columns A and B to belong to a set of valid pairs.
+    Expect the paired values from columns A and B to belong to a set of valid pairs.
+
+        For example:
+        ::
+            >>>d = {'fruit': ['appple','apple','apple','banana','banana'], 
+                    'color': ['red','green','yellow','yellow','red']}
+            >>>my_df = pd.DataFrame(data=d)
+            >>> my_df.expect_column_pair_values_to_be_in_set('fruit',
+                                                             'color',
+                                                            [ ('apple','red'),
+                                                              ('apple','green'),
+                                                              ('apple','yellow'),
+                                                              ('banana','yellow'),
+                                                            ]
+                                                            )
+            {
+                "success": false,
+                "meta": {},
+                "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                },
+                "result": {
+                    "element_count": 5,
+                    "unexpected_count": 1,
+                    "unexpected_percent": 20.0,
+                    "partial_unexpected_list": [
+                    [
+                        "banana",
+                        "red"
+                    ]
+                    ],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 20.0,
+                    "unexpected_percent_nonmissing": 20.0
+                }
+            }
 
     Args:
         column_A (str): The first column name
@@ -45,43 +55,40 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
         value_pairs_set (list of tuples): All the valid pairs to be matched
 
     Keyword Args:
-        ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "never"
+        ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither"
 
     Other Parameters:
         result_format (str or None): \
             Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
         include_config (boolean): \
             If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
         meta (dict or None): \
-            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-            modification. For more detail, see :ref:`meta`.
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification.
 
     Returns:
         An ExpectationSuiteValidationResult
-
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
     """
 
-    map_metric = ("column_pair_values.in_set",)
-    domain_keys = (
-        "batch_id",
-        "table",
-        "row_condition",
-        "condition_parser",
-        "column_A",
-        "column_B",
-    )
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "tags": [
+            "core expectation",
+            "multi-column expectation",
+        ],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
+    }
+
+    map_metric = "column_pair_values.in_set"
     success_keys = ("value_pairs_set", "ignore_row_if", "mostly")
 
     default_kwarg_values = {
-        "mostly": 1,
+        "mostly": 1.0,
         "ignore_row_if": "both_values_are_missing",
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
@@ -90,7 +97,15 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
         "catch_exceptions": False,
     }
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    args_keys = (
+        "column_A",
+        "column_B",
+        "value_pairs_set",
+    )
+
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -104,45 +119,3 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
             ), "must provide value_pairs_set"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
-
-    # TODO: fill out prescriptive renderer
-    @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    def _prescriptive_renderer(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
-        )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            [
-                "column_A",
-                "column_B",
-                "parse_strings_as_datetimes",
-                "ignore_row_if",
-                "mostly",
-                "or_equal",
-                "row_condition",
-                "condition_parser",
-            ],
-        )
-
-    # def _validate(
-    #     self,
-    #     configuration: ExpectationConfiguration,
-    #     metrics: Dict,
-    #     runtime_configuration: dict = None,
-    #     execution_engine: ExecutionEngine = None,
-    # ):
-    #     equal_columns = metrics.get("column_pair_values.in_set")
-    #     return {"success": equal_columns.all()}

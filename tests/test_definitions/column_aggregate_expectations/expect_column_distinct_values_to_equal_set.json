@@ -10,6 +10,7 @@
     "tests": [
       {
         "title": "basic_positive_test",
+        "include_in_gallery": true,
         "exact_match_out": false,
         "in": {
           "column": "dist1",
@@ -45,7 +46,7 @@
         }
       },
       {
-        "title": "positive_test__duplicate_and_null_values",
+        "title": "positive_test_duplicate_and_null_values",
         "exact_match_out": false,
         "in": {
           "column": "dist4",
@@ -57,7 +58,8 @@
         }
       },
       {
-        "title": "basic_negative_test__set_contained",
+        "title": "basic_negative_test_set_contained",
+        "include_in_gallery": true,
         "exact_match_out": false,
         "in": {
           "column": "dist1",
@@ -69,7 +71,7 @@
         }
       },
       {
-        "title": "negative_test__some_set_intersection",
+        "title": "negative_test_some_set_intersection",
         "exact_match_out": false,
         "in": {
           "column": "dist1",
@@ -105,7 +107,7 @@
         }
       },
       {
-        "title": "negative_test__duplicate_and_null_values",
+        "title": "negative_test_duplicate_and_null_values",
         "exact_match_out": false,
         "in": {
           "column": "dist4",

@@ -2,10 +2,11 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
-from great_expectations.core.id_dict import PartitionDefinition
+from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.data_connector.sorter import (
     CustomListSorter,
     DateTimeSorter,
+    DictionarySorter,
     LexicographicSorter,
     NumericSorter,
     Sorter,
@@ -24,6 +25,7 @@ def test_sorter_instantiation_base():
         my_sorter = Sorter(name="base", orderby="fake")
 
 
+@pytest.mark.unit
 def test_sorter_instantiation_lexicographic():
     # Lexicographic
     my_lex = LexicographicSorter(name="lex", orderby="desc")
@@ -32,6 +34,7 @@ def test_sorter_instantiation_lexicographic():
     assert my_lex.reverse is True
 
 
+@pytest.mark.unit
 def test_sorter_instantiation_datetime():
     sorter_params: dict = {
         "datetime_format": "%Y%m%d",
@@ -44,12 +47,26 @@ def test_sorter_instantiation_datetime():
     assert my_dt._datetime_format == "%Y%m%d"
 
 
+@pytest.mark.unit
 def test_sorter_instantiation_numeric():
     # NumericSorter
     my_num = NumericSorter(name="num", orderby="asc")
     assert isinstance(my_num, NumericSorter)
     assert my_num.name == "num"
     assert my_num.reverse is False
+
+
+@pytest.mark.unit
+def test_sorter_instantiation_dictionary():
+    # DictionarySorter
+    my_dict = DictionarySorter(
+        name="dict", orderby="asc", order_keys_by="asc", key_reference_list=[1, 2, 3]
+    )
+    assert isinstance(my_dict, DictionarySorter)
+    assert my_dict.name == "dict"
+    assert my_dict.reverse is False
+    assert my_dict.reverse_keys is False
+    assert my_dict.key_reference_list == [1, 2, 3]
 
 
 def test_sorter_instantiation_custom_list():
@@ -98,9 +115,9 @@ def test_sorter_instantiation_custom_list_with_periodic_table(
         datasource_name="test",
         data_connector_name="fake",
         data_asset_name="nowhere",
-        partition_definition=PartitionDefinition({"element": "Hydrogen"}),
+        batch_identifiers=IDDict({"element": "Hydrogen"}),
     )
-    returned_partition_key = my_custom_sorter.get_partition_key(test_batch_def)
+    returned_partition_key = my_custom_sorter.get_batch_key(test_batch_def)
     assert returned_partition_key == 0
 
     # This element does not : Vibranium
@@ -108,7 +125,7 @@ def test_sorter_instantiation_custom_list_with_periodic_table(
         datasource_name="test",
         data_connector_name="fake",
         data_asset_name="nowhere",
-        partition_definition=PartitionDefinition({"element": "Vibranium"}),
+        batch_identifiers=IDDict({"element": "Vibranium"}),
     )
     with pytest.raises(ge_exceptions.SorterError):
-        my_custom_sorter.get_partition_key(test_batch_def)
+        my_custom_sorter.get_batch_key(test_batch_def)

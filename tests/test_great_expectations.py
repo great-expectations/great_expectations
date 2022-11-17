@@ -8,6 +8,7 @@ import pytest
 from freezegun import freeze_time
 
 import great_expectations as ge
+from great_expectations import DataContext
 from great_expectations.core import (
     ExpectationConfiguration,
     expectationSuiteSchema,
@@ -25,6 +26,7 @@ from great_expectations.data_asset.data_asset import (
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import MetaPandasDataset, PandasDataset
 from great_expectations.exceptions import InvalidCacheValueError
+from great_expectations.util import is_library_loadable
 
 try:
     from unittest import mock
@@ -53,7 +55,7 @@ def isprime(n):
 
     # range starts with 3 and only needs to go up
     # the square root of n for all odd numbers
-    for x in range(3, int(n ** 0.5) + 1, 2):
+    for x in range(3, int(n**0.5) + 1, 2):
         if n % x == 0:
             return False
 
@@ -107,608 +109,40 @@ def test_custom_class():
         script_path + "/test_sets/Titanic.csv", dataset_class=CustomPandasDataset
     )
     df.set_default_expectation_argument("result_format", "COMPLETE")
+    # fmt: off
     assert df.expect_column_values_to_be_prime("Age").result["unexpected_list"] == [
-        30.0,
-        25.0,
-        0.92000000000000004,
-        63.0,
-        39.0,
-        58.0,
-        50.0,
-        24.0,
-        36.0,
-        26.0,
-        25.0,
-        25.0,
-        28.0,
-        45.0,
-        39.0,
-        30.0,
-        58.0,
-        45.0,
-        22.0,
-        48.0,
-        44.0,
-        60.0,
-        45.0,
-        58.0,
-        36.0,
-        33.0,
-        36.0,
-        36.0,
-        14.0,
-        49.0,
-        36.0,
-        46.0,
-        27.0,
-        27.0,
-        26.0,
-        64.0,
-        39.0,
-        55.0,
-        70.0,
-        69.0,
-        36.0,
-        39.0,
-        38.0,
-        27.0,
-        27.0,
-        4.0,
-        27.0,
-        50.0,
-        48.0,
-        49.0,
-        48.0,
-        39.0,
-        36.0,
-        30.0,
-        24.0,
-        28.0,
-        64.0,
-        60.0,
-        49.0,
-        44.0,
-        22.0,
-        60.0,
-        48.0,
-        35.0,
-        22.0,
-        45.0,
-        49.0,
-        54.0,
-        38.0,
-        58.0,
-        45.0,
-        46.0,
-        25.0,
-        21.0,
-        48.0,
-        49.0,
-        45.0,
-        36.0,
-        55.0,
-        52.0,
-        24.0,
-        16.0,
-        44.0,
-        51.0,
-        42.0,
-        35.0,
-        35.0,
-        38.0,
-        35.0,
-        50.0,
-        49.0,
-        46.0,
-        58.0,
-        42.0,
-        40.0,
-        42.0,
-        55.0,
-        50.0,
-        16.0,
-        21.0,
-        30.0,
-        15.0,
-        30.0,
-        46.0,
-        54.0,
-        36.0,
-        28.0,
-        65.0,
-        33.0,
-        44.0,
-        55.0,
-        36.0,
-        58.0,
-        64.0,
-        64.0,
-        22.0,
-        28.0,
-        22.0,
-        18.0,
-        52.0,
-        46.0,
-        56.0,
-        33.0,
-        27.0,
-        55.0,
-        54.0,
-        48.0,
-        18.0,
-        21.0,
-        34.0,
-        40.0,
-        36.0,
-        50.0,
-        39.0,
-        56.0,
-        28.0,
-        56.0,
-        56.0,
-        24.0,
-        18.0,
-        24.0,
-        45.0,
-        40.0,
-        6.0,
-        57.0,
-        32.0,
-        62.0,
-        54.0,
-        52.0,
-        62.0,
-        63.0,
-        46.0,
-        52.0,
-        39.0,
-        18.0,
-        48.0,
-        49.0,
-        39.0,
-        46.0,
-        64.0,
-        60.0,
-        60.0,
-        55.0,
-        54.0,
-        21.0,
-        57.0,
-        45.0,
-        50.0,
-        50.0,
-        27.0,
-        20.0,
-        51.0,
-        21.0,
-        36.0,
-        40.0,
-        32.0,
-        33.0,
-        30.0,
-        28.0,
-        18.0,
-        34.0,
-        32.0,
-        57.0,
-        18.0,
-        36.0,
-        28.0,
-        51.0,
-        32.0,
-        28.0,
-        36.0,
-        4.0,
-        1.0,
-        12.0,
-        34.0,
-        26.0,
-        27.0,
-        15.0,
-        45.0,
-        40.0,
-        20.0,
-        25.0,
-        36.0,
-        25.0,
-        42.0,
-        26.0,
-        26.0,
-        0.82999999999999996,
-        54.0,
-        44.0,
-        52.0,
-        30.0,
-        30.0,
-        27.0,
-        24.0,
-        35.0,
-        8.0,
-        22.0,
-        30.0,
-        20.0,
-        21.0,
-        49.0,
-        8.0,
-        28.0,
-        18.0,
-        28.0,
-        22.0,
-        25.0,
-        18.0,
-        32.0,
-        18.0,
-        42.0,
-        34.0,
-        8.0,
-        21.0,
-        38.0,
-        38.0,
-        35.0,
-        35.0,
-        38.0,
-        24.0,
-        16.0,
-        26.0,
-        45.0,
-        24.0,
-        21.0,
-        22.0,
-        34.0,
-        30.0,
-        50.0,
-        30.0,
-        1.0,
-        44.0,
-        28.0,
-        6.0,
-        30.0,
-        45.0,
-        24.0,
-        24.0,
-        49.0,
-        48.0,
-        34.0,
-        32.0,
-        21.0,
-        18.0,
-        21.0,
-        52.0,
-        42.0,
-        36.0,
-        21.0,
-        33.0,
-        34.0,
-        22.0,
-        45.0,
-        30.0,
-        26.0,
-        34.0,
-        26.0,
-        22.0,
-        1.0,
-        25.0,
-        48.0,
-        57.0,
-        27.0,
-        30.0,
-        20.0,
-        45.0,
-        46.0,
-        30.0,
-        48.0,
-        54.0,
-        64.0,
-        32.0,
-        18.0,
-        32.0,
-        26.0,
-        20.0,
-        39.0,
-        22.0,
-        24.0,
-        28.0,
-        50.0,
-        20.0,
-        40.0,
-        42.0,
-        21.0,
-        32.0,
-        34.0,
-        33.0,
-        8.0,
-        36.0,
-        34.0,
-        30.0,
-        28.0,
-        0.80000000000000004,
-        25.0,
-        50.0,
-        21.0,
-        25.0,
-        18.0,
-        20.0,
-        30.0,
-        30.0,
-        35.0,
-        22.0,
-        25.0,
-        25.0,
-        14.0,
-        50.0,
-        22.0,
-        27.0,
-        27.0,
-        30.0,
-        22.0,
-        35.0,
-        30.0,
-        28.0,
-        12.0,
-        40.0,
-        36.0,
-        28.0,
-        32.0,
-        4.0,
-        36.0,
-        33.0,
-        32.0,
-        26.0,
-        30.0,
-        24.0,
-        18.0,
-        42.0,
-        16.0,
-        35.0,
-        16.0,
-        25.0,
-        18.0,
-        20.0,
-        30.0,
-        26.0,
-        40.0,
-        24.0,
-        18.0,
-        0.82999999999999996,
-        20.0,
-        25.0,
-        35.0,
-        32.0,
-        20.0,
-        39.0,
-        39.0,
-        6.0,
-        38.0,
-        9.0,
-        26.0,
-        4.0,
-        20.0,
-        26.0,
-        25.0,
-        18.0,
-        24.0,
-        35.0,
-        40.0,
-        38.0,
-        9.0,
-        45.0,
-        27.0,
-        20.0,
-        32.0,
-        33.0,
-        18.0,
-        40.0,
-        26.0,
-        15.0,
-        45.0,
-        18.0,
-        27.0,
-        22.0,
-        26.0,
-        22.0,
-        20.0,
-        32.0,
-        21.0,
-        18.0,
-        26.0,
-        6.0,
-        9.0,
-        40.0,
-        32.0,
-        26.0,
-        18.0,
-        20.0,
-        22.0,
-        22.0,
-        35.0,
-        21.0,
-        20.0,
-        18.0,
-        18.0,
-        38.0,
-        30.0,
-        21.0,
-        21.0,
-        21.0,
-        24.0,
-        33.0,
-        33.0,
-        28.0,
-        16.0,
-        28.0,
-        24.0,
-        21.0,
-        32.0,
-        26.0,
-        18.0,
-        20.0,
-        24.0,
-        24.0,
-        36.0,
-        30.0,
-        22.0,
-        35.0,
-        27.0,
-        30.0,
-        36.0,
-        9.0,
-        44.0,
-        45.0,
-        22.0,
-        30.0,
-        34.0,
-        28.0,
-        0.33000000000000002,
-        27.0,
-        25.0,
-        24.0,
-        22.0,
-        21.0,
-        26.0,
-        33.0,
-        1.0,
-        0.17000000000000001,
-        25.0,
-        36.0,
-        36.0,
-        30.0,
-        26.0,
-        65.0,
-        42.0,
-        32.0,
-        30.0,
-        24.0,
-        24.0,
-        24.0,
-        22.0,
-        18.0,
-        16.0,
-        45.0,
-        21.0,
-        18.0,
-        9.0,
-        48.0,
-        16.0,
-        25.0,
-        38.0,
-        22.0,
-        16.0,
-        33.0,
-        9.0,
-        38.0,
-        40.0,
-        14.0,
-        16.0,
-        9.0,
-        10.0,
-        6.0,
-        40.0,
-        32.0,
-        20.0,
-        28.0,
-        24.0,
-        28.0,
-        24.0,
-        20.0,
-        45.0,
-        26.0,
-        21.0,
-        27.0,
-        18.0,
-        26.0,
-        22.0,
-        28.0,
-        22.0,
-        27.0,
-        42.0,
-        27.0,
-        25.0,
-        27.0,
-        20.0,
-        48.0,
-        34.0,
-        22.0,
-        33.0,
-        32.0,
-        26.0,
-        49.0,
-        1.0,
-        33.0,
-        4.0,
-        24.0,
-        32.0,
-        27.0,
-        21.0,
-        32.0,
-        20.0,
-        21.0,
-        30.0,
-        21.0,
-        22.0,
-        4.0,
-        39.0,
-        20.0,
-        21.0,
-        44.0,
-        42.0,
-        21.0,
-        24.0,
-        25.0,
-        22.0,
-        22.0,
-        39.0,
-        26.0,
-        4.0,
-        22.0,
-        26.0,
-        1.5,
-        36.0,
-        18.0,
-        25.0,
-        22.0,
-        20.0,
-        26.0,
-        22.0,
-        32.0,
-        21.0,
-        21.0,
-        36.0,
-        39.0,
-        25.0,
-        45.0,
-        36.0,
-        30.0,
-        20.0,
-        21.0,
-        1.5,
-        25.0,
-        18.0,
-        63.0,
-        18.0,
-        15.0,
-        28.0,
-        36.0,
-        28.0,
-        10.0,
-        36.0,
-        30.0,
-        22.0,
-        14.0,
-        22.0,
-        51.0,
-        18.0,
-        45.0,
-        28.0,
-        21.0,
-        27.0,
-        36.0,
-        27.0,
-        15.0,
-        27.0,
-        26.0,
-        22.0,
-        24.0,
+        30.0, 25.0, 0.92000000000000004, 63.0, 39.0, 58.0, 50.0, 24.0, 36.0, 26.0, 25.0, 25.0, 28.0, 45.0, 39.0, 30.0, 58.0, 45.0, 22.0, 48.0,
+        44.0, 60.0, 45.0, 58.0, 36.0, 33.0, 36.0, 36.0, 14.0, 49.0, 36.0, 46.0, 27.0, 27.0, 26.0, 64.0, 39.0, 55.0, 70.0, 69.0,
+        36.0, 39.0, 38.0, 27.0, 27.0, 4.0, 27.0, 50.0, 48.0, 49.0, 48.0, 39.0, 36.0, 30.0, 24.0, 28.0, 64.0, 60.0, 49.0, 44.0,
+        22.0, 60.0, 48.0, 35.0, 22.0, 45.0, 49.0, 54.0, 38.0, 58.0, 45.0, 46.0, 25.0, 21.0, 48.0, 49.0, 45.0, 36.0, 55.0, 52.0,
+        24.0, 16.0, 44.0, 51.0, 42.0, 35.0, 35.0, 38.0, 35.0, 50.0, 49.0, 46.0, 58.0, 42.0, 40.0, 42.0, 55.0, 50.0, 16.0, 21.0,
+        30.0, 15.0, 30.0, 46.0, 54.0, 36.0, 28.0, 65.0, 33.0, 44.0, 55.0, 36.0, 58.0, 64.0, 64.0, 22.0, 28.0, 22.0, 18.0, 52.0,
+        46.0, 56.0, 33.0, 27.0, 55.0, 54.0, 48.0, 18.0, 21.0, 34.0, 40.0, 36.0, 50.0, 39.0, 56.0, 28.0, 56.0, 56.0, 24.0, 18.0,
+        24.0, 45.0, 40.0, 6.0, 57.0, 32.0, 62.0, 54.0, 52.0, 62.0, 63.0, 46.0, 52.0, 39.0, 18.0, 48.0, 49.0, 39.0, 46.0, 64.0,
+        60.0, 60.0, 55.0, 54.0, 21.0, 57.0, 45.0, 50.0, 50.0, 27.0, 20.0, 51.0, 21.0, 36.0, 40.0, 32.0, 33.0, 30.0, 28.0, 18.0,
+        34.0, 32.0, 57.0, 18.0, 36.0, 28.0, 51.0, 32.0, 28.0, 36.0, 4.0, 1.0, 12.0, 34.0, 26.0, 27.0, 15.0, 45.0, 40.0, 20.0,
+        25.0, 36.0, 25.0, 42.0, 26.0, 26.0, 0.82999999999999996, 54.0, 44.0, 52.0, 30.0, 30.0, 27.0, 24.0, 35.0, 8.0, 22.0, 30.0, 20.0, 21.0,
+        49.0, 8.0, 28.0, 18.0, 28.0, 22.0, 25.0, 18.0, 32.0, 18.0, 42.0, 34.0, 8.0, 21.0, 38.0, 38.0, 35.0, 35.0, 38.0, 24.0,
+        16.0, 26.0, 45.0, 24.0, 21.0, 22.0, 34.0, 30.0, 50.0, 30.0, 1.0, 44.0, 28.0, 6.0, 30.0, 45.0, 24.0, 24.0, 49.0, 48.0,
+        34.0, 32.0, 21.0, 18.0, 21.0, 52.0, 42.0, 36.0, 21.0, 33.0, 34.0, 22.0, 45.0, 30.0, 26.0, 34.0, 26.0, 22.0, 1.0, 25.0,
+        48.0, 57.0, 27.0, 30.0, 20.0, 45.0, 46.0, 30.0, 48.0, 54.0, 64.0, 32.0, 18.0, 32.0, 26.0, 20.0, 39.0, 22.0, 24.0, 28.0,
+        50.0, 20.0, 40.0, 42.0, 21.0, 32.0, 34.0, 33.0, 8.0, 36.0, 34.0, 30.0, 28.0, 0.80000000000000004, 25.0, 50.0, 21.0, 25.0, 18.0, 20.0,
+        30.0, 30.0, 35.0, 22.0, 25.0, 25.0, 14.0, 50.0, 22.0, 27.0, 27.0, 30.0, 22.0, 35.0, 30.0, 28.0, 12.0, 40.0, 36.0, 28.0,
+        32.0, 4.0, 36.0, 33.0, 32.0, 26.0, 30.0, 24.0, 18.0, 42.0, 16.0, 35.0, 16.0, 25.0, 18.0, 20.0, 30.0, 26.0, 40.0, 24.0,
+        18.0, 0.82999999999999996, 20.0, 25.0, 35.0, 32.0, 20.0, 39.0, 39.0, 6.0, 38.0, 9.0, 26.0, 4.0, 20.0, 26.0, 25.0, 18.0, 24.0, 35.0,
+        40.0, 38.0, 9.0, 45.0, 27.0, 20.0, 32.0, 33.0, 18.0, 40.0, 26.0, 15.0, 45.0, 18.0, 27.0, 22.0, 26.0, 22.0, 20.0, 32.0,
+        21.0, 18.0, 26.0, 6.0, 9.0, 40.0, 32.0, 26.0, 18.0, 20.0, 22.0, 22.0, 35.0, 21.0, 20.0, 18.0, 18.0, 38.0, 30.0, 21.0,
+        21.0, 21.0, 24.0, 33.0, 33.0, 28.0, 16.0, 28.0, 24.0, 21.0, 32.0, 26.0, 18.0, 20.0, 24.0, 24.0, 36.0, 30.0, 22.0, 35.0,
+        27.0, 30.0, 36.0, 9.0, 44.0, 45.0, 22.0, 30.0, 34.0, 28.0, 0.33000000000000002, 27.0, 25.0, 24.0, 22.0, 21.0, 26.0, 33.0, 1.0, 0.17000000000000001,
+        25.0, 36.0, 36.0, 30.0, 26.0, 65.0, 42.0, 32.0, 30.0, 24.0, 24.0, 24.0, 22.0, 18.0, 16.0, 45.0, 21.0, 18.0, 9.0, 48.0,
+        16.0, 25.0, 38.0, 22.0, 16.0, 33.0, 9.0, 38.0, 40.0, 14.0, 16.0, 9.0, 10.0, 6.0, 40.0, 32.0, 20.0, 28.0, 24.0, 28.0,
+        24.0, 20.0, 45.0, 26.0, 21.0, 27.0, 18.0, 26.0, 22.0, 28.0, 22.0, 27.0, 42.0, 27.0, 25.0, 27.0, 20.0, 48.0, 34.0, 22.0,
+        33.0, 32.0, 26.0, 49.0, 1.0, 33.0, 4.0, 24.0, 32.0, 27.0, 21.0, 32.0, 20.0, 21.0, 30.0, 21.0, 22.0, 4.0, 39.0, 20.0,
+        21.0, 44.0, 42.0, 21.0, 24.0, 25.0, 22.0, 22.0, 39.0, 26.0, 4.0, 22.0, 26.0, 1.5, 36.0, 18.0, 25.0, 22.0, 20.0, 26.0,
+        22.0, 32.0, 21.0, 21.0, 36.0, 39.0, 25.0, 45.0, 36.0, 30.0, 20.0, 21.0, 1.5, 25.0, 18.0, 63.0, 18.0, 15.0, 28.0, 36.0,
+        28.0, 10.0, 36.0, 30.0, 22.0, 14.0, 22.0, 51.0, 18.0, 45.0, 28.0, 21.0, 27.0, 36.0, 27.0, 15.0, 27.0, 26.0, 22.0, 24.0,
     ]
+    # fmt: on
 
     primes = [3, 5, 7, 11, 13, 17, 23, 31]
     df["primes"] = df.Age.map(lambda x: random.choice(primes))
@@ -747,11 +181,15 @@ def test_base_class_expectation():
 
 
 @freeze_time("11/05/1955")
-def test_validate():
+def test_validate(empty_data_context):
+    context: DataContext = empty_data_context
     with open(
         file_relative_path(__file__, "./test_sets/titanic_expectations.json")
     ) as f:
-        my_expectation_suite = expectationSuiteSchema.loads(f.read())
+        my_expectation_suite_dict: dict = expectationSuiteSchema.loads(f.read())
+        my_expectation_suite = ExpectationSuite(
+            **my_expectation_suite_dict, data_context=context
+        )
 
     with mock.patch("uuid.uuid1") as uuid:
         uuid.return_value = "1234"
@@ -771,7 +209,7 @@ def test_validate():
         expected_results = expectationSuiteValidationResultSchema.loads(f.read())
 
     del results.meta["great_expectations_version"]
-
+    del results.meta["expectation_suite_meta"]["great_expectations_version"]
     assert results.to_json_dict() == expected_results.to_json_dict()
 
     # Now, change the results and ensure they are no longer equal
@@ -782,13 +220,14 @@ def test_validate():
     # and does not affect the "statistics" field.
     validation_results = my_df.validate(only_return_failures=True)
     del validation_results.meta["great_expectations_version"]
-
+    del validation_results.meta["expectation_suite_meta"]["great_expectations_version"]
     expected_results = ExpectationSuiteValidationResult(
         meta={
             "expectation_suite_name": "titanic",
             "run_id": {"run_name": None, "run_time": "1955-11-05T00:00:00+00:00"},
             "validation_time": "19551105T000000.000000Z",
             "batch_kwargs": {"ge_batch_id": "1234"},
+            "expectation_suite_meta": {},
             "batch_markers": {},
             "batch_parameters": {},
         },
@@ -813,6 +252,7 @@ def test_validate():
                     "missing_percent": 0.0,
                     "partial_unexpected_counts": [{"count": 1, "value": "*"}],
                     "partial_unexpected_list": ["*"],
+                    "unexpected_percent_total": 0.07616146230007616,
                     "unexpected_percent_nonmissing": 0.07616146230007616,
                     "missing_count": 0,
                     "unexpected_index_list": [456],
@@ -829,11 +269,15 @@ def test_validate():
     "great_expectations.core.ExpectationValidationResult.validate_result_dict",
     return_value=False,
 )
-def test_validate_with_invalid_result_catch_exceptions_false(validate_result_dict):
+def test_validate_with_invalid_result_catch_exceptions_false(empty_data_context):
+    context: DataContext = empty_data_context
     with open(
         file_relative_path(__file__, "./test_sets/titanic_expectations.json")
     ) as f:
-        my_expectation_suite = expectationSuiteSchema.loads(f.read())
+        my_expectation_suite_dict: dict = expectationSuiteSchema.loads(f.read())
+        my_expectation_suite = ExpectationSuite(
+            **my_expectation_suite_dict, data_context=context
+        )
 
     with mock.patch("uuid.uuid1") as uuid:
         uuid.return_value = "1234"
@@ -853,11 +297,15 @@ def test_validate_with_invalid_result_catch_exceptions_false(validate_result_dic
     "great_expectations.core.ExpectationValidationResult.validate_result_dict",
     return_value=False,
 )
-def test_validate_with_invalid_result(validate_result_dict):
+def test_validate_with_invalid_result(empty_data_context):
+    context: DataContext = empty_data_context
     with open(
         file_relative_path(__file__, "./test_sets/titanic_expectations.json")
     ) as f:
-        my_expectation_suite = expectationSuiteSchema.loads(f.read())
+        my_expectation_suite_dict: dict = expectationSuiteSchema.loads(f.read())
+        my_expectation_suite = ExpectationSuite(
+            **my_expectation_suite_dict, data_context=context
+        )
 
     with mock.patch("uuid.uuid1") as uuid:
         uuid.return_value = "1234"
@@ -878,6 +326,7 @@ def test_validate_with_invalid_result(validate_result_dict):
         expected_results = expectationSuiteValidationResultSchema.loads(f.read())
 
     del results.meta["great_expectations_version"]
+    del results.meta["expectation_suite_meta"]["great_expectations_version"]
 
     for result in results.results:
         result.exception_info.pop("exception_traceback")
@@ -885,7 +334,8 @@ def test_validate_with_invalid_result(validate_result_dict):
     assert results.to_json_dict() == expected_results.to_json_dict()
 
 
-def test_validate_catch_non_existent_expectation():
+def test_validate_catch_non_existent_expectation(empty_data_context):
+    context: DataContext = empty_data_context
     df = ge.dataset.PandasDataset({"x": [1, 2, 3, 4, 5]})
 
     validation_config_non_existent_expectation = ExpectationSuite(
@@ -896,6 +346,7 @@ def test_validate_catch_non_existent_expectation():
                 expectation_type="non_existent_expectation", kwargs={"column": "x"}
             )
         ],
+        data_context=context,
     )
 
     results = df.validate(expectation_suite=validation_config_non_existent_expectation)
@@ -906,7 +357,8 @@ def test_validate_catch_non_existent_expectation():
     )
 
 
-def test_validate_catch_invalid_parameter():
+def test_validate_catch_invalid_parameter(empty_data_context):
+    context: DataContext = empty_data_context
     df = ge.dataset.PandasDataset({"x": [1, 2, 3, 4, 5]})
 
     validation_config_invalid_parameter = ExpectationSuite(
@@ -918,6 +370,7 @@ def test_validate_catch_invalid_parameter():
                 kwargs={"column": "x", "min_value": 6, "max_value": 5},
             )
         ],
+        data_context=context,
     )
 
     result = df.validate(expectation_suite=validation_config_invalid_parameter)
@@ -987,11 +440,15 @@ def test_stats_mixed_expectations():
 class TestIO(unittest.TestCase):
     def test_read_csv(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_csv(script_path + "/test_sets/Titanic.csv",)
+        df = ge.read_csv(
+            script_path + "/test_sets/Titanic.csv",
+        )
 
     def test_read_json(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_json(script_path + "/test_sets/test_json_data_file.json",)
+        df = ge.read_json(
+            script_path + "/test_sets/test_json_data_file.json",
+        )
         assert df["x"][0] == "i"
         assert isinstance(df, PandasDataset)
         assert sorted(list(df.keys())) == ["x", "y", "z"]
@@ -1004,9 +461,15 @@ class TestIO(unittest.TestCase):
         assert isinstance(df, PandasDataset)
         assert sorted(list(df.keys())) == ["x", "y", "z"]
 
+    @pytest.mark.skipif(
+        not is_library_loadable(library_name="openpyxl"),
+        reason="GE uses pandas to read excel files, which requires openpyxl",
+    )
     def test_read_excel(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_excel(script_path + "/test_sets/Titanic_multi_sheet.xlsx",)
+        df = ge.read_excel(
+            script_path + "/test_sets/Titanic_multi_sheet.xlsx", engine="openpyxl"
+        )
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
@@ -1015,12 +478,16 @@ class TestIO(unittest.TestCase):
         pandas_version = pd.__version__
         if re.match(r"0\.2[012]\.", pandas_version) is not None:
             dfs_dict = ge.read_excel(
-                script_path + "/test_sets/Titanic_multi_sheet.xlsx", sheetname=None
+                script_path + "/test_sets/Titanic_multi_sheet.xlsx",
+                sheetname=None,
+                engine="openpyxl",
             )
 
         else:
             dfs_dict = ge.read_excel(
-                script_path + "/test_sets/Titanic_multi_sheet.xlsx", sheet_name=None
+                script_path + "/test_sets/Titanic_multi_sheet.xlsx",
+                sheet_name=None,
+                engine="openpyxl",
             )
         assert isinstance(dfs_dict, dict)
         assert list(dfs_dict.keys()) == ["Titanic_1", "Titanic_2", "Titanic_3"]
@@ -1033,6 +500,10 @@ class TestIO(unittest.TestCase):
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
+    @pytest.mark.skipif(
+        not is_library_loadable(library_name="pyarrow"),
+        reason="pyarrow is not installed",
+    )
     def test_read_feather(self):
         pandas_version = re.match(r"(\d+)\.(\d+)\..+", pd.__version__)
         if pandas_version is None:
@@ -1048,6 +519,11 @@ class TestIO(unittest.TestCase):
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
+    @pytest.mark.skipif(
+        not is_library_loadable(library_name="pyarrow")
+        and not is_library_loadable(library_name="fastparquet"),
+        reason="pyarrow and fastparquet are not installed",
+    )
     def test_read_parquet(self):
         """
         This test is unusual, because on travis (but only on travis), we have observed problems importing pyarrow,
@@ -1077,7 +553,18 @@ class TestIO(unittest.TestCase):
 
     def test_read_pickle(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_pickle(script_path + "/test_sets/Titanic.pkl",)
+        df = ge.read_pickle(
+            script_path + "/test_sets/Titanic.pkl",
+        )
+        assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
+        assert isinstance(df, PandasDataset)
+
+    def test_read_sas(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_sas(
+            script_path + "/test_sets/Titanic.sas7bdat",
+            encoding="latin-1",
+        )
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 

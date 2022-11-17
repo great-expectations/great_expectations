@@ -38,7 +38,7 @@ class MetaDataset(DataAsset):
     """
 
     @classmethod
-    def column_map_expectation(cls, func):
+    def column_map_expectation(cls, func) -> None:
         """Constructs an expectation using column-map semantics.
 
         The column_map_expectation decorator handles boilerplate issues surrounding the common pattern of evaluating
@@ -101,7 +101,7 @@ class MetaDataset(DataAsset):
             row_condition=None,
             condition_parser=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
@@ -197,9 +197,7 @@ class MetaDataset(DataAsset):
             if result_format["result_format"] in ["SUMMARY", "COMPLETE"]:
                 return return_obj
 
-            raise ValueError(
-                "Unknown result_format %s." % result_format["result_format"]
-            )
+            raise ValueError(f"Unknown result_format {result_format['result_format']}.")
 
         return inner_wrapper
 
@@ -231,7 +229,7 @@ class Dataset(MetaDataset):
         "get_column_count_in_range",
     ]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         # NOTE: using caching makes the strong assumption that the user will not modify the core data store
         # (e.g. self.spark_df) over the lifetime of the dataset instance
         self.caching = kwargs.pop("caching", True)
@@ -249,11 +247,11 @@ class Dataset(MetaDataset):
         is suitable really when a constructor knows to take its own type. In general, this should be overridden"""
         return cls(dataset)
 
-    def get_row_count(self):
+    def get_row_count(self) -> None:
         """Returns: int, table row count"""
         raise NotImplementedError
 
-    def get_column_count(self):
+    def get_column_count(self) -> None:
         """Returns: int, table column count"""
         raise NotImplementedError
 
@@ -261,15 +259,15 @@ class Dataset(MetaDataset):
         """Returns: List[str], list of column names"""
         raise NotImplementedError
 
-    def get_column_nonnull_count(self, column):
+    def get_column_nonnull_count(self, column) -> None:
         """Returns: int"""
         raise NotImplementedError
 
-    def get_column_mean(self, column):
+    def get_column_mean(self, column) -> None:
         """Returns: float"""
         raise NotImplementedError
 
-    def get_column_value_counts(self, column, sort="value", collate=None):
+    def get_column_value_counts(self, column, sort="value", collate=None) -> None:
         """Get a series containing the frequency counts of unique values from the named column.
 
         Args:
@@ -286,27 +284,27 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def get_column_sum(self, column):
+    def get_column_sum(self, column) -> None:
         """Returns: float"""
         raise NotImplementedError
 
-    def get_column_max(self, column, parse_strings_as_datetimes=False):
+    def get_column_max(self, column, parse_strings_as_datetimes=False) -> None:
         """Returns: Any"""
         raise NotImplementedError
 
-    def get_column_min(self, column, parse_strings_as_datetimes=False):
+    def get_column_min(self, column, parse_strings_as_datetimes=False) -> None:
         """Returns: Any"""
         raise NotImplementedError
 
-    def get_column_unique_count(self, column):
+    def get_column_unique_count(self, column) -> None:
         """Returns: int"""
         raise NotImplementedError
 
-    def get_column_modes(self, column):
+    def get_column_modes(self, column) -> None:
         """Returns: List[Any], list of modes (ties OK)"""
         raise NotImplementedError
 
-    def get_column_median(self, column):
+    def get_column_median(self, column) -> None:
         """Returns: Any"""
         raise NotImplementedError
 
@@ -324,7 +322,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def get_column_stdev(self, column):
+    def get_column_stdev(self, column) -> None:
         """Returns: float"""
         raise NotImplementedError
 
@@ -386,7 +384,7 @@ class Dataset(MetaDataset):
             raise ValueError("Invalid parameter for bins argument")
         return bins
 
-    def get_column_hist(self, column, bins):
+    def get_column_hist(self, column, bins) -> None:
         """Get a histogram of column values
         Args:
             column: the column for which to generate the histogram
@@ -397,7 +395,7 @@ class Dataset(MetaDataset):
 
     def get_column_count_in_range(
         self, column, min_val=None, max_val=None, strict_min=False, strict_max=True
-    ):
+    ) -> None:
         """Returns: int"""
         raise NotImplementedError
 
@@ -409,7 +407,7 @@ class Dataset(MetaDataset):
         bins_B=None,
         n_bins_A=None,
         n_bins_B=None,
-    ):
+    ) -> None:
         """Get crosstab of column_A and column_B, binning values if necessary"""
         raise NotImplementedError
 
@@ -590,7 +588,7 @@ class Dataset(MetaDataset):
     def expect_table_columns_to_match_set(
         self,
         column_set: Optional[Union[Set[str], List[str]]],
-        exact_match: Optional[bool] = True,
+        exact_match: bool = True,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -976,7 +974,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect each column value to be unique.
 
         This expectation detects duplicates. All duplicated values are counted as exceptions.
@@ -1028,7 +1026,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column values to not be null.
 
         To be counted as an exception, values must be explicitly null or missing, such as a NULL in PostgreSQL or an
@@ -1083,7 +1081,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column values to be null.
 
         expect_column_values_to_be_null is a \
@@ -1136,7 +1134,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect a column to contain values of a specified data type.
 
         expect_column_values_to_be_of_type is a :func:`column_aggregate_expectation \
@@ -1203,7 +1201,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect a column to contain values from a specified type list.
 
         expect_column_values_to_be_in_type_list is a :func:`column_aggregate_expectation \
@@ -1274,7 +1272,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         # noinspection PyUnresolvedReferences
         """Expect each column value to be in a given set.
 
@@ -1353,7 +1351,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         # noinspection PyUnresolvedReferences
         """Expect column entries to not be in the set.
 
@@ -1436,7 +1434,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column entries to be between a minimum value and a maximum value (inclusive).
 
         expect_column_values_to_be_between is a \
@@ -1508,7 +1506,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column values to be increasing.
 
         By default, this expectation only works for numeric or datetime data.
@@ -1572,7 +1570,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column values to be decreasing.
 
         By default, this expectation only works for numeric or datetime data.
@@ -1642,7 +1640,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column entries to be strings with length between a minimum value and a maximum value (inclusive).
 
         This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
@@ -1708,7 +1706,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column entries to be strings with length equal to the provided value.
 
         This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
@@ -1765,7 +1763,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column entries to be strings that match a given regular expression. Valid matches can be found \
         anywhere in the string, for example "[at]+" will identify the following strings as expected: "cat", "hat", \
         "aa", "a", and "t", and the following strings as unexpected: "fish", "dog".
@@ -1825,7 +1823,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column entries to be strings that do NOT match a given regular expression. The regex must not match \
         any portion of the provided string. For example, "[at]+" would identify the following strings as expected: \
         "fish", "dog", and the following as unexpected: "cat", "hat".
@@ -1886,7 +1884,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect the column entries to be strings that can be matched to either any of or all of a list of regular
         expressions. Matches can be anywhere in the string.
 
@@ -1949,7 +1947,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect the column entries to be strings that do not match any of a list of regular expressions. Matches can
         be anywhere in the string.
 
@@ -2011,7 +2009,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column entries to be strings representing a date or time with a given format.
 
         expect_column_values_to_match_strftime_format is a \
@@ -2061,7 +2059,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column entries to be parsable using dateutil.
 
         expect_column_values_to_be_dateutil_parseable is a \
@@ -2109,7 +2107,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column entries to be data written in JavaScript Object Notation.
 
         expect_column_values_to_be_json_parseable is a \
@@ -2162,7 +2160,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column entries to be JSON objects matching a given JSON schema.
 
         expect_column_values_to_match_json_schema is a \
@@ -2224,7 +2222,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """
         Expect the column values to be distributed similarly to a scipy distribution. \
 
@@ -2575,12 +2573,14 @@ class Dataset(MetaDataset):
             <great_expectations.dataset.dataset.Dataset.expect_column_distinct_values_to_equal_set>`
 
         """
+        observed_value_counts = self.get_column_value_counts(column)
+
         if parse_strings_as_datetimes:
             parsed_value_set = self._parse_value_set(value_set)
+            observed_value_counts.index = pd.to_datetime(observed_value_counts.index)
         else:
             parsed_value_set = value_set
 
-        observed_value_counts = self.get_column_value_counts(column)
         expected_value_set = set(parsed_value_set)
         observed_value_set = set(observed_value_counts.index)
 
@@ -2666,10 +2666,14 @@ class Dataset(MetaDataset):
 
         """
         if min_value is not None and not isinstance(min_value, Number):
-            raise ValueError("min_value must be a number")
+            raise ValueError(
+                "min_value must be a datetime (for datetime columns) or number"
+            )
 
         if max_value is not None and not isinstance(max_value, Number):
-            raise ValueError("max_value must be a number")
+            raise ValueError(
+                "max_value must be a datetime (for datetime columns) or number"
+            )
 
         column_mean = self.get_column_mean(column)
 
@@ -2920,7 +2924,7 @@ class Dataset(MetaDataset):
         quantile_value_ranges = quantile_ranges["value_ranges"]
         if len(quantiles) != len(quantile_value_ranges):
             raise ValueError(
-                "quntile_values and quantiles must have the same number of elements"
+                "quantile_values and quantiles must have the same number of elements"
             )
 
         quantile_vals = self.get_column_quantiles(
@@ -3517,7 +3521,9 @@ class Dataset(MetaDataset):
                     try:
                         min_value = parse(min_value)
                     except (ValueError, TypeError) as e:
-                        pass
+                        logger.debug(
+                            f"Something went wrong when parsing 'min_value': {e}"
+                        )
 
                 if strict_min:
                     above_min = column_min > min_value
@@ -3531,7 +3537,9 @@ class Dataset(MetaDataset):
                     try:
                         max_value = parse(max_value)
                     except (ValueError, TypeError) as e:
-                        pass
+                        logger.debug(
+                            f"Something went wrong when parsing 'max_value': {e}"
+                        )
 
                 if strict_max:
                     below_max = column_min < max_value
@@ -3648,7 +3656,9 @@ class Dataset(MetaDataset):
                     try:
                         min_value = parse(min_value)
                     except (ValueError, TypeError) as e:
-                        pass
+                        logger.debug(
+                            f"Something went wrong when parsing 'min_value': {e}"
+                        )
 
                 if strict_min:
                     above_min = column_max > min_value
@@ -3662,7 +3672,9 @@ class Dataset(MetaDataset):
                     try:
                         max_value = parse(max_value)
                     except (ValueError, TypeError) as e:
-                        pass
+                        logger.debug(
+                            f"Something went wrong when parsing 'max_value': {e}"
+                        )
 
                 if strict_max:
                     below_max = column_max < max_value
@@ -3796,7 +3808,7 @@ class Dataset(MetaDataset):
 
         test_result = stats.chisquare(test_df["count"], test_df["expected"])[1]
 
-        # Normalize the ouputs so they can be used as partitions into other expectations
+        # Normalize the outputs so they can be used as partitions into other expectations
         # GH653
         expected_weights = (test_df["expected"] / test_df["expected"].sum()).tolist()
         observed_weights = (test_df["count"] / test_df["count"].sum()).tolist()
@@ -3829,7 +3841,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column values to be distributed similarly to the provided continuous partition. This expectation \
         compares continuous distributions using a bootstrapped Kolmogorov-Smirnov test. It returns `success=True` if \
         values in the column match the distribution of the provided partition.
@@ -4452,7 +4464,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """
         Expect the values in column A to be the same as column B.
 
@@ -4498,7 +4510,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """
         Expect values in column A to be greater than column B.
 
@@ -4547,7 +4559,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """
         Expect paired values from columns A and B to belong to a set of valid pairs.
 
@@ -4557,7 +4569,7 @@ class Dataset(MetaDataset):
             value_pairs_set (list of tuples): All the valid pairs to be matched
 
         Keyword Args:
-            ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "never"
+            ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither"
 
         Other Parameters:
             result_format (str or None): \
@@ -4598,19 +4610,20 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """
         NOTE: This method is deprecated. Please use expect_select_column_values_to_be_unique_within_record instead
         Expect the values for each record to be unique across the columns listed.
         Note that records can be duplicated.
 
-        E.g.
-        A B C
-        1 1 2 Fail
-        1 2 3 Pass
-        8 2 7 Pass
-        1 2 3 Pass
-        4 4 4 Fail
+        For example::
+
+            A B C
+            1 1 2 Fail
+            1 2 3 Pass
+            8 2 7 Pass
+            1 2 3 Pass
+            4 4 4 Fail
 
         Args:
             column_list (tuple or list): The column names to evaluate
@@ -4651,18 +4664,19 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """
         Expect the values for each record to be unique across the columns listed.
         Note that records can be duplicated.
 
-        E.g.
-        A B C
-        1 1 2 Fail
-        1 2 3 Pass
-        8 2 7 Pass
-        1 2 3 Pass
-        4 4 4 Fail
+        For example::
+
+            A B C
+            1 1 2 Fail
+            1 2 3 Pass
+            8 2 7 Pass
+            1 2 3 Pass
+            4 4 4 Fail
 
         Args:
             column_list (tuple or list): The column names to evaluate
@@ -4703,18 +4717,19 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """
         Expect that the columns are unique together, e.g. a multi-column primary key
         Note that all instances of any duplicates are considered failed
 
-        E.g.
-        A B C
-        1 1 2 Fail
-        1 2 3 Pass
-        1 1 2 Fail
-        2 2 2 Pass
-        3 2 3 Pass
+        For example::
+
+            A B C
+            1 1 2 Fail
+            1 2 3 Pass
+            1 1 2 Fail
+            2 2 2 Pass
+            3 2 3 Pass
 
         Args:
             column_list (tuple or list): The column names to evaluate
@@ -4752,10 +4767,27 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """ Multi-Column Map Expectation
 
-        Expects that sum of all rows for a set of columns is equal to a specific value
+        Expects that the sum of row values is the same for each row, summing only values in columns specified in
+        column_list, and equal to the specific value, sum_total.
+
+        For example (with column_list=["B", "C"] and sum_total=5)::
+
+            A B C
+            1 3 2
+            1 5 0
+            1 1 4
+
+            Pass
+
+            A B C
+            1 3 2
+            1 5 1
+            1 1 4
+
+            Fail on row 2
 
         Args:
             column_list (List[str]): \

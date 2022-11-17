@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-
+import json
 import logging
 from typing import Any
 
@@ -10,10 +9,10 @@ logger = logging.getLogger(__name__)
 
 
 class LexicographicSorter(Sorter):
-    def get_partition_key(self, batch_definition: BatchDefinition) -> Any:
-        partition_definition: dict = batch_definition.partition_definition
-        partition_value: Any = partition_definition[self.name]
-        return partition_value
+    def get_batch_key(self, batch_definition: BatchDefinition) -> Any:
+        batch_identifiers: dict = batch_definition.batch_identifiers
+        batch_value: Any = batch_identifiers[self.name]
+        return batch_value
 
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
@@ -21,4 +20,4 @@ class LexicographicSorter(Sorter):
             "reverse": self.reverse,
             "type": "LexicographicSorter",
         }
-        return str(doc_fields_dict)
+        return json.dumps(doc_fields_dict, indent=2)

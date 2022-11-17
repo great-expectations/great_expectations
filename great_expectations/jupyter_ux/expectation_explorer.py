@@ -1,16 +1,16 @@
 import datetime
 import logging
 from itertools import chain
+from typing import Dict
 
 import ipywidgets as widgets
-from IPython.display import display
 
 logger = logging.getLogger(__name__)
 
 
 class ExpectationExplorer:
-    def __init__(self):
-        self.state = {"data_assets": {}}
+    def __init__(self) -> None:
+        self.state: Dict[str, Dict] = {"data_assets": {}}
         self.expectation_kwarg_field_names = {
             "expect_column_values_to_be_unique": ["mostly"],
             "expect_column_unique_value_count_to_be_between": [
@@ -122,8 +122,10 @@ class ExpectationExplorer:
             "expect_column_pair_values_to_be_in_set": [
                 "value_pairs_set",
                 "ignore_row_if",
+                "mostly",
             ],
             "expect_compound_columns_to_be_unique": ["ignore_row_if"],
+            "expect_multicolumn_sum_to_equal": ["sum_total", "ignore_row_if"],
             "expect_select_column_values_to_be_unique_within_record": ["ignore_row_if"],
             "expect_column_values_to_be_of_type": ["type_", "mostly"],
             "expect_column_values_to_be_in_type_list": ["type_list", "mostly"],
@@ -182,7 +184,7 @@ class ExpectationExplorer:
         self.debug_view = widgets.Output()
         self.styles = {"description_width": {"description_width": "150px"}}
 
-    def update_result(self, data_asset_name, new_result, column=None):
+    def update_result(self, data_asset_name, new_result, column=None) -> None:
         new_success_value = new_result.get("success")
         expectation_type = new_result.expectation_config.expectation_type
         new_result_widgets = self.generate_expectation_result_detail_widgets(
@@ -196,31 +198,23 @@ class ExpectationExplorer:
         if column:
             data_asset_expectations[column][expectation_type][
                 "success"
-            ].value = "<span><strong>Success: </strong>{new_success_value}</span>".format(
-                new_success_value=str(new_success_value)
-            )
+            ].value = f"<span><strong>Success: </strong>{str(new_success_value)}</span>"
             data_asset_expectations[column][expectation_type][
                 "result_detail_widget"
             ].children = new_result_widgets
             data_asset_expectations[column][expectation_type][
                 "editor_widget"
-            ].layout.border = "2px solid {new_border_color}".format(
-                new_border_color=new_border_color
-            )
+            ].layout.border = f"2px solid {new_border_color}"
         else:
             data_asset_expectations["non_column_expectations"][expectation_type][
                 "success"
-            ].value = "<span><strong>Success: </strong>{new_success_value}</span>".format(
-                new_success_value=str(new_success_value)
-            )
+            ].value = f"<span><strong>Success: </strong>{str(new_success_value)}</span>"
             data_asset_expectations["non_column_expectations"][expectation_type][
                 "result_detail_widget"
             ].children = new_result_widgets
             data_asset_expectations["non_column_expectations"][expectation_type][
                 "editor_widget"
-            ].layout.border = "2px solid {new_border_color}".format(
-                new_border_color=new_border_color
-            )
+            ].layout.border = f"2px solid {new_border_color}"
 
     def get_expectation_state(self, data_asset_name, expectation_type, column=None):
         data_asset_state = self.state["data_assets"].get(data_asset_name, {})
@@ -239,7 +233,7 @@ class ExpectationExplorer:
                 return None
             return non_column_expectations.get(expectation_type)
 
-    def initialize_data_asset_state(self, data_asset):
+    def initialize_data_asset_state(self, data_asset) -> None:
         data_asset_name = data_asset.data_asset_name
 
         self.state["data_assets"][data_asset_name] = {
@@ -247,12 +241,12 @@ class ExpectationExplorer:
             "expectations": {},
         }
 
-    def set_expectation_state(self, data_asset, expectation_state, column=None):
+    def set_expectation_state(self, data_asset, expectation_state, column=None) -> None:
         data_asset_name = data_asset.data_asset_name
         expectation_type = expectation_state.get("expectation_type")
-        data_asset_state = self.state["data_assets"].get(data_asset_name)
+        data_asset_state: Dict = self.state["data_assets"][data_asset_name]
 
-        data_asset_expectations = data_asset_state.get("expectations")
+        data_asset_expectations = data_asset_state.get("expectations", {})
 
         if column:
             column_expectations = data_asset_expectations.get(column, {})
@@ -278,9 +272,7 @@ class ExpectationExplorer:
                 continue
             if kwarg_name in ancillary_kwargs:
                 continue
-            elif not hasattr(
-                self, "generate_{kwarg_name}_widget_dict".format(kwarg_name=kwarg_name)
-            ):
+            elif not hasattr(self, f"generate_{kwarg_name}_widget_dict"):
                 expectation_kwargs[kwarg_name] = widget_dict.get("ge_kwarg_value")
             else:
                 expectation_kwargs[kwarg_name] = (
@@ -293,8 +285,8 @@ class ExpectationExplorer:
 
     def update_kwarg_widget_dict(
         self, expectation_state, current_widget_dict, ge_kwarg_name, new_ge_kwarg_value
-    ):
-        def update_tag_list_widget_dict(widget_dict, new_list):
+    ) -> None:
+        def update_tag_list_widget_dict(widget_dict, new_list) -> None:
             widget_dict["ge_kwarg_value"] = new_list
             widget_display = widget_dict["widget_display"]
             widget_display.children = self.generate_tag_button_list(
@@ -303,7 +295,7 @@ class ExpectationExplorer:
                 widget_display=widget_display,
             )
 
-        def ge_number_to_widget_string(widget_dict, number_kwarg):
+        def ge_number_to_widget_string(widget_dict, number_kwarg) -> None:
             if hasattr(widget_dict["kwarg_widget"], "value"):
                 widget_dict["kwarg_widget"].value = (
                     str(number_kwarg) if number_kwarg or number_kwarg == 0 else ""
@@ -313,7 +305,7 @@ class ExpectationExplorer:
                     str(number_kwarg) if number_kwarg or number_kwarg == 0 else ""
                 )
 
-        def min_max_value_to_string(widget_dict, number_kwarg):
+        def min_max_value_to_string(widget_dict, number_kwarg) -> None:
             # expectations with min/max kwargs where widget expects a string
             number_to_string_expectations = [
                 "expect_column_values_to_be_between",
@@ -362,15 +354,13 @@ class ExpectationExplorer:
             if current_widget_dict:
                 if not hasattr(
                     self,
-                    "generate_{ge_kwarg_name}_widget_dict".format(
-                        ge_kwarg_name=ge_kwarg_name
-                    ),
+                    f"generate_{ge_kwarg_name}_widget_dict",
                 ):
                     current_expectation_kwarg_dict[
                         ge_kwarg_name
                     ] = self.generate_expectation_kwarg_fallback_widget_dict(
                         expectation_kwarg_name=ge_kwarg_name,
-                        **new_ge_expectation_kwargs
+                        **new_ge_expectation_kwargs,
                     )
                 else:
                     self.update_kwarg_widget_dict(
@@ -382,20 +372,18 @@ class ExpectationExplorer:
             else:
                 widget_dict_generator = getattr(
                     self,
-                    "generate_{ge_kwarg_name}_widget_dict".format(
-                        ge_kwarg_name=ge_kwarg_name
-                    ),
+                    f"generate_{ge_kwarg_name}_widget_dict",
                     None,
                 )
                 widget_dict = (
                     widget_dict_generator(
                         expectation_state=existing_expectation_state,
-                        **new_ge_expectation_kwargs
+                        **new_ge_expectation_kwargs,
                     )
                     if widget_dict_generator
                     else self.generate_expectation_kwarg_fallback_widget_dict(
                         expectation_kwarg_name=ge_kwarg_name,
-                        **new_ge_expectation_kwargs
+                        **new_ge_expectation_kwargs,
                     )
                 )
                 current_expectation_kwarg_dict[ge_kwarg_name] = widget_dict
@@ -441,9 +429,7 @@ class ExpectationExplorer:
         return widgets.Textarea(
             value=value,
             placeholder=placeholder,
-            description="<strong>{description}: </strong>".format(
-                description=description
-            ),
+            description=f"<strong>{description}: </strong>",
             style=self.styles.get("description_width"),
             layout={"width": "400px"},
             description_tooltip=description_tooltip,
@@ -462,9 +448,7 @@ class ExpectationExplorer:
         return widgets.Text(
             value=value,
             placeholder=placeholder,
-            description="<strong>{description}: </strong>".format(
-                description=description
-            ),
+            description=f"<strong>{description}: </strong>",
             style=self.styles.get("description_width"),
             layout={"width": "400px"},
             description_tooltip=description_tooltip,
@@ -481,9 +465,7 @@ class ExpectationExplorer:
         return widgets.RadioButtons(
             options=options,
             value=value,
-            description="<strong>{description}: </strong>".format(
-                description=description
-            ),
+            description=f"<strong>{description}: </strong>",
             layout={"width": "400px"},
             style=self.styles.get("description_width"),
             description_tooltip=description_tooltip,
@@ -506,7 +488,7 @@ class ExpectationExplorer:
         )
 
         @expectation_feedback_widget.capture(clear_output=True)
-        def on_click(button):
+        def on_click(button) -> None:
             editor_widget = expectation_state.get("editor_widget")
             expectation = data_asset.remove_expectation(
                 expectation_type=expectation_type, column=column
@@ -588,9 +570,7 @@ class ExpectationExplorer:
             value=value,
             min=0,
             max=max,
-            description="<strong>{description}: </strong>".format(
-                description=description
-            ),
+            description=f"<strong>{description}: </strong>",
             style=self.styles.get("description_width"),
             layout={"width": "400px"},
             continuous_update=continuous_update,
@@ -602,7 +582,7 @@ class ExpectationExplorer:
         expectation_state,
         output_strftime_format="",
         column=None,
-        **expectation_kwargs
+        **expectation_kwargs,
     ):
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
@@ -624,7 +604,7 @@ class ExpectationExplorer:
         widget_dict = {"kwarg_widget": output_strftime_format_widget}
 
         @expectation_feedback_widget.capture(clear_output=True)
-        def on_output_strftime_format_submit(widget):
+        def on_output_strftime_format_submit(widget) -> None:
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
@@ -654,7 +634,7 @@ class ExpectationExplorer:
         widget_dict = {"kwarg_widget": strftime_format_widget}
 
         @expectation_feedback_widget.capture(clear_output=True)
-        def on_strftime_format_submit(widget):
+        def on_strftime_format_submit(widget) -> None:
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
@@ -680,7 +660,7 @@ class ExpectationExplorer:
         )
 
         @expectation_feedback_widget.capture(clear_output=True)
-        def on_value_change(change):
+        def on_value_change(change) -> None:
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
@@ -710,7 +690,7 @@ class ExpectationExplorer:
         )
 
         @expectation_feedback_widget.capture(clear_output=True)
-        def on_json_schema_change(change):
+        def on_json_schema_change(change) -> None:
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
@@ -739,7 +719,7 @@ class ExpectationExplorer:
         )
 
         @expectation_feedback_widget.capture(clear_output=True)
-        def on_ties_okay_change(change):
+        def on_ties_okay_change(change) -> None:
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
@@ -769,7 +749,7 @@ class ExpectationExplorer:
         )
 
         @expectation_feedback_widget.capture(clear_output=True)
-        def on_match_on_change(change):
+        def on_match_on_change(change) -> None:
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
@@ -1001,7 +981,7 @@ class ExpectationExplorer:
         )
 
         @expectation_feedback_widget.capture(clear_output=True)
-        def on_regex_change(change):
+        def on_regex_change(change) -> None:
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
@@ -1019,12 +999,12 @@ class ExpectationExplorer:
     def generate_parse_strings_as_datetimes_widget_dict(
         self,
         expectation_state,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes: bool = False,
         column=None,
-        **expectation_kwargs
+        **expectation_kwargs,
     ):
         data_asset_name = expectation_state["data_asset_name"]
-        data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
+        data_asset = self.state["data_assets"][data_asset_name]["data_asset"]
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
         expectation_type = expectation_state["expectation_type"]
         min_max_type_widget_dict = expectation_state["kwargs"].get("min_max_type", {})
@@ -1037,7 +1017,7 @@ class ExpectationExplorer:
         )
 
         @expectation_feedback_widget.capture(clear_output=True)
-        def on_parse_strings_as_datetimes_change(change):
+        def on_parse_strings_as_datetimes_change(change) -> None:
             output_strftime_format_widget_dict = expectation_state["kwargs"].get(
                 "output_strftime_format", {}
             )
@@ -1072,11 +1052,11 @@ class ExpectationExplorer:
         expectation_type = expectation_state["expectation_type"]
         inc_dec = expectation_type.split("_")[-1]
         strictly_widget = self.generate_boolean_checkbox_widget(
-            value=strictly, description="strictly {inc_dec}".format(inc_dec=inc_dec)
+            value=strictly, description=f"strictly {inc_dec}"
         )
 
         @expectation_feedback_widget.capture(clear_output=True)
-        def on_strictly_change(change):
+        def on_strictly_change(change) -> None:
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
@@ -1113,7 +1093,7 @@ class ExpectationExplorer:
         )
 
         @expectation_feedback_widget.capture(clear_output=True)
-        def on_mostly_change(change):
+        def on_mostly_change(change) -> None:
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
@@ -1152,7 +1132,7 @@ class ExpectationExplorer:
         )
 
         @expectation_feedback_widget.capture(clear_output=True)
-        def on_min_max_type_change(change):
+        def on_min_max_type_change(change) -> None:
             new_type_selection = change.get("new")
 
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
@@ -1164,8 +1144,8 @@ class ExpectationExplorer:
             parse_strings_as_datetimes_widget_dict = expectation_state["kwargs"].get(
                 "parse_strings_as_datetimes", {}
             )
-            parse_strings_as_datetimes_widget = parse_strings_as_datetimes_widget_dict.get(
-                "kwarg_widget"
+            parse_strings_as_datetimes_widget = (
+                parse_strings_as_datetimes_widget_dict.get("kwarg_widget")
             )
 
             if new_type_selection == "string":
@@ -1326,7 +1306,7 @@ class ExpectationExplorer:
         ):
 
             @expectation_feedback_widget.capture(clear_output=True)
-            def on_min_value_change(change):
+            def on_min_value_change(change) -> None:
                 ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                     expectation_state["kwargs"]
                 )
@@ -1345,8 +1325,10 @@ class ExpectationExplorer:
         if min_value_widget:
             min_value_widget_dict["kwarg_widget"] = min_value_widget
         else:
-            min_value_widget_dict = self.generate_expectation_kwarg_fallback_widget_dict(
-                expectation_kwarg_name="min_value", **{"min_value": min_value}
+            min_value_widget_dict = (
+                self.generate_expectation_kwarg_fallback_widget_dict(
+                    expectation_kwarg_name="min_value", **{"min_value": min_value}
+                )
             )
 
         expectation_state["kwargs"]["min_value"] = min_value_widget_dict
@@ -1481,7 +1463,7 @@ class ExpectationExplorer:
         ):
 
             @expectation_feedback_widget.capture(clear_output=True)
-            def on_max_value_change(change):
+            def on_max_value_change(change) -> None:
                 ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                     expectation_state["kwargs"]
                 )
@@ -1639,9 +1621,7 @@ class ExpectationExplorer:
         )
         static_widget = widgets.Textarea(
             value=str(ge_kwarg_value),
-            description="<strong>{expectation_kwarg_name}: </strong>".format(
-                expectation_kwarg_name=expectation_kwarg_name
-            ),
+            description=f"<strong>{expectation_kwarg_name}: </strong>",
             style=self.styles.get("description_width"),
             layout={"width": "400px"},
             disabled=True,
@@ -1656,20 +1636,14 @@ class ExpectationExplorer:
     # widget generators for general info shared between all expectations
     def generate_column_widget(self, column=None):
         return (
-            widgets.HTML(
-                value="<div><strong>Column: </strong>{column}</div>".format(
-                    column=column
-                )
-            )
+            widgets.HTML(value=f"<div><strong>Column: </strong>{column}</div>")
             if column
             else None
         )
 
     def generate_expectation_type_widget(self, expectation_type):
         return widgets.HTML(
-            value="<span><strong>Expectation Type: </strong>{expectation_type}</span>".format(
-                expectation_type=expectation_type
-            )
+            value=f"<span><strong>Expectation Type: </strong>{expectation_type}</span>"
         )
 
     def generate_basic_expectation_info_box(
@@ -1731,9 +1705,7 @@ class ExpectationExplorer:
                         result_title, result_value
                     )
                     if type(result_value) is float
-                    else "<span><strong>{result_title}: </strong>{result_value}</span>".format(
-                        result_title=result_title, result_value=result_value
-                    )
+                    else f"<span><strong>{result_title}: </strong>{result_value}</span>"
                 )
             )
 
@@ -1773,9 +1745,7 @@ class ExpectationExplorer:
         # success_widget
         success = expectation_validation_result.success
         success_widget = widgets.HTML(
-            value="<span><strong>Success: </strong>{success}</span>".format(
-                success=str(success)
-            )
+            value=f"<span><strong>Success: </strong>{str(success)}</span>"
         )
 
         # widget with result details
@@ -1824,9 +1794,7 @@ class ExpectationExplorer:
         ):
             widget_dict_generator = getattr(
                 self,
-                "generate_{expectation_kwarg_name}_widget_dict".format(
-                    expectation_kwarg_name=expectation_kwarg_name
-                ),
+                f"generate_{expectation_kwarg_name}_widget_dict",
                 None,
             )
             widget_dict = (
@@ -1861,18 +1829,14 @@ class ExpectationExplorer:
         expectation_editor_widget = widgets.Accordion(
             children=[expectation_editor_widget_content],
             layout=widgets.Layout(
-                border="2px solid {color}".format(color="green" if success else "red"),
+                border=f"2px solid {'green' if success else 'red'}",
                 margin="5px",
             ),
         )
         expectation_editor_title = (
-            "{column} | {expectation_type}".format(
-                column=column, expectation_type=expectation_type
-            )
+            f"{column} | {expectation_type}"
             if column
-            else "non_column_expectation | {expectation_type}".format(
-                expectation_type=expectation_type
-            )
+            else f"non_column_expectation | {expectation_type}"
         )
         expectation_editor_widget.set_title(0, expectation_editor_title)
 
@@ -1893,8 +1857,10 @@ class ExpectationExplorer:
             expectation_suite = data_asset.get_expectation_suite(
                 discard_failed_expectations=False
             )
-            expectation_suite_editor.children = self.generate_expectation_suite_editor_widgets(
-                data_asset, expectation_suite
+            expectation_suite_editor.children = (
+                self.generate_expectation_suite_editor_widgets(
+                    data_asset, expectation_suite
+                )
             )
 
         return expectation_editor_widget
@@ -1966,7 +1932,10 @@ class ExpectationExplorer:
             expectation_count=expectation_count,
         )
         summary_widget = widgets.HTML(
-            value=summary_widget_content, layout=widgets.Layout(margin="10px",)
+            value=summary_widget_content,
+            layout=widgets.Layout(
+                margin="10px",
+            ),
         )
 
         for column_name in column_names:
@@ -2001,13 +1970,17 @@ class ExpectationExplorer:
                 include_config=True, **expectation_kwargs
             )
 
-        expectation_suite_editor_widgets = self.generate_expectation_suite_editor_widgets(
-            data_asset, expectation_suite
+        expectation_suite_editor_widgets = (
+            self.generate_expectation_suite_editor_widgets(
+                data_asset, expectation_suite
+            )
         )
         ###################
         expectation_suite_editor = widgets.VBox(
             children=expectation_suite_editor_widgets,
-            layout=widgets.Layout(border="2px solid black",),
+            layout=widgets.Layout(
+                border="2px solid black",
+            ),
         )
 
         self.state["data_assets"][data_asset_name][

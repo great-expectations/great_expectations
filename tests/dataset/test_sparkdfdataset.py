@@ -1,4 +1,3 @@
-import importlib.util
 import json
 from unittest import mock
 
@@ -6,6 +5,7 @@ import pandas as pd
 import pytest
 
 from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
+from great_expectations.util import is_library_loadable
 
 
 def test_sparkdfdataset_persist(spark_session):
@@ -27,7 +27,8 @@ def test_sparkdfdataset_persist(spark_session):
 
 
 @pytest.mark.skipif(
-    importlib.util.find_spec("pyspark") is None, reason="requires the Spark library"
+    not is_library_loadable(library_name="pyspark"),
+    reason="pyspark must be installed",
 )
 @pytest.fixture
 def test_dataframe(spark_session):
@@ -115,7 +116,8 @@ def test_dataframe(spark_session):
 
 
 @pytest.mark.skipif(
-    importlib.util.find_spec("pyspark") is None, reason="requires the Spark library"
+    not is_library_loadable(library_name="pyspark"),
+    reason="pyspark must be installed",
 )
 def test_expect_column_values_to_be_of_type(spark_session, test_dataframe):
     """
@@ -137,7 +139,33 @@ def test_expect_column_values_to_be_of_type(spark_session, test_dataframe):
 
 
 @pytest.mark.skipif(
-    importlib.util.find_spec("pyspark") is None, reason="requires the Spark library"
+    not is_library_loadable(library_name="pyspark"),
+    reason="pyspark must be installed",
+)
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_adding_expectation_to_sparkdf_dataset_not_send_usage_message(
+    mock_emit, spark_session, test_dataframe
+):
+    """
+    What does this test and why?
+
+    When an Expectation is called using a SparkDFdataset, it validates the dataset using the implementation of
+    the Expectation. As part of the process, it also adds the Expectation to the active
+    ExpectationSuite. This test ensures that this in-direct way of adding an Expectation to the ExpectationSuite
+    (ie not calling add_expectations() directly) does not emit a usage_stats event.
+    """
+    validation = test_dataframe.expect_column_values_to_be_of_type(
+        "address.street", "StringType"
+    )
+    assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
+
+
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="pyspark"),
+    reason="pyspark must be installed",
 )
 def test_expect_column_values_to_be_of_type(spark_session, test_dataframe):
     """
@@ -159,7 +187,8 @@ def test_expect_column_values_to_be_of_type(spark_session, test_dataframe):
 
 
 @pytest.mark.skipif(
-    importlib.util.find_spec("pyspark") is None, reason="requires the Spark library"
+    not is_library_loadable(library_name="pyspark"),
+    reason="pyspark must be installed",
 )
 def test_expect_column_values_to_be_in_type_list(spark_session, test_dataframe):
     """
@@ -181,7 +210,8 @@ def test_expect_column_values_to_be_in_type_list(spark_session, test_dataframe):
 
 
 @pytest.mark.skipif(
-    importlib.util.find_spec("pyspark") is None, reason="requires the Spark library"
+    not is_library_loadable(library_name="pyspark"),
+    reason="pyspark must be installed",
 )
 def test_expect_column_pair_values_to_be_equal(spark_session, test_dataframe):
     """
@@ -205,7 +235,8 @@ def test_expect_column_pair_values_to_be_equal(spark_session, test_dataframe):
 
 
 @pytest.mark.skipif(
-    importlib.util.find_spec("pyspark") is None, reason="requires the Spark library"
+    not is_library_loadable(library_name="pyspark"),
+    reason="pyspark must be installed",
 )
 def test_expect_column_pair_values_A_to_be_greater_than_B(
     spark_session, test_dataframe
@@ -222,7 +253,8 @@ def test_expect_column_pair_values_A_to_be_greater_than_B(
 
 
 @pytest.mark.skipif(
-    importlib.util.find_spec("pyspark") is None, reason="requires the Spark library"
+    not is_library_loadable(library_name="pyspark"),
+    reason="pyspark must be installed",
 )
 def test_expect_select_column_values_to_be_unique_within_record(
     spark_session, test_dataframe
@@ -250,7 +282,8 @@ def test_expect_select_column_values_to_be_unique_within_record(
 
 
 @pytest.mark.skipif(
-    importlib.util.find_spec("pyspark") is None, reason="requires the Spark library"
+    not is_library_loadable(library_name="pyspark"),
+    reason="pyspark must be installed",
 )
 def test_expect_compound_columns_to_be_unique(spark_session, test_dataframe):
     """
@@ -311,7 +344,8 @@ def test_expect_compound_columns_to_be_unique(spark_session, test_dataframe):
 
 
 @pytest.mark.skipif(
-    importlib.util.find_spec("pyspark") is None, reason="requires the Spark library"
+    not is_library_loadable(library_name="pyspark"),
+    reason="pyspark must be installed",
 )
 def test_expect_column_values_to_be_unique(spark_session, test_dataframe):
     """
@@ -329,7 +363,8 @@ def test_expect_column_values_to_be_unique(spark_session, test_dataframe):
 
 
 @pytest.mark.skipif(
-    importlib.util.find_spec("pyspark") is None, reason="requires the Spark library"
+    not is_library_loadable(library_name="pyspark"),
+    reason="pyspark must be installed",
 )
 def test_expect_column_value_lengths_to_be_between(spark_session, test_dataframe):
     """
@@ -344,7 +379,8 @@ def test_expect_column_value_lengths_to_be_between(spark_session, test_dataframe
 
 
 @pytest.mark.skipif(
-    importlib.util.find_spec("pyspark") is None, reason="requires the Spark library"
+    not is_library_loadable(library_name="pyspark"),
+    reason="pyspark must be installed",
 )
 def test_expect_column_value_lengths_to_equal(spark_session, test_dataframe):
     """
@@ -357,7 +393,8 @@ def test_expect_column_value_lengths_to_equal(spark_session, test_dataframe):
 
 
 @pytest.mark.skipif(
-    importlib.util.find_spec("pyspark") is None, reason="requires the Spark library"
+    not is_library_loadable(library_name="pyspark"),
+    reason="pyspark must be installed",
 )
 def test_expect_column_values_to_be_json_parseable(spark_session):
     d1 = json.dumps({"i": [1, 2, 3], "j": 35, "k": {"x": "five", "y": 5, "z": "101"}})
@@ -378,7 +415,7 @@ def test_expect_column_values_to_be_json_parseable(spark_session):
         "most": [d1, d2, d3, "d4"],
     }
 
-    data_reshaped = list(zip(*[v for _, v in inner.items()]))
+    data_reshaped = list(zip(*(v for _, v in inner.items())))
     df = spark_session.createDataFrame(
         data_reshaped, ["json_col", "not_json", "py_dict", "most"]
     )
@@ -388,11 +425,17 @@ def test_expect_column_values_to_be_json_parseable(spark_session):
     T = [
         {
             "in": {"column": "json_col"},
-            "out": {"success": True, "unexpected_list": [],},
+            "out": {
+                "success": True,
+                "unexpected_list": [],
+            },
         },
         {
             "in": {"column": "not_json"},
-            "out": {"success": False, "unexpected_list": [4, 5, 6, 7],},
+            "out": {
+                "success": False,
+                "unexpected_list": [4, 5, 6, 7],
+            },
         },
         {
             "in": {"column": "py_dict"},
@@ -408,7 +451,10 @@ def test_expect_column_values_to_be_json_parseable(spark_session):
         },
         {
             "in": {"column": "most"},
-            "out": {"success": False, "unexpected_list": ["d4"],},
+            "out": {
+                "success": False,
+                "unexpected_list": ["d4"],
+            },
         },
         {
             "in": {"column": "most", "mostly": 0.75},

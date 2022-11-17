@@ -26,13 +26,13 @@ def test_parse_condition_to_spark(spark_session):
     res = parse_condition_to_spark('col("foo") > 5')
     # This is mostly a demonstrative test; it may be brittle. I do not know how to test
     # a condition itself.
-    assert str(res) == "Column<b'(foo > 5)'>"
+    assert str(res) in ["Column<b'(foo > 5)'>", "Column<'(foo > 5)'>"]
 
     res = parse_condition_to_spark('col("foo").notNull()')
     # This is mostly a demonstrative test; it may be brittle. I do not know how to test
     # a condition itself.
     print(str(res))
-    assert str(res) == "Column<b'(foo IS NOT NULL)'>"
+    assert str(res) in ["Column<b'(foo IS NOT NULL)'>", "Column<'(foo IS NOT NULL)'>"]
 
 
 def test_parse_condition_to_sqlalchemy(sa):

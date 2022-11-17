@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 from collections import OrderedDict
@@ -14,11 +15,58 @@ from great_expectations.exceptions import ProfilerError
 from great_expectations.profile.basic_suite_builder_profiler import (
     BasicSuiteBuilderProfiler,
 )
-from tests.test_utils import expectationSuiteValidationResultSchema
+from great_expectations.self_check.util import (
+    expectationSuiteValidationResultSchema,
+    get_dataset,
+)
+from great_expectations.util import is_library_loadable
 
 FALSEY_VALUES = [None, [], False]
 
 
+@pytest.fixture
+def datetime_dataset(test_backend):
+    data = {
+        "datetime": [
+            str(datetime.datetime(2020, 2, 4, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 5, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 6, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 7, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 8, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 9, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 10, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 11, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 12, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 13, 22, 12, 5, 943152)),
+        ]
+    }
+
+    schemas = {
+        "pandas": {
+            "datetime": "datetime64",
+        },
+        "postgresql": {
+            "datetime": "TIMESTAMP",
+        },
+        "sqlite": {
+            "datetime": "TIMESTAMP",
+        },
+        "mysql": {
+            "datetime": "TIMESTAMP",
+        },
+        "mssql": {
+            "datetime": "DATETIME",
+        },
+        "spark": {
+            "datetime": "TimestampType",
+        },
+    }
+    return get_dataset(test_backend, data, schemas=schemas)
+
+
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 def test__find_next_low_card_column(
     non_numeric_low_card_dataset, non_numeric_high_card_dataset
 ):
@@ -49,6 +97,9 @@ def test__find_next_low_card_column(
     )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 def test__create_expectations_for_low_card_column(non_numeric_low_card_dataset):
     column = "lowcardnonnum"
     column_cache = {}
@@ -76,6 +127,9 @@ def test__create_expectations_for_low_card_column(non_numeric_low_card_dataset):
     }
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 def test__find_next_numeric_column(
     numeric_high_card_dataset, non_numeric_low_card_dataset
 ):
@@ -125,6 +179,7 @@ def test__create_expectations_for_numeric_column(
     if test_backend in [
         "PandasDataset",
         "SparkDFDataset",
+        "sqlite",
         "postgresql",
         "mysql",
         "mssql",
@@ -153,10 +208,14 @@ def test__create_expectations_for_numeric_column(
             "expect_column_max_to_be_between",
             "expect_column_mean_to_be_between",
             "expect_column_median_to_be_between",
+            "expect_column_quantile_values_to_be_between",
             "expect_column_values_to_not_be_null",
         }
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 def test__find_next_string_column(
     non_numeric_high_card_dataset, non_numeric_low_card_dataset
 ):
@@ -214,6 +273,13 @@ def test__create_expectations_for_string_column(non_numeric_high_card_dataset):
     }
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
+@pytest.mark.skipif(
+    is_library_loadable(library_name="trino"),
+    reason="datetime doesnt exist in Trino",
+)
 def test__find_next_datetime_column(datetime_dataset, numeric_high_card_dataset):
     columns = datetime_dataset.get_table_columns()
     column_cache = {}
@@ -242,6 +308,13 @@ def test__find_next_datetime_column(datetime_dataset, numeric_high_card_dataset)
     )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
+@pytest.mark.skipif(
+    is_library_loadable(library_name="trino"),
+    reason="datetime doesnt exist in Trino",
+)
 def test__create_expectations_for_datetime_column(datetime_dataset):
     column = "datetime"
 
@@ -289,6 +362,9 @@ def test_BasicSuiteBuilderProfiler_raises_error_on_both_included_and_excluded_co
         )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 def test_BasicSuiteBuilderProfiler_raises_error_on_non_existent_column_on_pandas(
     pandas_dataset,
@@ -306,6 +382,9 @@ def test_BasicSuiteBuilderProfiler_raises_error_on_non_existent_column_on_pandas
         )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 def test_BasicSuiteBuilderProfiler_with_context(filesystem_csv_data_context):
     context = filesystem_csv_data_context
 
@@ -342,6 +421,7 @@ def test_BasicSuiteBuilderProfiler_with_context(filesystem_csv_data_context):
         "batch_kwargs",
         "batch_markers",
         "batch_parameters",
+        "expectation_suite_meta",
         "expectation_suite_name",
         "great_expectations_version",
         "run_id",
@@ -380,6 +460,9 @@ def test_BasicSuiteBuilderProfiler_with_context(filesystem_csv_data_context):
     assert set(expectation_types) == expected_expectation_types
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 def test_context_profiler(filesystem_csv_data_context):
     """
     This just validates that it's possible to profile using the datasource hook,
@@ -439,6 +522,12 @@ def test_context_profiler(filesystem_csv_data_context):
     assert set(expectation_types) == expected_expectation_types
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
+@pytest.mark.filterwarnings(
+    "ignore:String run_ids*:DeprecationWarning:great_expectations.profile.base"
+)
 @freeze_time("09/26/2019 13:42:41")
 def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
     """
@@ -468,7 +557,9 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
     # with open(file_relative_path(__file__, '../render/fixtures/BasicSuiteBuilderProfiler_evrs.json'), 'w+') as file:
     #     json.dump(expectationSuiteValidationResultSchema.dump(evrs), file, indent=2)
 
-    with open(expected_filepath,) as file:
+    with open(
+        expected_filepath,
+    ) as file:
         expected_evrs = expectationSuiteValidationResultSchema.load(
             json.load(file, object_pairs_hook=OrderedDict)
         )
@@ -486,7 +577,9 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
 
     # Version, run_id, batch id will be different
     del expected_evrs.meta["great_expectations_version"]
+    del expected_evrs.meta["expectation_suite_meta"]["great_expectations_version"]
     del evrs.meta["great_expectations_version"]
+    del evrs.meta["expectation_suite_meta"]["great_expectations_version"]
 
     del expected_evrs.meta["run_id"]
     del evrs.meta["run_id"]
@@ -494,15 +587,20 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
     del expected_evrs.meta["batch_kwargs"]["ge_batch_id"]
     del evrs.meta["batch_kwargs"]["ge_batch_id"]
 
+    del expected_evrs.meta["validation_time"]
     del evrs.meta["validation_time"]
 
     assert evrs == expected_evrs
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 def test_BasicSuiteBuilderProfiler_uses_all_columns_if_configuration_does_not_have_included_or_excluded_columns_on_pandas(
-    pandas_dataset,
+    pandas_dataset, empty_data_context
 ):
+    context: "DataContext" = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(pandas_dataset)
     assert isinstance(observed_suite, ExpectationSuite)
 
@@ -705,6 +803,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_columns_if_configuration_does_not_ha
                 "expectation_type": "expect_column_quantile_values_to_be_between",
             },
         ],
+        data_context=context,
     )
 
     # remove metadata to simplify assertions
@@ -713,8 +812,14 @@ def test_BasicSuiteBuilderProfiler_uses_all_columns_if_configuration_does_not_ha
     assert observed_suite == expected
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
-def test_BasicSuiteBuilderProfiler_uses_selected_columns_on_pandas(pandas_dataset,):
+def test_BasicSuiteBuilderProfiler_uses_selected_columns_on_pandas(
+    pandas_dataset, empty_data_context
+):
+    context: "DataContext" = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset, profiler_configuration={"included_columns": ["naturals"]}
     )
@@ -803,6 +908,7 @@ def test_BasicSuiteBuilderProfiler_uses_selected_columns_on_pandas(pandas_datase
                 "expectation_type": "expect_column_quantile_values_to_be_between",
             },
         ],
+        data_context=context,
     )
 
     # remove metadata to simplify assertions
@@ -811,10 +917,14 @@ def test_BasicSuiteBuilderProfiler_uses_selected_columns_on_pandas(pandas_datase
     assert observed_suite == expected
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 def test_BasicSuiteBuilderProfiler_respects_excluded_expectations_on_pandas(
-    pandas_dataset,
+    pandas_dataset, empty_data_context
 ):
+    context: "DataContext" = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
@@ -867,6 +977,7 @@ def test_BasicSuiteBuilderProfiler_respects_excluded_expectations_on_pandas(
                 "expectation_type": "expect_column_values_to_not_be_null",
             },
         ],
+        data_context=context,
     )
 
     # remove metadata to simplify assertions
@@ -875,10 +986,14 @@ def test_BasicSuiteBuilderProfiler_respects_excluded_expectations_on_pandas(
     assert observed_suite == expected
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 def test_BasicSuiteBuilderProfiler_respects_included_expectations_on_pandas(
-    pandas_dataset,
+    pandas_dataset, empty_data_context
 ):
+    context: "DataContext" = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
@@ -911,6 +1026,7 @@ def test_BasicSuiteBuilderProfiler_respects_included_expectations_on_pandas(
                 "expectation_type": "expect_column_values_to_not_be_null",
             },
         ],
+        data_context=context,
     )
 
     # remove metadata to simplify assertions
@@ -919,11 +1035,15 @@ def test_BasicSuiteBuilderProfiler_respects_included_expectations_on_pandas(
     assert observed_suite == expected
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 @pytest.mark.parametrize("included_columns", FALSEY_VALUES)
 def test_BasicSuiteBuilderProfiler_uses_no_columns_if_included_columns_are_falsey_on_pandas(
-    included_columns, pandas_dataset,
+    included_columns, pandas_dataset, empty_data_context
 ):
+    context: "DataContext" = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
@@ -946,6 +1066,7 @@ def test_BasicSuiteBuilderProfiler_uses_no_columns_if_included_columns_are_false
                 "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
             },
         ],
+        data_context=context,
     )
 
     # remove metadata to simplify assertions
@@ -957,15 +1078,20 @@ def test_BasicSuiteBuilderProfiler_uses_no_columns_if_included_columns_are_false
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 @pytest.mark.parametrize("included_expectations", FALSEY_VALUES)
 def test_BasicSuiteBuilderProfiler_uses_no_expectations_if_included_expectations_are_falsey_on_pandas(
-    included_expectations, pandas_dataset,
+    included_expectations, pandas_dataset, empty_data_context
 ):
+    context: "DataContext" = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
-        profiler_configuration={"included_expectations": included_expectations,},
+        profiler_configuration={
+            "included_expectations": included_expectations,
+        },
     )
     assert isinstance(observed_suite, ExpectationSuite)
 
-    expected = ExpectationSuite("default", data_asset_type="Dataset", expectations=[],)
+    expected = ExpectationSuite(
+        "default", data_asset_type="Dataset", expectations=[], data_context=context
+    )
 
     # remove metadata to simplify assertions
     observed_suite.meta = None
@@ -973,14 +1099,20 @@ def test_BasicSuiteBuilderProfiler_uses_no_expectations_if_included_expectations
     assert observed_suite == expected
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 @pytest.mark.parametrize("excluded_expectations", FALSEY_VALUES)
 def test_BasicSuiteBuilderProfiler_uses_all_expectations_if_excluded_expectations_are_falsey_on_pandas(
-    excluded_expectations, pandas_dataset,
+    excluded_expectations, pandas_dataset, empty_data_context
 ):
+    context: "DataContext" = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
-        profiler_configuration={"excluded_expectations": excluded_expectations,},
+        profiler_configuration={
+            "excluded_expectations": excluded_expectations,
+        },
     )
     assert isinstance(observed_suite, ExpectationSuite)
 
@@ -1183,6 +1315,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_expectations_if_excluded_expectation
                 "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
             },
         ],
+        data_context=context,
     )
 
     # remove metadata to simplify assertions
@@ -1191,11 +1324,15 @@ def test_BasicSuiteBuilderProfiler_uses_all_expectations_if_excluded_expectation
     assert observed_suite == expected
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 @pytest.mark.parametrize("excluded_columns", FALSEY_VALUES)
 def test_BasicSuiteBuilderProfiler_uses_all_columns_if_excluded_columns_are_falsey_on_pandas(
-    excluded_columns, pandas_dataset,
+    excluded_columns, pandas_dataset, empty_data_context
 ):
+    context: "DataContext" = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
@@ -1233,6 +1370,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_columns_if_excluded_columns_are_fals
                 "kwargs": {"column": "nulls", "mostly": 0.471},
             },
         ],
+        data_context=context,
     )
 
     # remove metadata to simplify assertions
@@ -1278,6 +1416,9 @@ def test_BasicSuiteBuilderProfiler_raises_error_on_not_real_expectations_in_excl
         )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @freeze_time("09/26/2019 13:42:41")
 def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_with_builder_configuration():
     """
@@ -1312,7 +1453,9 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_with_builder_configuratio
     # with open(file_relative_path(__file__, '../render/fixtures/SuiteBuilderProfiler_evrs.json'), 'w+') as file:
     #     json.dump(expectationSuiteValidationResultSchema.dump(evrs), file, indent=2)
 
-    with open(expected_filepath,) as file:
+    with open(
+        expected_filepath,
+    ) as file:
         expected_evrs = expectationSuiteValidationResultSchema.load(
             json.load(file, object_pairs_hook=OrderedDict)
         )
@@ -1320,10 +1463,13 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_with_builder_configuratio
         # Version and RUN-ID will be different
     del expected_evrs.meta["great_expectations_version"]
     del evrs.meta["great_expectations_version"]
+    del expected_evrs.meta["expectation_suite_meta"]["great_expectations_version"]
+    del evrs.meta["expectation_suite_meta"]["great_expectations_version"]
     del expected_evrs.meta["run_id"]
-    del expected_evrs.meta["batch_kwargs"]["ge_batch_id"]
     del evrs.meta["run_id"]
+    del expected_evrs.meta["batch_kwargs"]["ge_batch_id"]
     del evrs.meta["batch_kwargs"]["ge_batch_id"]
+    del expected_evrs.meta["validation_time"]
     del evrs.meta["validation_time"]
 
     assert evrs == expected_evrs

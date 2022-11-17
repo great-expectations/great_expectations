@@ -1,9 +1,16 @@
-from great_expectations.render.types import (
+from typing import Optional
+
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+from great_expectations.render import (
     RenderedBulletListContent,
     RenderedStringTemplateContent,
 )
-
-from .content_block import ContentBlockRenderer
+from great_expectations.render.renderer.content_block.content_block import (
+    ContentBlockRenderer,
+)
 
 
 class ExceptionListContentBlockRenderer(ContentBlockRenderer):
@@ -26,9 +33,13 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
                 "aria-expanded": "true",
                 "aria-controls": "collapseExample",
             },
-            "styles": {"cursor": "pointer",},
+            "styles": {
+                "cursor": "pointer",
+            },
         },
-        "body": {"classes": ["list-group", "collapse"],},
+        "body": {
+            "classes": ["list-group", "collapse"],
+        },
     }
 
     _default_element_styling = {
@@ -51,23 +62,22 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
     @classmethod
     def _missing_content_block_fn(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         # Only render EVR objects for which an exception was raised
         if result.exception_info["raised_exception"] is True:
             template_str = "$expectation_type raised an exception: $exception_message"
             if include_column_name:
-                template_str = "$column: " + template_str
+                template_str = f"$column: {template_str}"
 
             try:
                 column = result.expectation_config.kwargs["column"]

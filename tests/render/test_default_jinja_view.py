@@ -1,16 +1,11 @@
-import json
-from collections import OrderedDict
-
 import pytest
 
 import great_expectations as ge
-import great_expectations.render as render
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.render.renderer import ProfilingResultsPageRenderer
-from great_expectations.render.types import (
+from great_expectations.render import (
     RenderedGraphContent,
     RenderedHeaderContent,
     RenderedSectionContent,
@@ -19,24 +14,16 @@ from great_expectations.render.types import (
     TextContent,
     ValueListContent,
 )
+from great_expectations.render.renderer import ProfilingResultsPageRenderer
 from great_expectations.render.view import DefaultJinjaPageView
-
-
-@pytest.fixture()
-def validation_results():
-    with open("./tests/test_sets/expected_cli_results_default.json") as infile:
-        return json.load(infile, object_pairs_hook=OrderedDict)
-
-
-@pytest.fixture()
-def expectations():
-    with open("./tests/test_sets/titanic_expectations.json") as infile:
-        return json.load(infile, object_pairs_hook=OrderedDict)
 
 
 # noinspection PyPep8Naming
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
+@pytest.mark.filterwarnings(
+    "ignore:Cannot get %*::great_expectations.render.renderer.profiling_results_overview_section_renderer"
+)
 def test_render_DefaultJinjaPageView_meta_info():
     validation_results = ExpectationSuiteValidationResult(
         **{
@@ -64,7 +51,7 @@ def test_render_DefaultJinjaPageView_meta_info():
     html = DefaultJinjaPageView().render(document)
     with open(
         file_relative_path(
-            __file__, "./output/test_render_DefaultJinjaPageView_meta_info.html)"
+            __file__, "./output/test_render_DefaultJinjaPageView_meta_info.html"
         ),
         "w",
     ) as outfile:
@@ -77,7 +64,10 @@ def test_render_section_page():
             "section_name": None,
             "content_blocks": [
                 RenderedHeaderContent(
-                    **{"content_block_type": "header", "header": "Overview",}
+                    **{
+                        "content_block_type": "header",
+                        "header": "Overview",
+                    }
                 ),
                 RenderedTableContent(
                     **{
@@ -99,7 +89,10 @@ def test_render_section_page():
     ).to_json_dict()
 
     rendered_doc = ge.render.view.view.DefaultJinjaSectionView().render(
-        {"section": section, "section_loop": {"index": 1},}
+        {
+            "section": section,
+            "section_loop": {"index": 1},
+        }
     )  # .replace(" ", "").replace("\t", "").replace("\n", "")
 
     print(rendered_doc)
@@ -159,7 +152,10 @@ def test_rendering_components_without_section_loop_index():
         }
     ).to_json_dict()
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
-        {"content_block": header_component_content, "content_block_loop": {"index": 2},}
+        {
+            "content_block": header_component_content,
+            "content_block_loop": {"index": 2},
+        }
     )
     print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
@@ -180,7 +176,9 @@ def test_rendering_components_without_section_loop_index():
     )
 
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
-        {"content_block": header_component_content,}
+        {
+            "content_block": header_component_content,
+        }
     )
     print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
@@ -201,7 +199,10 @@ def test_rendering_components_without_section_loop_index():
     )
 
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
-        {"content_block": header_component_content, "section_loop": {"index": 3},}
+        {
+            "content_block": header_component_content,
+            "section_loop": {"index": 3},
+        }
     )
     print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
@@ -233,7 +234,11 @@ def test_rendering_components_with_styling():
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$var1 $var2 $var3",
-                        "params": {"var1": "AAA", "var2": "BBB", "var3": "CCC",},
+                        "params": {
+                            "var1": "AAA",
+                            "var2": "BBB",
+                            "var3": "CCC",
+                        },
                         "styling": {
                             "default": {"classes": ["x"]},
                             "params": {"var1": {"classes": ["y"]}},
@@ -246,7 +251,11 @@ def test_rendering_components_with_styling():
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$var1 $var2 $var3",
-                        "params": {"var1": "aaa", "var2": "bbb", "var3": "ccc",},
+                        "params": {
+                            "var1": "aaa",
+                            "var2": "bbb",
+                            "var3": "ccc",
+                        },
                         "styling": {
                             "default": {"classes": ["xx"]},
                             "params": {"var1": {"classes": ["yy"]}},
@@ -254,7 +263,10 @@ def test_rendering_components_with_styling():
                     },
                 }
             ),
-            "table": [["Mean", "446"], ["Minimum", "1"],],
+            "table": [
+                ["Mean", "446"],
+                ["Minimum", "1"],
+            ],
             "styling": {
                 "classes": ["root_foo"],
                 "styles": {"root": "bar"},
@@ -370,8 +382,13 @@ def test_render_table_component():
         **{
             "content_block_type": "table",
             "header": "Overview",
-            "table": [["Mean", "446"], ["Minimum", "1"],],
-            "styling": {"classes": ["col-4"],},
+            "table": [
+                ["Mean", "446"],
+                ["Minimum", "1"],
+            ],
+            "styling": {
+                "classes": ["col-4"],
+            },
         }
     ).to_json_dict()
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(

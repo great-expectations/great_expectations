@@ -9,7 +9,7 @@ h: SqlAlchemyDataset
 i: great_expectations.dataset
 j: great_expectations.datasource
 k:
-  drivername: postgres
+  drivername: postgresql
   host: localhost
   port: '5432'
   username: postgres
@@ -43,3 +43,8 @@ jj: SlackRenderer
 kk: store_evaluation_params
 ll: StoreEvaluationParametersAction
 mm: evaluation_parameter_store
+###
+cps: checkpoint_store
+cpu: CheckpointStore
+cpv: TupleFilesystemStoreBackend
+cpw: checkpoints/

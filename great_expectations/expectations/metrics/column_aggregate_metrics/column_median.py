@@ -1,30 +1,26 @@
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional
 
 import numpy as np
+import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
-from great_expectations.expectations.metrics.metric_provider import (
-    MetricProvider,
-    metric_value,
-)
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.expectations.metrics.import_manager import sa
+from great_expectations.expectations.metrics.metric_provider import metric_value
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
-class ColumnMedian(ColumnMetricProvider):
+class ColumnMedian(ColumnAggregateMetricProvider):
     """MetricProvider Class for Aggregate Mean MetricProvider"""
 
     metric_name = "column.median"
@@ -32,15 +28,17 @@ class ColumnMedian(ColumnMetricProvider):
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         """Pandas Median Implementation"""
-        return column.median()
+        column_null_elements_cond: pd.Series = column.isnull()
+        column_nonnull_elements: pd.Series = column[~column_null_elements_cond]
+        return column_nonnull_elements.median()
 
     @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
     def _sqlalchemy(
         cls,
-        execution_engine: "SqlAlchemyExecutionEngine",
+        execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         (
@@ -53,13 +51,11 @@ class ColumnMedian(ColumnMetricProvider):
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
         sqlalchemy_engine = execution_engine.engine
-        dialect = sqlalchemy_engine.dialect
         """SqlAlchemy Median Implementation"""
-        if dialect.name.lower() == "awsathena":
-            raise NotImplementedError("AWS Athena does not support OFFSET.")
         nonnull_count = metrics.get("column_values.nonnull.count")
         if not nonnull_count:
             return None
+
         element_values = sqlalchemy_engine.execute(
             sa.select([column])
             .order_by(column)
@@ -84,16 +80,20 @@ class ColumnMedian(ColumnMetricProvider):
             )  # Average center values
         else:
             # An odd number of column values, we can just take the center value
-            column_median = column_values[1][0]  # True center value
+            if len(column_values) == 1:
+                column_median = column_values[0][0]  # The only value
+            else:
+                column_median = column_values[1][0]  # True center value
+
         return column_median
 
     @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
     def _spark(
         cls,
-        execution_engine: "SqlAlchemyExecutionEngine",
+        execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         (
@@ -111,7 +111,7 @@ class ColumnMedian(ColumnMetricProvider):
         # Note that this can be an expensive computation; we are not exposing
         # spark's ability to estimate.
         # We add two to 2 * n_values to maintain a legitimate quantile
-        # in the degnerate case when n_values = 0
+        # in the degenerate case when n_values = 0
 
         """Spark Median Implementation"""
         table_row_count = metrics.get("table.row_count")
@@ -129,35 +129,22 @@ class ColumnMedian(ColumnMetricProvider):
         runtime_configuration: Optional[dict] = None,
     ):
         """This should return a dictionary:
-
         {
           "dependency_name": MetricConfiguration,
           ...
         }
         """
-
-        dependencies = super()._get_evaluation_dependencies(
+        dependencies: dict = super()._get_evaluation_dependencies(
             metric=metric,
             configuration=configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
 
-        table_domain_kwargs = {
-            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
-        }
-
-        dependencies.update(
-            {
-                "table.row_count": MetricConfiguration(
-                    "table.row_count", table_domain_kwargs
-                )
-            }
-        )
-
         if isinstance(execution_engine, SqlAlchemyExecutionEngine):
             dependencies["column_values.nonnull.count"] = MetricConfiguration(
-                "column_values.nonnull.count", metric.metric_domain_kwargs
+                metric_name="column_values.nonnull.count",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
             )
 
         return dependencies

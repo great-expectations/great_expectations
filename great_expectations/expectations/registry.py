@@ -1,16 +1,43 @@
-import logging
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
+from __future__ import annotations
 
+import logging
+import warnings
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
+
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric import Metric
-from great_expectations.exceptions.metric_exceptions import MetricProviderError
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.render import (
+    AtomicDiagnosticRendererType,
+    AtomicPrescriptiveRendererType,
+    AtomicRendererType,
+)
+
+if TYPE_CHECKING:
+    from great_expectations.core import ExpectationConfiguration
+    from great_expectations.execution_engine.execution_engine import (
+        ExecutionEngine,
+        MetricFunctionTypes,
+        MetricPartialFunctionTypes,
+    )
+    from great_expectations.expectations.expectation import Expectation
+    from great_expectations.expectations.metrics.metric_provider import MetricProvider
 
 logger = logging.getLogger(__name__)
 
-_registered_expectations = dict()
-_registered_metrics = dict()
-_registered_renderers = dict()
+_registered_expectations = {}
+_registered_metrics = {}
+_registered_renderers = {}
 
 """
 {
@@ -26,9 +53,10 @@ _registered_renderers = dict()
 
 def register_renderer(
     object_name: str,
-    parent_class: Type[Union["Expectation", "Metric"]],
+    parent_class: Type[Union[Expectation, Metric]],
     renderer_fn: Callable,
 ):
+    # noinspection PyUnresolvedReferences
     renderer_name = renderer_fn._renderer_type
     if object_name not in _registered_renderers:
         logger.debug(f"Registering {renderer_name} for expectation_type {object_name}.")
@@ -63,24 +91,63 @@ def register_renderer(
         return
 
 
+def get_renderer_names(expectation_or_metric_type: str) -> List[str]:
+    """Gets renderer names for a given Expectation or Metric.
+
+    Args:
+        expectation_or_metric_type: The type of an Expectation or Metric for which to get renderer names.
+
+    Returns:
+        A list of renderer names for the Expectation or Metric.
+    """
+    return list(_registered_renderers.get(expectation_or_metric_type, {}).keys())
+
+
+def get_renderer_names_with_renderer_type(
+    expectation_or_metric_type: str,
+    renderer_type: AtomicRendererType,
+) -> List[Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]]:
+    """Gets renderer names of a given type, for a given Expectation or Metric.
+
+    Args:
+        expectation_or_metric_type: The type of an Expectation or Metric for which to get renderer names.
+        renderer_type: The type of the renderers for which to return names.
+
+    Returns:
+        A list of renderer names for the given prefix and Expectation or Metric.
+    """
+    return [
+        renderer_name
+        for renderer_name in get_renderer_names(
+            expectation_or_metric_type=expectation_or_metric_type
+        )
+        if renderer_name.startswith(renderer_type)
+    ]
+
+
+def get_renderer_impls(object_name: str) -> List[str]:
+    return list(_registered_renderers.get(object_name, {}).values())
+
+
 def get_renderer_impl(object_name, renderer_type):
     return _registered_renderers.get(object_name, {}).get(renderer_type)
 
 
-def register_expectation(expectation: Type["Expectation"]) -> None:
+def register_expectation(expectation: Type[Expectation]) -> None:
     expectation_type = expectation.expectation_type
     # TODO: add version to key
     if expectation_type in _registered_expectations:
         if _registered_expectations[expectation_type] == expectation:
             logger.info(
-                "Multiple declarations of expectation " + expectation_type + " found."
+                f"Multiple declarations of expectation {expectation_type} found."
             )
             return
         else:
             logger.warning(
-                "Overwriting declaration of expectation " + expectation_type + "."
+                f"Overwriting declaration of expectation {expectation_type}."
             )
-    logger.debug("Registering expectation: " + expectation_type)
+
+    logger.debug(f"Registering expectation: {expectation_type}")
     _registered_expectations[expectation_type] = expectation
 
 
@@ -96,14 +163,14 @@ def register_metric(
     metric_name: str,
     metric_domain_keys: Tuple[str, ...],
     metric_value_keys: Tuple[str, ...],
-    execution_engine: Type["ExecutionEngine"],
-    metric_class: Type["MetricProvider"],
-    metric_provider: Union[Callable, None],
+    execution_engine: Type[ExecutionEngine],
+    metric_class: Type[MetricProvider],
+    metric_provider: Optional[Callable],
     metric_fn_type: Optional[
-        Union["MetricFunctionTypes", "MetricPartialFunctionTypes"]
+        Union[MetricFunctionTypes, MetricPartialFunctionTypes]
     ] = None,
 ) -> dict:
-    res = dict()
+    res = {}
     execution_engine_name = execution_engine.__name__
     logger.debug(f"Registering metric: {metric_name}")
     if metric_provider is not None and metric_fn_type is not None:
@@ -120,6 +187,7 @@ def register_metric(
                 "warning",
                 f"metric {metric_name} is being registered with different metric_domain_keys; overwriting metric_domain_keys",
             )
+
         current_value_keys = metric_definition.get("metric_value_keys", set())
         if set(current_value_keys) != set(metric_value_keys):
             logger.warning(
@@ -130,7 +198,8 @@ def register_metric(
                 "warning",
                 f"metric {metric_name} is being registered with different metric_value_keys; overwriting metric_value_keys",
             )
-        providers = metric_definition.get("providers", dict())
+
+        providers = metric_definition.get("providers", {})
         if execution_engine_name in providers:
             current_provider_cls, current_provider_fn = providers[execution_engine_name]
             if current_provider_fn != metric_provider:
@@ -162,25 +231,27 @@ def register_metric(
             "providers": {execution_engine_name: (metric_class, metric_provider)},
         }
         _registered_metrics[metric_name] = metric_definition
+
     res["success"] = True
+
     return res
 
 
 def get_metric_provider(
-    metric_name: str, execution_engine: "ExecutionEngine"
-) -> Tuple["MetricProvider", Callable]:
+    metric_name: str, execution_engine: ExecutionEngine
+) -> Tuple[MetricProvider, Callable]:
     try:
         metric_definition = _registered_metrics[metric_name]
         return metric_definition["providers"][type(execution_engine).__name__]
     except KeyError:
-        raise MetricProviderError(
+        raise ge_exceptions.MetricProviderError(
             f"No provider found for {metric_name} using {type(execution_engine).__name__}"
         )
 
 
 def get_metric_function_type(
-    metric_name: str, execution_engine: "ExecutionEngine"
-) -> Union[None, "MetricPartialFunctionTypes", "MetricFunctionTypes"]:
+    metric_name: str, execution_engine: ExecutionEngine
+) -> Optional[Union[MetricPartialFunctionTypes, MetricFunctionTypes]]:
     try:
         metric_definition = _registered_metrics[metric_name]
         provider_fn, provider_class = metric_definition["providers"][
@@ -188,20 +259,22 @@ def get_metric_function_type(
         ]
         return getattr(provider_fn, "metric_fn_type", None)
     except KeyError:
-        raise MetricProviderError(
+        raise ge_exceptions.MetricProviderError(
             f"No provider found for {metric_name} using {type(execution_engine).__name__}"
         )
 
 
 def get_metric_kwargs(
     metric_name: str,
-    configuration: Optional["ExpectationConfiguration"] = None,
+    configuration: Optional[ExpectationConfiguration] = None,
     runtime_configuration: Optional[dict] = None,
 ) -> Dict:
     try:
         metric_definition = _registered_metrics.get(metric_name)
         if metric_definition is None:
-            raise MetricProviderError(f"No definition found for {metric_name}")
+            raise ge_exceptions.MetricProviderError(
+                f"No definition found for {metric_name}"
+            )
         default_kwarg_values = metric_definition["default_kwarg_values"]
         metric_kwargs = {
             "metric_domain_keys": metric_definition["metric_domain_keys"],
@@ -236,30 +309,13 @@ def get_metric_kwargs(
             metric_kwargs["metric_value_kwargs"] = metric_value_kwargs
         return metric_kwargs
     except KeyError:
-        raise MetricProviderError(f"Incomplete definition found for {metric_name}")
-
-
-def extract_metrics(
-    metric_names: Iterable[str],
-    metrics: Dict[Tuple, Any],
-    configuration: "ExpectationConfiguration",
-    runtime_configuration: Optional[dict] = None,
-) -> dict:
-    res = dict()
-    for metric_name in metric_names:
-        kwargs = get_metric_kwargs(metric_name, configuration, runtime_configuration)
-        res[metric_name] = metrics[
-            MetricConfiguration(
-                metric_name,
-                kwargs["metric_domain_kwargs"],
-                kwargs["metric_value_kwargs"],
-            ).id
-        ]
-    return res
+        raise ge_exceptions.MetricProviderError(
+            f"Incomplete definition found for {metric_name}"
+        )
 
 
 def get_domain_metrics_dict_by_name(
-    metrics: Dict[Tuple, Any], metric_domain_kwargs: IDDict
+    metrics: Dict[Tuple[str, str, str], MetricValue], metric_domain_kwargs: IDDict
 ):
     return {
         metric_edge_key_id_tuple[0]: metric_value
@@ -268,12 +324,29 @@ def get_domain_metrics_dict_by_name(
     }
 
 
-def get_expectation_impl(expectation_name):
+def get_expectation_impl(expectation_name: str):
+    renamed: Dict[str, str] = {
+        "expect_column_values_to_be_vector": "expect_column_values_to_be_vectors",
+        "expect_columns_values_confidence_for_data_label_to_be_greater_than_or_equalto_threshold": "expect_column_values_confidence_for_data_label_to_be_greater_than_or_equal_to_threshold",
+        "expect_column_values_to_be_greater_than_or_equal_to_threshold": "expect_column_values_to_be_probabilistically_greater_than_or_equal_to_threshold",
+    }
+    if expectation_name in renamed:
+        # deprecated-v0.14.12
+        warnings.warn(
+            f"Expectation {expectation_name} was renamed to {renamed['expectation_name']} as of v0.14.12 "
+            "Please update usage in your pipeline(s) before the v0.17 release",
+            DeprecationWarning,
+        )
+        expectation_name = renamed[expectation_name]
+
+    if expectation_name not in _registered_expectations:
+        raise ge_exceptions.ExpectationNotFoundError(f"{expectation_name} not found")
+
     return _registered_expectations.get(expectation_name)
 
 
 def list_registered_expectation_implementations(
-    expectation_root: Type["Expectation"] = None,
+    expectation_root: Optional[Type[Expectation]] = None,
 ) -> List[str]:
     registered_expectation_implementations = []
     for (

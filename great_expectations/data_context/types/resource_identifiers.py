@@ -1,20 +1,26 @@
+from __future__ import annotations
+
 import logging
 import warnings
-from typing import Union
+from typing import TYPE_CHECKING, Optional, Union
+from uuid import UUID
 
 from dateutil.parser import parse
+from marshmallow import Schema, fields, post_load
 
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import BatchKwargs, IDDict
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
 from great_expectations.exceptions import DataContextError, InvalidDataContextKeyError
-from great_expectations.marshmallow__shade import Schema, fields, post_load
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 
 logger = logging.getLogger(__name__)
 
 
 class ExpectationSuiteIdentifier(DataContextKey):
-    def __init__(self, expectation_suite_name: str):
+    def __init__(self, expectation_suite_name: str) -> None:
         super().__init__()
         if not isinstance(expectation_suite_name, str):
             raise InvalidDataContextKeyError(
@@ -41,7 +47,7 @@ class ExpectationSuiteIdentifier(DataContextKey):
         return cls(expectation_suite_name=tuple_[0])
 
     def __repr__(self):
-        return self.__class__.__name__ + "::" + self._expectation_suite_name
+        return f"{self.__class__.__name__}::{self._expectation_suite_name}"
 
 
 class ExpectationSuiteIdentifierSchema(Schema):
@@ -54,13 +60,13 @@ class ExpectationSuiteIdentifierSchema(Schema):
 
 
 class BatchIdentifier(DataContextKey):
-    """A BatchIdentifier tracks """
+    """A BatchIdentifier tracks"""
 
     def __init__(
         self,
         batch_identifier: Union[BatchKwargs, dict, str],
-        data_asset_name: str = None,
-    ):
+        data_asset_name: Optional[str] = None,
+    ) -> None:
         super().__init__()
         # if isinstance(batch_identifier, (BatchKwargs, dict)):
         #     self._batch_identifier = batch_identifier.batch_fingerprint
@@ -95,23 +101,24 @@ class BatchIdentifierSchema(Schema):
 
 
 class ValidationResultIdentifier(DataContextKey):
-    """A ValidationResultIdentifier identifies a validation result by the fully qualified expectation_suite_identifer
+    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifier
     and run_id.
     """
 
-    def __init__(self, expectation_suite_identifier, run_id, batch_identifier):
+    def __init__(self, expectation_suite_identifier, run_id, batch_identifier) -> None:
         """Constructs a ValidationResultIdentifier
 
         Args:
             expectation_suite_identifier (ExpectationSuiteIdentifier, list, tuple, or dict):
-                identifying information for the fully qualified expectation suite used to validate
+                identifying information for the fully-qualified expectation suite used to validate
             run_id (RunIdentifier): The run_id for which validation occurred
         """
         super().__init__()
         self._expectation_suite_identifier = expectation_suite_identifier
         if isinstance(run_id, str):
+            # deprecated-v0.11.0
             warnings.warn(
-                "String run_ids will be deprecated in the future. Please provide a run_id of type "
+                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
                 "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
                 "and run_time (both optional).",
                 DeprecationWarning,
@@ -132,7 +139,7 @@ class ValidationResultIdentifier(DataContextKey):
         self._batch_identifier = batch_identifier
 
     @property
-    def expectation_suite_identifier(self):
+    def expectation_suite_identifier(self) -> ExpectationSuiteIdentifier:
         return self._expectation_suite_identifier
 
     @property
@@ -193,6 +200,65 @@ class ValidationResultIdentifier(DataContextKey):
         )
 
 
+class GXCloudIdentifier(DataContextKey):
+    def __init__(
+        self,
+        resource_type: GXCloudRESTResource,
+        ge_cloud_id: Optional[str] = None,
+        resource_name: Optional[str] = None,
+    ) -> None:
+        super().__init__()
+
+        self._resource_type = resource_type
+        self._ge_cloud_id = ge_cloud_id or ""
+        self._resource_name = resource_name or ""
+
+    @property
+    def resource_type(self):
+        return self._resource_type
+
+    @resource_type.setter
+    def resource_type(self, value) -> None:
+        self._resource_type = value
+
+    @property
+    def ge_cloud_id(self):
+        return self._ge_cloud_id
+
+    @ge_cloud_id.setter
+    def ge_cloud_id(self, value) -> None:
+        self._ge_cloud_id = value
+
+    @property
+    def resource_name(self) -> str:
+        return self._resource_name
+
+    def to_tuple(self):
+        return (self.resource_type, self.ge_cloud_id, self.resource_name)
+
+    def to_fixed_length_tuple(self):
+        return self.to_tuple()
+
+    @classmethod
+    def from_tuple(cls, tuple_):
+        # Only add resource name if it exists in the tuple_
+        if len(tuple_) == 3:
+            return cls(
+                resource_type=tuple_[0], ge_cloud_id=tuple_[1], resource_name=tuple_[2]
+            )
+        return cls(resource_type=tuple_[0], ge_cloud_id=tuple_[1])
+
+    @classmethod
+    def from_fixed_length_tuple(cls, tuple_):
+        return cls.from_tuple(tuple_)
+
+    def __repr__(self):
+        repr = f"{self.__class__.__name__}::{self.resource_type}::{self.ge_cloud_id}"
+        if self.resource_name:
+            repr += f"::{self.resource_name}"
+        return repr
+
+
 class ValidationResultIdentifierSchema(Schema):
     expectation_suite_identifier = fields.Nested(
         ExpectationSuiteIdentifierSchema,
@@ -217,7 +283,7 @@ class ValidationResultIdentifierSchema(Schema):
 
 
 class SiteSectionIdentifier(DataContextKey):
-    def __init__(self, site_section_name, resource_identifier):
+    def __init__(self, site_section_name, resource_identifier) -> None:
         self._site_section_name = site_section_name
         if site_section_name in ["validations", "profiling"]:
             if isinstance(resource_identifier, ValidationResultIdentifier):
@@ -232,13 +298,13 @@ class SiteSectionIdentifier(DataContextKey):
                 )
         elif site_section_name == "expectations":
             if isinstance(resource_identifier, ExpectationSuiteIdentifier):
-                self._resource_identifier = resource_identifier
+                self._resource_identifier = resource_identifier  # type: ignore[assignment]
             elif isinstance(resource_identifier, (tuple, list)):
-                self._resource_identifier = ExpectationSuiteIdentifier(
+                self._resource_identifier = ExpectationSuiteIdentifier(  # type: ignore[assignment]
                     *resource_identifier
                 )
             else:
-                self._resource_identifier = ExpectationSuiteIdentifier(
+                self._resource_identifier = ExpectationSuiteIdentifier(  # type: ignore[assignment]
                     **resource_identifier
                 )
         else:
@@ -278,7 +344,50 @@ class SiteSectionIdentifier(DataContextKey):
             )
 
 
+class ConfigurationIdentifier(DataContextKey):
+    def __init__(self, configuration_key: Union[str, UUID]) -> None:
+        super().__init__()
+        if isinstance(configuration_key, UUID):
+            configuration_key = str(configuration_key)
+        if not isinstance(configuration_key, str):
+            raise InvalidDataContextKeyError(
+                f"configuration_key must be a string, not {type(configuration_key).__name__}"
+            )
+        self._configuration_key = configuration_key
+
+    @property
+    def configuration_key(self) -> str:
+        return self._configuration_key
+
+    def to_tuple(self):
+        return tuple(self.configuration_key.split("."))
+
+    def to_fixed_length_tuple(self):
+        return (self.configuration_key,)
+
+    @classmethod
+    def from_tuple(cls, tuple_):
+        return cls(".".join(tuple_))
+
+    @classmethod
+    def from_fixed_length_tuple(cls, tuple_):
+        return cls(configuration_key=tuple_[0])
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}::{self._configuration_key}"
+
+
+class ConfigurationIdentifierSchema(Schema):
+    configuration_key = fields.Str()
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_configuration_identifier(self, data, **kwargs):
+        return ConfigurationIdentifier(**data)
+
+
 expectationSuiteIdentifierSchema = ExpectationSuiteIdentifierSchema()
 validationResultIdentifierSchema = ValidationResultIdentifierSchema()
 runIdentifierSchema = RunIdentifierSchema()
 batchIdentifierSchema = BatchIdentifierSchema()
+configurationIdentifierSchema = ConfigurationIdentifierSchema()

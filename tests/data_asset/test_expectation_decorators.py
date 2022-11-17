@@ -46,7 +46,8 @@ def test_expectation_decorator_build_config():
 
     assert (
         ExpectationConfiguration(
-            expectation_type="no_op_value_expectation", kwargs={"value": "a"},
+            expectation_type="no_op_value_expectation",
+            kwargs={"value": "a"},
         )
         == config.expectations[1]
     )
@@ -180,8 +181,9 @@ def test_column_map_expectation_decorator():
             "unexpected_count": 0,
             "unexpected_index_list": [],
             "unexpected_list": [],
-            "unexpected_percent": 0.0,
+            "unexpected_percent": None,
             "unexpected_percent_nonmissing": None,
+            "unexpected_percent_total": None,
         },
         success=True,
     )
@@ -221,8 +223,8 @@ def test_column_map_expectation_decorator():
             "unexpected_count": 2,
             "unexpected_index_list": [5, 6],
             "unexpected_list": [2, 4],
-            "unexpected_percent": 20.0,
-            "unexpected_percent_nonmissing": (2 / 7 * 100),
+            "unexpected_percent": ((2.0 / 7) * 100),
+            "unexpected_percent_nonmissing": ((2.0 / 7) * 100),
         },
         success=False,
     )
@@ -320,7 +322,13 @@ def test_column_aggregate_expectation_decorator():
             "odd_missing": [1, 3, 5, None, None],
             "mixed_missing": [1, 2, None, None, 6],
             "mixed_missing_2": [1, 3, None, None, 6],
-            "all_missing": [None, None, None, None, None,],
+            "all_missing": [
+                None,
+                None,
+                None,
+                None,
+                None,
+            ],
         }
     )
     df.set_default_expectation_argument("result_format", "COMPLETE")
@@ -328,10 +336,10 @@ def test_column_aggregate_expectation_decorator():
 
     assert df.expect_column_median_to_be_odd("all_odd") == ExpectationValidationResult(
         result={
-            "observed_value": 5,
+            "observed_value": 5.0,
             "element_count": 5,
-            "missing_count": 0,
-            "missing_percent": 0,
+            "missing_count": None,
+            "missing_percent": None,
         },
         success=True,
     )
@@ -340,8 +348,8 @@ def test_column_aggregate_expectation_decorator():
         result={
             "observed_value": 6,
             "element_count": 5,
-            "missing_count": 0,
-            "missing_percent": 0,
+            "missing_count": None,
+            "missing_percent": None,
         },
         success=False,
     )
@@ -350,10 +358,10 @@ def test_column_aggregate_expectation_decorator():
         "all_even", result_format="SUMMARY"
     ) == ExpectationValidationResult(
         result={
-            "observed_value": 6,
+            "observed_value": 6.0,
             "element_count": 5,
-            "missing_count": 0,
-            "missing_percent": 0,
+            "missing_count": None,
+            "missing_percent": None,
         },
         success=False,
     )
@@ -371,10 +379,10 @@ def test_column_aggregate_expectation_decorator():
         "all_even", result_format="BASIC"
     ) == ExpectationValidationResult(
         result={
-            "observed_value": 6,
+            "observed_value": 6.0,
             "element_count": 5,
-            "missing_count": 0,
-            "missing_percent": 0,
+            "missing_count": None,
+            "missing_percent": None,
         },
         success=False,
     )
@@ -404,7 +412,13 @@ def test_column_pair_map_expectation_decorator():
             "odd_missing": [1, 3, 5, None, None],
             "mixed_missing": [1, 2, None, None, 6],
             "mixed_missing_2": [1, 3, None, None, 6],
-            "all_missing": [None, None, None, None, None,],
+            "all_missing": [
+                None,
+                None,
+                None,
+                None,
+                None,
+            ],
         }
     )
     df.set_default_expectation_argument("result_format", "COMPLETE")
@@ -430,7 +444,9 @@ def test_column_pair_map_expectation_decorator():
     )
 
     assert df.expect_column_pair_values_to_be_different(
-        "all_odd", "all_even", ignore_row_if="both_values_are_missing",
+        "all_odd",
+        "all_even",
+        ignore_row_if="both_values_are_missing",
     ) == ExpectationValidationResult(
         success=True,
         result={
@@ -503,7 +519,7 @@ def test_column_pair_map_expectation_decorator():
             "missing_count": 2,
             "unexpected_count": 3,
             "missing_percent": 40.0,
-            "unexpected_percent": 60.0,
+            "unexpected_percent": 100.0,
             "unexpected_percent_nonmissing": 100.0,
             "unexpected_list": [(1, 1.0), (3, 3.0), (5, 5.0)],
             "unexpected_index_list": [0, 1, 2],

@@ -1,0 +1,309 @@
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+body,
+a {
+  font-family: HKGroteskPro, serif !important;
+}
+
+h1,
+h2,
+h3 {
+  padding-top: 80px;
+  margin-top: -80px;
+}
+
+body {
+  background-color: #efefef;
+  color: #2b354f;
+}
+
+a {
+  cursor: pointer;
+}
+
+@font-face {
+  font-family: HKGroteskPro;
+  font-weight: 400;
+  src: url(hk-grotesk-pro/HKGroteskPro-Regular.woff2) format("woff2"),
+    url(hk-grotesk-pro/HKGroteskPro-Regular.woff) format("woff");
+}
+
+@font-face {
+  font-family: HKGroteskPro;
+  font-weight: 600;
+  src: url(hk-grotesk-pro/HKGroteskPro-Medium.woff2) format("woff2"),
+    url(hk-grotesk-pro/HKGroteskPro-Medium.woff) format("woff");
+}
+
+@font-face {
+  font-family: HKGroteskPro;
+  font-weight: 700;
+  src: url(hk-grotesk-pro/HKGroteskPro-SemiBold.woff2) format("woff2"),
+    url(hk-grotesk-pro/HKGroteskPro-SemiBold.woff) format("woff");
+}
+
+@font-face {
+  font-family: HKGroteskPro;
+  font-weight: 800;
+  src: url(hk-grotesk-pro/HKGroteskPro-Bold.woff2) format("woff2"),
+    url(hk-grotesk-pro/HKGroteskPro-Bold.woff) format("woff");
+}
+
+@media print {
+  .no-print,
+  .no-print * {
+    display: none !important;
+  }
+}
+
+.wy-side-nav-search > a,
+.wy-side-nav-search .wy-dropdown > a {
+  display: none !important;
+}
+
+.wy-nav-content {
+  width: auto !important;
+  max-width: max-content !important;
+}
+
+.wy-body-for-nav {
+  background-color: #efefef;
+  padding-top: 88px;
+}
+
+.section {
+  max-width: 800px;
+}
+
+.widetable {
+  min-width: 1000px !important;
+}
+
+.wy-side-scroll {
+  background: #efefef;
+}
+.wy-nav-top {
+  background: #efefef;
+  color: rgba(0, 0, 0, 0.65) !important;
+  position: fixed;
+  top: 63px;
+  font-size: 13px;
+}
+
+.wy-nav-top a {
+  display: none;
+}
+
+.wy-nav-top i {
+  font-size: 24px;
+}
+
+.wy-nav-content {
+  color: #222222;
+  background: #efefef;
+}
+
+.wy-nav-content-wrap {
+  background: #efefef;
+}
+
+.wy-side-nav-search {
+  background: #efefef;
+}
+
+.wy-menu-vertical a {
+  color: #222222;
+}
+
+.wy-menu-vertical a:hover {
+  color: #333333;
+  background: #00bfa5;
+}
+
+.wy-nav-side {
+  background: #efefef;
+  top: 72px;
+}
+
+/*GE HEADER STYLES*/
+
+.ge_header {
+  background-color: #fff;
+  position: fixed;
+  z-index: 10000;
+  height: 72px;
+  width: 100%;
+  top: 0;
+}
+
+#header-logo {
+  overflow: hidden;
+  padding-left: 24px;
+  float: left;
+  line-height: 64px;
+  text-decoration: none;
+  height: auto;
+}
+
+#header-logo img {
+  display: inline;
+  vertical-align: middle;
+  margin-right: 16px;
+  max-width: 224px;
+  width: 100%;
+  margin-bottom: 0;
+}
+
+#header-actions {
+  float: right;
+  flex: 0 0 auto;
+  padding: 8px;
+  white-space: nowrap;
+  line-height: 46px;
+  font-size: 16px;
+}
+
+.header-item {
+  display: inline-block;
+  vertical-align: bottom;
+  padding: 0 20px;
+  display: block;
+  color: rgba(0, 0, 0, 0.65) !important;
+  float: left;
+  border-bottom: 2px solid transparent;
+  transition: border-bottom 0.3s cubic-bezier(0.645, 0.045, 0.355, 1),
+    background 0.3s cubic-bezier(0.645, 0.045, 0.355, 1),
+    padding 0.15s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+#header-actions a:hover {
+  color: #00bfa5 !important;
+  border-bottom: 2px solid #00bfa5;
+  transition: border-bottom 0.3s cubic-bezier(0.645, 0.045, 0.355, 1),
+    background 0.3s cubic-bezier(0.645, 0.045, 0.355, 1),
+    padding 0.15s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+#community-modal {
+  background: #fff;
+  min-width: 172px;
+  border-radius: 4px;
+  height: 0px;
+  transition: all 0.3s ease-in-out;
+  overflow: hidden;
+  position: relative;
+  width: 180px;
+  right: 30px;
+}
+
+#community-modal ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#community-modal li {
+  margin-bottom: 8px;
+  padding: 0 16px 0 28px;
+  height: 40px;
+  border: none !important;
+  margin-top: 4px;
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 40px;
+  text-overflow: ellipsis;
+}
+
+#community-modal a {
+  border-bottom: none !important;
+}
+
+#mobile-modal {
+  background: #fff;
+  border-radius: 4px;
+  height: 0px;
+  transition: all 0.3s ease-in-out;
+  overflow: hidden;
+  position: absolute;
+  top: 57px;
+  width: 168px;
+  right: 0;
+}
+
+#mobile-modal ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#mobile-modal li {
+  margin-bottom: 8px;
+  padding: 0 8px 0 16px;
+  height: 40px;
+  border: none !important;
+  margin-top: 4px;
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 40px;
+  text-overflow: ellipsis;
+  float: left;
+}
+
+#mobile-modal a {
+  border-bottom: none !important;
+}
+
+#header-mobile {
+  display: none;
+}
+
+#discourse-comments {
+  padding: 16px;
+  margin-bottom: 32px;
+  background-color: #fff;
+}
+
+@media only screen and (max-width: 768px) {
+  #header-actions {
+    display: none;
+  }
+
+  #header-mobile {
+    display: block;
+  }
+}
+
+.rst-content .sidebar {
+  margin-top: 80px !important;
+}
+
+/*** Make the API Reference breadcrumbs look kind of normal ***/
+ul.wy-breadcrumbs li code span.pre {
+  font-size: 16px;
+  font-family: HKGroteskPro, serif;
+  font-weight: 400;
+  color: rgb(155, 89, 182);
+}
+
+/***** Ugly hacks to start to mess with module doc formatting *****
+dl.class {
+  border: 2px solid blue;
+}
+
+dl.class dt{
+  border: 2px solid red;
+}
+
+dl.method{
+  border: 2px solid red;
+}
+
+dl.method dt{
+  background-color: red;
+}
+*/

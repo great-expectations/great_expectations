@@ -1,22 +1,17 @@
 # Utility methods for dealing with Dataset objects
-
 import logging
-from typing import Any, Dict, List, Union
+from typing import Any, List
 
 import numpy as np
 
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
 try:
-    import sqlalchemy
-    from sqlalchemy.engine.default import DefaultDialect
-    from sqlalchemy.sql.elements import WithinGroup
+    import sqlalchemy  # noqa: F401
 except ImportError:
     logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
-    DefaultDialect = None
-    WithinGroup = None
 
 
 def is_valid_partition_object(partition_object):
@@ -40,6 +35,7 @@ def is_valid_categorical_partition_object(partition_object):
         or ("values" not in partition_object)
     ):
         return False
+
     # Expect the same number of values as weights; weights should sum to one
     return len(partition_object["values"]) == len(
         partition_object["weights"]
@@ -66,7 +62,7 @@ def is_valid_continuous_partition_object(partition_object):
     else:
         comb_weights = partition_object["weights"]
 
-    ## TODO: Consider adding this check to migrate to the tail_weights structure of partition objects
+    # TODO: Consider adding this check to migrate to the tail_weights structure of partition objects
     # if (partition_object['bins'][0] == -np.inf) or (partition_object['bins'][-1] == np.inf):
     #     return False
 
@@ -121,15 +117,18 @@ def build_continuous_partition_object(
         bins = bins.tolist()
     else:
         bins = list(bins)
+
     hist_metric_configuration = MetricConfiguration(
         "column.histogram",
         metric_domain_kwargs=domain_kwargs,
-        metric_value_kwargs={"bins": tuple(bins),},
+        metric_value_kwargs={
+            "bins": tuple(bins),
+        },
     )
     nonnull_configuration = MetricConfiguration(
         "column_values.nonnull.count",
         metric_domain_kwargs=domain_kwargs,
-        metric_value_kwargs={"bins": tuple(bins),},
+        metric_value_kwargs=None,
     )
     metrics = execution_engine.resolve_metrics(
         (hist_metric_configuration, nonnull_configuration)
@@ -170,10 +169,14 @@ def build_categorical_partition_object(execution_engine, domain_kwargs, sort="va
     counts_configuration = MetricConfiguration(
         "column.partition",
         metric_domain_kwargs=domain_kwargs,
-        metric_value_kwargs={"sort": sort,},
+        metric_value_kwargs={
+            "sort": sort,
+        },
     )
     nonnull_configuration = MetricConfiguration(
-        "column_values.nonnull.count", metric_domain_kwargs=domain_kwargs,
+        "column_values.nonnull.count",
+        metric_domain_kwargs=domain_kwargs,
+        metric_value_kwargs=None,
     )
     metrics = execution_engine.resolve_metrics(
         (counts_configuration, nonnull_configuration)
@@ -188,7 +191,7 @@ def build_categorical_partition_object(execution_engine, domain_kwargs, sort="va
     }
 
 
-def infer_distribution_parameters(data, distribution, params=None):
+def infer_distribution_parameters(data, distribution, params=None):  # noqa: C901 - 18
     """Convenience method for determining the shape parameters of a given distribution
 
     Args:
@@ -216,7 +219,7 @@ def infer_distribution_parameters(data, distribution, params=None):
     """
 
     if params is None:
-        params = dict()
+        params = {}
     elif not isinstance(params, dict):
         raise TypeError(
             "params must be a dictionary object, see great_expectations documentation"
@@ -289,7 +292,7 @@ def _scipy_distribution_positional_args_from_dict(distribution, params):
 
        See the `cdf()` function here https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.beta.html#Methods\
        to see an example of scipy's positional arguments. This function returns the arguments specified by the \
-       scipy.stat.distribution.cdf() for tha distribution.
+       scipy.stat.distribution.cdf() for that distribution.
 
        Args:
            distribution (string): \
@@ -322,7 +325,7 @@ def _scipy_distribution_positional_args_from_dict(distribution, params):
         return params["loc"], params["scale"]
 
 
-def validate_distribution_parameters(distribution, params):
+def validate_distribution_parameters(distribution, params):  # noqa: C901 - 33
     """Ensures that necessary parameters for a distribution are present and that all parameters are sensical.
 
        If parameters necessary to construct a distribution are missing or invalid, this function raises ValueError\
@@ -367,7 +370,7 @@ def validate_distribution_parameters(distribution, params):
         "chi2",
         "expon",
     ]:
-        raise AttributeError("Unsupported  distribution provided: %s" % distribution)
+        raise AttributeError(f"Unsupported  distribution provided: {distribution}")
 
     if isinstance(params, dict):
         # `params` is a dictionary
@@ -378,19 +381,19 @@ def validate_distribution_parameters(distribution, params):
         if distribution == "beta" and (
             params.get("alpha", -1) <= 0 or params.get("beta", -1) <= 0
         ):
-            raise ValueError("Invalid parameters: %s" % beta_msg)
+            raise ValueError(f"Invalid parameters: {beta_msg}")
 
         # alpha is required and positive
         elif distribution == "gamma" and params.get("alpha", -1) <= 0:
-            raise ValueError("Invalid parameters: %s" % gamma_msg)
+            raise ValueError(f"Invalid parameters: {gamma_msg}")
 
         # lambda is a required and positive
         # elif distribution == 'poisson' and params.get('lambda', -1) <= 0:
         #    raise ValueError("Invalid parameters: %s" %poisson_msg)
 
-        # df is necessary and required to be positve
+        # df is necessary and required to be positive
         elif distribution == "chi2" and params.get("df", -1) <= 0:
-            raise ValueError("Invalid parameters: %s:" % chi2_msg)
+            raise ValueError(f"Invalid parameters: {chi2_msg}:")
 
     elif isinstance(params, tuple) or isinstance(params, list):
         scale = None
@@ -398,29 +401,29 @@ def validate_distribution_parameters(distribution, params):
         # `params` is a tuple or a list
         if distribution == "beta":
             if len(params) < 2:
-                raise ValueError("Missing required parameters: %s" % beta_msg)
+                raise ValueError(f"Missing required parameters: {beta_msg}")
             if params[0] <= 0 or params[1] <= 0:
-                raise ValueError("Invalid parameters: %s" % beta_msg)
+                raise ValueError(f"Invalid parameters: {beta_msg}")
             if len(params) == 4:
                 scale = params[3]
             elif len(params) > 4:
-                raise ValueError("Too many parameters provided: %s" % beta_msg)
+                raise ValueError(f"Too many parameters provided: {beta_msg}")
 
         elif distribution == "norm":
             if len(params) > 2:
-                raise ValueError("Too many parameters provided: %s" % norm_msg)
+                raise ValueError(f"Too many parameters provided: {norm_msg}")
             if len(params) == 2:
                 scale = params[1]
 
         elif distribution == "gamma":
             if len(params) < 1:
-                raise ValueError("Missing required parameters: %s" % gamma_msg)
+                raise ValueError(f"Missing required parameters: {gamma_msg}")
             if len(params) == 3:
                 scale = params[2]
             if len(params) > 3:
-                raise ValueError("Too many parameters provided: %s" % gamma_msg)
+                raise ValueError(f"Too many parameters provided: {gamma_msg}")
             elif params[0] <= 0:
-                raise ValueError("Invalid parameters: %s" % gamma_msg)
+                raise ValueError(f"Invalid parameters: {gamma_msg}")
 
         # elif distribution == 'poisson':
         #    if len(params) < 1:
@@ -434,24 +437,24 @@ def validate_distribution_parameters(distribution, params):
             if len(params) == 2:
                 scale = params[1]
             if len(params) > 2:
-                raise ValueError("Too many arguments provided: %s" % uniform_msg)
+                raise ValueError(f"Too many arguments provided: {uniform_msg}")
 
         elif distribution == "chi2":
             if len(params) < 1:
-                raise ValueError("Missing required parameters: %s" % chi2_msg)
+                raise ValueError(f"Missing required parameters: {chi2_msg}")
             elif len(params) == 3:
                 scale = params[2]
             elif len(params) > 3:
-                raise ValueError("Too many arguments provided: %s" % chi2_msg)
+                raise ValueError(f"Too many arguments provided: {chi2_msg}")
             if params[0] <= 0:
-                raise ValueError("Invalid parameters: %s" % chi2_msg)
+                raise ValueError(f"Invalid parameters: {chi2_msg}")
 
         elif distribution == "expon":
 
             if len(params) == 2:
                 scale = params[1]
             if len(params) > 2:
-                raise ValueError("Too many arguments provided: %s" % expon_msg)
+                raise ValueError(f"Too many arguments provided: {expon_msg}")
 
         if scale is not None and scale <= 0:
             raise ValueError("std_dev and scale must be positive.")
@@ -505,7 +508,8 @@ def get_approximate_percentile_disc_sql(selects: List, sql_engine_dialect: Any) 
 
 
 def check_sql_engine_dialect(
-    actual_sql_engine_dialect: Any, candidate_sql_engine_dialect: Any,
+    actual_sql_engine_dialect: Any,
+    candidate_sql_engine_dialect: Any,
 ) -> bool:
     try:
         # noinspection PyTypeChecker

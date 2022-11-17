@@ -2,7 +2,7 @@
 
 import logging
 import warnings
-from typing import Any, Dict, List, Union
+from typing import Any, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -11,37 +11,13 @@ from scipy import stats
 logger = logging.getLogger(__name__)
 
 try:
-    import sqlalchemy
+    import sqlalchemy  # noqa: F401
     from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.sql.elements import WithinGroup
 except ImportError:
     logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
     DefaultDialect = None
     WithinGroup = None
-
-
-SCHEMAS = {
-    "api_np": {"NegativeInfinity": -np.inf, "PositiveInfinity": np.inf,},
-    "api_cast": {"NegativeInfinity": -float("inf"), "PositiveInfinity": float("inf"),},
-    "mysql": {"NegativeInfinity": -1.79e308, "PositiveInfinity": 1.79e308,},
-    "mssql": {"NegativeInfinity": -1.79e308, "PositiveInfinity": 1.79e308,},
-}
-
-
-def get_sql_dialect_floating_point_infinity_value(
-    schema: str, negative: bool = False
-) -> float:
-    res: Union[Dict, None] = SCHEMAS.get(schema)
-    if res is None:
-        if negative:
-            return -np.inf
-        else:
-            return np.inf
-    else:
-        if negative:
-            return res["NegativeInfinity"]
-        else:
-            return res["PositiveInfinity"]
 
 
 def is_valid_partition_object(partition_object):
@@ -177,8 +153,9 @@ def kde_partition_data(data, estimate_tails=True):
 
 
 def partition_data(data, bins="auto", n_bins=10):
+    # deprecated-v0.10.10
     warnings.warn(
-        "partition_data is deprecated and will be removed. Use either continuous_partition_data or \
+        "partition_data is deprecated as of v0.10.10 and will be removed is a future release. Use either continuous_partition_data or \
                     categorical_partition_data instead.",
         DeprecationWarning,
     )
@@ -220,7 +197,7 @@ def continuous_partition_data(data, bins="auto", n_bins=10, **kwargs):
         )
     except TypeError as e:
         raise TypeError(
-            "Unable to compute histogram. numpy histogram raised error: " + str(e)
+            f"Unable to compute histogram. numpy histogram raised error: {str(e)}"
         )
 
     return {"bins": bin_edges, "weights": hist / len(data)}
@@ -326,7 +303,7 @@ def infer_distribution_parameters(data, distribution, params=None):
     """
 
     if params is None:
-        params = dict()
+        params = {}
     elif not isinstance(params, dict):
         raise TypeError(
             "params must be a dictionary object, see great_expectations documentation"
@@ -399,7 +376,7 @@ def _scipy_distribution_positional_args_from_dict(distribution, params):
 
        See the `cdf()` function here https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.beta.html#Methods\
        to see an example of scipy's positional arguments. This function returns the arguments specified by the \
-       scipy.stat.distribution.cdf() for tha distribution.
+       scipy.stat.distribution.cdf() for that distribution.
 
        Args:
            distribution (string): \
@@ -477,7 +454,7 @@ def validate_distribution_parameters(distribution, params):
         "chi2",
         "expon",
     ]:
-        raise AttributeError("Unsupported  distribution provided: %s" % distribution)
+        raise AttributeError(f"Unsupported  distribution provided: {distribution}")
 
     if isinstance(params, dict):
         # `params` is a dictionary
@@ -488,19 +465,19 @@ def validate_distribution_parameters(distribution, params):
         if distribution == "beta" and (
             params.get("alpha", -1) <= 0 or params.get("beta", -1) <= 0
         ):
-            raise ValueError("Invalid parameters: %s" % beta_msg)
+            raise ValueError(f"Invalid parameters: {beta_msg}")
 
         # alpha is required and positive
         elif distribution == "gamma" and params.get("alpha", -1) <= 0:
-            raise ValueError("Invalid parameters: %s" % gamma_msg)
+            raise ValueError(f"Invalid parameters: {gamma_msg}")
 
         # lambda is a required and positive
         # elif distribution == 'poisson' and params.get('lambda', -1) <= 0:
         #    raise ValueError("Invalid parameters: %s" %poisson_msg)
 
-        # df is necessary and required to be positve
+        # df is necessary and required to be positive
         elif distribution == "chi2" and params.get("df", -1) <= 0:
-            raise ValueError("Invalid parameters: %s:" % chi2_msg)
+            raise ValueError(f"Invalid parameters: {chi2_msg}:")
 
     elif isinstance(params, tuple) or isinstance(params, list):
         scale = None
@@ -508,29 +485,29 @@ def validate_distribution_parameters(distribution, params):
         # `params` is a tuple or a list
         if distribution == "beta":
             if len(params) < 2:
-                raise ValueError("Missing required parameters: %s" % beta_msg)
+                raise ValueError(f"Missing required parameters: {beta_msg}")
             if params[0] <= 0 or params[1] <= 0:
-                raise ValueError("Invalid parameters: %s" % beta_msg)
+                raise ValueError(f"Invalid parameters: {beta_msg}")
             if len(params) == 4:
                 scale = params[3]
             elif len(params) > 4:
-                raise ValueError("Too many parameters provided: %s" % beta_msg)
+                raise ValueError(f"Too many parameters provided: {beta_msg}")
 
         elif distribution == "norm":
             if len(params) > 2:
-                raise ValueError("Too many parameters provided: %s" % norm_msg)
+                raise ValueError(f"Too many parameters provided: {norm_msg}")
             if len(params) == 2:
                 scale = params[1]
 
         elif distribution == "gamma":
             if len(params) < 1:
-                raise ValueError("Missing required parameters: %s" % gamma_msg)
+                raise ValueError(f"Missing required parameters: {gamma_msg}")
             if len(params) == 3:
                 scale = params[2]
             if len(params) > 3:
-                raise ValueError("Too many parameters provided: %s" % gamma_msg)
+                raise ValueError(f"Too many parameters provided: {gamma_msg}")
             elif params[0] <= 0:
-                raise ValueError("Invalid parameters: %s" % gamma_msg)
+                raise ValueError(f"Invalid parameters: {gamma_msg}")
 
         # elif distribution == 'poisson':
         #    if len(params) < 1:
@@ -544,24 +521,24 @@ def validate_distribution_parameters(distribution, params):
             if len(params) == 2:
                 scale = params[1]
             if len(params) > 2:
-                raise ValueError("Too many arguments provided: %s" % uniform_msg)
+                raise ValueError(f"Too many arguments provided: {uniform_msg}")
 
         elif distribution == "chi2":
             if len(params) < 1:
-                raise ValueError("Missing required parameters: %s" % chi2_msg)
+                raise ValueError(f"Missing required parameters: {chi2_msg}")
             elif len(params) == 3:
                 scale = params[2]
             elif len(params) > 3:
-                raise ValueError("Too many arguments provided: %s" % chi2_msg)
+                raise ValueError(f"Too many arguments provided: {chi2_msg}")
             if params[0] <= 0:
-                raise ValueError("Invalid parameters: %s" % chi2_msg)
+                raise ValueError(f"Invalid parameters: {chi2_msg}")
 
         elif distribution == "expon":
 
             if len(params) == 2:
                 scale = params[1]
             if len(params) > 2:
-                raise ValueError("Too many arguments provided: %s" % expon_msg)
+                raise ValueError(f"Too many arguments provided: {expon_msg}")
 
         if scale is not None and scale <= 0:
             raise ValueError("std_dev and scale must be positive.")
@@ -615,10 +592,29 @@ def get_approximate_percentile_disc_sql(selects: List, sql_engine_dialect: Any) 
 
 
 def check_sql_engine_dialect(
-    actual_sql_engine_dialect: Any, candidate_sql_engine_dialect: Any,
+    actual_sql_engine_dialect: Any,
+    candidate_sql_engine_dialect: Any,
 ) -> bool:
     try:
         # noinspection PyTypeChecker
         return isinstance(actual_sql_engine_dialect, candidate_sql_engine_dialect)
     except (AttributeError, TypeError):
         return False
+
+
+def validate_mostly(mostly: Optional[Union[int, float]]) -> None:
+    """Validate mostly parameter is a number between 0 and 1 or None.
+
+    Args:
+        mostly: The mostly parameter for an expectation configuration.
+
+    Raises:
+        AssertionError: Raised is mostly is defined and not a number between 0 and 1.
+    """
+    if mostly is not None:
+        # Even though we type mostly as an int or float, we can't typecheck this whole project and
+        # need to verify the type.
+        assert isinstance(
+            mostly, (int, float)
+        ), "'mostly' parameter must be an integer or float"
+        assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"

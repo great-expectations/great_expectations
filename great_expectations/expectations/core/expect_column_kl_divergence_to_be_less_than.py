@@ -1,38 +1,51 @@
-from typing import Dict, Optional
+import logging
+from typing import Dict, Optional, Set, Tuple, Union
 
 import altair as alt
 import numpy as np
 import pandas as pd
 from scipy import stats as stats
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.util import (
-    build_categorical_partition_object,
-    build_continuous_partition_object,
     is_valid_categorical_partition_object,
     is_valid_partition_object,
 )
-from great_expectations.expectations.expectation import TableExpectation
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
+from great_expectations.expectations.expectation import (
+    ColumnExpectation,
+    render_evaluation_parameter_string,
+)
+from great_expectations.render import (
+    AtomicDiagnosticRendererType,
+    AtomicPrescriptiveRendererType,
+    LegacyDescriptiveRendererType,
+    LegacyDiagnosticRendererType,
+    LegacyRendererType,
+    RenderedAtomicContent,
     RenderedContentBlockContainer,
     RenderedGraphContent,
     RenderedStringTemplateContent,
+    renderedAtomicValueSchema,
 )
+from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.validator.validation_graph import (
-    MetricConfiguration,
-    ValidationGraph,
-)
-from great_expectations.validator.validator import Validator
+from great_expectations.validator.exception_info import ExceptionInfo
+from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validation_graph import ValidationGraph
+
+logger = logging.getLogger(__name__)
+logging.captureWarnings(True)
 
 
-class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
+class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
     """Expect the Kulback-Leibler (KL) divergence (relative entropy) of the specified column with respect to the \
             partition object to be lower than the provided threshold.
 
@@ -158,6 +171,16 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
 
             """
 
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "tags": ["core expectation", "column aggregate expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
+    }
+
     success_keys = (
         "partition_object",
         "threshold",
@@ -175,6 +198,27 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column",
+        "partition_object",
+        "threshold",
+    )
+
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
+        """
+        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+        necessary configuration arguments have been provided for the validation of the expectation.
+
+        Args:
+            configuration (OPTIONAL[ExpectationConfiguration]): \
+                An optional Expectation Configuration entry that will be used to configure the expectation
+        Returns:
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+        """
+        super().validate_configuration(configuration)
+        self.validate_metric_value_between_configuration(configuration=configuration)
 
     def get_validation_dependencies(
         self,
@@ -207,29 +251,42 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 # Note: 20201116 - JPC - the execution engine doesn't provide capability to evaluate
                 # dependencies, so we use a validator
                 #
-                validator = Validator(execution_engine=execution_engine)
-                graph = ValidationGraph()
-                validator.build_metric_dependency_graph(
-                    graph=graph,
-                    child_node=partition_metric_configuration,
-                    configuration=configuration,
-                    execution_engine=execution_engine,
+                graph = ValidationGraph(execution_engine=execution_engine)
+                graph.build_metric_dependency_graph(
+                    metric_configuration=partition_metric_configuration,
                 )
-                bins = validator.resolve_validation_graph(graph, metrics=dict())[
-                    partition_metric_configuration.id
-                ]
+
+                resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+
+                # updates graph with aborted metrics
+                aborted_metrics_info: Dict[
+                    Tuple[str, str, str],
+                    Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+                ] = graph.resolve_validation_graph(
+                    metrics=resolved_metrics,
+                    runtime_configuration=None,
+                )
+
+                if aborted_metrics_info:
+                    logger.warning(
+                        f"Exceptions\n{str(aborted_metrics_info)}\noccurred while resolving metrics."
+                    )
+
+                bins = resolved_metrics[partition_metric_configuration.id]
                 hist_metric_configuration = MetricConfiguration(
                     "column.histogram",
                     metric_domain_kwargs=domain_kwargs,
-                    metric_value_kwargs={"bins": tuple(bins),},
+                    metric_value_kwargs={
+                        "bins": tuple(bins),
+                    },
                 )
                 nonnull_configuration = MetricConfiguration(
                     "column_values.nonnull.count",
                     metric_domain_kwargs=domain_kwargs,
-                    metric_value_kwargs=dict(),
+                    metric_value_kwargs=None,
                 )
                 #
-                # NOTE 20201117 - JPC - Would prefer not to include partition_metric_configuraiton here,
+                # NOTE 20201117 - JPC - Would prefer not to include partition_metric_configuration here,
                 # since we have already evaluated it, and its result is in the kwargs for the histogram.
                 # However, currently the dependencies' configurations are not passed to the _validate method
                 #
@@ -241,10 +298,13 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 counts_configuration = MetricConfiguration(
                     "column.value_counts",
                     metric_domain_kwargs=domain_kwargs,
-                    metric_value_kwargs={"sort": "value",},
+                    metric_value_kwargs={
+                        "sort": "value",
+                    },
                 )
                 nonnull_configuration = MetricConfiguration(
-                    "column_values.nonnull.count", metric_domain_kwargs=domain_kwargs,
+                    "column_values.nonnull.count",
+                    metric_domain_kwargs=domain_kwargs,
                 )
                 dependencies["column.value_counts"] = counts_configuration
                 dependencies["column_values.nonnull.count"] = nonnull_configuration
@@ -269,19 +329,21 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
             hist_metric_configuration = MetricConfiguration(
                 "column.histogram",
                 metric_domain_kwargs=domain_kwargs,
-                metric_value_kwargs={"bins": bins,},
+                metric_value_kwargs={
+                    "bins": bins,
+                },
             )
             nonnull_configuration = MetricConfiguration(
                 "column_values.nonnull.count",
                 metric_domain_kwargs=domain_kwargs,
-                metric_value_kwargs=dict(),
+                metric_value_kwargs=None,
             )
             dependencies["column.histogram"] = hist_metric_configuration
             dependencies["column_values.nonnull.count"] = nonnull_configuration
             below_partition = MetricConfiguration(
                 "column_values.between.count",
                 metric_domain_kwargs=domain_kwargs,
-                metric_value_kwargs={"max_value": bins[0]},
+                metric_value_kwargs={"max_value": bins[0], "strict_max": True},
             )
             above_partition = MetricConfiguration(
                 "column_values.between.count",
@@ -296,8 +358,8 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         bucketize_data = configuration.kwargs.get(
             "bucketize_data", self.default_kwarg_values["bucketize_data"]
@@ -524,11 +586,17 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 expected_weights = expected_weights[1:]
 
                 comb_observed_weights = np.concatenate(
-                    (observed_weights, [above_partition / nonnull_count],)
+                    (
+                        observed_weights,
+                        [above_partition / nonnull_count],
+                    )
                 )
                 # Set aside left tail weight and above partition weight
                 observed_tail_weights = np.concatenate(
-                    ([observed_weights[0]], [above_partition / nonnull_count],)
+                    (
+                        [observed_weights[0]],
+                        [above_partition / nonnull_count],
+                    )
                 )
                 # Remove left tail weight from main observed_weights
                 observed_weights = observed_weights[1:]
@@ -554,11 +622,17 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 expected_weights = expected_weights[:-1]
 
                 comb_observed_weights = np.concatenate(
-                    ([below_partition / nonnull_count], observed_weights,)
+                    (
+                        [below_partition / nonnull_count],
+                        observed_weights,
+                    )
                 )
                 # Set aside right tail weight and below partition weight
                 observed_tail_weights = np.concatenate(
-                    ([below_partition / nonnull_count], [observed_weights[-1]],)
+                    (
+                        [below_partition / nonnull_count],
+                        [observed_weights[-1]],
+                    )
                 )
                 # Remove right tail weight from main observed_weights
                 observed_weights = observed_weights[:-1]
@@ -670,7 +744,11 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 bins_x2 = [round(value, 1) for value in bins[1:]]
 
                 df = pd.DataFrame(
-                    {"bin_min": bins_x1, "bin_max": bins_x2, "fraction": weights,}
+                    {
+                        "bin_min": bins_x1,
+                        "bin_max": bins_x2,
+                        "fraction": weights,
+                    }
                 )
 
                 bars = (
@@ -685,7 +763,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                     .properties(width=chart_pixel_width, height=400, autosize="fit")
                 )
 
-                chart = bars.to_json()
+                chart = bars.to_dict()
             elif partition_object.get("values"):
                 values = partition_object["values"]
 
@@ -699,7 +777,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                     )
                     .properties(width=chart_pixel_width, height=400, autosize="fit")
                 )
-                chart = bars.to_json()
+                chart = bars.to_dict()
 
             if header:
                 expected_distribution = RenderedGraphContent(
@@ -709,7 +787,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                         "header": header,
                         "styling": {
                             "classes": [
-                                "col-" + str(chart_container_col_width),
+                                f"col-{str(chart_container_col_width)}",
                                 "mt-2",
                                 "pl-1",
                                 "pr-1",
@@ -725,7 +803,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                         "graph": chart,
                         "styling": {
                             "classes": [
-                                "col-" + str(chart_container_col_width),
+                                f"col-{str(chart_container_col_width)}",
                                 "mt-2",
                                 "pl-1",
                                 "pr-1",
@@ -735,6 +813,69 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                     }
                 )
         return expected_distribution
+
+    @classmethod
+    def _atomic_kl_divergence_chart_template(cls, partition_object: dict) -> tuple:
+        weights = partition_object.get("weights")
+        if weights is None:
+            weights = []
+
+        chart_pixel_width = (len(weights) / 60.0) * 500
+        if chart_pixel_width < 250:
+            chart_pixel_width = 250
+        chart_container_col_width = round((len(weights) / 60.0) * 6)
+        if chart_container_col_width < 4:
+            chart_container_col_width = 4
+        elif chart_container_col_width >= 5:
+            chart_container_col_width = 6
+        elif chart_container_col_width >= 4:
+            chart_container_col_width = 5
+
+        mark_bar_args = {}
+        if len(weights) == 1:
+            mark_bar_args["size"] = 20
+
+        chart = {}
+        if partition_object.get("bins"):
+            bins = partition_object["bins"]
+            bins_x1 = [round(value, 1) for value in bins[:-1]]
+            bins_x2 = [round(value, 1) for value in bins[1:]]
+
+            df = pd.DataFrame(
+                {
+                    "bin_min": bins_x1,
+                    "bin_max": bins_x2,
+                    "fraction": weights,
+                }
+            )
+
+            bars = (
+                alt.Chart(df)
+                .mark_bar()
+                .encode(
+                    x="bin_min:O",
+                    x2="bin_max:O",
+                    y="fraction:Q",
+                    tooltip=["bin_min", "bin_max", "fraction"],
+                )
+                .properties(width=chart_pixel_width, height=400, autosize="fit")
+            )
+
+            chart = bars.to_dict()
+        elif partition_object.get("values"):
+            values = partition_object["values"]
+
+            df = pd.DataFrame({"values": values, "fraction": weights})
+
+            bars = (
+                alt.Chart(df)
+                .mark_bar()
+                .encode(x="values:N", y="fraction:Q", tooltip=["values", "fraction"])
+                .properties(width=chart_pixel_width, height=400, autosize="fit")
+            )
+            chart = bars.to_dict()
+
+        return chart, chart_container_col_width
 
     @classmethod
     def _get_kl_divergence_partition_object_table(cls, partition_object, header=None):
@@ -748,18 +889,14 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 if idx == len(fractions) - 1:
                     table_rows.append(
                         [
-                            "[{} - {}]".format(
-                                num_to_str(bins[idx]), num_to_str(bins[idx + 1])
-                            ),
+                            f"[{num_to_str(bins[idx])} - {num_to_str(bins[idx + 1])}]",
                             num_to_str(fraction),
                         ]
                     )
                 else:
                     table_rows.append(
                         [
-                            "[{} - {})".format(
-                                num_to_str(bins[idx]), num_to_str(bins[idx + 1])
-                            ),
+                            f"[{num_to_str(bins[idx])} - {num_to_str(bins[idx + 1])})",
                             num_to_str(fraction),
                         ]
                     )
@@ -828,19 +965,225 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
             }
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    def _prescriptive_renderer(
+    def _atomic_partition_object_table_template(cls, partition_object: dict):
+        table_rows = []
+        fractions = partition_object["weights"]
+
+        if partition_object.get("bins"):
+            bins = partition_object["bins"]
+
+            for idx, fraction in enumerate(fractions):
+                interval_start = num_to_str(bins[idx])
+                interval_end = num_to_str(bins[idx + 1])
+                interval_closing_symbol = "]" if idx == (len(fractions) - 1) else ")"
+                table_rows.append(
+                    [
+                        {
+                            "type": "string",
+                            "value": f"[{interval_start} - {interval_end}{interval_closing_symbol}",
+                        },
+                        {"type": "string", "value": num_to_str(fraction)},
+                    ]
+                )
+        else:
+            values = partition_object["values"]
+            table_rows = [
+                [
+                    {"schema": {"type": "string"}, "value": str(value)},
+                    {"schema": {"type": "string"}, "value": num_to_str(fractions[idx])},
+                ]
+                for idx, value in enumerate(values)
+            ]
+
+        header_row = [
+            {
+                "schema": {"type": "string"},
+                "value": "Interval" if partition_object.get("bins") else "Value",
+            },
+            {"schema": {"type": "string"}, "value": "Fraction"},
+        ]
+
+        return header_row, table_rows
+
+    @classmethod
+    def _atomic_prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            [
+                "column",
+                "partition_object",
+                "threshold",
+                "row_condition",
+                "condition_parser",
+            ],
+        )
+        header_params_with_json_schema = {
+            "column": {"schema": {"type": "string"}, "value": params.get("column")},
+            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
+            "threshold": {
+                "schema": {"type": "number"},
+                "value": params.get("threshold"),
+            },
+            "row_condition": {
+                "schema": {"type": "string"},
+                "value": params.get("row_condition"),
+            },
+            "condition_parser": {
+                "schema": {"type": "string"},
+                "value": params.get("condition_parser"),
+            },
+        }
+
+        expected_partition_object = params.get("partition_object")
+        if expected_partition_object is None:
+            expected_partition_object = {}
+        weights = expected_partition_object.get("weights")
+        if weights is None:
+            weights = []
+
+        chart = None
+        chart_container_col_width = None
+        distribution_table_header_row = None
+        distribution_table_rows = None
+
+        # generate template string for header
+        if not expected_partition_object:
+            header_template_str = "can match any distribution."
+        else:
+            header_template_str = (
+                "Kullback-Leibler (KL) divergence with respect to the following distribution must be "
+                "lower than $threshold."
+            )
+
+        # optionally, add column name
+        if include_column_name:
+            header_template_str = f"$column {header_template_str}"
+
+        # generate table or chart depending on number of weights
+        if len(weights) > 60:
+            (
+                distribution_table_header_row,
+                distribution_table_rows,
+            ) = cls._atomic_partition_object_table_template(
+                partition_object=expected_partition_object
+            )
+        else:
+            chart, chart_container_col_width = cls._atomic_kl_divergence_chart_template(
+                partition_object=expected_partition_object
+            )
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
+            header_template_str = (
+                f"{conditional_template_str}, then {header_template_str}"
+            )
+            header_params_with_json_schema.update(conditional_params)
+
+        return (
+            header_template_str,
+            header_params_with_json_schema,
+            chart,
+            chart_container_col_width,
+            distribution_table_header_row,
+            distribution_table_rows,
+            styling,
+        )
+
+    @classmethod
+    @renderer(renderer_type=AtomicPrescriptiveRendererType.SUMMARY)
+    @render_evaluation_parameter_string
+    def _prescriptive_summary(
+        cls,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
+        **kwargs,
+    ):
+        """
+        Rendering function that is utilized by GE Cloud Front-end
+        """
+        (
+            header_template_str,
+            header_params_with_json_schema,
+            chart,
+            _,
+            distribution_table_header_row,
+            distribution_table_rows,
+            _,
+        ) = cls._atomic_prescriptive_template(
+            configuration, result, language, runtime_configuration, **kwargs
+        )
+
+        if chart is not None:
+            value_obj = renderedAtomicValueSchema.load(
+                {
+                    "header": {
+                        "schema": {"type": "StringValueType"},
+                        "value": {
+                            "template": header_template_str,
+                            "params": header_params_with_json_schema,
+                        },
+                    },
+                    "graph": chart,
+                    "schema": {"type": "GraphType"},
+                }
+            )
+            value_type = "GraphType"
+        else:
+            value_obj = renderedAtomicValueSchema.load(
+                {
+                    "header": {
+                        "schema": {"type": "StringValueType"},
+                        "value": {
+                            "template": header_template_str,
+                            "params": header_params_with_json_schema,
+                        },
+                    },
+                    "header_row": distribution_table_header_row,
+                    "table": distribution_table_rows,
+                    "schema": {"type": "TableType"},
+                }
+            )
+            value_type = "TableType"
+
+        return RenderedAtomicContent(
+            name="atomic.prescriptive.summary",
+            value=value_obj,
+            value_type=value_type,
+        )
+
+    @classmethod
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
+        cls,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = (
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -867,14 +1210,14 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
             )
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         expectation_string_obj = {
@@ -888,14 +1231,142 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
             return [expectation_string_obj]
 
     @classmethod
-    @renderer(renderer_type="renderer.diagnostic.observed_value")
+    def _atomic_diagnostic_observed_value_template(
+        cls,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
+        **kwargs,
+    ):
+        observed_partition_object = result.result.get("details", {}).get(
+            "observed_partition", {}
+        )
+        weights = observed_partition_object.get("weights", [])
+
+        observed_value = (
+            num_to_str(result.result.get("observed_value"))
+            if result.result.get("observed_value")
+            else result.result.get("observed_value")
+        )
+        header_template_str = "KL Divergence: $observed_value"
+        header_params_with_json_schema = {
+            "observed_value": {
+                "schema": {"type": "string"},
+                "value": str(observed_value)
+                if observed_value
+                else "None (-infinity, infinity, or NaN)",
+            }
+        }
+
+        chart = None
+        chart_container_col_width = None
+        distribution_table_header_row = None
+        distribution_table_rows = None
+
+        if len(weights) > 60:
+            (
+                distribution_table_header_row,
+                distribution_table_rows,
+            ) = cls._atomic_partition_object_table_template(
+                partition_object=observed_partition_object
+            )
+        else:
+            chart, chart_container_col_width = cls._atomic_kl_divergence_chart_template(
+                partition_object=observed_partition_object
+            )
+
+        return (
+            header_template_str,
+            header_params_with_json_schema,
+            chart,
+            chart_container_col_width,
+            distribution_table_header_row,
+            distribution_table_rows,
+        )
+
+    @classmethod
+    @renderer(renderer_type=AtomicDiagnosticRendererType.OBSERVED_VALUE)
+    def _atomic_diagnostic_observed_value(
+        cls,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
+        **kwargs,
+    ):
+        if not result.result.get("details"):
+            value_obj = renderedAtomicValueSchema.load(
+                {
+                    "template": "--",
+                    "params": {},
+                    "schema": {"type": "StringValueType"},
+                }
+            )
+            return RenderedAtomicContent(
+                name="atomic.diagnostic.observed_value",
+                value=value_obj,
+                value_type="StringValueType",
+            )
+
+        (
+            header_template_str,
+            header_params_with_json_schema,
+            chart,
+            chart_container_col_width,
+            distribution_table_header_row,
+            distribution_table_rows,
+        ) = cls._atomic_diagnostic_observed_value_template(
+            configuration, result, language, runtime_configuration, **kwargs
+        )
+
+        if chart is not None:
+            value_obj = renderedAtomicValueSchema.load(
+                {
+                    "header": {
+                        "schema": {"type": "StringValueType"},
+                        "value": {
+                            "template": header_template_str,
+                            "params": header_params_with_json_schema,
+                        },
+                    },
+                    "graph": chart,
+                    "schema": {"type": "GraphType"},
+                }
+            )
+            value_type = "GraphType"
+        else:
+            value_obj = renderedAtomicValueSchema.load(
+                {
+                    "header": {
+                        "schema": {"type": "StringValueType"},
+                        "value": {
+                            "template": header_template_str,
+                            "params": header_params_with_json_schema,
+                        },
+                    },
+                    "header_row": distribution_table_header_row,
+                    "table": distribution_table_rows,
+                    "schema": {"type": "TableType"},
+                }
+            )
+            value_type = "TableType"
+
+        return RenderedAtomicContent(
+            name="atomic.diagnostic.observed_value",
+            value=value_obj,
+            value_type=value_type,
+        )
+
+    @classmethod
+    @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
+        **kwargs,
     ):
         if not result.result.get("details"):
             return "--"
@@ -932,14 +1403,14 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
         )
 
     @classmethod
-    @renderer(renderer_type="renderer.descriptive.histogram")
+    @renderer(renderer_type=LegacyDescriptiveRendererType.HISTOGRAM)
     def _descriptive_histogram_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
+        **kwargs,
     ):
         assert result, "Must pass in result."
         observed_partition_object = result.result["details"]["observed_partition"]

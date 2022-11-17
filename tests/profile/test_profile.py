@@ -1,4 +1,5 @@
 import os
+from unittest import mock
 
 import pytest
 
@@ -37,8 +38,13 @@ def test_ColumnsExistProfiler():
     assert expectations_config.expectations[0].kwargs["column"] == "x"
 
 
-def test_BasicDatasetProfiler():
-    toy_dataset = PandasDataset({"x": [1, 2, 3]},)
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_BasicDatasetProfiler(mock_emit):
+    toy_dataset = PandasDataset(
+        {"x": [1, 2, 3]},
+    )
     assert (
         len(toy_dataset.get_expectation_suite(suppress_warnings=True).expectations) == 0
     )
@@ -79,6 +85,12 @@ def test_BasicDatasetProfiler():
     }
 
     assert expected_expectations.issubset(added_expectations)
+
+    # Note 20211209 - Currently the only method called by the Profiler that is instrumented for usage_statistics
+    # is ExpectationSuite's add_expectation(). It will not send a usage_stats event when called from a Profiler.
+    # this number can change in the future our instrumentation changes.
+    assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
 
 
 def test_BasicDatasetProfiler_null_column():
@@ -265,6 +277,7 @@ def test_BasicDatasetProfiler_with_context(filesystem_csv_data_context):
         "batch_kwargs",
         "batch_markers",
         "batch_parameters",
+        "expectation_suite_meta",
         "expectation_suite_name",
         "great_expectations_version",
         "run_id",
@@ -346,8 +359,8 @@ def test_context_profiler_with_nonexisting_data_asset_name(filesystem_csv_data_c
 
 def test_context_profiler_with_non_existing_generator(filesystem_csv_data_context):
     """
-    If a non-existing generator name is passed to the profiling method
-in the generator_name argument, the profiling method must raise an exception.
+        If a non-existing generator name is passed to the profiling method
+    in the generator_name argument, the profiling method must raise an exception.
     """
     context = filesystem_csv_data_context
 
@@ -374,7 +387,9 @@ def test_context_profiler_without_generator_name_arg_on_datasource_with_multiple
         "rad_datasource",
         "second_generator",
         "SubdirReaderBatchKwargsGenerator",
-        **{"base_directory": str(filesystem_csv_2),}
+        **{
+            "base_directory": str(filesystem_csv_2),
+        }
     )
 
     assert isinstance(context.datasources["rad_datasource"], PandasDatasource)

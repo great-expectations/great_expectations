@@ -1,0 +1,115 @@
+
+Checking project...
+
+================================================================================
+
+
+Your project appears to have an out-of-date config version (1.0) - the version number must be at least 3.
+
+Would you like to run the Upgrade Helper to bring your project up-to-date? [Y/n]: 
+
+================================================================================
+
+++=====================================================++
+|| UpgradeHelperV11: Upgrade Overview (V2-API Version) ||
+++=====================================================++
+
+**WARNING**
+You have run the 'great_expectations project upgrade' command using the --v2-api flag, which is not able to perform the full upgrade to the configuration (3.0) that is fully compatible with the V3-API
+
+Please re-run the 'great_expectations project upgrade' command without the --v2-api flag.
+
+UpgradeHelperV11 will upgrade your project to be compatible with Great Expectations 0.11.x.
+
+**WARNING**: Before proceeding, please make sure you have appropriate backups of your project.
+
+Automated Steps
+================
+
+The following Stores and/or Data Docs sites will be upgraded:
+
+    - Validation Stores: validations_store
+    - Data Docs Sites: local_site
+
+Manual Steps
+=============
+
+No manual upgrade steps are required.
+
+Upgrade Confirmation
+=====================
+
+Please consult the 0.11.x migration guide for instructions on how to complete any required manual steps or
+to learn more about the automated upgrade process:
+
+    https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html#id1
+
+Would you like to proceed with the project upgrade? [Y/n]: 
+
+Upgrading project...
+
+================================================================================
+
+++================++
+|| Upgrade Report ||
+++================++
+
+Your project was successfully upgraded to be compatible with Great Expectations 0.11.x.
+The config_version of your great_expectations.yml has been automatically incremented to 2.0.
+
+A log detailing the upgrade can be found here:
+
+    - GE_PROJECT_DIR/uncommitted/logs/project_upgrades/UpgradeHelperV11_20190926T134241.000000Z.json
+++=====================================================++
+|| UpgradeHelperV13: Upgrade Overview (V2-API Version) ||
+++=====================================================++
+
+**WARNING**
+You have run the 'great_expectations project upgrade' command using the --v2-api flag, which is not able to perform the full upgrade to the configuration (3.0) that is fully compatible with the V3-API
+
+Please re-run the 'great_expectations project upgrade' command without the --v2-api flag.
+
+UpgradeHelperV13 will upgrade your project to be compatible with Great Expectations V3 API.
+
+**WARNING**: Before proceeding, please make sure you have appropriate backups of your project.
+
+Automated Steps
+================
+
+The following Stores and/or Store Names will be upgraded:
+
+    - Stores: checkpoint_store
+    - Store Names: checkpoint_store_name
+
+Manual Steps
+=============
+
+No manual upgrade steps are required.
+
+Upgrade Confirmation
+=====================
+
+Please consult the V3 API migration guide to learn more about the automated upgrade process:
+
+    https://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html
+
+Would you like to proceed with the project upgrade? [Y/n]: 
+
+Upgrading project...
+
+================================================================================
+
+++================++
+|| Upgrade Report ||
+++================++
+
+Your project was successfully upgraded to be compatible with Great Expectations V3 API.
+The config_version of your great_expectations.yml has been automatically incremented to 3.0.
+
+A log detailing the upgrade can be found here:
+
+    - GE_PROJECT_DIR/uncommitted/logs/project_upgrades/UpgradeHelperV13_20190926T134241.000000Z.json
+
+================================================================================
+
+Upgrade complete. Exiting...

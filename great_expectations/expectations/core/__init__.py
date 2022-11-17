@@ -41,7 +41,6 @@ from .expect_column_value_lengths_to_be_between import (
     ExpectColumnValueLengthsToBeBetween,
 )
 from .expect_column_value_lengths_to_equal import ExpectColumnValueLengthsToEqual
-from .expect_column_value_ratio_to_be_between import ExpectColumnValueRatioToBeBetween
 from .expect_column_value_z_scores_to_be_less_than import (
     ExpectColumnValueZScoresToBeLessThan,
 )
@@ -86,6 +85,7 @@ from .expect_column_values_to_not_match_regex_list import (
     ExpectColumnValuesToNotMatchRegexList,
 )
 from .expect_compound_columns_to_be_unique import ExpectCompoundColumnsToBeUnique
+from .expect_multicolumn_sum_to_equal import ExpectMulticolumnSumToEqual
 from .expect_multicolumn_values_to_be_unique import ExpectMulticolumnValuesToBeUnique
 from .expect_select_column_values_to_be_unique_within_record import (
     ExpectSelectColumnValuesToBeUniqueWithinRecord,

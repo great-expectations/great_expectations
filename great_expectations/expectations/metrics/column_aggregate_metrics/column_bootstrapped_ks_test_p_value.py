@@ -1,28 +1,18 @@
 import logging
 
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
-    column_aggregate_partial,
+from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
 from great_expectations.expectations.metrics.util import (
-    _scipy_distribution_positional_args_from_dict,
     is_valid_continuous_partition_object,
-    validate_distribution_parameters,
 )
 
 logger = logging.getLogger(__name__)
 
 try:
-    from pyspark.sql.functions import stddev_samp
+    from pyspark.sql.functions import stddev_samp  # noqa: F401
 except ImportError as e:
     logger.debug(str(e))
     logger.debug(
@@ -33,7 +23,7 @@ import numpy as np
 from scipy import stats
 
 
-class ColumnBootstrappedKSTestPValue(ColumnMetricProvider):
+class ColumnBootstrappedKSTestPValue(ColumnAggregateMetricProvider):
     """MetricProvider Class for Aggregate Standard Deviation metric"""
 
     metric_name = "column.bootstrapped_ks_test_p_value"

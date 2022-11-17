@@ -1,0 +1,4 @@
+id,event_type,user_id,event_ts,server_ts,device_ts,user_agent
+65eb2c03-458d-4623-bfd3-fd3463480c55,73,397433,2004-10-19 10:23:54,2004-10-19 10:23:54,2004-10-19 10:23:54,"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+e0c1b01f-790b-4cd5-8e3c-399c5ccc43d3,19,9488404,2004-10-19 10:23:55,2004-10-19 10:23:55,2004-10-19 10:23:55,"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+109f9cc6-84f5-421e-9857-4796e5a8abfb,22,2388055,2004-10-19 11:05:20,2004-10-19 11:05:20,2004-10-19 11:05:22,"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"

@@ -1,29 +1,148 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.expectation import TableExpectation
+from great_expectations.expectations.expectation import (
+    TableExpectation,
+    render_evaluation_parameter_string,
+)
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import substitute_none_for_missing
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,
+    RuleBasedProfilerConfig,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    PARAMETER_KEY,
+    VARIABLES_KEY,
+)
 
 
 class ExpectTableColumnsToMatchSet(TableExpectation):
+    """Expect the columns to match an *unordered* set.
+
+    expect_table_columns_to_match_set is a :func:`expectation \
+    <great_expectations.validator.validator.Validator.expectation>`, not a
+    ``column_map_expectation`` or ``column_aggregate_expectation``.
+
+    Args:
+        column_set (list of str): \
+            The column names, in any order.
+        exact_match (boolean): \
+            Whether the list of columns must exactly match the observed columns.
+
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+            For more detail, see :ref:`result_format <result_format>`.
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object. \
+            For more detail, see :ref:`include_config`.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see :ref:`catch_exceptions`.
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see :ref:`meta`.
+
+    Returns:
+        An ExpectationSuiteValidationResult
+
+        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+    """
+
+    library_metadata = {
+        "maturity": "production",
+        "tags": ["core expectation", "table expectation"],
+        "contributors": [
+            "@great_expectations",
+        ],
+        "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
+    }
+
     metric_dependencies = ("table.columns",)
     success_keys = (
         "column_set",
         "exact_match",
+        "auto",
+        "profiler_config",
     )
+
+    mean_table_columns_set_match_multi_batch_parameter_builder_config = (
+        ParameterBuilderConfig(
+            module_name="great_expectations.rule_based_profiler.parameter_builder",
+            class_name="MeanTableColumnsSetMatchMultiBatchParameterBuilder",
+            name="column_names_set_estimator",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            evaluation_parameter_builder_configs=None,
+        )
+    )
+    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
+        mean_table_columns_set_match_multi_batch_parameter_builder_config,
+    ]
+    default_profiler_config = RuleBasedProfilerConfig(
+        name="expect_table_columns_to_match_set",  # Convention: use "expectation_type" as profiler name.
+        config_version=1.0,
+        variables={},
+        rules={
+            "expect_table_columns_to_match_set": {
+                "variables": {
+                    "exact_match": None,
+                    "success_ratio": 1.0,
+                },
+                "domain_builder": {
+                    "class_name": "TableDomainBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                },
+                "expectation_configuration_builders": [
+                    {
+                        "expectation_type": "expect_table_columns_to_match_set",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
+                        "condition": f"{PARAMETER_KEY}{mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}success_ratio >= {VARIABLES_KEY}success_ratio",
+                        "column_set": f"{PARAMETER_KEY}{mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
+                        "exact_match": f"{VARIABLES_KEY}exact_match",
+                        "meta": {
+                            "profiler_details": f"{PARAMETER_KEY}{mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                        },
+                    },
+                ],
+            },
+        },
+    )
+
     default_kwarg_values = {
         "column_set": None,
         "exact_match": True,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
+        "auto": False,
+        "profiler_config": default_profiler_config,
     }
+    args_keys = (
+        "column_set",
+        "exact_match",
+    )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -32,7 +151,7 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
         Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
 
         # Setting up a configuration
@@ -51,22 +170,19 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
                 ), 'Evaluation Parameter dict for column_set kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    def _prescriptive_renderer(
+    def _atomic_prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -89,7 +205,57 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
             template_str = f"Must have {exact_match_str} these columns (in any order): {column_list_template_str}"
 
             for idx in range(len(params["column_list"])):
-                params["column_list_" + str(idx)] = params["column_list"][idx]
+                params[f"column_list_{str(idx)}"] = params["column_list"][idx]
+
+        params_with_json_schema = {
+            "column_list": {
+                "schema": {"type": "array"},
+                "value": params.get("column_list"),
+            },
+            "exact_match": {
+                "schema": {"type": "boolean"},
+                "value": params.get("exact_match"),
+            },
+        }
+        return (template_str, params_with_json_schema, styling)
+
+    @classmethod
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
+        cls,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = (
+            False if runtime_configuration.get("include_column_name") is False else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs, ["column_set", "exact_match"]
+        )
+
+        if params["column_set"] is None:
+            template_str = "Must specify a set or list of columns."
+
+        else:
+            # standardize order of the set for output
+            params["column_list"] = list(params["column_set"])
+
+            column_list_template_str = ", ".join(
+                [f"$column_list_{idx}" for idx in range(len(params["column_list"]))]
+            )
+
+            exact_match_str = "exactly" if params["exact_match"] is True else "at least"
+
+            template_str = f"Must have {exact_match_str} these columns (in any order): {column_list_template_str}"
+
+            for idx in range(len(params["column_list"])):
+                params[f"column_list_{str(idx)}"] = params["column_list"][idx]
 
         return [
             RenderedStringTemplateContent(
@@ -108,8 +274,8 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         # Obtaining columns and ordered list for sake of comparison
         expected_column_set = self.get_success_kwargs(configuration).get("column_set")

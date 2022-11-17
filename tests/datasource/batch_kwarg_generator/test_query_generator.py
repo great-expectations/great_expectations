@@ -1,6 +1,13 @@
 import os
 import shutil
 
+import pytest
+
+try:
+    sqlalchemy = pytest.importorskip("sqlalchemy")
+except ImportError:
+    sqlalchemy = None
+
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.batch_kwargs_generator import (
@@ -51,7 +58,9 @@ def test_add_query(basic_sqlalchemy_datasource):
 def test_partition_id(basic_sqlalchemy_datasource):
     generator = QueryBatchKwargsGenerator(
         datasource=basic_sqlalchemy_datasource,
-        queries={"my_asset": "SELECT * FROM my_table WHERE value = $partition_id",},
+        queries={
+            "my_asset": "SELECT * FROM my_table WHERE value = $partition_id",
+        },
     )
 
     batch_kwargs = generator.build_batch_kwargs(

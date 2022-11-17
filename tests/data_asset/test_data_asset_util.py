@@ -9,12 +9,18 @@ import numpy as np
 import pytest
 
 import great_expectations as ge
-from great_expectations.core.expectation_suite import ExpectationSuiteSchema
-from tests.test_utils import expectationSuiteSchema
+from great_expectations.self_check.util import expectationSuiteSchema
 
 
-def test_recursively_convert_to_json_serializable():
-    asset = ge.dataset.PandasDataset({"x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],})
+@pytest.mark.filterwarnings(
+    "ignore:partition_data*:DeprecationWarning:great_expectations.dataset.util"
+)
+def test_recursively_convert_to_json_serializable(tmp_path):
+    asset = ge.dataset.PandasDataset(
+        {
+            "x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        }
+    )
     asset.expect_column_values_to_be_in_set(
         "x", [1, 2, 3, 4, 5, 6, 7, 8, 9], mostly=0.8
     )
@@ -31,7 +37,10 @@ def test_recursively_convert_to_json_serializable():
         "y": {"alpha": None, "beta": np.nan, "delta": np.inf, "gamma": -np.inf},
         "z": {1, 2, 3, 4, 5},
         "zz": (1, 2, 3),
-        "zzz": [datetime.datetime(2017, 1, 1), datetime.date(2017, 5, 1),],
+        "zzz": [
+            datetime.datetime(2017, 1, 1),
+            datetime.date(2017, 5, 1),
+        ],
         "np.bool": np.bool_([True, False, True]),
         "np.int_": np.int_([5, 3, 2]),
         "np.int8": np.int8([5, 3, 2]),
@@ -49,7 +58,7 @@ def test_recursively_convert_to_json_serializable():
         "np.str": np.unicode_(["hello"]),
         "yyy": decimal.Decimal(123.456),
     }
-    if platform.system() != "Windows":
+    if hasattr(np, "float128") and platform.system() != "Windows":
         x["np.float128"] = np.float128([5.999999999998786324399999999, 20.4])
 
     x = ge.data_asset.util.recursively_convert_to_json_serializable(x)
@@ -67,7 +76,7 @@ def test_recursively_convert_to_json_serializable():
 
     assert isinstance(x["np.float32"][0], float)
     assert isinstance(x["np.float64"][0], float)
-    if platform.system() != "Windows":
+    if hasattr(np, "float128") and platform.system() != "Windows":
         assert isinstance(x["np.float128"][0], float)
     # self.assertEqual(type(x['np.complex64'][0]), complex)
     # self.assertEqual(type(x['np.complex128'][0]), complex)
@@ -75,7 +84,7 @@ def test_recursively_convert_to_json_serializable():
     assert isinstance(x["np.float_"][0], float)
 
     # Make sure nothing is going wrong with precision rounding
-    if platform.system() != "Windows":
+    if hasattr(np, "float128") and platform.system() != "Windows":
         assert np.allclose(
             x["np.float128"][0],
             5.999999999998786324399999999,
@@ -84,15 +93,8 @@ def test_recursively_convert_to_json_serializable():
 
     # TypeError when non-serializable numpy object is in dataset.
     with pytest.raises(TypeError):
-        y = {"p": np.DataSource()}
+        y = {"p": np.DataSource(tmp_path)}
         ge.data_asset.util.recursively_convert_to_json_serializable(y)
-
-    try:
-        x = unicode("abcdefg")
-        x = ge.data_asset.util.recursively_convert_to_json_serializable(x)
-        assert isinstance(x, unicode)
-    except NameError:
-        pass
 
 
 """
@@ -101,13 +103,11 @@ The following Parent and Child classes are used for testing documentation inheri
 
 
 class Parent:
-    """Parent class docstring
-    """
+    """Parent class docstring"""
 
     @classmethod
     def expectation(cls, func):
-        """Manages configuration and running of expectation objects.
-        """
+        """Manages configuration and running of expectation objects."""
 
         @wraps(func)
         def wrapper(*args, **kwargs):

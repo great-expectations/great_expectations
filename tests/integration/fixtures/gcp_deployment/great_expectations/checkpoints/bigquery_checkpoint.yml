@@ -1,0 +1,36 @@
+name: bigquery_checkpoint
+config_version: 1.0
+template_name:
+module_name: great_expectations.checkpoint
+class_name: Checkpoint
+run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
+expectation_suite_name:
+batch_request:
+action_list:
+  - name: store_validation_result
+    action:
+      class_name: StoreValidationResultAction
+  - name: store_evaluation_params
+    action:
+      class_name: StoreEvaluationParametersAction
+  - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+      site_names: []
+evaluation_parameters: {}
+runtime_configuration: {}
+validations:
+  - batch_request:
+      datasource_name: my_bigquery_datasource
+      data_connector_name: default_runtime_data_connector_name
+      data_asset_name: taxi_data
+      batch_identifiers:
+        default_identifier_name: 1
+      runtime_parameters:
+        query: SELECT * from demo.taxi_data LIMIT 10
+      batch_spec_passthrough:
+        bigquery_temp_table: ge_temp
+    expectation_suite_name: test_bigquery_suite
+profilers: []
+ge_cloud_id:
+expectation_suite_ge_cloud_id:

@@ -2,11 +2,12 @@ import logging
 import os
 import warnings
 
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
+    BatchKwargsGenerator,
+)
 from great_expectations.datasource.types import SqlAlchemyDatasourceQueryBatchKwargs
 from great_expectations.exceptions import BatchKwargsError, ClassInstantiationError
-
-from ...data_context.util import instantiate_class_from_config
-from .batch_kwargs_generator import BatchKwargsGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +67,7 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
 
     def __init__(
         self, name="default", datasource=None, query_store_backend=None, queries=None
-    ):
+    ) -> None:
         super().__init__(name=name, datasource=datasource)
         if (
             datasource
@@ -116,7 +117,7 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
     def _get_iterator(self, data_asset_name, query_parameters=None):
         raw_query = self._get_raw_query(data_asset_name=data_asset_name)
         if raw_query is None:
-            logger.warning("No query defined for data asset: %s" % data_asset_name)
+            logger.warning(f"No query defined for data asset: {data_asset_name}")
             # There is no valid query path or temp query storage defined with the data_asset_name
             return None
 
@@ -134,15 +135,16 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
         return iter_
 
     # TODO: deprecate generator_asset argument, remove default on query arg
-    def add_query(self, generator_asset=None, query=None, data_asset_name=None):
+    def add_query(self, generator_asset=None, query=None, data_asset_name=None) -> None:
         assert query, "Please provide a query."
         assert (generator_asset and not data_asset_name) or (
             not generator_asset and data_asset_name
         ), "Please provide either generator_asset or data_asset_name."
         if generator_asset:
+            # deprecated-v0.11.0
             warnings.warn(
-                "The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
-                "Please update code accordingly.",
+                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
+                "Please use 'data_asset_name' instead.",
                 DeprecationWarning,
             )
             data_asset_name = generator_asset
@@ -175,14 +177,17 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
         return SqlAlchemyDatasourceQueryBatchKwargs(batch_kwargs)
 
     # TODO: deprecate generator_asset argument
-    def get_available_partition_ids(self, generator_asset=None, data_asset_name=None):
+    def get_available_partition_ids(
+        self, generator_asset=None, data_asset_name=None
+    ) -> None:
         assert (generator_asset and not data_asset_name) or (
             not generator_asset and data_asset_name
         ), "Please provide either generator_asset or data_asset_name."
         if generator_asset:
+            # deprecated-v0.11.0
             warnings.warn(
-                "The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
-                "Please update code accordingly.",
+                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
+                "Please use 'data_asset_name' instead.",
                 DeprecationWarning,
             )
         raise BatchKwargsError(

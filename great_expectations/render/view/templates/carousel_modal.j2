@@ -2,7 +2,7 @@
   {% set expectation_suite_name_dot_count = expectation_suite_name.count(".") -%}
 {% endif %}
 
-{% set glossary_url = "https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=walkthrough&utm_medium=glossary" %}
+{% set glossary_url = "https://greatexpectations.io/expectations" %}
 
 {% if "ValidationResults" in renderer_type or "ProfilingResults" in renderer_type %}
   {% set static_images_dir = ((expectation_suite_name_dot_count + 4) * "../") + "static/images/" -%}
@@ -82,7 +82,7 @@ img.dev-loop {
                       Welcome! Now that you have initialized your project, the best way to work with Great Expectations is in this iterative dev loop:
                   </p>
                 <ol>
-                    <li>Let Great Expectations create a (terrible) first draft suite, by running <code class="inline-code bg-light">great_expectations suite new</code>.</li>
+                    <li>Let Great Expectations create a simple first draft suite, by running <code class="inline-code bg-light">great_expectations suite new</code>.</li>
                     <li>View the suite here in Data Docs.</li>
                     <li>Edit the suite in a Jupyter notebook by running <code class="inline-code bg-light">great_expectations suite edit</code></li>
                     <li>Repeat Steps 2-3 until you are happy with your suite.</li>

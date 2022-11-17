@@ -1,46 +1,43 @@
-from typing import Dict, List, Optional, Union
+from typing import Optional
 
-import numpy as np
-import pandas as pd
-
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
-
-from ...core.batch import Batch
-from ...data_asset.util import parse_result_format
-from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
-from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import (
-    num_to_str,
-    parse_row_condition_string_pandas_engine,
-    substitute_none_for_missing,
-)
-from ..expectation import (
+from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    Expectation,
     InvalidExpectationConfigurationError,
-    _format_map_output,
+    render_evaluation_parameter_string,
 )
-from ..registry import extract_metrics, get_metric_kwargs
+from great_expectations.render import LegacyRendererType
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.util import substitute_none_for_missing
 
 try:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: F401
 except ImportError:
     pass
 
 
 class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
+    """Expect the column entries to be strings that match a given like pattern expression."""
+
+    library_metadata = {
+        "maturity": "production",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": [
+            "@great_expectations",
+        ],
+        "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
+    }
+
     map_metric = "column_values.match_like_pattern"
     success_keys = (
         "mostly",
         "like_pattern",
     )
-
     default_kwarg_values = {
         "like_pattern": None,
         "row_condition": None,
@@ -50,8 +47,14 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": True,
     }
+    args_keys = (
+        "column",
+        "like_pattern",
+    )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         super().validate_configuration(configuration)
         try:
             assert "like_pattern" in configuration.kwargs, "Must provide like_pattern"
@@ -65,22 +68,21 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs
-    ):
+    ) -> None:
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(

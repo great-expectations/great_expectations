@@ -12,6 +12,7 @@
     },
     "tests" : [{
       "title" : "basic_positive_test",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "in": {
         "column": "x"
@@ -46,6 +47,7 @@
       }
     },{
       "title" : "basic_negative_test",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "in": {
         "column": "w"
@@ -54,7 +56,10 @@
         "unexpected_list": [4,3,2,1],
         "unexpected_index_list": [6,7,8,9],
         "success": false
-      }
+      },
+      "only_for": [
+            "pandas"
+          ]
     },{
       "title" : "positive_test_with_parse_strings_as_datetimes",
       "exact_match_out" : false,

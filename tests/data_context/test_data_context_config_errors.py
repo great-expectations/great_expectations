@@ -47,7 +47,13 @@ def test_DataContext_raises_error_on_invalid_top_level_type():
     with pytest.raises(ge_exceptions.InvalidDataContextConfigError) as exc:
         DataContext(local_dir)
 
-    assert "data_docs_sites" in exc.value.messages
+    error_messages = []
+    if exc.value.messages and len(exc.value.messages) > 0:
+        error_messages.extend(exc.value.messages)
+    if exc.value.message:
+        error_messages.append(exc.value.message)
+    error_messages = " ".join(error_messages)
+    assert "data_docs_sites" in error_messages
 
 
 def test_DataContext_raises_error_on_invalid_config_version():
@@ -57,7 +63,13 @@ def test_DataContext_raises_error_on_invalid_config_version():
     with pytest.raises(ge_exceptions.InvalidDataContextConfigError) as exc:
         DataContext(local_dir)
 
-    assert "config_version" in exc.value.messages
+    error_messages = []
+    if exc.value.messages and len(exc.value.messages) > 0:
+        error_messages.extend(exc.value.messages)
+    if exc.value.message:
+        error_messages.append(exc.value.message)
+    error_messages = " ".join(error_messages)
+    assert "config_version" in error_messages
 
 
 def test_DataContext_raises_error_on_old_config_version():

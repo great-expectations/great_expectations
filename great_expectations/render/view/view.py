@@ -11,12 +11,16 @@ from jinja2 import (
     Environment,
     FileSystemLoader,
     PackageLoader,
-    contextfilter,
     select_autoescape,
 )
 
+try:
+    from jinja2 import contextfilter
+except ImportError:
+    from jinja2 import pass_context as contextfilter
+
 from great_expectations import __version__ as ge_version
-from great_expectations.render.types import (
+from great_expectations.render import (
     RenderedComponentContent,
     RenderedContent,
     RenderedDocumentContent,
@@ -29,7 +33,7 @@ class NoOpTemplate:
 
 
 class PrettyPrintTemplate:
-    def render(self, document, indent=2):
+    def render(self, document, indent=2) -> None:
         print(json.dumps(document, indent=indent))
 
 
@@ -53,7 +57,9 @@ class DefaultJinjaView:
 
     _template = NoOpTemplate
 
-    def __init__(self, custom_styles_directory=None, custom_views_directory=None):
+    def __init__(
+        self, custom_styles_directory=None, custom_views_directory=None
+    ) -> None:
         self.custom_styles_directory = custom_styles_directory
         self.custom_views_directory = custom_views_directory
 
@@ -119,9 +125,9 @@ class DefaultJinjaView:
             datetime_iso_string = datetime.datetime.now(datetime.timezone.utc).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             )
-            url += "?d=" + datetime_iso_string
+            url += f"?d={datetime_iso_string}"
         if data_context_id:
-            url = url + "&dataContextId=" if add_datetime else url + "?dataContextId="
+            url = f"{url}&dataContextId=" if add_datetime else f"{url}?dataContextId="
             url += data_context_id
         return url
 
@@ -158,7 +164,7 @@ class DefaultJinjaView:
                 ):
                     new_content_block_id = None
                     if content_block_id:
-                        new_content_block_id = content_block_id + "-" + str(idx)
+                        new_content_block_id = f"{content_block_id}-{str(idx)}"
                     rendered_block += self.render_content_block(
                         jinja_context,
                         content_block_el,
@@ -169,13 +175,14 @@ class DefaultJinjaView:
                     if render_to_markdown:
                         rendered_block += str(content_block_el)
                     else:
-                        rendered_block += "<span>" + str(content_block_el) + "</span>"
+                        rendered_block += f"<span>{str(content_block_el)}</span>"
             return rendered_block
         elif not isinstance(content_block, dict):
             return content_block
         content_block_type = content_block.get("content_block_type")
         if content_block_type is None:
             return content_block
+
         if render_to_markdown:
             template_filename = f"markdown_{content_block_type}.j2"
         else:
@@ -193,7 +200,9 @@ class DefaultJinjaView:
                 jinja_context, content_block=content_block, index=index
             )
 
-    def render_dict_values(self, context, dict_, index=None, content_block_id=None):
+    def render_dict_values(
+        self, context, dict_, index=None, content_block_id=None
+    ) -> None:
         for key, val in dict_.items():
             if key.startswith("_"):
                 continue
@@ -254,7 +263,7 @@ class DefaultJinjaView:
         else:
             if type(class_list) == str:
                 raise TypeError("classes must be a list, not a string.")
-            class_str = 'class="' + " ".join(class_list) + '" '
+            class_str = f"class=\"{' '.join(class_list)}\" "
 
         attribute_dict = styling.get("attributes", None)
         if attribute_dict is None:
@@ -262,26 +271,29 @@ class DefaultJinjaView:
         else:
             attribute_str = ""
             for k, v in attribute_dict.items():
-                attribute_str += k + '="' + v + '" '
+                attribute_str += f'{k}="{v}" '
 
         style_dict = styling.get("styles", None)
         if style_dict is None:
             style_str = ""
         else:
             style_str = 'style="'
-            style_str += " ".join([k + ":" + v + ";" for k, v in style_dict.items()])
+            style_str += " ".join([f"{k}:{v};" for k, v in style_dict.items()])
             style_str += '" '
 
         styling_string = pTemplate("$classes$attributes$style").substitute(
-            {"classes": class_str, "attributes": attribute_str, "style": style_str,}
+            {
+                "classes": class_str,
+                "attributes": attribute_str,
+                "style": style_str,
+            }
         )
 
         return styling_string
 
     def render_styling_from_string_template(self, template):
         # NOTE: We should add some kind of type-checking to template
-        """This method is a thin wrapper use to call `render_styling` from within jinja templates.
-        """
+        """This method is a thin wrapper use to call `render_styling` from within jinja templates."""
         if not isinstance(template, (dict, OrderedDict)):
             return template
 
@@ -362,8 +374,10 @@ class DefaultJinjaView:
             if "default" in template["styling"]:
                 default_parameter_styling = template["styling"]["default"]
                 default_param_tag = default_parameter_styling.get("tag", "span")
-                base_param_template_string = "<{param_tag} $styling>$content</{param_tag}>".format(
-                    param_tag=default_param_tag
+                base_param_template_string = (
+                    "<{param_tag} $styling>$content</{param_tag}>".format(
+                        param_tag=default_param_tag
+                    )
                 )
 
                 for parameter in template["params"].keys():
@@ -391,8 +405,10 @@ class DefaultJinjaView:
                     if parameter not in params:
                         continue
                     param_tag = parameter_styling.get("tag", "span")
-                    param_template_string = "<{param_tag} $styling>$content</{param_tag}>".format(
-                        param_tag=param_tag
+                    param_template_string = (
+                        "<{param_tag} $styling>$content</{param_tag}>".format(
+                            param_tag=param_tag
+                        )
                     )
                     params[parameter] = pTemplate(
                         param_template_string
@@ -422,14 +438,14 @@ class DefaultJinjaView:
             )
         ).safe_substitute(template.get("params", {}))
 
-    def _validate_document(self, document):
+    def _validate_document(self, document) -> None:
         raise NotImplementedError
 
 
 class DefaultJinjaPageView(DefaultJinjaView):
     _template = "page.j2"
 
-    def _validate_document(self, document):
+    def _validate_document(self, document) -> None:
         assert isinstance(document, RenderedDocumentContent)
 
 
@@ -440,7 +456,7 @@ class DefaultJinjaIndexPageView(DefaultJinjaPageView):
 class DefaultJinjaSectionView(DefaultJinjaView):
     _template = "section.j2"
 
-    def _validate_document(self, document):
+    def _validate_document(self, document) -> None:
         assert isinstance(
             document["section"], dict
         )  # For now low-level views take dicts
@@ -449,7 +465,7 @@ class DefaultJinjaSectionView(DefaultJinjaView):
 class DefaultJinjaComponentView(DefaultJinjaView):
     _template = "component.j2"
 
-    def _validate_document(self, document):
+    def _validate_document(self, document) -> None:
         assert isinstance(
             document["content_block"], dict
         )  # For now low-level views take dicts
@@ -473,6 +489,7 @@ class DefaultMarkdownPageView(DefaultJinjaView):
         Handle list as well as single document
         """
         if isinstance(document, list):
+            # We need to keep this as super(DefaultMarkdownPageView, self); otherwise a wrong render will be called.
             return [
                 super(DefaultMarkdownPageView, self).render(
                     document=d, template=template, **kwargs
@@ -497,6 +514,11 @@ class DefaultMarkdownPageView(DefaultJinjaView):
         if not isinstance(template, (dict, OrderedDict)):
             return template
 
+        # replace and render any horizontal lines using ***
+        tag = template.get("tag", None)
+        if tag and tag == "hr":
+            template["template"] = "***"
+
         # if there are any groupings of two or more $, we need to double the groupings to account
         # for template string substitution escaping
         template["template"] = re.sub(
@@ -517,10 +539,19 @@ class DefaultMarkdownPageView(DefaultJinjaView):
             if parameter == "html_success_icon":
                 template["params"][parameter] = ""
                 continue
+            # to escape any values that are '*' which, when combined with bold ('**') in markdown,
+            # does not give the output we want.
+            elif template["params"][parameter] == "*":
+                template["params"][parameter] = "\\*"
+                continue
 
             template["params"][parameter] = pTemplate(
                 base_param_template_string
-            ).safe_substitute({"content": template["params"][parameter],})
+            ).safe_substitute(
+                {
+                    "content": template["params"][parameter],
+                }
+            )
 
         template["template"] = template.get("template", "").replace(
             "$PARAMETER", "$$PARAMETER"

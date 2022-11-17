@@ -3,33 +3,26 @@ import logging
 import re
 import traceback
 
-import altair as alt
-import pandas as pd
-
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
-from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less_than import (
-    ExpectColumnKlDivergenceToBeLessThan,
-)
 from great_expectations.expectations.registry import get_renderer_impl
-from great_expectations.render.renderer.content_block import (
-    ExceptionListContentBlockRenderer,
-)
-from great_expectations.render.renderer.renderer import Renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
+    LegacyDescriptiveRendererType,
     RenderedBulletListContent,
-    RenderedGraphContent,
     RenderedHeaderContent,
     RenderedSectionContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
     TextContent,
-    ValueListContent,
 )
+from great_expectations.render.renderer.content_block import (
+    ExceptionListContentBlockRenderer,
+)
+from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.util import load_class, verify_dynamic_loading_support
 
 logger = logging.getLogger(__name__)
@@ -40,7 +33,7 @@ def convert_to_string_and_escape(var):
 
 
 class ColumnSectionRenderer(Renderer):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
     @classmethod
@@ -64,7 +57,9 @@ class ColumnSectionRenderer(Renderer):
 
 
 class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
-    def __init__(self, properties_table_renderer=None, runtime_environment=None):
+    def __init__(
+        self, properties_table_renderer=None, runtime_environment=None
+    ) -> None:
         super().__init__()
         if properties_table_renderer is None:
             properties_table_renderer = {
@@ -115,20 +110,23 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                         getattr(self, content_block_function_name)(evrs)
                     )
             except Exception as e:
-                exception_message = f"""\
+                exception_message = """\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
 not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
 diagnose and repair the underlying issue.  Detailed information follows:
                 """
                 exception_traceback = traceback.format_exc()
                 exception_message += f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
-                logger.error(exception_message, e, exc_info=True)
+                logger.error(exception_message)
 
         # NOTE : Some render* functions return None so we filter them out
         populated_content_blocks = list(filter(None, content_blocks))
 
         return RenderedSectionContent(
-            **{"section_name": column, "content_blocks": populated_content_blocks,}
+            **{
+                "section_name": column,
+                "content_blocks": populated_content_blocks,
+            }
         )
 
     @classmethod
@@ -160,9 +158,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     **{
                         "content_block_type": "string_template",
                         "string_template": {
-                            "template": "Type: {column_type}".format(
-                                column_type=column_type
-                            ),
+                            "template": f"Type: {column_type}",
                             "tooltip": {
                                 "content": "expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list",
                             },
@@ -182,7 +178,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         )
 
     @classmethod
-    def _render_expectation_types(cls, evrs, content_blocks):
+    def _render_expectation_types(cls, evrs, content_blocks) -> None:
         # NOTE: The evr-fetching function is an kinda similar to the code other_section_
         # renderer.ProfilingResultsOverviewSectionRenderer._render_expectation_types
 
@@ -245,9 +241,13 @@ diagnose and repair the underlying issue.  Detailed information follows:
                                 "aria-expanded": "true",
                                 "aria-controls": "collapseExample",
                             },
-                            "styles": {"cursor": "pointer",},
+                            "styles": {
+                                "cursor": "pointer",
+                            },
                         },
-                        "body": {"classes": ["list-group", "collapse"],},
+                        "body": {
+                            "classes": ["list-group", "collapse"],
+                        },
                     },
                 }
             )
@@ -294,16 +294,16 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
         quantile_table_renderer = get_renderer_impl(
             object_name="expect_column_quantile_values_to_be_between",
-            renderer_type="renderer.descriptive.quantile_table",
+            renderer_type=LegacyDescriptiveRendererType.QUANTILE_TABLE,
         )[1]
         return quantile_table_renderer(result=quantile_evr)
 
     @classmethod
     def _render_stats_table(cls, evrs):
         expectation_renderers = {
-            "expect_column_mean_to_be_between": "renderer.descriptive.stats_table.mean_row",
-            "expect_column_min_to_be_between": "renderer.descriptive.stats_table.min_row",
-            "expect_column_max_to_be_between": "renderer.descriptive.stats_table.max_row",
+            "expect_column_mean_to_be_between": LegacyDescriptiveRendererType.STATS_TABLE_MEAN_ROW,
+            "expect_column_min_to_be_between": LegacyDescriptiveRendererType.STATS_TABLE_MIN_ROW,
+            "expect_column_max_to_be_between": LegacyDescriptiveRendererType.STATS_TABLE_MAX_ROW,
         }
 
         table_rows = []
@@ -329,7 +329,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     "table": table_rows,
                     "styling": {
                         "classes": ["col-3", "mt-1", "pl-1", "pr-1"],
-                        "body": {"classes": ["table", "table-sm", "table-unbordered"],},
+                        "body": {
+                            "classes": ["table", "table-sm", "table-unbordered"],
+                        },
                     },
                 }
             )
@@ -351,7 +353,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
         return get_renderer_impl(
             object_name="expect_column_values_to_be_in_set",
-            renderer_type="renderer.descriptive.example_values_block",
+            renderer_type=LegacyDescriptiveRendererType.EXAMPLE_VALUES_BLOCK,
         )[1](result=set_evr)
 
     def _render_histogram(self, evrs):
@@ -369,7 +371,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
         return get_renderer_impl(
             object_name="expect_column_kl_divergence_to_be_less_than",
-            renderer_type="renderer.descriptive.histogram",
+            renderer_type=LegacyDescriptiveRendererType.HISTOGRAM,
         )[1](result=kl_divergence_evr)
 
     @classmethod
@@ -385,7 +387,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
         return get_renderer_impl(
             object_name="expect_column_distinct_values_to_be_in_set",
-            renderer_type="renderer.descriptive.value_counts_bar_chart",
+            renderer_type=LegacyDescriptiveRendererType.VALUE_COUNTS_BAR_CHART,
         )[1](result=distinct_values_set_evr)
 
     @classmethod
@@ -393,7 +395,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         return ExceptionListContentBlockRenderer.render(evrs, include_column_name=False)
 
     @classmethod
-    def _render_unrecognized(cls, evrs, content_blocks):
+    def _render_unrecognized(cls, evrs, content_blocks) -> None:
         unrendered_blocks = []
         new_block = None
         for evr in evrs:
@@ -428,7 +430,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
 
 class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
-    def __init__(self, table_renderer=None):
+    def __init__(self, table_renderer=None) -> None:
         super().__init__()
         if table_renderer is None:
             table_renderer = {
@@ -468,28 +470,30 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         return validation_results, new_block
 
-    def _render_table(self, validation_results):
+    def _render_table(self, validation_results, evaluation_parameters=None):
         new_block = self._table_renderer.render(
-            validation_results, include_column_name=False
+            validation_results,
+            include_column_name=False,
+            evaluation_parameters=evaluation_parameters,
         )
-
         return [], new_block
 
-    def render(self, validation_results):
+    def render(self, validation_results, evaluation_parameters=None):
         column = self._get_column_name(validation_results)
         content_blocks = []
         remaining_evrs, content_block = self._render_header(validation_results)
         content_blocks.append(content_block)
-        remaining_evrs, content_block = self._render_table(remaining_evrs)
+        remaining_evrs, content_block = self._render_table(
+            remaining_evrs, evaluation_parameters
+        )
         content_blocks.append(content_block)
-
         return RenderedSectionContent(
             **{"section_name": column, "content_blocks": content_blocks}
         )
 
 
 class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
-    def __init__(self, bullet_list_renderer=None):
+    def __init__(self, bullet_list_renderer=None) -> None:
         super().__init__()
         if bullet_list_renderer is None:
             bullet_list_renderer = {
@@ -532,7 +536,8 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
     def _render_bullet_list(self, expectations):
 
         new_block = self._bullet_list_renderer.render(
-            expectations, include_column_name=False,
+            expectations,
+            include_column_name=False,
         )
 
         return [], new_block

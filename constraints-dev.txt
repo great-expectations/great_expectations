@@ -1,0 +1,26 @@
+# The pip resolver became more strict starting with version 20.3
+# This constraints file is "a way to specify global (version) limits for packages"
+# without specifying the install of these packages.
+# See also: https://pip.pypa.io/en/stable/user_guide/#constraints-files
+# We use it to place limits on certain packages to help the resolver come to a compatible configuration more quickly
+# To install dev dependencies using the new pip resolver (recommended) please use the following syntax:
+# `python -m pip install -r requirements-dev.txt -c constraints-dev.txt`
+
+boto3==1.17.106  # from botocore==1.20.106 dependency
+# NOTE - 20210114
+# aiobotocore is a dependency of the s3fs package
+# The latest version of aiobotocore (v1.4.0) is only compatible with botocore up to 1.20.106
+# botocore==1.20.106 is compatible with boto3==1.17.106
+botocore==1.20.106  # From aiobotocore v1.4.0 dependencies https://pypi.org/project/aiobotocore/
+# END NOTE
+
+# Several capitalone_dataprofiler_expectations that use tensorflow started
+# dying with the following error from site-packates/google/protobuf/descriptor.py
+#		TypeError: Descriptors cannot not be created directly.
+#		If this call came from a _pb2.py file, your generated code is out of date and must be regenerated with protoc >= 3.19.0.
+#		If you cannot immediately regenerate your protos, some other possible workarounds are:
+#		 1. Downgrade the protobuf package to 3.20.x or lower.
+#		 2. Set PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python (but this will use pure-Python parsing and will be much slower).
+#
+#		More information: https://developers.google.com/protocol-buffers/docs/news/2022-05-06#python-updates
+protobuf==3.20

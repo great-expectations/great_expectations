@@ -4,6 +4,7 @@ import logging
 import warnings
 from datetime import datetime
 from functools import wraps
+from operator import ge, gt, le, lt
 from typing import List
 
 import jsonschema
@@ -15,13 +16,13 @@ from scipy import stats
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
+from great_expectations.dataset.dataset import Dataset
 from great_expectations.dataset.util import (
     _scipy_distribution_positional_args_from_dict,
     is_valid_continuous_partition_object,
     validate_distribution_parameters,
+    validate_mostly,
 )
-
-from .dataset import Dataset
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ class MetaPandasDataset(Dataset):
     and PandasDataset implements the expectation methods themselves.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
     @classmethod
@@ -70,6 +71,7 @@ class MetaPandasDataset(Dataset):
                 result_format = self.default_expectation_args["result_format"]
 
             result_format = parse_result_format(result_format)
+
             if row_condition and self._supports_row_condition:
                 data = self._apply_row_condition(
                     row_condition=row_condition, condition_parser=condition_parser
@@ -78,6 +80,14 @@ class MetaPandasDataset(Dataset):
                 data = self
 
             series = data[column]
+
+            func_args = inspect.getfullargspec(func)[0][1:]
+            if (
+                "parse_strings_as_datetimes" in func_args
+                and pd.api.types.is_datetime64_any_dtype(series)
+            ):
+                kwargs["parse_strings_as_datetimes"] = True
+
             if func.__name__ in [
                 "expect_column_values_to_not_be_null",
                 "expect_column_values_to_be_null",
@@ -185,7 +195,7 @@ class MetaPandasDataset(Dataset):
                 result_format = self.default_expectation_args["result_format"]
 
             if row_condition:
-                self = self.query(row_condition).reset_index(drop=True)
+                self = self.query(row_condition)
 
             series_A = self[column_A]
             series_B = self[column_B]
@@ -194,10 +204,17 @@ class MetaPandasDataset(Dataset):
                 boolean_mapped_null_values = series_A.isnull() & series_B.isnull()
             elif ignore_row_if == "either_value_is_missing":
                 boolean_mapped_null_values = series_A.isnull() | series_B.isnull()
+            # elif ignore_row_if == "neither":
             elif ignore_row_if == "never":
+                """
+                TODO: <Alex>Note: The value of the "ignore_row_if" directive in the commented out line above is correct.
+                However, fixing the error would constitute a breaking change.  Hence, the documentation is updated now
+                (8/16/2021), while the implementation is corrected as part of the Expectations V3 API release.
+                </Alex>
+                """
                 boolean_mapped_null_values = series_A.map(lambda x: False)
             else:
-                raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
+                raise ValueError(f"Unknown value of ignore_row_if: {ignore_row_if}")
 
             assert len(series_A) == len(
                 series_B
@@ -289,7 +306,7 @@ class MetaPandasDataset(Dataset):
                 result_format = self.default_expectation_args["result_format"]
 
             if row_condition:
-                self = self.query(row_condition).reset_index(drop=True)
+                self = self.query(row_condition)
 
             test_df = self[column_list]
 
@@ -300,7 +317,9 @@ class MetaPandasDataset(Dataset):
             elif ignore_row_if == "never":
                 boolean_mapped_skip_values = pd.Series([False] * len(test_df))
             else:
-                raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
+                raise ValueError(f"Unknown value of ignore_row_if: {ignore_row_if}")
+
+            validate_mostly(mostly)
 
             boolean_mapped_success_values = func(
                 self, test_df[boolean_mapped_skip_values == False], *args, **kwargs
@@ -393,7 +412,7 @@ Notes:
     # We may want to expand or alter support for subclassing dataframes in the future:
     # See http://pandas.pydata.org/pandas-docs/stable/extending.html#extending-subclassing-pandas
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.discard_subset_failing_expectations = kwargs.get(
             "discard_subset_failing_expectations", False
@@ -425,9 +444,7 @@ Notes:
                 " and must be 'python' or 'pandas'"
             )
         else:
-            return self.query(row_condition, parser=condition_parser).reset_index(
-                drop=True
-            )
+            return self.query(row_condition, parser=condition_parser)
 
     def get_row_count(self):
         return self.shape[0]
@@ -493,11 +510,22 @@ Notes:
         return self[column].median()
 
     def get_column_quantiles(self, column, quantiles, allow_relative_error=False):
-        if allow_relative_error is not False:
+        interpolation_options = ("linear", "lower", "higher", "midpoint", "nearest")
+
+        if not allow_relative_error:
+            allow_relative_error = "nearest"
+
+        if allow_relative_error not in interpolation_options:
             raise ValueError(
-                "PandasDataset does not support relative error in column quantiles."
+                f"If specified for pandas, allow_relative_error must be one an allowed value for the 'interpolation'"
+                f"parameter of .quantile() (one of {interpolation_options})"
             )
-        return self[column].quantile(quantiles, interpolation="nearest").tolist()
+
+        return (
+            self[column]
+            .quantile(quantiles, interpolation=allow_relative_error)
+            .tolist()
+        )
 
     def get_column_stdev(self, column):
         return self[column].std()
@@ -578,7 +606,7 @@ Notes:
                 for lower, upper in zip(bins[:-1], bins[1:])
             ]
             if any(np.isnan(series)):
-                # Missings get digitized into bin = n_bins+1
+                # Missing get digitized into bin = n_bins+1
                 labels += ["(missing)"]
 
             return pd.Categorical.from_codes(
@@ -596,7 +624,7 @@ Notes:
                     other_values = sorted(value_counts.index[n_bins:])
                     replace = {value: "(other)" for value in other_values}
             else:
-                replace = dict()
+                replace = {}
                 for x in bins:
                     replace.update({value: ", ".join(x) for value in x})
             return (
@@ -880,7 +908,7 @@ Notes:
             comp_types.extend(native_type)
 
         if len(comp_types) < 1:
-            raise ValueError("Unrecognized numpy/python type: %s" % type_)
+            raise ValueError(f"Unrecognized numpy/python type: {type_}")
 
         return column.map(lambda x: isinstance(x, tuple(comp_types)))
 
@@ -1084,7 +1112,7 @@ Notes:
                 comp_types.extend(native_type)
 
         if len(comp_types) < 1:
-            raise ValueError("No recognized numpy/python type in list: %s" % type_list)
+            raise ValueError(f"No recognized numpy/python type in list: {type_list}")
 
         return column.map(lambda x: isinstance(x, tuple(comp_types)))
 
@@ -1184,91 +1212,32 @@ Notes:
         if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
 
-        def is_between(val):
-            # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).
-            # Ensure types can be compared since some types in Python 3 cannot be logically compared.
-            # print type(val), type(min_value), type(max_value), val, min_value, max_value
+        def comparator_factory(comparator, comparison_value):
+            def new_comparator(value):
+                return comparator(value, comparison_value)
 
-            if type(val) is None:
+            def always_true(value):
+                return True
+
+            return always_true if comparison_value is None else new_comparator
+
+        min_comparator = comparator_factory(gt if strict_min else ge, min_value)
+        max_comparator = comparator_factory(lt if strict_max else le, max_value)
+
+        def cross_type_comparator(val):
+            try:
+                return min_comparator(val) & max_comparator(val)
+            except TypeError:
                 return False
 
-            if min_value is not None and max_value is not None:
-                if allow_cross_type_comparisons:
-                    try:
-                        if strict_min and strict_max:
-                            return (min_value < val) and (val < max_value)
-                        elif strict_min:
-                            return (min_value < val) and (val <= max_value)
-                        elif strict_max:
-                            return (min_value <= val) and (val < max_value)
-                        else:
-                            return (min_value <= val) and (val <= max_value)
-                    except TypeError:
-                        return False
-
-                else:
-                    if (isinstance(val, str) != isinstance(min_value, str)) or (
-                        isinstance(val, str) != isinstance(max_value, str)
-                    ):
-                        raise TypeError(
-                            "Column values, min_value, and max_value must either be None or of the same type."
-                        )
-
-                    if strict_min and strict_max:
-                        return (min_value < val) and (val < max_value)
-                    elif strict_min:
-                        return (min_value < val) and (val <= max_value)
-                    elif strict_max:
-                        return (min_value <= val) and (val < max_value)
-                    else:
-                        return (min_value <= val) and (val <= max_value)
-
-            elif min_value is None and max_value is not None:
-                if allow_cross_type_comparisons:
-                    try:
-                        if strict_max:
-                            return val < max_value
-                        else:
-                            return val <= max_value
-                    except TypeError:
-                        return False
-
-                else:
-                    if isinstance(val, str) != isinstance(max_value, str):
-                        raise TypeError(
-                            "Column values, min_value, and max_value must either be None or of the same type."
-                        )
-
-                    if strict_max:
-                        return val < max_value
-                    else:
-                        return val <= max_value
-
-            elif min_value is not None and max_value is None:
-                if allow_cross_type_comparisons:
-                    try:
-                        if strict_min:
-                            return min_value < val
-                        else:
-                            return min_value <= val
-                    except TypeError:
-                        return False
-
-                else:
-                    if isinstance(val, str) != isinstance(min_value, str):
-                        raise TypeError(
-                            "Column values, min_value, and max_value must either be None or of the same type."
-                        )
-
-                    if strict_min:
-                        return min_value < val
-                    else:
-                        return min_value <= val
-
-            else:
-                return False
-
-        return temp_column.map(is_between)
+        try:
+            return min_comparator(temp_column) & max_comparator(temp_column)
+        except TypeError:
+            if allow_cross_type_comparisons:
+                return pd.Series(cross_type_comparator(val) for val in temp_column)
+            raise TypeError(
+                "Column values, min_value, and max_value must either be None or of the same type."
+            )
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -1510,7 +1479,7 @@ Notes:
                 datetime.strftime(datetime.now(), strftime_format), strftime_format
             )
         except ValueError as e:
-            raise ValueError("Unable to use provided strftime_format. " + str(e))
+            raise ValueError(f"Unable to use provided strftime_format. {str(e)}")
 
         def is_parseable_by_format(val):
             try:
@@ -1865,11 +1834,13 @@ Notes:
         meta=None,
     ):
         deprecation_warning = (
-            "expect_multicolumn_values_to_be_unique is being deprecated. Please use "
-            "expect_select_column_values_to_be_unique_within_record instead."
+            "expect_multicolumn_values_to_be_unique is deprecated as of v0.13.4 and will be removed in v0.16. "
+            "Please use expect_select_column_values_to_be_unique_within_record instead."
         )
+        # deprecated-v0.13.4
         warnings.warn(
-            deprecation_warning, DeprecationWarning,
+            deprecation_warning,
+            DeprecationWarning,
         )
 
         return self.expect_select_column_values_to_be_unique_within_record(
@@ -1911,7 +1882,8 @@ Notes:
     ):
         """ Multi-Column Map Expectation
 
-        Expects that sum of all rows for a set of columns is equal to a specific value
+        Expects that the sum of row values is the same for each row, summing only values in columns specified in
+        column_list, and equal to the specific value, sum_total.
 
         Args:
             column_list (List[str]): \

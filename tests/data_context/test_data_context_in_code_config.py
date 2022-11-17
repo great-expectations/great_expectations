@@ -1,6 +1,7 @@
 from typing import Dict, Optional, Set
 
 import boto3
+import pyparsing as pp
 from moto import mock_s3
 
 from great_expectations.data_context import BaseDataContext
@@ -80,7 +81,6 @@ def build_in_code_data_context_project_config(
                 },
                 "site_index_builder": {
                     "class_name": "DefaultSiteIndexBuilder",
-                    "show_cta_footer": True,
                 },
             }
         },
@@ -126,15 +126,19 @@ def get_store_backend_id_from_s3(bucket: str, prefix: str, key: str) -> str:
     s3_response_object = boto3.client("s3").get_object(
         Bucket=bucket, Key=f"{prefix}/{key}"
     )
-    s3_response_object_body = (
+    ge_store_backend_id_file_contents = (
         s3_response_object["Body"]
         .read()
         .decode(s3_response_object.get("ContentEncoding", "utf-8"))
     )
-    store_backend_id_from_s3_file = s3_response_object_body.replace(
-        StoreBackend.STORE_BACKEND_ID_PREFIX, ""
+
+    store_backend_id_file_parser = StoreBackend.STORE_BACKEND_ID_PREFIX + pp.Word(
+        pp.hexnums + "-"
     )
-    return store_backend_id_from_s3_file
+    parsed_store_backend_id = store_backend_id_file_parser.parseString(
+        ge_store_backend_id_file_contents
+    )
+    return parsed_store_backend_id[1]
 
 
 def list_s3_bucket_contents(bucket: str, prefix: str) -> Set[str]:
@@ -202,7 +206,9 @@ def test_DataContext_construct_data_context_id_uses_id_of_currently_configured_e
 
     # Make sure the store_backend_id from the file is equal to reading from the property
     expectations_store_backend_id_from_s3_file = get_store_backend_id_from_s3(
-        bucket=bucket, prefix=expectations_store_prefix, key=store_backend_id_filename,
+        bucket=bucket,
+        prefix=expectations_store_prefix,
+        key=store_backend_id_filename,
     )
     assert (
         expectations_store_backend_id_from_s3_file == s3_expectations_store_backend_id
@@ -227,9 +233,9 @@ def test_DataContext_construct_data_context_id_uses_id_of_currently_configured_e
     }
 
     # Make sure ids are consistent
-    in_code_data_context_expectations_store_store_backend_id = in_code_data_context.stores[
-        "expectations_S3_store"
-    ].store_backend_id
+    in_code_data_context_expectations_store_store_backend_id = (
+        in_code_data_context.stores["expectations_S3_store"].store_backend_id
+    )
     in_code_data_context_data_context_id = in_code_data_context.data_context_id
     constructed_data_context_id = in_code_data_context._construct_data_context_id()
     assert (
@@ -460,7 +466,7 @@ def test_inaccessible_active_bucket_warning_messages(caplog):
     """
     What does this test do and why?
 
-    Trying to create a data context with unreachable ACTIVE stores should show an warning message once per store
+    Trying to create a data context with unreachable ACTIVE stores should show a warning message once per store
     e.g. Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named expectations_S3_store
     Active stores are those named in:
     "expectations_store_name", "validations_store_name", "evaluation_parameter_store_name"

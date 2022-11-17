@@ -1,0 +1,74 @@
+[
+ {
+   "name": "vendor_id",
+   "type": "INT64"
+ },
+ {
+    "name": "pickup_datetime",
+    "type": "STRING"
+ },
+ {
+    "name": "dropoff_datetime",
+    "type": "STRING"
+ },
+ {
+    "name": "passenger_count",
+    "type": "INT64"
+ },
+ {
+    "name": "trip_distance",
+    "type": "NUMERIC"
+ },
+ {
+    "name": "rate_code_id",
+    "type": "INT64"
+ },
+ {
+    "name": "store_and_fwd_flag",
+    "type": "STRING"
+ },
+ {
+    "name": "pickup_location_id",
+    "type": "INT64"
+ },
+ {
+    "name": "dropoff_location_id",
+    "type": "INT64"
+ },
+ {
+    "name": "payment_type",
+    "type": "INT64"
+ },
+ {
+    "name": "fare_amount",
+    "type": "NUMERIC"
+ },
+ {
+    "name": "extra",
+    "type": "NUMERIC"
+ },
+ {
+    "name": "mta_tax",
+    "type": "NUMERIC"
+ },
+ {
+    "name": "tip_amount",
+    "type": "NUMERIC"
+ },
+ {
+    "name": "tolls_amount",
+    "type": "NUMERIC"
+ },
+ {
+    "name": "improvement_surcharge",
+    "type": "NUMERIC"
+ },
+ {
+    "name": "total_amount",
+    "type": "NUMERIC"
+ },
+ {
+    "name": "congestion_surcharge",
+    "type": "NUMERIC"
+ }
+]

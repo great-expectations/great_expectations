@@ -7,8 +7,7 @@ import pytest
 import great_expectations as ge
 import great_expectations.core.expectation_configuration
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-
-from .test_utils import get_dataset
+from great_expectations.self_check.util import get_dataset
 
 
 def test_no_autoinspection():

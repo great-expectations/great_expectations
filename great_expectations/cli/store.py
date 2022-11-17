@@ -1,48 +1,55 @@
 import click
 
 from great_expectations.cli import toolkit
-from great_expectations.cli.util import cli_message, cli_message_dict
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.core.usage_statistics.util import send_usage_message
 
 
 @click.group()
-def store():
+@click.pass_context
+def store(ctx: click.Context) -> None:
     """Store operations"""
-    pass
+    ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
+
+    cli_event_noun: str = "store"
+    (
+        begin_event_name,
+        end_event_name,
+    ) = UsageStatsEvents.get_cli_begin_and_end_event_names(
+        noun=cli_event_noun,
+        verb=ctx.invoked_subcommand,
+    )
+    send_usage_message(
+        data_context=ctx.obj.data_context,
+        event=begin_event_name,
+        success=True,
+    )
+    ctx.obj.usage_event_end = end_event_name
 
 
 @store.command(name="list")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
-def store_list(directory):
-    """List known Stores."""
-    context = toolkit.load_data_context_with_error_handling(directory)
-
+@click.pass_context
+def store_list(ctx: click.Context):
+    """List active Stores."""
+    context = ctx.obj.data_context
+    usage_event_end: str = ctx.obj.usage_event_end
     try:
-        stores = context.list_stores()
-
-        if len(stores) == 0:
-            cli_message("No Stores found")
-            send_usage_message(
-                data_context=context, event="cli.store.list", success=True
-            )
-            return
-        elif len(stores) == 1:
-            list_intro_string = "1 Store found:"
-        else:
-            list_intro_string = "{} Stores found:".format(len(stores))
-
-        cli_message(list_intro_string)
-
+        stores = context.list_active_stores()
+        cli_message(f"{len(stores)} active Stores found:")
         for store in stores:
             cli_message("")
             cli_message_dict(store)
 
-        send_usage_message(data_context=context, event="cli.store.list", success=True)
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            success=True,
+        )
     except Exception as e:
-        send_usage_message(data_context=context, event="cli.store.list", success=False)
-        raise e
+        toolkit.exit_with_failure_message_and_stats(
+            context=context,
+            usage_event=usage_event_end,
+            message=f"<red>{e}</red>",
+        )
+        return

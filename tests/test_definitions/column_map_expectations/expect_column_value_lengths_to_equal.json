@@ -9,7 +9,8 @@
       "equal_length_string":["a", "b", "c", "d", "e"]
     },
     "tests": [{
-      "title": "positive_test__string__one_character_length",
+      "title": "positive_test_string_one_character_length",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "in":{
         "column": "equal_length_string",
@@ -21,7 +22,8 @@
         "unexpected_list": []
       }
     },{
-      "title": "negative_test__string__value_is_1_too_high",
+      "title": "negative_test_string_value_is_1_too_high",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "in":{
         "column": "equal_length_string",
@@ -33,7 +35,7 @@
         "unexpected_list": ["a", "b", "c", "d", "e"]
       }
     },{
-      "title": "positive_test_with_missing_value_in_column__mostly",
+      "title": "positive_test_with_missing_value_in_column_mostly",
       "exact_match_out" : false,
       "in":{
         "column": "s3",
@@ -46,7 +48,7 @@
         "unexpected_list": ["collected", "casual"]
       }
     },{
-      "title": "negative__one_length_too_small",
+      "title": "negative_one_length_too_small",
       "exact_match_out" : false,
       "in":{
         "column": "s1",
@@ -58,7 +60,7 @@
         "unexpected_list": ["sexy"]
       }
     },{
-      "title": "positive__one_length_too_small__mostly",
+      "title": "positive_one_length_too_small_mostly",
       "exact_match_out" : false,
       "in":{
         "column": "s1",
@@ -71,7 +73,7 @@
         "unexpected_list": ["sexy"]
       }
     },{
-      "title": "positive_test__integer__length____1_postgres",
+      "title": "positive_test_integer_length_1_postgres",
       "exact_match_out" : false,
       "in":{
         "column": "equal_length_integer",
@@ -90,7 +92,7 @@
         "column": "s1",
         "value": 4,
         "catch_exceptions": true,
-        "row_condition": "(equal_length_integer == 5) & (equal_length_string == 'e')",
+        "row_condition": "(equal_length_integer == 5) & (equal_length_string == \"e\")",
         "condition_parser": "pandas"
       },
       "out" : {
@@ -106,12 +108,12 @@
         "column": "s1",
         "value": 4,
         "catch_exceptions": true,
-        "row_condition": "(equal_length_integer == 4) & (equal_length_string == 'd')",
+        "row_condition": "(equal_length_integer == 4) & (equal_length_string == \"d\")",
         "condition_parser": "pandas"
       },
       "out" : {
         "success": false,
-        "unexpected_index_list": [0],
+        "unexpected_index_list": [3],
         "unexpected_list": ["slimy"]
       }
     },{
@@ -122,7 +124,7 @@
         "column": "s1",
         "value": 4,
         "catch_exceptions": true,
-        "row_condition": "(equal_length_integer == 4) & (equal_length_string == 'd')",
+        "row_condition": "(equal_length_integer == 4) & (equal_length_string == \"d\")",
         "condition_parser": "bad_parser"
       },
       "out" : {

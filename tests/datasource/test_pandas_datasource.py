@@ -1,5 +1,6 @@
 import os
 import shutil
+from functools import partial
 from tempfile import mkstemp
 
 import boto3
@@ -11,12 +12,20 @@ from ruamel.yaml import YAML
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.util import nested_update
-from great_expectations.data_context.types.base import DataContextConfigSchema
+from great_expectations.data_context.types.base import (
+    DataContextConfigSchema,
+    DatasourceConfig,
+    datasourceConfigSchema,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import PandasDatasource
+from great_expectations.datasource.datasource_serializer import (
+    YAMLReadyDictDatasourceConfigSerializer,
+)
 from great_expectations.datasource.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
-from great_expectations.validator.validator import BridgeValidator, Validator
+from great_expectations.util import is_library_loadable
+from great_expectations.validator.validator import BridgeValidator
 
 yaml = YAML()
 
@@ -93,9 +102,17 @@ def test_create_pandas_datasource(
     ) as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
 
+    # To match what we expect out of the yaml file, we need to deserialize our config using the same mechanism
+    serializer = YAMLReadyDictDatasourceConfigSerializer(schema=datasourceConfigSchema)
+    datasource_config: DatasourceConfig = DataContextConfigSchema().dump(
+        data_context_config
+    )["datasources"][name]
+    expected_serialized_datasource_config: dict = serializer.serialize(
+        datasource_config
+    )
     assert (
         data_context_file_config["datasources"][name]
-        == DataContextConfigSchema().dump(data_context_config)["datasources"][name]
+        == expected_serialized_datasource_config
     )
 
     # We should have added a default generator built from the default config
@@ -151,12 +168,13 @@ def test_pandas_datasource_custom_data_asset(
     data_context_parameterized_expectation_suite.create_expectation_suite(
         expectation_suite_name="test"
     )
-    batch = data_context_parameterized_expectation_suite.get_batch(
-        expectation_suite_name="test",
-        batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
-            datasource=name, batch_kwargs_generator="subdir_reader", name="test"
-        ),
-    )
+    with pytest.deprecated_call():  # "name being deprecated as a batch_parameter. Please use data_asset_name instead.
+        batch = data_context_parameterized_expectation_suite.get_batch(
+            expectation_suite_name="test",
+            batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
+                datasource=name, batch_kwargs_generator="subdir_reader", name="test"
+            ),
+        )
     assert type(batch).__name__ == "CustomPandasDataset"
     res = batch.expect_column_values_to_have_odd_lengths("col_2")
     assert res.success is True
@@ -265,6 +283,11 @@ def test_pandas_source_read_csv(
     assert "😁" in list(batch["Μ"])
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="pyarrow")
+    and not is_library_loadable(library_name="fastparquet"),
+    reason="pyarrow and fastparquet are not installed",
+)
 @mock_s3
 def test_s3_pandas_source_read_parquet(
     data_context_parameterized_expectation_suite, tmp_path_factory
@@ -290,7 +313,12 @@ def test_s3_pandas_source_read_parquet(
             "s3_reader": {
                 "class_name": "S3GlobReaderBatchKwargsGenerator",
                 "bucket": test_bucket,
-                "assets": {"test_data": {"prefix": "", "regex_filter": r".*parquet",},},
+                "assets": {
+                    "test_data": {
+                        "prefix": "",
+                        "regex_filter": r".*parquet",
+                    },
+                },
                 "reader_options": {"columns": ["col_1"]},
             }
         },
@@ -299,12 +327,15 @@ def test_s3_pandas_source_read_parquet(
     data_context_parameterized_expectation_suite.create_expectation_suite(
         expectation_suite_name="test_parquet"
     )
-    batch = data_context_parameterized_expectation_suite.get_batch(
-        data_context_parameterized_expectation_suite.build_batch_kwargs(
-            "parquet_source", "s3_reader", "test_data",
-        ),
-        "test_parquet",
-    )
+    with pytest.deprecated_call():  # "Direct GE Support for the s3 BatchKwarg will be removed in v0.16.
+        batch = data_context_parameterized_expectation_suite.get_batch(
+            data_context_parameterized_expectation_suite.build_batch_kwargs(
+                "parquet_source",
+                "s3_reader",
+                "test_data",
+            ),
+            "test_parquet",
+        )
     assert batch.columns == ["col_1"]
     assert batch["col_1"][4] == 5
 
@@ -396,7 +427,10 @@ def test_process_batch_parameters():
     assert batch_kwargs == {"dataset_options": {"caching": False}}
 
 
-def test_pandas_datasource_processes_dataset_options(test_folder_connection_path_csv):
+def test_pandas_datasource_processes_dataset_options(
+    test_folder_connection_path_csv, empty_data_context
+):
+    context: DataContext = empty_data_context
     datasource = PandasDatasource(
         "PandasCSV",
         batch_kwargs_generators={
@@ -411,6 +445,20 @@ def test_pandas_datasource_processes_dataset_options(test_folder_connection_path
     )
     batch_kwargs["dataset_options"] = {"caching": False}
     batch = datasource.get_batch(batch_kwargs)
-    validator = BridgeValidator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    validator = BridgeValidator(
+        batch, ExpectationSuite(expectation_suite_name="foo", data_context=context)
+    )
     dataset = validator.get_dataset()
     assert dataset.caching is False
+
+
+@pytest.mark.parametrize(
+    "reader_fn",
+    [pd.read_csv, pd.read_excel, pd.read_parquet, pd.read_pickle, pd.read_sas],
+)
+def test_infer_default_options_partial_functions(reader_fn):
+    datasource = PandasDatasource()
+    reader_fn_partial = partial(reader_fn)
+    assert datasource._infer_default_options(
+        reader_fn_partial, {}
+    ) == datasource._infer_default_options(reader_fn, {})

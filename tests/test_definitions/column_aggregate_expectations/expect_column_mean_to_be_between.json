@@ -26,6 +26,7 @@
       },
       "tests": [{
           "title": "simple_mean_positive_range",
+          "include_in_gallery": true,
           "exact_match_out": false,
           "in": {
             "column": "x",
@@ -39,6 +40,7 @@
         },
         {
           "title": "simple_mean_negative_range",
+          "include_in_gallery": true,
           "exact_match_out": false,
           "in": {
             "column": "x",
@@ -154,7 +156,7 @@
           }
         },
         {
-          "title": "coerced_types_true__false_values",
+          "title": "coerced_types_true_false_values",
           "exact_match_out": false,
           "in": {
             "column": "b",
@@ -165,11 +167,11 @@
             "success": true,
             "observed_value": 0.5
           },
-          "suppress_test_for": ["postgresql", "mssql", "spark"],
-          "_comment": "postgresql, mssql, and spark will not allow coercing the boolean type to an average"
+          "suppress_test_for": ["postgresql", "mssql", "spark", "bigquery", "trino", "redshift", "snowflake"],
+          "_comment": "postgresql, mssql, bigquery, and spark will not allow coercing the boolean type to an average"
         },
         {
-          "title": "coerced_types_true__false_and_null",
+          "title": "coerced_types_true_false_and_null",
           "exact_match_out": false,
           "in": {
             "column": "x",
@@ -180,8 +182,8 @@
             "success": true,
             "observed_value": 0.5
           },
-          "suppress_test_for": ["postgresql", "mssql", "spark"],
-          "_comment": "postgresql, mssql, and spark will not allow coercing the boolean type to an average"
+          "suppress_test_for": ["postgresql", "mssql", "bigquery", "spark", "trino", "redshift", "snowflake"],
+          "_comment": "postgresql, mssql, bigquery and spark will not allow coercing the boolean type to an average"
         },
         {
           "title": "catch_exceptions___non_number_min_value",
@@ -192,7 +194,7 @@
             "catch_exceptions": true
           },
           "out": {
-            "traceback_substring": "must be a number"
+            "traceback_substring": "must be a datetime (for datetime columns) or number"
           }
         },
         {
@@ -204,7 +206,7 @@
             "catch_exceptions": true
           },
           "out": {
-            "traceback_substring": "must be a number"
+            "traceback_substring": "must be a datetime (for datetime columns) or number"
           }
         }]},
     {
@@ -217,7 +219,7 @@
         }
       },
       "tests": [{
-        "title": "test_empty_column__should_be_false_no_observed_value_with_which_to_compare",
+        "title": "test_empty_column_should_be_false_no_observed_value_with_which_to_compare",
         "exact_match_out": false,
         "in": {
           "column": "empty_column",

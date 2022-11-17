@@ -3,7 +3,8 @@
   "datasets" : [{
     "data" : {
       "w" : ["111", "222", "333", "123", "321", "444", "456", "654", "555", null],
-      "x" : ["man", "plan", "canal", "panama", "hat", "bat", "bit", "bot", "but", "bet"]
+      "x" : ["man", "plan", "canal", "panama", "hat", "bat", "bit", "bot", "but", "bet"],
+      "column_name with space": ["man", "plan", "canal", "panama", "hat", "bat", "bit", "bot", "but", "bet"]
     },
     "schemas": {
       "spark": {
@@ -15,6 +16,7 @@
     "tests" : [
     {
       "title" : "basic_positive_test",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -43,6 +45,7 @@
     },
     {
       "title" : "basic_negative_test",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "in": {
         "column": "w",

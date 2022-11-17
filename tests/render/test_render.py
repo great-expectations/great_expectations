@@ -1,10 +1,12 @@
 import json
+import warnings
 from collections import OrderedDict
 
 import pytest
 
 import great_expectations as ge
-from great_expectations.core.expectation_suite import ExpectationSuiteSchema
+from great_expectations import DataContext
+from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer import (
@@ -18,8 +20,9 @@ from great_expectations.render.renderer import (
 from great_expectations.render.renderer.content_block import (
     ValidationResultsTableContentBlockRenderer,
 )
+from great_expectations.render.types import CollapseContent, RenderedContent
 from great_expectations.render.view import DefaultJinjaPageView
-from tests.test_utils import (
+from great_expectations.self_check.util import (
     expectationSuiteSchema,
     expectationSuiteValidationResultSchema,
 )
@@ -46,28 +49,46 @@ def titanic_profiler_evrs_with_exception():
 
 
 @pytest.fixture(scope="module")
-def titanic_dataset_profiler_expectations():
+def titanic_dataset_profiler_expectations(empty_data_context_module_scoped):
+    context: DataContext = empty_data_context_module_scoped
     with open(
         file_relative_path(
             __file__, "./fixtures/BasicDatasetProfiler_expectations.json"
         ),
     ) as infile:
-        return expectationSuiteSchema.load(
+        expectations_dict: dict = expectationSuiteSchema.load(
             json.load(fp=infile, object_pairs_hook=OrderedDict)
         )
+        return ExpectationSuite(**expectations_dict, data_context=context)
 
 
 @pytest.fixture(scope="module")
-def titanic_dataset_profiler_expectations_with_distribution():
+def titanic_dataset_profiler_expectations_with_distribution(
+    empty_data_context_module_scoped,
+):
+    context: DataContext = empty_data_context_module_scoped
     with open(
         file_relative_path(
             __file__,
             "./fixtures/BasicDatasetProfiler_expectations_with_distribution.json",
         ),
     ) as infile:
-        return expectationSuiteSchema.load(
-            json.load(fp=infile, encoding="utf-8", object_pairs_hook=OrderedDict)
+        expectations_dict: dict = expectationSuiteSchema.load(
+            json.load(fp=infile, object_pairs_hook=OrderedDict)
         )
+        return ExpectationSuite(**expectations_dict, data_context=context)
+
+
+@pytest.fixture
+def titanic_profiled_expectations_1(empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
+    with open(
+        file_relative_path(
+            __file__, "./fixtures/BasicDatasetProfiler_expectations.json"
+        ),
+    ) as infile:
+        expectation_suite_dict: dict = expectationSuiteSchema.load(json.load(infile))
+        return ExpectationSuite(**expectation_suite_dict, data_context=context)
 
 
 @pytest.mark.smoketest
@@ -458,3 +479,20 @@ def test_render_string_template():
     )
 
     assert res == expected
+
+
+def test_render_types_module_deprecation_warning():
+    with warnings.catch_warnings(record=True) as w:
+        CollapseContent(collapse=True)
+        RenderedContent()
+    assert len(w) == 2
+    assert str(w[0].message) == (
+        "Importing the class CollapseContent from great_expectations.render.types is "
+        "deprecated as of v0.15.32 in v0.18. Please import class CollapseContent from "
+        "great_expectations.render."
+    )
+    assert str(w[1].message) == (
+        "Importing the class RenderedContent from great_expectations.render.types is "
+        "deprecated as of v0.15.32 in v0.18. Please import class RenderedContent from "
+        "great_expectations.render."
+    )

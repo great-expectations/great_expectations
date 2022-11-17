@@ -4,6 +4,7 @@ import logging
 import os
 import re
 import warnings
+from typing import Iterable
 
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
     BatchKwargsGenerator,
@@ -63,8 +64,8 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         reader_options=None,
         asset_globs=None,
         reader_method=None,
-    ):
-        logger.debug("Constructing GlobReaderBatchKwargsGenerator {!r}".format(name))
+    ) -> None:
+        logger.debug(f"Constructing GlobReaderBatchKwargsGenerator {name!r}")
         super().__init__(name, datasource=datasource)
         if reader_options is None:
             reader_options = {}
@@ -124,9 +125,10 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             not generator_asset and data_asset_name
         ), "Please provide either generator_asset or data_asset_name."
         if generator_asset:
+            # deprecated-v0.11.0
             warnings.warn(
-                "The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
-                "Please update code accordingly.",
+                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
+                "Please use 'data_asset_name' instead.",
                 DeprecationWarning,
             )
             data_asset_name = generator_asset
@@ -161,8 +163,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             ]
             if len(path) != 1:
                 raise BatchKwargsError(
-                    "Unable to identify partition %s for asset %s"
-                    % (partition_id, data_asset_name),
+                    f"Unable to identify partition {partition_id} for asset {data_asset_name}",
                     {data_asset_name: data_asset_name, partition_id: partition_id},
                 )
             batch_kwargs = self._build_batch_kwargs_from_path(
@@ -196,7 +197,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 "data_asset_name": data_asset_name,
             }
             raise BatchKwargsError(
-                "Unknown asset_name %s" % data_asset_name, batch_kwargs
+                f"Unknown asset_name {data_asset_name}", batch_kwargs
             )
 
     def _get_iterator(
@@ -219,7 +220,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         reader_method=None,
         reader_options=None,
         limit=None,
-    ):
+    ) -> Iterable[PathBatchKwargs]:
         for path in path_list:
             yield self._build_batch_kwargs_from_path(
                 path,
@@ -252,7 +253,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             # In the case that there is a defined regex, the user *wanted* a partition. But it didn't match.
             # So, we'll add a *sortable* id
             if matches is None:
-                logger.warning("No match found for path: %s" % path)
+                logger.warning(f"No match found for path: {path}")
                 return (
                     datetime.datetime.now(datetime.timezone.utc).strftime(
                         "%Y%m%dT%H%M%S.%fZ"
@@ -263,9 +264,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 try:
                     return matches.group(match_group_id)
                 except IndexError:
-                    logger.warning(
-                        "No match group %d in path %s" % (match_group_id, path)
-                    )
+                    logger.warning(f"No match group {match_group_id} in path {path}")
                     return (
                         datetime.datetime.now(datetime.timezone.utc).strftime(
                             "%Y%m%dT%H%M%S.%fZ"

@@ -3,26 +3,28 @@ import datetime
 import boto3
 import pytest
 from freezegun import freeze_time
+from marshmallow import ValidationError
 from moto import mock_s3
 
 from great_expectations.data_context.store import HtmlSiteStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
+    RunIdentifier,
     SiteSectionIdentifier,
     ValidationResultIdentifier,
     validationResultIdentifierSchema,
 )
-from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.util import gen_directory_tree_str
 
 
+@pytest.mark.integration
 @freeze_time("09/26/2019 13:42:41")
 def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
-    path = str(
-        tmp_path_factory.mktemp(
-            "test_HtmlSiteStore_with_TupleFileSystemStoreBackend__dir"
-        )
+    full_test_dir = tmp_path_factory.mktemp(
+        "test_HtmlSiteStore_with_TupleFileSystemStoreBackend__dir"
     )
+    test_dir = full_test_dir.parts[-1]
+    path = str(full_test_dir)
 
     my_store = HtmlSiteStore(
         store_backend={
@@ -52,7 +54,6 @@ def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
         ),
     )
     my_store.set(ns_1, "aaa")
-    # assert my_store.get(ns_1) == "aaa"
 
     ns_2 = SiteSectionIdentifier(
         site_section_name="validations",
@@ -68,20 +69,17 @@ def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
         ),
     )
     my_store.set(ns_2, "bbb")
-    # assert my_store.get(ns_2) == {"B": "bbb"}
 
-    print(my_store.list_keys())
     # WARNING: OBSERVE THAT SITE_SECTION_NAME IS LOST IN THE CALL TO LIST_KEYS
     assert set(my_store.list_keys()) == {
         ns_1.resource_identifier,
         ns_2.resource_identifier,
     }
 
-    print(gen_directory_tree_str(path))
     assert (
         gen_directory_tree_str(path)
-        == """\
-test_HtmlSiteStore_with_TupleFileSystemStoreBackend__dir0/
+        == f"""\
+{test_dir}/
     my_store/
         validations/
             a/
@@ -97,6 +95,7 @@ test_HtmlSiteStore_with_TupleFileSystemStoreBackend__dir0/
 
 @freeze_time("09/26/2019 13:42:41")
 @mock_s3
+@pytest.mark.integration
 def test_HtmlSiteStore_S3_backend():
     bucket = "test_validation_store_bucket"
     prefix = "test/prefix"
@@ -122,7 +121,7 @@ def test_HtmlSiteStore_S3_backend():
             expectation_suite_identifier=ExpectationSuiteIdentifier(
                 expectation_suite_name="asset.quarantine",
             ),
-            run_id="20191007T151224.1234Z_prod_100",
+            run_id=RunIdentifier(run_name="20191007T151224.1234Z_prod_100"),
             batch_identifier="1234",
         ),
     )

@@ -155,12 +155,13 @@ def test_file_format_map_output():
     expected_result = ExpectationValidationResult(
         success=None,
         result={
-            "element_count": 11,
-            "missing_count": 11,
-            "missing_percent": 100.0,
+            "element_count": 0,
+            "missing_count": 0,
+            "missing_percent": None,
             "unexpected_count": 0,
-            "unexpected_percent": 0,
+            "unexpected_percent": None,
             "unexpected_percent_nonmissing": None,
+            "unexpected_percent_total": None,
             "partial_unexpected_list": [],
         },
     )
@@ -181,10 +182,11 @@ def test_file_format_map_output():
         result={
             "element_count": 9,
             "missing_count": 2,
-            "missing_percent": (2 / 9 * 100),
+            "missing_percent": ((2.0 / 9) * 100),
             "unexpected_count": 3,
-            "unexpected_percent": (3 / 9 * 100),
-            "unexpected_percent_nonmissing": (3 / 7 * 100),
+            "unexpected_percent": ((3.0 / 7) * 100),
+            "unexpected_percent_total": ((3.0 / 9) * 100),
+            "unexpected_percent_nonmissing": ((3.0 / 7) * 100),
             "partial_unexpected_list": ["A,C,1\n", "B,1,4\n", "A,1,4\n"],
             "partial_unexpected_counts": [
                 {"value": "A,1,4\n", "count": 1},

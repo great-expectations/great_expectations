@@ -73,7 +73,8 @@ def test_SqlAlchemyDatasource_config(default_sql_alchemy_datasource_config):
 def test_SparkDatasource_config(default_spark_datasource_config):
 
     datasource_config = DatasourceConfig(
-        class_name="SparkDFDatasource", batch_kwargs_generators={},
+        class_name="SparkDFDatasource",
+        batch_kwargs_generators={},
     )
 
     desired_config = default_spark_datasource_config["my_spark_datasource"]

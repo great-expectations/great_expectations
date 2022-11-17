@@ -1,8 +1,7 @@
 import datetime
-from typing import Iterable
 
-import numpy as np
 from dateutil.parser import parse
+from tqdm.auto import tqdm
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.dataset.util import build_categorical_partition_object
@@ -12,6 +11,7 @@ from great_expectations.profile.basic_dataset_profiler import (
     BasicDatasetProfilerBase,
     logger,
 )
+from great_expectations.util import is_nan
 
 
 class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
@@ -19,7 +19,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     This profiler helps build coarse expectations for columns you care about.
 
     The goal of this profiler is to expedite the process of authoring an
-    expectation suite by building possibly relevant expections for columns that
+    expectation suite by building possibly relevant exceptions for columns that
     you care about. You can then easily edit the suite and adjust or delete
     these expectations to hone your new suite.
 
@@ -145,7 +145,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         column_cache,
         excluded_expectations=None,
         included_expectations=None,
-    ):
+    ) -> None:
         cls._create_non_nullity_expectations(
             dataset,
             column,
@@ -177,7 +177,10 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         ):
             if cls._get_column_cardinality_with_caching(
                 dataset, column, column_cache
-            ) in [ProfilerCardinality.TWO, ProfilerCardinality.VERY_FEW,]:
+            ) in [
+                ProfilerCardinality.TWO,
+                ProfilerCardinality.VERY_FEW,
+            ]:
                 partition_object = build_categorical_partition_object(dataset, column)
                 dataset.expect_column_kl_divergence_to_be_less_than(
                     column,
@@ -189,7 +192,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     @classmethod
     def _create_non_nullity_expectations(
         cls, dataset, column, excluded_expectations=None, included_expectations=None
-    ):
+    ) -> None:
         if (
             not excluded_expectations
             or "expect_column_values_to_not_be_null" not in excluded_expectations
@@ -209,7 +212,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     @classmethod
     def _create_expectations_for_numeric_column(
         cls, dataset, column, excluded_expectations=None, included_expectations=None
-    ):
+    ) -> None:
         cls._create_non_nullity_expectations(
             dataset,
             column,
@@ -227,7 +230,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             observed_min = dataset.expect_column_min_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
-            if not _is_nan(observed_min):
+            if not is_nan(observed_min):
                 dataset.expect_column_min_to_be_between(
                     column, min_value=observed_min - 1, max_value=observed_min + 1
                 )
@@ -246,7 +249,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             observed_max = dataset.expect_column_max_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
-            if not _is_nan(observed_max):
+            if not is_nan(observed_max):
                 dataset.expect_column_max_to_be_between(
                     column, min_value=observed_max - 1, max_value=observed_max + 1
                 )
@@ -265,7 +268,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             observed_mean = dataset.expect_column_mean_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
-            if not _is_nan(observed_mean):
+            if not is_nan(observed_mean):
                 dataset.expect_column_mean_to_be_between(
                     column, min_value=observed_mean - 1, max_value=observed_mean + 1
                 )
@@ -284,7 +287,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             observed_median = dataset.expect_column_median_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
-            if not _is_nan(observed_median):
+            if not is_nan(observed_median):
                 dataset.expect_column_median_to_be_between(
                     column, min_value=observed_median - 1, max_value=observed_median + 1
                 )
@@ -347,7 +350,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     @classmethod
     def _create_expectations_for_string_column(
         cls, dataset, column, excluded_expectations=None, included_expectations=None
-    ):
+    ) -> None:
         cls._create_non_nullity_expectations(
             dataset,
             column,
@@ -454,7 +457,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     @classmethod
     def _create_expectations_for_datetime_column(
         cls, dataset, column, excluded_expectations=None, included_expectations=None
-    ):
+    ) -> None:
         cls._create_non_nullity_expectations(
             dataset,
             column,
@@ -482,11 +485,14 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     match_type="domain",
                 )
                 try:
+                    min_value = parse(min_value)
+                except TypeError:
+                    pass
+
+                try:
                     min_value = min_value + datetime.timedelta(days=-365)
                 except OverflowError:
                     min_value = datetime.datetime.min
-                except TypeError:
-                    min_value = parse(min_value) + datetime.timedelta(days=-365)
 
         if (
             not excluded_expectations
@@ -507,11 +513,14 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     match_type="domain",
                 )
                 try:
+                    max_value = parse(max_value)
+                except TypeError:
+                    pass
+
+                try:
                     max_value = max_value + datetime.timedelta(days=365)
                 except OverflowError:
                     max_value = datetime.datetime.max
-                except TypeError:
-                    max_value = parse(max_value) + datetime.timedelta(days=365)
 
         if (
             not excluded_expectations
@@ -525,8 +534,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     column, min_value, max_value, parse_strings_as_datetimes=True
                 )
 
-    @classmethod
-    def _profile(cls, dataset, configuration=None):
+    @classmethod  # noqa: C901
+    def _profile(cls, dataset, configuration=None):  # noqa: C901 - 28
         logger.debug(f"Running profiler with configuration: {configuration}")
         if configuration == "demo":
             return cls._demo_profile(dataset)
@@ -594,53 +603,61 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
 
         column_cache = {}
         if selected_columns:
-            for column in selected_columns:
-                cardinality = cls._get_column_cardinality_with_caching(
-                    dataset, column, column_cache
-                )
-                column_type = cls._get_column_type_with_caching(
-                    dataset, column, column_cache
-                )
-
-                if cardinality in [
-                    ProfilerCardinality.TWO,
-                    ProfilerCardinality.VERY_FEW,
-                    ProfilerCardinality.FEW,
-                ]:
-                    cls._create_expectations_for_low_card_column(
+            with tqdm(
+                total=len(selected_columns), desc="Profiling Columns", delay=5
+            ) as pbar:
+                for column in selected_columns:
+                    pbar.set_postfix_str(column)
+                    cardinality = cls._get_column_cardinality_with_caching(
                         dataset, column, column_cache
                     )
-                elif cardinality in [
-                    ProfilerCardinality.MANY,
-                    ProfilerCardinality.VERY_MANY,
-                    ProfilerCardinality.UNIQUE,
-                ]:
-                    # TODO we will want to finesse the number and types of
-                    #  expectations created here. The simple version is deny/allow list
-                    #  and the more complex version is desired per column type and
-                    #  cardinality. This deserves more thought on configuration.
-                    dataset.expect_column_values_to_be_unique(column)
+                    column_type = cls._get_column_type_with_caching(
+                        dataset, column, column_cache
+                    )
 
-                    if column_type in [ProfilerDataType.INT, ProfilerDataType.FLOAT]:
-                        cls._create_expectations_for_numeric_column(dataset, column)
-                    elif column_type in [ProfilerDataType.DATETIME]:
-                        cls._create_expectations_for_datetime_column(
-                            dataset,
-                            column,
-                            excluded_expectations=excluded_expectations,
-                            included_expectations=included_expectations,
+                    if cardinality in [
+                        ProfilerCardinality.TWO,
+                        ProfilerCardinality.VERY_FEW,
+                        ProfilerCardinality.FEW,
+                    ]:
+                        cls._create_expectations_for_low_card_column(
+                            dataset, column, column_cache
                         )
-                    elif column_type in [ProfilerDataType.STRING]:
-                        cls._create_expectations_for_string_column(
-                            dataset,
-                            column,
-                            excluded_expectations=excluded_expectations,
-                            included_expectations=included_expectations,
-                        )
-                    elif column_type in [ProfilerDataType.UNKNOWN]:
-                        logger.debug(
-                            f"Skipping expectation creation for column {column} of unknown type: {column_type}"
-                        )
+                    elif cardinality in [
+                        ProfilerCardinality.MANY,
+                        ProfilerCardinality.VERY_MANY,
+                        ProfilerCardinality.UNIQUE,
+                    ]:
+                        # TODO we will want to finesse the number and types of
+                        #  expectations created here. The simple version is deny/allow list
+                        #  and the more complex version is desired per column type and
+                        #  cardinality. This deserves more thought on configuration.
+                        dataset.expect_column_values_to_be_unique(column)
+
+                        if column_type in [
+                            ProfilerDataType.INT,
+                            ProfilerDataType.FLOAT,
+                        ]:
+                            cls._create_expectations_for_numeric_column(dataset, column)
+                        elif column_type in [ProfilerDataType.DATETIME]:
+                            cls._create_expectations_for_datetime_column(
+                                dataset,
+                                column,
+                                excluded_expectations=excluded_expectations,
+                                included_expectations=included_expectations,
+                            )
+                        elif column_type in [ProfilerDataType.STRING]:
+                            cls._create_expectations_for_string_column(
+                                dataset,
+                                column,
+                                excluded_expectations=excluded_expectations,
+                                included_expectations=included_expectations,
+                            )
+                        elif column_type in [ProfilerDataType.UNKNOWN]:
+                            logger.debug(
+                                f"Skipping expectation creation for column {column} of unknown type: {column_type}"
+                            )
+                    pbar.update()
 
         if excluded_expectations:
             # NOTE: we reach into a private member here because of an expected future
@@ -650,7 +667,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             )
         if included_expectations:
             for expectation in dataset.get_expectation_suite(
-                discard_failed_expectations=False, suppress_logging=True,
+                discard_failed_expectations=False,
+                suppress_logging=True,
             ).expectations:
                 if expectation.expectation_type not in included_expectations:
                     try:
@@ -796,22 +814,15 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         return expectation_suite
 
 
-def _check_that_expectations_are_available(dataset, expectations):
+def _check_that_expectations_are_available(dataset, expectations) -> None:
     if expectations:
         for expectation in expectations:
             if expectation not in dataset.list_available_expectation_types():
                 raise ProfilerError(f"Expectation {expectation} is not available.")
 
 
-def _check_that_columns_exist(dataset, columns):
+def _check_that_columns_exist(dataset, columns) -> None:
     if columns:
         for column in columns:
             if column not in dataset.get_table_columns():
                 raise ProfilerError(f"Column {column} does not exist.")
-
-
-def _is_nan(value):
-    try:
-        return np.isnan(value)
-    except TypeError:
-        return False

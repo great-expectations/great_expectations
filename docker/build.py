@@ -7,7 +7,6 @@ from typing import List
 import click
 
 import docker
-from docker import APIClient
 
 PROJECT_ROOT = str(pathlib.Path(__file__).parent.parent.absolute())
 if PROJECT_ROOT not in sys.path:
@@ -24,7 +23,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 PYTHON_DOCKER_TAGS = [
-    "3.6-buster",
     "3.7-buster",
 ]
 

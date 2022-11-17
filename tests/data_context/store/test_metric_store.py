@@ -1,6 +1,9 @@
+import os
+
 import pytest
 
 import tests.test_utils as test_utils
+from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.util import instantiate_class_from_config
 
 
@@ -14,7 +17,7 @@ from great_expectations.data_context.util import instantiate_class_from_config
                     "drivername": "postgresql",
                     "username": "postgres",
                     "password": "",
-                    "host": "localhost",
+                    "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
                     "port": "5432",
                     "database": "test_ci",
                 },
@@ -39,7 +42,9 @@ def param_store(request, test_backends):
 
     return instantiate_class_from_config(
         config=request.param,
-        config_defaults={"module_name": "great_expectations.data_context.store",},
+        config_defaults={
+            "module_name": "great_expectations.data_context.store",
+        },
         runtime_environment={},
     )
 
@@ -48,7 +53,9 @@ def param_store(request, test_backends):
     params=[
         {
             "class_name": "MetricStore",
-            "store_backend": {"class_name": "InMemoryStoreBackend",},
+            "store_backend": {
+                "class_name": "InMemoryStoreBackend",
+            },
         },
         {
             "class_name": "MetricStore",
@@ -69,11 +76,14 @@ def in_memory_param_store(request, test_backends):
 
     return instantiate_class_from_config(
         config=request.param,
-        config_defaults={"module_name": "great_expectations.data_context.store",},
+        config_defaults={
+            "module_name": "great_expectations.data_context.store",
+        },
         runtime_environment={},
     )
 
 
+@pytest.mark.unit
 def test_metric_store_store_backend_id(in_memory_param_store):
     """
     What does this test and why?
@@ -84,3 +94,29 @@ def test_metric_store_store_backend_id(in_memory_param_store):
     assert in_memory_param_store.store_backend_id is not None
     # Check that store_backend_id is a valid UUID
     assert test_utils.validate_uuid4(in_memory_param_store.store_backend_id)
+
+
+@pytest.mark.unit
+def test_metric_store_serialize() -> None:
+    store = MetricStore()
+
+    value = {"foo": "bar"}
+    assert store.serialize(value=value) == '{"value": {"foo": "bar"}}'
+
+
+@pytest.mark.unit
+def test_metric_store_deserialize() -> None:
+    store = MetricStore()
+
+    value = '{"value": {"foo": "bar"}}'
+    assert store.deserialize(value=value) == {"foo": "bar"}
+
+
+@pytest.mark.unit
+def test_evaluation_parameter_store_get_bind_params() -> None:
+    pass
+
+
+@pytest.mark.unit
+def test_evaluation_parameter_store_config_property_and_defaults() -> None:
+    pass

@@ -1,15 +1,22 @@
+import copy
 import json
 import os
 import shutil
-from typing import List
+from collections import OrderedDict
+from typing import Dict, List, Union
 
 import pandas as pd
 import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
 
+import great_expectations as ge
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
+from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
-from great_expectations.core.batch import Batch
+from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import (
@@ -18,24 +25,36 @@ from great_expectations.data_context import (
     ExplorerDataContext,
 )
 from great_expectations.data_context.store import ExpectationsStore
-from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.types.base import (
+    CheckpointConfig,
+    DataContextConfig,
+    DataContextConfigDefaults,
+    DatasourceConfig,
+)
 from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
 )
-from great_expectations.data_context.util import file_relative_path
+from great_expectations.data_context.util import PasswordMasker, file_relative_path
 from great_expectations.dataset import Dataset
-from great_expectations.datasource import LegacyDatasource
-from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
-from great_expectations.exceptions import (
-    BatchKwargsError,
-    CheckpointError,
-    CheckpointNotFoundError,
-    ConfigNotFoundError,
-    DataContextError,
+from great_expectations.datasource import (
+    Datasource,
+    LegacyDatasource,
+    SimpleSqlalchemyDatasource,
 )
-from great_expectations.util import gen_directory_tree_str
-from tests.integration.usage_statistics.test_integration_usage_statistics import (
-    USAGE_STATISTICS_QA_URL,
+from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
+from great_expectations.expectations.expectation import TableExpectation
+from great_expectations.render import (
+    AtomicPrescriptiveRendererType,
+    AtomicRendererType,
+    RenderedAtomicContent,
+    renderedAtomicValueSchema,
+)
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.util import (
+    deep_filter_properties_iterable,
+    gen_directory_tree_str,
+    is_library_loadable,
 )
 from tests.test_utils import create_files_in_directory, safe_remove
 
@@ -46,15 +65,63 @@ except ImportError:
 
 yaml = YAML()
 
+parameterized_expectation_suite_name = "my_dag_node.default"
 
-@pytest.fixture()
-def parameterized_expectation_suite():
-    fixture_path = file_relative_path(
-        __file__,
-        "../test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
+
+@pytest.fixture(scope="function")
+def titanic_multibatch_data_context(
+    tmp_path,
+) -> DataContext:
+    """
+    Based on titanic_data_context, but with 2 identical batches of
+    data asset "titanic"
+    """
+    project_path = tmp_path / "titanic_data_context"
+    project_path.mkdir()
+    project_path = str(project_path)
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    data_path = os.path.join(context_path, "..", "data", "titanic")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    shutil.copy(
+        file_relative_path(__file__, "../test_fixtures/great_expectations_titanic.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
     )
-    with open(fixture_path,) as suite:
-        return json.load(suite)
+    shutil.copy(
+        file_relative_path(__file__, "../test_sets/Titanic.csv"),
+        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1911.csv")),
+    )
+    shutil.copy(
+        file_relative_path(__file__, "../test_sets/Titanic.csv"),
+        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
+    )
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def data_context_with_bad_datasource(tmp_path_factory):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+
+    This DataContext has a connection to a datasource named my_postgres_db
+    which is not a valid datasource.
+
+    It is used by test_get_batch_multiple_datasources_do_not_scan_all()
+    """
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    fixture_dir = file_relative_path(__file__, "../test_fixtures")
+    os.makedirs(
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "great_expectations_bad_datasource.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    return ge.data_context.DataContext(context_path)
 
 
 def test_create_duplicate_expectation_suite(titanic_data_context):
@@ -63,7 +130,7 @@ def test_create_duplicate_expectation_suite(titanic_data_context):
         expectation_suite_name="titanic.test_create_expectation_suite"
     )
     # attempt to create expectation suite with name that already exists on data asset
-    with pytest.raises(DataContextError):
+    with pytest.raises(ge_exceptions.DataContextError):
         titanic_data_context.create_expectation_suite(
             expectation_suite_name="titanic.test_create_expectation_suite"
         )
@@ -122,7 +189,11 @@ def test_get_available_data_asset_names_with_multiple_datasources_with_and_witho
     context.add_datasource(
         "first",
         class_name="SqlAlchemyDatasource",
-        batch_kwargs_generators={"foo": {"class_name": "TableBatchKwargsGenerator",}},
+        batch_kwargs_generators={
+            "foo": {
+                "class_name": "TableBatchKwargsGenerator",
+            }
+        },
         **connection_kwargs,
     )
     context.add_datasource(
@@ -131,7 +202,11 @@ def test_get_available_data_asset_names_with_multiple_datasources_with_and_witho
     context.add_datasource(
         "third",
         class_name="SqlAlchemyDatasource",
-        batch_kwargs_generators={"bar": {"class_name": "TableBatchKwargsGenerator",}},
+        batch_kwargs_generators={
+            "bar": {
+                "class_name": "TableBatchKwargsGenerator",
+            }
+        },
         **connection_kwargs,
     )
 
@@ -148,21 +223,29 @@ def test_get_available_data_asset_names_with_multiple_datasources_with_and_witho
 
 def test_list_expectation_suite_keys(data_context_parameterized_expectation_suite):
     assert data_context_parameterized_expectation_suite.list_expectation_suites() == [
-        ExpectationSuiteIdentifier(expectation_suite_name="my_dag_node.default")
+        ExpectationSuiteIdentifier(
+            expectation_suite_name=parameterized_expectation_suite_name
+        )
     ]
 
 
 def test_get_existing_expectation_suite(data_context_parameterized_expectation_suite):
-    expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
-        "my_dag_node.default"
+    expectation_suite = (
+        data_context_parameterized_expectation_suite.get_expectation_suite(
+            parameterized_expectation_suite_name
+        )
     )
-    assert expectation_suite.expectation_suite_name == "my_dag_node.default"
+    assert (
+        expectation_suite.expectation_suite_name == parameterized_expectation_suite_name
+    )
     assert len(expectation_suite.expectations) == 2
 
 
 def test_get_new_expectation_suite(data_context_parameterized_expectation_suite):
-    expectation_suite = data_context_parameterized_expectation_suite.create_expectation_suite(
-        "this_data_asset_does_not_exist.default"
+    expectation_suite = (
+        data_context_parameterized_expectation_suite.create_expectation_suite(
+            "this_data_asset_does_not_exist.default"
+        )
     )
     assert (
         expectation_suite.expectation_suite_name
@@ -172,8 +255,10 @@ def test_get_new_expectation_suite(data_context_parameterized_expectation_suite)
 
 
 def test_save_expectation_suite(data_context_parameterized_expectation_suite):
-    expectation_suite = data_context_parameterized_expectation_suite.create_expectation_suite(
-        "this_data_asset_config_does_not_exist.default"
+    expectation_suite = (
+        data_context_parameterized_expectation_suite.create_expectation_suite(
+            "this_data_asset_config_does_not_exist.default"
+        )
     )
     expectation_suite.expectations.append(
         ExpectationConfiguration(
@@ -183,14 +268,91 @@ def test_save_expectation_suite(data_context_parameterized_expectation_suite):
     data_context_parameterized_expectation_suite.save_expectation_suite(
         expectation_suite
     )
-    expectation_suite_saved = data_context_parameterized_expectation_suite.get_expectation_suite(
-        "this_data_asset_config_does_not_exist.default"
+    expectation_suite_saved = (
+        data_context_parameterized_expectation_suite.get_expectation_suite(
+            "this_data_asset_config_does_not_exist.default"
+        )
     )
     assert expectation_suite.expectations == expectation_suite_saved.expectations
 
 
-def test_compile_evaluation_parameter_dependencies(
+@pytest.mark.integration
+def test_save_expectation_suite_include_rendered_content(
     data_context_parameterized_expectation_suite,
+):
+    expectation_suite: ExpectationSuite = (
+        data_context_parameterized_expectation_suite.create_expectation_suite(
+            "this_data_asset_config_does_not_exist.default"
+        )
+    )
+    expectation_suite.expectations.append(
+        ExpectationConfiguration(
+            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
+        )
+    )
+    for expectation in expectation_suite.expectations:
+        assert expectation.rendered_content is None
+    data_context_parameterized_expectation_suite.save_expectation_suite(
+        expectation_suite,
+        include_rendered_content=True,
+    )
+    expectation_suite_saved: ExpectationSuite = (
+        data_context_parameterized_expectation_suite.get_expectation_suite(
+            "this_data_asset_config_does_not_exist.default"
+        )
+    )
+    for expectation in expectation_suite_saved.expectations:
+        for rendered_content_block in expectation.rendered_content:
+            assert isinstance(
+                rendered_content_block,
+                RenderedAtomicContent,
+            )
+
+
+@pytest.mark.integration
+def test_get_expectation_suite_include_rendered_content(
+    data_context_parameterized_expectation_suite,
+):
+    expectation_suite: ExpectationSuite = (
+        data_context_parameterized_expectation_suite.create_expectation_suite(
+            "this_data_asset_config_does_not_exist.default"
+        )
+    )
+    expectation_suite.expectations.append(
+        ExpectationConfiguration(
+            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
+        )
+    )
+    for expectation in expectation_suite.expectations:
+        assert expectation.rendered_content is None
+    data_context_parameterized_expectation_suite.save_expectation_suite(
+        expectation_suite,
+    )
+    expectation_suite_saved: ExpectationSuite = (
+        data_context_parameterized_expectation_suite.get_expectation_suite(
+            "this_data_asset_config_does_not_exist.default"
+        )
+    )
+    for expectation in expectation_suite.expectations:
+        assert expectation.rendered_content is None
+
+    expectation_suite_retrieved: ExpectationSuite = (
+        data_context_parameterized_expectation_suite.get_expectation_suite(
+            "this_data_asset_config_does_not_exist.default",
+            include_rendered_content=True,
+        )
+    )
+
+    for expectation in expectation_suite_retrieved.expectations:
+        for rendered_content_block in expectation.rendered_content:
+            assert isinstance(
+                rendered_content_block,
+                RenderedAtomicContent,
+            )
+
+
+def test_compile_evaluation_parameter_dependencies(
+    data_context_parameterized_expectation_suite: DataContext,
 ):
     assert (
         data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
@@ -216,7 +378,8 @@ def test_compile_evaluation_parameter_dependencies(
     )
 
 
-def test_list_datasources(data_context_parameterized_expectation_suite):
+@pytest.mark.v2_api
+def test_list_datasources_v2_api(data_context_parameterized_expectation_suite):
     datasources = data_context_parameterized_expectation_suite.list_datasources()
 
     assert datasources == [
@@ -268,6 +431,104 @@ def test_list_datasources(data_context_parameterized_expectation_suite):
         },
     ]
 
+    if is_library_loadable(library_name="psycopg2"):
+
+        # Make sure passwords are masked in password or url fields
+        data_context_parameterized_expectation_suite.add_datasource(
+            "postgres_source_with_password",
+            initialize=False,
+            module_name="great_expectations.datasource",
+            class_name="SqlAlchemyDatasource",
+            credentials={
+                "drivername": "postgresql",
+                "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
+                "port": "65432",
+                "username": "username_str",
+                "password": "password_str",
+                "database": "database_str",
+            },
+        )
+
+        data_context_parameterized_expectation_suite.add_datasource(
+            "postgres_source_with_password_in_url",
+            initialize=False,
+            module_name="great_expectations.datasource",
+            class_name="SqlAlchemyDatasource",
+            credentials={
+                "url": "postgresql+psycopg2://username:password@host:65432/database",
+            },
+        )
+
+        datasources = data_context_parameterized_expectation_suite.list_datasources()
+
+        assert datasources == [
+            {
+                "name": "mydatasource",
+                "class_name": "PandasDatasource",
+                "module_name": "great_expectations.datasource",
+                "data_asset_type": {"class_name": "PandasDataset"},
+                "batch_kwargs_generators": {
+                    "mygenerator": {
+                        "base_directory": "../data",
+                        "class_name": "SubdirReaderBatchKwargsGenerator",
+                        "reader_options": {"engine": "python", "sep": None},
+                    }
+                },
+            },
+            {
+                "name": "second_pandas_source",
+                "class_name": "PandasDatasource",
+                "module_name": "great_expectations.datasource",
+                "data_asset_type": {
+                    "class_name": "PandasDataset",
+                    "module_name": "great_expectations.dataset",
+                },
+            },
+            {
+                "name": "postgres_source_with_password",
+                "class_name": "SqlAlchemyDatasource",
+                "module_name": "great_expectations.datasource",
+                "data_asset_type": {
+                    "class_name": "SqlAlchemyDataset",
+                    "module_name": "great_expectations.dataset",
+                },
+                "credentials": {
+                    "drivername": "postgresql",
+                    "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
+                    "port": "65432",
+                    "username": "username_str",
+                    "password": PasswordMasker.MASKED_PASSWORD_STRING,
+                    "database": "database_str",
+                },
+            },
+            {
+                "name": "postgres_source_with_password_in_url",
+                "class_name": "SqlAlchemyDatasource",
+                "module_name": "great_expectations.datasource",
+                "data_asset_type": {
+                    "class_name": "SqlAlchemyDataset",
+                    "module_name": "great_expectations.dataset",
+                },
+                "credentials": {
+                    "url": f"postgresql+psycopg2://username:{PasswordMasker.MASKED_PASSWORD_STRING}@host:65432/database",
+                },
+            },
+        ]
+
+
+@mock.patch("great_expectations.data_context.store.DatasourceStore.update_by_name")
+def test_update_datasource_persists_changes_with_store(
+    mock_update_by_name: mock.MagicMock,
+    data_context_parameterized_expectation_suite: DataContext,
+) -> None:
+    context: DataContext = data_context_parameterized_expectation_suite
+
+    datasource_to_update: Datasource = tuple(context.datasources.values())[0]
+
+    context.update_datasource(datasource=datasource_to_update)
+
+    assert mock_update_by_name.call_count == 1
+
 
 @freeze_time("09/26/2019 13:42:41")
 def test_data_context_get_validation_result(titanic_data_context):
@@ -290,6 +551,25 @@ def test_data_context_get_validation_result(titanic_data_context):
         failed_only=True,
     )
     assert len(failed_validation_result.results) == 8
+
+
+def test_data_context_get_latest_validation_result(titanic_data_context):
+    """
+    Test that the latest validation result can be correctly fetched from the configured results
+    store
+    """
+    for _ in range(2):
+        titanic_data_context.profile_datasource("mydatasource")
+    assert len(titanic_data_context.validations_store.list_keys()) == 2
+
+    validation_results = [
+        titanic_data_context.validations_store.get(val_key)
+        for val_key in titanic_data_context.validations_store.list_keys()
+    ]
+    latest_validation_result = titanic_data_context.get_validation_result(
+        "mydatasource.mygenerator.Titanic.BasicDatasetProfiler"
+    )
+    assert latest_validation_result in validation_results
 
 
 def test_data_context_get_datasource(titanic_data_context):
@@ -342,13 +622,13 @@ def test_data_context_profile_datasource_on_non_existent_one_raises_helpful_erro
 
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.rendered_output
-def test_render_full_static_site_from_empty_project(tmp_path_factory, filesystem_csv_3):
+@pytest.mark.slow  # 1.02s
+def test_render_full_static_site_from_empty_project(tmp_path, filesystem_csv_3):
 
     # TODO : Use a standard test fixture
     # TODO : Have that test fixture copy a directory, rather than building a new one from scratch
 
-    base_dir = str(tmp_path_factory.mktemp("project_dir"))
-    project_dir = os.path.join(base_dir, "project_path")
+    project_dir = os.path.join(tmp_path, "project_path")
     os.mkdir(project_dir)
 
     os.makedirs(os.path.join(project_dir, "data"))
@@ -382,7 +662,6 @@ project_path/
     )
 
     context = DataContext.create(project_dir)
-    ge_directory = os.path.join(project_dir, "great_expectations")
     context.add_datasource(
         "titanic",
         module_name="great_expectations.datasource",
@@ -420,7 +699,6 @@ project_path/
     ).to_id()
 
     tree_str = gen_directory_tree_str(project_dir)
-    # print(tree_str)
     assert (
         tree_str
         == """project_path/
@@ -440,19 +718,13 @@ project_path/
                 subdir_reader/
                     Titanic/
                         BasicDatasetProfiler.json
-        notebooks/
-            pandas/
-                validation_playground.ipynb
-            spark/
-                validation_playground.ipynb
-            sql/
-                validation_playground.ipynb
         plugins/
             custom_data_docs/
                 renderers/
                 styles/
                     data_docs_custom_styles.css
                 views/
+        profilers/
         uncommitted/
             config_variables.yml
             data_docs/
@@ -493,7 +765,6 @@ project_path/
         project_dir, "great_expectations/uncommitted/data_docs"
     )
     observed = gen_directory_tree_str(data_docs_dir)
-    print(observed)
     assert (
         observed
         == """\
@@ -561,16 +832,16 @@ data_docs/
         )
     )
 
-    # save data_docs locally
-    os.makedirs("./tests/data_context/output", exist_ok=True)
-    os.makedirs("./tests/data_context/output/data_docs", exist_ok=True)
-
-    if os.path.isdir("./tests/data_context/output/data_docs"):
-        shutil.rmtree("./tests/data_context/output/data_docs")
-    shutil.copytree(
-        os.path.join(ge_directory, "uncommitted/data_docs/"),
-        "./tests/data_context/output/data_docs",
-    )
+    # save data_docs locally if you need to inspect the files manually
+    # os.makedirs("./tests/data_context/output", exist_ok=True)
+    # os.makedirs("./tests/data_context/output/data_docs", exist_ok=True)
+    #
+    # if os.path.isdir("./tests/data_context/output/data_docs"):
+    #     shutil.rmtree("./tests/data_context/output/data_docs")
+    # shutil.copytree(
+    #     os.path.join(ge_directory, "uncommitted/data_docs/"),
+    #     "./tests/data_context/output/data_docs",
+    # )
 
 
 def test_add_store(empty_data_context):
@@ -589,117 +860,81 @@ def test_add_store(empty_data_context):
     assert isinstance(new_store, ExpectationsStore)
 
 
-@pytest.fixture
-def basic_data_context_config():
-    return DataContextConfig(
-        **{
-            "commented_map": {},
-            "config_version": 2,
-            "plugins_directory": "plugins/",
-            "evaluation_parameter_store_name": "evaluation_parameter_store",
-            "validations_store_name": "does_not_have_to_be_real",
-            "expectations_store_name": "expectations_store",
-            "config_variables_file_path": "uncommitted/config_variables.yml",
-            "datasources": {},
-            "stores": {
-                "expectations_store": {
-                    "class_name": "ExpectationsStore",
-                    "store_backend": {
-                        "class_name": "TupleFilesystemStoreBackend",
-                        "base_directory": "expectations/",
-                    },
-                },
-                "evaluation_parameter_store": {
-                    "module_name": "great_expectations.data_context.store",
-                    "class_name": "EvaluationParameterStore",
-                },
-            },
-            "data_docs_sites": {},
-            "validation_operators": {
-                "default": {
-                    "class_name": "ActionListValidationOperator",
-                    "action_list": [],
-                }
-            },
-            "anonymous_usage_statistics": {
-                "enabled": True,
-                "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-                "usage_statistics_url": USAGE_STATISTICS_QA_URL,
-            },
-        }
-    )
-
-
+# noinspection PyPep8Naming
 def test_ExplorerDataContext(titanic_data_context):
     context_root_directory = titanic_data_context.root_directory
     explorer_data_context = ExplorerDataContext(context_root_directory)
     assert explorer_data_context._expectation_explorer_manager
 
 
+# noinspection PyPep8Naming
+@pytest.mark.unit
 def test_ConfigOnlyDataContext__initialization(
     tmp_path_factory, basic_data_context_config
 ):
     config_path = str(
         tmp_path_factory.mktemp("test_ConfigOnlyDataContext__initialization__dir")
     )
-    context = BaseDataContext(basic_data_context_config, config_path,)
-
-    assert (
-        context.root_directory.split("/")[-1]
-        == "test_ConfigOnlyDataContext__initialization__dir0"
+    context = BaseDataContext(
+        basic_data_context_config,
+        config_path,
     )
-    assert context.plugins_directory.split("/")[-3:] == [
-        "test_ConfigOnlyDataContext__initialization__dir0",
-        "plugins",
-        "",
-    ]
+
+    assert context.root_directory.split("/")[-1].startswith(
+        "test_ConfigOnlyDataContext__initialization__dir"
+    )
+
+    plugins_dir_parts = context.plugins_directory.split("/")[-3:]
+    assert len(plugins_dir_parts) == 3
+    assert plugins_dir_parts[0].startswith(
+        "test_ConfigOnlyDataContext__initialization__dir"
+    )
+    assert plugins_dir_parts[1:] == ["plugins", ""]
 
 
+@pytest.mark.unit
 def test__normalize_absolute_or_relative_path(
     tmp_path_factory, basic_data_context_config
 ):
-    config_path = str(
-        tmp_path_factory.mktemp("test__normalize_absolute_or_relative_path__dir")
-    )
-    context = BaseDataContext(basic_data_context_config, config_path,)
-
-    assert str(
-        os.path.join("test__normalize_absolute_or_relative_path__dir0", "yikes")
-    ) in context._normalize_absolute_or_relative_path("yikes")
-
-    assert (
+    full_test_dir = tmp_path_factory.mktemp(
         "test__normalize_absolute_or_relative_path__dir"
-        not in context._normalize_absolute_or_relative_path("/yikes")
     )
+    test_dir = full_test_dir.parts[-1]
+    config_path = str(full_test_dir)
+    context = BaseDataContext(
+        basic_data_context_config,
+        config_path,
+    )
+
+    assert context._normalize_absolute_or_relative_path("yikes").endswith(
+        os.path.join(test_dir, "yikes")
+    )
+
+    assert test_dir not in context._normalize_absolute_or_relative_path("/yikes")
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
 
 
-def test_load_data_context_from_environment_variables(tmp_path_factory):
-    curdir = os.path.abspath(os.getcwd())
-    try:
-        project_path = str(tmp_path_factory.mktemp("data_context"))
-        context_path = os.path.join(project_path, "great_expectations")
-        os.makedirs(context_path, exist_ok=True)
-        os.chdir(context_path)
-        with pytest.raises(DataContextError) as err:
-            DataContext.find_context_root_dir()
-        assert isinstance(err.value, ConfigNotFoundError)
+def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
+    project_path = tmp_path / "data_context"
+    project_path.mkdir()
+    project_path = str(project_path)
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(context_path, exist_ok=True)
+    assert os.path.isdir(context_path)
+    monkeypatch.chdir(context_path)
+    with pytest.raises(ge_exceptions.DataContextError) as err:
+        DataContext.find_context_root_dir()
+    assert isinstance(err.value, ge_exceptions.ConfigNotFoundError)
 
-        shutil.copy(
-            file_relative_path(
-                __file__, "../test_fixtures/great_expectations_basic.yml"
-            ),
-            str(os.path.join(context_path, "great_expectations.yml")),
-        )
-        os.environ["GE_HOME"] = context_path
-        assert DataContext.find_context_root_dir() == context_path
-    except Exception:
-        raise
-    finally:
-        # Make sure we unset the environment variable we're using
-        if "GE_HOME" in os.environ:
-            del os.environ["GE_HOME"]
-        os.chdir(curdir)
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join("..", "test_fixtures", "great_expectations_basic.yml"),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    monkeypatch.setenv("GE_HOME", context_path)
+    assert DataContext.find_context_root_dir() == context_path
 
 
 def test_data_context_updates_expectation_suite_names(
@@ -719,8 +954,10 @@ def test_data_context_updates_expectation_suite_names(
 
     # We'll get that expectation suite and then update its name and re-save, then verify that everything
     # has been properly updated
-    expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
-        expectation_suite_name
+    expectation_suite = (
+        data_context_parameterized_expectation_suite.get_expectation_suite(
+            expectation_suite_name
+        )
     )
 
     # Note we codify here the current behavior of having a string data_asset_name though typed ExpectationSuite objects
@@ -740,8 +977,10 @@ def test_data_context_updates_expectation_suite_names(
         expectation_suite=expectation_suite, expectation_suite_name="a_new_suite_name"
     )
 
-    fetched_expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
-        "a_new_suite_name"
+    fetched_expectation_suite = (
+        data_context_parameterized_expectation_suite.get_expectation_suite(
+            "a_new_suite_name"
+        )
     )
 
     assert fetched_expectation_suite.expectation_suite_name == "a_new_suite_name"
@@ -752,8 +991,10 @@ def test_data_context_updates_expectation_suite_names(
         expectation_suite_name="a_new_new_suite_name",
     )
 
-    fetched_expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
-        "a_new_new_suite_name"
+    fetched_expectation_suite = (
+        data_context_parameterized_expectation_suite.get_expectation_suite(
+            "a_new_new_suite_name"
+        )
     )
 
     assert fetched_expectation_suite.expectation_suite_name == "a_new_new_suite_name"
@@ -766,7 +1007,11 @@ def test_data_context_updates_expectation_suite_names(
             "a_new_new_suite_name.json",
         ),
     ) as suite_file:
-        loaded_suite = expectationSuiteSchema.load(json.load(suite_file))
+        loaded_suite_dict: dict = expectationSuiteSchema.load(json.load(suite_file))
+        loaded_suite = ExpectationSuite(
+            **loaded_suite_dict,
+            data_context=data_context_parameterized_expectation_suite,
+        )
         assert loaded_suite.expectation_suite_name == "a_new_new_suite_name"
 
     #   3. Using the new name but having the context draw that from the suite
@@ -775,8 +1020,10 @@ def test_data_context_updates_expectation_suite_names(
         expectation_suite=expectation_suite
     )
 
-    fetched_expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
-        "a_third_suite_name"
+    fetched_expectation_suite = (
+        data_context_parameterized_expectation_suite.get_expectation_suite(
+            "a_third_suite_name"
+        )
     )
     assert fetched_expectation_suite.expectation_suite_name == "a_third_suite_name"
 
@@ -981,19 +1228,13 @@ great_expectations/
     checkpoints/
     expectations/
         .ge_store_backend_id
-    notebooks/
-        pandas/
-            validation_playground.ipynb
-        spark/
-            validation_playground.ipynb
-        sql/
-            validation_playground.ipynb
     plugins/
         custom_data_docs/
             renderers/
             styles/
                 data_docs_custom_styles.css
             views/
+    profilers/
     uncommitted/
         config_variables.yml
         data_docs/
@@ -1013,19 +1254,13 @@ great_expectations/
     checkpoints/
     expectations/
         .ge_store_backend_id
-    notebooks/
-        pandas/
-            validation_playground.ipynb
-        spark/
-            validation_playground.ipynb
-        sql/
-            validation_playground.ipynb
     plugins/
         custom_data_docs/
             renderers/
             styles/
                 data_docs_custom_styles.css
             views/
+    profilers/
     uncommitted/
         config_variables.yml
         data_docs/
@@ -1083,8 +1318,8 @@ def test_data_context_create_builds_base_directories(tmp_path_factory):
 
     for directory in [
         "expectations",
-        "notebooks",
         "plugins",
+        "profilers",
         "checkpoints",
         "uncommitted",
     ]:
@@ -1114,28 +1349,22 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
     assert "# LOOK I WAS MODIFIED" in obs
 
 
-def test_scaffold_directories_and_notebooks(tmp_path_factory):
-    empty_directory = str(
-        tmp_path_factory.mktemp("test_scaffold_directories_and_notebooks")
-    )
+def test_scaffold_directories(tmp_path_factory):
+    empty_directory = str(tmp_path_factory.mktemp("test_scaffold_directories"))
     DataContext.scaffold_directories(empty_directory)
-    DataContext.scaffold_notebooks(empty_directory)
 
     assert set(os.listdir(empty_directory)) == {
         "plugins",
         "checkpoints",
+        "profilers",
         "expectations",
         ".gitignore",
         "uncommitted",
-        "notebooks",
     }
     assert set(os.listdir(os.path.join(empty_directory, "uncommitted"))) == {
         "data_docs",
         "validations",
     }
-    for subdir in DataContext.NOTEBOOK_SUBDIRECTORIES:
-        subdir_path = os.path.join(empty_directory, "notebooks", subdir)
-        assert set(os.listdir(subdir_path)) == {"validation_playground.ipynb"}
 
 
 def test_build_batch_kwargs(titanic_multibatch_data_context):
@@ -1169,108 +1398,9 @@ def test_build_batch_kwargs(titanic_multibatch_data_context):
     assert {"Titanic_1912.csv", "Titanic_1911.csv"} == set(paths)
 
 
-def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasources_and_a_site_configured(
-    tmp_path_factory,
+def test_load_config_variables_property(
+    basic_data_context_config, tmp_path_factory, monkeypatch
 ):
-    """
-    This test ensures that a url will be returned for a default site even if a
-    datasource is not configured, and docs are not built.
-    """
-    empty_directory = str(tmp_path_factory.mktemp("another_empty_project"))
-    DataContext.create(empty_directory)
-    context = DataContext(os.path.join(empty_directory, DataContext.GE_DIR))
-
-    obs = context.get_docs_sites_urls(only_if_exists=False)
-    assert len(obs) == 1
-    assert obs[0]["site_url"].endswith(
-        "great_expectations/uncommitted/data_docs/local_site/index.html"
-    )
-
-
-def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_site(
-    tmp_path_factory,
-):
-    empty_directory = str(tmp_path_factory.mktemp("yo_yo"))
-    DataContext.create(empty_directory)
-    ge_dir = os.path.join(empty_directory, DataContext.GE_DIR)
-    context = DataContext(ge_dir)
-
-    context._project_config["data_docs_sites"] = {
-        "my_rad_site": {
-            "class_name": "SiteBuilder",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": "uncommitted/data_docs/some/local/path/",
-            },
-        }
-    }
-
-    # TODO Workaround project config programmatic config manipulation
-    #  statefulness issues by writing to disk and re-upping a new context
-    context._save_project_config()
-    context = DataContext(ge_dir)
-    context.build_data_docs()
-
-    expected_path = os.path.join(
-        ge_dir, "uncommitted/data_docs/some/local/path/index.html"
-    )
-    assert os.path.isfile(expected_path)
-
-    obs = context.get_docs_sites_urls()
-    assert obs == [
-        {"site_name": "my_rad_site", "site_url": "file://{}".format(expected_path)}
-    ]
-
-
-def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_local_site(
-    tmp_path_factory,
-):
-    empty_directory = str(tmp_path_factory.mktemp("yo_yo_ma"))
-    DataContext.create(empty_directory)
-    ge_dir = os.path.join(empty_directory, DataContext.GE_DIR)
-    context = DataContext(ge_dir)
-
-    context._project_config["data_docs_sites"] = {
-        "my_rad_site": {
-            "class_name": "SiteBuilder",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": "uncommitted/data_docs/some/path/",
-            },
-        },
-        "another_just_amazing_site": {
-            "class_name": "SiteBuilder",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": "uncommitted/data_docs/another/path/",
-            },
-        },
-    }
-
-    # TODO Workaround project config programmatic config manipulation
-    #  statefulness issues by writing to disk and re-upping a new context
-    context._save_project_config()
-    context = DataContext(ge_dir)
-    context.build_data_docs()
-    data_docs_dir = os.path.join(ge_dir, "uncommitted/data_docs/")
-
-    path_1 = os.path.join(data_docs_dir, "some/path/index.html")
-    path_2 = os.path.join(data_docs_dir, "another/path/index.html")
-    for expected_path in [path_1, path_2]:
-        assert os.path.isfile(expected_path)
-
-    obs = context.get_docs_sites_urls()
-
-    assert obs == [
-        {"site_name": "my_rad_site", "site_url": "file://{}".format(path_1)},
-        {
-            "site_name": "another_just_amazing_site",
-            "site_url": "file://{}".format(path_2),
-        },
-    ]
-
-
-def test_load_config_variables_file(basic_data_context_config, tmp_path_factory):
     # Setup:
     base_path = str(tmp_path_factory.mktemp("test_load_config_variables_file"))
     os.makedirs(os.path.join(base_path, "uncommitted"), exist_ok=True)
@@ -1288,19 +1418,19 @@ def test_load_config_variables_file(basic_data_context_config, tmp_path_factory)
 
     try:
         # We should be able to load different files based on an environment variable
-        os.environ["TEST_CONFIG_FILE_ENV"] = "dev"
+        monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "dev")
         context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
-        config_vars = context._load_config_variables_file()
+        config_vars = context.config_variables
         assert config_vars["env"] == "dev"
-        os.environ["TEST_CONFIG_FILE_ENV"] = "prod"
+        monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "prod")
         context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
-        config_vars = context._load_config_variables_file()
+        config_vars = context.config_variables
         assert config_vars["env"] == "prod"
     except Exception:
         raise
     finally:
         # Make sure we unset the environment variable we're using
-        del os.environ["TEST_CONFIG_FILE_ENV"]
+        monkeypatch.delenv("TEST_CONFIG_FILE_ENV")
 
 
 def test_list_expectation_suite_with_no_suites(titanic_data_context):
@@ -1330,14 +1460,14 @@ def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
 def test_get_batch_raises_error_when_passed_a_non_string_type_for_suite_parameter(
     titanic_data_context,
 ):
-    with pytest.raises(DataContextError):
+    with pytest.raises(ge_exceptions.DataContextError):
         titanic_data_context.get_batch({}, 99)
 
 
 def test_get_batch_raises_error_when_passed_a_non_dict_or_batch_kwarg_type_for_batch_kwarg_parameter(
     titanic_data_context,
 ):
-    with pytest.raises(BatchKwargsError):
+    with pytest.raises(ge_exceptions.BatchKwargsError):
         titanic_data_context.get_batch(99, "foo")
 
 
@@ -1393,12 +1523,14 @@ def test_list_checkpoints_on_context_with_checkpoint(empty_context_with_checkpoi
     assert context.list_checkpoints() == ["my_checkpoint"]
 
 
-def test_list_checkpoints_on_context_with_twwo_checkpoints(
+def test_list_checkpoints_on_context_with_two_checkpoints(
     empty_context_with_checkpoint,
 ):
     context = empty_context_with_checkpoint
     checkpoints_file = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "my_checkpoint.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "my_checkpoint.yml",
     )
     shutil.copy(
         checkpoints_file, os.path.join(os.path.dirname(checkpoints_file), "another.yml")
@@ -1413,7 +1545,9 @@ def test_list_checkpoints_on_context_with_checkpoint_and_other_files_in_checkpoi
 
     for extension in [".json", ".txt", "", ".py"]:
         path = os.path.join(
-            context.root_directory, context.CHECKPOINTS_DIR, f"foo{extension}"
+            context.root_directory,
+            DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+            f"foo{extension}",
         )
         with open(path, "w") as f:
             f.write("foo: bar")
@@ -1426,91 +1560,81 @@ def test_get_checkpoint_raises_error_on_not_found_checkpoint(
     empty_context_with_checkpoint,
 ):
     context = empty_context_with_checkpoint
-    with pytest.raises(CheckpointNotFoundError):
+    with pytest.raises(ge_exceptions.CheckpointNotFoundError):
         context.get_checkpoint("not_a_checkpoint")
 
 
-def test_get_checkpoint_raises_error_empty_checkpoint(empty_context_with_checkpoint,):
+def test_get_checkpoint_raises_error_empty_checkpoint(
+    empty_context_with_checkpoint,
+):
     context = empty_context_with_checkpoint
     checkpoint_file_path = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "my_checkpoint.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "my_checkpoint.yml",
     )
     with open(checkpoint_file_path, "w") as f:
-        f.write("# Not a checkpoint file")
+        f.write("# Not a Checkpoint file")
     assert os.path.isfile(checkpoint_file_path)
     assert context.list_checkpoints() == ["my_checkpoint"]
 
-    with pytest.raises(CheckpointError):
+    with pytest.raises(ge_exceptions.InvalidCheckpointConfigError):
         context.get_checkpoint("my_checkpoint")
 
 
 def test_get_checkpoint(empty_context_with_checkpoint):
     context = empty_context_with_checkpoint
     obs = context.get_checkpoint("my_checkpoint")
-    assert isinstance(obs, dict)
-    assert {
-        "validation_operator_name": "action_list_operator",
+    assert isinstance(obs, Checkpoint)
+    config = obs.get_config(mode=ConfigOutputModes.JSON_DICT)
+    assert isinstance(config, dict)
+    assert config == {
+        "name": "my_checkpoint",
+        "class_name": "LegacyCheckpoint",
+        "module_name": "great_expectations.checkpoint",
         "batches": [
             {
                 "batch_kwargs": {
-                    "path": "/Users/me/projects/my_project/data/data.csv",
                     "datasource": "my_filesystem_datasource",
+                    "path": "/Users/me/projects/my_project/data/data.csv",
                     "reader_method": "read_csv",
                 },
                 "expectation_suite_names": ["suite_one", "suite_two"],
             },
             {
                 "batch_kwargs": {
-                    "query": "SELECT * FROM users WHERE status = 1",
                     "datasource": "my_redshift_datasource",
+                    "query": "SELECT * FROM users WHERE status = 1",
                 },
                 "expectation_suite_names": ["suite_three"],
             },
         ],
-    }
-
-
-def test_get_checkpoint_default_validation_operator(empty_data_context):
-    yaml = YAML(typ="safe")
-    context = empty_data_context
-
-    checkpoint = {"batches": []}
-    checkpoint_file_path = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "foo.yml"
-    )
-    with open(checkpoint_file_path, "w") as f:
-        yaml.dump(checkpoint, f)
-    assert os.path.isfile(checkpoint_file_path)
-
-    obs = context.get_checkpoint("foo")
-    assert isinstance(obs, dict)
-    expected = {
         "validation_operator_name": "action_list_operator",
-        "batches": [],
     }
-    assert expected == obs
 
 
 def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
-    yaml = YAML(typ="safe")
+    yaml_obj = YAML(typ="safe")
     context = empty_data_context
 
     checkpoint = {
         "validation_operator_name": "action_list_operator",
     }
     checkpoint_file_path = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "foo.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "foo.yml",
     )
     with open(checkpoint_file_path, "w") as f:
-        yaml.dump(checkpoint, f)
+        yaml_obj.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(CheckpointError) as e:
+    with pytest.raises(ge_exceptions.CheckpointError) as e:
         context.get_checkpoint("foo")
 
 
 def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
-    yaml = YAML(typ="safe")
+    yaml_obj = YAML(typ="safe")
     context = empty_data_context
 
     checkpoint = {
@@ -1518,39 +1642,47 @@ def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
         "batches": {"stuff": 33},
     }
     checkpoint_file_path = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "foo.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "foo.yml",
     )
     with open(checkpoint_file_path, "w") as f:
-        yaml.dump(checkpoint, f)
+        yaml_obj.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(CheckpointError) as e:
+    with pytest.raises(ge_exceptions.InvalidCheckpointConfigError) as e:
         context.get_checkpoint("foo")
 
 
 def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
     empty_data_context,
 ):
-    yaml = YAML(typ="safe")
+    yaml_obj = YAML(typ="safe")
     context = empty_data_context
 
     checkpoint = {
         "validation_operator_name": "action_list_operator",
-        "batches": [{"batch_kwargs": {"foo": 33},}],
+        "batches": [
+            {
+                "batch_kwargs": {"foo": 33},
+            }
+        ],
     }
     checkpoint_file_path = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "foo.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "foo.yml",
     )
     with open(checkpoint_file_path, "w") as f:
-        yaml.dump(checkpoint, f)
+        yaml_obj.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(CheckpointError) as e:
+    with pytest.raises(ge_exceptions.CheckpointError) as e:
         context.get_checkpoint("foo")
 
 
 def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context):
-    yaml = YAML(typ="safe")
+    yaml_obj = YAML(typ="safe")
     context = empty_data_context
 
     checkpoint = {
@@ -1558,20 +1690,91 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
         "batches": [{"expectation_suite_names": ["foo"]}],
     }
     checkpoint_file_path = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "foo.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "foo.yml",
     )
     with open(checkpoint_file_path, "w") as f:
-        yaml.dump(checkpoint, f)
+        yaml_obj.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(CheckpointError) as e:
+    with pytest.raises(ge_exceptions.CheckpointError) as e:
         context.get_checkpoint("foo")
 
 
-def test_get_validator_with_instantiated_expectation_suite(
-    empty_data_context_v3, tmp_path_factory
+@pytest.mark.integration
+def test_run_checkpoint_new_style(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context = empty_data_context_v3
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    # add Checkpoint config
+    checkpoint_config = CheckpointConfig(
+        name="my_checkpoint",
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        validations=[
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_basic_data_connector",
+                    "data_asset_name": "Titanic_1911",
+                }
+            }
+        ],
+    )
+    checkpoint_config_key = ConfigurationIdentifier(
+        configuration_key=checkpoint_config.name
+    )
+    context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
+
+    with pytest.raises(
+        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
+    ):
+        context.run_checkpoint(checkpoint_name=checkpoint_config.name)
+
+    assert len(context.validations_store.list_keys()) == 0
+
+    context.create_expectation_suite(expectation_suite_name="my_expectation_suite")
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name=checkpoint_config.name
+    )
+    assert len(result.list_validation_results()) == 1
+    assert result.success
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name=checkpoint_config.name
+    )
+    assert len(result.list_validation_results()) == 1
+    assert len(context.validations_store.list_keys()) == 2
+    assert result.success
+
+
+def test_get_validator_with_instantiated_expectation_suite(
+    empty_data_context_stats_enabled, tmp_path_factory
+):
+    context: DataContext = empty_data_context_stats_enabled
 
     base_directory = str(
         tmp_path_factory.mktemp(
@@ -1580,7 +1783,10 @@ def test_get_validator_with_instantiated_expectation_suite(
     )
 
     create_files_in_directory(
-        directory=base_directory, file_name_list=["some_file.csv",],
+        directory=base_directory,
+        file_name_list=[
+            "some_file.csv",
+        ],
     )
 
     yaml_config = f"""
@@ -1603,30 +1809,38 @@ data_connectors:
 
     config = yaml.load(yaml_config)
     context.add_datasource(
-        "my_directory_datasource", **config,
+        "my_directory_datasource",
+        **config,
     )
 
     my_validator = context.get_validator(
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={"alphanumeric": "some_file",},
-        expectation_suite=ExpectationSuite("my_expectation_suite"),
+        batch_identifiers={
+            "alphanumeric": "some_file",
+        },
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
     )
     assert my_validator.expectation_suite_name == "my_expectation_suite"
 
 
 def test_get_validator_with_attach_expectation_suite(
-    empty_data_context_v3, tmp_path_factory
+    empty_data_context, tmp_path_factory
 ):
-    context = empty_data_context_v3
+    context = empty_data_context
 
     base_directory = str(
         tmp_path_factory.mktemp("test_get_validator_with_attach_expectation_suite")
     )
 
     create_files_in_directory(
-        directory=base_directory, file_name_list=["some_file.csv",],
+        directory=base_directory,
+        file_name_list=[
+            "some_file.csv",
+        ],
     )
 
     yaml_config = f"""
@@ -1649,14 +1863,1412 @@ data_connectors:
 
     config = yaml.load(yaml_config)
     context.add_datasource(
-        "my_directory_datasource", **config,
+        "my_directory_datasource",
+        **config,
     )
 
     my_validator = context.get_validator(
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={"alphanumeric": "some_file",},
+        batch_identifiers={
+            "alphanumeric": "some_file",
+        },
         create_expectation_suite_with_name="A_expectation_suite",
     )
     assert my_validator.expectation_suite_name == "A_expectation_suite"
+
+
+@pytest.mark.slow  # 8.13s
+def test_get_validator_without_expectation_suite(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    batch = context.get_batch_list(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="pandas_datasource",
+            data_connector_name="runtime_data_connector",
+            data_asset_name="my_data_asset",
+            runtime_parameters={"batch_data": pd.DataFrame({"x": range(10)})},
+            batch_identifiers={
+                "id_key_0": "id_0_value_a",
+                "id_key_1": "id_1_value_a",
+            },
+        )
+    )[0]
+
+    my_validator = context.get_validator(batch=batch)
+    assert isinstance(my_validator.get_expectation_suite(), ExpectationSuite)
+    assert my_validator.expectation_suite_name == "default"
+
+
+@pytest.mark.slow  # 1.35s
+def test_get_validator_with_batch(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    my_batch = context.get_batch_list(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="pandas_datasource",
+            data_connector_name="runtime_data_connector",
+            data_asset_name="my_data_asset",
+            runtime_parameters={"batch_data": pd.DataFrame({"x": range(10)})},
+            batch_identifiers={
+                "id_key_0": "id_0_value_a",
+                "id_key_1": "id_1_value_a",
+            },
+        )
+    )[0]
+
+    my_validator = context.get_validator(
+        batch=my_batch,
+        create_expectation_suite_with_name="A_expectation_suite",
+    )
+
+
+def test_get_validator_with_batch_list(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    my_batch_list = [
+        context.get_batch_list(
+            batch_request=RuntimeBatchRequest(
+                datasource_name="pandas_datasource",
+                data_connector_name="runtime_data_connector",
+                data_asset_name="my_data_asset",
+                runtime_parameters={"batch_data": pd.DataFrame({"x": range(10)})},
+                batch_identifiers={
+                    "id_key_0": "id_0_value_a",
+                    "id_key_1": "id_1_value_a",
+                },
+            )
+        )[0],
+        context.get_batch_list(
+            batch_request=RuntimeBatchRequest(
+                datasource_name="pandas_datasource",
+                data_connector_name="runtime_data_connector",
+                data_asset_name="my_data_asset",
+                runtime_parameters={"batch_data": pd.DataFrame({"y": range(10)})},
+                batch_identifiers={
+                    "id_key_0": "id_0_value_b",
+                    "id_key_1": "id_1_value_b",
+                },
+            )
+        )[0],
+    ]
+
+    my_validator = context.get_validator(
+        batch_list=my_batch_list,
+        create_expectation_suite_with_name="A_expectation_suite",
+    )
+    assert len(my_validator.batches) == 2
+
+
+def test_get_batch_multiple_datasources_do_not_scan_all(
+    data_context_with_bad_datasource,
+):
+    """
+    What does this test and why?
+
+    A DataContext can have "stale" datasources in its configuration (ie. connections to DBs that are now offline).
+    If we configure a new datasource and are only using it (like the PandasDatasource below), then we don't
+    want to be dependent on all the "stale" datasources working too.
+
+    data_context_with_bad_datasource is a fixture that contains a configuration for an invalid datasource
+    (with "fake_port" and "fake_host")
+
+    In the test we configure a new expectation_suite, a local pandas_datasource and retrieve a single batch.
+
+    This tests a fix for the following issue:
+    https://github.com/great-expectations/great_expectations/issues/2241
+    """
+
+    context = data_context_with_bad_datasource
+    context.create_expectation_suite(expectation_suite_name="local_test.default")
+    expectation_suite = context.get_expectation_suite("local_test.default")
+    context.add_datasource("pandas_datasource", class_name="PandasDatasource")
+    df = pd.DataFrame({"a": [1, 2, 3]})
+    batch = context.get_batch(
+        batch_kwargs={"datasource": "pandas_datasource", "dataset": df},
+        expectation_suite_name=expectation_suite,
+    )
+    assert len(batch) == 3
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_add_expectation_to_expectation_suite(
+    mock_emit, empty_data_context_stats_enabled
+):
+    context: DataContext = empty_data_context_stats_enabled
+
+    expectation_suite: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite_name="my_new_expectation_suite"
+    )
+    expectation_suite.add_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
+        )
+    )
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "expectation_suite.add_expectation",
+                "event_payload": {},
+                "success": True,
+            }
+        )
+    ]
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_add_checkpoint_from_yaml(mock_emit, empty_data_context_stats_enabled):
+    """
+    What does this test and why?
+    We should be able to add a checkpoint directly from a valid yaml configuration.
+    test_yaml_config() should not automatically save a checkpoint if valid.
+    checkpoint yaml in a store should match the configuration, even if created from SimpleCheckpoints
+    Note: This tests multiple items and could stand to be broken up.
+    """
+
+    context: DataContext = empty_data_context_stats_enabled
+    checkpoint_name: str = "my_new_checkpoint"
+
+    assert checkpoint_name not in context.list_checkpoints()
+    assert len(context.list_checkpoints()) == 0
+
+    checkpoint_yaml_config = f"""
+name: {checkpoint_name}
+config_version: 1.0
+class_name: SimpleCheckpoint
+run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
+validations:
+  - batch_request:
+      datasource_name: data_dir
+      data_connector_name: data_dir_example_data_connector
+      data_asset_name: DEFAULT_ASSET_NAME
+      partition_request:
+        index: -1
+    expectation_suite_name: newsuite
+    """
+
+    checkpoint_from_test_yaml_config = context.test_yaml_config(
+        checkpoint_yaml_config, name=checkpoint_name
+    )
+    assert mock_emit.call_count == 1
+    # Substitute anonymized name since it changes for each run
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "SimpleCheckpoint",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
+
+    # test_yaml_config() no longer stores checkpoints automatically
+    assert checkpoint_name not in context.list_checkpoints()
+    assert len(context.list_checkpoints()) == 0
+
+    checkpoint_from_yaml = context.add_checkpoint(
+        **yaml.load(checkpoint_yaml_config),
+    )
+
+    expected_checkpoint_yaml: str = """name: my_new_checkpoint
+config_version: 1.0
+template_name:
+module_name: great_expectations.checkpoint
+class_name: Checkpoint
+run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
+expectation_suite_name:
+batch_request: {}
+action_list:
+  - name: store_validation_result
+    action:
+      class_name: StoreValidationResultAction
+  - name: store_evaluation_params
+    action:
+      class_name: StoreEvaluationParametersAction
+  - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+      site_names: []
+evaluation_parameters: {}
+runtime_configuration: {}
+validations:
+  - batch_request:
+      datasource_name: data_dir
+      data_connector_name: data_dir_example_data_connector
+      data_asset_name: DEFAULT_ASSET_NAME
+      partition_request:
+        index: -1
+    expectation_suite_name: newsuite
+profilers: []
+ge_cloud_id:
+expectation_suite_ge_cloud_id:
+"""
+
+    checkpoint_dir = os.path.join(
+        context.root_directory,
+        context.checkpoint_store.config["store_backend"]["base_directory"],
+    )
+    checkpoint_file = os.path.join(checkpoint_dir, f"{checkpoint_name}.yml")
+
+    with open(checkpoint_file) as cf:
+        checkpoint_from_disk = cf.read()
+
+    assert checkpoint_from_disk == expected_checkpoint_yaml
+    assert (
+        checkpoint_from_yaml.get_config(mode=ConfigOutputModes.YAML)
+        == expected_checkpoint_yaml
+    )
+    assert deep_filter_properties_iterable(
+        properties=checkpoint_from_yaml.get_config(mode=ConfigOutputModes.DICT),
+        clean_falsy=True,
+    ) == deep_filter_properties_iterable(
+        properties=dict(yaml.load(expected_checkpoint_yaml)),
+        clean_falsy=True,
+    )
+
+    checkpoint_from_store = context.get_checkpoint(name=checkpoint_name)
+    assert (
+        checkpoint_from_store.get_config(mode=ConfigOutputModes.YAML)
+        == expected_checkpoint_yaml
+    )
+    assert deep_filter_properties_iterable(
+        properties=checkpoint_from_store.get_config(mode=ConfigOutputModes.DICT),
+        clean_falsy=True,
+    ) == deep_filter_properties_iterable(
+        properties=dict(yaml.load(expected_checkpoint_yaml)),
+        clean_falsy=True,
+    )
+
+    expected_action_list = [
+        {
+            "name": "store_validation_result",
+            "action": {"class_name": "StoreValidationResultAction"},
+        },
+        {
+            "name": "store_evaluation_params",
+            "action": {"class_name": "StoreEvaluationParametersAction"},
+        },
+        {
+            "name": "update_data_docs",
+            "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
+        },
+    ]
+
+    assert checkpoint_from_yaml.action_list == expected_action_list
+    assert checkpoint_from_store.action_list == expected_action_list
+    assert checkpoint_from_test_yaml_config.action_list == expected_action_list
+    assert checkpoint_from_store.action_list == expected_action_list
+
+    assert checkpoint_from_test_yaml_config.name == checkpoint_from_yaml.name
+    assert (
+        checkpoint_from_test_yaml_config.action_list == checkpoint_from_yaml.action_list
+    )
+
+    assert checkpoint_from_yaml.name == checkpoint_name
+    assert checkpoint_from_yaml.get_config(
+        mode=ConfigOutputModes.JSON_DICT, clean_falsy=True
+    ) == {
+        "name": "my_new_checkpoint",
+        "config_version": 1.0,
+        "class_name": "Checkpoint",
+        "module_name": "great_expectations.checkpoint",
+        "run_name_template": "%Y%m%d-%H%M%S-my-run-name-template",
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {"class_name": "StoreValidationResultAction"},
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {"class_name": "StoreEvaluationParametersAction"},
+            },
+            {
+                "name": "update_data_docs",
+                "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
+            },
+        ],
+        "validations": [
+            {
+                "batch_request": {
+                    "datasource_name": "data_dir",
+                    "data_connector_name": "data_dir_example_data_connector",
+                    "data_asset_name": "DEFAULT_ASSET_NAME",
+                    "partition_request": {"index": -1},
+                },
+                "expectation_suite_name": "newsuite",
+            }
+        ],
+    }
+
+    assert isinstance(checkpoint_from_yaml, Checkpoint)
+
+    assert checkpoint_name in context.list_checkpoints()
+    assert len(context.list_checkpoints()) == 1
+
+    # No other usage stats calls detected
+    assert mock_emit.call_count == 1
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_add_checkpoint_from_yaml_fails_for_unrecognized_class_name(
+    mock_emit, empty_data_context_stats_enabled
+):
+    """
+    What does this test and why?
+    Checkpoint yaml should have a valid class_name
+    """
+
+    context: DataContext = empty_data_context_stats_enabled
+    checkpoint_name: str = "my_new_checkpoint"
+
+    assert checkpoint_name not in context.list_checkpoints()
+    assert len(context.list_checkpoints()) == 0
+
+    checkpoint_yaml_config = f"""
+name: {checkpoint_name}
+config_version: 1.0
+class_name: NotAValidCheckpointClassName
+run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
+validations:
+  - batch_request:
+      datasource_name: data_dir
+      data_connector_name: data_dir_example_data_connector
+      data_asset_name: DEFAULT_ASSET_NAME
+      partition_request:
+        index: -1
+    expectation_suite_name: newsuite
+    """
+
+    with pytest.raises(KeyError):
+        context.test_yaml_config(checkpoint_yaml_config, name=checkpoint_name)
+
+    with pytest.raises(AttributeError):
+        context.add_checkpoint(
+            **yaml.load(checkpoint_yaml_config),
+        )
+
+    assert checkpoint_name not in context.list_checkpoints()
+    assert len(context.list_checkpoints()) == 0
+    assert mock_emit.call_count == 1
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {},
+                "success": False,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
+    """
+    What does this test and why?
+    Adding a datasource using context.add_datasource() via a config from a parsed yaml string without substitution variables should work as expected.
+    """
+    context: DataContext = empty_data_context_stats_enabled
+
+    assert "my_new_datasource" not in context.datasources.keys()
+    assert "my_new_datasource" not in context.list_datasources()
+    assert "my_new_datasource" not in context.get_config()["datasources"]
+
+    datasource_name: str = "my_datasource"
+
+    example_yaml = f"""
+    class_name: Datasource
+    execution_engine:
+      class_name: PandasExecutionEngine
+    data_connectors:
+      data_dir_example_data_connector:
+        class_name: InferredAssetFilesystemDataConnector
+        datasource_name: {datasource_name}
+        base_directory: ../data
+        default_regex:
+          group_names: data_asset_name
+          pattern: (.*)
+    """
+    datasource_from_test_yaml_config = context.test_yaml_config(
+        example_yaml, name=datasource_name
+    )
+    assert mock_emit.call_count == 1
+    # Substitute anonymized names since it changes for each run
+    anonymized_datasource_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    anonymized_execution_engine_name = mock_emit.call_args_list[0][0][0][
+        "event_payload"
+    ]["anonymized_execution_engine"]["anonymized_name"]
+    anonymized_data_connector_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_data_connectors"
+    ][0]["anonymized_name"]
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_datasource_name,
+                    "parent_class": "Datasource",
+                    "anonymized_execution_engine": {
+                        "anonymized_name": anonymized_execution_engine_name,
+                        "parent_class": "PandasExecutionEngine",
+                    },
+                    "anonymized_data_connectors": [
+                        {
+                            "anonymized_name": anonymized_data_connector_name,
+                            "parent_class": "InferredAssetFilesystemDataConnector",
+                        }
+                    ],
+                },
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
+
+    datasource_from_yaml = context.add_datasource(
+        name=datasource_name, **yaml.load(example_yaml)
+    )
+    assert mock_emit.call_count == 2
+    expected_call_args_list.extend(
+        [
+            mock.call(
+                {
+                    "event": "data_context.add_datasource",
+                    "event_payload": {},
+                    "success": True,
+                }
+            ),
+        ]
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
+
+    assert datasource_from_test_yaml_config.config == datasource_from_yaml.config
+
+    assert datasource_from_yaml.name == datasource_name
+    assert datasource_from_yaml.config == {
+        "execution_engine": {
+            "class_name": "PandasExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "data_dir_example_data_connector": {
+                "class_name": "InferredAssetFilesystemDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
+                "default_regex": {"group_names": "data_asset_name", "pattern": "(.*)"},
+                "base_directory": "../data",
+                "name": "data_dir_example_data_connector",
+            }
+        },
+        "id": None,
+        "name": "my_datasource",
+    }
+    assert isinstance(datasource_from_yaml, Datasource)
+    assert datasource_from_yaml.__class__.__name__ == "Datasource"
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]
+
+    # Check that the datasource was written to disk as expected
+    root_directory = context.root_directory
+    del context
+    context = DataContext(root_directory)
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]
+    assert mock_emit.call_count == 3
+    expected_call_args_list.extend(
+        [
+            mock.call(
+                {
+                    "event": "data_context.__init__",
+                    "event_payload": {},
+                    "success": True,
+                }
+            ),
+        ]
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_add_datasource_from_yaml_sql_datasource(
+    mock_emit,
+    sa,
+    test_backends,
+    empty_data_context_stats_enabled,
+):
+    """
+    What does this test and why?
+    Adding a datasource using context.add_datasource() via a config from a parsed yaml string without substitution variables should work as expected.
+    """
+
+    if "postgresql" not in test_backends:
+        pytest.skip("test_add_datasource_from_yaml_sql_datasource requires postgresql")
+
+    context: DataContext = empty_data_context_stats_enabled
+
+    assert "my_new_datasource" not in context.datasources.keys()
+    assert "my_new_datasource" not in context.list_datasources()
+    assert "my_new_datasource" not in context.get_config()["datasources"]
+
+    datasource_name: str = "my_datasource"
+
+    example_yaml = """
+    class_name: SimpleSqlalchemyDatasource
+    introspection:
+      whole_table:
+        data_asset_name_suffix: __whole_table
+    credentials:
+      drivername: postgresql
+      host: localhost
+      port: '5432'
+      username: postgres
+      password: ''
+      database: postgres
+    """
+
+    datasource_from_test_yaml_config = context.test_yaml_config(
+        example_yaml, name=datasource_name
+    )
+    assert mock_emit.call_count == 1
+    # Substitute anonymized name since it changes for each run
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    anonymized_data_connector_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_data_connectors"
+    ][0]["anonymized_name"]
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "SimpleSqlalchemyDatasource",
+                    "anonymized_execution_engine": {
+                        "parent_class": "SqlAlchemyExecutionEngine"
+                    },
+                    "anonymized_data_connectors": [
+                        {
+                            "anonymized_name": anonymized_data_connector_name,
+                            "parent_class": "InferredAssetSqlDataConnector",
+                        }
+                    ],
+                },
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
+    datasource_from_yaml = context.add_datasource(
+        name=datasource_name, **yaml.load(example_yaml)
+    )
+    assert mock_emit.call_count == 2
+    expected_call_args_list.extend(
+        [
+            mock.call(
+                {
+                    "event": "data_context.add_datasource",
+                    "event_payload": {},
+                    "success": True,
+                }
+            ),
+        ]
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
+
+    # .config not implemented for SimpleSqlalchemyDatasource
+    assert datasource_from_test_yaml_config.config == {}
+    assert datasource_from_yaml.config == {}
+
+    assert datasource_from_yaml.name == datasource_name
+    assert isinstance(datasource_from_yaml, SimpleSqlalchemyDatasource)
+    assert datasource_from_yaml.__class__.__name__ == "SimpleSqlalchemyDatasource"
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]
+
+    assert isinstance(
+        context.get_datasource(datasource_name=datasource_name),
+        SimpleSqlalchemyDatasource,
+    )
+    assert isinstance(
+        context.get_config()["datasources"][datasource_name], DatasourceConfig
+    )
+
+    # As of 20210312 SimpleSqlalchemyDatasource returns an empty {} .config
+    # so here we check for each part of the config individually
+    datasource_config = context.get_config()["datasources"][datasource_name]
+    assert datasource_config.class_name == "SimpleSqlalchemyDatasource"
+    assert datasource_config.credentials == {
+        "drivername": "postgresql",
+        "host": "localhost",
+        "port": "5432",
+        "username": "postgres",
+        "password": "",
+        "database": "postgres",
+    }
+    assert datasource_config.credentials == OrderedDict(
+        [
+            ("drivername", "postgresql"),
+            ("host", "localhost"),
+            ("port", "5432"),
+            ("username", "postgres"),
+            ("password", ""),
+            ("database", "postgres"),
+        ]
+    )
+    assert datasource_config.introspection == OrderedDict(
+        [("whole_table", OrderedDict([("data_asset_name_suffix", "__whole_table")]))]
+    )
+    assert datasource_config.module_name == "great_expectations.datasource"
+
+    # Check that the datasource was written to disk as expected
+    root_directory = context.root_directory
+    del context
+    context = DataContext(root_directory)
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]
+
+    assert isinstance(
+        context.get_datasource(datasource_name=datasource_name),
+        SimpleSqlalchemyDatasource,
+    )
+    assert isinstance(
+        context.get_config()["datasources"][datasource_name], DatasourceConfig
+    )
+
+    # As of 20210312 SimpleSqlalchemyDatasource returns an empty {} .config
+    # so here we check for each part of the config individually
+    datasource_config = context.get_config()["datasources"][datasource_name]
+    assert datasource_config.class_name == "SimpleSqlalchemyDatasource"
+    assert datasource_config.credentials == {
+        "drivername": "postgresql",
+        "host": "localhost",
+        "port": "5432",
+        "username": "postgres",
+        "password": "",
+        "database": "postgres",
+    }
+    assert datasource_config.credentials == OrderedDict(
+        [
+            ("drivername", "postgresql"),
+            ("host", "localhost"),
+            ("port", "5432"),
+            ("username", "postgres"),
+            ("password", ""),
+            ("database", "postgres"),
+        ]
+    )
+    assert datasource_config.introspection == OrderedDict(
+        [("whole_table", OrderedDict([("data_asset_name_suffix", "__whole_table")]))]
+    )
+    assert datasource_config.module_name == "great_expectations.datasource"
+    assert mock_emit.call_count == 3
+    expected_call_args_list.extend(
+        [
+            mock.call(
+                {
+                    "event": "data_context.__init__",
+                    "event_payload": {},
+                    "success": True,
+                }
+            ),
+        ]
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_add_datasource_from_yaml_sql_datasource_with_credentials(
+    mock_emit, sa, test_backends, empty_data_context_stats_enabled
+):
+    """
+    What does this test and why?
+    Adding a datasource using context.add_datasource() via a config from a parsed yaml string without substitution variables.
+    In addition, this tests whether the same can be accomplished using credentials with a  Datasource and SqlAlchemyExecutionEngine, rather than a SimpleSqlalchemyDatasource
+    """
+
+    if "postgresql" not in test_backends:
+        pytest.skip(
+            "test_add_datasource_from_yaml_sql_datasource_with_credentials requires postgresql"
+        )
+
+    context: DataContext = empty_data_context_stats_enabled
+
+    assert "my_new_datasource" not in context.datasources.keys()
+    assert "my_new_datasource" not in context.list_datasources()
+    assert "my_new_datasource" not in context.get_config()["datasources"]
+
+    datasource_name: str = "my_datasource"
+
+    example_yaml = """
+    class_name: Datasource
+    execution_engine:
+      class_name: SqlAlchemyExecutionEngine
+      credentials:
+        host: localhost
+        port: 5432
+        username: postgres
+        password:
+        database: test_ci
+        drivername: postgresql
+    data_connectors:
+      default_inferred_data_connector_name:
+        class_name: InferredAssetSqlDataConnector
+        name: whole_table
+      default_runtime_data_connector_name:
+        class_name: RuntimeDataConnector
+        batch_identifiers:
+          - default_identifier_name
+    """
+
+    datasource_from_test_yaml_config = context.test_yaml_config(
+        example_yaml, name=datasource_name
+    )
+    assert mock_emit.call_count == 1
+    # Substitute anonymized name since it changes for each run
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    anonymized_execution_engine_name = mock_emit.call_args_list[0][0][0][
+        "event_payload"
+    ]["anonymized_execution_engine"]["anonymized_name"]
+    anonymized_data_connector_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_data_connectors"
+    ][0]["anonymized_name"]
+    anonymized_data_connector_name_1 = mock_emit.call_args_list[0][0][0][
+        "event_payload"
+    ]["anonymized_data_connectors"][1]["anonymized_name"]
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "Datasource",
+                    "anonymized_execution_engine": {
+                        "anonymized_name": anonymized_execution_engine_name,
+                        "parent_class": "SqlAlchemyExecutionEngine",
+                    },
+                    "anonymized_data_connectors": [
+                        {
+                            "anonymized_name": anonymized_data_connector_name,
+                            "parent_class": "InferredAssetSqlDataConnector",
+                        },
+                        {
+                            "anonymized_name": anonymized_data_connector_name_1,
+                            "parent_class": "RuntimeDataConnector",
+                        },
+                    ],
+                },
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
+    datasource_from_yaml = context.add_datasource(
+        name=datasource_name, **yaml.load(example_yaml)
+    )
+    assert mock_emit.call_count == 2
+    expected_call_args_list.extend(
+        [
+            mock.call(
+                {
+                    "event": "data_context.add_datasource",
+                    "event_payload": {},
+                    "success": True,
+                }
+            ),
+        ]
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
+
+    assert datasource_from_test_yaml_config.config == {
+        "execution_engine": {
+            "class_name": "SqlAlchemyExecutionEngine",
+            "credentials": {
+                "host": "localhost",
+                "port": 5432,
+                "username": "postgres",
+                "password": None,
+                "database": "test_ci",
+                "drivername": "postgresql",
+            },
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "default_inferred_data_connector_name": {
+                "class_name": "InferredAssetSqlDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
+                "name": "default_inferred_data_connector_name",
+            },
+            "default_runtime_data_connector_name": {
+                "class_name": "RuntimeDataConnector",
+                "batch_identifiers": ["default_identifier_name"],
+                "module_name": "great_expectations.datasource.data_connector",
+                "name": "default_runtime_data_connector_name",
+            },
+        },
+        "id": None,
+        "name": "my_datasource",
+    }
+    assert datasource_from_yaml.config == {
+        "execution_engine": {
+            "class_name": "SqlAlchemyExecutionEngine",
+            "credentials": {
+                "host": "localhost",
+                "port": 5432,
+                "username": "postgres",
+                "password": None,
+                "database": "test_ci",
+                "drivername": "postgresql",
+            },
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "default_inferred_data_connector_name": {
+                "class_name": "InferredAssetSqlDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
+                "name": "default_inferred_data_connector_name",
+            },
+            "default_runtime_data_connector_name": {
+                "class_name": "RuntimeDataConnector",
+                "batch_identifiers": ["default_identifier_name"],
+                "module_name": "great_expectations.datasource.data_connector",
+                "name": "default_runtime_data_connector_name",
+            },
+        },
+        "id": None,
+        "name": "my_datasource",
+    }
+
+    assert datasource_from_yaml.name == datasource_name
+    assert isinstance(datasource_from_yaml, Datasource)
+    assert datasource_from_yaml.__class__.__name__ == "Datasource"
+
+    assert datasource_name == context.list_datasources()[0]["name"]
+    assert isinstance(context.datasources[datasource_name], Datasource)
+
+    assert isinstance(
+        context.get_datasource(datasource_name=datasource_name),
+        Datasource,
+    )
+    assert isinstance(
+        context.get_config()["datasources"][datasource_name], DatasourceConfig
+    )
+
+    # making sure the config is right
+    datasource_config = context.get_config()["datasources"][datasource_name]
+    assert datasource_config.class_name == "Datasource"
+    assert datasource_config.execution_engine.credentials == {
+        "host": "localhost",
+        "port": 5432,
+        "username": "postgres",
+        "password": None,
+        "database": "test_ci",
+        "drivername": "postgresql",
+    }
+    assert datasource_config.execution_engine.credentials == OrderedDict(
+        [
+            ("host", "localhost"),
+            ("port", 5432),
+            ("username", "postgres"),
+            ("password", None),
+            ("database", "test_ci"),
+            ("drivername", "postgresql"),
+        ]
+    )
+
+    # No other usage stats calls detected
+    assert mock_emit.call_count == 2
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_add_datasource_from_yaml_with_substitution_variables(
+    mock_emit, empty_data_context_stats_enabled, monkeypatch
+):
+    """
+    What does this test and why?
+    Adding a datasource using context.add_datasource() via a config from a parsed yaml string containing substitution variables should work as expected.
+    """
+
+    context: DataContext = empty_data_context_stats_enabled
+
+    assert "my_new_datasource" not in context.datasources.keys()
+    assert "my_new_datasource" not in context.list_datasources()
+    assert "my_new_datasource" not in context.get_config()["datasources"]
+
+    datasource_name: str = "my_datasource"
+
+    monkeypatch.setenv("SUBSTITUTED_BASE_DIRECTORY", "../data")
+
+    example_yaml = f"""
+        class_name: Datasource
+        execution_engine:
+          class_name: PandasExecutionEngine
+        data_connectors:
+          data_dir_example_data_connector:
+            class_name: InferredAssetFilesystemDataConnector
+            datasource_name: {datasource_name}
+            base_directory: ${{SUBSTITUTED_BASE_DIRECTORY}}
+            default_regex:
+              group_names: data_asset_name
+              pattern: (.*)
+        """
+    datasource_from_test_yaml_config = context.test_yaml_config(
+        example_yaml, name=datasource_name
+    )
+
+    assert mock_emit.call_count == 1
+    # Substitute anonymized names since it changes for each run
+    anonymized_datasource_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    anonymized_execution_engine_name = mock_emit.call_args_list[0][0][0][
+        "event_payload"
+    ]["anonymized_execution_engine"]["anonymized_name"]
+    anonymized_data_connector_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_data_connectors"
+    ][0]["anonymized_name"]
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_datasource_name,
+                    "parent_class": "Datasource",
+                    "anonymized_execution_engine": {
+                        "anonymized_name": anonymized_execution_engine_name,
+                        "parent_class": "PandasExecutionEngine",
+                    },
+                    "anonymized_data_connectors": [
+                        {
+                            "anonymized_name": anonymized_data_connector_name,
+                            "parent_class": "InferredAssetFilesystemDataConnector",
+                        }
+                    ],
+                },
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
+    datasource_from_yaml = context.add_datasource(
+        name=datasource_name, **yaml.load(example_yaml)
+    )
+    assert mock_emit.call_count == 2
+    expected_call_args_list.extend(
+        [
+            mock.call(
+                {
+                    "event": "data_context.add_datasource",
+                    "event_payload": {},
+                    "success": True,
+                }
+            ),
+        ]
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
+
+    assert datasource_from_test_yaml_config.config == datasource_from_yaml.config
+
+    assert datasource_from_yaml.name == datasource_name
+    assert datasource_from_yaml.config == {
+        "execution_engine": {
+            "class_name": "PandasExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "data_dir_example_data_connector": {
+                "class_name": "InferredAssetFilesystemDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
+                "default_regex": {"group_names": "data_asset_name", "pattern": "(.*)"},
+                "base_directory": "../data",
+                "name": "data_dir_example_data_connector",
+            }
+        },
+        "id": None,
+        "name": "my_datasource",
+    }
+    assert isinstance(datasource_from_yaml, Datasource)
+    assert datasource_from_yaml.__class__.__name__ == "Datasource"
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]
+
+    # Check that the datasource was written to disk as expected
+    root_directory = context.root_directory
+    del context
+    context = DataContext(root_directory)
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]
+    assert mock_emit.call_count == 3
+    expected_call_args_list.extend(
+        [
+            mock.call(
+                {
+                    "event": "data_context.__init__",
+                    "event_payload": {},
+                    "success": True,
+                }
+            ),
+        ]
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
+
+
+def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_store):
+    """End to end test demonstrating usage of Stores evaluation parameters"""
+    context = data_context_with_query_store
+    suite_name = "eval_param_suite"
+    context.create_expectation_suite(expectation_suite_name=suite_name)
+    batch_request = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "default_runtime_data_connector_name",
+        "data_asset_name": "DEFAULT_ASSET_NAME",
+        "batch_identifiers": {"default_identifier_name": "test123"},
+        "runtime_parameters": {"query": "select * from titanic"},
+    }
+    validator = context.get_validator(
+        batch_request=RuntimeBatchRequest(**batch_request),
+        expectation_suite_name=suite_name,
+    )
+    validator.expect_table_row_count_to_equal(
+        value={
+            # unnecessarily complex URN which should resolve to the actual row count.
+            "$PARAMETER": "abs(-urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count) + 4"
+        }
+    )
+
+    checkpoint_config = {
+        "class_name": "SimpleCheckpoint",
+        "validations": [
+            {"batch_request": batch_request, "expectation_suite_name": suite_name}
+        ],
+    }
+    checkpoint = SimpleCheckpoint(
+        f"_tmp_checkpoint_{suite_name}", context, **checkpoint_config
+    )
+    checkpoint_result = checkpoint.run()
+    assert checkpoint_result.get("success") is True
+
+
+def test_modifications_to_env_vars_is_recognized_within_same_program_execution(
+    empty_data_context: DataContext, monkeypatch
+) -> None:
+    """
+    What does this test do and why?
+
+    Great Expectations recognizes changes made to environment variables within a program execution
+    and ensures that these changes are recognized in subsequent calls within the same process.
+
+    This is particularly relevant when performing substitutions within a user's project config.
+    """
+    context: DataContext = empty_data_context
+    env_var_name: str = "MY_PLUGINS_DIRECTORY"
+    env_var_value: str = "my_patched_value"
+
+    context.variables.config.plugins_directory = f"${env_var_name}"
+    monkeypatch.setenv(env_var_name, env_var_value)
+
+    assert context.plugins_directory and context.plugins_directory.endswith(
+        env_var_value
+    )
+
+
+def test_modifications_to_config_vars_is_recognized_within_same_program_execution(
+    empty_data_context: DataContext,
+) -> None:
+    """
+    What does this test do and why?
+
+    Great Expectations recognizes changes made to config variables within a program execution
+    and ensures that these changes are recognized in subsequent calls within the same process.
+
+    This is particularly relevant when performing substitutions within a user's project config.
+    """
+    context: DataContext = empty_data_context
+    config_var_name: str = "my_plugins_dir"
+    config_var_value: str = "my_patched_value"
+
+    context.variables.config.plugins_directory = f"${config_var_name}"
+    context.save_config_variable(
+        config_variable_name=config_var_name, value=config_var_value
+    )
+
+    assert context.plugins_directory and context.plugins_directory.endswith(
+        config_var_value
+    )
+
+
+@pytest.mark.integration
+def test_check_for_usage_stats_sync_finds_diff(
+    empty_data_context_stats_enabled: DataContext,
+    data_context_config_with_datasources: DataContextConfig,
+) -> None:
+    """
+    What does this test do and why?
+
+    During DataContext instantiation, if the project config used to create the object
+    and the actual config assigned to self.config differ in terms of their usage statistics
+    values, we want to be able to identify that and persist values accordingly.
+    """
+    context = empty_data_context_stats_enabled
+    project_config = data_context_config_with_datasources
+
+    res = context._check_for_usage_stats_sync(project_config=project_config)
+    assert res is True
+
+
+@pytest.mark.integration
+def test_check_for_usage_stats_sync_does_not_find_diff(
+    empty_data_context_stats_enabled: DataContext,
+) -> None:
+    """
+    What does this test do and why?
+
+    During DataContext instantiation, if the project config used to create the object
+    and the actual config assigned to self.config differ in terms of their usage statistics
+    values, we want to be able to identify that and persist values accordingly.
+    """
+    context = empty_data_context_stats_enabled
+    project_config = copy.deepcopy(context.config)  # Using same exact config
+
+    res = context._check_for_usage_stats_sync(project_config=project_config)
+    assert res is False
+
+
+@pytest.mark.integration
+def test_check_for_usage_stats_sync_short_circuits_due_to_disabled_usage_stats(
+    empty_data_context: DataContext,
+    data_context_config_with_datasources: DataContextConfig,
+) -> None:
+    context = empty_data_context
+    project_config = data_context_config_with_datasources
+    project_config.anonymous_usage_statistics.enabled = False
+
+    res = context._check_for_usage_stats_sync(project_config=project_config)
+    assert res is False
+
+
+class ExpectSkyToBeColor(TableExpectation):
+    metric_dependencies = ("table.color",)
+    success_keys = ("color",)
+    args_keys = ("color",)
+
+    @classmethod
+    @renderer(
+        renderer_type=".".join(
+            [AtomicRendererType.PRESCRIPTIVE, "custom_renderer_type"]
+        )
+    )
+    def _prescriptive_renderer_custom(
+        cls,
+        **kwargs: dict,
+    ) -> None:
+        raise ValueError("This renderer is broken!")
+
+    def _validate(
+        self,
+        **kwargs: dict,
+    ) -> Dict[str, Union[bool, dict]]:
+        return {
+            "success": True,
+            "result": {"observed_value": "blue"},
+        }
+
+
+@pytest.mark.integration
+def test_unrendered_and_failed_prescriptive_renderer_behavior(
+    empty_data_context: DataContext,
+):
+    context: DataContext = empty_data_context
+
+    expectation_suite_name: str = "test_suite"
+
+    expectation_suite = ExpectationSuite(
+        expectation_suite_name=expectation_suite_name,
+        data_context=context,
+        expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_table_row_count_to_equal", kwargs={"value": 0}
+            ),
+        ],
+    )
+    context.save_expectation_suite(expectation_suite=expectation_suite)
+
+    # Without include_rendered_content set, all legacy rendered_content was None.
+    expectation_suite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+    assert not any(
+        [
+            expectation_configuration.rendered_content
+            for expectation_configuration in expectation_suite.expectations
+        ]
+    )
+
+    # Once we include_rendered_content, we get rendered_content on each ExpectationConfiguration in the ExpectationSuite.
+    context.variables.include_rendered_content.expectation_suite = True
+    expectation_suite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+    for expectation_configuration in expectation_suite.expectations:
+        assert all(
+            [
+                isinstance(rendered_content_block, RenderedAtomicContent)
+                for rendered_content_block in expectation_configuration.rendered_content
+            ]
+        )
+
+    # If we change the ExpectationSuite to use an Expectation that has two content block renderers, one of which is
+    # broken, we should get the failure message for one of the content blocks.
+    expectation_suite = ExpectationSuite(
+        expectation_suite_name=expectation_suite_name,
+        data_context=context,
+        expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_sky_to_be_color", kwargs={"color": "blue"}
+            ),
+        ],
+    )
+    context.save_expectation_suite(expectation_suite=expectation_suite)
+    expectation_suite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+
+    expected_rendered_content: List[RenderedAtomicContent] = [
+        RenderedAtomicContent(
+            name=AtomicPrescriptiveRendererType.FAILED,
+            value=renderedAtomicValueSchema.load(
+                {
+                    "template": "Rendering failed for Expectation: $expectation_type(**$kwargs).",
+                    "params": {
+                        "expectation_type": {
+                            "schema": {"type": "string"},
+                            "value": "expect_sky_to_be_color",
+                        },
+                        "kwargs": {
+                            "schema": {"type": "string"},
+                            "value": {"color": "blue"},
+                        },
+                    },
+                    "schema": {"type": "com.superconductive.rendered.string"},
+                }
+            ),
+            value_type="StringValueType",
+        ),
+        RenderedAtomicContent(
+            name=AtomicPrescriptiveRendererType.SUMMARY,
+            value=renderedAtomicValueSchema.load(
+                {
+                    "schema": {"type": "com.superconductive.rendered.string"},
+                    "template": "$expectation_type(**$kwargs)",
+                    "params": {
+                        "expectation_type": {
+                            "schema": {"type": "string"},
+                            "value": "expect_sky_to_be_color",
+                        },
+                        "kwargs": {
+                            "schema": {"type": "string"},
+                            "value": {"color": "blue"},
+                        },
+                    },
+                }
+            ),
+            value_type="StringValueType",
+        ),
+    ]
+
+    actual_rendered_content: List[RenderedAtomicContent] = []
+    for expectation_configuration in expectation_suite.expectations:
+        actual_rendered_content.extend(expectation_configuration.rendered_content)
+
+    assert actual_rendered_content == expected_rendered_content
+
+    # If we have a legacy ExpectationSuite with successful rendered_content blocks, but the new renderer is broken,
+    # we should not update the existing rendered_content.
+    legacy_rendered_content = [
+        RenderedAtomicContent(
+            name=".".join([AtomicRendererType.PRESCRIPTIVE, "custom_renderer_type"]),
+            value=renderedAtomicValueSchema.load(
+                {
+                    "schema": {"type": "com.superconductive.rendered.string"},
+                    "template": "This is a working renderer for $expectation_type(**$kwargs).",
+                    "params": {
+                        "expectation_type": {
+                            "schema": {"type": "string"},
+                            "value": "expect_sky_to_be_color",
+                        },
+                        "kwargs": {
+                            "schema": {"type": "string"},
+                            "value": {"color": "blue"},
+                        },
+                    },
+                }
+            ),
+            value_type="StringValueType",
+        ),
+        RenderedAtomicContent(
+            name=AtomicPrescriptiveRendererType.SUMMARY,
+            value=renderedAtomicValueSchema.load(
+                {
+                    "schema": {"type": "com.superconductive.rendered.string"},
+                    "template": "$expectation_type(**$kwargs)",
+                    "params": {
+                        "expectation_type": {
+                            "schema": {"type": "string"},
+                            "value": "expect_sky_to_be_color",
+                        },
+                        "kwargs": {
+                            "schema": {"type": "string"},
+                            "value": {"color": "blue"},
+                        },
+                    },
+                }
+            ),
+            value_type="StringValueType",
+        ),
+    ]
+
+    expectation_suite.expectations[0].rendered_content = legacy_rendered_content
+
+    actual_rendered_content: List[RenderedAtomicContent] = []
+    for expectation_configuration in expectation_suite.expectations:
+        actual_rendered_content.extend(expectation_configuration.rendered_content)
+
+    assert actual_rendered_content == legacy_rendered_content

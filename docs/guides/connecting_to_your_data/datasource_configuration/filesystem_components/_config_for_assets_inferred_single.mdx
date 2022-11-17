@@ -1,0 +1,38 @@
+Because of the simple regex matching that groups files into Batches for a given Data Asset, it is actually quite straight forward to create a Data Connector which has Data Assets that are only capable of providing a single Batch.  All you need to do is define a regular expression that consists of a single group which corresponds to a unique portion of your data files' names that is unique for each file.
+
+The simplest way to do this is to define a group that consists of the entire file name.
+
+For this example, lets assume we have the following files in our `data` directory:
+- `yellow_tripdata_sample_2020-01.csv`
+- `yellow_tripdata_sample_2020-02.csv`
+- `yellow_tripdata_sample_2020-03.csv`
+
+In this case you could define the `pattern` key as follows:
+
+```python name="datasource_configuration_inferred_single_batch_regex_pattern"
+```
+
+This regex will match the full name of any file that has the `.csv` extension, and will put everything prior to `.csv` extension into a group.
+
+Since each `.csv` file will necessarily have a unique name preceeding its extension, the content that matches this pattern will be unique for each file.  This will ensure that only one file is included as a Batch for each Data Asset.
+
+To correspond to the single group that was defined in your regex, you will define a single entry in the list for the `group_names` key.  Since the first group in an Inferred Asset Data Connector is used to generate names for the inferred Data Assets, you should name that group as follows:
+
+```python name="datasource_configuration_inferred_single_batch_group_names"
+```
+
+Looking back at our sample files, this regex will result in the `InferredAssetFilesystemDataConnector` providing three Data Assets, which can be accessed by the portion of the file that matches the first group in our regex.  In future workflows you will be able to refer to one of these Data Assets in a Batch Request py providing one of the following `data_asset_name`s:
+- `yellow_tripdata_sample_2020-01`
+- `yellow_tripdata_sample_2020-02`
+- `yellow_tripdata_sample_2020-03`
+
+:::note
+
+Since we did not include `.csv` in the first group of the regex we defined, the `.csv` portion of the filename will be dropped from the value that is recognized as a valid `data_asset_name`.
+
+:::
+
+With all of these values put together into a single dictionary, your Data Connector configuration will look like this:
+
+```python name="data_connector_configuration_post_single_batch_regex"
+```

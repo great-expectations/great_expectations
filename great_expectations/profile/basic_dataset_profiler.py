@@ -1,10 +1,10 @@
 import logging
 
+from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.profile.base import (
     DatasetProfiler,
     ProfilerCardinality,
     ProfilerDataType,
-    ProfilerTypeMapping,
 )
 
 try:
@@ -85,9 +85,7 @@ class BasicDatasetProfilerBase(DatasetProfiler):
             ).result["observed_value"]
         except KeyError:  # if observed_value value is not set
             logger.error(
-                "Failed to get cardinality of column {:s} - continuing...".format(
-                    column
-                )
+                f"Failed to get cardinality of column {column:s} - continuing..."
             )
 
         if num_unique is None or num_unique == 0 or pct_unique is None:
@@ -125,8 +123,8 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
     such as min, max, mean and median, for numeric columns, and distribution of values, when appropriate.
     """
 
-    @classmethod
-    def _profile(cls, dataset, configuration=None):
+    @classmethod  # noqa: C901
+    def _profile(cls, dataset, configuration=None):  # noqa: C901 - 18
         df = dataset
 
         df.set_default_expectation_argument("catch_exceptions", True)
@@ -144,9 +142,7 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
         number_of_columns = len(columns)
         for i, column in enumerate(columns):
             logger.info(
-                "            Preparing column {} of {}: {}".format(
-                    i + 1, number_of_columns, column
-                )
+                f"            Preparing column {i + 1} of {number_of_columns}: {column}"
             )
 
             # df.expect_column_to_exist(column)
@@ -268,8 +264,8 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
 
             elif type_ == ProfilerDataType.STRING:
                 # Check for leading and trailing whitespace.
-                #!!! It would be nice to build additional Expectations here, but
-                #!!! the default logic for remove_expectations prevents us.
+                # !!! It would be nice to build additional Expectations here, but
+                # !!! the default logic for remove_expectations prevents us.
                 df.expect_column_values_to_not_match_regex(column, r"^\s+|\s+$")
 
                 if cardinality == ProfilerCardinality.UNIQUE:

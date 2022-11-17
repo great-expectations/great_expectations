@@ -15,9 +15,9 @@ from dateutil.parser import parse
 
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
-
-from .dataset import Dataset
-from .pandas_dataset import PandasDataset
+from great_expectations.dataset.dataset import Dataset
+from great_expectations.dataset.pandas_dataset import PandasDataset
+from great_expectations.dataset.util import validate_mostly
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,6 @@ try:
         struct,
         udf,
         when,
-        year,
     )
 except ImportError as e:
     logger.debug(str(e))
@@ -61,7 +60,7 @@ class MetaSparkDFDataset(Dataset):
     and SparkDFDataset implements the expectation methods themselves.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
     @classmethod
@@ -81,7 +80,12 @@ class MetaSparkDFDataset(Dataset):
         @cls.expectation(argspec)
         @wraps(func)
         def inner_wrapper(
-            self, column, mostly=None, result_format=None, *args, **kwargs,
+            self,
+            column,
+            mostly=None,
+            result_format=None,
+            *args,
+            **kwargs,
         ):
             """
             This whole decorator is pending a re-write. Currently there is are huge performance issues
@@ -91,7 +95,7 @@ class MetaSparkDFDataset(Dataset):
             """
 
             # Rename column so we only have to handle dot notation here
-            eval_col = "__eval_col_" + column.replace(".", "__").replace("`", "_")
+            eval_col = f"__eval_col_{column.replace('.', '__').replace('`', '_')}"
             self.spark_df = self.spark_df.withColumn(eval_col, col(column))
 
             if result_format is None:
@@ -226,8 +230,8 @@ class MetaSparkDFDataset(Dataset):
             **kwargs,
         ):
             # Rename column so we only have to handle dot notation here
-            eval_col_A = "__eval_col_A_" + column_A.replace(".", "__").replace("`", "_")
-            eval_col_B = "__eval_col_B_" + column_B.replace(".", "__").replace("`", "_")
+            eval_col_A = f"__eval_col_A_{column_A.replace('.', '__').replace('`', '_')}"
+            eval_col_B = f"__eval_col_B_{column_B.replace('.', '__').replace('`', '_')}"
 
             self.spark_df = self.spark_df.withColumn(
                 eval_col_A, col(column_A)
@@ -268,11 +272,16 @@ class MetaSparkDFDataset(Dataset):
                     "`__row`",
                     "`{0}` AS `A_{0}`".format(eval_col_A),
                     "`{0}` AS `B_{0}`".format(eval_col_B),
-                    "ISNULL(`{}`) OR ISNULL(`{}`) AS `__null_val`".format(
-                        eval_col_A, eval_col_B
-                    ),
+                    f"ISNULL(`{eval_col_A}`) OR ISNULL(`{eval_col_B}`) AS `__null_val`",
                 )
+            # elif ignore_row_if == "neither":
             elif ignore_row_if == "never":
+                """
+                TODO: <Alex>Note: The value of the "ignore_row_if" directive in the commented out line above is correct.
+                However, fixing the error would constitute a breaking change.  Hence, the documentation is updated now
+                (8/16/2021), while the implementation is corrected as part of the Expectations V3 API release.
+                </Alex>
+                """
                 boolean_mapped_null_values = cols_df.selectExpr(
                     "`__row`",
                     "`{0}` AS `A_{0}`".format(eval_col_A),
@@ -280,7 +289,7 @@ class MetaSparkDFDataset(Dataset):
                     lit(False).alias("__null_val"),
                 )
             else:
-                raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
+                raise ValueError(f"Unknown value of ignore_row_if: {ignore_row_if}")
 
             # since pyspark guaranteed each columns selected has the same number of rows, no need to do assert as in pandas
             # assert series_A.count() == (
@@ -289,8 +298,8 @@ class MetaSparkDFDataset(Dataset):
             nonnull_df = boolean_mapped_null_values.filter("__null_val = False")
             nonnull_count = nonnull_df.count()
 
-            col_A_df = nonnull_df.select("__row", "`A_{}`".format(eval_col_A))
-            col_B_df = nonnull_df.select("__row", "`B_{}`".format(eval_col_B))
+            col_A_df = nonnull_df.select("__row", f"`A_{eval_col_A}`")
+            col_B_df = nonnull_df.select("__row", f"`B_{eval_col_B}`")
 
             success_df = func(self, col_A_df, col_B_df, *args, **kwargs)
             success_count = success_df.filter("__success = True").count()
@@ -306,7 +315,10 @@ class MetaSparkDFDataset(Dataset):
                 if unexpected_count_limit:
                     unexpected_df = unexpected_df.limit(unexpected_count_limit)
                 maybe_limited_unexpected_list = [
-                    (row["A_{}".format(eval_col_A)], row["B_{}".format(eval_col_B)],)
+                    (
+                        row[f"A_{eval_col_A}"],
+                        row[f"B_{eval_col_B}"],
+                    )
                     for row in unexpected_df.collect()
                 ]
 
@@ -393,7 +405,7 @@ class MetaSparkDFDataset(Dataset):
             # Rename column so we only have to handle dot notation here
             eval_cols = []
             for col_name in column_list:
-                eval_col = "__eval_col_" + col_name.replace(".", "__").replace("`", "_")
+                eval_col = f"__eval_col_{col_name.replace('.', '__').replace('`', '_')}"
                 eval_cols.append(eval_col)
                 self.spark_df = self.spark_df.withColumn(eval_col, col(col_name))
             if result_format is None:
@@ -438,7 +450,9 @@ class MetaSparkDFDataset(Dataset):
                     [*eval_cols, lit(False).alias("__null_val")]
                 )
             else:
-                raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
+                raise ValueError(f"Unknown value of ignore_row_if: {ignore_row_if}")
+
+            validate_mostly(mostly)
 
             nonnull_df = boolean_mapped_skip_values.filter("__null_val = False")
             nonnull_count = nonnull_df.count()
@@ -519,75 +533,75 @@ class MetaSparkDFDataset(Dataset):
 
 class SparkDFDataset(MetaSparkDFDataset):
     """
-This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
+    This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
 
-    id: validation_engine_pyspark_self_managed
-    title: Validation Engine - pyspark - Self-Managed
-    icon:
-    short_description: Use Spark DataFrame to validate data
-    description: Use Spark DataFrame to validate data
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
-    maturity: Production
-    maturity_details:
-        api_stability: Stable
-        implementation_completeness: Moderate
-        unit_test_coverage: Complete
-        integration_infrastructure_test_coverage: N/A -> see relevant Datasource evaluation
-        documentation_completeness: Complete
-        bug_risk: Low/Moderate
-        expectation_completeness: Moderate
+        id: validation_engine_pyspark_self_managed
+        title: Validation Engine - pyspark - Self-Managed
+        icon:
+        short_description: Use Spark DataFrame to validate data
+        description: Use Spark DataFrame to validate data
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
+        maturity: Production
+        maturity_details:
+            api_stability: Stable
+            implementation_completeness: Moderate
+            unit_test_coverage: Complete
+            integration_infrastructure_test_coverage: N/A -> see relevant Datasource evaluation
+            documentation_completeness: Complete
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
 
-    id: validation_engine_databricks
-    title: Validation Engine - Databricks
-    icon:
-    short_description: Use Spark DataFrame in a Databricks cluster to validate data
-    description: Use Spark DataFrame in a Databricks cluster to validate data
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
-    maturity: Beta
-    maturity_details:
-        api_stability: Stable
-        implementation_completeness: Low (dbfs-specific handling)
-        unit_test_coverage: N/A -> implementation not different
-        integration_infrastructure_test_coverage: Minimal (we've tested a bit, know others have used it)
-        documentation_completeness: Moderate (need docs on managing project configuration via dbfs/etc.)
-        bug_risk: Low/Moderate
-        expectation_completeness: Moderate
+        id: validation_engine_databricks
+        title: Validation Engine - Databricks
+        icon:
+        short_description: Use Spark DataFrame in a Databricks cluster to validate data
+        description: Use Spark DataFrame in a Databricks cluster to validate data
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
+        maturity: Beta
+        maturity_details:
+            api_stability: Stable
+            implementation_completeness: Low (dbfs-specific handling)
+            unit_test_coverage: N/A -> implementation not different
+            integration_infrastructure_test_coverage: Minimal (we've tested a bit, know others have used it)
+            documentation_completeness: Moderate (need docs on managing project configuration via dbfs/etc.)
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
 
-    id: validation_engine_emr_spark
-    title: Validation Engine - EMR - Spark
-    icon:
-    short_description: Use Spark DataFrame in an EMR cluster to validate data
-    description: Use Spark DataFrame in an EMR cluster to validate data
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
-    maturity: Experimental
-    maturity_details:
-        api_stability: Stable
-        implementation_completeness: Low (need to provide guidance on "known good" paths, and we know there are many "knobs" to tune that we have not explored/tested)
-        unit_test_coverage: N/A -> implementation not different
-        integration_infrastructure_test_coverage: Unknown
-        documentation_completeness: Low (must install specific/latest version but do not have docs to that effect or of known useful paths)
-        bug_risk: Low/Moderate
-        expectation_completeness: Moderate
+        id: validation_engine_emr_spark
+        title: Validation Engine - EMR - Spark
+        icon:
+        short_description: Use Spark DataFrame in an EMR cluster to validate data
+        description: Use Spark DataFrame in an EMR cluster to validate data
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
+        maturity: Experimental
+        maturity_details:
+            api_stability: Stable
+            implementation_completeness: Low (need to provide guidance on "known good" paths, and we know there are many "knobs" to tune that we have not explored/tested)
+            unit_test_coverage: N/A -> implementation not different
+            integration_infrastructure_test_coverage: Unknown
+            documentation_completeness: Low (must install specific/latest version but do not have docs to that effect or of known useful paths)
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
 
-    id: validation_engine_spark_other
-    title: Validation Engine - Spark - Other
-    icon:
-    short_description: Use Spark DataFrame to validate data
-    description: Use Spark DataFrame to validate data
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
-    maturity: Experimental
-    maturity_details:
-        api_stability: Stable
-        implementation_completeness: Other (we haven't tested possibility, known glue deployment)
-        unit_test_coverage: N/A -> implementation not different
-        integration_infrastructure_test_coverage: Unknown
-        documentation_completeness: Low (must install specific/latest version but do not have docs to that effect or of known useful paths)
-        bug_risk: Low/Moderate
-        expectation_completeness: Moderate
+        id: validation_engine_spark_other
+        title: Validation Engine - Spark - Other
+        icon:
+        short_description: Use Spark DataFrame to validate data
+        description: Use Spark DataFrame to validate data
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
+        maturity: Experimental
+        maturity_details:
+            api_stability: Stable
+            implementation_completeness: Other (we haven't tested possibility, known glue deployment)
+            unit_test_coverage: N/A -> implementation not different
+            integration_infrastructure_test_coverage: Unknown
+            documentation_completeness: Low (must install specific/latest version but do not have docs to that effect or of known useful paths)
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
     """
 
     @classmethod
@@ -597,7 +611,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         else:
             raise ValueError("from_dataset requires a SparkDFDataset dataset")
 
-    def __init__(self, spark_df, *args, **kwargs):
+    def __init__(self, spark_df, *args, **kwargs) -> None:
         # Creation of the Spark DataFrame is done outside this class
         self.spark_df = spark_df
         self._persist = kwargs.pop("persist", True)
@@ -641,7 +655,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return self.spark_df.select(column).groupBy().sum().collect()[0][0]
 
     # TODO: consider getting all basic statistics in one go:
-    def _describe_column(self, column):
+    def _describe_column(self, column) -> None:
         # temp_column = self.spark_df.select(column).where(col(column).isNotNull())
         # return self.spark_df.select(
         #     [
@@ -711,7 +725,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         # Note that this can be an expensive computation; we are not exposing
         # spark's ability to estimate.
         # We add two to 2 * n_values to maintain a legitimate quantile
-        # in the degnerate case when n_values = 0
+        # in the degenerate case when n_values = 0
         result = self.spark_df.approxQuantile(
             column, [0.5, 0.5 + (1 / (2 + (2 * self.get_row_count())))], 0
         )
@@ -1053,7 +1067,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 datetime.strftime(datetime.now(), strftime_format), strftime_format
             )
         except ValueError as e:
-            raise ValueError("Unable to use provided strftime_format. " + e.message)
+            raise ValueError(f"Unable to use provided strftime_format. {e.message}")
 
         def is_parseable_by_format(val):
             try:
@@ -1160,7 +1174,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         meta=None,
     ):
         # Rename column so we only have to handle dot notation here
-        eval_col = "__eval_col_" + column.replace(".", "__").replace("`", "_")
+        eval_col = f"__eval_col_{column.replace('.', '__').replace('`', '_')}"
         self.spark_df = self.spark_df.withColumn(eval_col, col(column))
         if mostly is not None:
             raise ValueError(
@@ -1172,9 +1186,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             col_data = [f for f in col_df.schema.fields if f.name == eval_col][0]
             col_type = type(col_data.dataType)
         except IndexError:
-            raise ValueError("Unrecognized column: %s" % column)
+            raise ValueError(f"Unrecognized column: {column}")
         except KeyError:
-            raise ValueError("No type data available for column: %s" % column)
+            raise ValueError(f"No type data available for column: {column}")
 
         try:
             if type_ is None:
@@ -1186,7 +1200,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             return {"success": success, "result": {"observed_value": col_type.__name__}}
 
         except AttributeError:
-            raise ValueError("Unrecognized spark type: %s" % type_)
+            raise ValueError(f"Unrecognized spark type: {type_}")
 
     @DocInherit
     @DataAsset.expectation(["column", "type_list", "mostly"])
@@ -1201,7 +1215,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         meta=None,
     ):
         # Rename column so we only have to handle dot notation here
-        eval_col = "__eval_col_" + column.replace(".", "__").replace("`", "_")
+        eval_col = f"__eval_col_{column.replace('.', '__').replace('`', '_')}"
         self.spark_df = self.spark_df.withColumn(eval_col, col(column))
 
         if mostly is not None:
@@ -1214,9 +1228,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             col_data = [f for f in col_df.schema.fields if f.name == eval_col][0]
             col_type = type(col_data.dataType)
         except IndexError:
-            raise ValueError("Unrecognized column: %s" % column)
+            raise ValueError(f"Unrecognized column: {column}")
         except KeyError:
-            raise ValueError("No database type data available for column: %s" % column)
+            raise ValueError(f"No database type data available for column: {column}")
 
         if type_list is None:
             success = True
@@ -1227,7 +1241,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                     type_class = getattr(sparktypes, type_)
                     types.append(type_class)
                 except AttributeError:
-                    logger.debug("Unrecognized type: %s" % type_)
+                    logger.debug(f"Unrecognized type: {type_}")
             if len(types) == 0:
                 raise ValueError("No recognized spark types in type_list")
             types = tuple(types)
@@ -1278,12 +1292,27 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         if match_on == "any":
             return column.withColumn("__success", column[0].rlike("|".join(regex_list)))
         elif match_on == "all":
-            formatted_regex_list = ["(?={})".format(regex) for regex in regex_list]
+            formatted_regex_list = [f"(?={regex})" for regex in regex_list]
             return column.withColumn(
                 "__success", column[0].rlike("".join(formatted_regex_list))
             )
         else:
             raise ValueError("match_on must be either 'any' or 'all'")
+
+    @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_not_match_regex_list(
+        self,
+        column,
+        regex_list,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        # column value is not matched by any regex in regex_list
+        return column.withColumn("__success", ~(column[0].rlike("|".join(regex_list))))
 
     @DocInherit
     @MetaSparkDFDataset.column_pair_map_expectation
@@ -1333,8 +1362,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             _udf = udf(parse, sparktypes.TimestampType())
             # Create new columns for comparison without replacing original values.
             (timestamp_column_A, timestamp_column_B) = (
-                "__ts_{}".format(column_A_name),
-                "__ts_{}".format(column_B_name),
+                f"__ts_{column_A_name}",
+                f"__ts_{column_B_name}",
             )
             temp_column_A = column_A.withColumn(timestamp_column_A, _udf(column_A_name))
             temp_column_B = column_B.withColumn(timestamp_column_B, _udf(column_B_name))
@@ -1407,11 +1436,13 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         meta=None,
     ):
         deprecation_warning = (
-            "expect_multicolumn_values_to_be_unique is being deprecated. Please use "
-            "expect_select_column_values_to_be_unique_within_record instead."
+            "expect_multicolumn_values_to_be_unique is deprecated as of v0.13.4 and will be removed in v0.16. "
+            "Please use expect_select_column_values_to_be_unique_within_record instead."
         )
+        # deprecated-v0.13.4
         warnings.warn(
-            deprecation_warning, DeprecationWarning,
+            deprecation_warning,
+            DeprecationWarning,
         )
 
         return self.expect_select_column_values_to_be_unique_within_record(
@@ -1606,7 +1637,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     ):
         """ Multi-Column Map Expectation
 
-        Expects that sum of all rows for a set of columns is equal to a specific value
+        Expects that the sum of row values is the same for each row, summing only values in columns specified in
+        column_list, and equal to the specific value, sum_total.
 
         Args:
             column_list (List[str]): \
@@ -1614,9 +1646,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             sum_total (int): \
                 expected sum of columns
         """
-        expression = "+".join(
-            ["COALESCE({}, 0)".format(col) for col in column_list.columns]
-        )
+        expression = "+".join([f"COALESCE({col}, 0)" for col in column_list.columns])
         column_list = column_list.withColumn("actual_total", expr(expression))
         return column_list.withColumn(
             "__success",

@@ -1,30 +1,28 @@
-from typing import Dict, List, Optional, Union
+from typing import Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-
-from ..expectation import ColumnMapExpectation, InvalidExpectationConfigurationError
-from ..metrics import ColumnValuesZScore
+from great_expectations.core import ExpectationConfiguration
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    InvalidExpectationConfigurationError,
+)
 
 
 class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
     """
-    Expect the Z-scores of a columns values to be less than a given threshold
+    Expect the Z-scores of a column's values to be less than a given threshold.
 
             expect_column_values_to_be_of_type is a :func:`column_map_expectation \
             <great_expectations.execution_engine.execution_engine.MetaExecutionEngine.column_map_expectation>` for
-            typed-column
-            backends,
-            and also for PandasExecutionEngine where the column dtype and provided type_ are unambiguous constraints (any
-            dtype
-            except 'object' or dtype of 'object' with type_ specified as 'object').
+            typed-column backends,
+            and also for PandasExecutionEngine where the column dtype and provided type_ are unambiguous constraints
+            (any dtype except 'object' or dtype of 'object' with type_ specified as 'object').
 
-            Parameters:
+            Args:
                 column (str): \
                     The column name of a numerical column.
                 threshold (number): \
                     A maximum Z-score threshold. All column Z-scores that are lower than this threshold will evaluate
                     successfully.
-
 
             Keyword Args:
                 mostly (None or a float between 0 and 1): \
@@ -35,7 +33,6 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
                     Example:
                     double_sided = True, threshold = 2 -> Z scores in non-inclusive interval(-2,2)
                     double_sided = False, threshold = 2 -> Z scores in non-inclusive interval (-infinity,2)
-
 
             Other Parameters:
                 result_format (str or None): \
@@ -58,6 +55,16 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
                 :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
     """
 
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
+    }
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     map_metric = "column_values.z_score.under_threshold"
     success_keys = ("threshold", "double_sided", "mostly")
@@ -73,17 +80,20 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = ("column", "threshold")
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        neccessary configuration arguments have been provided for the validation of the expectation.
+        necessary configuration arguments have been provided for the validation of the expectation.
 
         Args:
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
         Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
 
         # Setting up a configuration
@@ -112,4 +122,3 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
                 ), 'Evaluation Parameter dict for double_sided kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True

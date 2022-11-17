@@ -1,15 +1,75 @@
+import re
+from glob import glob
+
+import pkg_resources
 from setuptools import find_packages, setup
 
 import versioneer
+
+
+def get_extras_require():
+    results = {}
+    extra_key_mapping = {
+        "aws_secrets": "boto",
+        "azure_secrets": "azure",
+        "gcp": "bigquery",
+        "s3": "boto",
+    }
+    sqla_keys = (
+        "athena",
+        "bigquery",
+        "dremio",
+        "mssql",
+        "mysql",
+        "postgresql",
+        "redshift",
+        "snowflake",
+        "teradata",
+        "trino",
+        "vertica",
+    )
+    ignore_keys = (
+        "sqlalchemy",
+        "test",
+        "tools",
+        "all-contrib-expectations",
+    )
+    requirements_dir = "reqs"
+    rx_fname_part = re.compile(rf"{requirements_dir}/requirements-dev-(.*).txt")
+    for fname in glob(f"{requirements_dir}/*.txt"):
+        match = rx_fname_part.match(fname)
+        assert (
+            match is not None
+        ), f"The extras requirements dir ({requirements_dir}) contains files that do not adhere to the following format: requirements-dev-*.txt"
+        key = match.group(1)
+        if key in ignore_keys:
+            continue
+        with open(fname) as f:
+            parsed = [str(req) for req in pkg_resources.parse_requirements(f)]
+            results[key] = parsed
+
+    lite = results.pop("lite")
+    contrib = results.pop("contrib")
+    results["boto"] = [req for req in lite if req.startswith("boto")]
+    results["sqlalchemy"] = [req for req in lite if req.startswith("sqlalchemy")]
+    results["test"] = lite + contrib
+
+    for new_key, existing_key in extra_key_mapping.items():
+        results[new_key] = results[existing_key]
+    for key in sqla_keys:
+        results[key] += results["sqlalchemy"]
+
+    results.pop("boto")
+    all_requirements_set = set()
+    [all_requirements_set.update(vals) for vals in results.values()]
+    results["dev"] = sorted(all_requirements_set)
+    return results
+
 
 # Parse requirements.txt
 with open("requirements.txt") as f:
     required = f.read().splitlines()
 
-# try:
-#    import pypandoc
-#    long_description = pypandoc.convert_file('README.md', 'rst')
-# except (IOError, ImportError):
 long_description = "Always know what to expect from your data. (See https://github.com/great-expectations/great_expectations for full description)."
 
 config = {
@@ -20,21 +80,8 @@ config = {
     "version": versioneer.get_version(),
     "cmdclass": versioneer.get_cmdclass(),
     "install_requires": required,
-    "extras_require": {
-        "spark": ["pyspark>=2.3.2"],
-        "sqlalchemy": ["sqlalchemy>=1.2"],
-        "airflow": ["apache-airflow[s3]>=1.9.0", "boto3>=1.7.3"],
-        "gcp": [
-            "google-cloud>=0.34.0",
-            "google-cloud-storage>=1.28.0",
-            "google-cloud-secret-manager>=1.0.0",
-            "pybigquery==0.4.15",
-        ],
-        "redshift": ["psycopg2>=2.8"],
-        "s3": ["boto3>=1.14"],
-        "snowflake": ["snowflake-sqlalchemy>=1.2"],
-    },
-    "packages": find_packages(exclude=["docs*", "tests*", "examples*"]),
+    "extras_require": get_extras_require(),
+    "packages": find_packages(exclude=["contrib*", "docs*", "tests*", "examples*"]),
     "entry_points": {
         "console_scripts": ["great_expectations=great_expectations.cli:main"]
     },
@@ -53,9 +100,9 @@ config = {
         "Topic :: Software Development :: Testing",
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
 }
 

@@ -8,7 +8,7 @@ from great_expectations.dataset import PandasDataset
 
 
 def test_pandas_datetime_evaluation_parameter():
-    evaluation_params = {
+    evaluation_parameters = {
         "now": pd.Timestamp.now(),
         "now_minus_48h": pd.Timestamp.now() - pd.to_timedelta(2, unit="d"),
     }
@@ -22,8 +22,8 @@ def test_pandas_datetime_evaluation_parameter():
     _df = pd.DataFrame(test_data)
     df = PandasDataset(_df)
 
-    for param in evaluation_params:
-        df.set_evaluation_parameter(param, evaluation_params[param])
+    for param in evaluation_parameters:
+        df.set_evaluation_parameter(param, evaluation_parameters[param])
     df.expect_column_max_to_be_between(
         column="data_refresh", min_value={"$PARAMETER": "now_minus_48h"}
     )

@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 import copy
+import datetime
 import logging
 import math
 import operator
 import traceback
 from collections import namedtuple
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
 from pyparsing import (
     CaselessKeyword,
@@ -12,16 +16,22 @@ from pyparsing import (
     Group,
     Literal,
     ParseException,
+    ParseResults,
     Regex,
     Suppress,
     Word,
     alphanums,
     alphas,
     delimitedList,
+    dictOf,
 )
 
 from great_expectations.core.urn import ge_urn
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import EvaluationParameterError
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import DataContext
 
 logger = logging.getLogger(__name__)
 _epsilon = 1e-12
@@ -62,23 +72,26 @@ class EvaluationParameterParser:
         "trunc": lambda a: int(a),
         "round": round,
         "sgn": lambda a: -1 if a < -_epsilon else 1 if a > _epsilon else 0,
+        "now": datetime.datetime.now,
+        "datetime": datetime.datetime,
+        "timedelta": datetime.timedelta,
     }
 
-    def __init__(self):
-        self.exprStack = []
+    def __init__(self) -> None:
+        self.exprStack: list = []
         self._parser = None
 
-    def push_first(self, toks):
+    def push_first(self, toks) -> None:
         self.exprStack.append(toks[0])
 
-    def push_unary_minus(self, toks):
+    def push_unary_minus(self, toks) -> None:
         for t in toks:
             if t == "-":
                 self.exprStack.append("unary -")
             else:
                 break
 
-    def clear_stack(self):
+    def clear_stack(self) -> None:
         del self.exprStack[:]
 
     def get_parser(self):
@@ -94,12 +107,12 @@ class EvaluationParameterParser:
             #                    Optional(e + Word("+-"+nums, nums)))
             # or use provided pyparsing_common.number, but convert back to str:
             # fnumber = ppc.number().addParseAction(lambda t: str(t[0]))
-            fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?")
+            fnumber = Regex(r"[+-]?(?:\d+|\.\d+)(?:\.\d+)?(?:[eE][+-]?\d+)?")
             ge_urn = Combine(
                 Literal("urn:great_expectations:")
-                + Word(alphas, alphanums + "_$:?=%.&")
+                + Word(alphas, f"{alphanums}_$:?=%.&")
             )
-            variable = Word(alphas, alphanums + "_$")
+            variable = Word(alphas, f"{alphanums}_$")
             ident = ge_urn | variable
 
             plus, minus, mult, div = map(Literal, "+-*/")
@@ -110,9 +123,28 @@ class EvaluationParameterParser:
 
             expr = Forward()
             expr_list = delimitedList(Group(expr))
-            # add parse action that replaces the function identifier with a (name, number of args) tuple
-            fn_call = (ident + lpar - Group(expr_list) + rpar).setParseAction(
-                lambda t: t.insert(0, (t.pop(0), len(t[0])))
+
+            # We will allow functions either to accept *only* keyword
+            # expressions or *only* non-keyword expressions
+            # define function keyword arguments
+            key = Word(f"{alphas}_") + Suppress("=")
+            # value = (fnumber | Word(alphanums))
+            value = expr
+            keyval = dictOf(key.setParseAction(self.push_first), value)
+            kwarglist = delimitedList(keyval)
+
+            # add parse action that replaces the function identifier with a (name, number of args, has_fn_kwargs) tuple
+            # 20211009 - JPC - Note that it's important that we consider kwarglist
+            # first as part of disabling backtracking for the function's arguments
+            fn_call = (ident + lpar + rpar).setParseAction(
+                lambda t: t.insert(0, (t.pop(0), 0, False))
+            ) | (
+                (ident + lpar - Group(expr_list) + rpar).setParseAction(
+                    lambda t: t.insert(0, (t.pop(0), len(t[0]), False))
+                )
+                ^ (ident + lpar - Group(kwarglist) + rpar).setParseAction(
+                    lambda t: t.insert(0, (t.pop(0), len(t[0]), True))
+                )
             )
             atom = (
                 addop[...]
@@ -132,9 +164,9 @@ class EvaluationParameterParser:
         return self._parser
 
     def evaluate_stack(self, s):
-        op, num_args = s.pop(), 0
+        op, num_args, has_fn_kwargs = s.pop(), 0, False
         if isinstance(op, tuple):
-            op, num_args = op
+            op, num_args, has_fn_kwargs = op
         if op == "unary -":
             return -self.evaluate_stack(s)
         if op in "+-*/^":
@@ -148,14 +180,22 @@ class EvaluationParameterParser:
             return math.e  # 2.718281828
         elif op in self.fn:
             # note: args are pushed onto the stack in reverse order
-            args = reversed([self.evaluate_stack(s) for _ in range(num_args)])
-            return self.fn[op](*args)
+            if has_fn_kwargs:
+                kwargs = dict()
+                for _ in range(num_args):
+                    v = self.evaluate_stack(s)
+                    k = s.pop()
+                    kwargs.update({k: v})
+                return self.fn[op](**kwargs)
+            else:
+                args = reversed([self.evaluate_stack(s) for _ in range(num_args)])
+                return self.fn[op](*args)
         else:
             # try to evaluate as int first, then as float if int fails
             # NOTE: JPC - 20200403 - Originally I considered returning the raw op here if parsing as float also
             # fails, but I decided against it to instead require that the *entire* expression evaluates
             # numerically UNLESS there is *exactly one* expression to substitute (see cases where len(L) == 1 in the
-            # parse_evaluation_parameter method
+            # parse_evaluation_parameter method.
             try:
                 return int(op)
             except ValueError:
@@ -163,17 +203,17 @@ class EvaluationParameterParser:
 
 
 def build_evaluation_parameters(
-    expectation_args,
-    evaluation_parameters=None,
-    interactive_evaluation=True,
+    expectation_args: dict,
+    evaluation_parameters: Optional[dict] = None,
+    interactive_evaluation: bool = True,
     data_context=None,
-):
+) -> Tuple[dict, dict]:
     """Build a dictionary of parameters to evaluate, using the provided evaluation_parameters,
     AND mutate expectation_args by removing any parameter values passed in as temporary values during
     exploratory work.
     """
     evaluation_args = copy.deepcopy(expectation_args)
-    substituted_parameters = dict()
+    substituted_parameters = {}
 
     # Iterate over arguments, and replace $PARAMETER-defined args with their
     # specified parameters.
@@ -185,11 +225,10 @@ def build_evaluation_parameters(
 
             # First, check to see whether an argument was supplied at runtime
             # If it was, use that one, but remove it from the stored config
-            if "$PARAMETER." + value["$PARAMETER"] in value:
-                evaluation_args[key] = evaluation_args[key][
-                    "$PARAMETER." + value["$PARAMETER"]
-                ]
-                del expectation_args[key]["$PARAMETER." + value["$PARAMETER"]]
+            param_key = f"$PARAMETER.{value['$PARAMETER']}"
+            if param_key in value:
+                evaluation_args[key] = evaluation_args[key][param_key]
+                del expectation_args[key][param_key]
 
             # If not, try to parse the evaluation parameter and substitute, which will raise
             # an exception if we do not have a value
@@ -207,7 +246,7 @@ def build_evaluation_parameters(
     return evaluation_args, substituted_parameters
 
 
-expr = EvaluationParameterParser()
+EXPR = EvaluationParameterParser()
 
 
 def find_evaluation_parameter_dependencies(parameter_expression):
@@ -271,9 +310,11 @@ def find_evaluation_parameter_dependencies(parameter_expression):
     return dependencies
 
 
-def parse_evaluation_parameter(
-    parameter_expression, evaluation_parameters=None, data_context=None
-):
+def parse_evaluation_parameter(  # noqa: C901 - complexity 19
+    parameter_expression: str,
+    evaluation_parameters: Optional[Dict[str, Any]] = None,
+    data_context: Optional[DataContext] = None,
+) -> Any:
     """Use the provided evaluation_parameters dict to parse a given parameter expression.
 
     Args:
@@ -292,21 +333,21 @@ def parse_evaluation_parameter(
     if evaluation_parameters is None:
         evaluation_parameters = {}
 
-    # Calling get_parser clears the stack
-    parser = expr.get_parser()
-    try:
-        L = parser.parseString(parameter_expression, parseAll=True)
-    except ParseException as err:
-        L = ["Parse Failure", parameter_expression, (str(err), err.line, err.column)]
+    parse_results: Union[ParseResults, list] = _get_parse_results(parameter_expression)
 
-    if len(L) == 1 and L[0] not in evaluation_parameters:
+    if _is_single_function_no_args(parse_results):
+        # Necessary to catch `now()` (which only needs to be evaluated with `expr.exprStack`)
+        # NOTE: 20211122 - Chetan - Any future built-ins that are zero arity functions will match this behavior
+        pass
+
+    elif len(parse_results) == 1 and parse_results[0] not in evaluation_parameters:
         # In this special case there were no operations to find, so only one value, but we don't have something to
         # substitute for that value
         try:
-            res = ge_urn.parseString(L[0])
+            res = ge_urn.parseString(parse_results[0])
             if res["urn_type"] == "stores":
-                store = data_context.stores.get(res["store_name"])
-                return store.get_query_result(
+                store = data_context.stores.get(res["store_name"])  # type: ignore[union-attr]
+                return store.get_query_result(  # type: ignore[union-attr]
                     res["metric_name"], res.get("metric_kwargs", {})
                 )
             else:
@@ -314,37 +355,63 @@ def parse_evaluation_parameter(
                     "Unrecognized urn_type in ge_urn: must be 'stores' to use a metric store."
                 )
                 raise EvaluationParameterError(
-                    "No value found for $PARAMETER " + str(L[0])
+                    f"No value found for $PARAMETER {str(parse_results[0])}"
                 )
         except ParseException as e:
             logger.debug(
                 f"Parse exception while parsing evaluation parameter: {str(e)}"
             )
-            raise EvaluationParameterError("No value found for $PARAMETER " + str(L[0]))
-        except AttributeError:
+            raise EvaluationParameterError(
+                f"No value found for $PARAMETER {str(parse_results[0])}"
+            ) from e
+        except AttributeError as e:
             logger.warning("Unable to get store for store-type valuation parameter.")
-            raise EvaluationParameterError("No value found for $PARAMETER " + str(L[0]))
+            raise EvaluationParameterError(
+                f"No value found for $PARAMETER {str(parse_results[0])}"
+            ) from e
 
-    elif len(L) == 1:
+    elif len(parse_results) == 1:
         # In this case, we *do* have a substitution for a single type. We treat this specially because in this
         # case, we allow complex type substitutions (i.e. do not coerce to string as part of parsing)
         # NOTE: 20201023 - JPC - to support MetricDefinition as an evaluation parameter type, we need to handle that
         # case here; is the evaluation parameter provided here in fact a metric definition?
-        return evaluation_parameters[L[0]]
+        return evaluation_parameters[parse_results[0]]
 
-    elif len(L) == 0 or L[0] != "Parse Failure":
-        for i, ob in enumerate(expr.exprStack):
+    elif len(parse_results) == 0 or parse_results[0] != "Parse Failure":
+        # we have a stack to evaluate and there was no parse failure.
+        # iterate through values and look for URNs pointing to a store:
+        for i, ob in enumerate(EXPR.exprStack):
             if isinstance(ob, str) and ob in evaluation_parameters:
-                expr.exprStack[i] = str(evaluation_parameters[ob])
+                EXPR.exprStack[i] = str(evaluation_parameters[ob])
+            elif isinstance(ob, str) and ob not in evaluation_parameters:
+                # try to retrieve this value from a store
+                try:
+                    res = ge_urn.parseString(ob)
+                    if res["urn_type"] == "stores":
+                        store = data_context.stores.get(res["store_name"])  # type: ignore[union-attr]
+                        EXPR.exprStack[i] = str(
+                            store.get_query_result(  # type: ignore[union-attr]
+                                res["metric_name"], res.get("metric_kwargs", {})
+                            )
+                        )  # value placed back in stack must be a string
+                    else:
+                        # handle other urn_types here, but note that validations URNs are being resolved elsewhere.
+                        pass
+                # graceful error handling for cases where the value in the stack isn't a URN:
+                except ParseException:
+                    pass
+                except AttributeError:
+                    pass
 
     else:
-        err_str, err_line, err_col = L[-1]
+        err_str, err_line, err_col = parse_results[-1]
         raise EvaluationParameterError(
             f"Parse Failure: {err_str}\nStatement: {err_line}\nColumn: {err_col}"
         )
 
     try:
-        result = expr.evaluate_stack(expr.exprStack)
+        result = EXPR.evaluate_stack(EXPR.exprStack)
+        result = convert_to_json_serializable(result)
     except Exception as e:
         exception_traceback = traceback.format_exc()
         exception_message = (
@@ -352,18 +419,43 @@ def parse_evaluation_parameter(
         )
         logger.debug(exception_message, e, exc_info=True)
         raise EvaluationParameterError(
-            "Error while evaluating evaluation parameter expression: " + str(e)
-        )
+            f"Error while evaluating evaluation parameter expression: {str(e)}"
+        ) from e
 
     return result
 
 
-def _deduplicate_evaluation_parameter_dependencies(dependencies):
-    deduplicated = dict()
+def _get_parse_results(
+    parameter_expression: str,
+) -> Union[ParseResults, Union[ParseResults, list]]:
+    # Calling get_parser clears the stack
+    parser = EXPR.get_parser()
+    try:
+        parse_results = parser.parseString(parameter_expression, parseAll=True)
+    except ParseException as err:
+        parse_results = [
+            "Parse Failure",
+            parameter_expression,
+            (str(err), err.line, err.column),
+        ]
+    return parse_results
+
+
+def _is_single_function_no_args(parse_results: Union[ParseResults, list]) -> bool:
+    # Represents a valid parser result of a single function that has no arguments
+    return (
+        len(parse_results) == 1
+        and isinstance(parse_results[0], tuple)
+        and parse_results[0][2] is False
+    )
+
+
+def _deduplicate_evaluation_parameter_dependencies(dependencies: dict) -> dict:
+    deduplicated: dict = {}
     for suite_name, required_metrics in dependencies.items():
         deduplicated[suite_name] = []
         metrics = set()
-        metric_kwargs = dict()
+        metric_kwargs: dict = {}
         for metric in required_metrics:
             if isinstance(metric, str):
                 metrics.add(metric)

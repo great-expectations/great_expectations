@@ -5,8 +5,7 @@ import pytest
 
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.render.renderer import ProfilingResultsOverviewSectionRenderer
-from great_expectations.render.types import RenderedTableContent
-from tests.test_utils import expectationSuiteValidationResultSchema
+from great_expectations.self_check.util import expectationSuiteValidationResultSchema
 
 
 @pytest.fixture(scope="module")

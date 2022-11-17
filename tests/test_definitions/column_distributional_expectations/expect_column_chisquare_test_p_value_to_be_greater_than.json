@@ -6,6 +6,7 @@
     },
     "tests" : [{
       "title": "categorical_fixed_partition_object",
+      "include_in_gallery": true,
       "exact_match_out": false,
       "in": {
         "column": "categorical_fixed",
@@ -22,6 +23,7 @@
     },
     {
       "title": "categorical_fixed_alternate_partition_object",
+      "include_in_gallery": true,
       "exact_match_out": false,
       "in": {
         "column": "categorical_fixed",
@@ -37,7 +39,7 @@
       }
     },
     {
-      "title": "categorical_fixed_alternate_partition_object__exact_match",
+      "title": "categorical_fixed_alternate_partition_object_exact_match",
       "exact_match_out": true,
       "in": {
         "column": "categorical_fixed",
@@ -53,8 +55,8 @@
         "result": {
           "observed_value": 5.1397782097623862e-53,
           "element_count": 1000,
-          "missing_count": 0,
-          "missing_percent": 0,
+          "missing_count": null,
+          "missing_percent": null,
           "details": {
             "observed_partition": {
               "values": ["A", "B", "C"],
@@ -75,7 +77,7 @@
     },
     "tests": [
       {
-        "title": "categorical_fixed_alternate__new_categorical_vals__no_holdout",
+        "title": "categorical_fixed_alternate_new_categorical_vals_no_holdout",
         "exact_match_out": false,
         "in": {
           "column": "categorical_list",
@@ -90,7 +92,7 @@
         }
       },
       {
-        "title": "categorical_fixed_alternate__new_categorical_vals__holdout",
+        "title": "categorical_fixed_alternate_new_categorical_vals_holdout",
         "exact_match_out": false,
         "in": {
           "column": "categorical_list",
@@ -113,7 +115,7 @@
     },
     "tests": [
       {
-        "title": "categorical_fixed__missing_categorical_vals__no_holdout",
+        "title": "categorical_fixed_missing_categorical_vals_no_holdout",
         "exact_match_out": false,
         "in": {
           "column": "categorical_list",

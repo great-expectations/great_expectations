@@ -3,11 +3,9 @@ import logging
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.map_metric import (
+from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
@@ -29,7 +27,7 @@ class ColumnValuesMatchRegex(ColumnMapMetricProvider):
         regex_expression = get_dialect_regex_expression(column, regex, _dialect)
         if regex_expression is None:
             logger.warning(
-                "Regex is not supported for dialect %s" % str(_dialect.dialect.name)
+                f"Regex is not supported for dialect {str(_dialect.dialect.name)}"
             )
             raise NotImplementedError
 

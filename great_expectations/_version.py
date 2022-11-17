@@ -89,20 +89,20 @@ def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False, env=
             if e.errno == errno.ENOENT:
                 continue
             if verbose:
-                print("unable to run %s" % dispcmd)
+                print(f"unable to run {dispcmd}")
                 print(e)
             return None, None
     else:
         if verbose:
-            print("unable to find command, tried {}".format(commands))
+            print(f"unable to find command, tried {commands}")
         return None, None
     stdout = p.communicate()[0].strip()
     if sys.version_info[0] >= 3:
         stdout = stdout.decode()
     if p.returncode != 0:
         if verbose:
-            print("unable to run %s (error)" % dispcmd)
-            print("stdout was %s" % stdout)
+            print(f"unable to run {dispcmd} (error)")
+            print(f"stdout was {stdout}")
         return None, p.returncode
     return stdout, p.returncode
 
@@ -201,15 +201,15 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose):
         # "stabilization", as well as "HEAD" and "master".
         tags = {r for r in refs if re.search(r"\d", r)}
         if verbose:
-            print("discarding '%s', no digits" % ",".join(refs - tags))
+            print(f"discarding '{','.join(refs - tags)}', no digits")
     if verbose:
-        print("likely tags: %s" % ",".join(sorted(tags)))
+        print(f"likely tags: {','.join(sorted(tags))}")
     for ref in sorted(tags):
         # sorting will prefer e.g. "2.0" over "2.0rc1"
         if ref.startswith(tag_prefix):
             r = ref[len(tag_prefix) :]
             if verbose:
-                print("picking %s" % r)
+                print(f"picking {r}")
             return {
                 "version": r,
                 "full-revisionid": keywords["full"].strip(),
@@ -244,7 +244,7 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     out, rc = run_command(GITS, ["rev-parse", "--git-dir"], cwd=root, hide_stderr=True)
     if rc != 0:
         if verbose:
-            print("Directory %s not under git control" % root)
+            print(f"Directory {root} not under git control")
         raise NotThisMethod("'git rev-parse --git-dir' returned error")
 
     # if there is a tag matching tag_prefix, this yields TAG-NUM-gHEX[-dirty]
@@ -258,7 +258,7 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
             "--always",
             "--long",
             "--match",
-            "%s*" % tag_prefix,
+            f"{tag_prefix}*",
         ],
         cwd=root,
     )
@@ -292,8 +292,8 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
         # TAG-NUM-gHEX
         mo = re.search(r"^(.+)-(\d+)-g([0-9a-f]+)$", git_describe)
         if not mo:
-            # unparseable. Maybe git-describe is misbehaving?
-            pieces["error"] = "unable to parse git-describe output: '%s'" % describe_out
+            # unparsable. Maybe git-describe is misbehaving?
+            pieces["error"] = f"unable to parse git-describe output: '{describe_out}'"
             return pieces
 
         # tag
@@ -303,7 +303,8 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
                 fmt = "tag '%s' doesn't start with prefix '%s'"
                 print(fmt % (full_tag, tag_prefix))
             pieces["error"] = "tag '{}' doesn't start with prefix '{}'".format(
-                full_tag, tag_prefix,
+                full_tag,
+                tag_prefix,
             )
             return pieces
         pieces["closest-tag"] = full_tag[len(tag_prefix) :]
@@ -393,13 +394,13 @@ def render_pep440_post(pieces):
             if pieces["dirty"]:
                 rendered += ".dev0"
             rendered += plus_or_dot(pieces)
-            rendered += "g%s" % pieces["short"]
+            rendered += f"g{pieces['short']}"
     else:
         # exception #1
         rendered = "0.post%d" % pieces["distance"]
         if pieces["dirty"]:
             rendered += ".dev0"
-        rendered += "+g%s" % pieces["short"]
+        rendered += f"+g{pieces['short']}"
     return rendered
 
 
@@ -492,7 +493,7 @@ def render(pieces, style):
     elif style == "git-describe-long":
         rendered = render_git_describe_long(pieces)
     else:
-        raise ValueError("unknown style '%s'" % style)
+        raise ValueError(f"unknown style '{style}'")
 
     return {
         "version": rendered,

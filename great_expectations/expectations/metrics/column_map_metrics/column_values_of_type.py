@@ -5,7 +5,7 @@ from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.core.expect_column_values_to_be_of_type import (
     _native_type_type_map,
 )
-from great_expectations.expectations.metrics.map_metric import (
+from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
@@ -40,6 +40,6 @@ class ColumnValuesOfType(ColumnMapMetricProvider):
             comp_types.extend(native_type)
 
         if len(comp_types) < 1:
-            raise ValueError("Unrecognized numpy/python type: %s" % type_)
+            raise ValueError(f"Unrecognized numpy/python type: {type_}")
 
         return column.map(lambda x: isinstance(x, tuple(comp_types)))

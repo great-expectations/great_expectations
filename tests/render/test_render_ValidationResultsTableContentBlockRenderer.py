@@ -1,17 +1,42 @@
 import json
 
+import pytest
+
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.expectations.registry import get_renderer_impl
-from great_expectations.render.renderer.content_block import (
-    ValidationResultsTableContentBlockRenderer,
-)
-from great_expectations.render.types import (
+from great_expectations.render import (
+    LegacyDiagnosticRendererType,
     RenderedComponentContent,
     RenderedStringTemplateContent,
 )
+from great_expectations.render.renderer.content_block import (
+    ValidationResultsTableContentBlockRenderer,
+)
+
+
+@pytest.fixture
+def evr_failed_with_exception():
+    return ExpectationValidationResult(
+        success=False,
+        exception_info={
+            "raised_exception": True,
+            "exception_message": "Invalid partition object.",
+            "exception_traceback": 'Traceback (most recent call last):\n  File "/great_expectations/great_expectations/data_asset/data_asset.py", line 216, in wrapper\n    return_obj = func(self, **evaluation_args)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 106, in inner_wrapper\n    evaluation_result = func(self, column, *args, **kwargs)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 3381, in expect_column_kl_divergence_to_be_less_than\n    raise ValueError("Invalid partition object.")\nValueError: Invalid partition object.\n',
+        },
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_kl_divergence_to_be_less_than",
+            kwargs={
+                "column": "live",
+                "partition_object": None,
+                "threshold": None,
+                "result_format": "SUMMARY",
+            },
+            meta={"BasicDatasetProfiler": {"confidence": "very low"}},
+        ),
+    )
 
 
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_with_errored_expectation(
@@ -130,6 +155,27 @@ def test_ValidationResultsTableContentBlockRenderer_render(
     assert json.dumps(validation_results_table.to_json_dict()).count("$icon") == 6
 
 
+def test_ValidationResultsTableContentBlockRenderer_get_custom_columns(evr_success):
+    assert (
+        ValidationResultsTableContentBlockRenderer._get_custom_columns([evr_success])
+        == []
+    )
+
+    evr_success.expectation_config.kwargs["meta_properties_to_render"] = {}
+    assert (
+        ValidationResultsTableContentBlockRenderer._get_custom_columns([evr_success])
+        == []
+    )
+
+    evr_success.expectation_config.kwargs["meta_properties_to_render"] = {
+        "doesntmatterone": "doesntmatter",
+        "doesntmattertwo": "doesntmatter",
+    }
+    assert ValidationResultsTableContentBlockRenderer._get_custom_columns(
+        [evr_success]
+    ) == ["doesntmatterone", "doesntmattertwo"]
+
+
 def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_success):
     content_block_fn = ValidationResultsTableContentBlockRenderer._get_content_block_fn(
         "expect_table_row_count_to_be_between"
@@ -173,8 +219,6 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
                             "min_value": 0,
                             "max_value": None,
                             "result_format": "SUMMARY",
-                            "row_condition": None,
-                            "condition_parser": None,
                             "strict_max": None,
                             "strict_min": None,
                         },
@@ -183,6 +227,284 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
                 }
             ),
             "1,313",
+        ]
+    ]
+    assert content_block_fn_output == content_block_fn_expected_output
+
+    content_block_fn_expected_output = [
+        [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "$icon",
+                        "params": {"icon": "", "markdown_status_icon": "✅"},
+                        "styling": {
+                            "params": {
+                                "icon": {
+                                    "classes": [
+                                        "fas",
+                                        "fa-check-circle",
+                                        "text-success",
+                                    ],
+                                    "tag": "i",
+                                }
+                            }
+                        },
+                    },
+                    "styling": {
+                        "parent": {
+                            "classes": ["hide-succeeded-validation-target-child"]
+                        }
+                    },
+                }
+            ),
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Must have greater than or equal to $min_value rows.",
+                        "params": {
+                            "meta_properties_to_render": {},
+                            "min_value": 0,
+                            "max_value": None,
+                            "result_format": "SUMMARY",
+                            "strict_max": None,
+                            "strict_min": None,
+                        },
+                        "styling": None,
+                    },
+                }
+            ),
+            "1,313",
+        ]
+    ]
+
+    evr_success.expectation_config.kwargs["meta_properties_to_render"] = {}
+    content_block_fn_output = content_block_fn(result=evr_success)
+    assert (
+        content_block_fn_output[0][0].to_json_dict()
+        == content_block_fn_expected_output[0][0].to_json_dict()
+    )
+    assert (
+        content_block_fn_output[0][1].to_json_dict()
+        == content_block_fn_expected_output[0][1].to_json_dict()
+    )
+
+    assert content_block_fn_output == content_block_fn_expected_output
+
+    evr_success.expectation_config.kwargs["meta_properties_to_render"] = {
+        "property_that_doesnt_exist": "property"
+    }
+    content_block_fn_expected_output = [
+        [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "$icon",
+                        "params": {"icon": "", "markdown_status_icon": "✅"},
+                        "styling": {
+                            "params": {
+                                "icon": {
+                                    "classes": [
+                                        "fas",
+                                        "fa-check-circle",
+                                        "text-success",
+                                    ],
+                                    "tag": "i",
+                                }
+                            }
+                        },
+                    },
+                    "styling": {
+                        "parent": {
+                            "classes": ["hide-succeeded-validation-target-child"]
+                        }
+                    },
+                }
+            ),
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Must have greater than or equal to $min_value rows.",
+                        "params": {
+                            "meta_properties_to_render": {
+                                "property_that_doesnt_exist": "property"
+                            },
+                            "min_value": 0,
+                            "max_value": None,
+                            "result_format": "SUMMARY",
+                            "strict_max": None,
+                            "strict_min": None,
+                        },
+                        "styling": None,
+                    },
+                }
+            ),
+            "1,313",
+            ["N/A"],
+        ]
+    ]
+    content_block_fn_output = content_block_fn(result=evr_success)
+    assert content_block_fn_output == content_block_fn_expected_output
+
+    evr_success.expectation_config.meta = {
+        "attributes": {"property": 5, "nested": {"property": "this is nested"}}
+    }
+    evr_success.expectation_config.kwargs["meta_properties_to_render"] = {
+        "property_that_exists": "property",
+        "other existing prop": "nested.property",
+    }
+
+    content_block_fn_expected_output = [
+        [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "$icon",
+                        "params": {"icon": "", "markdown_status_icon": "✅"},
+                        "styling": {
+                            "params": {
+                                "icon": {
+                                    "classes": [
+                                        "fas",
+                                        "fa-check-circle",
+                                        "text-success",
+                                    ],
+                                    "tag": "i",
+                                }
+                            }
+                        },
+                    },
+                    "styling": {
+                        "parent": {
+                            "classes": ["hide-succeeded-validation-target-child"]
+                        }
+                    },
+                }
+            ),
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Must have greater than or equal to $min_value rows.",
+                        "params": {
+                            "meta_properties_to_render": {
+                                "property_that_exists": "property",
+                                "other existing prop": "nested.property",
+                            },
+                            "min_value": 0,
+                            "max_value": None,
+                            "result_format": "SUMMARY",
+                            "strict_max": None,
+                            "strict_min": None,
+                        },
+                        "styling": None,
+                    },
+                }
+            ),
+            "1,313",
+            ["this is nested"],
+            [5],
+        ]
+    ]
+    content_block_fn_output = content_block_fn(result=evr_success)
+    assert content_block_fn_output == content_block_fn_expected_output
+
+
+@pytest.mark.filterwarnings("ignore:V2 API style custom rendering*:DeprecationWarning")
+def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn_with_v2_api_style_custom_rendering():
+    """Test backwards support for custom expectation rendering with the V2 API as described at
+    https://docs.greatexpectations.io/en/latest/reference/spare_parts/data_docs_reference.html#customizing-data-docs.
+    """
+
+    custom_expectation_template = "custom_expectation_template"
+    custom_expectation_observed_value = "custom_expectation_observed_value"
+
+    class ValidationResultsTableContentBlockRendererWithV2ApiStyleCustomExpectations(
+        ValidationResultsTableContentBlockRenderer
+    ):
+        @classmethod
+        def expect_custom_expectation_written_in_v2_api_style(
+            cls, expectation, styling=None, include_column_name: bool = True
+        ):
+            return [
+                RenderedStringTemplateContent(
+                    content_block_type="string_template",
+                    string_template={
+                        "template": custom_expectation_template,
+                        "params": expectation.kwargs,
+                        "styling": styling,
+                    },
+                )
+            ]
+
+    evr = ExpectationValidationResult(
+        success=True,
+        result={
+            "observed_value": custom_expectation_observed_value,
+        },
+        exception_info={
+            "raised_exception": False,
+            "exception_message": None,
+            "exception_traceback": None,
+        },
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_custom_expectation",
+            kwargs={"column": "a_column_name", "result_format": "SUMMARY"},
+        ),
+    )
+
+    content_block_fn = ValidationResultsTableContentBlockRendererWithV2ApiStyleCustomExpectations._get_content_block_fn(
+        "expect_custom_expectation_written_in_v2_api_style"
+    )
+    content_block_fn_output = content_block_fn(result=evr)
+
+    content_block_fn_expected_output = [
+        [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "$icon",
+                        "params": {"icon": "", "markdown_status_icon": "✅"},
+                        "styling": {
+                            "params": {
+                                "icon": {
+                                    "classes": [
+                                        "fas",
+                                        "fa-check-circle",
+                                        "text-success",
+                                    ],
+                                    "tag": "i",
+                                }
+                            }
+                        },
+                    },
+                    "styling": {
+                        "parent": {
+                            "classes": ["hide-succeeded-validation-target-child"]
+                        }
+                    },
+                }
+            ),
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": custom_expectation_template,
+                        "params": {
+                            "column": "a_column_name",
+                            "result_format": "SUMMARY",
+                        },
+                        "styling": None,
+                    },
+                }
+            ),
+            custom_expectation_observed_value,
         ]
     ]
     assert content_block_fn_output == content_block_fn_expected_output
@@ -240,30 +562,50 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
         ),
     )
 
+    evr_success_zero = ExpectationValidationResult(
+        success=True,
+        result={"observed_value": 0},
+        exception_info={
+            "raised_exception": False,
+            "exception_message": None,
+            "exception_traceback": None,
+        },
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_table_row_count_to_be_between",
+            kwargs={"min_value": 0, "max_value": None, "result_format": "SUMMARY"},
+        ),
+    )
+
     # test _get_observed_value when evr.result["observed_value"] exists
     output_1 = get_renderer_impl(
         object_name=evr_success.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.observed_value",
+        renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE,
     )[1](result=evr_success)
     assert output_1 == "1,313"
     # test _get_observed_value when evr.result does not exist
     output_2 = get_renderer_impl(
         object_name=evr_no_result_key.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.observed_value",
+        renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE,
     )[1](result=evr_no_result_key)
     assert output_2 == "--"
     # test _get_observed_value for expect_column_values_to_not_be_null expectation type
     output_3 = get_renderer_impl(
         object_name=evr_expect_column_values_to_not_be_null.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.observed_value",
+        renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE,
     )[1](result=evr_expect_column_values_to_not_be_null)
     assert output_3 == "≈20.03% not null"
     # test _get_observed_value for expect_column_values_to_be_null expectation type
     output_4 = get_renderer_impl(
         object_name=evr_expect_column_values_to_be_null.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.observed_value",
+        renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE,
     )[1](result=evr_expect_column_values_to_be_null)
     assert output_4 == "100% null"
+    # test _get_observed_value to be 0
+    output_5 = get_renderer_impl(
+        object_name=evr_success_zero.expectation_config.expectation_type,
+        renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE,
+    )[1](result=evr_success_zero)
+    assert output_5 == "0"
 
 
 def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
@@ -319,14 +661,14 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
     # test for succeeded evr
     output_1 = get_renderer_impl(
         object_name=evr_success.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.unexpected_statement",
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT,
     )[1](result=evr_success)
     assert output_1 == []
 
     # test for failed evr
     output_2 = get_renderer_impl(
         object_name=evr_failed.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.unexpected_statement",
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT,
     )[1](result=evr_failed)
     assert output_2 == [
         RenderedStringTemplateContent(
@@ -349,7 +691,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
     # test for evr with no "result" key
     output_3 = get_renderer_impl(
         object_name=evr_no_result.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.unexpected_statement",
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT,
     )[1](result=evr_no_result)
     print(json.dumps(output_3, indent=2))
     assert output_3 == []
@@ -357,7 +699,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
     # test for evr with no unexpected count
     output_4 = get_renderer_impl(
         object_name=evr_failed_no_unexpected_count.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.unexpected_statement",
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT,
     )[1](result=evr_failed_no_unexpected_count)
     print(output_4)
     assert output_4 == []
@@ -382,7 +724,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
 
     output_5 = get_renderer_impl(
         object_name=evr_failed_exception.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.unexpected_statement",
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT,
     )[1](result=evr_failed_exception)
     output_5 = [content.to_json_dict() for content in output_5]
     expected_output_5 = [
@@ -608,28 +950,28 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
     # test for succeeded evr
     output_1 = get_renderer_impl(
         object_name=evr_success.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.unexpected_table",
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_success)
     assert output_1 is None
 
     # test for failed evr with no "result" key
     output_2 = get_renderer_impl(
         object_name=evr_failed_no_result.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.unexpected_table",
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_failed_no_result)
     assert output_2 is None
 
     # test for failed evr with no unexpected list or unexpected counts
     output_3 = get_renderer_impl(
         object_name=evr_failed_no_unexpected_list_or_counts.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.unexpected_table",
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_failed_no_unexpected_list_or_counts)
     assert output_3 is None
 
     # test for failed evr with partial unexpected list
     output_4 = get_renderer_impl(
         object_name=evr_failed_partial_unexpected_list.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.unexpected_table",
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_failed_partial_unexpected_list)
     assert output_4.to_json_dict() == {
         "content_block_type": "table",
@@ -662,7 +1004,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
     # test for failed evr with partial unexpected counts
     output_5 = get_renderer_impl(
         object_name=evr_failed_partial_unexpected_counts.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.unexpected_table",
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_failed_partial_unexpected_counts)
     assert output_5.to_json_dict() == {
         "content_block_type": "table",
@@ -699,7 +1041,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
     # test for failed evr with exception
     output_1 = get_renderer_impl(
         object_name=evr_failed_with_exception.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.status_icon",
+        renderer_type=LegacyDiagnosticRendererType.STATUS_ICON,
     )[1](result=evr_failed_with_exception)
     assert output_1.to_json_dict() == {
         "content_block_type": "string_template",
@@ -720,7 +1062,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
     # test for succeeded evr
     output_2 = get_renderer_impl(
         object_name=evr_success.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.status_icon",
+        renderer_type=LegacyDiagnosticRendererType.STATUS_ICON,
     )[1](result=evr_success)
     assert output_2.to_json_dict() == {
         "content_block_type": "string_template",
@@ -742,7 +1084,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
     # test for failed evr
     output_3 = get_renderer_impl(
         object_name=evr_failed.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.status_icon",
+        renderer_type=LegacyDiagnosticRendererType.STATUS_ICON,
     )[1](result=evr_failed)
     assert output_3.to_json_dict() == {
         "content_block_type": "string_template",

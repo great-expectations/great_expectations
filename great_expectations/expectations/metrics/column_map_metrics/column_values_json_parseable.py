@@ -5,7 +5,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
 )
 from great_expectations.expectations.metrics.import_manager import F, sparktypes
-from great_expectations.expectations.metrics.map_metric import (
+from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
@@ -26,7 +26,7 @@ class ColumnValuesJsonParseable(ColumnMapMetricProvider):
         return column.map(is_json)
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
-    def _spark(cls, column, json_schema, **kwargs):
+    def _spark(cls, column, **kwargs):
         def is_json(val):
             try:
                 json.loads(val)

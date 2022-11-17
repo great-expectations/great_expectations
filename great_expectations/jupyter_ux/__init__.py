@@ -5,8 +5,20 @@ import logging
 import sys
 from datetime import datetime
 
+import pandas as pd
 import tzlocal
-from IPython.core.display import HTML, display
+from IPython.display import HTML, display
+from packaging import version
+
+pd.set_option("display.max_rows", None)
+pd.set_option("display.max_columns", None)
+pd.set_option("display.width", None)
+
+if version.parse(pd.__version__) <= version.parse("1.0.0"):
+    # support for negative integers was deprecated in version 1.0.1
+    pd.set_option("display.max_colwidth", -1)
+else:
+    pd.set_option("display.max_colwidth", None)
 
 from great_expectations.render.renderer import (
     ExpectationSuiteColumnSectionRenderer,
@@ -48,13 +60,12 @@ If you did not create the data source during init, here is how to add it now: <a
                     """
 <p>
 Found more than one data source in the great_expectations.yml of your project:
-<b>{1:s}</b>
+<b>{:s}</b>
 </p>
 <p>
 Uncomment the next cell and set data_source_name to one of these names.
 </p>
 """.format(
-                        data_source_type,
                         ",".join(
                             [
                                 datasource["name"]
@@ -161,8 +172,7 @@ def setup_notebook_logging(logger=None, log_level=logging.INFO):
     logger.addHandler(chandler)
     logger.setLevel(log_level)
     logger.info(
-        "Great Expectations logging enabled at %s level by JupyterUX module."
-        % (log_level,)
+        f"Great Expectations logging enabled at {log_level} level by JupyterUX module."
     )
     #
     # # Filter warnings
@@ -170,8 +180,8 @@ def setup_notebook_logging(logger=None, log_level=logging.INFO):
     # warnings.filterwarnings('ignore')
 
 
-def show_available_data_asset_names(context, data_source_name=None):
-    """ List asset names found in the current context. """
+def show_available_data_asset_names(context, data_source_name=None) -> None:
+    """List asset names found in the current context."""
     # TODO: Needs tests.
     styles = """
     <style type='text/css'>
@@ -209,7 +219,7 @@ def show_available_data_asset_names(context, data_source_name=None):
             # TODO hacks to deal w/ inconsistent return types. Remove urgently
             mystery_object = generator.get_available_data_asset_names()
             if isinstance(mystery_object, dict) and "names" in mystery_object.keys():
-                data_asset_names = sorted([name[0] for name in mystery_object["names"]])
+                data_asset_names = sorted(name[0] for name in mystery_object["names"])
             elif isinstance(mystery_object, list):
                 data_asset_names = sorted(mystery_object)
             else:
@@ -220,7 +230,7 @@ def show_available_data_asset_names(context, data_source_name=None):
                 html += styles
                 html += "<ul class='data-assets'>"
                 for data_asset_name in data_asset_names:
-                    html += "<li>{:s}</li>".format(data_asset_name)
+                    html += f"<li>{data_asset_name:s}</li>"
                     data_asset_expectation_suite_keys = [
                         es_key
                         for es_key in expectation_suite_keys
@@ -305,7 +315,9 @@ cooltip_style_element = """<style type="text/css">
 
 
 def _render_for_jupyter(
-    view, include_styling, return_without_displaying,
+    view,
+    include_styling,
+    return_without_displaying,
 ):
     if include_styling:
         html_to_display = bootstrap_link_element + cooltip_style_element + view
@@ -319,7 +331,10 @@ def _render_for_jupyter(
 
 
 def display_column_expectations_as_section(
-    expectation_suite, column, include_styling=True, return_without_displaying=False,
+    expectation_suite,
+    column,
+    include_styling=True,
+    return_without_displaying=False,
 ):
     """This is a utility function to render all of the Expectations in an ExpectationSuite with the same column name as an HTML block.
 
@@ -347,11 +362,18 @@ def display_column_expectations_as_section(
     )
     view = DefaultJinjaSectionView().render({"section": document, "section_loop": 1})
 
-    return _render_for_jupyter(view, include_styling, return_without_displaying,)
+    return _render_for_jupyter(
+        view,
+        include_styling,
+        return_without_displaying,
+    )
 
 
 def display_profiled_column_evrs_as_section(
-    evrs, column, include_styling=True, return_without_displaying=False,
+    evrs,
+    column,
+    include_styling=True,
+    return_without_displaying=False,
 ):
     """This is a utility function to render all of the EVRs in an ExpectationSuite with the same column name as an HTML block.
 
@@ -378,14 +400,24 @@ def display_profiled_column_evrs_as_section(
         ProfilingResultsColumnSectionRenderer().render(column_evr_list).to_json_dict()
     )
     view = DefaultJinjaSectionView().render(
-        {"section": document, "section_loop": {"index": 1},}
+        {
+            "section": document,
+            "section_loop": {"index": 1},
+        }
     )
 
-    return _render_for_jupyter(view, include_styling, return_without_displaying,)
+    return _render_for_jupyter(
+        view,
+        include_styling,
+        return_without_displaying,
+    )
 
 
 def display_column_evrs_as_section(
-    evrs, column, include_styling=True, return_without_displaying=False,
+    evrs,
+    column,
+    include_styling=True,
+    return_without_displaying=False,
 ):
     """
     Display validation results for a single column as a section.
@@ -407,10 +439,17 @@ def display_column_evrs_as_section(
         ValidationResultsColumnSectionRenderer().render(column_evr_list).to_json_dict()
     )
     view = DefaultJinjaSectionView().render(
-        {"section": document, "section_loop": {"index": 1},}
+        {
+            "section": document,
+            "section_loop": {"index": 1},
+        }
     )
 
-    return _render_for_jupyter(view, include_styling, return_without_displaying,)
+    return _render_for_jupyter(
+        view,
+        include_styling,
+        return_without_displaying,
+    )
 
 
 # When importing the jupyter_ux module, we set up a preferred logging configuration

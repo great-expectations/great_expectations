@@ -1,25 +1,24 @@
 import os
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 
 import jinja2
 import nbformat
 
+from great_expectations import DataContext
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.data_context.types.base import (
     NotebookConfig,
     NotebookTemplateConfig,
-    notebookConfigSchema,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import (
     SuiteEditNotebookCustomTemplateModuleNotFoundError,
 )
-from great_expectations.render.renderer.renderer import Renderer
-from great_expectations.util import lint_code
+from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
 
 
-class SuiteEditNotebookRenderer(Renderer):
+class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     """
     Render a notebook that can re-create or edit a suite.
 
@@ -43,7 +42,8 @@ class SuiteEditNotebookRenderer(Renderer):
         footer_code: Optional[NotebookTemplateConfig] = None,
         column_expectation_code: Optional[NotebookTemplateConfig] = None,
         table_expectation_code: Optional[NotebookTemplateConfig] = None,
-    ):
+        context: Optional[DataContext] = None,
+    ) -> None:
         super().__init__()
         custom_loader = []
 
@@ -83,14 +83,13 @@ class SuiteEditNotebookRenderer(Renderer):
         self.footer_code = footer_code
         self.column_expectation_code = column_expectation_code
         self.table_expectation_code = table_expectation_code
+        self.context = context
 
     @staticmethod
     def from_data_context(data_context):
         suite_edit_notebook_config: Optional[NotebookConfig] = None
         if data_context.notebooks and data_context.notebooks.get("suite_edit"):
-            suite_edit_notebook_config = notebookConfigSchema.load(
-                data_context.notebooks.get("suite_edit")
-            )
+            suite_edit_notebook_config = data_context.notebooks.get("suite_edit")
 
         return instantiate_class_from_config(
             config=suite_edit_notebook_config.__dict__
@@ -99,7 +98,7 @@ class SuiteEditNotebookRenderer(Renderer):
                 "module_name": "great_expectations.render.renderer.suite_edit_notebook_renderer",
                 "class_name": "SuiteEditNotebookRenderer",
             },
-            runtime_environment={},
+            runtime_environment={"context": data_context},
             config_defaults={},
         )
 
@@ -125,14 +124,14 @@ class SuiteEditNotebookRenderer(Renderer):
         for k, v in expectation["kwargs"].items():
             if k == "column":
                 # make the column a positional argument
-                kwargs.insert(0, "{}='{}'".format(k, v))
+                kwargs.insert(0, f"{k}='{v}'")
 
             elif isinstance(v, str):
                 # Put strings in quotes
-                kwargs.append("{}='{}'".format(k, v))
+                kwargs.append(f"{k}='{v}'")
             else:
                 # Pass other types as is
-                kwargs.append("{}={}".format(k, v))
+                kwargs.append(f"{k}={v}")
 
         return ", ".join(kwargs)
 
@@ -140,11 +139,11 @@ class SuiteEditNotebookRenderer(Renderer):
         self,
         notebook_config: Optional[NotebookTemplateConfig],
         default_file_name: str,
-        **default_kwargs
+        **default_kwargs,
     ):
         if notebook_config:
             rendered = self.template_env.get_template(notebook_config.file_name).render(
-                **default_kwargs, **notebook_config.template_kwargs
+                **{**default_kwargs, **notebook_config.template_kwargs}
             )
         else:
             rendered = self.template_env.get_template(default_file_name).render(
@@ -152,7 +151,9 @@ class SuiteEditNotebookRenderer(Renderer):
             )
         return rendered
 
-    def add_header(self, suite_name: str, batch_kwargs) -> None:
+    def add_header(
+        self, suite_name: str, batch_kwargs, suite_notes: Optional[dict]
+    ) -> None:
         markdown = self.render_with_overwrite(
             self.header_markdown, "HEADER.md", suite_name=suite_name
         )
@@ -160,10 +161,11 @@ class SuiteEditNotebookRenderer(Renderer):
         self.add_markdown_cell(markdown)
 
         if not batch_kwargs:
-            batch_kwargs = dict()
+            batch_kwargs = {}
         code = self.render_with_overwrite(
             self.header_code,
             "header.py.j2",
+            suite_notes=suite_notes,
             suite_name=suite_name,
             batch_kwargs=batch_kwargs,
             env=os.environ,
@@ -175,27 +177,20 @@ class SuiteEditNotebookRenderer(Renderer):
         self.add_markdown_cell(markdown)
         # TODO this may become confusing for users depending on what they are trying
         #  to accomplish in their dev loop
-        code = self.render_with_overwrite(self.footer_code, "footer.py.j2")
+        validation_operator_name = None
+        if self.context and self.context.validation_operators.get(
+            "action_list_operator"
+        ):
+            validation_operator_name = "action_list_operator"
+
+        code = self.render_with_overwrite(
+            self.footer_code,
+            "footer.py.j2",
+            validation_operator_name=validation_operator_name,
+        )
         self.add_code_cell(code)
 
-    def add_code_cell(self, code: str, lint: bool = False, **template_params) -> None:
-        """
-        Add the given code as a new code cell.
-        """
-        if lint:
-            code = lint_code(code).rstrip("\n")
-
-        cell = nbformat.v4.new_code_cell(code)
-        self._notebook["cells"].append(cell)
-
-    def add_markdown_cell(self, markdown: str) -> None:
-        """
-        Add the given markdown as a new markdown cell.
-        """
-        cell = nbformat.v4.new_markdown_cell(markdown)
-        self._notebook["cells"].append(cell)
-
-    def add_expectation_cells_from_suite(self, expectations):
+    def add_expectation_cells_from_suite(self, expectations) -> None:
         expectations_by_column = self._get_expectations_by_column(expectations)
         markdown = self.render_with_overwrite(
             self.table_expectations_header_markdown, "TABLE_EXPECTATIONS_HEADER.md"
@@ -236,7 +231,8 @@ class SuiteEditNotebookRenderer(Renderer):
                     meta_args=self._build_meta_arguments(exp.meta),
                 )
                 self.add_code_cell(
-                    code, lint=True,
+                    code,
+                    lint=True,
                 )
 
     def _add_table_level_expectations(self, expectations_by_column):
@@ -268,14 +264,9 @@ class SuiteEditNotebookRenderer(Renderer):
             meta.pop(profiler)
 
         if meta.keys():
-            return ", meta={}".format(meta)
+            return f", meta={meta}"
 
         return ""
-
-    @classmethod
-    def write_notebook_to_disk(cls, notebook, notebook_file_path):
-        with open(notebook_file_path, "w") as f:
-            nbformat.write(notebook, f)
 
     def render(
         self, suite: ExpectationSuite, batch_kwargs=None
@@ -291,7 +282,9 @@ class SuiteEditNotebookRenderer(Renderer):
         suite_name = suite.expectation_suite_name
 
         batch_kwargs = self.get_batch_kwargs(suite, batch_kwargs)
-        self.add_header(suite_name, batch_kwargs)
+        self.add_header(
+            suite_name, batch_kwargs, suite_notes=suite.meta.get("notes", None)
+        )
         self.add_authoring_intro()
         self.add_expectation_cells_from_suite(suite.expectations)
         self.add_footer()
@@ -310,7 +303,7 @@ class SuiteEditNotebookRenderer(Renderer):
         self.render(suite, batch_kwargs)
         self.write_notebook_to_disk(self._notebook, notebook_file_path)
 
-    def add_authoring_intro(self):
+    def add_authoring_intro(self) -> None:
         markdown = self.render_with_overwrite(
             self.authoring_intro_markdown, "AUTHORING_INTRO.md"
         )

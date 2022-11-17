@@ -21,7 +21,7 @@ class MetaFileDataAsset(DataAsset):
     and FileDataset implements the expectation methods themselves.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
     @classmethod
@@ -101,7 +101,9 @@ class MetaFileDataAsset(DataAsset):
                     nonnull_lines = list(
                         compress(lines, np.invert(boolean_mapped_null_lines))
                     )
-                    nonnull_count = int((boolean_mapped_null_lines == False).sum())
+                    nonnull_count = int(
+                        (boolean_mapped_null_lines == False).sum()  # noqa: E712
+                    )
                     boolean_mapped_success_lines = np.array(
                         func(self, _lines=nonnull_lines, *args, **kwargs)
                     )
@@ -165,7 +167,7 @@ class FileDataAsset(MetaFileDataAsset):
 
     _data_asset_type = "FileDataAsset"
 
-    def __init__(self, file_path=None, *args, **kwargs):
+    def __init__(self, file_path=None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._path = file_path
 
@@ -523,7 +525,7 @@ class FileDataAsset(MetaFileDataAsset):
 
         Args:
             filepath (str or None): \
-                The filepath to evalutate. If none, will check the currently-configured path object
+                The filepath to evaluate. If none, will check the currently-configured path object
                 of this FileDataAsset.
 
         Keyword Args:
@@ -700,6 +702,6 @@ class FileDataAsset(MetaFileDataAsset):
                 success = False
             except jsonschema.SchemaError:
                 raise
-            except:
+            except BaseException:
                 raise
         return {"success": success}

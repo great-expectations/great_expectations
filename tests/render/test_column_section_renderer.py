@@ -3,7 +3,8 @@ from collections import OrderedDict
 
 import pytest
 
-from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
+from great_expectations import DataContext
+from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
@@ -16,18 +17,57 @@ from great_expectations.render.renderer import (
     ValidationResultsColumnSectionRenderer,
 )
 from great_expectations.render.renderer.content_block import (
+    ProfilingColumnPropertiesTableContentBlockRenderer,
     ValidationResultsTableContentBlockRenderer,
+)
+from great_expectations.self_check.util import (
+    expectationSuiteSchema,
+    expectationSuiteValidationResultSchema,
 )
 
 
 @pytest.fixture(scope="module")
-def titanic_expectations():
+def titanic_expectations(empty_data_context_module_scoped):
+    context: DataContext = empty_data_context_module_scoped
     with open(
         file_relative_path(__file__, "../test_sets/titanic_expectations.json")
     ) as infile:
-        return expectationSuiteSchema.load(
+        titanic_expectation_suite_dict: dict = expectationSuiteSchema.load(
             json.load(infile, object_pairs_hook=OrderedDict)
         )
+        return ExpectationSuite(**titanic_expectation_suite_dict, data_context=context)
+
+
+@pytest.fixture
+def titanic_profiled_name_column_expectations(empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
+    with open(
+        file_relative_path(
+            __file__, "./fixtures/BasicDatasetProfiler_expectations.json"
+        ),
+    ) as infile:
+        titanic_profiled_expectations_dict: dict = expectationSuiteSchema.load(
+            json.load(infile)
+        )
+        titanic_profiled_expectations = ExpectationSuite(
+            **titanic_profiled_expectations_dict, data_context=context
+        )
+
+    (
+        columns,
+        ordered_columns,
+    ) = titanic_profiled_expectations.get_grouped_and_ordered_expectations_by_column()
+    name_column_expectations = columns["Name"]
+
+    return name_column_expectations
+
+
+@pytest.fixture
+def titanic_validation_results():
+    with open(
+        file_relative_path(__file__, "../test_sets/expected_cli_results_default.json"),
+    ) as infile:
+        return expectationSuiteValidationResultSchema.load(json.load(infile))
 
 
 @pytest.mark.smoketest
@@ -191,7 +231,8 @@ def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_doll
     )
 
     content_block = ProfilingResultsColumnSectionRenderer._render_header(
-        [evr_with_unescaped_dollar_sign], column_type=[],
+        [evr_with_unescaped_dollar_sign],
+        column_type=[],
     ).to_json_dict()
     print(content_block)
     assert content_block == {
@@ -1316,7 +1357,6 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
         ),
     )
     result = ValidationResultsTableContentBlockRenderer.render([evr]).to_json_dict()
-    print(result)
 
     # Note: A better approach to testing would separate out styling into a separate test.
     assert result == {
@@ -1391,6 +1431,255 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
 
 
 # noinspection PyPep8Naming
+@pytest.mark.integration
+def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_happy_path_with_eval_parameter():
+    evr = ExpectationValidationResult(
+        success=True,
+        result={
+            "observed_value": True,
+            "element_count": 162,
+            "missing_count": 153,
+            "missing_percent": 94.44444444444444,
+        },
+        exception_info={
+            "raised_exception": False,
+            "exception_message": None,
+            "exception_traceback": None,
+        },
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_min_to_be_between",
+            kwargs={
+                "column": "live",
+                "min_value": {"$PARAMETER": "MIN_VAL_PARAM * 2"},
+                "max_value": {"$PARAMETER": "MAX_VAL_PARAM"},
+                "result_format": "SUMMARY",
+            },
+            meta={"BasicDatasetProfiler": {"confidence": "very low"}},
+        ),
+    )
+
+    # evaluation_parameters are usually stored at the ExpectationSuiteValidationResult
+    # and passed along as a kwarg to the ValidationResultsTableContentBlockRenderer
+    evaluation_parameter = {"MIN_VAL_PARAM": 10, "MAX_VAL_PARAM": 40}
+    result = ValidationResultsTableContentBlockRenderer.render(
+        [evr], evaluation_parameters=evaluation_parameter
+    ).to_json_dict()
+
+    assert result == {
+        "content_block_type": "table",
+        "styling": {
+            "body": {"classes": ["table"]},
+            "classes": [
+                "ml-2",
+                "mr-2",
+                "mt-0",
+                "mb-0",
+                "table-responsive",
+                "hide-succeeded-validations-column-section-target-child",
+            ],
+        },
+        "table": [
+            [
+                {
+                    "content_block_type": "string_template",
+                    "styling": {
+                        "parent": {
+                            "classes": ["hide-succeeded-validation-target-child"]
+                        }
+                    },
+                    "string_template": {
+                        "template": "$icon",
+                        "params": {"icon": "", "markdown_status_icon": "✅"},
+                        "styling": {
+                            "params": {
+                                "icon": {
+                                    "classes": [
+                                        "fas",
+                                        "fa-check-circle",
+                                        "text-success",
+                                    ],
+                                    "tag": "i",
+                                }
+                            }
+                        },
+                    },
+                },
+                [
+                    {
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value.",
+                            "params": {
+                                "column": "live",
+                                "min_value": {"$PARAMETER": "MIN_VAL_PARAM * 2"},
+                                "max_value": {"$PARAMETER": "MAX_VAL_PARAM"},
+                                "result_format": "SUMMARY",
+                                "parse_strings_as_datetimes": None,
+                                "row_condition": None,
+                                "condition_parser": None,
+                                "strict_min": None,
+                                "strict_max": None,
+                            },
+                            "styling": {
+                                "default": {"classes": ["badge", "badge-secondary"]},
+                                "params": {
+                                    "column": {"classes": ["badge", "badge-primary"]}
+                                },
+                            },
+                        },
+                    },
+                    {
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": "\n - $eval_param = $eval_param_value (at time of validation).",
+                            "params": {
+                                "eval_param": "MIN_VAL_PARAM",
+                                "eval_param_value": 10,
+                            },
+                            "styling": {
+                                "default": {"classes": ["badge", "badge-secondary"]},
+                                "params": {
+                                    "column": {"classes": ["badge", "badge-primary"]}
+                                },
+                            },
+                        },
+                    },
+                    {
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": "\n - $eval_param = $eval_param_value (at time of validation).",
+                            "params": {
+                                "eval_param": "MAX_VAL_PARAM",
+                                "eval_param_value": 40,
+                            },
+                            "styling": {
+                                "default": {"classes": ["badge", "badge-secondary"]},
+                                "params": {
+                                    "column": {"classes": ["badge", "badge-primary"]}
+                                },
+                            },
+                        },
+                    },
+                ],
+                "True",
+            ]
+        ],
+        "header_row": ["Status", "Expectation", "Observed Value"],
+        "header_row_options": {"Status": {"sortable": True}},
+        "table_options": {"search": True, "icon-size": "sm"},
+    }
+
+    # also test case where evaluation_parameters aren't required at runtime such as using now()
+    evr = ExpectationValidationResult(
+        success=True,
+        result={
+            "observed_value": True,
+            "element_count": 162,
+            "missing_count": 153,
+            "missing_percent": 94.44444444444444,
+        },
+        exception_info={
+            "raised_exception": False,
+            "exception_message": None,
+            "exception_traceback": None,
+        },
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_min_to_be_between",
+            kwargs={
+                "column": "start_date",
+                "min_value": {"$PARAMETER": "now() - timedelta(weeks=208)"},
+                "max_value": {"$PARAMETER": "now() - timedelta(weeks=1)"},
+                "result_format": "SUMMARY",
+            },
+        ),
+    )
+
+    result = ValidationResultsTableContentBlockRenderer.render(
+        [evr],
+    ).to_json_dict()
+
+    assert result == {
+        "content_block_type": "table",
+        "styling": {
+            "body": {"classes": ["table"]},
+            "classes": [
+                "ml-2",
+                "mr-2",
+                "mt-0",
+                "mb-0",
+                "table-responsive",
+                "hide-succeeded-validations-column-section-target-child",
+            ],
+        },
+        "table": [
+            [
+                {
+                    "content_block_type": "string_template",
+                    "styling": {
+                        "parent": {
+                            "classes": ["hide-succeeded-validation-target-child"]
+                        }
+                    },
+                    "string_template": {
+                        "template": "$icon",
+                        "params": {"icon": "", "markdown_status_icon": "✅"},
+                        "styling": {
+                            "params": {
+                                "icon": {
+                                    "classes": [
+                                        "fas",
+                                        "fa-check-circle",
+                                        "text-success",
+                                    ],
+                                    "tag": "i",
+                                }
+                            }
+                        },
+                    },
+                },
+                {
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "params": {
+                            "column": "start_date",
+                            "condition_parser": None,
+                            "max_value": {
+                                "$PARAMETER": "now() " "- " "timedelta(weeks=1)"
+                            },
+                            "min_value": {
+                                "$PARAMETER": "now() " "- " "timedelta(weeks=208)"
+                            },
+                            "parse_strings_as_datetimes": None,
+                            "result_format": "SUMMARY",
+                            "row_condition": None,
+                            "strict_max": None,
+                            "strict_min": None,
+                        },
+                        "styling": {
+                            "default": {"classes": ["badge", "badge-secondary"]},
+                            "params": {
+                                "column": {"classes": ["badge", "badge-primary"]}
+                            },
+                        },
+                        "template": "$column minimum value must be "
+                        "greater than or equal to "
+                        "$min_value and less than or "
+                        "equal to $max_value.",
+                    },
+                },
+                "True",
+            ]
+        ],
+        "header_row": ["Status", "Expectation", "Observed Value"],
+        "header_row_options": {"Status": {"sortable": True}},
+        "table_options": {"search": True, "icon-size": "sm"},
+    }
+
+
+# noinspection PyPep8Naming
+@pytest.mark.filterwarnings(
+    "ignore:Cannot get %*::great_expectations.render.renderer.profiling_results_overview_section_renderer"
+)
 def test_ProfilingResultsOverviewSectionRenderer_empty_type_list():
     # This rather specific test is a reaction to the error documented in #679
     validation = ExpectationSuiteValidationResult(
@@ -1428,3 +1717,189 @@ def test_ProfilingResultsOverviewSectionRenderer_empty_type_list():
         and block.header.string_template["template"] == "Variable types"
     ][0]
     assert ["unknown", "1"] in types_table
+
+
+# noinspection PyPep8Naming
+def test_ProfilingColumnPropertiesTableContentBlockRenderer():
+    ge_object = [
+        ExpectationValidationResult(
+            **{
+                "exception_info": {
+                    "raised_exception": False,
+                    "exception_message": None,
+                    "exception_traceback": None,
+                },
+                "result": {
+                    "element_count": 101766,
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_count": 0,
+                    "unexpected_percent": 0.0,
+                    "unexpected_percent_total": 0.0,
+                    "unexpected_percent_nonmissing": 0.0,
+                    "partial_unexpected_list": [],
+                    "partial_unexpected_index_list": [],
+                    "partial_unexpected_counts": [],
+                },
+                "success": True,
+                "expectation_config": ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_values_to_not_match_regex",
+                        "kwargs": {
+                            "column": "race",
+                            "regex": "^\\s+|\\s+$",
+                            "result_format": "SUMMARY",
+                        },
+                        "meta": {"BasicDatasetProfiler": {"confidence": "very low"}},
+                    }
+                ),
+                "meta": {},
+            },
+        ),
+        ExpectationValidationResult(
+            **{
+                "exception_info": {
+                    "raised_exception": False,
+                    "exception_message": None,
+                    "exception_traceback": None,
+                },
+                "result": {
+                    "observed_value": 3,
+                    "element_count": 101766,
+                    "missing_count": None,
+                    "missing_percent": None,
+                },
+                "success": True,
+                "expectation_config": ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_unique_value_count_to_be_between",
+                        "kwargs": {
+                            "column": "gender",
+                            "min_value": None,
+                            "max_value": None,
+                            "result_format": "SUMMARY",
+                        },
+                        "meta": {"BasicDatasetProfiler": {"confidence": "very low"}},
+                    }
+                ),
+                "meta": {},
+            },
+        ),
+        ExpectationValidationResult(
+            **{
+                "exception_info": {
+                    "raised_exception": False,
+                    "exception_message": None,
+                    "exception_traceback": None,
+                },
+                "result": {
+                    "observed_value": 2.947939390366134e-02,
+                    "element_count": 101766,
+                    "missing_count": None,
+                    "missing_percent": None,
+                },
+                "success": True,
+                "expectation_config": ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+                        "kwargs": {
+                            "column": "gender",
+                            "min_value": None,
+                            "max_value": None,
+                            "result_format": "SUMMARY",
+                        },
+                        "meta": {"BasicDatasetProfiler": {"confidence": "very low"}},
+                    }
+                ),
+                "meta": {},
+            },
+        ),
+        ExpectationValidationResult(
+            **{
+                "exception_info": {
+                    "raised_exception": False,
+                    "exception_message": None,
+                    "exception_traceback": None,
+                },
+                "result": {
+                    "element_count": 101766,
+                    "unexpected_count": 29008,
+                    "unexpected_percent": 23,
+                    "unexpected_percent_total": 0.0,
+                    "partial_unexpected_list": [],
+                },
+                "success": True,
+                "expectation_config": ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_values_to_not_be_null",
+                        "kwargs": {
+                            "column": "gender",
+                            "mostly": 0.5,
+                            "result_format": "SUMMARY",
+                        },
+                        "meta": {"BasicDatasetProfiler": {"confidence": "very low"}},
+                    }
+                ),
+                "meta": {},
+            },
+        ),
+    ]
+
+    expected_result_json_dict = {
+        "content_block_type": "table",
+        "table": [
+            ["Leading or trailing whitespace (n)", 0],
+            [
+                {
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Distinct (n)",
+                        "tooltip": {
+                            "content": "expect_column_unique_value_count_to_be_between"
+                        },
+                    },
+                },
+                3,
+            ],
+            [
+                {
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Distinct (%)",
+                        "tooltip": {
+                            "content": "expect_column_proportion_of_unique_values_to_be_between"
+                        },
+                    },
+                },
+                "2.9%",
+            ],
+            [
+                {
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Missing (n)",
+                        "tooltip": {"content": "expect_column_values_to_not_be_null"},
+                    },
+                },
+                29008,
+            ],
+            [
+                {
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Missing (%)",
+                        "tooltip": {"content": "expect_column_values_to_not_be_null"},
+                    },
+                },
+                "23.0%",
+            ],
+        ],
+        "header_row": [],
+    }
+    result_json_dict = (
+        ProfilingColumnPropertiesTableContentBlockRenderer()
+        .render(ge_object=ge_object)
+        .to_json_dict()
+    )
+
+    assert result_json_dict == expected_result_json_dict

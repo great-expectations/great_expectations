@@ -6,7 +6,7 @@ import traceback
 import tzlocal
 from dateutil.parser import parse
 
-from great_expectations.render.types import (
+from great_expectations.render import (
     RenderedBootstrapTableContent,
     RenderedDocumentContent,
     RenderedHeaderContent,
@@ -14,9 +14,10 @@ from great_expectations.render.types import (
     RenderedStringTemplateContent,
     RenderedTabsContent,
 )
-
-from .call_to_action_renderer import CallToActionRenderer
-from .renderer import Renderer
+from great_expectations.render.renderer.call_to_action_renderer import (
+    CallToActionRenderer,
+)
+from great_expectations.render.renderer.renderer import Renderer
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +97,13 @@ class SiteIndexPageRenderer(Renderer):
                 "sortName": "_run_time_sort",
                 "sortable": "true",
                 "filterControl": "datepicker",
+                "filterCustomSearch": "formatRuntimeDateForFilter",
+                "filterDatepickerOptions": {
+                    "clearBtn": "true",
+                    "autoclose": "true",
+                    "format": "yyyy-mm-dd",
+                    "todayHighlight": "true",
+                },
             },
             {
                 "field": "asset_name",
@@ -166,6 +174,7 @@ class SiteIndexPageRenderer(Renderer):
             "filterControl": "true",
             "iconSize": "sm",
             "toolbarAlign": "right",
+            "showSearchClearButton": "true",
         }
 
         table_columns = [
@@ -183,6 +192,13 @@ class SiteIndexPageRenderer(Renderer):
                 "sortName": "_run_time_sort",
                 "sortable": "true",
                 "filterControl": "datepicker",
+                "filterCustomSearch": "formatRuntimeDateForFilter",
+                "filterDatepickerOptions": {
+                    "clearBtn": "true",
+                    "autoclose": "true",
+                    "format": "yyyy-mm-dd",
+                    "todayHighlight": "true",
+                },
             },
             {
                 "field": "run_name",
@@ -307,11 +323,11 @@ class SiteIndexPageRenderer(Renderer):
     def _get_formatted_datetime(cls, _datetime):
         if isinstance(_datetime, datetime.datetime):
             local_datetime = _datetime.astimezone(tz=tzlocal.get_localzone())
-            return local_datetime.strftime("%m/%d/%Y %H:%M:%S %Z")
+            return local_datetime.strftime("%Y-%m-%d %H:%M:%S %Z")
         elif isinstance(_datetime, str):
             dt = parse(_datetime)
             local_datetime = dt.astimezone(tz=tzlocal.get_localzone())
-            return local_datetime.strftime("%m/%d/%Y %H:%M:%S %Z")
+            return local_datetime.strftime("%Y-%m-%d %H:%M:%S %Z")
         else:
             return None
 
@@ -424,7 +440,9 @@ class SiteIndexPageRenderer(Renderer):
             tabs_content_block = RenderedTabsContent(
                 **{
                     "tabs": tabs,
-                    "styling": {"classes": ["col-12", "ge-index-page-tabs-container"],},
+                    "styling": {
+                        "classes": ["col-12", "ge-index-page-tabs-container"],
+                    },
                 }
             )
 
@@ -452,7 +470,7 @@ class SiteIndexPageRenderer(Renderer):
             return index_page_document
 
         except Exception as e:
-            exception_message = f"""\
+            exception_message = """\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
 not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
 diagnose and repair the underlying issue.  Detailed information follows:
@@ -461,4 +479,4 @@ diagnose and repair the underlying issue.  Detailed information follows:
             exception_message += (
                 f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
             )
-            logger.error(exception_message, e, exc_info=True)
+            logger.error(exception_message)

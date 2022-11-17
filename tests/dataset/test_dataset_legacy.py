@@ -3,11 +3,16 @@ from collections import OrderedDict
 import pytest
 
 from great_expectations.dataset import PandasDataset
-from tests.test_utils import get_dataset
+from great_expectations.self_check.util import get_dataset
 
 data = OrderedDict([["a", [2.0, 5.0]], ["b", [5, 5]], ["c", [0, 10]], ["d", [0, None]]])
 schemas = {
-    "SparkDFDataset": {"a": "float", "b": "int", "c": "int", "d": "int",},
+    "SparkDFDataset": {
+        "a": "float",
+        "b": "int",
+        "c": "int",
+        "d": "int",
+    },
 }
 
 

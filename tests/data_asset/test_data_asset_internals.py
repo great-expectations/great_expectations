@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 
 import great_expectations as ge
+from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
@@ -13,12 +14,19 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 
 
-def test_get_and_save_expectation_suite(tmp_path_factory):
+def test_get_and_save_expectation_suite(
+    tmp_path_factory, empty_data_context_stats_enabled
+):
+    context: DataContext = empty_data_context_stats_enabled
     directory_name = str(
         tmp_path_factory.mktemp("test_get_and_save_expectation_config")
     )
     df = ge.dataset.PandasDataset(
-        {"x": [1, 2, 4], "y": [1, 2, 5], "z": ["hello", "jello", "mello"],}
+        {
+            "x": [1, 2, 4],
+            "y": [1, 2, 5],
+            "z": ["hello", "jello", "mello"],
+        }
     )
 
     df.expect_column_values_to_be_in_set("x", [1, 2, 4])
@@ -26,6 +34,8 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         "y", [1, 2, 4], catch_exceptions=True, include_config=True
     )
     df.expect_column_values_to_match_regex("z", "ello")
+    df.expect_compound_columns_to_be_unique(column_list=["x", "y"])
+    df.expect_compound_columns_to_be_unique(column_list=["y", "z"])
 
     ### First test set ###
 
@@ -39,9 +49,18 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
                 expectation_type="expect_column_values_to_match_regex",
                 kwargs={"column": "z", "regex": "ello"},
             ),
+            ExpectationConfiguration(
+                expectation_type="expect_compound_columns_to_be_unique",
+                kwargs={"column_list": ["x", "y"]},
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_compound_columns_to_be_unique",
+                kwargs={"column_list": ["y", "z"]},
+            ),
         ],
         expectation_suite_name="default",
         data_asset_type="Dataset",
+        data_context=context,
         meta={"great_expectations_version": ge.__version__},
     )
 
@@ -49,7 +68,9 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
 
     df.save_expectation_suite(directory_name + "/temp1.json")
     with open(directory_name + "/temp1.json") as infile:
-        loaded_config = expectationSuiteSchema.loads(infile.read())
+        loaded_config_dict: dict = expectationSuiteSchema.loads(infile.read())
+        loaded_config = ExpectationSuite(**loaded_config_dict, data_context=context)
+
     assert output_config == loaded_config
 
     ### Second test set ###
@@ -68,9 +89,18 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
                 expectation_type="expect_column_values_to_match_regex",
                 kwargs={"column": "z", "regex": "ello"},
             ),
+            ExpectationConfiguration(
+                expectation_type="expect_compound_columns_to_be_unique",
+                kwargs={"column_list": ["x", "y"]},
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_compound_columns_to_be_unique",
+                kwargs={"column_list": ["y", "z"]},
+            ),
         ],
         expectation_suite_name="default",
         data_asset_type="Dataset",
+        data_context=context,
         meta={"great_expectations_version": ge.__version__},
     )
 
@@ -79,7 +109,9 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         directory_name + "/temp2.json", discard_failed_expectations=False
     )
     with open(directory_name + "/temp2.json") as infile:
-        loaded_suite = expectationSuiteSchema.loads(infile.read())
+        loaded_suite_dict: dict = expectationSuiteSchema.loads(infile.read())
+        loaded_suite = ExpectationSuite(**loaded_suite_dict, data_context=context)
+
     assert output_config == loaded_suite
 
     ### Third test set ###
@@ -98,9 +130,18 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
                 expectation_type="expect_column_values_to_match_regex",
                 kwargs={"column": "z", "regex": "ello", "result_format": "BASIC"},
             ),
+            ExpectationConfiguration(
+                expectation_type="expect_compound_columns_to_be_unique",
+                kwargs={"column_list": ["x", "y"], "result_format": "BASIC"},
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_compound_columns_to_be_unique",
+                kwargs={"column_list": ["y", "z"], "result_format": "BASIC"},
+            ),
         ],
         expectation_suite_name="default",
         data_asset_type="Dataset",
+        data_context=context,
         meta={"great_expectations_version": ge.__version__},
     )
     assert output_config == df.get_expectation_suite(
@@ -108,7 +149,6 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         discard_include_config_kwargs=False,
         discard_catch_exceptions_kwargs=False,
     )
-
     df.save_expectation_suite(
         directory_name + "/temp3.json",
         discard_result_format_kwargs=False,
@@ -116,13 +156,18 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         discard_catch_exceptions_kwargs=False,
     )
     with open(directory_name + "/temp3.json") as infile:
-        loaded_suite = expectationSuiteSchema.loads(infile.read())
+        loaded_suite_dict: dict = expectationSuiteSchema.loads(infile.read())
+        loaded_suite = ExpectationSuite(**loaded_suite_dict, data_context=context)
     assert output_config == loaded_suite
 
 
 def test_expectation_meta():
     df = ge.dataset.PandasDataset(
-        {"x": [1, 2, 4], "y": [1, 2, 5], "z": ["hello", "jello", "mello"],}
+        {
+            "x": [1, 2, 4],
+            "y": [1, 2, 5],
+            "z": ["hello", "jello", "mello"],
+        }
     )
     result = df.expect_column_median_to_be_between(
         "x", 2, 2, meta={"notes": "This expectation is for lolz."}
@@ -139,14 +184,18 @@ def test_expectation_meta():
     # This should raise an error because meta isn't serializable.
     with pytest.raises(InvalidExpectationConfigurationError) as exc:
         df.expect_column_values_to_be_increasing(
-            "x", meta={"unserializable_content": np.complex(0, 0)}
+            "x", meta={"unserializable_content": complex(0, 0)}
         )
     assert "which cannot be serialized to json" in exc.value.message
 
 
 def test_set_default_expectation_argument():
     df = ge.dataset.PandasDataset(
-        {"x": [1, 2, 4], "y": [1, 2, 5], "z": ["hello", "jello", "mello"],}
+        {
+            "x": [1, 2, 4],
+            "y": [1, 2, 5],
+            "z": ["hello", "jello", "mello"],
+        }
     )
 
     assert {
@@ -165,7 +214,12 @@ def test_set_default_expectation_argument():
 
 
 def test_test_column_map_expectation_function():
-    asset = ge.dataset.PandasDataset({"x": [1, 3, 5, 7, 9], "y": [1, 2, None, 7, 9],})
+    asset = ge.dataset.PandasDataset(
+        {
+            "x": [1, 3, 5, 7, 9],
+            "y": [1, 2, None, 7, 9],
+        }
+    )
 
     def is_odd(
         self,
@@ -211,7 +265,12 @@ def test_test_column_map_expectation_function():
 
 
 def test_test_column_aggregate_expectation_function():
-    asset = ge.dataset.PandasDataset({"x": [1, 3, 5, 7, 9], "y": [1, 2, None, 7, 9],})
+    asset = ge.dataset.PandasDataset(
+        {
+            "x": [1, 3, 5, 7, 9],
+            "y": [1, 2, None, 7, 9],
+        }
+    )
 
     def expect_second_value_to_be(
         self,
@@ -224,7 +283,9 @@ def test_test_column_aggregate_expectation_function():
     ):
         return {
             "success": self[column].iloc[1] == value,
-            "result": {"observed_value": self[column].iloc[1],},
+            "result": {
+                "observed_value": self[column].iloc[1],
+            },
         }
 
     assert asset.test_column_aggregate_expectation_function(
@@ -233,20 +294,27 @@ def test_test_column_aggregate_expectation_function():
         result={
             "observed_value": 3,
             "element_count": 5,
-            "missing_count": 0,
-            "missing_percent": 0.0,
+            "missing_count": None,
+            "missing_percent": None,
         },
         success=False,
+        meta={},
+        expectation_config=None,
+        exception_info={
+            "raised_exception": False,
+            "exception_traceback": None,
+            "exception_message": None,
+        },
     )
 
     assert asset.test_column_aggregate_expectation_function(
         expect_second_value_to_be, column="x", value=3, include_config=False
     ) == ExpectationValidationResult(
         result={
-            "observed_value": 3.0,
+            "observed_value": 3,
             "element_count": 5,
-            "missing_count": 0,
-            "missing_percent": 0.0,
+            "missing_count": None,
+            "missing_percent": None,
         },
         success=True,
     )
@@ -268,37 +336,12 @@ def test_test_column_aggregate_expectation_function():
     ) == ExpectationValidationResult(success=True)
 
 
-def test_meta_version_warning():
-    asset = ge.data_asset.DataAsset()
-
-    with pytest.warns(UserWarning) as w:
-        suite = ExpectationSuite(expectations=[], expectation_suite_name="test")
-        # mangle the metadata
-        suite.meta = {"foo": "bar"}
-        out = asset.validate(expectation_suite=suite)
-    assert (
-        w[0].message.args[0]
-        == "WARNING: No great_expectations version found in configuration object."
-    )
-
-    with pytest.warns(UserWarning) as w:
-        suite = ExpectationSuite(
-            expectations=[],
-            expectation_suite_name="test",
-            meta={"great_expectations_version": "0.0.0"},
-        )
-        # mangle the metadata
-        suite.meta = {"great_expectations_version": "0.0.0"}
-        out = asset.validate(expectation_suite=suite)
-    assert (
-        w[0].message.args[0]
-        == "WARNING: This configuration object was built using version 0.0.0 of great_expectations, but is currently "
-        "being validated by version %s." % ge.__version__
-    )
-
-
 def test_format_map_output():
-    df = ge.dataset.PandasDataset({"x": list("abcdefghijklmnopqrstuvwxyz"),})
+    df = ge.dataset.PandasDataset(
+        {
+            "x": list("abcdefghijklmnopqrstuvwxyz"),
+        }
+    )
 
     ### Normal Test ###
 
@@ -338,6 +381,7 @@ def test_format_map_output():
             "partial_unexpected_list": [],
             "unexpected_count": 0,
             "unexpected_percent": 0.0,
+            "unexpected_percent_total": 0.0,
             "unexpected_percent_nonmissing": 0.0,
         },
     }
@@ -359,6 +403,7 @@ def test_format_map_output():
             "partial_unexpected_list": [],
             "unexpected_count": 0,
             "unexpected_percent": 0.0,
+            "unexpected_percent_total": 0.0,
             "unexpected_percent_nonmissing": 0.0,
             "partial_unexpected_index_list": [],
             "partial_unexpected_counts": [],
@@ -382,6 +427,7 @@ def test_format_map_output():
             "partial_unexpected_list": [],
             "unexpected_count": 0,
             "unexpected_percent": 0.0,
+            "unexpected_percent_total": 0.0,
             "unexpected_percent_nonmissing": 0.0,
             "partial_unexpected_index_list": [],
             "partial_unexpected_counts": [],
@@ -394,9 +440,9 @@ def test_format_map_output():
 
     success = True
     element_count = 20
-    nonnull_values = pd.Series([])
+    nonnull_values = pd.Series([], dtype=np.float64)
     nonnull_count = 0
-    boolean_mapped_success_values = pd.Series([])
+    boolean_mapped_success_values = pd.Series([], dtype=np.float64)
     success_count = 0
     unexpected_list = []
     unexpected_index_list = []
@@ -427,7 +473,8 @@ def test_format_map_output():
             "missing_percent": 100,
             "partial_unexpected_list": [],
             "unexpected_count": 0,
-            "unexpected_percent": 0.0,
+            "unexpected_percent": None,
+            "unexpected_percent_total": None,
             "unexpected_percent_nonmissing": None,
         },
     }
@@ -448,7 +495,8 @@ def test_format_map_output():
             "missing_percent": 100,
             "partial_unexpected_list": [],
             "unexpected_count": 0,
-            "unexpected_percent": 0.0,
+            "unexpected_percent": None,
+            "unexpected_percent_total": None,
             "unexpected_percent_nonmissing": None,
             "partial_unexpected_index_list": [],
             "partial_unexpected_counts": [],
@@ -471,7 +519,8 @@ def test_format_map_output():
             "missing_percent": 100,
             "partial_unexpected_list": [],
             "unexpected_count": 0,
-            "unexpected_percent": 0.0,
+            "unexpected_percent": None,
+            "unexpected_percent_total": None,
             "unexpected_percent_nonmissing": None,
             "partial_unexpected_index_list": [],
             "partial_unexpected_counts": [],
@@ -484,9 +533,9 @@ def test_format_map_output():
 
     success = False
     element_count = 0
-    nonnull_values = pd.Series([])
+    nonnull_values = pd.Series([], dtype=np.float64)
     nonnull_count = 0
-    boolean_mapped_success_values = pd.Series([])
+    boolean_mapped_success_values = pd.Series([], dtype=np.float64)
     success_count = 0
     unexpected_list = []
     unexpected_index_list = []
@@ -518,6 +567,7 @@ def test_format_map_output():
             "partial_unexpected_list": [],
             "unexpected_count": 0,
             "unexpected_percent": None,
+            "unexpected_percent_total": None,
             "unexpected_percent_nonmissing": None,
         },
     }
@@ -539,6 +589,7 @@ def test_format_map_output():
             "partial_unexpected_list": [],
             "unexpected_count": 0,
             "unexpected_percent": None,
+            "unexpected_percent_total": None,
             "unexpected_percent_nonmissing": None,
             "partial_unexpected_counts": [],
             "partial_unexpected_index_list": [],
@@ -562,6 +613,7 @@ def test_format_map_output():
             "partial_unexpected_list": [],
             "unexpected_count": 0,
             "unexpected_percent": None,
+            "unexpected_percent_total": None,
             "unexpected_percent_nonmissing": None,
             "partial_unexpected_counts": [],
             "partial_unexpected_index_list": [],
@@ -775,8 +827,18 @@ def test_discard_failing_expectations():
 
 
 def test_test_expectation_function():
-    asset = ge.dataset.PandasDataset({"x": [1, 3, 5, 7, 9], "y": [1, 2, None, 7, 9],})
-    asset_2 = ge.dataset.PandasDataset({"x": [1, 3, 5, 6, 9], "y": [1, 2, None, 6, 9],})
+    asset = ge.dataset.PandasDataset(
+        {
+            "x": [1, 3, 5, 7, 9],
+            "y": [1, 2, None, 7, 9],
+        }
+    )
+    asset_2 = ge.dataset.PandasDataset(
+        {
+            "x": [1, 3, 5, 6, 9],
+            "y": [1, 2, None, 6, 9],
+        }
+    )
 
     def expect_dataframe_to_contain_7(self):
         return {"success": bool((self == 7).sum().sum() > 0)}

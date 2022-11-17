@@ -4,7 +4,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.import_manager import sa
-from great_expectations.expectations.metrics.map_metric import (
+from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
@@ -37,23 +37,22 @@ class ColumnValuesMatchLikePatternList(ColumnMapMetricProvider):
         )
         if like_pattern_expression is None:
             logger.warning(
-                "Like patterns are not supported for dialect %s"
-                % str(_dialect.dialect.name)
+                f"Like patterns are not supported for dialect {str(_dialect.dialect.name)}"
             )
             raise NotImplementedError
 
         if match_on == "any":
             condition = sa.or_(
-                *[
+                *(
                     get_dialect_like_pattern_expression(column, _dialect, like_pattern)
                     for like_pattern in like_pattern_list
-                ]
+                )
             )
         else:
             condition = sa.and_(
-                *[
+                *(
                     get_dialect_like_pattern_expression(column, _dialect, like_pattern)
                     for like_pattern in like_pattern_list
-                ]
+                )
             )
         return condition

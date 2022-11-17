@@ -8,6 +8,7 @@ from freezegun import freeze_time
 from great_expectations import DataContext
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.store import ExpectationsStore, ValidationsStore
+from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -26,7 +27,7 @@ def assert_how_to_buttons(
     show_how_to_buttons=True,
 ):
     """Helper function to assert presence or non-presence of how-to buttons and related content in various
-        Data Docs pages.
+    Data Docs pages.
     """
 
     # these are simple checks for presence of certain page elements
@@ -92,10 +93,14 @@ def assert_how_to_buttons(
 
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.rendered_output
+@pytest.mark.filterwarnings(
+    "ignore:String run_ids*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
+)
+@pytest.mark.slow  # 3.60s
 def test_configuration_driven_site_builder(
-    site_builder_data_context_with_html_store_titanic_random,
+    site_builder_data_context_v013_with_html_store_titanic_random,
 ):
-    context = site_builder_data_context_with_html_store_titanic_random
+    context = site_builder_data_context_v013_with_html_store_titanic_random
 
     context.add_validation_operator(
         "validate_and_store",
@@ -143,7 +148,8 @@ def test_configuration_driven_site_builder(
     )
 
     batch = context.get_batch(
-        batch_kwargs=batch_kwargs, expectation_suite_name=expectation_suite_name,
+        batch_kwargs=batch_kwargs,
+        expectation_suite_name=expectation_suite_name,
     )
     run_id = RunIdentifier(run_name="test_run_id_12345")
     context.run_validation_operator(
@@ -243,7 +249,7 @@ def test_configuration_driven_site_builder(
         shutil.rmtree("./tests/render/output/documentation")
     shutil.copytree(
         os.path.join(
-            site_builder_data_context_with_html_store_titanic_random.root_directory,
+            site_builder_data_context_v013_with_html_store_titanic_random.root_directory,
             "uncommitted/data_docs/",
         ),
         "./tests/render/output/documentation",
@@ -345,7 +351,7 @@ def test_configuration_driven_site_builder(
     assert len(obs) == 0
 
     # restore site
-    context = site_builder_data_context_with_html_store_titanic_random
+    context = site_builder_data_context_v013_with_html_store_titanic_random
     site_builder = SiteBuilder(
         data_context=context,
         runtime_environment={"root_directory": context.root_directory},
@@ -356,6 +362,7 @@ def test_configuration_driven_site_builder(
 
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.rendered_output
+@pytest.mark.slow  # 3.10s
 def test_configuration_driven_site_builder_skip_and_clean_missing(
     site_builder_data_context_with_html_store_titanic_random,
 ):
@@ -410,7 +417,8 @@ def test_configuration_driven_site_builder_skip_and_clean_missing(
     )
 
     batch = context.get_batch(
-        batch_kwargs=batch_kwargs, expectation_suite_name=expectation_suite_name,
+        batch_kwargs=batch_kwargs,
+        expectation_suite_name=expectation_suite_name,
     )
     run_id = RunIdentifier(run_name="test_run_id_12345")
     context.run_validation_operator(
@@ -493,6 +501,10 @@ def test_configuration_driven_site_builder_skip_and_clean_missing(
 
 
 @pytest.mark.rendered_output
+@pytest.mark.filterwarnings(
+    "ignore:name is deprecated as a batch_parameter*:DeprecationWarning:great_expectations.data_context.data_context"
+)
+@pytest.mark.slow  # 2.13s
 def test_configuration_driven_site_builder_without_how_to_buttons(
     site_builder_data_context_with_html_store_titanic_random,
 ):
@@ -544,12 +556,13 @@ def test_configuration_driven_site_builder_without_how_to_buttons(
     )
 
     batch = context.get_batch(
-        batch_kwargs=batch_kwargs, expectation_suite_name=expectation_suite_name,
+        batch_kwargs=batch_kwargs,
+        expectation_suite_name=expectation_suite_name,
     )
     run_id = "test_run_id_12345"
     context.run_validation_operator(
         assets_to_validate=[batch],
-        run_id=run_id,
+        run_id=RunIdentifier(run_name=run_id),
         validation_operator_name="validate_and_store",
     )
 
@@ -619,13 +632,14 @@ def test_site_builder_with_custom_site_section_builders_config(tmp_path_factory)
 
 
 @freeze_time("09/24/2019 23:18:36")
+@pytest.mark.slow  # 1.65s
 def test_site_builder_usage_statistics_enabled(
     site_builder_data_context_with_html_store_titanic_random,
 ):
     context = site_builder_data_context_with_html_store_titanic_random
 
     sites = (
-        site_builder_data_context_with_html_store_titanic_random._project_config_with_variables_substituted.data_docs_sites
+        site_builder_data_context_with_html_store_titanic_random.project_config_with_variables_substituted.data_docs_sites
     )
     local_site_config = sites["local_site"]
     site_builder = instantiate_class_from_config(
@@ -664,18 +678,19 @@ def test_site_builder_usage_statistics_enabled(
 
 
 @freeze_time("09/24/2019 23:18:36")
+@pytest.mark.slow  # 1.67s
 def test_site_builder_usage_statistics_disabled(
     site_builder_data_context_with_html_store_titanic_random,
 ):
     context = site_builder_data_context_with_html_store_titanic_random
-    context._project_config.anonymous_usage_statistics = {
-        "enabled": False,
-        "data_context_id": "f43d4897-385f-4366-82b0-1a8eda2bf79c",
-    }
+    context.variables.anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
+        enabled=False,
+        data_context_id="f43d4897-385f-4366-82b0-1a8eda2bf79c",
+    )
     data_context_id = context.anonymous_usage_statistics["data_context_id"]
 
     sites = (
-        site_builder_data_context_with_html_store_titanic_random._project_config_with_variables_substituted.data_docs_sites
+        site_builder_data_context_with_html_store_titanic_random.project_config_with_variables_substituted.data_docs_sites
     )
     local_site_config = sites["local_site"]
     site_builder = instantiate_class_from_config(

@@ -1,24 +1,18 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional
 
-import numpy as np
-import pandas as pd
-
-from great_expectations.core.batch import Batch
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-
-from ...data_asset.util import parse_result_format
-from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import substitute_none_for_missing
-from ..expectation import (
-    ColumnMapExpectation,
-    Expectation,
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectations.expectation import (
     InvalidExpectationConfigurationError,
     TableExpectation,
-    _format_map_output,
+    render_evaluation_parameter_string,
 )
-from ..registry import extract_metrics
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.util import substitute_none_for_missing
 
 
 class ExpectTableColumnCountToEqual(TableExpectation):
@@ -56,10 +50,19 @@ class ExpectTableColumnCountToEqual(TableExpectation):
         expect_table_column_count_to_be_between
     """
 
+    library_metadata = {
+        "maturity": "production",
+        "tags": ["core expectation", "table expectation"],
+        "contributors": [
+            "@great_expectations",
+        ],
+        "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
+    }
+
     metric_dependencies = ("table.column_count",)
-
     success_keys = ("value",)
-
     default_kwarg_values = {
         "value": None,
         "result_format": "BASIC",
@@ -67,10 +70,13 @@ class ExpectTableColumnCountToEqual(TableExpectation):
         "catch_exceptions": False,
         "meta": None,
     }
+    args_keys = ("value",)
 
     """ A Metric Decorator for the Column Count"""
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -79,7 +85,7 @@ class ExpectTableColumnCountToEqual(TableExpectation):
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
         Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
 
         # Setting up a configuration
@@ -100,22 +106,42 @@ class ExpectTableColumnCountToEqual(TableExpectation):
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    def _prescriptive_renderer(
+    def _atomic_prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(configuration.kwargs, ["value"])
+        template_str = "Must have exactly $value columns."
+        params_with_json_schema = {
+            "value": {"schema": {"type": "number"}, "value": params.get("value")},
+        }
+        return (template_str, params_with_json_schema, styling)
+
+    @classmethod
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
+        cls,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = (
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(configuration.kwargs, ["value"])
@@ -133,51 +159,12 @@ class ExpectTableColumnCountToEqual(TableExpectation):
             )
         ]
 
-    # @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
-    ):
-        """Validates given column count against expected value"""
-        # Obtaining dependencies used to validate the expectation
-        validation_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-        # Extracting metrics
-        metric_vals = extract_metrics(
-            validation_dependencies, metrics, configuration, runtime_configuration
-        )
-
-        # Runtime configuration has preference
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-        column_count = metric_vals.get("columns.count")
-
-        # Obtaining components needed for validation
-        value = self.get_success_kwargs(configuration).get("value")
-
-        # Checking if the column count is equivalent to value
-        success = column_count == value
-        return {"success": success, "result": {"observed_value": column_count}}
-
     def _validate(
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         expected_column_count = configuration.kwargs.get("value")
         actual_column_count = metrics.get("table.column_count")

@@ -2,27 +2,22 @@ import logging
 import uuid
 from pathlib import Path
 from typing import Dict, Tuple
-from urllib.parse import urlparse
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store.store_backend import StoreBackend
+from great_expectations.util import (
+    filter_properties_dict,
+    get_sqlalchemy_url,
+    import_make_url,
+)
 
 try:
     import sqlalchemy as sa
-    from sqlalchemy import (
-        Column,
-        MetaData,
-        String,
-        Table,
-        and_,
-        column,
-        create_engine,
-        select,
-        text,
-    )
-    from sqlalchemy.engine.reflection import Inspector
+    from sqlalchemy import Column, MetaData, String, Table, and_, column, select
     from sqlalchemy.engine.url import URL
     from sqlalchemy.exc import IntegrityError, NoSuchTableError, SQLAlchemyError
+
+    make_url = import_make_url()
 except ImportError:
     sa = None
     create_engine = None
@@ -32,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 class DatabaseStoreBackend(StoreBackend):
-    def __init__(
+    def __init__(  # noqa: C901 - 16
         self,
         table_name,
         key_columns,
@@ -43,11 +38,13 @@ class DatabaseStoreBackend(StoreBackend):
         engine=None,
         store_name=None,
         suppress_store_backend_id=False,
+        manually_initialize_store_backend_id: str = "",
         **kwargs,
-    ):
+    ) -> None:
         super().__init__(
             fixed_length_key=fixed_length_key,
             suppress_store_backend_id=suppress_store_backend_id,
+            manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             store_name=store_name,
         )
         if not sa:
@@ -77,7 +74,8 @@ class DatabaseStoreBackend(StoreBackend):
         elif connection_string is not None:
             self.engine = sa.create_engine(connection_string, **kwargs)
         elif url is not None:
-            self.drivername = urlparse(url).scheme
+            parsed_url = make_url(url)
+            self.drivername = parsed_url.drivername
             self.engine = sa.create_engine(url, **kwargs)
         else:
             raise ge_exceptions.InvalidConfigError(
@@ -88,12 +86,12 @@ class DatabaseStoreBackend(StoreBackend):
         self.key_columns = key_columns
         # Dynamically construct a SQLAlchemy table with the name and column names we'll use
         cols = []
-        for column in key_columns:
-            if column == "value":
+        for column_ in key_columns:
+            if column_ == "value":
                 raise ge_exceptions.InvalidConfigError(
                     "'value' cannot be used as a key_element name"
                 )
-            cols.append(Column(column, String, primary_key=True))
+            cols.append(Column(column_, String, primary_key=True))
         cols.append(Column("value", String))
         try:
             table = Table(table_name, meta, autoload=True, autoload_with=self.engine)
@@ -120,6 +118,25 @@ class DatabaseStoreBackend(StoreBackend):
         # Initialize with store_backend_id
         self._store_backend_id = None
         self._store_backend_id = self.store_backend_id
+
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = {
+            "table_name": table_name,
+            "key_columns": key_columns,
+            "fixed_length_key": fixed_length_key,
+            "credentials": credentials,
+            "url": url,
+            "connection_string": connection_string,
+            "engine": engine,
+            "store_name": store_name,
+            "suppress_store_backend_id": suppress_store_backend_id,
+            "manually_initialize_store_backend_id": manually_initialize_store_backend_id,
+            "module_name": self.__class__.__module__,
+            "class_name": self.__class__.__name__,
+        }
+        self._config.update(kwargs)
+        filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     @property
     def store_backend_id(self) -> str:
@@ -157,7 +174,7 @@ class DatabaseStoreBackend(StoreBackend):
                 drivername, credentials
             )
         else:
-            options = sa.engine.url.URL(drivername, **credentials)
+            options = get_sqlalchemy_url(drivername, **credentials)
 
         self.drivername = drivername
 
@@ -210,7 +227,7 @@ class DatabaseStoreBackend(StoreBackend):
         credentials_driver_name = credentials.pop("drivername", None)
         create_engine_kwargs = {"connect_args": {"private_key": pkb}}
         return (
-            sa.engine.url.URL(drivername or credentials_driver_name, **credentials),
+            get_sqlalchemy_url(drivername or credentials_driver_name, **credentials),
             create_engine_kwargs,
         )
 
@@ -220,25 +237,25 @@ class DatabaseStoreBackend(StoreBackend):
             .select_from(self._table)
             .where(
                 and_(
-                    *[
+                    *(
                         getattr(self._table.columns, key_col) == val
                         for key_col, val in zip(self.key_columns, key)
-                    ]
+                    )
                 )
             )
         )
         try:
             return self.engine.execute(sel).fetchone()[0]
         except (IndexError, SQLAlchemyError) as e:
-            logger.debug("Error fetching value: " + str(e))
-            raise ge_exceptions.StoreError("Unable to fetch value for key: " + str(key))
+            logger.debug(f"Error fetching value: {str(e)}")
+            raise ge_exceptions.StoreError(f"Unable to fetch value for key: {str(key)}")
 
-    def _set(self, key, value, allow_update=True):
+    def _set(self, key, value, allow_update=True, **kwargs) -> None:
         cols = {k: v for (k, v) in zip(self.key_columns, key)}
         cols["value"] = value
 
         if allow_update:
-            if self.has_key(key):
+            if self.has_key(key):  # noqa: W601
                 ins = (
                     self._table.update()
                     .where(getattr(self._table.columns, self.key_columns[0]) == key[0])
@@ -259,7 +276,7 @@ class DatabaseStoreBackend(StoreBackend):
                     f"Integrity error {str(e)} while trying to store key"
                 )
 
-    def _move(self):
+    def _move(self) -> None:  # type: ignore[override]
         raise NotImplementedError
 
     def get_url_for_key(self, key):
@@ -278,7 +295,7 @@ class DatabaseStoreBackend(StoreBackend):
         full_url = str(self.engine.url)
         engine_name = full_url.split("://")[0]
         db_name = full_url.split("/")[-1]
-        return engine_name + "://" + db_name + "/" + str(key[0])
+        return f"{engine_name}://{db_name}/{str(key[0])}"
 
     def _has_key(self, key):
         sel = (
@@ -286,17 +303,17 @@ class DatabaseStoreBackend(StoreBackend):
             .select_from(self._table)
             .where(
                 and_(
-                    *[
+                    *(
                         getattr(self._table.columns, key_col) == val
                         for key_col, val in zip(self.key_columns, key)
-                    ]
+                    )
                 )
             )
         )
         try:
             return self.engine.execute(sel).fetchone()[0] == 1
         except (IndexError, SQLAlchemyError) as e:
-            logger.debug("Error checking for value: " + str(e))
+            logger.debug(f"Error checking for value: {str(e)}")
             return False
 
     def list_keys(self, prefix=()):
@@ -305,10 +322,11 @@ class DatabaseStoreBackend(StoreBackend):
             .select_from(self._table)
             .where(
                 and_(
-                    *[
+                    True,
+                    *(
                         getattr(self._table.columns, key_col) == val
                         for key_col, val in zip(self.key_columns[: len(prefix)], prefix)
-                    ]
+                    ),
                 )
             )
         )
@@ -317,10 +335,10 @@ class DatabaseStoreBackend(StoreBackend):
     def remove_key(self, key):
         delete_statement = self._table.delete().where(
             and_(
-                *[
+                *(
                     getattr(self._table.columns, key_col) == val
                     for key_col, val in zip(self.key_columns, key)
-                ]
+                )
             )
         )
         try:
@@ -330,4 +348,6 @@ class DatabaseStoreBackend(StoreBackend):
                 f"Unable to delete key: got sqlalchemy error {str(e)}"
             )
 
-    _move = None
+    @property
+    def config(self) -> dict:
+        return self._config

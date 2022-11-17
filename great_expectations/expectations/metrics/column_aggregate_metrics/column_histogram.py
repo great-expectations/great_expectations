@@ -1,29 +1,30 @@
 import copy
 import logging
-from typing import Any, Dict, Tuple
+from typing import Any, Dict
 
 import numpy as np
+import pandas as pd
 
-from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.util import (
+    convert_to_json_serializable,
+    get_sql_dialect_floating_point_infinity_value,
+)
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    ColumnAggregateMetricProvider,
 )
 from great_expectations.expectations.metrics.import_manager import Bucketizer, F, sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.expectations.metrics.util import (
-    get_sql_dialect_floating_point_infinity_value,
-)
 
 logger = logging.getLogger(__name__)
 
 
-class ColumnHistogram(ColumnMetricProvider):
+class ColumnHistogram(ColumnAggregateMetricProvider):
     metric_name = "column.histogram"
     value_keys = ("bins",)
 
@@ -33,7 +34,7 @@ class ColumnHistogram(ColumnMetricProvider):
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
@@ -41,7 +42,10 @@ class ColumnHistogram(ColumnMetricProvider):
         )
         column = accessor_domain_kwargs["column"]
         bins = metric_value_kwargs["bins"]
-        hist, bin_edges = np.histogram(df[column], bins, density=False)
+        column_series: pd.Series = df[column]
+        column_null_elements_cond: pd.Series = column_series.isnull()
+        column_nonnull_elements: pd.Series = column_series[~column_null_elements_cond]
+        hist, bin_edges = np.histogram(column_nonnull_elements, bins, density=False)
         return list(hist)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
@@ -50,29 +54,88 @@ class ColumnHistogram(ColumnMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         """return a list of counts corresponding to bins
 
-         Args:
-             column: the name of the column for which to get the histogram
-             bins: tuple of bin edges for which to get histogram values; *must* be tuple to support caching
-         """
+        Args:
+            column: the name of the column for which to get the histogram
+            bins: tuple of bin edges for which to get histogram values; *must* be tuple to support caching
+        """
         selectable, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
             domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
         column = accessor_domain_kwargs["column"]
         bins = metric_value_kwargs["bins"]
 
-        case_conditions = []
-        idx = 0
         if isinstance(bins, np.ndarray):
             bins = bins.tolist()
         else:
             bins = list(bins)
 
-        # If we have an infinte lower bound, don't express that in sql
+        case_conditions = []
+        if len(bins) == 1 and not (
+            (
+                bins[0]
+                == get_sql_dialect_floating_point_infinity_value(
+                    schema="api_np", negative=True
+                )
+            )
+            or (
+                bins[0]
+                == get_sql_dialect_floating_point_infinity_value(
+                    schema="api_cast", negative=True
+                )
+            )
+            or (
+                bins[0]
+                == get_sql_dialect_floating_point_infinity_value(
+                    schema="api_np", negative=False
+                )
+            )
+            or (
+                bins[0]
+                == get_sql_dialect_floating_point_infinity_value(
+                    schema="api_cast", negative=False
+                )
+            )
+        ):
+            # Single-valued column data are modeled using "impulse" (or "sample") distributions (on open interval).
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (
+                                sa.and_(
+                                    float(bins[0] - np.finfo(float).eps)
+                                    < sa.column(column),
+                                    sa.column(column)
+                                    < float(bins[0] + np.finfo(float).eps),
+                                ),
+                                1,
+                            )
+                        ],
+                        else_=0,
+                    )
+                ).label("bin_0")
+            )
+            query = (
+                sa.select(case_conditions)
+                .where(
+                    sa.column(column) != None,
+                )
+                .select_from(selectable)
+            )
+
+            # Run the data through convert_to_json_serializable to ensure we do not have Decimal types
+            return convert_to_json_serializable(
+                list(execution_engine.engine.execute(query).fetchone())
+            )
+
+        idx = 0
+
+        # If we have an infinite lower bound, don't express that in sql
         if (
             bins[0]
             == get_sql_dialect_floating_point_infinity_value(
@@ -87,26 +150,30 @@ class ColumnHistogram(ColumnMetricProvider):
             case_conditions.append(
                 sa.func.sum(
                     sa.case([(sa.column(column) < bins[idx + 1], 1)], else_=0)
-                ).label("bin_" + str(idx))
+                ).label(f"bin_{str(idx)}")
             )
             idx += 1
 
+        negative_boundary: float
+        positive_boundary: float
         for idx in range(idx, len(bins) - 2):
+            negative_boundary = float(bins[idx])
+            positive_boundary = float(bins[idx + 1])
             case_conditions.append(
                 sa.func.sum(
                     sa.case(
                         [
                             (
                                 sa.and_(
-                                    bins[idx] <= sa.column(column),
-                                    sa.column(column) < bins[idx + 1],
+                                    negative_boundary <= sa.column(column),
+                                    sa.column(column) < positive_boundary,
                                 ),
                                 1,
                             )
                         ],
                         else_=0,
                     )
-                ).label("bin_" + str(idx))
+                ).label(f"bin_{str(idx)}")
             )
 
         if (
@@ -120,40 +187,44 @@ class ColumnHistogram(ColumnMetricProvider):
                 schema="api_cast", negative=False
             )
         ):
+            negative_boundary = float(bins[-2])
             case_conditions.append(
                 sa.func.sum(
-                    sa.case([(bins[-2] <= sa.column(column), 1)], else_=0)
-                ).label("bin_" + str(len(bins) - 1))
+                    sa.case([(negative_boundary <= sa.column(column), 1)], else_=0)
+                ).label(f"bin_{str(len(bins) - 1)}")
             )
         else:
+            negative_boundary = float(bins[-2])
+            positive_boundary = float(bins[-1])
             case_conditions.append(
                 sa.func.sum(
                     sa.case(
                         [
                             (
                                 sa.and_(
-                                    bins[-2] <= sa.column(column),
-                                    sa.column(column) <= bins[-1],
+                                    negative_boundary <= sa.column(column),
+                                    sa.column(column) <= positive_boundary,
                                 ),
                                 1,
                             )
                         ],
                         else_=0,
                     )
-                ).label("bin_" + str(len(bins) - 1))
+                ).label(f"bin_{str(len(bins) - 1)}")
             )
 
         query = (
             sa.select(case_conditions)
-            .where(sa.column(column) != None,)
+            .where(
+                sa.column(column) != None,
+            )
             .select_from(selectable)
         )
 
         # Run the data through convert_to_json_serializable to ensure we do not have Decimal types
-        hist = convert_to_json_serializable(
+        return convert_to_json_serializable(
             list(execution_engine.engine.execute(query).fetchone())
         )
-        return hist
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
@@ -161,7 +232,7 @@ class ColumnHistogram(ColumnMetricProvider):
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
@@ -174,6 +245,7 @@ class ColumnHistogram(ColumnMetricProvider):
         bins = list(
             copy.deepcopy(bins)
         )  # take a copy since we are inserting and popping
+
         if bins[0] == -np.inf or bins[0] == -float("inf"):
             added_min = False
             bins[0] = -float("inf")
