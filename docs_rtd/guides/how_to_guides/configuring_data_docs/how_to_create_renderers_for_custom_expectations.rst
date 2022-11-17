@@ -108,10 +108,7 @@ Steps
                   ) -> List[Union[dict, str, RenderedStringTemplateContent, RenderedTableContent, RenderedBulletListContent,
                                   RenderedGraphContent, Any]]:
                       runtime_configuration = runtime_configuration or {}
-                      include_column_name = runtime_configuration.get("include_column_name", True)
-                      include_column_name = (
-                          include_column_name if include_column_name is not None else True
-                      )
+                      include_column_name = False if runtime_configuration.get("include_column_name") is False else True
                       styling = runtime_configuration.get("styling")
                       # get params dict with all expected kwargs
                       params = substitute_none_for_missing(
@@ -220,10 +217,7 @@ Steps
                   ) -> List[Union[dict, str, RenderedStringTemplateContent, RenderedTableContent, RenderedBulletListContent,
                                   RenderedGraphContent, Any]]:
                       runtime_configuration = runtime_configuration or {}
-                      include_column_name = runtime_configuration.get("include_column_name", True)
-                      include_column_name = (
-                          include_column_name if include_column_name is not None else True
-                      )
+                      include_column_name = False if runtime_configuration.get("include_column_name") is False else True
                       styling = runtime_configuration.get("styling")
                       # get params dict with all expected kwargs
                       params = substitute_none_for_missing(
@@ -342,10 +336,7 @@ Steps
                       **kwargs
                   ):
                       runtime_configuration = runtime_configuration or {}
-                      include_column_name = runtime_configuration.get("include_column_name", True)
-                      include_column_name = (
-                          include_column_name if include_column_name is not None else True
-                      )
+                      include_column_name = False if runtime_configuration.get("include_column_name") is False else True
                       styling = runtime_configuration.get("styling")
                       # get params dict with all expected kwargs
                       params = substitute_none_for_missing(
@@ -485,10 +476,7 @@ Steps
                       **kwargs
                   ):
                       runtime_configuration = runtime_configuration or {}
-                      include_column_name = runtime_configuration.get("include_column_name", True)
-                      include_column_name = (
-                          include_column_name if include_column_name is not None else True
-                      )
+                      include_column_name = False if runtime_configuration.get("include_column_name") is False else True
                       styling = runtime_configuration.get("styling")
                       # get params dict with all expected kwargs
                       params = substitute_none_for_missing(
