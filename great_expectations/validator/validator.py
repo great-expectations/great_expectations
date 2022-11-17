@@ -10,7 +10,18 @@ import traceback
 import warnings
 from collections import defaultdict, namedtuple
 from collections.abc import Hashable
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Union,
+)
 
 from dateutil.parser import parse
 from marshmallow import ValidationError
@@ -77,6 +88,7 @@ from great_expectations.validator.validation_graph import (
     MetricEdge,
     ValidationGraph,
 )
+from great_expectations.zep.interfaces import Batch as ZepBatch
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -121,7 +133,7 @@ class Validator:
         expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
         data_context: Optional[AbstractDataContext] = None,
-        batches: Optional[List[Batch]] = None,
+        batches: Optional[Sequence[Union[Batch, ZepBatch]]] = None,
         include_rendered_content: Optional[bool] = None,
         **kwargs,
     ) -> None:
@@ -214,7 +226,7 @@ class Validator:
         return self._execution_engine.batch_manager.batch_cache
 
     @property
-    def batches(self) -> Dict[str, Batch]:
+    def batches(self) -> Dict[str, Union[Batch, ZepBatch]]:
         """Getter for dictionary of Batch objects (alias convenience property, to be deprecated)"""
         return self.batch_cache
 

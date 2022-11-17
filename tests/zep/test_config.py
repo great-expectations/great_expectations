@@ -22,7 +22,7 @@ SIMPLE_DS_DICT = {
         "my_ds": {
             "name": "my_ds",
             "type": "postgres",
-            "connection_str": "postgres",
+            "connection_string": "postgres",
         }
     }
 }
