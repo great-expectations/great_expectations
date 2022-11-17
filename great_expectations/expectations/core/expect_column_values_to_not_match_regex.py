@@ -194,7 +194,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = runtime_configuration.get("include_column_name") or True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -269,7 +269,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = runtime_configuration.get("include_column_name") or True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
