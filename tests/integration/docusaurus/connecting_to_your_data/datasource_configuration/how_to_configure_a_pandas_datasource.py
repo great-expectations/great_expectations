@@ -1,4 +1,4 @@
-"""Example Script: How to create an Expectation Suite with the Onboarding Data Assistant
+"""Example Script: How to configure a Pandas Datasource
 
 This example script is intended for use in documentation on how to configure a Pandas Datasource.
 
