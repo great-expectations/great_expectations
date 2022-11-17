@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import datetime
 import logging
 import os
 from collections import OrderedDict
@@ -12,14 +11,11 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
-    run_validation_operator_usage_statistics,
     save_expectation_suite_usage_statistics,
     usage_statistics_enabled_method,
 )
-from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
@@ -50,7 +46,6 @@ from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.rule_based_profiler import RuleBasedProfiler
-from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -443,84 +438,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         super().delete_datasource(datasource_name, save_changes=save_changes)
         self._synchronize_self_with_underlying_data_context()
 
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_VALIDATION_OPERATOR,
-        args_payload_fn=run_validation_operator_usage_statistics,
-    )
-    def run_validation_operator(
-        self,
-        validation_operator_name: str,
-        assets_to_validate: List,
-        run_id: Optional[Union[str, RunIdentifier]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        run_name: Optional[str] = None,
-        run_time: Optional[Union[str, datetime.datetime]] = None,
-        result_format: Optional[Union[str, dict]] = None,
-        **kwargs,
-    ):
-        """
-        Run a validation operator to validate data assets and to perform the business logic around
-        validation that the operator implements.
-
-        Args:
-            validation_operator_name: name of the operator, as appears in the context's config file
-            assets_to_validate: a list that specifies the data assets that the operator will validate. The members of
-                the list can be either batches, or a tuple that will allow the operator to fetch the batch:
-                (batch_kwargs, expectation_suite_name)
-            evaluation_parameters: $parameter_name syntax references to be evaluated at runtime
-            run_id: The run_id for the validation; if None, a default value will be used
-            run_name: The run_name for the validation; if None, a default value will be used
-            run_time: The date/time of the run
-            result_format: one of several supported formatting directives for expectation validation results
-            **kwargs: Additional kwargs to pass to the validation operator
-
-        Returns:
-            ValidationOperatorResult
-        """
-        result_format = result_format or {"result_format": "SUMMARY"}
-
-        if not assets_to_validate:
-            raise ge_exceptions.DataContextError(
-                "No batches of data were passed in. These are required"
-            )
-
-        for batch in assets_to_validate:
-            if not isinstance(batch, (tuple, DataAsset, Validator)):
-                raise ge_exceptions.DataContextError(
-                    "Batches are required to be of type DataAsset or Validator"
-                )
-        try:
-            validation_operator = self.validation_operators[validation_operator_name]
-        except KeyError:
-            raise ge_exceptions.DataContextError(
-                f"No validation operator `{validation_operator_name}` was found in your project. Please verify this in your great_expectations.yml"
-            )
-
-        if run_id is None and run_name is None:
-            run_name = datetime.datetime.now(datetime.timezone.utc).strftime(
-                "%Y%m%dT%H%M%S.%fZ"
-            )
-            logger.info(f"Setting run_name to: {run_name}")
-        if evaluation_parameters is None:
-            return validation_operator.run(
-                assets_to_validate=assets_to_validate,
-                run_id=run_id,
-                run_name=run_name,
-                run_time=run_time,
-                result_format=result_format,
-                **kwargs,
-            )
-        else:
-            return validation_operator.run(
-                assets_to_validate=assets_to_validate,
-                run_id=run_id,
-                evaluation_parameters=evaluation_parameters,
-                run_name=run_name,
-                run_time=run_time,
-                result_format=result_format,
-                **kwargs,
-            )
-
     def add_datasource(
         self,
         name: str,
@@ -550,28 +467,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
         self._synchronize_self_with_underlying_data_context()
         return new_datasource
-
-    def add_batch_kwargs_generator(
-        self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
-    ):
-        """
-        Add a batch kwargs generator to the named datasource, using the provided
-        configuration.
-
-        Args:
-            datasource_name: name of datasource to which to add the new batch kwargs generator
-            batch_kwargs_generator_name: name of the generator to add
-            class_name: class of the batch kwargs generator to add
-            **kwargs: batch kwargs generator configuration, provided as kwargs
-
-        Returns:
-
-        """
-        datasource_obj = self.get_datasource(datasource_name)
-        generator = datasource_obj.add_batch_kwargs_generator(
-            name=batch_kwargs_generator_name, class_name=class_name, **kwargs
-        )
-        return generator
 
     def create_expectation_suite(
         self,
