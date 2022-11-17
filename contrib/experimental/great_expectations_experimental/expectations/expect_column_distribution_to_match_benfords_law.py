@@ -316,7 +316,7 @@ class ExpectColumnDistributionToMatchBenfordsLaw(ColumnExpectation):
     #     **kwargs,
     # ):
     #     runtime_configuration = runtime_configuration or {}
-    #     include_column_name = runtime_configuration.get("include_column_name") or True
+    #     include_column_name = False if runtime_configuration.get("include_column_name") is False else True
     #     include_column_name = (
     #         include_column_name if include_column_name is not None else True
     #     )
