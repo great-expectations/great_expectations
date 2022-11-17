@@ -1,6 +1,8 @@
 import hashlib
 import json
-from typing import Any, Optional, Set
+from typing import Set
+
+from great_expectations.core.util import convert_to_json_serializable
 
 
 class IDDict(dict):
@@ -18,32 +20,10 @@ class IDDict(dict):
             key = list(id_keys)[0]
             return f"{key}={str(self[key])}"
 
-        _id_dict = {k: self[k] for k in id_keys}
+        _id_dict = convert_to_json_serializable(data={k: self[k] for k in id_keys})
         return hashlib.md5(
             json.dumps(_id_dict, sort_keys=True).encode("utf-8")
         ).hexdigest()
-
-    @staticmethod
-    def convert_dictionary_to_id_dict(data: Optional[Any]):
-        """
-        This method converts any nested "data" argument of dictionary or iterable type to "IDDict" object (recursively).
-        """
-        if isinstance(data, dict):
-            data = IDDict(data)
-
-            key: str
-            value: Any
-            for key, value in data.items():
-                data[key] = IDDict.convert_dictionary_to_id_dict(data=value)
-        elif isinstance(data, (list, set, tuple)):
-            data_type: type = type(data)
-
-            value: Any  # type: ignore[no-redef]
-            data = data_type(
-                [IDDict.convert_dictionary_to_id_dict(data=value) for value in data]
-            )
-
-        return data
 
     def __hash__(self) -> int:  # type: ignore[override]
         """Overrides the default implementation"""

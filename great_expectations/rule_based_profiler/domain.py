@@ -214,7 +214,7 @@ def convert_dictionary_to_domain_kwargs(
     if not isinstance(source, dict):
         return source
 
-    return _convert_dictionary_to_domain_kwargs(source)
+    return _convert_dictionary_to_domain_kwargs(source=DomainKwargs(source))
 
 
 def _convert_dictionary_to_domain_kwargs(source: dict) -> DomainKwargs:
@@ -222,6 +222,16 @@ def _convert_dictionary_to_domain_kwargs(source: dict) -> DomainKwargs:
     value: Any
     for key, value in source.items():
         if isinstance(value, dict):
-            source[key] = _convert_dictionary_to_domain_kwargs(value)
+            source[key] = _convert_dictionary_to_domain_kwargs(source=value)
+        elif isinstance(source, (list, set, tuple)):
+            data_type: type = type(source)
+
+            element: Any
+            source = data_type(
+                [
+                    _convert_dictionary_to_domain_kwargs(source=element)
+                    for element in source
+                ]
+            )
 
     return DomainKwargs(source)

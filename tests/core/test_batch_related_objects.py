@@ -15,40 +15,6 @@ from great_expectations.exceptions import InvalidBatchSpecError
 
 
 @pytest.mark.unit
-def test_id_dict_structure():
-    data: dict = {
-        "a0": 1,
-        "a1": {
-            "b0": "2",
-            "b1": [
-                "c0",
-                (
-                    "d0",
-                    {
-                        "e0": 3,
-                        "e1": 4,
-                    },
-                    {"f0", "f1", "f2"},
-                ),
-            ],
-            "b2": 5,
-        },
-    }
-    nested_id_dictionary: IDDict = IDDict.convert_dictionary_to_id_dict(data=data)
-    assert isinstance(nested_id_dictionary, IDDict)
-    assert isinstance(nested_id_dictionary["a0"], int)
-    assert isinstance(nested_id_dictionary["a1"], IDDict)
-    assert isinstance(nested_id_dictionary["a1"]["b0"], str)
-    assert isinstance(nested_id_dictionary["a1"]["b1"], list)
-    assert isinstance(nested_id_dictionary["a1"]["b1"][0], str)
-    assert isinstance(nested_id_dictionary["a1"]["b1"][1], tuple)
-    assert isinstance(list(nested_id_dictionary["a1"]["b1"][1])[0], str)
-    assert isinstance(list(nested_id_dictionary["a1"]["b1"][1])[1], IDDict)
-    assert isinstance(list(nested_id_dictionary["a1"]["b1"][1])[2], set)
-    assert isinstance(nested_id_dictionary["a1"]["b2"], int)
-
-
-@pytest.mark.unit
 def test_iddict_is_hashable():
     data_0: dict = {
         "a0": 1,
@@ -80,14 +46,14 @@ def test_iddict_is_hashable():
         "c0": "4",
         "c1": "5",
     }
-    # noinspection PyBroadException
+    # noinspection PyBroadException,PyUnusedLocal
     try:
         # noinspection PyUnusedLocal
         dictionaries_as_set: set = {
-            IDDict.convert_dictionary_to_id_dict(data=data_0),
-            IDDict.convert_dictionary_to_id_dict(data=data_1),
-            IDDict.convert_dictionary_to_id_dict(data=data_2),
-            IDDict.convert_dictionary_to_id_dict(data=data_3),
+            IDDict(data_0),
+            IDDict(data_1),
+            IDDict(data_2),
+            IDDict(data_3),
         }
     except Exception as e:
         assert False, "IDDict.__hash__() failed."
@@ -112,6 +78,7 @@ def test_batch_definition_instantiation():
         # noinspection PyTypeChecker,PyUnusedLocal,PyPep8Naming
         A = BatchDefinition("A", "a", "aaa", {"id": "A"})
 
+    # noinspection PyPep8Naming
     A = BatchDefinition("A", "a", "aaa", batch_identifiers=IDDict({"id": "A"}))
 
     print(A.id)
@@ -201,6 +168,7 @@ def test_batch_request_instantiation():
 
     # No data_source_name specified
     with pytest.raises(TypeError):
+        # noinspection PyArgumentList
         BatchRequest(
             data_connector_name="a",
             data_asset_name="aaa",
@@ -209,15 +177,18 @@ def test_batch_request_instantiation():
 
     # No data_source_name and data_connector_name specified
     with pytest.raises(TypeError):
+        # noinspection PyArgumentList
         BatchRequest(data_asset_name="aaa", data_connector_query={"id": "A"})
 
     # No data_source_name and data_connector_name and data_asset_name specified
     with pytest.raises(TypeError):
+        # noinspection PyArgumentList
         BatchRequest(data_connector_query={"id": "A"})
 
     BatchRequest(datasource_name="A", data_connector_name="a", data_asset_name="aaa")
 
 
+# noinspection PyPep8Naming
 @pytest.mark.unit
 def test_RuntimeDataBatchSpec():
     with pytest.raises(InvalidBatchSpecError):

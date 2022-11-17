@@ -233,7 +233,7 @@ def convert_dictionary_to_parameter_node(
     if not isinstance(source, dict):
         return source
 
-    return _convert_dictionary_to_parameter_node(source)
+    return _convert_dictionary_to_parameter_node(source=ParameterNode(source))
 
 
 def _convert_dictionary_to_parameter_node(source: dict) -> ParameterNode:
@@ -241,7 +241,17 @@ def _convert_dictionary_to_parameter_node(source: dict) -> ParameterNode:
     value: Any
     for key, value in source.items():
         if isinstance(value, dict):
-            source[key] = _convert_dictionary_to_parameter_node(value)
+            source[key] = _convert_dictionary_to_parameter_node(source=value)
+        elif isinstance(source, (list, set, tuple)):
+            data_type: type = type(source)
+
+            element: Any
+            source = data_type(
+                [
+                    _convert_dictionary_to_parameter_node(source=element)
+                    for element in source
+                ]
+            )
 
     return ParameterNode(source)
 
