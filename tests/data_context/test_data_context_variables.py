@@ -7,7 +7,7 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.core.config_provider import ConfigurationProvider
+from great_expectations.core.config_provider import _ConfigurationProvider
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
@@ -91,7 +91,7 @@ def data_context_config(data_context_config_dict: dict) -> DataContextConfig:
     return config
 
 
-class StubConfigurationProvider(ConfigurationProvider):
+class StubConfigurationProvider(_ConfigurationProvider):
     def __init__(self, config_values=None) -> None:
         self._config_values = config_values or {}
         super().__init__()
