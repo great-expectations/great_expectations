@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Optional
 
+from great_expectations.core.config_provider import _ConfigurationProvider
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
@@ -18,7 +19,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GXCloudIdentifier,
 )
-from great_expectations.data_context.util import substitute_all_config_variables
 
 if TYPE_CHECKING:
     from great_expectations.data_context import DataContext
@@ -66,18 +66,14 @@ class DataContextVariables(ABC):
     Should maintain parity with the `DataContextConfig`.
 
     Args:
-        config:        A reference to the DataContextConfig to perform CRUD on.
-        substitutions: A dictionary used to perform substitutions of ${VARIABLES}; to be used with GET requests.
-        _store:        An instance of a DataContextStore with the appropriate backend to persist config changes.
+        config:          A reference to the DataContextConfig to perform CRUD on.
+        config_provider: Responsible for determining config values and substituting them in GET calls.
+        _store:          An instance of a DataContextStore with the appropriate backend to persist config changes.
     """
 
     config: DataContextConfig
-    substitutions: Optional[dict] = None
+    config_provider: _ConfigurationProvider
     _store: Optional[DataContextStore] = None
-
-    def __post_init__(self) -> None:
-        if self.substitutions is None:
-            self.substitutions = {}
 
     def __str__(self) -> str:
         return str(self.config)
@@ -111,7 +107,7 @@ class DataContextVariables(ABC):
     def _get(self, attr: DataContextVariableSchema) -> Any:
         key: str = attr.value
         val: Any = self.config[key]
-        substituted_val: Any = substitute_all_config_variables(val, self.substitutions)
+        substituted_val: Any = self.config_provider.substitute_config(val)
         return substituted_val
 
     def save_config(self) -> Any:
@@ -370,9 +366,12 @@ class CloudDataContextVariables(DataContextVariables):
         from great_expectations.data_context.store.data_context_store import (
             DataContextStore,
         )
+        from great_expectations.data_context.store.gx_cloud_store_backend import (
+            GXCloudStoreBackend,
+        )
 
         store_backend: dict = {
-            "class_name": "GeCloudStoreBackend",
+            "class_name": GXCloudStoreBackend.__name__,
             "ge_cloud_base_url": self.ge_cloud_base_url,
             "ge_cloud_resource_type": GXCloudRESTResource.DATA_CONTEXT_VARIABLES,
             "ge_cloud_credentials": {
@@ -392,9 +391,7 @@ class CloudDataContextVariables(DataContextVariables):
         """
         Generates a GE Cloud-specific key for use with Stores. See parent "DataContextVariables.get_key" for more details.
         """
-        from great_expectations.data_context.store.ge_cloud_store_backend import (
-            GXCloudRESTResource,
-        )
+        from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.DATA_CONTEXT_VARIABLES

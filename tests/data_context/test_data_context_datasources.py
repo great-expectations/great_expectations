@@ -7,8 +7,8 @@ from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
 from great_expectations.data_context.data_context.data_context import DataContext
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudStoreBackend,
+from great_expectations.data_context.store.gx_cloud_store_backend import (
+    GXCloudStoreBackend,
 )
 from great_expectations.data_context.store.inline_store_backend import (
     InlineStoreBackend,
@@ -67,7 +67,7 @@ def test_data_context_instantiates_ge_cloud_store_backend_with_cloud_config(
         ge_cloud_config=ge_cloud_config,
     )
 
-    assert isinstance(context._datasource_store.store_backend, GeCloudStoreBackend)
+    assert isinstance(context._datasource_store.store_backend, GXCloudStoreBackend)
 
 
 @pytest.mark.integration

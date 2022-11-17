@@ -264,8 +264,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # necessary properties / overrides
         self._synchronize_self_with_underlying_data_context()
 
-        self._config_provider = self._data_context._config_provider
-        self._variables = self._data_context.variables  # type: ignore[assignment]
+        self._config_provider = self._data_context.config_provider
+        self._variables = self._data_context.variables
 
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing

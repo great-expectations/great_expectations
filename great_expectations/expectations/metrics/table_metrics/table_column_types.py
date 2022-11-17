@@ -96,7 +96,7 @@ def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
         table_selectable: TextClause = batch_data.selectable
         schema_name = None
     else:
-        table_selectable: str = (
+        table_selectable: str = (  # type: ignore[no-redef]
             batch_data.source_table_name or batch_data.selectable.name
         )
         schema_name = batch_data.source_schema_name or batch_data.selectable.schema
