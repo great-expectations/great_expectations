@@ -1,6 +1,9 @@
 from typing import Dict, List, Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnExpectation,
@@ -223,10 +226,10 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
@@ -314,10 +317,10 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
@@ -388,10 +391,10 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
     )
     def _descriptive_column_properties_table_distinct_percent_row_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         assert result, "Must pass in result."

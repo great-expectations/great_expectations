@@ -1,19 +1,18 @@
-from typing import Dict, List, Optional, Union
+from typing import Optional
 
-import numpy as np
-import pandas as pd
 from lxml import etree
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    Expectation,
     ExpectationConfiguration,
-    InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
 from great_expectations.expectations.metrics.import_manager import F, sparktypes
@@ -139,10 +138,10 @@ class ExpectColumnValuesToBeXmlParseable(ColumnMapExpectation):
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs
     ):
         runtime_configuration = runtime_configuration or {}
