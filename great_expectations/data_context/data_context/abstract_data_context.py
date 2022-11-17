@@ -3635,7 +3635,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 "data_context": self,
                 "root_directory": self.root_directory,
                 "site_name": site_name,
-                "ge_cloud_mode": False,
             },
             config_defaults={
                 "module_name": "great_expectations.render.renderer.site_builder"
