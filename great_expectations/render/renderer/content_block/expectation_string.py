@@ -1,3 +1,9 @@
+from typing import Optional
+
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.content_block.content_block import (
     ContentBlockRenderer,
