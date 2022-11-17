@@ -63,7 +63,7 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = runtime_configuration.get("include_column_name") or True
         styling = runtime_configuration.get("styling")
         # Only render EVR objects for which an exception was raised
         if result.exception_info["raised_exception"] is True:
