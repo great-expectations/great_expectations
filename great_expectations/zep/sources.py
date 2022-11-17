@@ -148,7 +148,7 @@ class _SourceFactories:
             def wrapped(name: str, **kwargs):
                 datasource = ds_constructor(name=name, **kwargs)
                 # TODO (bdirks): _attach_datasource_to_context to the AbstractDataContext class
-                self._data_context._attach_datasource_to_context(datasource)  # type: ignore[union-attr]
+                self._data_context._attach_datasource_to_context(datasource)
                 return datasource
 
             return wrapped
