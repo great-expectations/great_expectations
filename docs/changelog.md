@@ -2,6 +2,37 @@
 title: Changelog
 ---
 
+### 0.15.33
+* [FEATURE] POC ZEP Config Loading (#6320)
+* [BUGFIX] Fix issue with misaligned indentation in docs snippets (#6339)
+* [BUGFIX] Use `requirements.txt` file when installing linting/static check dependencies in CI (#6368)
+* [BUGFIX] Patch nested snippet indentation issues within `remark-named-snippets` plugin (#6376)
+* [BUGFIX] Ensure `packaging_and_installation` CI tests against latest tag (#6386)
+* [DOCS] DOC-308 update CLI command in docs when working with RBPs instead of Data Assistants (#6222)
+* [DOCS] DOC-366 updates to docs in support of branding updates (#5766)
+* [DOCS] Add `yarn snippet-check` command (#6351)
+* [MAINTENANCE] Add missing one-line docstrings and try to make the others consistent (#6340)
+* [MAINTENANCE] Refactor variable aggregation/substitution logic into `ConfigurationProvider` hierarchy (#6321)
+* [MAINTENANCE] In ExecutionEngine: Make variable names and usage more descriptive of their purpose. (#6342)
+* [MAINTENANCE] Move Cloud-specific enums to `cloud_constants.py` (#6349)
+* [MAINTENANCE] Refactor out `termcolor` dependency (#6348)
+* [MAINTENANCE] Zep PostgresDatasource returns a list of batches. (#6341)
+* [MAINTENANCE] Refactor `usage_stats_opt_out` method in DataContext (#5339)
+* [MAINTENANCE] Fix computed metrics type hint in ExecutionEngine.resolve_metrics() method (#6347)
+* [MAINTENANCE] Subject: Support to include ID/PK in validation result for each row t… (#5876) (thanks @abekfenn)
+* [MAINTENANCE] Pin `mypy` to `0.990` (#6361)
+* [MAINTENANCE] Misc cleanup of GX Cloud helpers (#6352)
+* [MAINTENANCE] Update column_reflection_fallback to also use schema name for Trino (#6350)
+* [MAINTENANCE] Bump version of `mypy` in contrib CLI (#6370)
+* [MAINTENANCE] Move config variable substitution logic into `ConfigurationProvider` (#6345)
+* [MAINTENANCE] Removes comment in code that was causing confusion to some users. (#6366)
+* [MAINTENANCE] minor metrics typing (#6374)
+* [MAINTENANCE] Make `ConfigurationProvider` and `ConfigurationSubstitutor` private (#6375)
+* [MAINTENANCE] Rename `GeCloudStoreBackend` to `GXCloudStoreBackend` (#6377)
+* [MAINTENANCE] Cleanup Metrics and ExecutionEngine methods (#6371)
+* [MAINTENANCE] F/great 1314/integrate zep in core (#6358)
+* [MAINTENANCE] Loosen `pydantic` version requirement (#6384)
+
 ### 0.15.32
 * [BUGFIX] Patch broken `CloudNotificationAction` tests (#6327)
 * [BUGFIX] add create_temp_table flag to ExecutionEngineConfigSchema (#6331) (thanks @tommy-watts-depop)
