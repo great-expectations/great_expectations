@@ -6,13 +6,14 @@ from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core.batch import (
     Batch,
-    BatchData,
+    BatchDataType,
     BatchDefinition,
     BatchMarkers,
 )
-from great_expectations.core.id_dict import BatchSpec
+from great_expectations.zep.interfaces import Batch as ZepBatch
 
 if TYPE_CHECKING:
+    from great_expectations.core.id_dict import BatchSpec
     from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -39,12 +40,12 @@ class BatchManager:
             batch_list = []
 
         self._batch_cache: Dict[str, Batch] = OrderedDict()
-        self._batch_data_cache: Dict[str, BatchData] = {}
+        self._batch_data_cache: Dict[str, BatchDataType] = {}
 
         self.load_batch_list(batch_list=batch_list)
 
     @property
-    def batch_data_cache(self) -> Dict[str, BatchData]:
+    def batch_data_cache(self) -> Dict[str, BatchDataType]:
         """Dictionary of loaded BatchData objects."""
         return self._batch_data_cache
 
@@ -74,7 +75,7 @@ class BatchManager:
         return None
 
     @property
-    def active_batch_data(self) -> Optional[BatchData]:
+    def active_batch_data(self) -> Optional[BatchDataType]:
         """The BatchData object from the currently-active Batch object."""
         if self.active_batch_data_id is None:
             return None
@@ -151,7 +152,7 @@ class BatchManager:
         for batch in batch_list:
             try:
                 assert isinstance(
-                    batch, Batch
+                    batch, (Batch, ZepBatch)
                 ), "Batch objects provided to BatchManager must be formal Great Expectations Batch typed objects."
             except AssertionError as e:
                 logger.error(str(e))
@@ -165,7 +166,7 @@ class BatchManager:
             # that has been loaded.  Hence, the final active_batch_id will be that of the final BatchData loaded.
             self._active_batch_id = batch.id
 
-    def save_batch_data(self, batch_id: str, batch_data: BatchData) -> None:
+    def save_batch_data(self, batch_id: str, batch_data: BatchDataType) -> None:
         """
         Updates the data for the specified Batch in the cache
         """

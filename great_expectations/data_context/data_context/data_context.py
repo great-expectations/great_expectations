@@ -31,6 +31,8 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource
+from great_expectations.zep.context import _SourceFactories
+from great_expectations.zep.interfaces import Datasource as ZepDatasource
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -233,6 +235,7 @@ class DataContext(BaseDataContext):
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
+        self._sources: _SourceFactories = _SourceFactories(self)
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = self._init_ge_cloud_config(
             ge_cloud_mode=ge_cloud_mode,
@@ -258,6 +261,19 @@ class DataContext(BaseDataContext):
         # Save project config if data_context_id auto-generated
         if self._check_for_usage_stats_sync(project_config):
             self._save_project_config()
+
+    def _attach_datasource_to_context(self, datasource: ZepDatasource):
+        # We currently don't allow one to overwrite a datasource with this internal method
+        if datasource.name in self.datasources:
+            raise ge_exceptions.DataContextError(
+                f"Can not write the ZEP datasource {datasource.name} because a datasource of that "
+                "name already exists in the data context."
+            )
+        self.datasources[datasource.name] = datasource
+
+    @property
+    def sources(self) -> _SourceFactories:
+        return self._sources
 
     def _init_ge_cloud_config(
         self,

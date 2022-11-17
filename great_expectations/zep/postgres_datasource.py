@@ -4,7 +4,7 @@ import dataclasses
 import itertools
 from datetime import datetime
 from pprint import pformat as pf
-from typing import Dict, Iterable, List, Optional, Type, cast
+from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Type, cast
 
 import dateutil.tz
 from pydantic import Field
@@ -12,7 +12,6 @@ from pydantic import dataclasses as pydantic_dc
 from typing_extensions import ClassVar, Literal
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.zep.interfaces import (
     Batch,
     BatchRequest,
@@ -20,6 +19,9 @@ from great_expectations.zep.interfaces import (
     DataAsset,
     Datasource,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.execution_engine import ExecutionEngine
 
 
 class PostgresDatasourceError(Exception):
@@ -89,6 +91,11 @@ class TableAsset(DataAsset):
         )
 
     def validate_batch_request(self, batch_request: BatchRequest) -> None:
+        """Validates the batch_request has the correct form.
+
+        Args:
+            batch_request: A batch request object to be validated.
+        """
         if not (
             batch_request.datasource_name == self.datasource.name
             and batch_request.data_asset_name == self.name
@@ -212,9 +219,14 @@ class PostgresDatasource(Datasource):
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
     type: Literal["postgres"] = "postgres"
-    connection_str: str
-    execution_engine: SqlAlchemyExecutionEngine
+    connection_string: str
     assets: Dict[str, TableAsset] = {}
+
+    def execution_engine_type(self) -> Type[ExecutionEngine]:
+        """Returns the default execution engine type."""
+        from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+
+        return SqlAlchemyExecutionEngine
 
     def add_table_asset(self, name: str, table_name: str) -> TableAsset:
         """Adds a table asset to this datasource.
@@ -282,7 +294,7 @@ class PostgresDatasource(Datasource):
                 Batch(
                     datasource=self,
                     data_asset=data_asset,
-                    batch_request=batch_request,
+                    batch_request=request,
                     data=data,
                 )
             )
