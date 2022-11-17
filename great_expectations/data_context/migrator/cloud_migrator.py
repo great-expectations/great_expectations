@@ -41,8 +41,8 @@ from great_expectations.data_context.migrator.configuration_bundle import (
     ConfigurationBundleJsonSerializer,
     ConfigurationBundleSchema,
 )
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudStoreBackend,
+from great_expectations.data_context.store.gx_cloud_store_backend import (
+    GXCloudStoreBackend,
     construct_json_payload,
     construct_url,
     get_user_friendly_error_message,
@@ -310,14 +310,14 @@ class CloudMigrator:
     def _process_validation_results(
         self, serialized_validation_results: Dict[str, dict], test_migrate: bool
     ) -> None:
-        # 20220928 - Chetan - We want to use the static lookup tables in GeCloudStoreBackend
+        # 20220928 - Chetan - We want to use the static lookup tables in GXCloudStoreBackend
         # to ensure the appropriate URL and payload shape. This logic should be moved to
         # a more central location.
         resource_type = GXCloudRESTResource.EXPECTATION_VALIDATION_RESULT
-        resource_name = GeCloudStoreBackend.RESOURCE_PLURALITY_LOOKUP_DICT[
+        resource_name = GXCloudStoreBackend.RESOURCE_PLURALITY_LOOKUP_DICT[
             resource_type
         ]
-        attributes_key = GeCloudStoreBackend.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
+        attributes_key = GXCloudStoreBackend.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
         unsuccessful_validations = {}
 

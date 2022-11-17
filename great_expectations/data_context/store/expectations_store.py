@@ -180,7 +180,7 @@ class ExpectationsStore(Store):
 
     def serialize(self, value):
         if self.ge_cloud_mode:
-            # GeCloudStoreBackend expects a json str
+            # GXCloudStoreBackend expects a json str
             return self._expectationSuiteSchema.dump(value)
         return self._expectationSuiteSchema.dumps(value, indent=2, sort_keys=True)
 

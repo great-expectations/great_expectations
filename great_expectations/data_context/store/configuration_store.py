@@ -93,7 +93,7 @@ class ConfigurationStore(Store):
 
     def serialize(self, value):
         if self.ge_cloud_mode:
-            # GeCloudStoreBackend expects a json str
+            # GXCloudStoreBackend expects a json str
             config_schema = value.get_schema_class()()
             return config_schema.dump(value)
         return value.to_yaml_str()

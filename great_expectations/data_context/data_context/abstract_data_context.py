@@ -39,10 +39,10 @@ from great_expectations.core.batch import (
     get_batch_request_from_acceptable_arguments,
 )
 from great_expectations.core.config_provider import (
-    ConfigurationProvider,
-    ConfigurationVariablesConfigurationProvider,
-    EnvironmentConfigurationProvider,
-    RuntimeEnvironmentConfigurationProvider,
+    _ConfigurationProvider,
+    _ConfigurationVariablesConfigurationProvider,
+    _EnvironmentConfigurationProvider,
+    _RuntimeEnvironmentConfigurationProvider,
 )
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
@@ -210,12 +210,12 @@ class AbstractDataContext(ABC):
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         self.validation_operators: dict = {}
 
-    def _init_config_provider(self) -> ConfigurationProvider:
-        config_provider = ConfigurationProvider()
+    def _init_config_provider(self) -> _ConfigurationProvider:
+        config_provider = _ConfigurationProvider()
         self._register_providers(config_provider)
         return config_provider
 
-    def _register_providers(self, config_provider: ConfigurationProvider) -> None:
+    def _register_providers(self, config_provider: _ConfigurationProvider) -> None:
         """
         Registers any relevant ConfigurationProvider instances to self._config_provider.
 
@@ -228,14 +228,14 @@ class AbstractDataContext(ABC):
         config_variables_file_path = self._project_config.config_variables_file_path
         if config_variables_file_path:
             config_provider.register_provider(
-                ConfigurationVariablesConfigurationProvider(
+                _ConfigurationVariablesConfigurationProvider(
                     config_variables_file_path=config_variables_file_path,
                     root_directory=self.root_directory,
                 )
             )
-        config_provider.register_provider(EnvironmentConfigurationProvider())
+        config_provider.register_provider(_EnvironmentConfigurationProvider())
         config_provider.register_provider(
-            RuntimeEnvironmentConfigurationProvider(self.runtime_environment)
+            _RuntimeEnvironmentConfigurationProvider(self.runtime_environment)
         )
 
     @abstractmethod
@@ -296,7 +296,7 @@ class AbstractDataContext(ABC):
         return self.variables.config
 
     @property
-    def config_provider(self) -> ConfigurationProvider:
+    def config_provider(self) -> _ConfigurationProvider:
         return self._config_provider
 
     @property
@@ -2527,7 +2527,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _load_config_variables(self) -> Dict:
         config_var_provider = self.config_provider.get_provider(
-            ConfigurationVariablesConfigurationProvider
+            _ConfigurationVariablesConfigurationProvider
         )
         if config_var_provider:
             return config_var_provider.get_values()

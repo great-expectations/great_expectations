@@ -6,7 +6,7 @@ import pytest
 from ruamel.yaml import YAML
 
 import great_expectations as ge
-from great_expectations.core.config_provider import ConfigurationSubstitutor
+from great_expectations.core.config_provider import _ConfigurationSubstitutor
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import (
     DataContextConfig,
@@ -145,7 +145,7 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
 
 
 def test_substitute_config_variable():
-    config_substitutor = ConfigurationSubstitutor()
+    config_substitutor = _ConfigurationSubstitutor()
     config_variables_dict = {
         "arg0": "val_of_arg_0",
         "arg2": {"v1": 2},
