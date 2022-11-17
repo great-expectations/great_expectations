@@ -122,11 +122,19 @@ module.exports = {
       style: 'light',
       links: [
         {
-          title: 'Docs',
+          title: 'Product',
           items: [
             {
-              label: 'Getting Started',
-              to: 'docs/tutorials/getting_started/tutorial_overview'
+              label: 'GX Cloud',
+              to: 'https://greatexpectations.io/cloud'
+            },
+            {
+              label: 'GX OSS',
+              to: 'https://greatexpectations.io/oss'
+            }
+                        {
+              label: 'Documentation',
+              to: 'https://docs.greatexpectations.io/'
             }
           ]
         },
