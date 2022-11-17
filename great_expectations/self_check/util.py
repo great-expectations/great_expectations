@@ -2929,11 +2929,12 @@ def check_json_test_result(test, result, data_asset=None) -> None:  # noqa: C901
             elif key == "unexpected_index_list":
                 if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset)):
                     pass
-                elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDFBatchData)):
-                    # TODO: add JSON test to ensure this parameter is fully tested
-                    assert (
-                        result["result"]["unexpected_index_list"] == value
-                    ), f"{result['result']['unexpected_index_list']} != {value}"
+                # elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDFBatchData)):
+                #    pass
+                # TODO: add JSON test to ensure this parameter is fully tested
+                # assert (
+                #     result["result"]["unexpected_index_list"] == value
+                # ), f"{result['result']['unexpected_index_list']} != {value}"
                 else:
                     assert (
                         result["result"]["unexpected_index_list"] == value
