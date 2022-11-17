@@ -74,7 +74,7 @@ class Datasource(ZepBaseModel, metaclass=MetaDatasource):
     }
     # Setting this in a Datasource subclass will override the execution engine type.
     # The primary use case is to inject an execution engine for testing.
-    execution_engine_override: ClassVar[Optional[ExecutionEngine]] = None
+    execution_engine_override: ClassVar[Optional[Type[ExecutionEngine]]] = None
 
     # instance attrs
     type: str

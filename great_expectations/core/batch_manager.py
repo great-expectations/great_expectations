@@ -41,12 +41,12 @@ class BatchManager:
             batch_list = []
 
         self._batch_cache: Dict[str, Batch] = OrderedDict()
-        self._batch_data_cache: Dict[str, BatchData] = {}
+        self._batch_data_cache: Dict[str, BatchDataType] = {}
 
         self.load_batch_list(batch_list=batch_list)
 
     @property
-    def batch_data_cache(self) -> Dict[str, BatchData]:
+    def batch_data_cache(self) -> Dict[str, BatchDataType]:
         """Dictionary of loaded BatchData objects."""
         return self._batch_data_cache
 
@@ -76,7 +76,7 @@ class BatchManager:
         return None
 
     @property
-    def active_batch_data(self) -> Optional[BatchData]:
+    def active_batch_data(self) -> Optional[BatchDataType]:
         """The BatchData object from the currently-active Batch object."""
         if self.active_batch_data_id is None:
             return None
