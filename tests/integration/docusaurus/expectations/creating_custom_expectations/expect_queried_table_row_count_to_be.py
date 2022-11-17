@@ -72,7 +72,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
-
+        # </snippet>
         value = configuration["kwargs"].get("value")
         query_result = metrics.get("query.table")[0][0]
 
@@ -159,7 +159,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
 if __name__ == "__main__":
     # <snippet>
     ExpectQueriedTableRowCountToBe().print_diagnostic_checklist()
-    # </snippet
+    # </snippet>
 
 # Note to users: code below this line is only for integration testing -- ignore!
 

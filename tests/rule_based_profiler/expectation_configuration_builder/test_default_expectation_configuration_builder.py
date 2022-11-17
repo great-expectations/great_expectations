@@ -21,6 +21,8 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.20s
 def test_meta_not_dict_exception(
     alice_columnar_table_single_batch_context,
 ):
@@ -85,6 +87,8 @@ def test_meta_not_dict_exception(
     )
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.24s
 def test_condition_not_string_exception(
     alice_columnar_table_single_batch_context,
 ):
@@ -148,6 +152,8 @@ def test_condition_not_string_exception(
     )
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.31s
 def test_default_expectation_configuration_builder_alice_null_condition_parameter_builder_validation_dependency_separate(
     alice_columnar_table_single_batch_context,
 ):
@@ -213,6 +219,8 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
     assert expectation_configuration.kwargs["min_value"] == 397433
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.34s
 def test_default_expectation_configuration_builder_alice_null_condition_parameter_builder_validation_dependency_included(
     alice_columnar_table_single_batch_context,
 ):
@@ -273,6 +281,8 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
     assert expectation_configuration.kwargs["min_value"] == 397433
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.33s
 def test_default_expectation_configuration_builder_alice_single_term_parameter_condition_true(
     alice_columnar_table_single_batch_context,
 ):
@@ -338,6 +348,8 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
     assert expectation_configuration.kwargs["min_value"] == 397433
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.25s
 def test_default_expectation_configuration_builder_alice_single_term_parameter_condition_false(
     alice_columnar_table_single_batch_context,
 ):
@@ -403,6 +415,8 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
     assert expectation_configuration is None
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.23s
 def test_default_expectation_configuration_builder_alice_single_term_variable_condition_true(
     alice_columnar_table_single_batch_context,
 ):
@@ -472,6 +486,8 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
     assert expectation_configuration.kwargs["min_value"] == 397433
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.19s
 def test_default_expectation_configuration_builder_alice_single_term_variable_condition_false(
     alice_columnar_table_single_batch_context,
 ):
@@ -541,6 +557,8 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
     assert expectation_configuration is None
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.19s
 def test_default_expectation_configuration_builder_alice_two_term_and_parameter_variable_condition_true(
     alice_columnar_table_single_batch_context,
 ):
@@ -610,6 +628,8 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
     assert expectation_configuration.kwargs["min_value"] == 397433
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.18s
 def test_default_expectation_configuration_builder_alice_two_term_and_parameter_variable_condition_false(
     alice_columnar_table_single_batch_context,
 ):
@@ -679,6 +699,8 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
     assert expectation_configuration is None
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.19s
 def test_default_expectation_configuration_builder_alice_two_term_or_parameter_variable_condition_true(
     alice_columnar_table_single_batch_context,
 ):
@@ -748,6 +770,8 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
     assert expectation_configuration.kwargs["min_value"] == 397433
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.19s
 def test_default_expectation_configuration_builder_alice_two_term_or_parameter_variable_condition_false(
     alice_columnar_table_single_batch_context,
 ):
@@ -817,6 +841,8 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
     assert expectation_configuration is None
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.19s
 def test_default_expectation_configuration_builder_alice_more_than_two_term_parameter_variable_condition_true(
     alice_columnar_table_single_batch_context,
 ):
@@ -886,6 +912,8 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
     assert expectation_configuration.kwargs["min_value"] == 397433
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.20s
 def test_default_expectation_configuration_builder_alice_more_than_two_term_parameter_variable_condition_false(
     alice_columnar_table_single_batch_context,
 ):
@@ -955,6 +983,8 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
     assert expectation_configuration is None
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.19s
 def test_default_expectation_configuration_builder_alice_parentheses_parameter_variable_condition_true(
     alice_columnar_table_single_batch_context,
 ):
@@ -1024,6 +1054,8 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
     assert expectation_configuration.kwargs["min_value"] == 397433
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.21s
 def test_default_expectation_configuration_builder_alice_parentheses_parameter_variable_condition_false(
     alice_columnar_table_single_batch_context,
 ):

@@ -8,6 +8,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_partial,
@@ -40,9 +41,9 @@ class ColumnStandardDeviation(ColumnAggregateMetricProvider):
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, _dialect, _metrics, **kwargs):
         """SqlAlchemy Standard Deviation implementation"""
-        if _dialect.name.lower() == "mssql":
+        if _dialect.name.lower() == GESqlDialect.MSSQL:
             standard_deviation = sa.func.stdev(column)
-        elif _dialect.name.lower() == "sqlite":
+        elif _dialect.name.lower() == GESqlDialect.SQLITE:
             mean = _metrics["column.mean"]
             nonnull_row_count = _metrics["column_values.null.unexpected_count"]
             standard_deviation = sa.func.sqrt(
@@ -81,13 +82,11 @@ class ColumnStandardDeviation(ColumnAggregateMetricProvider):
                 metric_name="column.mean",
                 metric_domain_kwargs=metric.metric_domain_kwargs,
                 metric_value_kwargs=None,
-                metric_dependencies=None,
             )
             dependencies["column_values.null.unexpected_count"] = MetricConfiguration(
                 metric_name="column_values.null.unexpected_count",
                 metric_domain_kwargs=metric.metric_domain_kwargs,
                 metric_value_kwargs=None,
-                metric_dependencies=None,
             )
 
         return dependencies

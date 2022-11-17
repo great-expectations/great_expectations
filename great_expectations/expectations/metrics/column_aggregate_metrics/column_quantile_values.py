@@ -13,6 +13,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 from great_expectations.execution_engine.util import get_approximate_percentile_disc_sql
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
@@ -103,35 +104,35 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
         quantiles = metric_value_kwargs["quantiles"]
         allow_relative_error = metric_value_kwargs.get("allow_relative_error", False)
         table_row_count = metrics.get("table.row_count")
-        if dialect.name.lower() == "mssql":
+        if dialect.name.lower() == GESqlDialect.MSSQL:
             return _get_column_quantiles_mssql(
                 column=column,
                 quantiles=quantiles,
                 selectable=selectable,
                 sqlalchemy_engine=sqlalchemy_engine,
             )
-        elif dialect.name.lower() == "bigquery":
+        elif dialect.name.lower() == GESqlDialect.BIGQUERY:
             return _get_column_quantiles_bigquery(
                 column=column,
                 quantiles=quantiles,
                 selectable=selectable,
                 sqlalchemy_engine=sqlalchemy_engine,
             )
-        elif dialect.name.lower() == "mysql":
+        elif dialect.name.lower() == GESqlDialect.MYSQL:
             return _get_column_quantiles_mysql(
                 column=column,
                 quantiles=quantiles,
                 selectable=selectable,
                 sqlalchemy_engine=sqlalchemy_engine,
             )
-        elif dialect.name.lower() == "trino":
+        elif dialect.name.lower() == GESqlDialect.TRINO:
             return _get_column_quantiles_trino(
                 column=column,
                 quantiles=quantiles,
                 selectable=selectable,
                 sqlalchemy_engine=sqlalchemy_engine,
             )
-        elif dialect.name.lower() == "snowflake":
+        elif dialect.name.lower() == GESqlDialect.SNOWFLAKE:
             # NOTE: 20201216 - JPC - snowflake has a representation/precision limitation
             # in its percentile_disc implementation that causes an error when we do
             # not round. It is unclear to me *how* the call to round affects the behavior --
@@ -148,7 +149,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
                 selectable=selectable,
                 sqlalchemy_engine=sqlalchemy_engine,
             )
-        elif dialect.name.lower() == "sqlite":
+        elif dialect.name.lower() == GESqlDialect.SQLITE:
             return _get_column_quantiles_sqlite(
                 column=column,
                 quantiles=quantiles,
@@ -156,7 +157,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
                 sqlalchemy_engine=sqlalchemy_engine,
                 table_row_count=table_row_count,
             )
-        elif dialect.name.lower() == "awsathena":
+        elif dialect.name.lower() == GESqlDialect.AWSATHENA:
             return _get_column_quantiles_athena(
                 column=column,
                 quantiles=quantiles,

@@ -39,6 +39,7 @@ sqlite_batch_request: BatchRequest = BatchRequest(
         (sqlite_runtime_batch_request, True, 70, 70, 'col("Age")>17'),
     ],
 )
+@pytest.mark.slow  # 4.32s
 def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
     batch_request,
     success,
@@ -85,6 +86,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
         ),
     ],
 )
+@pytest.mark.slow  # 1.59s
 def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_sqlite(
     batch_request,
     success,

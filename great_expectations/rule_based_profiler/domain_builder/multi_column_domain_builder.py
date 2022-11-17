@@ -1,4 +1,6 @@
-from typing import Dict, List, Optional, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -12,6 +14,12 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+    from great_expectations.validator.validator import Validator
+
 
 class MultiColumnDomainBuilder(ColumnDomainBuilder):
     """
@@ -21,12 +29,12 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
     def __init__(
         self,
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         Args:
             include_column_names: Explicitly specified desired columns
-            data_context: BaseDataContext associated with this DomainBuilder
+            data_context: AbstractDataContext associated with this DomainBuilder
         """
         super().__init__(
             include_column_names=include_column_names,
@@ -60,7 +68,7 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
         """
         batch_ids: List[str] = self.get_batch_ids(variables=variables)
 
-        validator: "Validator" = self.get_validator(variables=variables)  # noqa: F821
+        validator: Validator = self.get_validator(variables=variables)
 
         effective_column_names: List[str] = self.get_effective_column_names(
             batch_ids=batch_ids,

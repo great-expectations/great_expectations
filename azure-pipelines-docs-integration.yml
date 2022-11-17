@@ -29,7 +29,7 @@ resources:
     ports:
       - 1433:1433
   - container: trino
-    image: trinodb/trino:379
+    image: trinodb/trino:400
     ports:
       - 8088:8080
 
@@ -110,12 +110,6 @@ stages:
           inputs:
               secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
               retryCount: '2'
-        - task: DownloadSecureFile@1
-          name: aws_authkey
-          displayName: 'Download AWS Credentials'
-          inputs:
-              secureFile: 'aws_config_sandbox'
-              retryCount: '2'
         - script: |
             # install google cloud storage dependency
             pip install google-cloud-bigquery-storage
@@ -157,7 +151,9 @@ stages:
             REDSHIFT_DATABASE: $(REDSHIFT_DATABASE)
             REDSHIFT_SSLMODE: $(REDSHIFT_SSLMODE)
             # AWS credentials
-            AWS_CONFIG_FILE: $(aws_authkey.secureFilePath)
+            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+            AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
             ATHENA_DB_NAME: $(ATHENA_DB_NAME)
             ATHENA_STAGING_S3: $(ATHENA_STAGING_S3)
             ATHENA_DATA_BUCKET: $(ATHENA_DATA_BUCKET)

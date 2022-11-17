@@ -1,5 +1,5 @@
 import logging
-from typing import Mapping, Optional, Union
+from typing import Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
@@ -36,7 +36,7 @@ class FileDataContext(AbstractDataContext):
 
     def __init__(
         self,
-        project_config: Union[DataContextConfig, Mapping],
+        project_config: DataContextConfig,
         context_root_dir: str,
         runtime_environment: Optional[dict] = None,
     ) -> None:
@@ -53,7 +53,6 @@ class FileDataContext(AbstractDataContext):
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
-        self._variables: FileDataContextVariables = self._init_variables()
         super().__init__(runtime_environment=runtime_environment)
 
     def _init_datasource_store(self) -> None:
@@ -131,7 +130,7 @@ class FileDataContext(AbstractDataContext):
         )
         if include_rendered_content:
             expectation_suite.render()
-        return self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[arg-type]
+        return self.expectations_store.set(key, expectation_suite, **kwargs)
 
     @property
     def root_directory(self) -> Optional[str]:
@@ -146,6 +145,7 @@ class FileDataContext(AbstractDataContext):
     def _init_variables(self) -> FileDataContextVariables:
         variables = FileDataContextVariables(
             config=self._project_config,
+            config_provider=self.config_provider,
             data_context=self,  # type: ignore[arg-type]
         )
         return variables

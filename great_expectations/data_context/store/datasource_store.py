@@ -3,16 +3,19 @@ from __future__ import annotations
 import copy
 from typing import List, Optional, Union
 
-from great_expectations.core.data_context_key import DataContextVariableKey
+from great_expectations.core.data_context_key import (
+    DataContextKey,
+    DataContextVariableKey,
+)
 from great_expectations.core.serializer import AbstractConfigSerializer
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
-    DatasourceConfigSchema,
+    datasourceConfigSchema,
 )
-from great_expectations.data_context.types.refs import GeCloudResourceRef
-from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
+from great_expectations.data_context.types.refs import GXCloudResourceRef
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.util import filter_properties_dict
 
 
@@ -30,7 +33,7 @@ class DatasourceStore(Store):
         store_backend: Optional[dict] = None,
         runtime_environment: Optional[dict] = None,
     ) -> None:
-        self._schema = DatasourceConfigSchema()
+        self._schema = datasourceConfigSchema
         self._serializer = serializer
         super().__init__(
             store_backend=store_backend,
@@ -61,7 +64,7 @@ class DatasourceStore(Store):
         )
         return keys_without_store_backend_id
 
-    def remove_key(self, key: Union[DataContextVariableKey, GeCloudIdentifier]) -> None:
+    def remove_key(self, key: Union[DataContextVariableKey, GXCloudIdentifier]) -> None:
         """
         See parent `Store.remove_key()` for more information
         """
@@ -71,7 +74,7 @@ class DatasourceStore(Store):
         """
         See parent 'Store.serialize()' for more information
         """
-        return self._serializer.serialize(value)  # type: ignore[return-value]
+        return self._serializer.serialize(value)
 
     def deserialize(self, value: Union[dict, DatasourceConfig]) -> DatasourceConfig:
         """
@@ -112,7 +115,7 @@ class DatasourceStore(Store):
             ValueError if a DatasourceConfig is not found.
         """
         datasource_key: Union[
-            DataContextVariableKey, GeCloudIdentifier
+            DataContextVariableKey, GXCloudIdentifier
         ] = self.store_backend.build_key(name=datasource_name)
         if not self.has_key(datasource_key):  # noqa: W601
             raise ValueError(
@@ -121,17 +124,6 @@ class DatasourceStore(Store):
 
         datasource_config: DatasourceConfig = copy.deepcopy(self.get(datasource_key))  # type: ignore[assignment]
         return datasource_config
-
-    def delete_by_name(self, datasource_name: str) -> None:
-        """Deletes a DatasourceConfig persisted in the store by it's given name.
-
-        Args:
-            datasource_name: The name of the Datasource to retrieve.
-        """
-        datasource_key: DataContextVariableKey = self._determine_datasource_key(
-            datasource_name=datasource_name
-        )
-        self.remove_key(datasource_key)
 
     def delete(self, datasource_config: DatasourceConfig) -> None:
         """Deletes a DatasourceConfig persisted in the store using its config.
@@ -144,18 +136,10 @@ class DatasourceStore(Store):
 
     def _build_key_from_config(  # type: ignore[override]
         self, datasource_config: DatasourceConfig
-    ) -> Union[GeCloudIdentifier, DataContextVariableKey]:
-        if hasattr(datasource_config, "id"):
-            id = datasource_config.id
-        else:
-            id = None
-        if hasattr(datasource_config, "name"):
-            name = datasource_config.name
-        else:
-            name = None
+    ) -> Union[GXCloudIdentifier, DataContextVariableKey]:
         return self.store_backend.build_key(
-            name=name,
-            id=id,
+            name=datasource_config.name,
+            id=datasource_config.id,
         )
 
     def set_by_name(
@@ -172,22 +156,33 @@ class DatasourceStore(Store):
         )
         self.set(datasource_key, datasource_config)
 
-    def create(
-        self, datasource_config: DatasourceConfig
-    ) -> Optional[GeCloudResourceRef]:
+    def set(  # type: ignore[override]
+        self, key: Union[DataContextKey, None], value: DatasourceConfig, **_: dict
+    ) -> DatasourceConfig:
         """Create a datasource config in the store using a store_backend-specific key.
-
         Args:
-            datasource_config: Config containing the datasource name.
-
+            key: Optional key to use when setting value.
+            value: DatasourceConfig set in the store at the key provided or created from the DatasourceConfig attributes.
+            **_: kwargs will be ignored but accepted to align with the parent class.
         Returns:
-            None unless using GeCloudStoreBackend and if so the GeCloudResourceRef which contains the id
-            which was used to create the config in the backend.
+            DatasourceConfig retrieved from the DatasourceStore.
         """
-        key: Union[
-            GeCloudIdentifier, DataContextVariableKey
-        ] = self._build_key_from_config(datasource_config)
-        return self.set(key, datasource_config)  # type: ignore[func-returns-value]
+        if not key:
+            key = self._build_key_from_config(value)
+
+        # Make two separate requests to set and get in order to obtain any additional
+        # values that may have been added to the config by the StoreBackend (i.e. object ids)
+        ref: Optional[Union[bool, GXCloudResourceRef]] = super().set(key, value)
+        if ref and isinstance(ref, GXCloudResourceRef):
+            key.ge_cloud_id = ref.ge_cloud_id  # type: ignore[attr-defined]
+
+        return_value: DatasourceConfig = self.get(key)  # type: ignore[assignment]
+        if not return_value.name and isinstance(key, DataContextVariableKey):
+            # Setting the name in the config is currently needed to handle adding the name to v2 datasource
+            # configs and can be refactored (e.g. into `get()`)
+            return_value.name = key.resource_name
+
+        return return_value
 
     def update_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig

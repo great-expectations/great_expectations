@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import datetime
 import json
 import logging
 from copy import deepcopy
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 try:
     from typing import TypedDict
@@ -29,7 +31,8 @@ from great_expectations.core.util import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
-from great_expectations.render.types import (
+from great_expectations.render import (
+    AtomicDiagnosticRendererType,
     RenderedAtomicContent,
     RenderedAtomicContentSchema,
 )
@@ -229,7 +232,17 @@ class ExpectationValidationResult(SerializableDictDot):
                 class_name=inline_renderer_config["class_name"],
             )
 
-        self.rendered_content = inline_renderer.get_rendered_content()
+        rendered_content: List[
+            RenderedAtomicContent
+        ] = inline_renderer.get_rendered_content()
+
+        self.rendered_content = (
+            inline_renderer.replace_or_keep_existing_rendered_content(
+                existing_rendered_content=self.rendered_content,
+                new_rendered_content=rendered_content,
+                failed_renderer_type=AtomicDiagnosticRendererType.FAILED,
+            )
+        )
 
     @staticmethod
     def validate_result_dict(result):
@@ -480,7 +493,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
 
     def get_failed_validation_results(
         self,
-    ) -> "ExpectationSuiteValidationResult":  # noqa: F821
+    ) -> ExpectationSuiteValidationResult:
         validation_results = [result for result in self.results if not result.success]
 
         successful_expectations = sum(exp.success for exp in validation_results)

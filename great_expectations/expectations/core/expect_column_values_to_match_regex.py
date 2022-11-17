@@ -4,10 +4,10 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     InvalidExpectationConfigurationError,
+    render_evaluation_parameter_string,
 )
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -28,7 +28,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 
 
 class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
-    """Expect column entries to be strings that match a given regular expression.
+    """Expect the column entries to be strings that match a given regular expression.
 
     Valid matches can be found \
     anywhere in the string, for example "[at]+" will identify the following strings as expected: "cat", "hat", \
@@ -88,7 +88,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         ],
         "requirements": [],
         "has_full_test_suite": True,
-        "manually_reviewed_code": False,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.match_regex"
@@ -182,7 +182,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
-    @renderer(renderer_type="renderer.question")
+    @renderer(renderer_type=LegacyRendererType.QUESTION)
     def _question_renderer(
         cls, configuration, result=None, language=None, runtime_configuration=None
     ):
@@ -193,7 +193,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         return f'Do at least {mostly * 100}% of values in column "{column}" match the regular expression {regex}?'
 
     @classmethod
-    @renderer(renderer_type="renderer.answer")
+    @renderer(renderer_type=LegacyRendererType.ANSWER)
     def _answer_renderer(
         cls, configuration=None, result=None, language=None, runtime_configuration=None
     ):
@@ -273,7 +273,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,

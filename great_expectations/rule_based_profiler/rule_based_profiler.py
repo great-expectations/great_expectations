@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import json
 import logging
 import sys
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -24,13 +26,11 @@ from great_expectations.core.util import (
     determine_progress_bar_method_by_environment,
     nested_update,
 )
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
-from great_expectations.data_context.types.refs import GeCloudResourceRef
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
@@ -74,8 +74,13 @@ from great_expectations.rule_based_profiler.parameter_container import (
     build_parameter_container_for_variables,
 )
 from great_expectations.rule_based_profiler.rule import Rule, RuleOutput
-from great_expectations.rule_based_profiler.rule_state import RuleState
+from great_expectations.rule_based_profiler.rule.rule_state import RuleState
 from great_expectations.util import filter_properties_dict
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
+    from great_expectations.data_context.store.profiler_store import ProfilerStore
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -95,7 +100,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def __init__(
         self,
         profiler_config: RuleBasedProfilerConfig,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
         usage_statistics_handler: Optional[UsageStatisticsHandler] = None,
     ) -> None:
         """
@@ -107,7 +112,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         Args:
             profiler_config: RuleBasedProfilerConfig -- formal typed object containing configuration
-            data_context: BaseDataContext object that defines full runtime environment (data access, etc.)
+            data_context: AbstractDataContext object that defines full runtime environment (data access, etc.)
         """
         name: str = profiler_config.name
         id: Optional[str] = None
@@ -215,7 +220,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     @staticmethod
     def _init_rule_domain_builder(
         domain_builder_config: dict,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> DomainBuilder:
         domain_builder: DomainBuilder = instantiate_class_from_config(
             config=domain_builder_config,
@@ -228,7 +233,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return domain_builder
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.RULE_BASED_PROFILER_RUN.value,
+        event_name=UsageStatsEvents.RULE_BASED_PROFILER_RUN,
         args_payload_fn=get_profiler_run_usage_statistics,
     )
     def run(
@@ -1046,8 +1051,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     @staticmethod
     def run_profiler(
-        data_context: "BaseDataContext",  # noqa: F821
-        profiler_store: "ProfilerStore",  # noqa: F821
+        data_context: AbstractDataContext,
+        profiler_store: ProfilerStore,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         name: Optional[str] = None,
@@ -1076,8 +1081,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     @staticmethod
     def run_profiler_on_data(
-        data_context: "BaseDataContext",  # noqa: F821
-        profiler_store: "ProfilerStore",  # noqa: F821
+        data_context: AbstractDataContext,
+        profiler_store: ProfilerStore,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         name: Optional[str] = None,
@@ -1110,9 +1115,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
     @staticmethod
     def add_profiler(
         config: RuleBasedProfilerConfig,
-        data_context: "BaseDataContext",  # noqa: F821
-        profiler_store: "ProfilerStore",  # noqa: F821
-    ) -> "RuleBasedProfiler":  # noqa: F821
+        data_context: AbstractDataContext,
+        profiler_store: ProfilerStore,
+    ) -> RuleBasedProfiler:
         if not RuleBasedProfiler._check_validity_of_batch_requests_in_config(
             config=config
         ):
@@ -1120,8 +1125,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 f'batch_data found in batch_request cannot be saved to ProfilerStore "{profiler_store.store_name}"'
             )
 
-        # Chetan - 20220204 - BaseDataContext to be removed once it can be decoupled from RBP
-        new_profiler: "RuleBasedProfiler" = instantiate_class_from_config(  # noqa: F821
+        # Chetan - 20220204 - AbstractDataContext to be removed once it can be decoupled from RBP
+        new_profiler: RuleBasedProfiler = instantiate_class_from_config(
             config=config.to_json_dict(),
             runtime_environment={
                 "data_context": data_context,
@@ -1132,16 +1137,16 @@ class BaseRuleBasedProfiler(ConfigPeer):
             },
         )
 
-        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+        key: Union[GXCloudIdentifier, ConfigurationIdentifier]
         if data_context.ge_cloud_mode:
-            key = GeCloudIdentifier(resource_type=GeCloudRESTResource.PROFILER)
+            key = GXCloudIdentifier(resource_type=GXCloudRESTResource.PROFILER)
         else:
             key = ConfigurationIdentifier(
                 configuration_key=config.name,
             )
 
         response = profiler_store.set(key=key, value=config)
-        if isinstance(response, GeCloudResourceRef):
+        if isinstance(response, GXCloudResourceRef):
             new_profiler.ge_cloud_id = response.ge_cloud_id
 
         return new_profiler
@@ -1174,19 +1179,19 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     @staticmethod
     def get_profiler(
-        data_context: "BaseDataContext",  # noqa: F821
-        profiler_store: "ProfilerStore",  # noqa: F821
+        data_context: AbstractDataContext,
+        profiler_store: ProfilerStore,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
-    ) -> "RuleBasedProfiler":  # noqa: F821
+    ) -> RuleBasedProfiler:
         assert bool(name) ^ bool(
             ge_cloud_id
         ), "Must provide either name or ge_cloud_id (but not both)"
 
-        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+        key: Union[GXCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
-            key = GeCloudIdentifier(
-                resource_type=GeCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
+            key = GXCloudIdentifier(
+                resource_type=GXCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
             )
         else:
             key = ConfigurationIdentifier(
@@ -1195,7 +1200,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         try:
             profiler_config: RuleBasedProfilerConfig = profiler_store.get(key=key)
         except ge_exceptions.InvalidKeyError as exc_ik:
-            id: Union[GeCloudIdentifier, ConfigurationIdentifier] = (
+            id: Union[GXCloudIdentifier, ConfigurationIdentifier] = (
                 key.configuration_key
                 if isinstance(key, ConfigurationIdentifier)
                 else key
@@ -1210,7 +1215,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         config = filter_properties_dict(properties=config, clean_falsy=True)
 
-        profiler: "RuleBasedProfiler" = instantiate_class_from_config(  # noqa: F821
+        profiler: RuleBasedProfiler = instantiate_class_from_config(
             config=config,
             runtime_environment={
                 "data_context": data_context,
@@ -1225,7 +1230,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     @staticmethod
     def delete_profiler(
-        profiler_store: "ProfilerStore",  # noqa: F821
+        profiler_store: ProfilerStore,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> None:
@@ -1233,10 +1238,10 @@ class BaseRuleBasedProfiler(ConfigPeer):
             ge_cloud_id
         ), "Must provide either name or ge_cloud_id (but not both)"
 
-        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+        key: Union[GXCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
-            key = GeCloudIdentifier(
-                resource_type=GeCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
+            key = GXCloudIdentifier(
+                resource_type=GXCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
             )
         else:
             key = ConfigurationIdentifier(configuration_key=name)
@@ -1255,7 +1260,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     @staticmethod
     def list_profilers(
-        profiler_store: "ProfilerStore",  # noqa: F821
+        profiler_store: ProfilerStore,
         ge_cloud_mode: bool,
     ) -> List[str]:
         if ge_cloud_mode:
@@ -1264,7 +1269,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     def self_check(self, pretty_print: bool = True) -> dict:
         """
-        Necessary to enable integration with `BaseDataContext.test_yaml_config`
+        Necessary to enable integration with `AbstractDataContext.test_yaml_config`
         Args:
             pretty_print: flag to turn on verbose output
         Returns:
@@ -1421,7 +1426,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         config_version: float,
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
         id: Optional[str] = None,
     ) -> None:
         """
@@ -1437,7 +1442,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             variables: Any variables to be substituted within the rules
             rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and
             expectation_configuration_builders configuration components
-            data_context: BaseDataContext object that defines full runtime environment (data access, etc.)
+            data_context: AbstractDataContext object that defines full runtime environment (data access, etc.)
         """
         profiler_config = RuleBasedProfilerConfig(
             name=name,

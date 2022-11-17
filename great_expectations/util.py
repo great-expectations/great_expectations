@@ -25,11 +25,25 @@ from inspect import (
     getclosurevars,
     getmodule,
     signature,
+    stack,
 )
 from numbers import Number
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+    cast,
+    overload,
+)
 
 import numpy as np
 import pandas as pd
@@ -38,15 +52,32 @@ from packaging import version
 from pkg_resources import Distribution
 
 from great_expectations.exceptions import (
+    GXCloudConfigurationError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
 from great_expectations.expectations.registry import _registered_expectations
 
+if TYPE_CHECKING:
+    # needed until numpy min version 1.20
+    import numpy.typing as npt
+
+    from great_expectations.data_context.data_context import (
+        BaseDataContext,
+        CloudDataContext,
+        DataContext,
+    )
+    from great_expectations.data_context.types.base import DataContextConfig
+
+try:
+    from typing import TypeGuard  # type: ignore[attr-defined]
+except ImportError:
+    from typing_extensions import TypeGuard
+
 try:
     import black
 except ImportError:
-    black = None
+    black = None  # type: ignore[assignment]
 
 try:
     # This library moved in python 3.8
@@ -83,7 +114,7 @@ class bidict(dict):
 
     def __init__(self, *args: List[Any], **kwargs: Dict[str, Any]) -> None:
         super().__init__(*args, **kwargs)
-        self.inverse = {}
+        self.inverse: Dict = {}
         for key, value in self.items():
             self.inverse.setdefault(value, []).append(key)
 
@@ -132,7 +163,7 @@ def hyphen(txt: str):
     return txt.replace("_", "-")
 
 
-def profile(func: Callable = None) -> Callable:
+def profile(func: Callable) -> Callable:
     @wraps(func)
     def profile_function_call(*args, **kwargs) -> Any:
         pr: cProfile.Profile = cProfile.Profile()
@@ -197,7 +228,7 @@ def measure_execution_time(
                 if kwargs is None:
                     kwargs = {}
 
-                execution_time_holder: type = kwargs.get(
+                execution_time_holder: type = kwargs.get(  # type: ignore[assignment]
                     execution_time_holder_object_reference_name
                 )
                 if execution_time_holder is not None and hasattr(
@@ -244,8 +275,8 @@ def get_project_distribution() -> Optional[Distribution]:
 
 # Returns the object reference to the currently running function (i.e., the immediate function under execution).
 def get_currently_executing_function() -> Callable:
-    cf: FrameType = currentframe()
-    fb: FrameType = cf.f_back
+    cf = cast(FrameType, currentframe())
+    fb = cast(FrameType, cf.f_back)
     fc: CodeType = fb.f_code
     func_obj: Callable = [
         referer
@@ -277,8 +308,8 @@ def get_currently_executing_function_call_arguments(
     )
     filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
     """
-    cf: FrameType = currentframe()
-    fb: FrameType = cf.f_back
+    cf = cast(FrameType, currentframe())
+    fb = cast(FrameType, cf.f_back)
     argvs: ArgInfo = getargvalues(fb)
     fc: CodeType = fb.f_code
     cur_func_obj: Callable = [
@@ -312,7 +343,7 @@ def get_currently_executing_function_call_arguments(
         call_args_dict.update(value)
 
     if include_module_name:
-        call_args_dict.update({"module_name": cur_mod.__name__})
+        call_args_dict.update({"module_name": cur_mod.__name__})  # type: ignore[union-attr]
 
     if not include_caller_names:
         if call_args.get("cls"):
@@ -325,18 +356,20 @@ def get_currently_executing_function_call_arguments(
     return call_args_dict
 
 
-def verify_dynamic_loading_support(module_name: str, package_name: str = None) -> None:
+def verify_dynamic_loading_support(
+    module_name: str, package_name: Optional[str] = None
+) -> None:
     """
     :param module_name: a possibly-relative name of a module
     :param package_name: the name of a package, to which the given module belongs
     """
     try:
         # noinspection PyUnresolvedReferences
-        module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(
+        module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(  # type: ignore[attr-defined]
             module_name, package=package_name
         )
     except ModuleNotFoundError:
-        module_spec = None
+        module_spec = None  # type: ignore[assignment]
     if not module_spec:
         if not package_name:
             package_name = ""
@@ -1190,15 +1223,86 @@ def filter_properties_dict(
     return properties
 
 
+@overload
 def deep_filter_properties_iterable(
-    properties: Optional[Any] = None,
+    properties: dict,
+    keep_fields: Optional[Set[str]] = ...,
+    delete_fields: Optional[Set[str]] = ...,
+    clean_nulls: bool = ...,
+    clean_falsy: bool = ...,
+    keep_falsy_numerics: bool = ...,
+    inplace: bool = ...,
+) -> dict:
+    ...
+
+
+@overload
+def deep_filter_properties_iterable(
+    properties: list,
+    keep_fields: Optional[Set[str]] = ...,
+    delete_fields: Optional[Set[str]] = ...,
+    clean_nulls: bool = ...,
+    clean_falsy: bool = ...,
+    keep_falsy_numerics: bool = ...,
+    inplace: bool = ...,
+) -> list:
+    ...
+
+
+@overload
+def deep_filter_properties_iterable(
+    properties: set,
+    keep_fields: Optional[Set[str]] = ...,
+    delete_fields: Optional[Set[str]] = ...,
+    clean_nulls: bool = ...,
+    clean_falsy: bool = ...,
+    keep_falsy_numerics: bool = ...,
+    inplace: bool = ...,
+) -> set:
+    ...
+
+
+@overload
+def deep_filter_properties_iterable(
+    properties: tuple,
+    keep_fields: Optional[Set[str]] = ...,
+    delete_fields: Optional[Set[str]] = ...,
+    clean_nulls: bool = ...,
+    clean_falsy: bool = ...,
+    keep_falsy_numerics: bool = ...,
+    inplace: bool = ...,
+) -> tuple:
+    ...
+
+
+@overload
+def deep_filter_properties_iterable(
+    properties: None,
+    keep_fields: Optional[Set[str]] = ...,
+    delete_fields: Optional[Set[str]] = ...,
+    clean_nulls: bool = ...,
+    clean_falsy: bool = ...,
+    keep_falsy_numerics: bool = ...,
+    inplace: bool = ...,
+) -> None:
+    ...
+
+
+def deep_filter_properties_iterable(
+    properties: Union[dict, list, set, tuple, None] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
     clean_nulls: bool = True,
     clean_falsy: bool = False,
     keep_falsy_numerics: bool = True,
     inplace: bool = False,
-) -> Optional[Union[dict, list, set]]:
+) -> Union[dict, list, set, tuple, None]:
+    if keep_fields is None:
+        keep_fields = set()
+
+    if delete_fields is None:
+        delete_fields = set()
+
     if isinstance(properties, dict):
         if not inplace:
             properties = copy.deepcopy(properties)
@@ -1226,10 +1330,11 @@ def deep_filter_properties_iterable(
                 inplace=True,
             )
 
-        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties
+        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties.
         keys_to_delete: List[str] = list(
             filter(
-                lambda k: _is_to_be_removed_from_deep_filter_properties_iterable(
+                lambda k: k not in keep_fields  # type: ignore[arg-type]
+                and _is_to_be_removed_from_deep_filter_properties_iterable(
                     value=properties[k],
                     clean_nulls=clean_nulls,
                     clean_falsy=clean_falsy,
@@ -1245,7 +1350,6 @@ def deep_filter_properties_iterable(
         if not inplace:
             properties = copy.deepcopy(properties)
 
-        value: Any
         for value in properties:
             deep_filter_properties_iterable(
                 properties=value,
@@ -1257,7 +1361,7 @@ def deep_filter_properties_iterable(
                 inplace=True,
             )
 
-        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties
+        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties.
         properties_type: type = type(properties)
         properties = properties_type(
             filter(
@@ -1283,7 +1387,7 @@ def _is_to_be_removed_from_deep_filter_properties_iterable(
     conditions: Tuple[bool, ...] = (
         clean_nulls and value is None,
         not keep_falsy_numerics and is_numeric(value) and value == 0,
-        clean_falsy and not is_numeric(value) and not value,
+        clean_falsy and not (is_numeric(value) or value),
     )
     return any(condition for condition in conditions)
 
@@ -1340,7 +1444,20 @@ def convert_decimal_to_float(d: decimal.Decimal) -> float:
     """
     This method convers "decimal.Decimal" to standard "float" type.
     """
-    if requires_lossy_conversion(d=d):
+    rule_based_profiler_call: bool = (
+        len(
+            list(
+                filter(
+                    lambda frame_info: Path(frame_info.filename).name
+                    == "parameter_builder.py"
+                    and frame_info.function == "get_metrics",
+                    stack(),
+                )
+            )
+        )
+        > 0
+    )
+    if not rule_based_profiler_call and requires_lossy_conversion(d=d):
         logger.warning(
             f"Using lossy conversion for decimal {d} to float object to support serialization."
         )
@@ -1387,20 +1504,23 @@ def isclose(
     if isinstance(operand_a, datetime.datetime) and isinstance(
         operand_b, datetime.datetime
     ):
-        operand_a = operand_a.timestamp()
-        operand_b = operand_b.timestamp()
+        operand_a = operand_a.timestamp()  # type: ignore[assignment]
+        operand_b = operand_b.timestamp()  # type: ignore[assignment]
     elif isinstance(operand_a, datetime.timedelta) and isinstance(
         operand_b, datetime.timedelta
     ):
-        operand_a = operand_a.total_seconds()
-        operand_b = operand_b.total_seconds()
+        operand_a = operand_a.total_seconds()  # type: ignore[assignment]
+        operand_b = operand_b.total_seconds()  # type: ignore[assignment]
 
-    return np.isclose(
-        a=np.float64(operand_a),
-        b=np.float64(operand_b),
-        rtol=rtol,
-        atol=atol,
-        equal_nan=equal_nan,
+    return cast(
+        bool,
+        np.isclose(
+            a=np.float64(operand_a),
+            b=np.float64(operand_b),
+            rtol=rtol,
+            atol=atol,
+            equal_nan=equal_nan,
+        ),
     )
 
 
@@ -1458,7 +1578,10 @@ def is_ndarray_datetime_dtype(
 
 
 def convert_ndarray_to_datetime_dtype_best_effort(
-    data: np.ndarray, parse_strings_as_datetimes: bool = False, fuzzy: bool = False
+    data: np.ndarray,
+    datetime_detected: bool = False,
+    parse_strings_as_datetimes: bool = False,
+    fuzzy: bool = False,
 ) -> Tuple[bool, bool, np.ndarray]:
     """
     Attempt to parse all elements of 1-D "np.ndarray" argument into "datetime.datetime" type objects.
@@ -1474,7 +1597,7 @@ def convert_ndarray_to_datetime_dtype_best_effort(
         return True, False, data
 
     value: Any
-    if is_ndarray_datetime_dtype(
+    if datetime_detected or is_ndarray_datetime_dtype(
         data=data, parse_strings_as_datetimes=parse_strings_as_datetimes, fuzzy=fuzzy
     ):
         try:
@@ -1489,20 +1612,28 @@ def convert_ndarray_to_datetime_dtype_best_effort(
     return False, False, data
 
 
-def convert_ndarray_datetime_to_float_dtype(data: np.ndarray) -> np.ndarray:
+def convert_ndarray_datetime_to_float_dtype_utc_timezone(
+    data: np.ndarray,
+) -> np.ndarray:
     """
     Convert all elements of 1-D "np.ndarray" argument from "datetime.datetime" type to "timestamp" "float" type objects.
+
+    Note: Conversion of "datetime.datetime" to "float" uses "UTC" TimeZone to normalize all "datetime.datetime" values.
     """
     value: Any
-    return np.asarray([value.timestamp() for value in data])
+    return np.asarray(
+        [value.replace(tzinfo=datetime.timezone.utc).timestamp() for value in data]
+    )
 
 
 def convert_ndarray_float_to_datetime_dtype(data: np.ndarray) -> np.ndarray:
     """
     Convert all elements of 1-D "np.ndarray" argument from "float" type to "datetime.datetime" type objects.
+
+    Note: Converts to "naive" "datetime.datetime" values (assumes "UTC" TimeZone based floating point timestamps).
     """
     value: Any
-    return np.asarray([datetime.datetime.fromtimestamp(value) for value in data])
+    return np.asarray([datetime.datetime.utcfromtimestamp(value) for value in data])
 
 
 def convert_ndarray_float_to_datetime_tuple(
@@ -1510,14 +1641,136 @@ def convert_ndarray_float_to_datetime_tuple(
 ) -> Tuple[datetime.datetime, ...]:
     """
     Convert all elements of 1-D "np.ndarray" argument from "float" type to "datetime.datetime" type tuple elements.
+
+    Note: Converts to "naive" "datetime.datetime" values (assumes "UTC" TimeZone based floating point timestamps).
     """
     return tuple(convert_ndarray_float_to_datetime_dtype(data=data).tolist())
 
 
-def get_context():
-    from great_expectations.data_context.data_context import DataContext
+def is_ndarray_decimal_dtype(
+    data: "npt.NDArray",
+) -> TypeGuard["npt.NDArray"]:
+    """
+    Determine whether or not all elements of 1-D "np.ndarray" argument are "decimal.Decimal" type objects.
+    """
+    value: Any
+    result: bool = all(isinstance(value, decimal.Decimal) for value in data)
+    return result
 
-    return DataContext()
+
+def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
+    """
+    Convert all elements of N-D "np.ndarray" argument from "decimal.Decimal" type to "float" type objects.
+    """
+    convert_decimal_to_float_vectorized: Callable[
+        [np.ndarray], np.ndarray
+    ] = np.vectorize(pyfunc=convert_decimal_to_float)
+    return convert_decimal_to_float_vectorized(data)
+
+
+def get_context(
+    project_config: Optional[Union["DataContextConfig", Mapping]] = None,
+    context_root_dir: Optional[str] = None,
+    runtime_environment: Optional[dict] = None,
+    ge_cloud_base_url: Optional[str] = None,
+    ge_cloud_access_token: Optional[str] = None,
+    ge_cloud_organization_id: Optional[str] = None,
+    ge_cloud_mode: Optional[bool] = None,
+) -> Union["DataContext", "BaseDataContext", "CloudDataContext"]:
+    """
+    Method to return the appropriate DataContext depending on parameters and environment.
+
+    Usage:
+        import great_expectations as gx
+        my_context = gx.get_context([parameters])
+
+    1. If gx.get_context() is run in a filesystem where `great_expectations init` has been run, then it will return a
+        DataContext
+
+    2. If gx.get_context() is passed in a `context_root_dir` (which contains great_expectations.yml) then it will return
+         a DataContext
+
+    3. If gx.get_context() is passed in an in-memory `project_config` then it will return BaseDataContext.
+        `context_root_dir` can also be passed in, but the configurations from the in-memory config will override the
+        configurations in the `great_expectations.yml` file.
+
+
+    4. If GX is being run in the cloud, and the information needed for ge_cloud_config (ie ge_cloud_base_url,
+        ge_cloud_access_token, ge_cloud_organization_id) are passed in as parameters to get_context(), configured as
+        environment variables, or in a .conf file, then get_context() will return a CloudDataContext.
+
+
+    +-----------------------+---------------------+---------------+
+    |  get_context params   |    Env Not Config'd |  Env Config'd |
+    +-----------------------+---------------------+---------------+
+    | ()                    | Local               | Cloud         |
+    | (ge_cloud_mode=True)  | Exception!          | Cloud         |
+    | (ge_cloud_mode=False) | Local               | Local         |
+    +-----------------------+---------------------+---------------+
+
+    TODO: This method will eventually return FileDataContext and EphemeralDataContext, rather than DataContext and Base
+
+    Args:
+        project_config (dict or DataContextConfig): In-memory configuration for DataContext.
+        context_root_dir (str): Path to directory that contains great_expectations.yml file
+        runtime_environment (dict): A dictionary of values can be passed to a DataContext when it is instantiated.
+            These values will override both values from the config variables file and
+            from environment variables.
+
+        The following parameters are relevant when running ge_cloud
+        ge_cloud_base_url (str): url for ge_cloud endpoint.
+        ge_cloud_access_token (str): access_token for ge_cloud account.
+        ge_cloud_organization_id (str): org_id for ge_cloud account.
+        ge_cloud_mode (bool): bool flag to specify whether to run GE in cloud mode (default is None).
+
+    Returns:
+        DataContext. Either a DataContext, BaseDataContext, or CloudDataContext depending on environment and/or
+        parameters
+
+    """
+    from great_expectations.data_context.data_context import (
+        BaseDataContext,
+        CloudDataContext,
+        DataContext,
+    )
+
+    # First, check for ge_cloud conditions
+
+    config_available = CloudDataContext.is_ge_cloud_config_available(
+        ge_cloud_base_url=ge_cloud_base_url,
+        ge_cloud_access_token=ge_cloud_access_token,
+        ge_cloud_organization_id=ge_cloud_organization_id,
+    )
+
+    # If config available and not explicitly disabled
+    if config_available and ge_cloud_mode is not False:
+        return CloudDataContext(
+            project_config=project_config,
+            runtime_environment=runtime_environment,
+            context_root_dir=context_root_dir,
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_organization_id=ge_cloud_organization_id,
+        )
+
+    if ge_cloud_mode and not config_available:
+        raise GXCloudConfigurationError(
+            "GE Cloud Mode enabled, but missing env vars: GE_CLOUD_ORGANIZATION_ID, GE_CLOUD_ACCESS_TOKEN"
+        )
+
+    # Second, check for which type of local
+
+    if project_config is not None:
+        return BaseDataContext(
+            project_config=project_config,
+            context_root_dir=context_root_dir,
+            runtime_environment=runtime_environment,
+        )
+
+    return DataContext(
+        context_root_dir=context_root_dir,
+        runtime_environment=runtime_environment,
+    )
 
 
 def is_sane_slack_webhook(url: str) -> bool:
@@ -1528,7 +1781,7 @@ def is_sane_slack_webhook(url: str) -> bool:
     return url.strip().startswith("https://hooks.slack.com/")
 
 
-def is_list_of_strings(_list) -> bool:
+def is_list_of_strings(_list) -> TypeGuard[List[str]]:
     return isinstance(_list, list) and all([isinstance(site, str) for site in _list])
 
 

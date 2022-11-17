@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import json
 import logging
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
 from marshmallow import INCLUDE, Schema, ValidationError, fields, post_dump, post_load
 from ruamel.yaml.comments import CommentedMap
@@ -21,6 +23,12 @@ from great_expectations.util import (
     deep_filter_properties_iterable,
     filter_properties_dict,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.rule_based_profiler.rule.rule import Rule
+    from great_expectations.rule_based_profiler.rule_based_profiler import (
+        RuleBasedProfiler,
+    )
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -519,11 +527,11 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
             raise
 
     @classmethod
-    def get_config_class(cls) -> Type["RuleBasedProfilerConfig"]:  # noqa: F821
+    def get_config_class(cls) -> Type[RuleBasedProfilerConfig]:
         return cls
 
     @classmethod
-    def get_schema_class(cls) -> Type["RuleBasedProfilerConfigSchema"]:  # noqa: F821
+    def get_schema_class(cls) -> Type[RuleBasedProfilerConfigSchema]:
         return RuleBasedProfilerConfigSchema
 
     def to_json_dict(self) -> dict:
@@ -572,10 +580,10 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
     @classmethod
     def resolve_config_using_acceptable_arguments(
         cls,
-        profiler: "RuleBasedProfiler",  # noqa: F821
+        profiler: RuleBasedProfiler,
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
-    ) -> "RuleBasedProfilerConfig":  # noqa: F821
+    ) -> RuleBasedProfilerConfig:
         """Reconciles variables/rules by taking into account runtime overrides and variable substitution.
 
         Utilized in usage statistics to interact with the args provided in `RuleBasedProfiler.run()`.
@@ -599,12 +607,12 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
             variables=effective_variables
         )
 
-        effective_rules: List["Rule"] = profiler.reconcile_profiler_rules(  # noqa: F821
+        effective_rules: List[Rule] = profiler.reconcile_profiler_rules(
             rules=rules,
         )
 
-        rule: "Rule"  # noqa: F821
-        effective_rules_dict: Dict[str, "Rule"] = {  # noqa: F821
+        rule: Rule
+        effective_rules_dict: Dict[str, Rule] = {
             rule.name: rule for rule in effective_rules
         }
         runtime_rules: Dict[str, dict] = {
@@ -624,7 +632,7 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
 
     @staticmethod
     def _substitute_variables_in_config(
-        rule: "Rule",  # noqa: F821
+        rule: Rule,
         variables_container: ParameterContainer,
     ) -> dict:
         """Recursively updates a given rule to substitute $variable references.

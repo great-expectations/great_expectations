@@ -1,5 +1,6 @@
 import os
 
+import pytest
 from click.testing import CliRunner
 
 from great_expectations import DataContext
@@ -24,6 +25,7 @@ def test_docs_help_output(caplog):
 
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 2.67s
 def test_docs_build_view(
     mock_webbrowser,
     caplog,
@@ -67,6 +69,7 @@ def test_docs_build_view(
 
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 2.57s
 def test_docs_build_no_view(
     mock_webbrowser,
     caplog,
@@ -112,6 +115,7 @@ def test_docs_build_no_view(
     )
 
 
+@pytest.mark.slow  # 2.43s
 def test_docs_build_assume_yes(
     caplog, site_builder_data_context_v013_with_html_store_titanic_random
 ):

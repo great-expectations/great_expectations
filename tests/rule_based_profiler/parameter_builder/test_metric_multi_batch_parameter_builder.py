@@ -1,5 +1,7 @@
 from typing import Dict, Optional
 
+import pytest
+
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.domain import Domain
@@ -16,6 +18,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 
+@pytest.mark.integration
 def test_metric_multi_batch_parameter_builder_bobby_single_batch_default(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -77,7 +80,6 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_default(
                 "domain_kwargs": {},
                 "metric_name": "table.row_count",
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
@@ -97,6 +99,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_default(
     assert parameter_node == expected_value_dict
 
 
+@pytest.mark.integration
 def test_metric_multi_batch_parameter_builder_bobby_single_batch_no(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -162,7 +165,6 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_no(
                 "domain_kwargs": {},
                 "metric_name": "table.row_count",
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
@@ -182,6 +184,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_no(
     assert parameter_node == expected_value_dict
 
 
+@pytest.mark.integration
 def test_metric_multi_batch_parameter_builder_bobby_single_batch_yes(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -247,7 +250,6 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_yes(
                 "domain_kwargs": {},
                 "metric_name": "table.row_count",
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 1,
         },

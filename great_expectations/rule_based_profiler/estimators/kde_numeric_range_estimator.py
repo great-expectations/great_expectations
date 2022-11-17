@@ -3,6 +3,7 @@ from typing import Callable, Dict, Optional, Union
 
 import numpy as np
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
     NumericRangeEstimationResult,
@@ -20,6 +21,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
 from great_expectations.types.attributes import Attributes
+from great_expectations.util import is_ndarray_datetime_dtype
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -52,6 +54,15 @@ class KdeNumericRangeEstimator(NumericRangeEstimator):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> NumericRangeEstimationResult:
+        if is_ndarray_datetime_dtype(
+            data=metric_values,
+            parse_strings_as_datetimes=True,
+            fuzzy=False,
+        ):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f'Estimator "{self.__class__.__name__}" does not support DateTime/TimeStamp data types.'
+            )
+
         false_positive_rate: np.float64 = get_false_positive_rate_from_rule_state(
             false_positive_rate=self.configuration.false_positive_rate,
             domain=domain,
@@ -81,7 +92,7 @@ class KdeNumericRangeEstimator(NumericRangeEstimator):
 
         quantile_statistic_interpolation_method: str = get_quantile_statistic_interpolation_method_from_rule_state(
             quantile_statistic_interpolation_method=self.configuration.quantile_statistic_interpolation_method,
-            round_decimals=self.configuration.quantile_statistic_interpolation_method,
+            round_decimals=self.configuration.round_decimals,
             domain=domain,
             variables=variables,
             parameters=parameters,

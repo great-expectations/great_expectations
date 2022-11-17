@@ -1,6 +1,8 @@
+import contextlib
+import copy
 import datetime
 from numbers import Number
-from typing import Any, Dict, List, Optional, Tuple, cast
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Type, cast
 from unittest import mock
 
 import numpy as np
@@ -10,6 +12,9 @@ from freezegun import freeze_time
 from packaging import version
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
+
+# To support python 3.7 we must import Protocol from typing_extensions instead of typing
+from typing_extensions import Protocol
 
 from great_expectations import DataContext
 from great_expectations.core import (
@@ -21,6 +26,10 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.datasource import DataConnector, Datasource
+from great_expectations.expectations.core import (
+    expect_column_quantile_values_to_be_between,
+    expect_column_values_to_be_between,
+)
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config.base import (
@@ -159,6 +168,8 @@ def quentin_validator(
     return validator
 
 
+@pytest.mark.slow  # 1.15s
+@pytest.mark.integration
 def test_alice_columnar_table_single_batch_batches_are_accessible(
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
@@ -213,6 +224,8 @@ def test_alice_columnar_table_single_batch_batches_are_accessible(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 2.31s
+@pytest.mark.integration
 def test_alice_profiler_user_workflow_single_batch(
     mock_emit,
     caplog,
@@ -403,6 +416,8 @@ def test_alice_profiler_user_workflow_single_batch(
 
 
 @freeze_time(TIMESTAMP)
+@pytest.mark.slow  # 0.86s
+@pytest.mark.integration
 def test_alice_expect_column_values_to_match_regex_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     alice_validator: Validator,
 ) -> None:
@@ -424,12 +439,13 @@ def test_alice_expect_column_values_to_match_regex_auto_yes_default_profiler_con
         "column": "id",
         "include_config": True,
         "mostly": 1.0,
-        "regex": "(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}",
+        "regex": "-?\\d+",
         "result_format": "SUMMARY",
     }
 
 
 @freeze_time(TIMESTAMP)
+@pytest.mark.integration
 def test_alice_expect_column_values_to_not_match_regex_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     alice_validator: Validator,
 ) -> None:
@@ -453,12 +469,14 @@ def test_alice_expect_column_values_to_not_match_regex_auto_yes_default_profiler
         "column": "id",
         "include_config": True,
         "mostly": 1.0,
-        "regex": "(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}",
+        "regex": "-?\\d+",
         "result_format": "SUMMARY",
     }
 
 
 @freeze_time(TIMESTAMP)
+@pytest.mark.slow  # 1.38s
+@pytest.mark.integration
 def test_alice_expect_column_values_to_match_stftime_format_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     alice_validator: Validator,
 ) -> None:
@@ -488,6 +506,8 @@ def test_alice_expect_column_values_to_match_stftime_format_auto_yes_default_pro
 
 
 @freeze_time(TIMESTAMP)
+@pytest.mark.slow  # 1.26s
+@pytest.mark.integration
 def test_alice_expect_column_value_lengths_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     alice_validator: Validator,
 ) -> None:
@@ -520,6 +540,8 @@ def test_alice_expect_column_value_lengths_to_be_between_auto_yes_default_profil
 
 
 # noinspection PyUnusedLocal
+@pytest.mark.slow  # 1.16s
+@pytest.mark.integration
 def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     monkeypatch,
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -573,7 +595,6 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
             "batch_id": validator_latest.active_batch_id,
         },
         "metric_value_kwargs": None,
-        "metric_dependencies": None,
     }
     metric_value: int = validator_latest.get_metric(
         metric=MetricConfiguration(**metric_configuration_arguments)
@@ -596,6 +617,8 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 13.08s
+@pytest.mark.integration
 def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_column_ranges_rule_quantiles_estimator(
     mock_emit,
     caplog,
@@ -870,6 +893,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     reason="requires numpy version 1.21.0 or newer",
 )
 @freeze_time(TIMESTAMP)
+@pytest.mark.integration
 def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     bobby_validator: Validator,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
@@ -981,11 +1005,43 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     }
 
 
+class HasStaticDefaultProfiler(Protocol):
+    default_profiler_config: RuleBasedProfilerConfig
+    # I'd like to force the key "profiler_config" to be present in the following dict.
+    # While its absence doesn't break functionality, I do expect it to exist. TypeDicts
+    # unfortunately don't help us here since one needs to list all potential keys in a
+    # TypeDict since they don't allow extras keys to be present. See the discussion here:
+    # https://github.com/python/mypy/issues/4617#issuecomment-367647383
+    default_kwarg_values: Dict[str, Any]
+
+
+# An expectations default profiler config is a static variable. Setting it to a custom value will
+# actually overwrite the default. This will cause other tests in this session to fail that depend
+# on the default value. This decorator stores the default value and restores it at the end of this test.
+# We shouldn't be overwriting the default and that is ticketed:
+# https://superconductive.atlassian.net/browse/GREAT-1127
+@contextlib.contextmanager
+def restore_profiler_config(
+    expectation: Type[HasStaticDefaultProfiler],
+) -> Iterator[None]:
+    original_default_profiler_config = copy.deepcopy(
+        expectation.default_profiler_config
+    )
+    try:
+        yield
+    finally:
+        expectation.default_profiler_config = original_default_profiler_config
+        expectation.default_kwarg_values[
+            "profiler_config"
+        ] = original_default_profiler_config
+
+
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
 @freeze_time(TIMESTAMP)
+@pytest.mark.integration
 def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_yes(
     bobby_columnar_table_multi_batch_deterministic_data_context,
     bobby_validator: Validator,
@@ -993,215 +1049,218 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
     validator: Validator = bobby_validator
 
-    custom_profiler_config = RuleBasedProfilerConfig(
-        name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
-        config_version=1.0,
-        rules={
-            "custom_column_values_between_rule": {
-                "parameter_builders": [
-                    {
-                        "name": "my_min_estimator",
-                        "class_name": "MetricMultiBatchParameterBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                        "metric_name": "column.min",
-                        "metric_domain_kwargs": "$domain.domain_kwargs",
-                        "enforce_numeric_metric": True,
-                        "replace_nan_with_zero": True,
-                    },
-                ],
-                "expectation_configuration_builders": [
-                    {
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "expectation_type": "expect_column_values_to_be_between",
-                        "column": "$domain.domain_kwargs.column",
-                        "min_value": "$parameter.my_min_estimator.value[0]",
-                        "mostly": "$variables.mostly",
-                        "strict_min": "$variables.strict_min",
-                        "meta": {
-                            "details": {
-                                "my_min_estimator": "$parameter.my_min_estimator.details",
+    with restore_profiler_config(
+        expect_column_values_to_be_between.ExpectColumnValuesToBeBetween
+    ):
+        custom_profiler_config = RuleBasedProfilerConfig(
+            name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
+            config_version=1.0,
+            rules={
+                "custom_column_values_between_rule": {
+                    "parameter_builders": [
+                        {
+                            "name": "my_min_estimator",
+                            "class_name": "MetricMultiBatchParameterBuilder",
+                            "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                            "metric_name": "column.min",
+                            "metric_domain_kwargs": "$domain.domain_kwargs",
+                            "enforce_numeric_metric": True,
+                            "replace_nan_with_zero": True,
+                        },
+                    ],
+                    "expectation_configuration_builders": [
+                        {
+                            "class_name": "DefaultExpectationConfigurationBuilder",
+                            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                            "expectation_type": "expect_column_values_to_be_between",
+                            "column": "$domain.domain_kwargs.column",
+                            "min_value": "$parameter.my_min_estimator.value[0]",
+                            "mostly": "$variables.mostly",
+                            "strict_min": "$variables.strict_min",
+                            "meta": {
+                                "details": {
+                                    "my_min_estimator": "$parameter.my_min_estimator.details",
+                                },
                             },
                         },
-                    },
-                ],
+                    ],
+                },
             },
-        },
-    )
+        )
 
-    column_name: str = "fare_amount"
+        column_name: str = "fare_amount"
 
-    result = validator.expect_column_values_to_be_between(
-        column=column_name,
-        result_format="SUMMARY",
-        include_config=True,
-        auto=True,
-        profiler_config=custom_profiler_config.to_json_dict(),
-    )
-    assert result.success
-    assert result.expectation_config["kwargs"] == {
-        "column": "fare_amount",
-        "min_value": -52.0,
-        "strict_min": False,
-        "mostly": 1.0,
-        "result_format": "SUMMARY",
-        "include_config": True,
-        "auto": True,
-        "profiler_config": custom_profiler_config.to_json_dict(),
-        "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
-    }
+        result = validator.expect_column_values_to_be_between(
+            column=column_name,
+            result_format="SUMMARY",
+            include_config=True,
+            auto=True,
+            profiler_config=custom_profiler_config.to_json_dict(),
+        )
+        assert result.success
+        assert result.expectation_config["kwargs"] == {
+            "column": "fare_amount",
+            "min_value": -52.0,
+            "strict_min": False,
+            "mostly": 1.0,
+            "result_format": "SUMMARY",
+            "include_config": True,
+            "auto": True,
+            "profiler_config": custom_profiler_config.to_json_dict(),
+            "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
+        }
 
-    result = validator.expect_column_values_to_be_between(
-        column=column_name,
-        min_value=0.0,
-        result_format="SUMMARY",
-        include_config=True,
-        auto=True,
-        profiler_config=custom_profiler_config,
-    )
-    assert not result.success
-    assert result.expectation_config["kwargs"] == {
-        "column": "fare_amount",
-        "min_value": 0.0,
-        "strict_min": False,
-        "mostly": 1.0,
-        "result_format": "SUMMARY",
-        "include_config": True,
-        "auto": True,
-        "profiler_config": custom_profiler_config.to_json_dict(),
-        "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
-    }
+        result = validator.expect_column_values_to_be_between(
+            column=column_name,
+            min_value=0.0,
+            result_format="SUMMARY",
+            include_config=True,
+            auto=True,
+            profiler_config=custom_profiler_config,
+        )
+        assert not result.success
+        assert result.expectation_config["kwargs"] == {
+            "column": "fare_amount",
+            "min_value": 0.0,
+            "strict_min": False,
+            "mostly": 1.0,
+            "result_format": "SUMMARY",
+            "include_config": True,
+            "auto": True,
+            "profiler_config": custom_profiler_config.to_json_dict(),
+            "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
+        }
 
-    result = validator.expect_column_values_to_be_between(
-        column=column_name,
-        min_value=0.0,
-        mostly=8.75e-1,
-        result_format="SUMMARY",
-        include_config=True,
-        auto=True,
-        profiler_config=custom_profiler_config,
-    )
-    assert result.success
-    assert result.expectation_config["kwargs"] == {
-        "column": "fare_amount",
-        "min_value": 0.0,
-        "strict_min": False,
-        "mostly": 8.75e-1,
-        "result_format": "SUMMARY",
-        "include_config": True,
-        "auto": True,
-        "profiler_config": custom_profiler_config.to_json_dict(),
-        "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
-    }
+        result = validator.expect_column_values_to_be_between(
+            column=column_name,
+            min_value=0.0,
+            mostly=8.75e-1,
+            result_format="SUMMARY",
+            include_config=True,
+            auto=True,
+            profiler_config=custom_profiler_config,
+        )
+        assert result.success
+        assert result.expectation_config["kwargs"] == {
+            "column": "fare_amount",
+            "min_value": 0.0,
+            "strict_min": False,
+            "mostly": 8.75e-1,
+            "result_format": "SUMMARY",
+            "include_config": True,
+            "auto": True,
+            "profiler_config": custom_profiler_config.to_json_dict(),
+            "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
+        }
 
-    with pytest.raises(AssertionError) as e:
-        # noinspection PyUnusedLocal
+        with pytest.raises(AssertionError) as e:
+            # noinspection PyUnusedLocal
+            result = validator.expect_column_values_to_be_between(
+                column=column_name,
+                mostly=1.0,
+                result_format="SUMMARY",
+                include_config=True,
+                auto=False,
+                profiler_config=custom_profiler_config,
+            )
+        assert "min_value and max_value cannot both be None" in str(e.value)
+
+        # Use one batch (at index "1"), loaded by Validator as active_batch, for estimating Expectation argument values.
+        batch_request = {
+            "datasource_name": "taxi_pandas",
+            "data_connector_name": "monthly",
+            "data_asset_name": "my_reports",
+            "data_connector_query": {
+                "index": 1,
+            },
+        }
+
+        validator: Validator = get_validator_with_expectation_suite(
+            data_context=context,
+            batch_list=None,
+            batch_request=batch_request,
+            expectation_suite_name=None,
+            expectation_suite=None,
+            component_name="profiler",
+            persist=False,
+        )
+        assert len(validator.batches) == 1
+
+        custom_profiler_config = RuleBasedProfilerConfig(
+            name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
+            config_version=1.0,
+            rules={
+                "custom_column_values_between_rule": {
+                    "parameter_builders": [
+                        {
+                            "name": "my_min_estimator",
+                            "class_name": "MetricMultiBatchParameterBuilder",
+                            "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                            "metric_name": "column.min",
+                            "metric_domain_kwargs": "$domain.domain_kwargs",
+                            "enforce_numeric_metric": True,
+                            "replace_nan_with_zero": True,
+                        },
+                    ],
+                    "expectation_configuration_builders": [
+                        {
+                            "class_name": "DefaultExpectationConfigurationBuilder",
+                            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                            "expectation_type": "expect_column_values_to_be_between",
+                            "column": "$domain.domain_kwargs.column",
+                            "min_value": "$parameter.my_min_estimator.value[0]",
+                            "mostly": "$variables.mostly",
+                            "strict_min": "$variables.strict_min",
+                            "meta": {
+                                "details": {
+                                    "my_min_estimator": "$parameter.my_min_estimator.details",
+                                },
+                            },
+                        },
+                    ],
+                },
+            },
+        )
+
         result = validator.expect_column_values_to_be_between(
             column=column_name,
             mostly=1.0,
             result_format="SUMMARY",
             include_config=True,
-            auto=False,
+            auto=True,
             profiler_config=custom_profiler_config,
         )
-    assert "min_value and max_value cannot both be None" in str(e.value)
+        assert result.success
+        assert result.expectation_config["kwargs"] == {
+            "column": "fare_amount",
+            "min_value": -21.0,
+            "strict_min": False,
+            "mostly": 1.0,
+            "result_format": "SUMMARY",
+            "include_config": True,
+            "auto": True,
+            "profiler_config": custom_profiler_config.to_json_dict(),
+            "batch_id": "0808e185a52825d22356de2fe00a8f5f",
+        }
 
-    # Use one batch (at index "1"), loaded by Validator as active_batch, for estimating Expectation argument values.
-    batch_request = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-        "data_connector_query": {
-            "index": 1,
-        },
-    }
-
-    validator: Validator = get_validator_with_expectation_suite(
-        data_context=context,
-        batch_list=None,
-        batch_request=batch_request,
-        expectation_suite_name=None,
-        expectation_suite=None,
-        component_name="profiler",
-        persist=False,
-    )
-    assert len(validator.batches) == 1
-
-    custom_profiler_config = RuleBasedProfilerConfig(
-        name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
-        config_version=1.0,
-        rules={
-            "custom_column_values_between_rule": {
-                "parameter_builders": [
-                    {
-                        "name": "my_min_estimator",
-                        "class_name": "MetricMultiBatchParameterBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                        "metric_name": "column.min",
-                        "metric_domain_kwargs": "$domain.domain_kwargs",
-                        "enforce_numeric_metric": True,
-                        "replace_nan_with_zero": True,
-                    },
-                ],
-                "expectation_configuration_builders": [
-                    {
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "expectation_type": "expect_column_values_to_be_between",
-                        "column": "$domain.domain_kwargs.column",
-                        "min_value": "$parameter.my_min_estimator.value[0]",
-                        "mostly": "$variables.mostly",
-                        "strict_min": "$variables.strict_min",
-                        "meta": {
-                            "details": {
-                                "my_min_estimator": "$parameter.my_min_estimator.details",
-                            },
-                        },
-                    },
-                ],
-            },
-        },
-    )
-
-    result = validator.expect_column_values_to_be_between(
-        column=column_name,
-        mostly=1.0,
-        result_format="SUMMARY",
-        include_config=True,
-        auto=True,
-        profiler_config=custom_profiler_config,
-    )
-    assert result.success
-    assert result.expectation_config["kwargs"] == {
-        "column": "fare_amount",
-        "min_value": -21.0,
-        "strict_min": False,
-        "mostly": 1.0,
-        "result_format": "SUMMARY",
-        "include_config": True,
-        "auto": True,
-        "profiler_config": custom_profiler_config.to_json_dict(),
-        "batch_id": "0808e185a52825d22356de2fe00a8f5f",
-    }
-
-    result = validator.expect_column_values_to_be_between(
-        column=column_name,
-        min_value=-21.0,
-        mostly=1.0,
-        result_format="SUMMARY",
-        include_config=True,
-        auto=False,
-    )
-    assert result.success
-    assert result.expectation_config["kwargs"] == {
-        "column": "fare_amount",
-        "min_value": -21.0,
-        "mostly": 1.0,
-        "result_format": "SUMMARY",
-        "include_config": True,
-        "auto": False,
-        "batch_id": "0808e185a52825d22356de2fe00a8f5f",
-    }
+        result = validator.expect_column_values_to_be_between(
+            column=column_name,
+            min_value=-21.0,
+            mostly=1.0,
+            result_format="SUMMARY",
+            include_config=True,
+            auto=False,
+        )
+        assert result.success
+        assert result.expectation_config["kwargs"] == {
+            "column": "fare_amount",
+            "min_value": -21.0,
+            "mostly": 1.0,
+            "result_format": "SUMMARY",
+            "include_config": True,
+            "auto": False,
+            "batch_id": "0808e185a52825d22356de2fe00a8f5f",
+        }
 
 
 @pytest.mark.skipif(
@@ -1209,6 +1268,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     reason="requires numpy version 1.21.0 or newer",
 )
 @freeze_time(TIMESTAMP)
+@pytest.mark.integration
 def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_config_no_custom_profiler_config_yes(
     bobby_columnar_table_multi_batch_deterministic_data_context,
     bobby_validator: Validator,
@@ -1475,6 +1535,8 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 4.83s
+@pytest.mark.integration
 def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstrap_estimator(
     mock_emit,
     caplog,
@@ -1602,6 +1664,8 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     reason="requires numpy version 1.21.0 or newer",
 )
 @freeze_time(TIMESTAMP)
+@pytest.mark.slow  # 4.24s
+@pytest.mark.integration
 def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     bobster_validator: Validator,
 ):
@@ -1621,6 +1685,8 @@ def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
+@pytest.mark.slow  # 2.02s
+@pytest.mark.integration
 def test_quentin_expect_expect_table_columns_to_match_set_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_validator: Validator,
 ):
@@ -1681,6 +1747,8 @@ def test_quentin_expect_expect_table_columns_to_match_set_auto_yes_default_profi
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 15.07s
+@pytest.mark.integration
 def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     mock_emit,
     caplog,
@@ -1828,181 +1896,186 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     reason="requires numpy version 1.21.0 or newer",
 )
 @freeze_time(TIMESTAMP)
+@pytest.mark.slow  # 2.40s
+@pytest.mark.integration
 def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_yes(
     quentin_validator: Validator,
 ):
-    validator: Validator = quentin_validator
+    with restore_profiler_config(
+        expect_column_quantile_values_to_be_between.ExpectColumnQuantileValuesToBeBetween
+    ):
+        validator: Validator = quentin_validator
 
-    custom_profiler_config = RuleBasedProfilerConfig(
-        name="expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
-        config_version=1.0,
-        variables={
-            "quantiles": [2.5e-1, 5.0e-1, 7.5e-1],
-            "allow_relative_error": "linear",
-            "n_resamples": 9139,
-            "random_seed": 43792,
-            "false_positive_rate": 5.0e-2,
-            "quantile_statistic_interpolation_method": "auto",
-            "quantile_bias_correction": True,
-            "quantile_bias_std_error_ratio_threshold": 0.25,
-        },
-        rules={
-            "column_quantiles_rule": {
-                "domain_builder": {
-                    "class_name": "ColumnDomainBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
-                },
-                "parameter_builders": [
-                    {
-                        "name": "quantile_value_ranges",
-                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                        "metric_name": "column.quantile_values",
-                        "metric_domain_kwargs": "$domain.domain_kwargs",
-                        "metric_value_kwargs": {
-                            "quantiles": "$variables.quantiles",
+        custom_profiler_config = RuleBasedProfilerConfig(
+            name="expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
+            config_version=1.0,
+            variables={
+                "quantiles": [2.5e-1, 5.0e-1, 7.5e-1],
+                "allow_relative_error": "linear",
+                "n_resamples": 9139,
+                "random_seed": 43792,
+                "false_positive_rate": 5.0e-2,
+                "quantile_statistic_interpolation_method": "auto",
+                "quantile_bias_correction": True,
+                "quantile_bias_std_error_ratio_threshold": 0.25,
+            },
+            rules={
+                "column_quantiles_rule": {
+                    "domain_builder": {
+                        "class_name": "ColumnDomainBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                    },
+                    "parameter_builders": [
+                        {
+                            "name": "quantile_value_ranges",
+                            "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                            "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                            "metric_name": "column.quantile_values",
+                            "metric_domain_kwargs": "$domain.domain_kwargs",
+                            "metric_value_kwargs": {
+                                "quantiles": "$variables.quantiles",
+                                "allow_relative_error": "$variables.allow_relative_error",
+                            },
+                            "n_resamples": "$variables.n_resamples",
+                            "random_seed": "$variables.random_seed",
+                            "false_positive_rate": "$variables.false_positive_rate",
+                            "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
+                            "quantile_bias_correction": "$variables.quantile_bias_correction",
+                            "quantile_bias_std_error_ratio_threshold": "$variables.quantile_bias_std_error_ratio_threshold",
+                            "round_decimals": None,
+                        }
+                    ],
+                    "expectation_configuration_builders": [
+                        {
+                            "expectation_type": "expect_column_quantile_values_to_be_between",
+                            "class_name": "DefaultExpectationConfigurationBuilder",
+                            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                            "column": "$domain.domain_kwargs.column",
+                            "quantile_ranges": {
+                                "quantiles": "$variables.quantiles",
+                                "value_ranges": "$parameter.quantile_value_ranges.value",
+                            },
                             "allow_relative_error": "$variables.allow_relative_error",
-                        },
-                        "n_resamples": "$variables.n_resamples",
-                        "random_seed": "$variables.random_seed",
-                        "false_positive_rate": "$variables.false_positive_rate",
-                        "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
-                        "quantile_bias_correction": "$variables.quantile_bias_correction",
-                        "quantile_bias_std_error_ratio_threshold": "$variables.quantile_bias_std_error_ratio_threshold",
-                        "round_decimals": 2,
-                    }
-                ],
-                "expectation_configuration_builders": [
-                    {
-                        "expectation_type": "expect_column_quantile_values_to_be_between",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "column": "$domain.domain_kwargs.column",
-                        "quantile_ranges": {
-                            "quantiles": "$variables.quantiles",
-                            "value_ranges": "$parameter.quantile_value_ranges.value",
-                        },
-                        "allow_relative_error": "$variables.allow_relative_error",
-                        "meta": {
-                            "profiler_details": "$parameter.quantile_value_ranges.details"
-                        },
-                    }
-                ],
-            }
-        },
-    )
+                            "meta": {
+                                "profiler_details": "$parameter.quantile_value_ranges.details"
+                            },
+                        }
+                    ],
+                }
+            },
+        )
 
-    result = validator.expect_column_quantile_values_to_be_between(
-        column="fare_amount",
-        result_format="SUMMARY",
-        include_config=True,
-        auto=True,
-        profiler_config=custom_profiler_config,
-    )
-    assert result.success
+        result = validator.expect_column_quantile_values_to_be_between(
+            column="fare_amount",
+            result_format="SUMMARY",
+            include_config=True,
+            auto=True,
+            profiler_config=custom_profiler_config,
+        )
+        assert result.success
 
-    value_ranges_expected = [
-        [
-            5.94,
-            6.5,
-        ],
-        [
-            8.44,
-            9.56,
-        ],
-        [
-            13.44,
-            15.62,
-        ],
-    ]
+        value_ranges_expected = [
+            [
+                5.94,
+                6.5,
+            ],
+            [
+                8.44,
+                9.56,
+            ],
+            [
+                13.44,
+                15.62,
+            ],
+        ]
 
-    value_ranges_computed = result.expectation_config["kwargs"]["quantile_ranges"][
-        "value_ranges"
-    ]
+        value_ranges_computed = result.expectation_config["kwargs"]["quantile_ranges"][
+            "value_ranges"
+        ]
 
-    assert len(value_ranges_computed) == len(value_ranges_expected)
+        assert len(value_ranges_computed) == len(value_ranges_expected)
 
-    paired_quantiles = zip(
-        value_ranges_computed,
-        value_ranges_expected,
-    )
-    for value_ranges in list(paired_quantiles):
-        for idx in range(2):
-            np.testing.assert_allclose(
-                actual=value_ranges[0][idx],
-                desired=value_ranges[1][idx],
-                rtol=RTOL,
-                atol=ATOL,
-                err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {ATOL + RTOL * abs(value_ranges[1][idx])} tolerance.",
-            )
+        paired_quantiles = zip(
+            value_ranges_computed,
+            value_ranges_expected,
+        )
+        for value_ranges in list(paired_quantiles):
+            for idx in range(2):
+                np.testing.assert_allclose(
+                    actual=value_ranges[0][idx],
+                    desired=value_ranges[1][idx],
+                    rtol=RTOL,
+                    atol=ATOL,
+                    err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {ATOL + RTOL * abs(value_ranges[1][idx])} tolerance.",
+                )
 
-    custom_profiler_config = RuleBasedProfilerConfig(
-        name="expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
-        config_version=1.0,
-        variables={
-            "quantiles": [2.5e-1, 5.0e-1, 7.5e-1],
-            "allow_relative_error": "linear",
-            "n_resamples": 9139,
-            "random_seed": 43792,
-            "false_positive_rate": 5.0e-2,
-            "quantile_statistic_interpolation_method": "auto",
-            "quantile_bias_correction": True,
-            "quantile_bias_std_error_ratio_threshold": 0.25,
-        },
-        rules={
-            "column_quantiles_rule": {
-                "domain_builder": {
-                    "class_name": "ColumnDomainBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
-                },
-                "parameter_builders": [
-                    {
-                        "name": "quantile_value_ranges",
-                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                        "metric_name": "column.quantile_values",
-                        "metric_domain_kwargs": "$domain.domain_kwargs",
-                        "metric_value_kwargs": {
-                            "quantiles": "$variables.quantiles",
+        custom_profiler_config = RuleBasedProfilerConfig(
+            name="expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
+            config_version=1.0,
+            variables={
+                "quantiles": [2.5e-1, 5.0e-1, 7.5e-1],
+                "allow_relative_error": "linear",
+                "n_resamples": 9139,
+                "random_seed": 43792,
+                "false_positive_rate": 5.0e-2,
+                "quantile_statistic_interpolation_method": "auto",
+                "quantile_bias_correction": True,
+                "quantile_bias_std_error_ratio_threshold": 0.25,
+            },
+            rules={
+                "column_quantiles_rule": {
+                    "domain_builder": {
+                        "class_name": "ColumnDomainBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                    },
+                    "parameter_builders": [
+                        {
+                            "name": "quantile_value_ranges",
+                            "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                            "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                            "metric_name": "column.quantile_values",
+                            "metric_domain_kwargs": "$domain.domain_kwargs",
+                            "metric_value_kwargs": {
+                                "quantiles": "$variables.quantiles",
+                                "allow_relative_error": "$variables.allow_relative_error",
+                            },
+                            "n_resamples": "$variables.n_resamples",
+                            "random_seed": "$variables.random_seed",
+                            "false_positive_rate": "$variables.false_positive_rate",
+                            "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
+                            "quantile_bias_correction": "$variables.quantile_bias_correction",
+                            "quantile_bias_std_error_ratio_threshold": "$variables.quantile_bias_std_error_ratio_threshold",
+                            "round_decimals": "$variables.round_decimals",
+                        }
+                    ],
+                    "expectation_configuration_builders": [
+                        {
+                            "expectation_type": "expect_column_quantile_values_to_be_between",
+                            "class_name": "DefaultExpectationConfigurationBuilder",
+                            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                            "column": "$domain.domain_kwargs.column",
+                            "quantile_ranges": {
+                                "quantiles": "$variables.quantiles",
+                                "value_ranges": "$parameter.quantile_value_ranges.value",
+                            },
                             "allow_relative_error": "$variables.allow_relative_error",
-                        },
-                        "n_resamples": "$variables.n_resamples",
-                        "random_seed": "$variables.random_seed",
-                        "false_positive_rate": "$variables.false_positive_rate",
-                        "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
-                        "quantile_bias_correction": "$variables.quantile_bias_correction",
-                        "quantile_bias_std_error_ratio_threshold": "$variables.quantile_bias_std_error_ratio_threshold",
-                        "round_decimals": "$variables.round_decimals",
-                    }
-                ],
-                "expectation_configuration_builders": [
-                    {
-                        "expectation_type": "expect_column_quantile_values_to_be_between",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "column": "$domain.domain_kwargs.column",
-                        "quantile_ranges": {
-                            "quantiles": "$variables.quantiles",
-                            "value_ranges": "$parameter.quantile_value_ranges.value",
-                        },
-                        "allow_relative_error": "$variables.allow_relative_error",
-                        "meta": {
-                            "profiler_details": "$parameter.quantile_value_ranges.details"
-                        },
-                    }
-                ],
-            }
-        },
-    )
+                            "meta": {
+                                "profiler_details": "$parameter.quantile_value_ranges.details"
+                            },
+                        }
+                    ],
+                }
+            },
+        )
 
-    result = validator.expect_column_quantile_values_to_be_between(
-        column="fare_amount",
-        result_format="SUMMARY",
-        include_config=True,
-        auto=True,
-        profiler_config=custom_profiler_config,
-    )
-    assert result.success
+        result = validator.expect_column_quantile_values_to_be_between(
+            column="fare_amount",
+            result_format="SUMMARY",
+            include_config=True,
+            auto=True,
+            profiler_config=custom_profiler_config,
+        )
+        assert result.success
 
 
 @pytest.mark.skipif(
@@ -2010,6 +2083,8 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
     reason="requires numpy version 1.21.0 or newer",
 )
 @freeze_time(TIMESTAMP)
+@pytest.mark.slow  # 2.15s
+@pytest.mark.integration
 def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_validator: Validator,
 ):
@@ -2051,6 +2126,8 @@ def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_con
     reason="requires numpy version 1.21.0 or newer",
 )
 @freeze_time(TIMESTAMP)
+@pytest.mark.slow  # 3.44s
+@pytest.mark.integration
 def test_quentin_expect_column_min_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_validator: Validator,
 ):
@@ -2091,6 +2168,8 @@ def test_quentin_expect_column_min_to_be_between_auto_yes_default_profiler_confi
     reason="requires numpy version 1.21.0 or newer",
 )
 @freeze_time(TIMESTAMP)
+@pytest.mark.slow  # 2.12s
+@pytest.mark.integration
 def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_validator: Validator,
 ):
@@ -2156,6 +2235,8 @@ def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_confi
     reason="requires numpy version 1.21.0 or newer",
 )
 @freeze_time(TIMESTAMP)
+@pytest.mark.slow  # 2.24s
+@pytest.mark.integration
 def test_quentin_expect_column_unique_value_count_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_validator: Validator,
 ) -> None:
@@ -2209,6 +2290,8 @@ def test_quentin_expect_column_unique_value_count_to_be_between_auto_yes_default
     reason="requires numpy version 1.21.0 or newer",
 )
 @freeze_time(TIMESTAMP)
+@pytest.mark.slow  # 2.67s
+@pytest.mark.integration
 def test_quentin_expect_column_proportion_of_unique_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_validator: Validator,
 ) -> None:
@@ -2265,6 +2348,8 @@ def test_quentin_expect_column_proportion_of_unique_values_to_be_between_auto_ye
     reason="requires numpy version 1.21.0 or newer",
 )
 @freeze_time(TIMESTAMP)
+@pytest.mark.slow  # 2.26s
+@pytest.mark.integration
 def test_quentin_expect_column_sum_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_validator: Validator,
 ) -> None:
@@ -2321,6 +2406,8 @@ def test_quentin_expect_column_sum_to_be_between_auto_yes_default_profiler_confi
     reason="requires numpy version 1.21.0 or newer",
 )
 @freeze_time(TIMESTAMP)
+@pytest.mark.slow  # 2.29s
+@pytest.mark.integration
 def test_quentin_expect_column_stdev_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_validator: Validator,
 ):

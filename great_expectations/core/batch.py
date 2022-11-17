@@ -10,13 +10,25 @@ from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.zep.interfaces import BatchRequest as ZepBatchRequest
 
 logger = logging.getLogger(__name__)
 
 try:
+    import pandas as pd
+except ImportError:
+    pd = None
+
+    logger.debug(
+        "Unable to load pandas; install optional pandas dependency for support."
+    )
+
+try:
     import pyspark
+    from pyspark.sql import DataFrame as SparkDataFrame
 except ImportError:
     pyspark = None
+    SparkDataFrame = None
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
@@ -494,6 +506,23 @@ class BatchMarkers(BatchKwargs):
         return self.get("ge_load_time")
 
 
+class BatchData:
+    def __init__(self, execution_engine) -> None:
+        self._execution_engine = execution_engine
+
+    @property
+    def execution_engine(self):
+        return self._execution_engine
+
+    # noinspection PyMethodMayBeStatic
+    def head(self, *args, **kwargs):
+        # CONFLICT ON PURPOSE. REMOVE.
+        return pd.DataFrame({})
+
+
+BatchDataType = Union[BatchData, pd.DataFrame, SparkDataFrame]
+
+
 # TODO: <Alex>This module needs to be cleaned up.
 #  We have Batch used for the legacy design, and we also need Batch for the new design.
 #  However, right now, the Batch from the legacy design is imported into execution engines of the new design.
@@ -502,11 +531,11 @@ class BatchMarkers(BatchKwargs):
 class Batch(SerializableDictDot):
     def __init__(
         self,
-        data,
+        data: BatchDataType,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        batch_definition: BatchDefinition = None,
-        batch_spec: BatchSpec = None,
-        batch_markers: BatchMarkers = None,
+        batch_definition: Optional[BatchDefinition] = None,
+        batch_spec: Optional[BatchSpec] = None,
+        batch_markers: Optional[BatchMarkers] = None,
         # The remaining parameters are for backward compatibility.
         data_context=None,
         datasource_name=None,
@@ -541,8 +570,14 @@ class Batch(SerializableDictDot):
         self._batch_kwargs = batch_kwargs or BatchKwargs()
 
     @property
-    def data(self):
+    def data(self) -> BatchDataType:
+        """Getter for Batch data"""
         return self._data
+
+    @data.setter
+    def data(self, value: BatchDataType) -> None:
+        """Setter for Batch data"""
+        self._data = value
 
     @property
     def batch_request(self):
@@ -737,10 +772,12 @@ def get_batch_request_from_acceptable_arguments(  # noqa: C901 - complexity 21
     """
 
     if batch_request:
-        if not isinstance(batch_request, (BatchRequest, RuntimeBatchRequest)):
+        if not isinstance(
+            batch_request, (BatchRequest, RuntimeBatchRequest, ZepBatchRequest)
+        ):
             raise TypeError(
-                f"""batch_request must be an instance of BatchRequest or RuntimeBatchRequest object, not \
-{type(batch_request)}"""
+                "batch_request must be a BatchRequest, RuntimeBatchRequest, or a "
+                f"zep.interfaces.BatchRequest object, not {type(batch_request)}"
             )
         datasource_name = batch_request.datasource_name
 

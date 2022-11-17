@@ -4,13 +4,14 @@ from great_expectations.core import ExpectationValidationResult
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations.expectation import ColumnMapExpectation
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
+    LegacyRendererType,
     RenderedBulletListContent,
     RenderedGraphContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
 )
+from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import (
     handle_strict_min_max,
     num_to_str,
@@ -35,11 +36,13 @@ try:
 except ImportError:
     pass
 
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.expectations.expectation import (
+    render_evaluation_parameter_string,
+)
 
 
 class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
-    """Expect column entries to be strings with length between a minimum value and a maximum value (inclusive).
+    """Expect the column entries to be strings with length between a minimum value and a maximum value (inclusive).
 
     This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
 
@@ -370,14 +373,14 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration: ExpectationConfiguration = None,
-        result: ExpectationValidationResult = None,
-        language: str = None,
-        runtime_configuration: dict = None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ) -> List[
         Union[

@@ -1,0 +1,72 @@
+{
+  "expectation_type": "expect_column_values_to_be_between",
+  "datasets": [{
+    "data": {
+      "ts": [
+        "1970-01-01 12:00:01.000000 +0530",
+        "1999-12-31 12:00:01.012345 +0800",
+        "2000-01-01 12:00:01.678900 -0830",
+        "2000-02-01 12:00:01.001234 -1230",
+        "2000-03-01 12:00:01.567890 +0630",
+        "2000-04-01 12:00:01.000123 +0730",
+        "2000-05-01 12:00:01.456789 +0430",
+        "2000-06-01 12:00:01.000012 +0300",
+        "2019-09-01 15:27:05.345678 +0900",
+        "2001-06-01 16:00:00.132678 -0800"
+      ]
+    },
+    "schemas": {
+      "pandas": {
+        "ts": "datetime64[ns]"
+      },
+      "sqlite": {
+        "ts": "TIMESTAMP"
+      },
+      "postgresql": {
+        "ts": "TIMESTAMP"
+      },
+      "mssql": {
+        "ts": "DATETIME"
+      },
+      "mysql": {
+        "ts": "TIMESTAMP"
+      },
+      "spark": {
+        "ts": "TimestampType"
+      }
+    },
+    "tests": [
+      {
+        "title": "basic_positive_test_with_timestamps_tz_informed",
+        "suppress_test_for": ["trino", "bigquery"],
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "ts",
+          "max_value": "2020-09-01 15:27:05.345678 +0900",
+          "min_value": "1970-01-01 12:00:01.000000 +0600",
+          "parse_strings_as_datetimes": true
+        }
+      },
+      {
+        "title": "basic_negative_test_with_timestamps_tz_informed",
+        "suppress_test_for": ["trino", "bigquery"],
+        "exact_match_out": false,
+        "out": {
+          "unexpected_index_list": [0, 8, 9],
+          "success": false
+        },
+        "in": {
+          "column": "ts",
+          "max_value": "2001-02-01 12:00:01.001234 -1230",
+          "min_value": "1990-01-01 12:00:00.000000 -0800",
+          "parse_strings_as_datetimes": true
+        }
+      }
+    ]
+  }]
+}

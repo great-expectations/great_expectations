@@ -1,5 +1,6 @@
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 
+import numpy as np
 import pandas as pd
 
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -11,7 +12,15 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.expectations.metrics.import_manager import (
+    F,
+    pyspark_sql_DataFrame,
+    pyspark_sql_Row,
+    sa,
+    sa_sql_expression_Select,
+    sa_sql_expression_Selectable,
+    sqlalchemy_engine_Row,
+)
 from great_expectations.expectations.metrics.metric_provider import metric_value
 
 
@@ -25,13 +34,12 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
     def _pandas(
         cls,
         execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
-        runtime_configuration: Dict,
-    ):
-        sort = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
-        collate = metric_value_kwargs.get(
+        metric_domain_kwargs: Dict[str, str],
+        metric_value_kwargs: Dict[str, Optional[str]],
+        **kwargs,
+    ) -> pd.Series:
+        sort: str = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
+        collate: Optional[str] = metric_value_kwargs.get(
             "collate", cls.default_kwarg_values["collate"]
         )
 
@@ -40,12 +48,14 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         if collate is not None:
             raise ValueError("collate parameter is not supported in PandasDataset")
 
+        df: pd.DataFrame
+        accessor_domain_kwargs: Dict[str, str]
         df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
-        column = accessor_domain_kwargs["column"]
+        column: str = accessor_domain_kwargs["column"]
 
-        counts = df[column].value_counts()
+        counts: pd.Series = df[column].value_counts()
         if sort == "value":
             try:
                 counts.sort_index(inplace=True)
@@ -65,13 +75,12 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
-        runtime_configuration: Dict,
-    ):
-        sort = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
-        collate = metric_value_kwargs.get(
+        metric_domain_kwargs: Dict[str, str],
+        metric_value_kwargs: Dict[str, Optional[str]],
+        **kwargs,
+    ) -> pd.Series:
+        sort: str = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
+        collate: Optional[str] = metric_value_kwargs.get(
             "collate", cls.default_kwarg_values["collate"]
         )
 
@@ -80,24 +89,35 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         if collate is not None:
             raise ValueError("collate parameter is not supported in PandasDataset")
 
+        selectable: sa_sql_expression_Selectable
+        accessor_domain_kwargs: Dict[str, str]
         selectable, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
-        column = accessor_domain_kwargs["column"]
+        column: str = accessor_domain_kwargs["column"]
 
-        if sort not in ["value", "count", "none"]:
-            raise ValueError("sort must be either 'value', 'count', or 'none'")
-
-        query = (
-            sa.select(
-                [
-                    sa.column(column).label("value"),
-                    sa.func.count(sa.column(column)).label("count"),
-                ]
+        if hasattr(sa.column(column), "is_not"):
+            query: sa_sql_expression_Select = (
+                sa.select(
+                    [
+                        sa.column(column).label("value"),
+                        sa.func.count(sa.column(column)).label("count"),
+                    ]
+                )
+                .where(sa.column(column).is_not(None))
+                .group_by(sa.column(column))
             )
-            .where(sa.column(column) != None)
-            .group_by(sa.column(column))
-        )
+        else:
+            query: sa_sql_expression_Select = (
+                sa.select(
+                    [
+                        sa.column(column).label("value"),
+                        sa.func.count(sa.column(column)).label("count"),
+                    ]
+                )
+                .where(sa.column(column).isnot(None))
+                .group_by(sa.column(column))
+            )
         if sort == "value":
             # NOTE: depending on the way the underlying database collates columns,
             # ordering can vary. postgresql collate "C" matches default sort
@@ -109,13 +129,15 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
                 query = query.order_by(sa.column(column))
         elif sort == "count":
             query = query.order_by(sa.column("count").desc())
-        results = execution_engine.engine.execute(
+        results: List[sqlalchemy_engine_Row] = execution_engine.engine.execute(
             query.select_from(selectable)
         ).fetchall()
+        # Numpy does not always infer the correct DataTypes for SqlAlchemy Row, so we cannot use vectorized approach.
         series = pd.Series(
-            [row[1] for row in results],
+            data=[row[1] for row in results],
             index=pd.Index(data=[row[0] for row in results], name="value"),
             name="count",
+            dtype="object",
         )
         return series
 
@@ -123,13 +145,12 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
     def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
-        runtime_configuration: Dict,
-    ):
-        sort = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
-        collate = metric_value_kwargs.get(
+        metric_domain_kwargs: Dict[str, str],
+        metric_value_kwargs: Dict[str, Optional[str]],
+        **kwargs,
+    ) -> pd.Series:
+        sort: str = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
+        collate: Optional[str] = metric_value_kwargs.get(
             "collate", cls.default_kwarg_values["collate"]
         )
 
@@ -138,22 +159,36 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         if collate is not None:
             raise ValueError("collate parameter is not supported in SparkDFDataset")
 
+        df: pyspark_sql_DataFrame
+        accessor_domain_kwargs: Dict[str, str]
         df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
-        column = accessor_domain_kwargs["column"]
+        column: str = accessor_domain_kwargs["column"]
 
-        value_counts = (
+        value_counts_df: pyspark_sql_DataFrame = (
             df.select(column).where(F.col(column).isNotNull()).groupBy(column).count()
         )
+
         if sort == "value":
-            value_counts = value_counts.orderBy(column)
+            value_counts_df = value_counts_df.orderBy(column)
         elif sort == "count":
-            value_counts = value_counts.orderBy(F.desc("count"))
-        value_counts = value_counts.collect()
+            value_counts_df = value_counts_df.orderBy(F.desc("count"))
+
+        value_counts: List[pyspark_sql_Row] = value_counts_df.collect()
+
+        # Numpy does not always infer the correct DataTypes for Spark df, so we cannot use vectorized approach.
+        values: List[Any]
+        counts: List[int]
+        if len(value_counts) > 0:
+            values, counts = zip(*value_counts)
+        else:
+            values = []
+            counts = []
+
         series = pd.Series(
-            [row["count"] for row in value_counts],
-            index=pd.Index(data=[row[column] for row in value_counts], name="value"),
+            counts,
+            index=pd.Index(data=values, name="value"),
             name="count",
         )
         return series

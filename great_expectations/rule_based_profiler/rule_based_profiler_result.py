@@ -80,7 +80,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
         return self.to_dict()
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.RULE_BASED_PROFILER_RESULT_GET_EXPECTATION_SUITE.value,
+        event_name=UsageStatsEvents.RULE_BASED_PROFILER_RESULT_GET_EXPECTATION_SUITE,
         args_payload_fn=get_expectation_suite_usage_statistics,
     )
     def get_expectation_suite(self, expectation_suite_name: str) -> ExpectationSuite:

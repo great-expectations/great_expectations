@@ -4,7 +4,7 @@ title: How to write integration documentation
 
 ### Introduction
 As the data stack ecosystem grows and expands in usage and tooling, so does the need to integrate with 3rd party
-products or services. [Superconductive](https://superconductive.com) as drivers and ushers
+products or services. As drivers and ushers
 of [Great Expectations](https://greatexpectations.io), we want to make the process to integrating with Great Expectations
 as low friction as possible. We are committed to work and iterate in the process and greatly value any feedback you may have.
 The aim of this document is to provide guidance for vendors or community partners which wish to integrate with us as to

@@ -1,8 +1,11 @@
 import importlib
 
+import pytest
+
 from great_expectations.util import verify_dynamic_loading_support
 
 
+@pytest.mark.integration
 def test_store_dynamic_loading_enablement() -> None:
     module = importlib.import_module("great_expectations.data_context.store")
     module_dict = vars(module)

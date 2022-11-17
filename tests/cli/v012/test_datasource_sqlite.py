@@ -1,10 +1,12 @@
 import os
 from collections import OrderedDict
 
+import pytest
 from click.testing import CliRunner
 
 from great_expectations import DataContext
 from great_expectations.cli.v012 import cli
+from tests.cli.utils import escape_ansi
 from tests.cli.v012.test_cli import yaml
 from tests.cli.v012.utils import (
     assert_no_logging_messages_or_tracebacks,
@@ -37,23 +39,23 @@ def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog):
     )
     url = str(empty_sqlite_db.engine.url)
     expected_output = """\
-1 Datasource found:[0m
-[0m
- - [36mname:[0m wow_a_datasource[0m
-   [36mmodule_name:[0m great_expectations.datasource[0m
-   [36mclass_name:[0m SqlAlchemyDatasource[0m
-   [36mbatch_kwargs_generators:[0m[0m
-     [36mdefault:[0m[0m
-       [36mclass_name:[0m TableBatchKwargsGenerator[0m
-   [36mcredentials:[0m[0m
-     [36murl:[0m {}[0m
-   [36mdata_asset_type:[0m[0m
-     [36mclass_name:[0m SqlAlchemyDataset[0m
-     [36mmodule_name:[0m None[0m
+1 Datasource found:
+
+ - name: wow_a_datasource
+   module_name: great_expectations.datasource
+   class_name: SqlAlchemyDatasource
+   batch_kwargs_generators:
+     default:
+       class_name: TableBatchKwargsGenerator
+   credentials:
+     url: {}
+   data_asset_type:
+     class_name: SqlAlchemyDataset
+     module_name: None
 """.format(
         url
     ).strip()
-    stdout = result.stdout.strip()
+    stdout = escape_ansi(result.stdout).strip()
 
     assert stdout == expected_output
 
@@ -256,6 +258,7 @@ def test_cli_datasource_profile_on_empty_database(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.slow  # 1.05s
 def test_cli_datasource_profile_with_datasource_arg(
     empty_data_context, titanic_sqlite_db, caplog
 ):
@@ -313,6 +316,7 @@ def test_cli_datasource_profile_with_datasource_arg(
     assert_no_tracebacks(result)
 
 
+@pytest.mark.slow  # 1.07s
 def test_cli_datasource_profile_with_datasource_arg_and_generator_name_arg(
     empty_data_context, titanic_sqlite_db, caplog
 ):
@@ -372,6 +376,7 @@ def test_cli_datasource_profile_with_datasource_arg_and_generator_name_arg(
     assert_no_tracebacks(result)
 
 
+@pytest.mark.slow  # 1.07s
 def test_cli_datasource_profile_with_no_datasource_args(
     empty_data_context, titanic_sqlite_db, caplog
 ):
@@ -423,6 +428,7 @@ def test_cli_datasource_profile_with_no_datasource_args(
     assert_no_tracebacks(result)
 
 
+@pytest.mark.slow  # 1.12s
 def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with_limit(
     empty_data_context, titanic_sqlite_db, caplog
 ):
@@ -501,6 +507,7 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with
     assert_no_tracebacks(result)
 
 
+@pytest.mark.slow  # 1.06s
 def test_cli_datasource_profile_with_valid_data_asset_arg(
     empty_data_context, titanic_sqlite_db, caplog
 ):

@@ -2,13 +2,11 @@ import random
 import uuid
 from typing import Union
 
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.configuration_store import ConfigurationStore
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
 )
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
@@ -18,7 +16,7 @@ class ProfilerStore(ConfigurationStore):
     A ProfilerStore manages Profilers for the DataContext.
     """
 
-    _configuration_class = RuleBasedProfilerConfig  # type: ignore[assignment]
+    _configuration_class = RuleBasedProfilerConfig
 
     def serialization_self_check(self, pretty_print: bool) -> None:
         """
@@ -32,10 +30,10 @@ class ProfilerStore(ConfigurationStore):
             rules={},
         )
 
-        test_key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+        test_key: Union[GXCloudIdentifier, ConfigurationIdentifier]
         if self.ge_cloud_mode:
             test_key = self.key_class(  # type: ignore[assignment,call-arg]
-                resource_type=GeCloudRESTResource.PROFILER,
+                resource_type=GXCloudRESTResource.PROFILER,
                 ge_cloud_id=str(uuid.uuid4()),
             )
         else:

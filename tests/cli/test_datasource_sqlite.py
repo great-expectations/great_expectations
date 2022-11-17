@@ -3,12 +3,13 @@ from collections import OrderedDict
 from unittest import mock
 
 import nbformat
+import pytest
 from click.testing import CliRunner
 from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
-from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+from tests.cli.utils import assert_no_logging_messages_or_tracebacks, escape_ansi
 
 
 @mock.patch(
@@ -45,13 +46,13 @@ def test_cli_datasource_list(
         catch_exceptions=False,
     )
     expected_output = """\
-Using v3 (Batch Request) API\x1b[0m
-1 Datasource found:[0m
-[0m
- - [36mname:[0m wow_a_datasource[0m
-   [36mclass_name:[0m SqlAlchemyDatasource[0m
+Using v3 (Batch Request) API
+1 Datasource found:
+
+ - name: wow_a_datasource
+   class_name: SqlAlchemyDatasource
 """.strip()
-    stdout = result.stdout.strip()
+    stdout = escape_ansi(result.stdout).strip()
 
     assert stdout == expected_output
 
@@ -218,6 +219,7 @@ def _add_datasource__with_two_generators_and_credentials_to_context(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
+@pytest.mark.slow  # 6.81s
 def test_cli_datasource_new_connection_string(
     mock_subprocess,
     mock_emit,
@@ -235,7 +237,7 @@ def test_cli_datasource_new_connection_string(
     result = runner.invoke(
         cli,
         "--v3-api datasource new",
-        input="2\n6\n",
+        input="2\n7\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -288,10 +290,18 @@ def test_cli_datasource_new_connection_string(
     with open(expected_notebook) as f:
         nb = nbformat.read(f, as_version=4)
 
-    # mock the user adding a connection string into the notebook by overwriting the right cell
+    # Mock the user adding a connection string into the notebook by overwriting the right cell
+    credentials_cell = nb["cells"][5]["source"]
 
-    assert "connection_string" in nb["cells"][5]["source"]
-    nb["cells"][5]["source"] = '  connection_string = "sqlite://"'
+    credentials = ("connection_string", "schema_name", "table_name")
+    for credential in credentials:
+        assert credential in credentials_cell
+
+    # Replace placeholder with actual value to allow remainder of notebook to execute successfully
+    nb["cells"][5]["source"] = credentials_cell.replace(
+        "YOUR_CONNECTION_STRING", "sqlite://"
+    )
+
     ep = ExecutePreprocessor(timeout=60, kernel_name="python3")
     ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
@@ -317,6 +327,20 @@ def test_cli_datasource_new_connection_string(
                     "class_name": "InferredAssetSqlDataConnector",
                     "module_name": "great_expectations.datasource.data_connector",
                     "include_schema_name": True,
+                    "introspection_directives": {
+                        "schema_name": "YOUR_SCHEMA",
+                    },
+                },
+                "default_configured_data_connector_name": {
+                    "assets": {
+                        "YOUR_TABLE_NAME": {
+                            "class_name": "Asset",
+                            "module_name": "great_expectations.datasource.data_connector.asset",
+                            "schema_name": "YOUR_SCHEMA",
+                        },
+                    },
+                    "class_name": "ConfiguredAssetSqlDataConnector",
+                    "module_name": "great_expectations.datasource.data_connector",
                 },
             },
             "name": "my_datasource",

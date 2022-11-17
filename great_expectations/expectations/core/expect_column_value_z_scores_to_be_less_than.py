@@ -9,7 +9,7 @@ from great_expectations.expectations.expectation import (
 
 class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
     """
-    Expect the Z-scores of a columns values to be less than a given threshold
+    Expect the Z-scores of a column's values to be less than a given threshold.
 
             expect_column_values_to_be_of_type is a :func:`column_map_expectation \
             <great_expectations.execution_engine.execution_engine.MetaExecutionEngine.column_map_expectation>` for
@@ -61,6 +61,8 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\

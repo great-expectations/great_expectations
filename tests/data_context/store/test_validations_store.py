@@ -28,6 +28,7 @@ from tests.core.usage_statistics.util import (
 @pytest.mark.filterwarnings(
     "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
 )
+@pytest.mark.integration
 def test_ValidationsStore_with_TupleS3StoreBackend():
     bucket = "test_validation_store_bucket"
     prefix = "test/prefix"
@@ -103,6 +104,7 @@ def test_ValidationsStore_with_TupleS3StoreBackend():
 
 
 @freeze_time("09/26/2019 13:42:41")
+@pytest.mark.integration
 def test_ValidationsStore_with_InMemoryStoreBackend():
     my_store = ValidationsStore(
         store_backend={
@@ -253,6 +255,7 @@ def test_ValidationsStore_with_TupleFileSystemStoreBackend(tmp_path_factory):
 @pytest.mark.filterwarnings(
     "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
 )
+@pytest.mark.integration
 def test_ValidationsStore_with_DatabaseStoreBackend(sa):
     # Use sqlite so we don't require postgres for this test.
     connection_kwargs = {"drivername": "sqlite"}
@@ -315,6 +318,7 @@ def test_ValidationsStore_with_DatabaseStoreBackend(sa):
 @pytest.mark.filterwarnings(
     "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
 )
+@pytest.mark.integration
 def test_instantiation_with_test_yaml_config(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):
@@ -351,3 +355,36 @@ store_backend:
     # Confirm that logs do not contain any exceptions or invalid messages
     assert not usage_stats_exceptions_exist(messages=caplog.messages)
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_ge_cloud_response_json_to_object_dict() -> None:
+    store = ValidationsStore(store_name="validations_store")
+
+    validation_id = "c1e8f964-ba44-4a13-a9b6-7331a358f12d"
+    validation_config = {
+        "results": [],
+        "success": True,
+        "statistics": {
+            "evaluated_expectations": 0,
+            "successful_expectations": 0,
+            "unsuccessful_expectations": 0,
+            "success_percent": None,
+        },
+    }
+    response_json = {
+        "data": {
+            "id": validation_id,
+            "attributes": {
+                "result": validation_config,
+            },
+        }
+    }
+
+    expected = validation_config
+    expected["ge_cloud_id"] = validation_id
+
+    actual = store.ge_cloud_response_json_to_object_dict(response_json)
+
+    assert actual == expected

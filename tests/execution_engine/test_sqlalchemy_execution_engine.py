@@ -1,5 +1,6 @@
 import logging
 import os
+from typing import Dict, Tuple, cast
 
 import pandas as pd
 import pytest
@@ -11,6 +12,9 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
+    SqlAlchemyBatchData,
+)
 from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
@@ -23,6 +27,7 @@ from great_expectations.expectations.row_conditions import (
 )
 from great_expectations.self_check.util import build_sa_engine
 from great_expectations.util import get_sqlalchemy_domain_data
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 from tests.expectations.test_util import get_table_columns_metric
@@ -155,52 +160,52 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
-    desired_metric_1 = MetricConfiguration(
+    aggregate_fn_metric_1 = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
-    desired_metric_2 = MetricConfiguration(
+    aggregate_fn_metric_1.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    aggregate_fn_metric_2 = MetricConfiguration(
         metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
-    desired_metric_3 = MetricConfiguration(
+    aggregate_fn_metric_2.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    aggregate_fn_metric_3 = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
-    desired_metric_4 = MetricConfiguration(
+    aggregate_fn_metric_3.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    aggregate_fn_metric_4 = MetricConfiguration(
         metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    aggregate_fn_metric_4.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(
-            desired_metric_1,
-            desired_metric_2,
-            desired_metric_3,
-            desired_metric_4,
+            aggregate_fn_metric_1,
+            aggregate_fn_metric_2,
+            aggregate_fn_metric_3,
+            aggregate_fn_metric_4,
         ),
         metrics=metrics,
     )
@@ -210,38 +215,38 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
         metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric_1,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric_1.metric_dependencies = {
+        "metric_partial_fn": aggregate_fn_metric_1,
+        "table.columns": table_columns_metric,
+    }
     desired_metric_2 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric_2,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric_2.metric_dependencies = {
+        "metric_partial_fn": aggregate_fn_metric_2,
+        "table.columns": table_columns_metric,
+    }
     desired_metric_3 = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric_3,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric_3.metric_dependencies = {
+        "metric_partial_fn": aggregate_fn_metric_3,
+        "table.columns": table_columns_metric,
+    }
     desired_metric_4 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric_4,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric_4.metric_dependencies = {
+        "metric_partial_fn": aggregate_fn_metric_4,
+        "table.columns": table_columns_metric,
+    }
     caplog.clear()
     caplog.set_level(logging.DEBUG, logger="great_expectations")
     start = datetime.datetime.now()
@@ -291,7 +296,9 @@ def test_get_domain_records_with_column_domain(sa):
     expected_column_df = df.iloc[:3]
     engine = build_sa_engine(expected_column_df, sa)
     expected_data = engine.engine.execute(
-        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+        sa.select(["*"]).select_from(
+            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+        )
     ).fetchall()
 
     assert (
@@ -322,7 +329,9 @@ def test_get_domain_records_with_column_domain_and_filter_conditions(sa):
     expected_column_df = df.iloc[:3]
     engine = build_sa_engine(expected_column_df, sa)
     expected_data = engine.engine.execute(
-        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+        sa.select(["*"]).select_from(
+            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+        )
     ).fetchall()
 
     assert (
@@ -353,7 +362,9 @@ def test_get_domain_records_with_different_column_domain_and_filter_conditions(s
     expected_column_df = df.iloc[:1]
     engine = build_sa_engine(expected_column_df, sa)
     expected_data = engine.engine.execute(
-        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+        sa.select(["*"]).select_from(
+            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+        )
     ).fetchall()
 
     assert (
@@ -413,7 +424,9 @@ def test_get_domain_records_with_column_pair_domain(sa):
     )
     engine = build_sa_engine(expected_column_pair_df, sa)
     expected_data = engine.engine.execute(
-        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+        sa.select(["*"]).select_from(
+            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+        )
     ).fetchall()
 
     assert (
@@ -437,7 +450,9 @@ def test_get_domain_records_with_column_pair_domain(sa):
     )
     engine = build_sa_engine(expected_column_pair_df, sa)
     expected_data = engine.engine.execute(
-        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+        sa.select(["*"]).select_from(
+            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+        )
     ).fetchall()
 
     assert (
@@ -465,7 +480,9 @@ def test_get_domain_records_with_column_pair_domain(sa):
     )
     engine = build_sa_engine(expected_column_pair_df, sa)
     expected_data = engine.engine.execute(
-        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+        sa.select(["*"]).select_from(
+            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+        )
     ).fetchall()
 
     assert (
@@ -497,7 +514,9 @@ def test_get_domain_records_with_multicolumn_domain(sa):
     )
     engine = build_sa_engine(expected_multicolumn_df, sa)
     expected_data = engine.engine.execute(
-        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+        sa.select(["*"]).select_from(
+            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+        )
     ).fetchall()
 
     assert (
@@ -527,7 +546,9 @@ def test_get_domain_records_with_multicolumn_domain(sa):
     )
     engine = build_sa_engine(expected_multicolumn_df, sa)
     expected_data = engine.engine.execute(
-        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+        sa.select(["*"]).select_from(
+            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+        )
     ).fetchall()
 
     assert (
@@ -560,7 +581,9 @@ def test_get_domain_records_with_multicolumn_domain(sa):
     )
     engine = build_sa_engine(expected_multicolumn_df, sa)
     expected_data = engine.engine.execute(
-        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+        sa.select(["*"]).select_from(
+            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+        )
     ).fetchall()
 
     assert (
@@ -580,7 +603,9 @@ def test_get_compute_domain_with_no_domain_kwargs(sa):
 
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
     raw_data = engine.engine.execute(
-        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+        sa.select(["*"]).select_from(
+            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+        )
     ).fetchall()
     domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
 
@@ -603,7 +628,9 @@ def test_get_compute_domain_with_column_pair(sa):
 
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
     raw_data = engine.engine.execute(
-        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+        sa.select(["*"]).select_from(
+            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+        )
     ).fetchall()
     domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
 
@@ -633,7 +660,9 @@ def test_get_compute_domain_with_multicolumn(sa):
 
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
     raw_data = engine.engine.execute(
-        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+        sa.select(["*"]).select_from(
+            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+        )
     ).fetchall()
     domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
 
@@ -658,7 +687,9 @@ def test_get_compute_domain_with_column_domain(sa):
 
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
     raw_data = engine.engine.execute(
-        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+        sa.select(["*"]).select_from(
+            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+        )
     ).fetchall()
     domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
 
@@ -686,7 +717,9 @@ def test_get_compute_domain_with_unmeetable_row_condition(sa):
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
     raw_data = engine.engine.execute(
         sa.select(["*"])
-        .select_from(engine.active_batch_data.selectable)
+        .select_from(
+            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+        )
         .where(sa.column("b") > 24)
     ).fetchall()
     domain_data = engine.engine.execute(get_sqlalchemy_domain_data(data)).fetchall()
@@ -719,7 +752,9 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
     raw_data = engine.engine.execute(
         sa.select(["*"])
-        .select_from(engine.active_batch_data.selectable)
+        .select_from(
+            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+        )
         .where(sa.column("b") == 2)
     ).fetchall()
     domain_data = engine.engine.execute(get_sqlalchemy_domain_data(data)).fetchall()
@@ -814,28 +849,28 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(sa)
         batch_id="1234",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
-    desired_metric = MetricConfiguration(
+    aggregate_fn_metric = MetricConfiguration(
         metric_name="column_values.length.max.aggregate_fn",
         metric_domain_kwargs={
             "column": "names",
             "batch_id": "1234",
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
         metric_value_kwargs=None,
     )
+    aggregate_fn_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
 
     try:
-        results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+        results = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn_metric,))
     except ge_exceptions.MetricProviderError as e:
         assert False, str(e)
 
@@ -845,10 +880,10 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(sa)
             "batch_id": "1234",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "metric_partial_fn": aggregate_fn_metric,
+    }
 
     try:
         results = engine.resolve_metrics(
@@ -895,10 +930,10 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -909,10 +944,10 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
         metric_name="column_values.unique.condition",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,), metrics=metrics
     )
@@ -924,10 +959,11 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
         metric_name="column_values.unique.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+    }
+    # noinspection PyUnusedLocal
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
