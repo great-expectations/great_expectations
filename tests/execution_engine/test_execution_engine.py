@@ -327,7 +327,3 @@ def test_resolve_metrics_with_incomplete_metric_input():
     # Ensuring that incomplete metrics given raises a GreatExpectationsError
     with pytest.raises(ge_exceptions.GreatExpectationsError) as error:
         engine.resolve_metrics(metrics_to_resolve=(desired_metric,), metrics={})
-
-
-def test_resolve_metrics_sqlalchemy():
-    pass

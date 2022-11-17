@@ -1,5 +1,3 @@
-import os
-
 import pandas as pd
 import pytest
 
@@ -7,14 +5,11 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest, IDDict
+from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource.data_connector import (
-    ConfiguredAssetSqlDataConnector,
-    InferredAssetSqlDataConnector,
-)
+from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SqlAlchemyExecutionEngine,

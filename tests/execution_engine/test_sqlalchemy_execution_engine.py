@@ -153,6 +153,7 @@ def test_instantiation_error_states(sa, test_db_connection_string):
 
 
 def test_sa_column_map_metrics(caplog, sa):
+    # TODO: add map metric test for SA
     engine = build_sa_engine(
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
@@ -996,6 +997,3 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     )
 
     validate_tmp_tables()
-
-
-# adding tests here

@@ -2930,7 +2930,7 @@ def check_json_test_result(test, result, data_asset=None) -> None:  # noqa: C901
                 if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset)):
                     pass
                 elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDFBatchData)):
-                    # adding JSON test result to ensure this is fully tested
+                    # TODO: add JSON test to ensure this parameter is fully tested
                     assert (
                         result["result"]["unexpected_index_list"] == value
                     ), f"{result['result']['unexpected_index_list']} != {value}"

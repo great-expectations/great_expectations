@@ -422,7 +422,6 @@ def column_condition_partial(
                     accessor_domain_kwargs,
                 )
 
-            # is this where unexpected condition is built
             return inner_func
 
         return wrapper
@@ -864,10 +863,8 @@ def column_pair_condition_partial(
                     _sqlalchemy_engine=sqlalchemy_engine,
                     _metrics=metrics,
                 )
-                # this is where build the unexpected condition
                 unexpected_condition = sa.not_(expected_condition)
 
-                # should we have the metric for the unexpected condition
                 return (
                     unexpected_condition,
                     compute_domain_kwargs,
@@ -1888,9 +1885,6 @@ def _pandas_map_condition_rows(
     return df.iloc[: result_format["partial_unexpected_count"]]
 
 
-# testing aggregate function
-
-
 def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
     cls,
     execution_engine: SqlAlchemyExecutionEngine,
@@ -1903,7 +1897,6 @@ def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
-    # this is the unexpected condition
     return (
         sa.func.sum(
             sa.case(

@@ -2313,14 +2313,12 @@ class ColumnMapExpectation(TableExpectation, ABC):
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
-        # print(type(execution_engine))
         if isinstance(execution_engine, SqlAlchemyExecutionEngine):
             metric_kwargs = get_metric_kwargs(
                 f"{self.map_metric}.unexpected_index_list",
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
-            # print(f"metric_kwargs: {metric_kwargs}")
             metric_dependencies[
                 f"{self.map_metric}.unexpected_index_list"
             ] = MetricConfiguration(
@@ -2328,7 +2326,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
-            # print(f"metric_dependencies: {metric_dependencies}")
         return dependencies
 
     def _validate(
@@ -2361,8 +2358,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
         unexpected_index_list: Optional[List[int]] = metrics.get(
             f"{self.map_metric}.unexpected_index_list"
         )
-        # print("HI HI HI HI HI HI")
-        # print(f"unexpected_index_list: {unexpected_index_list}")
         unexpected_rows = None
         if include_unexpected_rows:
             unexpected_rows = metrics.get(f"{self.map_metric}.unexpected_rows")
