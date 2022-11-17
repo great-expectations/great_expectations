@@ -10,14 +10,14 @@
 
 /* You can override the default Infima variables here. */
 :root {
-    --ifm-font-color-base: rgb(15, 42, 63);
-    --ifm-navbar-link-color: rgb(15, 42, 63);
-    --ifm-menu-color: rgb(15, 42, 63);
-    --ifm-footer-title-color: rgb(15, 42, 63);
-    --ifm-footer-link-color: rgb(15, 42, 63);
+    --ifm-font-color-base: #404041;
+    --ifm-navbar-link-color: #404041;
+    --ifm-menu-color: #404041;
+    --ifm-footer-title-color: #FF8D3A;
+    --ifm-footer-link-color: #F8F8F8;
     --ifm-dropdown-font-weight: 700;
-    --ifm-footer-background-color: #fff;
-    --ifm-color-primary: #fd5383;
+    --ifm-footer-background-color: #404041;
+    --ifm-color-primary: #ff6310;
     --ifm-color-primary-dark: #fd326b;
     --ifm-color-primary-darker: #fc215f;
     --ifm-color-primary-darkest: #e80344;
@@ -28,7 +28,7 @@
 
     /* sync up some of the typography */
     --ifm-heading-line-height: 1;
-    --ifm-h1-font-size: 40px;
+    --ifm-h1-font-size: 48px;
     --ifm-h2-font-size: 20px;
     --ifm-font-family-base: Montserrat, 'Open Sans', Verdana, sans‑serif;
     --ifm-dropdown-font-weight: bold;
@@ -44,12 +44,20 @@
     font-size: var(--ifm-h1-font-size) !important;
 }
 
+h1, h2, h3 {
+    line-height: 1.4;
+}
+
+h4, h5, h6, p {
+    line-height: 1.5;
+}
+
 h3 {
-    color: #8884FF;
+    color: #404041;
 }
 
 .markdown p {
-    line-height: 29px;
+    line-height: 1.8;
 }
 
 /* pagination overrides */
@@ -98,6 +106,16 @@ a.pagination-nav__link:hover {
     height: auto;
 }
 
+/*footer*/
+
+.footer__link-item {
+    font-size: 18px;
+}
+
+.footer__title {
+    font-size: 20px;
+    margin-bottom: 15px;
+}
 
 /* change the carat in the top menu to open carat */
 .dropdown > .navbar__link:after,
