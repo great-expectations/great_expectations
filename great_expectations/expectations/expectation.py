@@ -478,12 +478,15 @@ class Expectation(metaclass=MetaExpectation):
             meta_properties_to_render = result.expectation_config.kwargs.get(
                 "meta_properties_to_render"
             )
-        if meta_properties_to_render is not None:
+        if meta_properties_to_render:
             for key in sorted(meta_properties_to_render.keys()):
                 meta_property = meta_properties_to_render[key]
-                if meta_property is not None:
+                if meta_property:
                     try:
                         # Allow complex structure with . usage
+                        assert isinstance(
+                            result.expectation_config, ExpectationConfiguration
+                        )
                         obj = result.expectation_config.meta["attributes"]
                         keys = meta_property.split(".")
                         for i in range(0, len(keys)):
@@ -498,8 +501,6 @@ class Expectation(metaclass=MetaExpectation):
                         custom_property_values.append([obj])
                     except KeyError:
                         custom_property_values.append(["N/A"])
-            else:
-                custom_property_values.append(["N/A"])
         return custom_property_values
 
     @classmethod
