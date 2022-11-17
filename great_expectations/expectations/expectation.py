@@ -292,7 +292,7 @@ class Expectation(metaclass=MetaExpectation):
         """
         Default rendering function that is utilized by GE Cloud Front-end if an implemented atomic renderer fails
         """
-        template_str = "Rendering failed for "
+        template_str = "Rendering failed for Expectation: "
 
         expectation_type: str
         expectation_kwargs: dict
@@ -828,7 +828,7 @@ class Expectation(metaclass=MetaExpectation):
                 "value": expectation_kwargs,
             },
         }
-        template_str = "Rendering failed for $expectation_type(**$kwargs)."
+        template_str = "Rendering failed for Expectation: $expectation_type(**$kwargs)."
 
         value_obj = renderedAtomicValueSchema.load(
             {
