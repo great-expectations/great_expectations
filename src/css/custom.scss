@@ -36,7 +36,8 @@
     --ifm-heading-vertical-rhythm-bottom: 0;
 
     /* make pagination look like the nice buttons */
-    --ifm-pagination-nav-border-radius: 40px;
+    --ifm-pagination-nav-border-radius: 35px;
+    --ifm-pagination-nav-padding: 16px;
 }
 
 /* override huge h1 */
@@ -71,13 +72,15 @@ h3 {
 
 .pagination-nav__sublabel {
     color: #fff;
+    display: none;
 }
 
 .pagination-nav__link {
     border: none;
     color: #fff;
-    padding: 12px 28px;
+    padding: var(--ifm-pagination-nav-padding);
     background: var(--ifm-link-color);
+    text-align: center;
 }
 
 a.pagination-nav__link:hover {
