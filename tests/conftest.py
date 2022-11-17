@@ -31,6 +31,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import BaseDataContext, CloudDataContext
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.store.gx_cloud_store_backend import (
+    GXCloudStoreBackend,
+)
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
@@ -2459,7 +2462,7 @@ stores:
   default_expectations_store:
     class_name: ExpectationsStore
     store_backend:
-      class_name: GeCloudStoreBackend
+      class_name: {GXCloudStoreBackend.__name__}
       ge_cloud_base_url: {ge_cloud_base_url}
       ge_cloud_resource_type: expectation_suite
       ge_cloud_credentials:
@@ -2470,7 +2473,7 @@ stores:
   default_validations_store:
     class_name: ValidationsStore
     store_backend:
-      class_name: GeCloudStoreBackend
+      class_name: {GXCloudStoreBackend.__name__}
       ge_cloud_base_url: {ge_cloud_base_url}
       ge_cloud_resource_type: validation_result
       ge_cloud_credentials:
@@ -2481,7 +2484,7 @@ stores:
   default_checkpoint_store:
     class_name: CheckpointStore
     store_backend:
-      class_name: GeCloudStoreBackend
+      class_name: {GXCloudStoreBackend.__name__}
       ge_cloud_base_url: {ge_cloud_base_url}
       ge_cloud_resource_type: checkpoint
       ge_cloud_credentials:
@@ -2492,7 +2495,7 @@ stores:
   default_profiler_store:
     class_name: ProfilerStore
     store_backend:
-      class_name: GeCloudStoreBackend
+      class_name: {GXCloudStoreBackend.__name__}
       ge_cloud_base_url: {ge_cloud_base_url}
       ge_cloud_resource_type: profiler
       ge_cloud_credentials:
@@ -2665,7 +2668,7 @@ def cloud_data_context_with_datasource_pandas_engine(
         return value
 
     with mock.patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
+        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.list_keys"
     ), mock.patch(
         "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
         side_effect=set_side_effect,

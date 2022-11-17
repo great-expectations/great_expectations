@@ -8,7 +8,7 @@ from pydantic import FilePath, ValidationError
 from typing_extensions import ClassVar, Literal
 
 from great_expectations.zep.config import GxConfig
-from great_expectations.zep.fakes import sqlachemy_execution_engine_mock
+from great_expectations.zep.fakes import sqlachemy_execution_engine_mock_cls
 
 if TYPE_CHECKING:
     from great_expectations.zep.postgres_datasource import (
@@ -197,7 +197,8 @@ if __name__ == "__main__":
     # round_trip()
     # type_lookup()
     # add_real_asset()
-
-    with sqlachemy_execution_engine_mock(lambda x: None):
-        from_yaml_config()
-        pg_ds_nested_within_asset()
+    PostgresDatasource.execution_engine_override = sqlachemy_execution_engine_mock_cls(
+        lambda x: None
+    )
+    from_yaml_config()
+    pg_ds_nested_within_asset()
