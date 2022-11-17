@@ -667,7 +667,7 @@ class CloudDataContext(AbstractDataContext):
                 "data_context": self,
                 "root_directory": self.root_directory,
                 "site_name": site_name,
-                "ge_cloud_mode": True,
+                "ge_cloud_mode": self.ge_cloud_mode,
             },
             config_defaults={
                 "module_name": "great_expectations.render.renderer.site_builder"
