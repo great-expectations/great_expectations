@@ -321,14 +321,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         except PermissionError as e:
             logger.warning(f"Could not save project config to disk: {e}")
 
-    def _normalize_store_path(self, resource_store):
-        if resource_store["type"] == "filesystem":
-            if not os.path.isabs(resource_store["base_directory"]):
-                resource_store["base_directory"] = os.path.join(
-                    self.root_directory, resource_store["base_directory"]
-                )
-        return resource_store
-
     #####
     #
     # Internal helper methods
