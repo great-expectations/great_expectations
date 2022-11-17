@@ -7,18 +7,18 @@ from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Union
 
 from pydantic import DirectoryPath, validate_arguments
 
-from great_expectations.zep.config import GxConfig
-from great_expectations.zep.sources import _SourceFactories
+from great_expectations.experimental.datasources.config import GxConfig
+from great_expectations.experimental.datasources.sources import _SourceFactories
 
 if TYPE_CHECKING:
-    from great_expectations.zep.interfaces import Datasource
+    from great_expectations.experimental.datasources.interfaces import Datasource
 
 LOGGER = logging.getLogger(__name__)
 
 
 class DataContext:
     """
-    NOTE: this is just a scaffold for exploring and iterating on our ZEP prototype
+    NOTE: this is just a scaffold for exploring and iterating on our experimental datasource prototype
     this will be formalized and tested prior to release.
 
     Use `great_expectations.get_context()` for a real DataContext.
@@ -79,7 +79,7 @@ class DataContext:
 def get_context(
     context_root_dir: Optional[DirectoryPath] = None, **kwargs
 ) -> DataContext:
-    """ZEP get_context placeholder function."""
+    """Experimental get_context placeholder function."""
     LOGGER.info(f"3. Getting context {context_root_dir or ''}")
     context = DataContext.get_context(context_root_dir=context_root_dir, **kwargs)
     return context
