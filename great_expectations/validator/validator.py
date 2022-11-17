@@ -59,6 +59,7 @@ from great_expectations.expectations.registry import (
     get_expectation_impl,
     list_registered_expectation_implementations,
 )
+from great_expectations.experimental.datasources.interfaces import Batch as XBatch
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
@@ -88,7 +89,6 @@ from great_expectations.validator.validation_graph import (
     MetricEdge,
     ValidationGraph,
 )
-from great_expectations.zep.interfaces import Batch as ZepBatch
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -133,7 +133,7 @@ class Validator:
         expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
         data_context: Optional[AbstractDataContext] = None,
-        batches: Optional[Sequence[Union[Batch, ZepBatch]]] = None,
+        batches: Optional[Sequence[Union[Batch, XBatch]]] = None,
         include_rendered_content: Optional[bool] = None,
         **kwargs,
     ) -> None:
@@ -226,7 +226,7 @@ class Validator:
         return self._execution_engine.batch_manager.batch_cache
 
     @property
-    def batches(self) -> Dict[str, Union[Batch, ZepBatch]]:
+    def batches(self) -> Dict[str, Union[Batch, XBatch]]:
         """Getter for dictionary of Batch objects (alias convenience property, to be deprecated)"""
         return self.batch_cache
 
