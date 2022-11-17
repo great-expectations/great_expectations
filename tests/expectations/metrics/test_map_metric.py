@@ -83,15 +83,15 @@ def sqlite_table_for_unexpected_rows_with_index(test_backends):
                     ],
                 }
             )
-            sqlite_engine.execute(
-                """CREATE TABLE test_temp(
-                   pk_1 INT,
-                   pk_2 TEXT,
-                   numbers_with_duplicates INT,
-                   animal_names_no_duplicates TEXT
-                );"""
-            )
-            # may need this later for creating temp tables
+            # sqlite_engine.execute(
+            #     """CREATE TEMP TABLE test_temp(
+            #        pk_1 INT,
+            #        pk_2 TEXT,
+            #        numbers_with_duplicates INT,
+            #        animal_names_no_duplicates TEXT
+            #     );"""
+            # )
+            # # may need this later for creating temp tables
             # sqlite_engine.execute("""CREATE INDEX index_name ON test_temp (pk_1);""")
             df.to_sql(
                 name="test_temp", con=sqlite_engine, index=False, if_exists="replace"
@@ -881,6 +881,88 @@ def test_include_unexpected_rows_without_explicit_result_format_raises_error(
         expectation.validate(validator)
 
 
+def test_sqlite_single_column_complete_result_format(
+    sa, sqlite_table_for_unexpected_rows_with_index
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "numbers_with_duplicates",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "COMPLETE",
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
+    connection_string = f"sqlite:///{sqlite_path}"
+    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
+    execution_engine = engine
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=execution_engine,
+            assets={
+                "my_asset": {
+                    "table_name": "test_temp",
+                },
+            },
+        )
+    )
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="my_test_datasource",
+            data_connector_name="my_sql_data_connector",
+            # data_asset_name="main.my_asset"
+            data_asset_name="my_asset",
+        )
+    )
+    assert len(batch_definition_list) == 1
+    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
+        batch_definition=batch_definition_list[0]
+    )
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=batch_spec
+    )
+    batch = Batch(data=batch_data)
+    validator = Validator(execution_engine, batches=[batch])
+    result = expectation.validate(validator)
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "unexpected_count": 2,
+        "unexpected_index_list": [
+            {
+                "pk_1": 3,
+            },
+            {
+                "pk_1": 5,
+            },
+        ],  # Dicts since a column was provided
+        "partial_unexpected_index_list": [
+            {
+                "pk_1": 3,
+            },
+            {
+                "pk_1": 5,
+            },
+        ],  # Dicts since a column was provided
+        "unexpected_percent": 33.33333333333333,
+        "partial_unexpected_list": [3, 10],
+        "unexpected_list": [3, 10],
+        "partial_unexpected_counts": [
+            {"value": 3, "count": 1},
+            {"value": 10, "count": 1},
+        ],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 33.33333333333333,
+        "unexpected_percent_nonmissing": 33.33333333333333,
+    }
+
+
 def test_sqlite_single_unexpected_index_column_names_complete_result_format(
     sa, sqlite_table_for_unexpected_rows_with_index
 ):
@@ -1036,3 +1118,471 @@ def test_sqlite_single_unexpected_index_column_names_summary_result_format(
         "unexpected_percent_total": 33.33333333333333,
         "unexpected_percent_nonmissing": 33.33333333333333,
     }
+
+
+def test_sqlite_multiple_unexpected_index_column_names_complete_result_format(
+    sa, sqlite_table_for_unexpected_rows_with_index
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "numbers_with_duplicates",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
+    connection_string = f"sqlite:///{sqlite_path}"
+    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
+    execution_engine = engine
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=execution_engine,
+            assets={
+                "my_asset": {
+                    "table_name": "test_temp",
+                },
+            },
+        )
+    )
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="my_test_datasource",
+            data_connector_name="my_sql_data_connector",
+            # data_asset_name="main.my_asset"
+            data_asset_name="my_asset",
+        )
+    )
+    assert len(batch_definition_list) == 1
+    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
+        batch_definition=batch_definition_list[0]
+    )
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=batch_spec
+    )
+    batch = Batch(data=batch_data)
+    validator = Validator(execution_engine, batches=[batch])
+    result = expectation.validate(validator)
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "unexpected_count": 2,
+        "unexpected_index_list": [
+            {"pk_1": 3, "pk_2": "three"},
+            {"pk_1": 5, "pk_2": "five"},
+        ],  # Dicts since columns were provided
+        "partial_unexpected_index_list": [
+            {"pk_1": 3, "pk_2": "three"},
+            {"pk_1": 5, "pk_2": "five"},
+        ],  # Dicts since columns were provided
+        "unexpected_percent": 33.33333333333333,
+        "partial_unexpected_list": [3, 10],
+        "unexpected_list": [3, 10],
+        "partial_unexpected_counts": [
+            {"value": 3, "count": 1},
+            {"value": 10, "count": 1},
+        ],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 33.33333333333333,
+        "unexpected_percent_nonmissing": 33.33333333333333,
+    }
+
+
+def test_sql_multiple_unexpected_index_column_names_complete_result_format_limit_1(
+    sa, sqlite_table_for_unexpected_rows_with_index
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "numbers_with_duplicates",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
+                "partial_unexpected_count": 1,
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
+    connection_string = f"sqlite:///{sqlite_path}"
+    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
+    execution_engine = engine
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=execution_engine,
+            assets={
+                "my_asset": {
+                    "table_name": "test_temp",
+                },
+            },
+        )
+    )
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="my_test_datasource",
+            data_connector_name="my_sql_data_connector",
+            # data_asset_name="main.my_asset"
+            data_asset_name="my_asset",
+        )
+    )
+    assert len(batch_definition_list) == 1
+    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
+        batch_definition=batch_definition_list[0]
+    )
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=batch_spec
+    )
+    batch = Batch(data=batch_data)
+    validator = Validator(execution_engine, batches=[batch])
+    result = expectation.validate(validator)
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "unexpected_count": 2,
+        "unexpected_index_list": [
+            {"pk_1": 3, "pk_2": "three"},
+            {"pk_1": 5, "pk_2": "five"},
+        ],  # Dicts since columns were provided
+        "partial_unexpected_index_list": [
+            {"pk_1": 3, "pk_2": "three"},
+        ],  # Dicts since columns were provided
+        "unexpected_percent": 33.33333333333333,
+        "partial_unexpected_list": [3],
+        "unexpected_list": [3, 10],
+        "partial_unexpected_counts": [
+            {"value": 3, "count": 1},
+        ],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 33.33333333333333,
+        "unexpected_percent_nonmissing": 33.33333333333333,
+    }
+
+
+def test_sql_multiple_unexpected_index_column_names_summary_result_format(
+    sa, sqlite_table_for_unexpected_rows_with_index
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "numbers_with_duplicates",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "SUMMARY",  # SUMMARY will include partial_unexpected* values only
+                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
+    connection_string = f"sqlite:///{sqlite_path}"
+    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
+    execution_engine = engine
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=execution_engine,
+            assets={
+                "my_asset": {
+                    "table_name": "test_temp",
+                },
+            },
+        )
+    )
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="my_test_datasource",
+            data_connector_name="my_sql_data_connector",
+            # data_asset_name="main.my_asset"
+            data_asset_name="my_asset",
+        )
+    )
+    assert len(batch_definition_list) == 1
+    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
+        batch_definition=batch_definition_list[0]
+    )
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=batch_spec
+    )
+    batch = Batch(data=batch_data)
+    validator = Validator(execution_engine, batches=[batch])
+    result = expectation.validate(validator)
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "unexpected_count": 2,
+        "partial_unexpected_index_list": [
+            {"pk_1": 3, "pk_2": "three"},
+            {"pk_1": 5, "pk_2": "five"},
+        ],  # Dicts since columns were provided
+        "unexpected_percent": 33.33333333333333,
+        "partial_unexpected_list": [3, 10],
+        "partial_unexpected_counts": [
+            {"value": 3, "count": 1},
+            {"value": 10, "count": 1},
+        ],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 33.33333333333333,
+        "unexpected_percent_nonmissing": 33.33333333333333,
+    }
+
+
+def test_sql_multiple_unexpected_index_column_names_summary_result_format_limit_1(
+    sa, sqlite_table_for_unexpected_rows_with_index
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "numbers_with_duplicates",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "SUMMARY",  # SUMMARY will include partial_unexpected* values only
+                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
+                "partial_unexpected_count": 1,
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
+    connection_string = f"sqlite:///{sqlite_path}"
+    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
+    execution_engine = engine
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=execution_engine,
+            assets={
+                "my_asset": {
+                    "table_name": "test_temp",
+                },
+            },
+        )
+    )
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="my_test_datasource",
+            data_connector_name="my_sql_data_connector",
+            # data_asset_name="main.my_asset"
+            data_asset_name="my_asset",
+        )
+    )
+    assert len(batch_definition_list) == 1
+    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
+        batch_definition=batch_definition_list[0]
+    )
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=batch_spec
+    )
+    batch = Batch(data=batch_data)
+    validator = Validator(execution_engine, batches=[batch])
+    result = expectation.validate(validator)
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "unexpected_count": 2,
+        "partial_unexpected_index_list": [
+            {"pk_1": 3, "pk_2": "three"},
+        ],  # Dicts since columns were provided
+        "unexpected_percent": 33.33333333333333,
+        "partial_unexpected_list": [3],
+        "partial_unexpected_counts": [
+            {"value": 3, "count": 1},
+        ],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 33.33333333333333,
+        "unexpected_percent_nonmissing": 33.33333333333333,
+    }
+
+
+def test_sql_multiple_unexpected_index_column_names_basic_result_format(
+    sa, sqlite_table_for_unexpected_rows_with_index
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "numbers_with_duplicates",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "BASIC",  # SUMMARY will include partial_unexpected_list only, which means unexpected_index_column_names will have no effect
+                "unexpected_index_column_names": ["pk_1", "pk_2"],
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
+    connection_string = f"sqlite:///{sqlite_path}"
+    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
+    execution_engine = engine
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=execution_engine,
+            assets={
+                "my_asset": {
+                    "table_name": "test_temp",
+                },
+            },
+        )
+    )
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="my_test_datasource",
+            data_connector_name="my_sql_data_connector",
+            # data_asset_name="main.my_asset"
+            data_asset_name="my_asset",
+        )
+    )
+    assert len(batch_definition_list) == 1
+    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
+        batch_definition=batch_definition_list[0]
+    )
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=batch_spec
+    )
+    batch = Batch(data=batch_data)
+    validator = Validator(execution_engine, batches=[batch])
+    result = expectation.validate(validator)
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "unexpected_count": 2,
+        "unexpected_percent": 33.33333333333333,
+        "partial_unexpected_list": [3, 10],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 33.33333333333333,
+        "unexpected_percent_nonmissing": 33.33333333333333,
+    }
+
+
+def test_sql_single_unexpected_index_column_names_complete_result_format_non_existing_column(
+    sa, sqlite_table_for_unexpected_rows_with_index
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "numbers_with_duplicates",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["i_dont_exist"],  # Single column
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
+    connection_string = f"sqlite:///{sqlite_path}"
+    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
+    execution_engine = engine
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=execution_engine,
+            assets={
+                "my_asset": {
+                    "table_name": "test_temp",
+                },
+            },
+        )
+    )
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="my_test_datasource",
+            data_connector_name="my_sql_data_connector",
+            # data_asset_name="main.my_asset"
+            data_asset_name="my_asset",
+        )
+    )
+    assert len(batch_definition_list) == 1
+    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
+        batch_definition=batch_definition_list[0]
+    )
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=batch_spec
+    )
+    batch = Batch(data=batch_data)
+    validator = Validator(execution_engine, batches=[batch])
+    result = expectation.validate(validator)
+    assert result.success is False
+    assert result.exception_info
+    assert (
+        result.exception_info["exception_message"]
+        == 'Error: The unexpected_index_column: "i_dont_exist" in does not exist in SQL Table. Please check your configuration and try again.'
+    )
+
+
+def test_sql_multiple_unexpected_index_column_names_complete_result_format_non_existing_column(
+    sa, sqlite_table_for_unexpected_rows_with_index
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "numbers_with_duplicates",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": [
+                    "pk_1",
+                    "i_dont_exist",
+                ],  # Only 1 column is valid
+            },
+        },
+    )
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
+    connection_string = f"sqlite:///{sqlite_path}"
+    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
+    execution_engine = engine
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=execution_engine,
+            assets={
+                "my_asset": {
+                    "table_name": "test_temp",
+                },
+            },
+        )
+    )
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="my_test_datasource",
+            data_connector_name="my_sql_data_connector",
+            # data_asset_name="main.my_asset"
+            data_asset_name="my_asset",
+        )
+    )
+    assert len(batch_definition_list) == 1
+    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
+        batch_definition=batch_definition_list[0]
+    )
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=batch_spec
+    )
+    batch = Batch(data=batch_data)
+    validator = Validator(execution_engine, batches=[batch])
+    result = expectation.validate(validator)
+    assert result.success is False
+    assert result.exception_info
+    assert (
+        result.exception_info["exception_message"]
+        == 'Error: The unexpected_index_column: "i_dont_exist" in does not exist in SQL Table. Please check your configuration and try again.'
+    )
