@@ -2314,18 +2314,21 @@ class ColumnMapExpectation(TableExpectation, ABC):
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
         if isinstance(execution_engine, SqlAlchemyExecutionEngine):
-            metric_kwargs = get_metric_kwargs(
-                f"{self.map_metric}.unexpected_index_list",
-                configuration=configuration,
-                runtime_configuration=runtime_configuration,
-            )
-            metric_dependencies[
-                f"{self.map_metric}.unexpected_index_list"
-            ] = MetricConfiguration(
-                metric_name=f"{self.map_metric}.unexpected_index_list",
-                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-            )
+            # this is the check whether to add unexpected_index_list to return value
+            if "unexpected_index_column_names" in dependencies["result_format"]:
+
+                metric_kwargs = get_metric_kwargs(
+                    f"{self.map_metric}.unexpected_index_list",
+                    configuration=configuration,
+                    runtime_configuration=runtime_configuration,
+                )
+                metric_dependencies[
+                    f"{self.map_metric}.unexpected_index_list"
+                ] = MetricConfiguration(
+                    metric_name=f"{self.map_metric}.unexpected_index_list",
+                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                )
         return dependencies
 
     def _validate(
@@ -2355,6 +2358,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
         unexpected_values: Optional[List[Any]] = metrics.get(
             f"{self.map_metric}.unexpected_values"
         )
+        # if isinstance(execution_engine, PandasExecutionEngine):
         unexpected_index_list: Optional[List[int]] = metrics.get(
             f"{self.map_metric}.unexpected_index_list"
         )
@@ -2923,26 +2927,26 @@ def _format_map_output(
                 {"error": "partial_exception_counts requires a hashable type"}
             ]
         finally:
+            # this is only true for Pandas. This is a bug that will need to be taken care of
+            if unexpected_index_list is not None:
+                return_obj["result"].update(
+                    {
+                        "partial_unexpected_index_list": unexpected_index_list[
+                            : result_format["partial_unexpected_count"]
+                        ],
+                    }
+                )
             return_obj["result"].update(
-                {
-                    "partial_unexpected_index_list": unexpected_index_list[
-                        : result_format["partial_unexpected_count"]
-                    ]
-                    if unexpected_index_list is not None
-                    else None,
-                    "partial_unexpected_counts": partial_unexpected_counts,
-                }
+                {"partial_unexpected_counts": partial_unexpected_counts}
             )
 
     if result_format["result_format"] == "SUMMARY":
         return return_obj
 
-    return_obj["result"].update(
-        {
-            "unexpected_list": unexpected_list,
-            "unexpected_index_list": unexpected_index_list,
-        }
-    )
+    if unexpected_list is not None:
+        return_obj["result"].update({"unexpected_list": unexpected_list})
+    if unexpected_index_list is not None:
+        return_obj["result"].update({"unexpected_index_list": unexpected_index_list})
 
     if result_format["result_format"] == "COMPLETE":
         return return_obj

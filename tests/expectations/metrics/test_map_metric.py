@@ -967,22 +967,6 @@ def test_sqlite_single_column_complete_result_format(
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "unexpected_count": 2,
-        "unexpected_index_list": [
-            {
-                "pk_1": 3,
-            },
-            {
-                "pk_1": 5,
-            },
-        ],  # Dicts since a column was provided
-        "partial_unexpected_index_list": [
-            {
-                "pk_1": 3,
-            },
-            {
-                "pk_1": 5,
-            },
-        ],  # Dicts since a column was provided
         "unexpected_percent": 33.33333333333333,
         "partial_unexpected_list": [3, 10],
         "unexpected_list": [3, 10],
