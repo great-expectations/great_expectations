@@ -14,6 +14,7 @@ import pathlib
 import shutil
 
 import invoke
+from bs4 import BeautifulSoup
 
 from scripts import check_type_hint_coverage
 
@@ -378,7 +379,9 @@ def docs(
             code=1,
         )
 
-    os.chdir("docs/api_docs")
+    os.chdir("sphinx_markdown_api_docs")
+
+    # TODO: AJB 20221116 Move all of this to separate utility functions in another module, called here.
 
     # Remove existing sphinx api docs
     if clean:
@@ -394,4 +397,34 @@ def docs(
     cmds = ["make html"]
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
+    # Create api mdx files from content between <section> tags
+    # First clean the docs/reference/api folder
+    api_path = curdir / pathlib.Path("docs/reference/api")
+    shutil.rmtree(api_path)
+    path = pathlib.Path(api_path).mkdir(parents=True, exist_ok=True)
+
+    # Process and create mdx files
+    # First get file paths
+    static_html_file_path = curdir / pathlib.Path("static/api_docs/html")
+    paths = static_html_file_path.glob('**/*.html')
+    files = [x for x in paths if x.is_file() and x.name not in ("genindex.html", "search.html", "taxi.html")]
+    print([f.relative_to(static_html_file_path) for f in files])
+
+    # Read with beautiful soup
+    # Pull out content between <section> tag
+    # Write out to .mdx file in docs/reference/api using the relative file directory structure
+    for html_file in files:
+        print("processing:", html_file.absolute())
+        with open(html_file, "r") as f:
+            soup = BeautifulSoup(f.read(), "html.parser")
+            doc = soup.find("section")
+            doc_str = str(doc)
+
+            output_path = curdir / pathlib.Path("docs/reference/api") / html_file.relative_to(static_html_file_path).with_suffix(".mdx")
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(output_path, "w") as fout:
+                fout.write(doc_str)
+
+
+    # Change back to the directory where the command was run
     os.chdir(curdir)

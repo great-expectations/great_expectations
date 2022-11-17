@@ -12,6 +12,7 @@ import sys
 def _prepend_base_repository_dir_to_sys_path():
     """Add great_expectations base repo dir to the front of sys path. Used for docs processing."""
     sys.path.insert(0, os.path.abspath("../../"))
+    sys.path.insert(0, os.path.abspath("../"))
 
 
 _prepend_base_repository_dir_to_sys_path()
@@ -34,7 +35,7 @@ extensions = [
 ]
 
 templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', "README.md"]
 
 
 
