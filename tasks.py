@@ -362,7 +362,6 @@ def docker(
 @invoke.task(
     help={
         "clean": "Clean out existing documentation first. Defaults to True.",
-        "api_docs": "Build api docs stubs. Defaults to False.",
     }
 )
 def docs(
@@ -382,6 +381,14 @@ def docs(
     os.chdir(sphinx_api_docs_source_dir)
 
     # TODO: AJB 20221116 Move all of this to separate utility functions in another module, called here.
+    # TODO: AJB 20221117 Warn & exit if dependencies not installed.
+    try:
+        import sphinx
+    except ImportError:
+        raise invoke.Exit(
+            "Please make sure to install docs dependencies by running pip install -r docs/api_docs/requirements-dev-api-docs.txt",
+            code=1,
+        )
 
     # Remove existing sphinx api docs
     if clean:
@@ -395,7 +402,8 @@ def docs(
     # Create api mdx files from content between <section> tags
     # First clean the docs/reference/api folder
     api_path = curdir / pathlib.Path("docs/reference/api")
-    shutil.rmtree(api_path)
+    if api_path.is_dir():
+        shutil.rmtree(api_path)
     pathlib.Path(api_path).mkdir(parents=True, exist_ok=True)
 
     # Process and create mdx files
@@ -404,7 +412,7 @@ def docs(
 
     static_html_file_path = curdir / pathlib.Path(sphinx_api_docs_build_dir) / "html"
     paths = static_html_file_path.glob('**/*.html')
-    files = [x for x in paths if x.is_file() and x.name not in ("genindex.html", "search.html", "taxi.html")]
+    files = [p for p in paths if p.is_file() and p.name not in ("genindex.html", "search.html", "taxi.html") and "_static" not in str(p)]
     print([f.relative_to(static_html_file_path) for f in files])
 
     # Read with beautiful soup
@@ -422,6 +430,9 @@ def docs(
             with open(output_path, "w") as fout:
                 fout.write(doc_str)
 
+    # Remove temp build dir
+    temp_docs_build_dir = curdir / pathlib.Path(sphinx_api_docs_build_dir)
+    shutil.rmtree(temp_docs_build_dir)
 
     # Change back to the directory where the command was run
     os.chdir(curdir)
