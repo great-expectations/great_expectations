@@ -1,12 +1,15 @@
 import logging
-from typing import Any, Dict, Optional, Set, Tuple, Union
+from typing import Dict, Optional, Set, Tuple, Union
 
 import altair as alt
 import numpy as np
 import pandas as pd
 from scipy import stats as stats
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.util import (
     is_valid_categorical_partition_object,
@@ -1005,19 +1008,17 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
-
         params = substitute_none_for_missing(
             configuration.kwargs,
             [
@@ -1110,10 +1111,10 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
     @render_evaluation_parameter_string
     def _prescriptive_summary(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         """
@@ -1174,16 +1175,15 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -1233,10 +1233,10 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
     @classmethod
     def _atomic_diagnostic_observed_value_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         observed_partition_object = result.result.get("details", {}).get(
@@ -1289,10 +1289,10 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
     @renderer(renderer_type=AtomicDiagnosticRendererType.OBSERVED_VALUE)
     def _atomic_diagnostic_observed_value(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         if not result.result.get("details"):
@@ -1362,10 +1362,10 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
     @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         if not result.result.get("details"):
@@ -1406,10 +1406,10 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
     @renderer(renderer_type=LegacyDescriptiveRendererType.HISTOGRAM)
     def _descriptive_histogram_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         assert result, "Must pass in result."

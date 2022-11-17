@@ -33,7 +33,6 @@ def context_sources_cleanup() -> _SourceFactories:
             _SourceFactories._SourceFactories__source_factories
         )
         type_lookup_copy = copy.deepcopy(_SourceFactories.type_lookup)
-        engine_lookup_copy = copy.deepcopy(_SourceFactories.engine_lookup)
         sources = get_context().sources
 
         assert (
@@ -44,16 +43,13 @@ def context_sources_cleanup() -> _SourceFactories:
     finally:
         _SourceFactories._SourceFactories__source_factories = sources_copy
         _SourceFactories.type_lookup = type_lookup_copy
-        _SourceFactories.engine_lookup = engine_lookup_copy
 
 
 @pytest.fixture(scope="function")
 def empty_sources(context_sources_cleanup) -> _SourceFactories:
     _SourceFactories._SourceFactories__source_factories.clear()
     _SourceFactories.type_lookup.clear()
-    _SourceFactories.engine_lookup.clear()
     assert not _SourceFactories.type_lookup
-    assert not _SourceFactories.engine_lookup
     yield context_sources_cleanup
 
 
@@ -73,7 +69,9 @@ class TestMetaDatasource:
         class MyTestDatasource(Datasource):
             asset_types: ClassVar[List[Type[DataAsset]]] = []
             type: str = "my_test"
-            execution_engine: DummyExecutionEngine
+
+            def execution_engine_type(self) -> Type[ExecutionEngine]:
+                return DummyExecutionEngine
 
         expected_registrants = 1
 
@@ -93,7 +91,9 @@ class TestMetaDatasource:
         class MyTestDatasource(Datasource):
             asset_types: ClassVar[List[Type[DataAsset]]] = []
             type: str = "my_test"
-            execution_engine: DummyExecutionEngine
+
+            def execution_engine_type(self) -> Type[ExecutionEngine]:
+                return DummyExecutionEngine
 
         ds_factory_method_final = getattr(
             context_sources_cleanup, expected_method_name, None
@@ -117,7 +117,9 @@ class TestMetaDatasource:
         class FooBarDatasource(Datasource):
             asset_types: ClassVar = [FooAsset, BarAsset]
             type: str = "foo_bar"
-            execution_engine: DummyExecutionEngine
+
+            def execution_engine_type(self) -> Type[ExecutionEngine]:
+                return DummyExecutionEngine
 
         print(f" type_lookup ->\n{pf(type_lookup)}\n")
         asset_types = FooBarDatasource.asset_types
@@ -130,28 +132,6 @@ class TestMetaDatasource:
 
         assert len(asset_types) == len(registered_type_names)
 
-    def test__new__updates_engine_lookup(
-        self, context_sources_cleanup: _SourceFactories
-    ):
-        engine_lookup = context_sources_cleanup.engine_lookup
-        num_engines_initial = len(engine_lookup)
-
-        class FooAsset(DataAsset):
-            pass
-
-        class BarAsset(DataAsset):
-            pass
-
-        class FooBarDatasource(Datasource):
-            asset_types = []
-            type: str = "foo_bar"
-            execution_engine: DummyExecutionEngine
-
-        print(f" engine_lookup ->\n{pf(engine_lookup)}\n")
-
-        assert DummyExecutionEngine in engine_lookup
-        assert len(engine_lookup) == num_engines_initial + 2
-
 
 @pytest.mark.unit
 class TestMisconfiguredMetaDatasource:
@@ -163,30 +143,20 @@ class TestMisconfiguredMetaDatasource:
         ):
 
             class MissingTypeDatasource(Datasource):
-                execution_engine: DummyExecutionEngine
+                def execution_engine_type(self) -> Type[ExecutionEngine]:
+                    return DummyExecutionEngine
 
         # check that no types were registered
         assert len(empty_sources.type_lookup) < 1
-        assert len(empty_sources.engine_lookup) < 1
 
-    def test_ds_execution_engine_type_hint_not_set(
+    def test_ds_execution_engine_type_not_defined(
         self, empty_sources: _SourceFactories
     ):
+        class MissingExecEngineTypeDatasource(Datasource):
+            type: str = "valid"
 
-        with pytest.raises(
-            TypeRegistrationError,
-            match=(
-                r"`MissingExecEngineTypeDatasource.execution_engine`"
-                r" must be annotated with a concrete `ExecutionEngine`"
-            ),
-        ):
-
-            class MissingExecEngineTypeDatasource(Datasource):
-                type: str = "valid"
-
-        # check that no types were registered
-        assert len(empty_sources.type_lookup) < 1
-        assert len(empty_sources.engine_lookup) < 1
+        with pytest.raises(NotImplementedError):
+            MissingExecEngineTypeDatasource(name="name")
 
     def test_ds_assets_type_field_not_set(self, empty_sources: _SourceFactories):
 
@@ -200,12 +170,13 @@ class TestMisconfiguredMetaDatasource:
 
             class BadAssetDatasource(Datasource):
                 type: str = "valid"
-                execution_engine: DummyExecutionEngine
                 asset_types: ClassVar = [MissingTypeAsset]
+
+                def execution_engine_type(self) -> Type[ExecutionEngine]:
+                    return DummyExecutionEngine
 
         # check that no types were registered
         assert len(empty_sources.type_lookup) < 1
-        assert len(empty_sources.engine_lookup) < 1
 
 
 def test_minimal_ds_to_asset_flow(context_sources_cleanup):
@@ -220,7 +191,9 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     class PurpleDatasource(Datasource):
         asset_types = [RedAsset, BlueAsset]
         type: str = "purple"
-        execution_engine: DummyExecutionEngine
+
+        def execution_engine_type(self) -> Type[ExecutionEngine]:
+            return DummyExecutionEngine
 
         def add_red_asset(self, asset_name: str) -> RedAsset:
             asset = RedAsset(name=asset_name)
