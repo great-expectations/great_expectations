@@ -214,6 +214,7 @@ def convert_dictionary_to_domain_kwargs(
     if isinstance(source, dict):
         return _convert_dictionary_to_domain_kwargs(source=DomainKwargs(source))
 
+    # Must allow for non-dictionary source types, since their internal nested structures may contain dictionaries.
     if isinstance(source, (list, set, tuple)):
         data_type: type = type(source)
 
