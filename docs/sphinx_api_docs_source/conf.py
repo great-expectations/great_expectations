@@ -50,7 +50,6 @@ html_static_path = ['_static']
 WHITELISTED_TAG = "--Public API--"
 def skip(app, what, name, obj, would_skip, options):
     if WHITELISTED_TAG in obj.__doc__:
-        # breakpoint()
         return False
     return True
 

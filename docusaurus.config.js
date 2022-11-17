@@ -164,6 +164,7 @@ module.exports = {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           remarkPlugins: [remarkCodeImport, remarkNamedSnippets],
+          exclude: ['sphinx_api_docs_source/**/*'],
           editUrl:
                         'https://github.com/great-expectations/great_expectations/tree/develop/'
         },

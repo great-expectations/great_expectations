@@ -368,7 +368,6 @@ def docker(
 def docs(
     ctx,
     clean=True,
-    api_docs=False,
 ):
     """Build documentation. Note: Currently only builds the sphinx based api docs, please build docusaurus docs separately."""
     filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
@@ -379,7 +378,8 @@ def docs(
             code=1,
         )
 
-    os.chdir("sphinx_markdown_api_docs")
+    sphinx_api_docs_source_dir = "docs/sphinx_api_docs_source"
+    os.chdir(sphinx_api_docs_source_dir)
 
     # TODO: AJB 20221116 Move all of this to separate utility functions in another module, called here.
 
@@ -388,24 +388,21 @@ def docs(
         cmds = ["make clean"]
         ctx.run(" ".join(cmds), echo=True, pty=True)
 
-    # Build fresh api doc stubs
-    if api_docs:
-        cmds = ["sphinx-apidoc -o . ../../great_expectations"]
-        ctx.run(" ".join(cmds), echo=True, pty=True)
-
     # Build html api documentation in docusaurus static folder
-    cmds = ["make html"]
+    cmds = ["sphinx-build -M html ./ ../../temp_docs_build_dir/sphinx_api_docs"]
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
     # Create api mdx files from content between <section> tags
     # First clean the docs/reference/api folder
     api_path = curdir / pathlib.Path("docs/reference/api")
     shutil.rmtree(api_path)
-    path = pathlib.Path(api_path).mkdir(parents=True, exist_ok=True)
+    pathlib.Path(api_path).mkdir(parents=True, exist_ok=True)
 
     # Process and create mdx files
     # First get file paths
-    static_html_file_path = curdir / pathlib.Path("static/api_docs/html")
+    sphinx_api_docs_build_dir = "temp_docs_build_dir/sphinx_api_docs"
+
+    static_html_file_path = curdir / pathlib.Path(sphinx_api_docs_build_dir) / "html"
     paths = static_html_file_path.glob('**/*.html')
     files = [x for x in paths if x.is_file() and x.name not in ("genindex.html", "search.html", "taxi.html")]
     print([f.relative_to(static_html_file_path) for f in files])
