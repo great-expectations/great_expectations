@@ -33,9 +33,11 @@ from tests.conftest import (
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 )
 
+test_root_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+
 
 @pytest.fixture
-def bobby_profile_report_based_columns_data_assistant_result_usage_stats_enabled(
+def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_enabled(
         bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
 ) -> DataProfilerStructuredDataAssistantResult:
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
@@ -55,13 +57,12 @@ def bobby_profile_report_based_columns_data_assistant_result_usage_stats_enabled
 
     data_assistant_result: DataAssistantResult = context.assistants.data_profiler.run(
         batch_request=batch_request,
-        columns_rule={
-            "profile_path": os.path.join("/".join(os.getcwd().split("/")[:-2]),
-                                         os.path.join(
-                                             "data_profiler_files",
-                                             "profile.pkl",
-                                         )
-                                         ),
+         numeric_rule={
+            "profile_path": os.path.join(
+                                test_root_path,
+                                "data_profiler_files",
+                                "profile.pkl",
+                            ),
         },
         exclude_column_names=exclude_column_names,
         estimation="flag_outliers",
@@ -71,7 +72,7 @@ def bobby_profile_report_based_columns_data_assistant_result_usage_stats_enabled
 
 
 @pytest.fixture(scope="module")
-def bobby_profile_report_based_columns_data_assistant_result(
+def bobby_profile_data_profiler_structured_data_assistant_result(
         bobby_columnar_table_multi_batch_probabilistic_data_context: DataContext,
 ) -> DataProfilerStructuredDataAssistantResult:
     context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
@@ -94,13 +95,12 @@ def bobby_profile_report_based_columns_data_assistant_result(
     data_assistant_result: DataAssistantResult = context.assistants.data_profiler.run(
         batch_request=batch_request,
         exclude_column_names=exclude_column_names,
-        columns_rule={
-            "profile_path": os.path.join("/".join(os.getcwd().split("/")[:-2]),
-                                         os.path.join(
-                                             "data_profiler_files",
-                                             "profile.pkl",
-                                         )
-                                         ),
+        numeric_rule={
+            "profile_path": os.path.join(
+                                test_root_path,
+                                "data_profiler_files",
+                                "profile.pkl",
+                            ),
         },
         estimation="flag_outliers",
     )
@@ -109,21 +109,21 @@ def bobby_profile_report_based_columns_data_assistant_result(
 
 @pytest.mark.integration
 @pytest.mark.slow  # 6.90s
-def test_profile_report_based_columns_data_assistant_result_serialization(
-        bobby_profile_report_based_columns_data_assistant_result: DataProfilerStructuredDataAssistantResult,
+def test_profile_data_profiler_structured_data_assistant_result_serialization(
+        bobby_profile_data_profiler_structured_data_assistant_result: DataProfilerStructuredDataAssistantResult,
 ) -> None:
-    profile_report_based_columns_data_assistant_result_as_dict: dict = (
-        bobby_profile_report_based_columns_data_assistant_result.to_dict()
+    profile_data_profiler_structured_data_assistant_result_as_dict: dict = (
+        bobby_profile_data_profiler_structured_data_assistant_result.to_dict()
     )
     assert (
-            set(profile_report_based_columns_data_assistant_result_as_dict.keys())
+            set(profile_data_profiler_structured_data_assistant_result_as_dict.keys())
             == DataAssistantResult.ALLOWED_KEYS
     )
     assert (
-            bobby_profile_report_based_columns_data_assistant_result.to_json_dict()
-            == profile_report_based_columns_data_assistant_result_as_dict
+            bobby_profile_data_profiler_structured_data_assistant_result.to_json_dict()
+            == profile_data_profiler_structured_data_assistant_result_as_dict
     )
-    assert len(bobby_profile_report_based_columns_data_assistant_result.profiler_config.rules) == 1
+    assert len(bobby_profile_data_profiler_structured_data_assistant_result.profiler_config.rules) == 1
 
 
 @pytest.mark.integration
@@ -131,13 +131,13 @@ def test_profile_report_based_columns_data_assistant_result_serialization(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @pytest.mark.slow  # 7.34s
-def test_profile_report_based_columns_data_assistant_result_get_expectation_suite(
+def test_profile_data_profiler_structured_data_assistant_result_get_expectation_suite(
         mock_emit,
-        bobby_profile_report_based_columns_data_assistant_result_usage_stats_enabled: DataProfilerStructuredDataAssistantResult,
+        bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_enabled: DataProfilerStructuredDataAssistantResult,
 ):
     expectation_suite_name: str = "my_suite"
 
-    suite: ExpectationSuite = bobby_profile_report_based_columns_data_assistant_result_usage_stats_enabled.get_expectation_suite(
+    suite: ExpectationSuite = bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_enabled.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
 
@@ -154,8 +154,8 @@ def test_profile_report_based_columns_data_assistant_result_get_expectation_suit
 
 
 @pytest.mark.integration
-def test_profile_report_based_columns_data_assistant_metrics_count(
-        bobby_profile_report_based_columns_data_assistant_result: DataProfilerStructuredDataAssistantResult,
+def test_profile_data_profiler_structured_data_assistant_metrics_count(
+        bobby_profile_data_profiler_structured_data_assistant_result: DataProfilerStructuredDataAssistantResult,
 ) -> None:
     domain: Domain
     parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
@@ -169,7 +169,7 @@ def test_profile_report_based_columns_data_assistant_metrics_count(
     for (
             domain,
             parameter_values_for_fully_qualified_parameter_names,
-    ) in bobby_profile_report_based_columns_data_assistant_result.metrics_by_domain.items():
+    ) in bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain.items():
         if domain.is_superset(domain_key):
             num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
 
@@ -179,25 +179,25 @@ def test_profile_report_based_columns_data_assistant_metrics_count(
     for (
             domain,
             parameter_values_for_fully_qualified_parameter_names,
-    ) in bobby_profile_report_based_columns_data_assistant_result.metrics_by_domain.items():
+    ) in bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain.items():
         num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
 
     assert num_metrics == 14
 
 
 @pytest.mark.integration
-def test_profile_report_based_columns_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
-        bobby_profile_report_based_columns_data_assistant_result: DataProfilerStructuredDataAssistantResult,
+def test_profile_data_profiler_structured_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
+        bobby_profile_data_profiler_structured_data_assistant_result: DataProfilerStructuredDataAssistantResult,
 ):
     metrics_by_domain: Optional[
         Dict[Domain, Dict[str, ParameterNode]]
-    ] = bobby_profile_report_based_columns_data_assistant_result.metrics_by_domain
+    ] = bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain
 
     parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
     parameter_node: ParameterNode
     batch_id: str
     assert all(
-        bobby_profile_report_based_columns_data_assistant_result._batch_id_to_batch_identifier_display_name_map[
+        bobby_profile_data_profiler_structured_data_assistant_result._batch_id_to_batch_identifier_display_name_map[
             batch_id
         ]
         is not None

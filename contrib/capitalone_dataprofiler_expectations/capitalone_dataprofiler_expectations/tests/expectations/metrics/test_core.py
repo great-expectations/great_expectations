@@ -10,6 +10,7 @@ from great_expectations.self_check.util import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
+test_root_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 def test_data_profiler_column_profile_report_metric_pd():
     engine = build_pandas_engine(
@@ -29,12 +30,11 @@ def test_data_profiler_column_profile_report_metric_pd():
         )
     )
 
-    profile_path = os.path.join("/".join(os.getcwd().split("/")[:-2]),
-                                         os.path.join(
-                                             "data_profiler_files",
-                                             "profile.pkl",
-                                         )
-                                         )
+    profile_path = os.path.join(
+                                test_root_path,
+                                "data_profiler_files",
+                                "profile.pkl",
+                    )
 
     metrics: dict = {}
 
