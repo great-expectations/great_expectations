@@ -19,6 +19,7 @@ from typing import (
     List,
     Mapping,
     Optional,
+    Sequence,
     Tuple,
     Union,
     cast,
@@ -33,16 +34,15 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
-    BatchDefinition,
     BatchRequestBase,
     IDDict,
     get_batch_request_from_acceptable_arguments,
 )
 from great_expectations.core.config_provider import (
-    ConfigurationProvider,
-    ConfigurationVariablesConfigurationProvider,
-    EnvironmentConfigurationProvider,
-    RuntimeEnvironmentConfigurationProvider,
+    _ConfigurationProvider,
+    _ConfigurationVariablesConfigurationProvider,
+    _EnvironmentConfigurationProvider,
+    _RuntimeEnvironmentConfigurationProvider,
 )
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
@@ -131,6 +131,8 @@ if TYPE_CHECKING:
     from great_expectations.validation_operators.validation_operators import (
         ValidationOperator,
     )
+    from great_expectations.zep.interfaces import Batch as ZepBatch
+    from great_expectations.zep.interfaces import Datasource as ZepDatasource
 
 logger = logging.getLogger(__name__)
 yaml = YAMLHandler()
@@ -208,12 +210,12 @@ class AbstractDataContext(ABC):
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         self.validation_operators: dict = {}
 
-    def _init_config_provider(self) -> ConfigurationProvider:
-        config_provider = ConfigurationProvider()
+    def _init_config_provider(self) -> _ConfigurationProvider:
+        config_provider = _ConfigurationProvider()
         self._register_providers(config_provider)
         return config_provider
 
-    def _register_providers(self, config_provider: ConfigurationProvider) -> None:
+    def _register_providers(self, config_provider: _ConfigurationProvider) -> None:
         """
         Registers any relevant ConfigurationProvider instances to self._config_provider.
 
@@ -226,14 +228,14 @@ class AbstractDataContext(ABC):
         config_variables_file_path = self._project_config.config_variables_file_path
         if config_variables_file_path:
             config_provider.register_provider(
-                ConfigurationVariablesConfigurationProvider(
+                _ConfigurationVariablesConfigurationProvider(
                     config_variables_file_path=config_variables_file_path,
                     root_directory=self.root_directory,
                 )
             )
-        config_provider.register_provider(EnvironmentConfigurationProvider())
+        config_provider.register_provider(_EnvironmentConfigurationProvider())
         config_provider.register_provider(
-            RuntimeEnvironmentConfigurationProvider(self.runtime_environment)
+            _RuntimeEnvironmentConfigurationProvider(self.runtime_environment)
         )
 
     @abstractmethod
@@ -294,7 +296,7 @@ class AbstractDataContext(ABC):
         return self.variables.config
 
     @property
-    def config_provider(self) -> ConfigurationProvider:
+    def config_provider(self) -> _ConfigurationProvider:
         return self._config_provider
 
     @property
@@ -1423,7 +1425,7 @@ class AbstractDataContext(ABC):
     def get_validator_using_batch_list(
         self,
         expectation_suite: ExpectationSuite,
-        batch_list: List[Batch],
+        batch_list: Sequence[Union[Batch, ZepBatch]],
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Validator:
@@ -1451,10 +1453,15 @@ class AbstractDataContext(ABC):
         )
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
-        batch_definition: BatchDefinition = batch_list[-1].batch_definition
-        execution_engine: ExecutionEngine = self.datasources[  # type: ignore[union-attr]
-            batch_definition.datasource_name
-        ].execution_engine
+        execution_engine: ExecutionEngine
+        if hasattr(batch_list[-1], "execution_engine"):
+            # ZEP batches are execution engine aware. We just checked for this attr so we ignore the following
+            # attr defined mypy error
+            execution_engine = batch_list[-1].execution_engine
+        else:
+            execution_engine = self.datasources[  # type: ignore[union-attr]
+                batch_list[-1].batch_definition.datasource_name
+            ].execution_engine
         validator = Validator(
             execution_engine=execution_engine,
             interactive_evaluation=True,
@@ -2520,7 +2527,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _load_config_variables(self) -> Dict:
         config_var_provider = self.config_provider.get_provider(
-            ConfigurationVariablesConfigurationProvider
+            _ConfigurationVariablesConfigurationProvider
         )
         if config_var_provider:
             return config_var_provider.get_values()
@@ -2657,7 +2664,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return self.variables.notebooks  # type: ignore[return-value]
 
     @property
-    def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
+    def datasources(
+        self,
+    ) -> Dict[str, Union[LegacyDatasource, BaseDatasource, ZepDatasource]]:
         """A single holder for all Datasources in this context"""
         return self._cached_datasources
 

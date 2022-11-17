@@ -10,6 +10,7 @@ from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.zep.interfaces import BatchRequest as ZepBatchRequest
 
 logger = logging.getLogger(__name__)
 
@@ -771,10 +772,12 @@ def get_batch_request_from_acceptable_arguments(  # noqa: C901 - complexity 21
     """
 
     if batch_request:
-        if not isinstance(batch_request, (BatchRequest, RuntimeBatchRequest)):
+        if not isinstance(
+            batch_request, (BatchRequest, RuntimeBatchRequest, ZepBatchRequest)
+        ):
             raise TypeError(
-                f"""batch_request must be an instance of BatchRequest or RuntimeBatchRequest object, not \
-{type(batch_request)}"""
+                "batch_request must be a BatchRequest, RuntimeBatchRequest, or a "
+                f"zep.interfaces.BatchRequest object, not {type(batch_request)}"
             )
         datasource_name = batch_request.datasource_name
 
