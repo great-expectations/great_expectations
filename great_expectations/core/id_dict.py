@@ -1,8 +1,10 @@
 import hashlib
 import json
-from typing import Set
+from typing import Any, Set, TypeVar, Union
 
 from great_expectations.core.util import convert_to_json_serializable
+
+T = TypeVar("T")
 
 
 class IDDict(dict):
@@ -29,6 +31,30 @@ class IDDict(dict):
         """Overrides the default implementation"""
         _result_hash: int = hash(self.to_id())
         return _result_hash
+
+
+def convert_dictionary_to_id_dict(source: Union[T, dict]) -> Union[T, IDDict]:
+    if not isinstance(source, dict):
+        return source
+
+    return _convert_dictionary_to_id_dict(source=IDDict(source))
+
+
+def _convert_dictionary_to_id_dict(source: dict) -> IDDict:
+    key: str
+    value: Any
+    for key, value in source.items():
+        if isinstance(value, dict):
+            source[key] = _convert_dictionary_to_id_dict(source=value)
+        elif isinstance(source, (list, set, tuple)):
+            data_type: type = type(source)
+
+            element: Any
+            source = data_type(
+                [_convert_dictionary_to_id_dict(source=element) for element in source]
+            )
+
+    return IDDict(source)
 
 
 class BatchKwargs(IDDict):

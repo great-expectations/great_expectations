@@ -10,8 +10,43 @@ from great_expectations.core.batch import (
     IDDict,
 )
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
+from great_expectations.core.id_dict import convert_dictionary_to_id_dict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchSpecError
+
+
+@pytest.mark.unit
+def test_id_dict_structure():
+    data: dict = {
+        "a0": 1,
+        "a1": {
+            "b0": "2",
+            "b1": [
+                "c0",
+                (
+                    "d0",
+                    {
+                        "e0": 3,
+                        "e1": 4,
+                    },
+                    {"f0", "f1", "f2"},
+                ),
+            ],
+            "b2": 5,
+        },
+    }
+    nested_id_dictionary: IDDict = convert_dictionary_to_id_dict(source=data)
+    assert isinstance(nested_id_dictionary, IDDict)
+    assert isinstance(nested_id_dictionary["a0"], int)
+    assert isinstance(nested_id_dictionary["a1"], IDDict)
+    assert isinstance(nested_id_dictionary["a1"]["b0"], str)
+    assert isinstance(nested_id_dictionary["a1"]["b1"], list)
+    assert isinstance(nested_id_dictionary["a1"]["b1"][0], str)
+    assert isinstance(nested_id_dictionary["a1"]["b1"][1], tuple)
+    assert isinstance(list(nested_id_dictionary["a1"]["b1"][1])[0], str)
+    assert isinstance(list(nested_id_dictionary["a1"]["b1"][1])[1], IDDict)
+    assert isinstance(list(nested_id_dictionary["a1"]["b1"][1])[2], set)
+    assert isinstance(nested_id_dictionary["a1"]["b2"], int)
 
 
 @pytest.mark.unit
@@ -50,10 +85,10 @@ def test_iddict_is_hashable():
     try:
         # noinspection PyUnusedLocal
         dictionaries_as_set: set = {
-            IDDict(data_0),
-            IDDict(data_1),
-            IDDict(data_2),
-            IDDict(data_3),
+            convert_dictionary_to_id_dict(source=data_0),
+            convert_dictionary_to_id_dict(source=data_1),
+            convert_dictionary_to_id_dict(source=data_2),
+            convert_dictionary_to_id_dict(source=data_3),
         }
     except Exception as e:
         assert False, "IDDict.__hash__() failed."

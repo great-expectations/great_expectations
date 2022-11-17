@@ -3,7 +3,7 @@ from inspect import isabstract
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequestBase
-from great_expectations.core.id_dict import IDDict
+from great_expectations.core.id_dict import convert_dictionary_to_id_dict
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
@@ -670,7 +670,11 @@ class DataAssistant(metaclass=MetaDataAssistant):
             batches = {}
 
         return {
-            batch_id: set(IDDict(batch.batch_definition.batch_identifiers).items())
+            batch_id: set(
+                convert_dictionary_to_id_dict(
+                    source=batch.batch_definition.batch_identifiers
+                ).items()
+            )
             for batch_id, batch in batches.items()
         }
 
