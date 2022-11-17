@@ -408,9 +408,10 @@ def docs(
 
     # Process and create mdx files
     # First get file paths
-    sphinx_api_docs_build_dir = "temp_docs_build_dir/sphinx_api_docs"
+    temp_docs_build_dir = curdir / pathlib.Path("temp_docs_build_dir")
+    sphinx_api_docs_build_dir = temp_docs_build_dir / "sphinx_api_docs"
 
-    static_html_file_path = curdir / pathlib.Path(sphinx_api_docs_build_dir) / "html"
+    static_html_file_path = pathlib.Path(sphinx_api_docs_build_dir) / "html"
     paths = static_html_file_path.glob('**/*.html')
     files = [p for p in paths if p.is_file() and p.name not in ("genindex.html", "search.html", "taxi.html") and "_static" not in str(p)]
     print([f.relative_to(static_html_file_path) for f in files])
