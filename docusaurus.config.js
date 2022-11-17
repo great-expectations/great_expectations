@@ -53,15 +53,15 @@ module.exports = {
       disableSwitch: true
     },
     zoomSelector: '.markdown :not(em) > img',
-    announcementBar: {
-      id: 'RTD_docs', // Link to RTD Docs
-      content:
-                '🔄 Older Documentation for Great Expectations can be found at the <a href="https://legacy.docs.greatexpectations.io">legacy.docs.greatexpectations.io</a> 🔄',
-      // backgroundColor: '#32a852', // Defaults to `#fff`.
-      backgroundColor: '#143556', // Defaults to `#fff`.
-      textColor: '#ffffff', // Defaults to `#000`.
-      isCloseable: false // Defaults to `true`.
-    },
+    // announcementBar: {
+    //   id: 'RTD_docs', // Link to RTD Docs
+    //   content:
+    //             '🔄 Older Documentation for Great Expectations can be found at the <a href="https://legacy.docs.greatexpectations.io">legacy.docs.greatexpectations.io</a> 🔄',
+    //   // backgroundColor: '#32a852', // Defaults to `#fff`.
+    //   backgroundColor: '#143556', // Defaults to `#fff`.
+    //   textColor: '#ffffff', // Defaults to `#000`.
+    //   isCloseable: false // Defaults to `true`.
+    // },
     navbar: {
       logo: {
         alt: 'Great Expectations',
