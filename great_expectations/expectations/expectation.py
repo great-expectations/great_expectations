@@ -477,27 +477,28 @@ class Expectation(metaclass=MetaExpectation):
             meta_properties_to_render = result.expectation_config.kwargs.get(
                 "meta_properties_to_render"
             )
-            meta: dict = result.expectation_config.meta
-            for key in sorted(meta_properties_to_render.keys()):
-                meta_property = meta_properties_to_render[key]
-                if meta_property:
-                    # Allow complex structure with . usage
-                    obj = meta["attributes"]
-                    keys = meta_property.split(".")
-                    for i in range(0, len(keys)):
-                        # Allow for keys with a . in the string like {"item.key": "1"}
-                        remaining_key = "".join(keys[i:])
-                        if remaining_key in obj:
-                            obj = obj[remaining_key]
-                            break
-                        else:
-                            obj = obj[keys[i]]
+            if meta_properties_to_render:
+                meta: dict = result.expectation_config.meta
+                for key in sorted(meta_properties_to_render.keys()):
+                    meta_property = meta_properties_to_render[key]
+                    if meta_property:
+                        # Allow complex structure with . usage
+                        obj = meta["attributes"]
+                        keys = meta_property.split(".")
+                        for i in range(0, len(keys)):
+                            # Allow for keys with a . in the string like {"item.key": "1"}
+                            remaining_key = "".join(keys[i:])
+                            if remaining_key in obj:
+                                obj = obj[remaining_key]
+                                break
+                            else:
+                                obj = obj[keys[i]]
 
-                    custom_property_values.append([obj])
+                        custom_property_values.append([obj])
+                    else:
+                        custom_property_values.append(["N/A"])
                 else:
                     custom_property_values.append(["N/A"])
-            else:
-                custom_property_values.append(["N/A"])
         return custom_property_values
 
     @classmethod
