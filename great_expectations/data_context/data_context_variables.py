@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Optional
 
-from great_expectations.core.config_provider import ConfigurationProvider
+from great_expectations.core.config_provider import _ConfigurationProvider
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
@@ -72,7 +72,7 @@ class DataContextVariables(ABC):
     """
 
     config: DataContextConfig
-    config_provider: ConfigurationProvider
+    config_provider: _ConfigurationProvider
     _store: Optional[DataContextStore] = None
 
     def __str__(self) -> str:
@@ -366,9 +366,12 @@ class CloudDataContextVariables(DataContextVariables):
         from great_expectations.data_context.store.data_context_store import (
             DataContextStore,
         )
+        from great_expectations.data_context.store.gx_cloud_store_backend import (
+            GXCloudStoreBackend,
+        )
 
         store_backend: dict = {
-            "class_name": "GeCloudStoreBackend",
+            "class_name": GXCloudStoreBackend.__name__,
             "ge_cloud_base_url": self.ge_cloud_base_url,
             "ge_cloud_resource_type": GXCloudRESTResource.DATA_CONTEXT_VARIABLES,
             "ge_cloud_credentials": {
@@ -388,9 +391,7 @@ class CloudDataContextVariables(DataContextVariables):
         """
         Generates a GE Cloud-specific key for use with Stores. See parent "DataContextVariables.get_key" for more details.
         """
-        from great_expectations.data_context.store.ge_cloud_store_backend import (
-            GXCloudRESTResource,
-        )
+        from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.DATA_CONTEXT_VARIABLES

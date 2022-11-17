@@ -19,14 +19,6 @@ from .map_metric_provider import (
     column_condition_partial,
     column_function_partial,
 )
-from .metric_provider import (
-    MetricDomainTypes,
-    MetricFunctionTypes,
-    MetricPartialFunctionTypes,
-    MetricProvider,
-    metric_partial,
-    metric_value,
-)
 from .multicolumn_map_metrics import *
 from .query_metrics import *
 from .table_metrics import *

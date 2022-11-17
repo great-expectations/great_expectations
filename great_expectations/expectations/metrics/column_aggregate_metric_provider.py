@@ -39,6 +39,8 @@ def column_aggregate_value(
 
     Args:
         engine:
+        metric_fn_type:
+        domain_type:
         **kwargs:
 
     Returns:

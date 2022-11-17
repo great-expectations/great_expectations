@@ -374,7 +374,7 @@ def test_resolve_metric_bundle():
     metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
