@@ -5,8 +5,14 @@ For detailed instructions on how to use it, please see:
 """
 
 
+from typing import Optional
+
 from shapely.geometry import Point, Polygon
 
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
