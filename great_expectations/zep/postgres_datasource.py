@@ -21,10 +21,7 @@ from great_expectations.zep.interfaces import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.execution_engine import (
-        ExecutionEngine,
-        SqlAlchemyExecutionEngine,
-    )
+    from great_expectations.execution_engine import ExecutionEngine
 
 
 class PostgresDatasourceError(Exception):
@@ -94,6 +91,11 @@ class TableAsset(DataAsset):
         )
 
     def validate_batch_request(self, batch_request: BatchRequest) -> None:
+        """Validates the batch_request has the correct form.
+
+        Args:
+            batch_request: A batch request object to be validated.
+        """
         if not (
             batch_request.datasource_name == self.datasource.name
             and batch_request.data_asset_name == self.name
@@ -221,6 +223,7 @@ class PostgresDatasource(Datasource):
     assets: Dict[str, TableAsset] = {}
 
     def execution_engine_type(self) -> Type[ExecutionEngine]:
+        """Returns the default execution engine type."""
         from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
         return SqlAlchemyExecutionEngine

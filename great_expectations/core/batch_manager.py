@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core.batch import (
     Batch,
-    BatchData,
     BatchDataType,
     BatchDefinition,
     BatchMarkers,
