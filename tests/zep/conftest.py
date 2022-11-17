@@ -33,7 +33,7 @@ def inject_engine_lookup_double(monkeypatch: MonkeyPatch) -> ExecutionEngineDoub
     """
 
     original_engine_override: Dict[MetaDatasource, ExecutionEngine] = {}
-    for key, _ in _SourceFactories.type_lookup.items():
+    for key in _SourceFactories.type_lookup.keys():
         if issubclass(type(key), MetaDatasource):
             original_engine_override[key] = key.execution_engine_override
 

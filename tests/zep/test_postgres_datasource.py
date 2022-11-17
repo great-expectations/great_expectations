@@ -33,7 +33,7 @@ def _source(
 # We may be able parameterize this fixture so we can instantiate _source in the fixture. This
 # would reduce the `with ...` boilerplate in the individual tests.
 @pytest.fixture
-def create_source():
+def create_source() -> ContextManager:
     return _source
 
 
