@@ -3,7 +3,10 @@ from typing import Dict, Optional
 import numpy as np
 import pandas as pd
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -143,9 +146,8 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -233,20 +235,23 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
+        if configuration:
+            kwargs = configuration.kwargs
+        elif result and result.expectation_config:
+            kwargs = result.expectation_config.kwargs
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            kwargs,
             [
                 "column",
                 "value_set",
