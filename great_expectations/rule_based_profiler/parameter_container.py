@@ -230,10 +230,18 @@ class ParameterContainer(SerializableDictDot):
 def convert_dictionary_to_parameter_node(
     source: Union[T, dict]
 ) -> Union[T, ParameterNode]:
-    if not isinstance(source, dict):
-        return source
+    if isinstance(source, dict):
+        return _convert_dictionary_to_parameter_node(source=ParameterNode(source))
 
-    return _convert_dictionary_to_parameter_node(source=ParameterNode(source))
+    if isinstance(source, (list, set, tuple)):
+        data_type: type = type(source)
+
+        element: Any
+        return data_type(
+            [convert_dictionary_to_parameter_node(source=element) for element in source]
+        )
+
+    return source
 
 
 def _convert_dictionary_to_parameter_node(source: dict) -> ParameterNode:
@@ -242,14 +250,14 @@ def _convert_dictionary_to_parameter_node(source: dict) -> ParameterNode:
     for key, value in source.items():
         if isinstance(value, dict):
             source[key] = _convert_dictionary_to_parameter_node(source=value)
-        elif isinstance(source, (list, set, tuple)):
-            data_type: type = type(source)
+        elif isinstance(value, (list, set, tuple)):
+            data_type: type = type(value)
 
             element: Any
-            source = data_type(
+            source[key] = data_type(
                 [
-                    _convert_dictionary_to_parameter_node(source=element)
-                    for element in source
+                    convert_dictionary_to_parameter_node(source=element)
+                    for element in value
                 ]
             )
 

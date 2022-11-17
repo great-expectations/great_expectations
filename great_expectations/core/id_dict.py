@@ -34,10 +34,18 @@ class IDDict(dict):
 
 
 def convert_dictionary_to_id_dict(source: Union[T, dict]) -> Union[T, IDDict]:
-    if not isinstance(source, dict):
-        return source
+    if isinstance(source, dict):
+        return _convert_dictionary_to_id_dict(source=IDDict(source))
 
-    return _convert_dictionary_to_id_dict(source=IDDict(source))
+    if isinstance(source, (list, set, tuple)):
+        data_type: type = type(source)
+
+        element: Any
+        return data_type(
+            [convert_dictionary_to_id_dict(source=element) for element in source]
+        )
+
+    return source
 
 
 def _convert_dictionary_to_id_dict(source: dict) -> IDDict:
@@ -46,12 +54,12 @@ def _convert_dictionary_to_id_dict(source: dict) -> IDDict:
     for key, value in source.items():
         if isinstance(value, dict):
             source[key] = _convert_dictionary_to_id_dict(source=value)
-        elif isinstance(source, (list, set, tuple)):
-            data_type: type = type(source)
+        elif isinstance(value, (list, set, tuple)):
+            data_type: type = type(value)
 
             element: Any
-            source = data_type(
-                [_convert_dictionary_to_id_dict(source=element) for element in source]
+            source[key] = data_type(
+                [convert_dictionary_to_id_dict(source=element) for element in value]
             )
 
     return IDDict(source)

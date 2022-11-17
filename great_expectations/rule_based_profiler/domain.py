@@ -211,10 +211,18 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
 def convert_dictionary_to_domain_kwargs(
     source: Union[T, dict]
 ) -> Union[T, DomainKwargs]:
-    if not isinstance(source, dict):
-        return source
+    if isinstance(source, dict):
+        return _convert_dictionary_to_domain_kwargs(source=DomainKwargs(source))
 
-    return _convert_dictionary_to_domain_kwargs(source=DomainKwargs(source))
+    if isinstance(source, (list, set, tuple)):
+        data_type: type = type(source)
+
+        element: Any
+        return data_type(
+            [convert_dictionary_to_domain_kwargs(source=element) for element in source]
+        )
+
+    return source
 
 
 def _convert_dictionary_to_domain_kwargs(source: dict) -> DomainKwargs:
@@ -223,14 +231,14 @@ def _convert_dictionary_to_domain_kwargs(source: dict) -> DomainKwargs:
     for key, value in source.items():
         if isinstance(value, dict):
             source[key] = _convert_dictionary_to_domain_kwargs(source=value)
-        elif isinstance(source, (list, set, tuple)):
-            data_type: type = type(source)
+        elif isinstance(value, (list, set, tuple)):
+            data_type: type = type(value)
 
             element: Any
-            source = data_type(
+            source[key] = data_type(
                 [
-                    _convert_dictionary_to_domain_kwargs(source=element)
-                    for element in source
+                    convert_dictionary_to_domain_kwargs(source=element)
+                    for element in value
                 ]
             )
 
