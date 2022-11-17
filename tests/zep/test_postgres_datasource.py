@@ -1,26 +1,45 @@
+from contextlib import contextmanager
+from typing import Callable
+
 import pytest
 
 import great_expectations.zep.postgres_datasource as postgres_datasource
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.zep.fakes import sqlachemy_execution_engine_mock
+from great_expectations.zep.fakes import sqlachemy_execution_engine_mock_cls
 from great_expectations.zep.interfaces import BatchRequest, BatchRequestOptions
 
-# TODO (kilo59) simplify exec engine testing with fixture that makes type_engine lookup
-# always return a Execution engine Test Double (Fake/Stub/Mock)
+
+@contextmanager
+def _source(
+    validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None]
+) -> postgres_datasource.PostgresDatasource:
+    execution_eng_cls = sqlachemy_execution_engine_mock_cls(validate_batch_spec)
+    original_override = postgres_datasource.PostgresDatasource.execution_engine_override
+    try:
+        postgres_datasource.PostgresDatasource.execution_engine_override = (
+            execution_eng_cls
+        )
+        yield postgres_datasource.PostgresDatasource(
+            name="my_datasource",
+            connection_string="postgresql+psycopg2://postgres:@localhost/test_ci",
+        )
+    finally:
+        postgres_datasource.PostgresDatasource.execution_engine_override = (
+            original_override
+        )
 
 
-def _source() -> postgres_datasource.PostgresDatasource:
-    return postgres_datasource.PostgresDatasource(
-        name="my_datasource",
-        connection_str="postgresql+psycopg2://postgres:@localhost/test_ci",
-    )
+# We may be able parameterize this fixture so we can instantiate _source in the fixture. This
+# would reduce the `with ...` boilerplate in the individual tests.
+@pytest.fixture
+def create_source():
+    return _source
 
 
 @pytest.mark.unit
-def test_construct_postgres_datasource():
-    with sqlachemy_execution_engine_mock(lambda: None):
-        source = _source()
+def test_construct_postgres_datasource(create_source):
+    with create_source(lambda: None) as source:
         assert source.name == "my_datasource"
         assert isinstance(source.execution_engine, SqlAlchemyExecutionEngine)
         assert source.assets == {}
@@ -48,9 +67,8 @@ def assert_batch_request(
 
 
 @pytest.mark.unit
-def test_add_table_asset_with_splitter():
-    with sqlachemy_execution_engine_mock(lambda: None):
-        source = _source()
+def test_add_table_asset_with_splitter(create_source):
+    with create_source(lambda: None) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter("my_column")
         assert len(source.assets) == 1
@@ -71,9 +89,8 @@ def test_add_table_asset_with_splitter():
 
 
 @pytest.mark.unit
-def test_add_table_asset_with_no_splitter():
-    with sqlachemy_execution_engine_mock(lambda: None):
-        source = _source()
+def test_add_table_asset_with_no_splitter(create_source):
+    with create_source(lambda: None) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         assert len(source.assets) == 1
         assert asset == list(source.assets.values())[0]
@@ -99,18 +116,16 @@ def test_add_table_asset_with_no_splitter():
 
 
 @pytest.mark.unit
-def test_construct_table_asset_directly_with_no_splitter():
-    with sqlachemy_execution_engine_mock(lambda: None):
-        source = _source()
+def test_construct_table_asset_directly_with_no_splitter(create_source):
+    with create_source(lambda: None) as source:
         asset = postgres_datasource.TableAsset(name="my_asset", table_name="my_table")
         asset._datasource = source
         assert_batch_request(asset.get_batch_request(), "my_datasource", "my_asset", {})
 
 
 @pytest.mark.unit
-def test_construct_table_asset_directly_with_splitter():
-    with sqlachemy_execution_engine_mock(lambda: None):
-        source = _source()
+def test_construct_table_asset_directly_with_splitter(create_source):
+    with create_source(lambda: None) as source:
         splitter = postgres_datasource.ColumnSplitter(
             method_name="splitter_method",
             column_name="col",
@@ -140,7 +155,7 @@ def test_construct_table_asset_directly_with_splitter():
 
 
 @pytest.mark.unit
-def test_datasource_gets_batch_list_no_splitter():
+def test_datasource_gets_batch_list_no_splitter(create_source):
     def validate_batch_spec(spec: SqlAlchemyDatasourceBatchSpec) -> None:
         assert spec == {
             "batch_identifiers": {},
@@ -149,8 +164,7 @@ def test_datasource_gets_batch_list_no_splitter():
             "type": "table",
         }
 
-    with sqlachemy_execution_engine_mock(validate_batch_spec):
-        source = _source()
+    with create_source(validate_batch_spec) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         source.get_batch_list_from_batch_request(asset.get_batch_request())
 
@@ -175,14 +189,15 @@ def assert_batch_specs_correct_with_year_month_splitter_defaults(batch_specs):
 
 
 @pytest.mark.unit
-def test_datasource_gets_batch_list_splitter_with_unspecified_batch_request_options():
+def test_datasource_gets_batch_list_splitter_with_unspecified_batch_request_options(
+    create_source,
+):
     batch_specs = []
 
     def collect_batch_spec(spec: SqlAlchemyDatasourceBatchSpec) -> None:
         batch_specs.append(spec)
 
-    with sqlachemy_execution_engine_mock(collect_batch_spec):
-        source = _source()
+    with create_source(collect_batch_spec) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
         empty_batch_request = asset.get_batch_request()
@@ -192,14 +207,15 @@ def test_datasource_gets_batch_list_splitter_with_unspecified_batch_request_opti
 
 
 @pytest.mark.unit
-def test_datasource_gets_batch_list_splitter_with_batch_request_options_set_to_none():
+def test_datasource_gets_batch_list_splitter_with_batch_request_options_set_to_none(
+    create_source,
+):
     batch_specs = []
 
     def collect_batch_spec(spec: SqlAlchemyDatasourceBatchSpec) -> None:
         batch_specs.append(spec)
 
-    with sqlachemy_execution_engine_mock(collect_batch_spec):
-        source = _source()
+    with create_source(collect_batch_spec) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
         batch_request_with_none = asset.get_batch_request(
@@ -212,14 +228,15 @@ def test_datasource_gets_batch_list_splitter_with_batch_request_options_set_to_n
 
 
 @pytest.mark.unit
-def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_request_options():
+def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_request_options(
+    create_source,
+):
     batch_specs = []
 
     def collect_batch_spec(spec: SqlAlchemyDatasourceBatchSpec) -> None:
         batch_specs.append(spec)
 
-    with sqlachemy_execution_engine_mock(collect_batch_spec):
-        source = _source()
+    with create_source(collect_batch_spec) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
         source.get_batch_list_from_batch_request(
@@ -239,7 +256,9 @@ def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_requ
 
 
 @pytest.mark.unit
-def test_datasource_gets_batch_list_with_fully_specified_batch_request_options():
+def test_datasource_gets_batch_list_with_fully_specified_batch_request_options(
+    create_source,
+):
     def validate_batch_spec(spec: SqlAlchemyDatasourceBatchSpec) -> None:
         assert spec == {
             "batch_identifiers": {"my_col": {"month": 1, "year": 2022}},
@@ -250,8 +269,7 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_request_options()
             "type": "table",
         }
 
-    with sqlachemy_execution_engine_mock(validate_batch_spec):
-        source = _source()
+    with create_source(validate_batch_spec) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
         source.get_batch_list_from_batch_request(
@@ -260,9 +278,8 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_request_options()
 
 
 @pytest.mark.unit
-def test_datasource_gets_nonexistent_asset():
-    with sqlachemy_execution_engine_mock(lambda: None):
-        source = _source()
+def test_datasource_gets_nonexistent_asset(create_source):
+    with create_source(lambda: None) as source:
         with pytest.raises(LookupError):
             source.get_asset("my_asset")
 
@@ -278,10 +295,10 @@ def test_datasource_gets_nonexistent_asset():
     ],
 )
 def test_bad_batch_request_passed_into_get_batch_list_from_batch_request(
+    create_source,
     batch_request_args,
 ):
-    with sqlachemy_execution_engine_mock(lambda: None):
-        source = _source()
+    with create_source(lambda: None) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
 
@@ -305,9 +322,8 @@ def test_bad_batch_request_passed_into_get_batch_list_from_batch_request(
     "batch_request_options",
     [{}, {"year": 2021}, {"year": 2021, "month": 10}, {"year": None, "month": 10}],
 )
-def test_validate_good_batch_request(batch_request_options):
-    with sqlachemy_execution_engine_mock(lambda: None):
-        source = _source()
+def test_validate_good_batch_request(create_source, batch_request_options):
+    with create_source(lambda: None) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
         batch_request = BatchRequest(
@@ -329,9 +345,8 @@ def test_validate_good_batch_request(batch_request_options):
         ("bad", "bad", None),
     ],
 )
-def test_validate_malformed_batch_request(batch_request_args):
-    with sqlachemy_execution_engine_mock(lambda: None):
-        source = _source()
+def test_validate_malformed_batch_request(create_source, batch_request_args):
+    with create_source(lambda: None) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
         src, ast, op = batch_request_args
@@ -344,9 +359,8 @@ def test_validate_malformed_batch_request(batch_request_args):
             asset.validate_batch_request(batch_request)
 
 
-def test_get_bad_batch_request():
-    with sqlachemy_execution_engine_mock(lambda: None):
-        source = _source()
+def test_get_bad_batch_request(create_source):
+    with create_source(lambda: None) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
         with pytest.raises(postgres_datasource.BatchRequestError):

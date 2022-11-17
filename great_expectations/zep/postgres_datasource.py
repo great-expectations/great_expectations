@@ -21,29 +21,10 @@ from great_expectations.zep.interfaces import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-
-
-# _EXECUTION_ENGINE allows us to inject a mock execution engine for testing.
-# It also allows us to delay importing SqlAlchemyExecutionEngine until we use it. This is
-# useful to avoid circular dependencies which happens because we want to load this
-# Datasource when someone imports zep. In particular, great_expectations/core/batch.py imports
-# zep.interfaces so it can do runtime checking of the BatchRequest type. That would be fine
-# except this forces this datasource to get loaded, which imports ExecutionEngine which imports
-# batch.py.
-_EXECUTION_ENGINE: Optional[Type[SqlAlchemyExecutionEngine]] = None
-
-
-def get_execution_engine() -> Optional[Type[SqlAlchemyExecutionEngine]]:
-    return _EXECUTION_ENGINE
-
-
-def set_execution_engine(
-    execution_engine: Optional[Type[SqlAlchemyExecutionEngine]],
-) -> Optional[Type[SqlAlchemyExecutionEngine]]:
-    global _EXECUTION_ENGINE
-    _EXECUTION_ENGINE = execution_engine
-    return _EXECUTION_ENGINE
+    from great_expectations.execution_engine import (
+        ExecutionEngine,
+        SqlAlchemyExecutionEngine,
+    )
 
 
 class PostgresDatasourceError(Exception):
@@ -236,9 +217,13 @@ class PostgresDatasource(Datasource):
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
     type: Literal["postgres"] = "postgres"
-    connection_str: str
-    execution_engine: SqlAlchemyExecutionEngine
+    connection_string: str
     assets: Dict[str, TableAsset] = {}
+
+    def execution_engine_type(self) -> Type[ExecutionEngine]:
+        from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+
+        return SqlAlchemyExecutionEngine
 
     def add_table_asset(self, name: str, table_name: str) -> TableAsset:
         """Adds a table asset to this datasource.

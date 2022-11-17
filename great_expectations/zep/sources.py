@@ -32,7 +32,6 @@ class _SourceFactories:
 
     # TODO (kilo59): split DataAsset & Datasource lookups
     type_lookup: ClassVar = TypeLookup()
-    engine_lookup: ClassVar = TypeLookup()
     __source_factories: ClassVar[Dict[str, SourceFactoryFn]] = {}
 
     _data_context: Union[DataContext, GXDataContext]
@@ -85,14 +84,6 @@ class _SourceFactories:
                 datasource_type_lookup=type_lookup,
             )
 
-            # NOTE: this is order dependent.
-            # Once the type_lookup is namespaced this should the same as `type_lookup` as above
-            cls._register_engine(
-                ds_type,
-                type_lookup_name=ds_type_name,
-                engine_type_lookup=cls.engine_lookup,
-            )
-
     @classmethod
     def _register_datasource_and_factory_method(
         cls,
@@ -120,35 +111,6 @@ class _SourceFactories:
         LOGGER.info(f"'{ds_type_name}' added to `type_lookup`")
         cls.__source_factories[method_name] = factory_fn
         return ds_type_name
-
-    @classmethod
-    def _register_engine(
-        cls,
-        ds_type: Type[Datasource],
-        type_lookup_name: str,
-        engine_type_lookup: TypeLookup,
-    ):
-        try:
-            exec_engine_type: Type[ExecutionEngine] = ds_type.__fields__[
-                "execution_engine"
-            ].type_
-        except (AttributeError, KeyError) as exc:
-            LOGGER.warning(f"{exc.__class__.__name__}:{exc}")
-            raise TypeError(
-                f"No `execution_engine` found for {ds_type.__name__} unable to register `ExecutionEngine` type"
-            ) from exc
-
-        eng_class_name: str = exec_engine_type.__name__
-        if eng_class_name == "ExecutionEngine":
-            raise TypeRegistrationError(
-                f"`{ds_type.__name__}.execution_engine` must be annotated with a concrete `ExecutionEngine`",
-            )
-
-        LOGGER.info(
-            f"2c. Registering `ExecutionEngine` type `{eng_class_name}` for '{type_lookup_name}'"
-        )
-        engine_type_lookup[type_lookup_name] = exec_engine_type
-        LOGGER.info(list(engine_type_lookup.keys()))
 
     @classmethod
     def _register_assets(cls, ds_type: Type[Datasource], asset_type_lookup: TypeLookup):

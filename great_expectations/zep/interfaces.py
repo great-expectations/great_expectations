@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses
 import logging
 from pprint import pformat as pf
-from typing import Any, Dict, List, Mapping, Optional, Set, Type, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Set, Type
 
 import pydantic
 from typing_extensions import ClassVar, TypeAlias
@@ -72,46 +72,31 @@ class Datasource(ZepBaseModel, metaclass=MetaDatasource):
         "execution_engine",
         "assets",
     }
+    # Setting this in a Datasource subclass will override the execution engine type.
+    # The primary use case is to inject an execution engine for testing.
+    execution_engine_override: ClassVar[Optional[ExecutionEngine]] = None
 
     # instance attrs
     type: str
     name: str
-    execution_engine: ExecutionEngine
     assets: Mapping[str, DataAsset] = {}
+    _execution_engine: ExecutionEngine = pydantic.PrivateAttr()
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        engine_kwargs = {
+            k: v for (k, v) in kwargs.items() if k not in self._excluded_eng_args
+        }
+        self._execution_engine = self._execution_engine_type()(**engine_kwargs)
+
+    @property
+    def execution_engine(self) -> ExecutionEngine:
+        return self._execution_engine
 
     class Config:
         # TODO: revisit this (1 option - define __get_validator__ on ExecutionEngine)
         # https://pydantic-docs.helpmanual.io/usage/types/#custom-data-types
         arbitrary_types_allowed = True
-
-    @pydantic.root_validator(pre=True)
-    @classmethod
-    def _load_execution_engine(cls, values: Dict[str, Any]):
-        """
-        Lookup and instantiate an ExecutionEngine based on the 'type' string of the datasource.
-        Assign this ExecutionEngine instance to the `execution_engine` field.
-        """
-        # NOTE (kilo59): this method is only ever called by the Pydantic framework.
-        # Should we use name mangling? `__load_execution_engine`?
-        LOGGER.info(
-            f"Selecting & instantiating `Datasource.execution_engine' ->\n {pf(values, depth=1)}"
-        )
-        # TODO (kilo59): catch key errors
-        ds_type_default = cls.__fields__["type"].default
-        registered_ds_type_name: str = values.get("type", ds_type_default)
-
-        engine_type: Type[ExecutionEngine] = _SourceFactories.engine_lookup[
-            registered_ds_type_name
-        ]
-
-        engine_kwargs = {
-            k: v for (k, v) in values.items() if k not in cls._excluded_eng_args
-        }
-        LOGGER.debug(f"{engine_type} - kwargs: {list(engine_kwargs.keys())}")
-        engine = engine_type(**engine_kwargs)
-        values["execution_engine"] = engine
-        LOGGER.info(f"{registered_ds_type_name} - {engine_type.__name__} - {engine}")
-        return values
 
     @pydantic.validator("assets", pre=True)
     @classmethod
@@ -128,6 +113,16 @@ class Datasource(ZepBaseModel, metaclass=MetaDatasource):
 
         LOGGER.debug(f"Loaded 'assets' ->\n{repr(loaded_assets)}")
         return loaded_assets
+
+    def _execution_engine_type(self) -> Type[ExecutionEngine]:
+        """Returns the execution engine to be used"""
+        return self.execution_engine_override or self.execution_engine_type()
+
+    def execution_engine_type(self) -> Type[ExecutionEngine]:
+        """Return the ExecutionEngine type use for this Datasource"""
+        raise NotImplementedError(
+            "One needs to implement 'execution_engine_type' on a Datasource subclass"
+        )
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
