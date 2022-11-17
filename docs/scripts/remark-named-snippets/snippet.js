@@ -76,7 +76,6 @@ function parseFile (file) {
       if (stack.length === 0) {
         return
       }
-      text = sanitizeText(text)
 
       // If we have nested snippets, all snippets on the stack need to be updated
       // to reflect any nested content
@@ -94,6 +93,8 @@ function parseFile (file) {
       }
 
       const popped = stack.pop()
+      // Clean up formatting and identation before writing to result array
+      popped.contents = sanitizeText(popped.contents)
       snippets.push(popped)
     }
   })
@@ -122,7 +123,7 @@ function sanitizeText (text) {
     text = text.substring(1, text.length)
   }
 
-  // Determine indentation
+  // Calculate indentation to remove
   let indent = "";
   for (let i = 0; i < text.length; i++) {
     if (text[i] === " ") {
@@ -132,13 +133,6 @@ function sanitizeText (text) {
     }
   }
 
-  // Remove any Python comment remnants
-  text = text.trim()
-  if (text.endsWith('#')) {
-    text = text.substring(0, text.length - 1)
-  }
-
-  // Uniformly remove indentation across snippet
   function unindent(line) {
     if (line.startsWith(indent)) {
       line = line.substring(indent.length, text.length)
@@ -146,10 +140,11 @@ function sanitizeText (text) {
     return line
   }
 
+  // Apply unindent and misc cleanup
   return text
     .split('\n')
+    .filter((l) => !(l.trim() === "#")) // Remove any nested snippet remnants
     .map(unindent)
-    .filter((l) => !(l.includes('<snippet') || l.includes('snippet>')))
     .join('\n')
     .trim()
 }

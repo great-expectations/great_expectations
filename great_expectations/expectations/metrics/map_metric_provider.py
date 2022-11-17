@@ -1,7 +1,7 @@
 import inspect
 import logging
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
 
@@ -395,6 +395,7 @@ def column_condition_partial(
                     # Trino
                     if hasattr(sqlalchemy_engine, "dialect"):
                         dialect = sqlalchemy_engine.dialect
+
                 expected_condition = metric_fn(
                     cls,
                     sa.column(column_name),
@@ -1422,8 +1423,8 @@ def _pandas_column_map_condition_values(
 
     if result_format["result_format"] == "COMPLETE":
         return list(domain_values)
-    else:
-        return list(domain_values[: result_format["partial_unexpected_count"]])
+
+    return list(domain_values[: result_format["partial_unexpected_count"]])
 
 
 def _pandas_column_pair_map_condition_values(
@@ -1481,8 +1482,8 @@ def _pandas_column_pair_map_condition_values(
     ]
     if result_format["result_format"] == "COMPLETE":
         return unexpected_list
-    else:
-        return unexpected_list[: result_format["partial_unexpected_count"]]
+
+    return unexpected_list[: result_format["partial_unexpected_count"]]
 
 
 def _pandas_column_pair_map_condition_filtered_row_count(
@@ -1569,10 +1570,8 @@ def _pandas_multicolumn_map_condition_values(
 
     if result_format["result_format"] == "COMPLETE":
         return domain_values.to_dict("records")
-    else:
-        return domain_values[: result_format["partial_unexpected_count"]].to_dict(
-            "records"
-        )
+
+    return domain_values[: result_format["partial_unexpected_count"]].to_dict("records")
 
 
 def _pandas_multicolumn_map_condition_filtered_row_count(
@@ -1610,6 +1609,7 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
     return df.shape[0]
 
 
+# TODO: <Alex>11/15/2022: Please DO_NOT_DELETE this method (even though it is not currently utilized).  Thanks.</Alex>
 def _pandas_column_map_series_and_domain_values(
     cls,
     execution_engine: PandasExecutionEngine,
@@ -1674,11 +1674,11 @@ def _pandas_column_map_series_and_domain_values(
             list(domain_values),
             list(map_series),
         )
-    else:
-        return (
-            list(domain_values[: result_format["partial_unexpected_count"]]),
-            list(map_series[: result_format["partial_unexpected_count"]]),
-        )
+
+    return (
+        list(domain_values[: result_format["partial_unexpected_count"]]),
+        list(map_series[: result_format["partial_unexpected_count"]]),
+    )
 
 
 def _pandas_map_condition_index(
@@ -1734,7 +1734,6 @@ def _pandas_map_condition_index(
     df = df[boolean_mapped_unexpected_values]
 
     if "unexpected_index_column_names" in result_format:
-
         unexpected_index_list: Optional[List[Dict[str, Any]]] = []
         unexpected_index_column_names: List[str] = result_format[
             "unexpected_index_column_names"
@@ -1745,18 +1744,21 @@ def _pandas_map_condition_index(
             for column_name in unexpected_index_column_names:
                 if column_name not in metrics["table.columns"]:
                     raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
-                        message=f'Error: The unexpected_index_column: "{column_name}" in does not exist in Dataframe. '
+                        message=f'Error: The unexpected_index_column: "{column_name}" does not exist in Dataframe. '
                         f"Please check your configuration and try again."
                     )
+
                 primary_key_dict[column_name] = df.at[index, column_name]
             unexpected_index_list.append(primary_key_dict)
+
         if result_format["result_format"] == "COMPLETE":
             return unexpected_index_list
-        return unexpected_index_list[: result_format["partial_unexpected_count"]]
 
+        return unexpected_index_list[: result_format["partial_unexpected_count"]]
     else:
         if result_format["result_format"] == "COMPLETE":
             return list(df.index)
+
         return list(df.index[: result_format["partial_unexpected_count"]])
 
 
@@ -1822,8 +1824,8 @@ def _pandas_column_map_condition_value_counts(
 
     if result_format["result_format"] == "COMPLETE":
         return value_counts
-    else:
-        return value_counts[result_format["partial_unexpected_count"]]
+
+    return value_counts[result_format["partial_unexpected_count"]]
 
 
 def _pandas_map_condition_rows(
@@ -2575,8 +2577,8 @@ def _spark_map_condition_rows(
 
     if result_format["result_format"] == "COMPLETE":
         return filtered.collect()
-    else:
-        return filtered.limit(result_format["partial_unexpected_count"]).collect()
+
+    return filtered.limit(result_format["partial_unexpected_count"]).collect()
 
 
 def _spark_column_pair_map_condition_values(
@@ -2772,13 +2774,13 @@ def _spark_multicolumn_map_condition_filtered_row_count(
 
 
 class MapMetricProvider(MetricProvider):
-    condition_domain_keys = (
+    condition_domain_keys: Tuple[str, ...] = (
         "batch_id",
         "table",
         "row_condition",
         "condition_parser",
     )
-    function_domain_keys = (
+    function_domain_keys: Tuple[str, ...] = (
         "batch_id",
         "table",
         "row_condition",
@@ -3224,49 +3226,32 @@ class MapMetricProvider(MetricProvider):
                 has_aggregate_fn = False
             if has_aggregate_fn:
                 dependencies["metric_partial_fn"] = MetricConfiguration(
-                    f"{metric_name}.aggregate_fn",
-                    metric.metric_domain_kwargs,
-                    base_metric_value_kwargs,
+                    metric_name=f"{metric_name}.aggregate_fn",
+                    metric_domain_kwargs=metric.metric_domain_kwargs,
+                    metric_value_kwargs=base_metric_value_kwargs,
                 )
             else:
                 dependencies["unexpected_condition"] = MetricConfiguration(
-                    f"{metric_name[:-len(metric_suffix)]}.condition",
-                    metric.metric_domain_kwargs,
-                    base_metric_value_kwargs,
+                    metric_name=f"{metric_name[:-len(metric_suffix)]}.condition",
+                    metric_domain_kwargs=metric.metric_domain_kwargs,
+                    metric_value_kwargs=base_metric_value_kwargs,
                 )
 
-        # MapMetric uses the condition to build unexpected_count.aggregate_fn as well
-        metric_suffix = ".unexpected_count.aggregate_fn"
-        if metric_name.endswith(metric_suffix):
-            dependencies["unexpected_condition"] = MetricConfiguration(
-                f"{metric_name[:-len(metric_suffix)]}.condition",
-                metric.metric_domain_kwargs,
-                base_metric_value_kwargs,
-            )
-
+        # MapMetric uses "condition" metric to build "unexpected_count.aggregate_fn" and other listed metrics as well.
         for metric_suffix in [
-            ".unexpected_values",
+            ".unexpected_count.aggregate_fn",
             ".unexpected_value_counts",
             ".unexpected_index_list",
-            ".unexpected_rows",
             ".filtered_row_count",
+            ".unexpected_values",
+            ".unexpected_rows",
         ]:
             if metric_name.endswith(metric_suffix):
                 dependencies["unexpected_condition"] = MetricConfiguration(
-                    f"{metric_name[:-len(metric_suffix)]}.condition",
-                    metric.metric_domain_kwargs,
-                    base_metric_value_kwargs,
+                    metric_name=f"{metric_name[:-len(metric_suffix)]}.condition",
+                    metric_domain_kwargs=metric.metric_domain_kwargs,
+                    metric_value_kwargs=base_metric_value_kwargs,
                 )
-
-        try:
-            _ = get_metric_provider(f"{metric_name}.map", execution_engine)
-            dependencies["metric_map_fn"] = MetricConfiguration(
-                f"{metric_name}.map",
-                metric.metric_domain_kwargs,
-                metric.metric_value_kwargs,
-            )
-        except ge_exceptions.MetricProviderError:
-            pass
 
         return dependencies
 
@@ -3348,7 +3333,7 @@ class ColumnMapMetricProvider(MapMetricProvider):
 
 
 class ColumnPairMapMetricProvider(MapMetricProvider):
-    condition_domain_keys = (
+    condition_domain_keys: Tuple[str, ...] = (
         "batch_id",
         "table",
         "column_A",
@@ -3409,7 +3394,7 @@ class ColumnPairMapMetricProvider(MapMetricProvider):
 
 
 class MulticolumnMapMetricProvider(MapMetricProvider):
-    condition_domain_keys = (
+    condition_domain_keys: Tuple[str, ...] = (
         "batch_id",
         "table",
         "column_list",
