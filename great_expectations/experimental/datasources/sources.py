@@ -9,7 +9,6 @@ from great_expectations.experimental.datasources.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
     from great_expectations.data_context import DataContext as GXDataContext
-    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.experimental.datasources.context import DataContext
     from great_expectations.experimental.datasources.interfaces import (
         DataAsset,

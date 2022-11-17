@@ -1,40 +1,29 @@
 import logging
-from typing import Tuple, Type, Union
+from typing import Callable, Dict, Tuple
 
 import pytest
 from pytest import MonkeyPatch
 
-from great_expectations.core.batch import BatchData
-from great_expectations.core.batch_spec import BatchMarkers
 from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.experimental.datasources.sources import _SourceFactories
+from great_expectations.experimental.datasources.metadatasource import MetaDatasource
 
 LOGGER = logging.getLogger(__name__)
 
-from contextlib import contextmanager
-from typing import Callable, ContextManager, Tuple
-
-import great_expectations.experimental.datasources.postgres_datasource as pg_datasource
 from great_expectations.core.batch import BatchData
 from great_expectations.core.batch_spec import (
     BatchMarkers,
     SqlAlchemyDatasourceBatchSpec,
 )
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.experimental.datasources.sources import _SourceFactories
 
 
-@contextmanager
-def _sqlachemy_execution_engine_mock(
+def sqlachemy_execution_engine_mock_cls(
     validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None]
 ):
-    ds_type_name: str = pg_datasource.PostgresDatasource.__fields__["type"].default
-    assert ds_type_name
-
-    class MockSqlAlchemyExecEngine(SqlAlchemyExecutionEngine):
+    class MockSqlAlchemyExecutionEngine(SqlAlchemyExecutionEngine):
         def __init__(self, *args, **kwargs):
             pass
 
@@ -44,20 +33,7 @@ def _sqlachemy_execution_engine_mock(
             validate_batch_spec(batch_spec)
             return BatchData(self), BatchMarkers(ge_load_time=None)
 
-    original_engine = pg_datasource.SqlAlchemyExecutionEngine
-    try:
-        pg_datasource.SqlAlchemyExecutionEngine = MockSqlAlchemyExecEngine  # type: ignore[misc]
-        # swapping engine_lookup entry
-        _SourceFactories.engine_lookup.data[ds_type_name] = MockSqlAlchemyExecEngine
-        yield pg_datasource.SqlAlchemyExecutionEngine
-    finally:
-        pg_datasource.SqlAlchemyExecutionEngine = original_engine  # type: ignore[misc]
-        _SourceFactories.engine_lookup.data[ds_type_name] = original_engine
-
-
-@pytest.fixture
-def sqlachemy_execution_engine_mock() -> ContextManager:
-    return _sqlachemy_execution_engine_mock
+    return MockSqlAlchemyExecutionEngine
 
 
 class ExecutionEngineDouble:
@@ -75,22 +51,15 @@ def inject_engine_lookup_double(monkeypatch: MonkeyPatch) -> ExecutionEngineDoub
     so that all Datasources use the execution engine double.
     Dynamically create a new subclass so that runtime type validation does not fail.
     """
-    LOGGER.info(
-        f"Patching `_SourceFactories.engine_lookup` to return {ExecutionEngineDouble.__name__}"
-    )
-    key: Union[str, Type[ExecutionEngine]]
-    value: Type[ExecutionEngine]
-    for key, value in _SourceFactories.engine_lookup.items():
-        if isinstance(key, str):
-            engine_double_cls = type(  # TODO: make sure order of bases is correct
-                f"{key.capitalize()}ExecutionEngineDouble",
-                (ExecutionEngineDouble, value),
-                {},
-            )
-            monkeypatch.setitem(
-                _SourceFactories.engine_lookup.data, key, engine_double_cls
-            )
-            LOGGER.info(
-                f"patched '{key}' -BEFORE-> {value.__name__} -AFTER-> {engine_double_cls.__name__}"
-            )
-    yield ExecutionEngineDouble
+    original_engine_override: Dict[MetaDatasource, ExecutionEngine] = {}
+    for key in _SourceFactories.type_lookup.keys():
+        if issubclass(type(key), MetaDatasource):
+            original_engine_override[key] = key.execution_engine_override
+
+    try:
+        for source in original_engine_override.keys():
+            source.execution_engine_override = ExecutionEngineDouble
+        yield ExecutionEngineDouble
+    finally:
+        for source, engine in original_engine_override.items():
+            source.execution_engine_override = engine

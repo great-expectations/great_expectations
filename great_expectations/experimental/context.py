@@ -18,7 +18,7 @@ LOGGER = logging.getLogger(__name__)
 
 class DataContext:
     """
-    NOTE: this is just a scaffold for exploring and iterating on our ZEP prototype
+    NOTE: this is just a scaffold for exploring and iterating on our experimental datasource prototype
     this will be formalized and tested prior to release.
 
     Use `great_expectations.get_context()` for a real DataContext.
@@ -79,7 +79,7 @@ class DataContext:
 def get_context(
     context_root_dir: Optional[DirectoryPath] = None, **kwargs
 ) -> DataContext:
-    """ZEP get_context placeholder function."""
+    """Experimental get_context placeholder function."""
     LOGGER.info(f"3. Getting context {context_root_dir or ''}")
     context = DataContext.get_context(context_root_dir=context_root_dir, **kwargs)
     return context

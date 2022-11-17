@@ -10,6 +10,8 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     BatchRequestOptions,
 )
+from tests.experimental.datasources.conftest import sqlachemy_execution_engine_mock_cls
+
 
 @contextmanager
 def _source(

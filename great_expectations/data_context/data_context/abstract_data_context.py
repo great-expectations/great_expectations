@@ -126,13 +126,15 @@ if TYPE_CHECKING:
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
     )
+    from great_expectations.experimental.datasources.interfaces import Batch as XBatch
+    from great_expectations.experimental.datasources.interfaces import (
+        Datasource as XDatasource,
+    )
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.rule_based_profiler import RuleBasedProfilerResult
     from great_expectations.validation_operators.validation_operators import (
         ValidationOperator,
     )
-    from great_expectations.zep.interfaces import Batch as ZepBatch
-    from great_expectations.zep.interfaces import Datasource as ZepDatasource
 
 logger = logging.getLogger(__name__)
 yaml = YAMLHandler()
@@ -1425,7 +1427,7 @@ class AbstractDataContext(ABC):
     def get_validator_using_batch_list(
         self,
         expectation_suite: ExpectationSuite,
-        batch_list: Sequence[Union[Batch, ZepBatch]],
+        batch_list: Sequence[Union[Batch, XBatch]],
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Validator:
@@ -1455,7 +1457,7 @@ class AbstractDataContext(ABC):
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
         execution_engine: ExecutionEngine
         if hasattr(batch_list[-1], "execution_engine"):
-            # ZEP batches are execution engine aware. We just checked for this attr so we ignore the following
+            # 'XBatch's are execution engine aware. We just checked for this attr so we ignore the following
             # attr defined mypy error
             execution_engine = batch_list[-1].execution_engine
         else:
@@ -2666,7 +2668,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     @property
     def datasources(
         self,
-    ) -> Dict[str, Union[LegacyDatasource, BaseDatasource, ZepDatasource]]:
+    ) -> Dict[str, Union[LegacyDatasource, BaseDatasource, XDatasource]]:
         """A single holder for all Datasources in this context"""
         return self._cached_datasources
 
