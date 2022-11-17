@@ -8,10 +8,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def _missing_content_block_fn(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         return [
@@ -40,10 +40,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def _diagnostic_status_icon_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         assert result, "Must provide a result object."
