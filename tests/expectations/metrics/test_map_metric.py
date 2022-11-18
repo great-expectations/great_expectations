@@ -1045,12 +1045,13 @@ def test_sqlite_single_column_complete_result_format(
             },
         )
     )
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="my_test_datasource",
-            data_connector_name="my_sql_data_connector",
-            # data_asset_name="main.my_asset"
-            data_asset_name="my_asset",
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="my_asset",
+            )
         )
     )
     assert len(batch_definition_list) == 1
@@ -1071,10 +1072,8 @@ def test_sqlite_single_column_complete_result_format(
             {"count": 1, "value": 3},
             {"count": 1, "value": 10},
         ],
-        "partial_unexpected_index_list": None,
         "partial_unexpected_list": [3, 10],
         "unexpected_count": 2,
-        "unexpected_index_list": None,
         "unexpected_list": [3, 10],
         "unexpected_percent": 33.33333333333333,
         "unexpected_percent_nonmissing": 33.33333333333333,
@@ -1112,12 +1111,13 @@ def test_sqlite_single_column_summary_result_format(
             },
         )
     )
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="my_test_datasource",
-            data_connector_name="my_sql_data_connector",
-            # data_asset_name="main.my_asset"
-            data_asset_name="my_asset",
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="my_asset",
+            )
         )
     )
     assert len(batch_definition_list) == 1
@@ -1138,7 +1138,6 @@ def test_sqlite_single_column_summary_result_format(
             {"count": 1, "value": 3},
             {"count": 1, "value": 10},
         ],
-        "partial_unexpected_index_list": None,
         "partial_unexpected_list": [3, 10],
         "unexpected_count": 2,
         "unexpected_percent": 33.33333333333333,
