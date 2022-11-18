@@ -36,20 +36,20 @@ PG_COMPLEX_CONFIG_DICT = {
                     "table_name": "my_table",
                     "type": "table",
                 },
-                "with_splitters": {
-                    "column_splitter": {
-                        "column_name": "my_column",
-                        "method_name": "foobar_it",
-                        "name": "my_splitter",
-                        "param_defaults": {
-                            "alpha": ["fizz", "bizz"],
-                            "bravo": ["foo", "bar"],
-                        },
-                    },
-                    "name": "with_splitters",
-                    "table_name": "another_table",
-                    "type": "table",
-                },
+                # "with_splitters": {
+                #     "column_splitter": {
+                #         "column_name": "my_column",
+                #         "method_name": "foobar_it",
+                #         "name": "my_splitter",
+                #         "param_defaults": {
+                #             "alpha": ["fizz", "bizz"],
+                #             "bravo": ["foo", "bar"],
+                #         },
+                #     },
+                #     "name": "with_splitters",
+                #     "table_name": "another_table",
+                #     "type": "table",
+                # },
             },
         }
     }
