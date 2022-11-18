@@ -415,7 +415,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         See `AbstractDataContext.create_expectation_suite` for more information.
         """
-        suite = self._data_context.create_expectation_suite(  # type: ignore[union-attr]
+        suite = self._data_context.create_expectation_suite(
             expectation_suite_name,
             overwrite_existing=overwrite_existing,
             **kwargs,
@@ -444,7 +444,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 self._determine_if_expectation_suite_include_rendered_content()
             )
 
-        res = self._data_context.get_expectation_suite(  # type: ignore[union-attr]
+        res = self._data_context.get_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             include_rendered_content=include_rendered_content,
             ge_cloud_id=ge_cloud_id,
@@ -459,7 +459,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         See `AbstractDataContext.delete_expectation_suite` for more information.
         """
-        res = self._data_context.delete_expectation_suite(  # type: ignore[union-attr]
+        res = self._data_context.delete_expectation_suite(
             expectation_suite_name=expectation_suite_name, ge_cloud_id=ge_cloud_id
         )
         self._synchronize_self_with_underlying_data_context()
@@ -495,7 +495,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             )
         )
 
-        self._data_context.save_expectation_suite(  # type: ignore[union-attr]
+        self._data_context.save_expectation_suite(
             expectation_suite,
             expectation_suite_name,
             overwrite_existing,
@@ -507,7 +507,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     @property
     def root_directory(self) -> Optional[str]:
         if hasattr(self._data_context, "_context_root_directory"):
-            return self._data_context._context_root_directory  # type: ignore[union-attr]
+            return self._data_context._context_root_directory
         return None
 
     def add_checkpoint(
@@ -540,7 +540,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         See parent 'AbstractDataContext.add_checkpoint()' for more information
         """
-        checkpoint = self._data_context.add_checkpoint(  # type: ignore[union-attr]
+        checkpoint = self._data_context.add_checkpoint(
             name=name,
             config_version=config_version,
             template_name=template_name,
