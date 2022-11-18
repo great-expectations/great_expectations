@@ -15,6 +15,8 @@ from great_expectations.experimental.datasources.interfaces import Datasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
 
 yaml = YAML(typ="safe")
+yaml.indent(mapping=2, sequence=4, offset=2)
+yaml.default_flow_style = False
 
 
 LOGGER = logging.getLogger(__name__)

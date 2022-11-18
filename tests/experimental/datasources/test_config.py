@@ -138,6 +138,9 @@ def test_json_config_round_trip(
     assert from_json_gx_config == re_loaded
 
 
+# TODO (kilo59): low-priority - test for the correct yaml style??
+
+
 def test_yaml_config_round_trip(
     inject_engine_lookup_double, from_yaml_gx_config: GxConfig
 ):
