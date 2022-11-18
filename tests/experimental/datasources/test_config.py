@@ -4,7 +4,6 @@ import pathlib
 from typing import Callable
 
 import pytest
-from pytest import FixtureRequest
 
 from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Datasource
@@ -106,7 +105,7 @@ def from_json_gx_config() -> GxConfig:
 
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
-def from_yaml_gx_config(request: FixtureRequest) -> GxConfig:
+def from_yaml_gx_config() -> GxConfig:
     gx_config = GxConfig.parse_yaml(PG_CONFIG_YAML_STR)
     assert gx_config
     return gx_config
