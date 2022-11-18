@@ -34,6 +34,7 @@ from great_expectations.expectations.metrics.util import (
     Insert,
     Label,
     Select,
+    get_sqlalchemy_source_table_and_schema_selectable,
     sql_post_compile_to_string,
 )
 from great_expectations.expectations.registry import (
@@ -43,7 +44,6 @@ from great_expectations.expectations.registry import (
 from great_expectations.util import (
     generate_temporary_table_name,
     get_sqlalchemy_selectable,
-    get_sqlalchemy_source_table_and_schema_selectable,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
