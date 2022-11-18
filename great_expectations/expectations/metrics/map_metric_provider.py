@@ -43,6 +43,7 @@ from great_expectations.expectations.registry import (
 from great_expectations.util import (
     generate_temporary_table_name,
     get_sqlalchemy_selectable,
+    get_sqlalchemy_source_table_and_schema_selectable,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -2364,6 +2365,7 @@ def _sqlalchemy_map_condition_query(
         - domain column + pk columns that are given
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
+    # boo this is not what we want
     selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
     result_format = metric_value_kwargs["result_format"]
     # original
@@ -2385,9 +2387,12 @@ def _sqlalchemy_map_condition_query(
     # at this point we have the columns to select
     query = sa.select(column_selector).where(unexpected_condition)
     # TODO: not a temp table but the original one
-    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
-        selectable = get_sqlalchemy_selectable(selectable)
-        new_query = query.select_from(selectable)
+    # execution_engine.batch_manager.active_batch_data.source_schema_name
+    # execution_engine.batch_manager.active_batch_data.source_table_name
+    selectable = get_sqlalchemy_source_table_and_schema_selectable(execution_engine)
+
+    new_selectable = get_sqlalchemy_selectable(selectable)
+    new_query = query.select_from(new_selectable)
     # query: this is going to be a sepraate metric
     query_as_string: str = sql_post_compile_to_string(
         engine=execution_engine.engine, select_statement=new_query

@@ -8,6 +8,7 @@ import sqlalchemy.sql
 from dateutil.parser import parse
 from packaging import version
 
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 from great_expectations.execution_engine.util import check_sql_engine_dialect
 from great_expectations.util import get_sqlalchemy_inspector
@@ -25,6 +26,7 @@ except ImportError:
 
 try:
     import sqlalchemy as sa
+    from sqlalchemy import Table
     from sqlalchemy.dialects import registry
     from sqlalchemy.engine import Engine, reflection
     from sqlalchemy.engine.interfaces import Dialect
@@ -54,6 +56,7 @@ except ImportError:
     literal = None
     custom_op = None
     OperationalError = None
+    Table = None
 
 try:
     import sqlalchemy_redshift
@@ -923,3 +926,30 @@ def sql_post_compile_to_string(
     params = (repr(compiled.params[name]) for name in compiled.positiontup)
     query_as_string = re.sub(r"\?", lambda m: next(params), str(compiled))
     return query_as_string
+
+
+def get_sqlalchemy_source_table_and_schema_selectable(
+    engine: SqlAlchemyExecutionEngine,
+) -> Table:
+    """
+    Util method to extract table when temp_table is being used.  This allows you to get the source_table_name
+    even if a temp_temp table is created.
+
+    This is used by `_sqlalchemy_map_condition_query()` which returns the query that allows you to get the
+    unexpected values and their indices
+
+    Args:
+        engine (SqlAlchemyExecutionEngine): Engine that is currently being used to calculate the Metrics
+
+    Returns:
+        SqlAlchemy Table that is the source table and schema.
+
+    """
+    schema_name = engine.batch_manager.active_batch_data.source_schema_name
+    table_name = engine.batch_manager.active_batch_data.source_table_name
+    selectable = sa.Table(
+        table_name,
+        sa.MetaData(),
+        schema=schema_name,
+    )
+    return selectable

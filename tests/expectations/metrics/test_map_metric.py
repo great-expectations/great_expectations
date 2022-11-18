@@ -1033,34 +1033,24 @@ def test_sqlite_single_unexpected_index_column_names_complete_result_format(
     result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
-        "unexpected_count": 2,
-        "unexpected_index_list": [
-            {
-                "pk_1": 3,
-            },
-            {
-                "pk_1": 5,
-            },
-        ],  # Dicts since a column was provided
-        "partial_unexpected_index_list": [
-            {
-                "pk_1": 3,
-            },
-            {
-                "pk_1": 5,
-            },
-        ],  # Dicts since a column was provided
-        "unexpected_percent": 33.33333333333333,
-        "partial_unexpected_list": [3, 10],
-        "unexpected_list": [3, 10],
-        "partial_unexpected_counts": [
-            {"value": 3, "count": 1},
-            {"value": 10, "count": 1},
-        ],
         "missing_count": 0,
         "missing_percent": 0.0,
-        "unexpected_percent_total": 33.33333333333333,
+        "partial_unexpected_counts": [
+            {"count": 1, "value": 3},
+            {"count": 1, "value": 10},
+        ],
+        "partial_unexpected_index_list": [{"pk_1": 3}, {"pk_1": 5}],
+        "partial_unexpected_list": [3, 10],
+        "unexpected_count": 2,
+        "unexpected_index_list": [{"pk_1": 3}, {"pk_1": 5}],
+        "unexpected_index_query": "SELECT numbers_with_duplicates, pk_1 \n"
+        "FROM test_temp \n"
+        "WHERE numbers_with_duplicates IS NOT NULL AND "
+        "(numbers_with_duplicates NOT IN (1, 5, 22))",
+        "unexpected_list": [3, 10],
+        "unexpected_percent": 33.33333333333333,
         "unexpected_percent_nonmissing": 33.33333333333333,
+        "unexpected_percent_total": 33.33333333333333,
     }
 
 
@@ -1190,26 +1180,30 @@ def test_sqlite_multiple_unexpected_index_column_names_complete_result_format(
     result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "partial_unexpected_counts": [
+            {"count": 1, "value": 3},
+            {"count": 1, "value": 10},
+        ],
+        "partial_unexpected_index_list": [
+            {"pk_1": 3, "pk_2": "three"},
+            {"pk_1": 5, "pk_2": "five"},
+        ],
+        "partial_unexpected_list": [3, 10],
         "unexpected_count": 2,
         "unexpected_index_list": [
             {"pk_1": 3, "pk_2": "three"},
             {"pk_1": 5, "pk_2": "five"},
-        ],  # Dicts since columns were provided
-        "partial_unexpected_index_list": [
-            {"pk_1": 3, "pk_2": "three"},
-            {"pk_1": 5, "pk_2": "five"},
-        ],  # Dicts since columns were provided
-        "unexpected_percent": 33.33333333333333,
-        "partial_unexpected_list": [3, 10],
-        "unexpected_list": [3, 10],
-        "partial_unexpected_counts": [
-            {"value": 3, "count": 1},
-            {"value": 10, "count": 1},
         ],
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "unexpected_percent_total": 33.33333333333333,
+        "unexpected_index_query": "SELECT numbers_with_duplicates, pk_1, pk_2 \n"
+        "FROM test_temp \n"
+        "WHERE numbers_with_duplicates IS NOT NULL AND "
+        "(numbers_with_duplicates NOT IN (1, 5, 22))",
+        "unexpected_list": [3, 10],
+        "unexpected_percent": 33.33333333333333,
         "unexpected_percent_nonmissing": 33.33333333333333,
+        "unexpected_percent_total": 33.33333333333333,
     }
 
 
@@ -1266,24 +1260,24 @@ def test_sql_multiple_unexpected_index_column_names_complete_result_format_limit
     result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "partial_unexpected_counts": [{"count": 1, "value": 3}],
+        "partial_unexpected_index_list": [{"pk_1": 3, "pk_2": "three"}],
+        "partial_unexpected_list": [3],
         "unexpected_count": 2,
         "unexpected_index_list": [
             {"pk_1": 3, "pk_2": "three"},
             {"pk_1": 5, "pk_2": "five"},
-        ],  # Dicts since columns were provided
-        "partial_unexpected_index_list": [
-            {"pk_1": 3, "pk_2": "three"},
-        ],  # Dicts since columns were provided
-        "unexpected_percent": 33.33333333333333,
-        "partial_unexpected_list": [3],
-        "unexpected_list": [3, 10],
-        "partial_unexpected_counts": [
-            {"value": 3, "count": 1},
         ],
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "unexpected_percent_total": 33.33333333333333,
+        "unexpected_index_query": "SELECT numbers_with_duplicates, pk_1, pk_2 \n"
+        "FROM test_temp \n"
+        "WHERE numbers_with_duplicates IS NOT NULL AND "
+        "(numbers_with_duplicates NOT IN (1, 5, 22))",
+        "unexpected_list": [3, 10],
+        "unexpected_percent": 33.33333333333333,
         "unexpected_percent_nonmissing": 33.33333333333333,
+        "unexpected_percent_total": 33.33333333333333,
     }
 
 
