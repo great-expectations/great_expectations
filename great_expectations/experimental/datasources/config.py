@@ -9,8 +9,8 @@ from typing import Dict, Type, Union
 from pydantic import BaseModel, validator
 from ruamel.yaml import YAML
 
-from great_expectations.zep.interfaces import Datasource
-from great_expectations.zep.sources import _SourceFactories
+from great_expectations.experimental.datasources.interfaces import Datasource
+from great_expectations.experimental.datasources.sources import _SourceFactories
 
 yaml = YAML(typ="safe")
 

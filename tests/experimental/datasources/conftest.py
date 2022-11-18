@@ -1,19 +1,39 @@
 import logging
-from typing import Dict, Tuple, Type, Union
+from typing import Callable, Dict, Tuple
 
 import pytest
 from pytest import MonkeyPatch
 
-from great_expectations.core.batch import BatchData
-from great_expectations.core.batch_spec import BatchMarkers
 from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.zep.metadatasource import MetaDatasource
-from great_expectations.zep.sources import _SourceFactories
+from great_expectations.experimental.datasources.metadatasource import MetaDatasource
 
 LOGGER = logging.getLogger(__name__)
+
+from great_expectations.core.batch import BatchData
+from great_expectations.core.batch_spec import (
+    BatchMarkers,
+    SqlAlchemyDatasourceBatchSpec,
+)
+from great_expectations.experimental.datasources.sources import _SourceFactories
+
+
+def sqlachemy_execution_engine_mock_cls(
+    validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None]
+):
+    class MockSqlAlchemyExecutionEngine(SqlAlchemyExecutionEngine):
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def get_batch_data_and_markers(  # type: ignore[override]
+            self, batch_spec: SqlAlchemyDatasourceBatchSpec
+        ) -> Tuple[BatchData, BatchMarkers]:
+            validate_batch_spec(batch_spec)
+            return BatchData(self), BatchMarkers(ge_load_time=None)
+
+    return MockSqlAlchemyExecutionEngine
 
 
 class ExecutionEngineDouble:
@@ -31,7 +51,6 @@ def inject_engine_lookup_double(monkeypatch: MonkeyPatch) -> ExecutionEngineDoub
     so that all Datasources use the execution engine double.
     Dynamically create a new subclass so that runtime type validation does not fail.
     """
-
     original_engine_override: Dict[MetaDatasource, ExecutionEngine] = {}
     for key in _SourceFactories.type_lookup.keys():
         if issubclass(type(key), MetaDatasource):
