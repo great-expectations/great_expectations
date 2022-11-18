@@ -81,6 +81,7 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.refs import GXCloudIDAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
@@ -977,6 +978,12 @@ class AbstractDataContext(ABC):
             for store in self.list_stores()
             if store.get("name") in active_store_names  # type: ignore[arg-type,operator]
         ]
+
+    def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+        return self.checkpoint_store.list_checkpoints()
+
+    def list_profilers(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+        return RuleBasedProfiler.list_profilers(self.profiler_store)
 
     def get_datasource(
         self, datasource_name: str = "default"

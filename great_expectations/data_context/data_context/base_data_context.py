@@ -653,9 +653,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         return index_page_locator_infos
 
-    def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
-        return self.checkpoint_store.list_checkpoints(ge_cloud_mode=self.ge_cloud_mode)
-
     def add_checkpoint(
         self,
         name: str,
@@ -743,16 +740,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         profiler = self.get_profiler(name=name, ge_cloud_id=ge_cloud_id)
         return profiler
-
-    def list_profilers(self) -> List[str]:
-        if self.profiler_store is None:
-            raise ge_exceptions.StoreConfigurationError(
-                "Attempted to list profilers from a Profiler Store, which is not a configured store."
-            )
-        return RuleBasedProfiler.list_profilers(
-            profiler_store=self.profiler_store,
-            ge_cloud_mode=self.ge_cloud_mode,
-        )
 
     def list_expectation_suites(
         self,
