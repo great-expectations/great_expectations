@@ -9,7 +9,7 @@ from typing import Dict, Type, Union
 from pydantic import validator
 from ruamel.yaml import YAML
 
-from great_expectations.experimental.datasources.base_config_models import (
+from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,
 )
 from great_expectations.experimental.datasources.interfaces import Datasource

@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Set, Type
 import pydantic
 from typing_extensions import ClassVar, TypeAlias
 
-from great_expectations.experimental.datasources.base_config_models import (
+from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,
 )
 from great_expectations.experimental.datasources.metadatasource import MetaDatasource
