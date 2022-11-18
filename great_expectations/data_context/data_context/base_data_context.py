@@ -567,7 +567,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # <TODO> Remove this after BaseDataContext refactor is complete.
         # currently this can cause problems if the Checkpoint is instantiated with
         # EphemeralDataContext, which does not (yet) have full functionality.
-        checkpoint._data_context = self
+        checkpoint._data_context = self  # type: ignore[assignment]
 
         self._synchronize_self_with_underlying_data_context()
         return checkpoint
@@ -578,13 +578,13 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         See parent 'AbstractDataContext.list_expectation_suites()` for more information.
         """
-        return self._data_context.list_expectation_suites()  # type: ignore[union-attr]
+        return self._data_context.list_expectation_suites()
 
     def list_expectation_suite_names(self) -> List[str]:
         """
         See parent 'AbstractDataContext.list_expectation_suite_names()` for more information.
         """
-        return self._data_context.list_expectation_suite_names()  # type: ignore[union-attr]
+        return self._data_context.list_expectation_suite_names()
 
     def _instantiate_datasource_from_config_and_update_project_config(
         self,
@@ -602,7 +602,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             If initialize=True return an instantiated Datasource object, else None.
         """
-        datasource: Datasource = self._data_context._instantiate_datasource_from_config_and_update_project_config(  # type: ignore[assignment,union-attr]
+        datasource = self._data_context._instantiate_datasource_from_config_and_update_project_config(
             config=config,
             initialize=initialize,
             save_changes=save_changes,
