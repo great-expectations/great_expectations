@@ -48,10 +48,26 @@ html_static_path = ['_static']
 
 # Skip autodoc unless part of the Public API
 WHITELISTED_TAG = "--Public API--"
-def skip(app, what, name, obj, would_skip, options):
+def skip_if_not_whitelisted(app, what, name, obj, would_skip, options):
+    """Skip rendering documentation for docstrings that are not whitelisted.
+
+    Whitelisted docstrings contain the WHITELISTED_TAG.
+    """
     if WHITELISTED_TAG in obj.__doc__:
         return False
     return True
 
+def remove_whitelist_tag(app, what, name, obj, options, lines):
+    """Remove the whitelisted tag from documentation before rendering.
+
+    Note: This method modifies lines in place per sphinx documentation.
+    """
+    for idx, line in enumerate(lines):
+        if WHITELISTED_TAG in line:
+            trimmed_line = line.replace(WHITELISTED_TAG, "")
+            lines[idx] = trimmed_line
+
+
 def setup(app):
-    app.connect("autodoc-skip-member", skip)
+    app.connect("autodoc-skip-member", skip_if_not_whitelisted)
+    app.connect("autodoc-process-docstring", remove_whitelist_tag)
