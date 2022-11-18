@@ -15,7 +15,6 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     save_expectation_suite_usage_statistics,
     usage_statistics_enabled_method,
 )
-from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
@@ -32,14 +31,9 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     GXCloudConfig,
 )
-from great_expectations.data_context.types.refs import GXCloudResourceRef
-from great_expectations.data_context.types.resource_identifiers import (
-    ConfigurationIdentifier,
-    GXCloudIdentifier,
-)
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.rule_based_profiler import RuleBasedProfiler
 
 logger = logging.getLogger(__name__)
 
