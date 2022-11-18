@@ -9,7 +9,7 @@ import textwrap
 import click
 
 try:
-    from pybigquery.parse_url import parse_url as parse_bigquery_url
+    from sqlalchemy_bigquery.parse_url import parse_url as parse_bigquery_url
 except (ImportError, ModuleNotFoundError):
     parse_bigquery_url = None
 
@@ -1441,17 +1441,12 @@ def _verify_snowflake_dependent_modules() -> bool:
 
 
 def _verify_bigquery_dependent_modules() -> bool:
-    pybigquery_ok = verify_library_dependent_modules(
-        python_import_name="pybigquery.sqlalchemy_bigquery",
-        pip_library_name="pybigquery",
-        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
-    )
     sqlalchemy_bigquery_ok = verify_library_dependent_modules(
         python_import_name="sqlalchemy_bigquery",
         pip_library_name="sqlalchemy_bigquery",
         module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
     )
-    return pybigquery_ok or sqlalchemy_bigquery_ok
+    return sqlalchemy_bigquery_ok
 
 
 def _verify_pyspark_dependent_modules() -> bool:
