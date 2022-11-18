@@ -3,7 +3,7 @@ Click>=7.1.2         # CLI tooling
 cookiecutter==1.7.3  # Project templating
 isort==5.10.1        # Linting / code style
 mypy==0.991          # Type checker
-pydantic>=1.0<2.0    # Needed for mypy plugin
+pydantic>=1.0,<2.0    # Needed for mypy plugin
 pytest>=5.3.5        # Test framework
 twine==3.7.1         # Packaging
 wheel==0.37.1        # Packaging
