@@ -91,7 +91,7 @@ def sqlite_table_for_unexpected_rows_with_index(
             import sqlalchemy as sa
 
             sqlite_path = file_relative_path(
-                __file__, "../../test_sets/test_cases_for_sql_data_connector.db"
+                __file__, "../../test_sets/metrics_test.db"
             )
             sqlite_engine = sa.create_engine(f"sqlite:///{sqlite_path}")
             df = pd.DataFrame(
@@ -1029,9 +1029,7 @@ def test_sqlite_single_column_complete_result_format(
         },
     )
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    sqlite_path = file_relative_path(
-        __file__, "../../test_sets/test_cases_for_sql_data_connector.db"
-    )
+    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
     connection_string = f"sqlite:///{sqlite_path}"
     engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
     execution_engine = engine
@@ -1098,9 +1096,7 @@ def test_sqlite_single_column_summary_result_format(
         },
     )
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    sqlite_path = file_relative_path(
-        __file__, "../../test_sets/test_cases_for_sql_data_connector.db"
-    )
+    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
     connection_string = f"sqlite:///{sqlite_path}"
     engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
     execution_engine = engine
