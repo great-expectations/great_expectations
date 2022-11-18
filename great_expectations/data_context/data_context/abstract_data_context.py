@@ -112,9 +112,17 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # isort
     UsageStatisticsHandler,
     add_datasource_usage_statistics,
     get_batch_list_usage_statistics,
+    run_validation_operator_usage_statistics,
     send_usage_message,
     usage_statistics_enabled_method,
 )
+
+try:
+    from sqlalchemy.exc import SQLAlchemyError
+except ImportError:
+    # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
+    # just fall through
+    SQLAlchemyError = ge_exceptions.ProfilerError
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
@@ -126,13 +134,15 @@ if TYPE_CHECKING:
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
     )
+    from great_expectations.experimental.datasources.interfaces import Batch as XBatch
+    from great_expectations.experimental.datasources.interfaces import (
+        Datasource as XDatasource,
+    )
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.rule_based_profiler import RuleBasedProfilerResult
     from great_expectations.validation_operators.validation_operators import (
         ValidationOperator,
     )
-    from great_expectations.zep.interfaces import Batch as ZepBatch
-    from great_expectations.zep.interfaces import Datasource as ZepDatasource
 
 logger = logging.getLogger(__name__)
 yaml = YAMLHandler()
@@ -155,6 +165,11 @@ class AbstractDataContext(ABC):
     ]
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
     MIGRATION_WEBSITE: str = "https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api"
+
+    PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
+    PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
+    PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND = 4
+    PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND = 5
 
     def __init__(self, runtime_environment: Optional[dict] = None) -> None:
         """
@@ -1425,7 +1440,7 @@ class AbstractDataContext(ABC):
     def get_validator_using_batch_list(
         self,
         expectation_suite: ExpectationSuite,
-        batch_list: Sequence[Union[Batch, ZepBatch]],
+        batch_list: Sequence[Union[Batch, XBatch]],
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Validator:
@@ -1455,7 +1470,7 @@ class AbstractDataContext(ABC):
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
         execution_engine: ExecutionEngine
         if hasattr(batch_list[-1], "execution_engine"):
-            # ZEP batches are execution engine aware. We just checked for this attr so we ignore the following
+            # 'XBatch's are execution engine aware. We just checked for this attr so we ignore the following
             # attr defined mypy error
             execution_engine = batch_list[-1].execution_engine
         else:
@@ -1837,6 +1852,84 @@ class AbstractDataContext(ABC):
         self.validation_operators[validation_operator_name] = new_validation_operator
         return new_validation_operator
 
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_VALIDATION_OPERATOR,
+        args_payload_fn=run_validation_operator_usage_statistics,
+    )
+    def run_validation_operator(
+        self,
+        validation_operator_name: str,
+        assets_to_validate: List,
+        run_id: Optional[Union[str, RunIdentifier]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        run_name: Optional[str] = None,
+        run_time: Optional[Union[str, datetime.datetime]] = None,
+        result_format: Optional[Union[str, dict]] = None,
+        **kwargs,
+    ):
+        """
+        Run a validation operator to validate data assets and to perform the business logic around
+        validation that the operator implements.
+
+        Args:
+            validation_operator_name: name of the operator, as appears in the context's config file
+            assets_to_validate: a list that specifies the data assets that the operator will validate. The members of
+                the list can be either batches, or a tuple that will allow the operator to fetch the batch:
+                (batch_kwargs, expectation_suite_name)
+            evaluation_parameters: $parameter_name syntax references to be evaluated at runtime
+            run_id: The run_id for the validation; if None, a default value will be used
+            run_name: The run_name for the validation; if None, a default value will be used
+            run_time: The date/time of the run
+            result_format: one of several supported formatting directives for expectation validation results
+            **kwargs: Additional kwargs to pass to the validation operator
+
+        Returns:
+            ValidationOperatorResult
+        """
+        result_format = result_format or {"result_format": "SUMMARY"}
+
+        if not assets_to_validate:
+            raise ge_exceptions.DataContextError(
+                "No batches of data were passed in. These are required"
+            )
+
+        for batch in assets_to_validate:
+            if not isinstance(batch, (tuple, DataAsset, Validator)):
+                raise ge_exceptions.DataContextError(
+                    "Batches are required to be of type DataAsset or Validator"
+                )
+        try:
+            validation_operator = self.validation_operators[validation_operator_name]
+        except KeyError:
+            raise ge_exceptions.DataContextError(
+                f"No validation operator `{validation_operator_name}` was found in your project. Please verify this in your great_expectations.yml"
+            )
+
+        if run_id is None and run_name is None:
+            run_name = datetime.datetime.now(datetime.timezone.utc).strftime(
+                "%Y%m%dT%H%M%S.%fZ"
+            )
+            logger.info(f"Setting run_name to: {run_name}")
+        if evaluation_parameters is None:
+            return validation_operator.run(
+                assets_to_validate=assets_to_validate,
+                run_id=run_id,
+                run_name=run_name,
+                run_time=run_time,
+                result_format=result_format,
+                **kwargs,
+            )
+        else:
+            return validation_operator.run(
+                assets_to_validate=assets_to_validate,
+                run_id=run_id,
+                evaluation_parameters=evaluation_parameters,
+                run_name=run_name,
+                run_time=run_time,
+                result_format=result_format,
+                **kwargs,
+            )
+
     def list_validation_operators(self):
         """List currently-configured Validation Operators on this context"""
 
@@ -2041,6 +2134,28 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         profiling_results["success"] = True
         return profiling_results
+
+    def add_batch_kwargs_generator(
+        self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
+    ):
+        """
+        Add a batch kwargs generator to the named datasource, using the provided
+        configuration.
+
+        Args:
+            datasource_name: name of datasource to which to add the new batch kwargs generator
+            batch_kwargs_generator_name: name of the generator to add
+            class_name: class of the batch kwargs generator to add
+            **kwargs: batch kwargs generator configuration, provided as kwargs
+
+        Returns:
+
+        """
+        datasource_obj = self.get_datasource(datasource_name)
+        generator = datasource_obj.add_batch_kwargs_generator(
+            name=batch_kwargs_generator_name, class_name=class_name, **kwargs
+        )
+        return generator
 
     def get_available_data_asset_names(
         self, datasource_names=None, batch_kwargs_generator_names=None
@@ -2666,7 +2781,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     @property
     def datasources(
         self,
-    ) -> Dict[str, Union[LegacyDatasource, BaseDatasource, ZepDatasource]]:
+    ) -> Dict[str, Union[LegacyDatasource, BaseDatasource, XDatasource]]:
         """A single holder for all Datasources in this context"""
         return self._cached_datasources
 
@@ -3203,3 +3318,328 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             return_mode=return_mode,
             shorten_tracebacks=shorten_tracebacks,
         )
+
+    def profile_datasource(  # noqa: C901 - complexity 25
+        self,
+        datasource_name,
+        batch_kwargs_generator_name=None,
+        data_assets=None,
+        max_data_assets=20,
+        profile_all_data_assets=True,
+        profiler=BasicDatasetProfiler,
+        profiler_configuration=None,
+        dry_run=False,
+        run_id=None,
+        additional_batch_kwargs=None,
+        run_name=None,
+        run_time=None,
+    ):
+        """Profile the named datasource using the named profiler.
+
+        Args:
+            datasource_name: the name of the datasource for which to profile data_assets
+            batch_kwargs_generator_name: the name of the batch kwargs generator to use to get batches
+            data_assets: list of data asset names to profile
+            max_data_assets: if the number of data assets the batch kwargs generator yields is greater than this max_data_assets,
+                profile_all_data_assets=True is required to profile all
+            profile_all_data_assets: when True, all data assets are profiled, regardless of their number
+            profiler: the profiler class to use
+            profiler_configuration: Optional profiler configuration dict
+            dry_run: when true, the method checks arguments and reports if can profile or specifies the arguments that are missing
+            additional_batch_kwargs: Additional keyword arguments to be provided to get_batch when loading the data asset.
+        Returns:
+            A dictionary::
+
+                {
+                    "success": True/False,
+                    "results": List of (expectation_suite, EVR) tuples for each of the data_assets found in the datasource
+                }
+
+            When success = False, the error details are under "error" key
+        """
+
+        # We don't need the datasource object, but this line serves to check if the datasource by the name passed as
+        # an arg exists and raise an error if it does not.
+        datasource = self.get_datasource(datasource_name)
+        assert datasource
+
+        if not dry_run:
+            logger.info(f"Profiling '{datasource_name}' with '{profiler.__name__}'")
+
+        profiling_results = {}
+
+        # Build the list of available data asset names (each item a tuple of name and type)
+
+        data_asset_names_dict = self.get_available_data_asset_names(datasource_name)
+
+        available_data_asset_name_list = []
+        try:
+            datasource_data_asset_names_dict = data_asset_names_dict[datasource_name]
+        except KeyError:
+            # KeyError will happen if there is not datasource
+            raise ge_exceptions.ProfilerError(f"No datasource {datasource_name} found.")
+
+        if batch_kwargs_generator_name is None:
+            # if no generator name is passed as an arg and the datasource has only
+            # one generator with data asset names, use it.
+            # if ambiguous, raise an exception
+            for name in datasource_data_asset_names_dict.keys():
+                if batch_kwargs_generator_name is not None:
+                    profiling_results = {
+                        "success": False,
+                        "error": {
+                            "code": self.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND
+                        },
+                    }
+                    return profiling_results
+
+                if len(datasource_data_asset_names_dict[name]["names"]) > 0:
+                    available_data_asset_name_list = datasource_data_asset_names_dict[
+                        name
+                    ]["names"]
+                    batch_kwargs_generator_name = name
+
+            if batch_kwargs_generator_name is None:
+                profiling_results = {
+                    "success": False,
+                    "error": {
+                        "code": self.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND
+                    },
+                }
+                return profiling_results
+        else:
+            # if the generator name is passed as an arg, get this generator's available data asset names
+            try:
+                available_data_asset_name_list = datasource_data_asset_names_dict[
+                    batch_kwargs_generator_name
+                ]["names"]
+            except KeyError:
+                raise ge_exceptions.ProfilerError(
+                    "batch kwargs Generator {} not found. Specify the name of a generator configured in this datasource".format(
+                        batch_kwargs_generator_name
+                    )
+                )
+
+        available_data_asset_name_list = sorted(
+            available_data_asset_name_list, key=lambda x: x[0]
+        )
+
+        if len(available_data_asset_name_list) == 0:
+            raise ge_exceptions.ProfilerError(
+                "No Data Assets found in Datasource {}. Used batch kwargs generator: {}.".format(
+                    datasource_name, batch_kwargs_generator_name
+                )
+            )
+        total_data_assets = len(available_data_asset_name_list)
+
+        if isinstance(data_assets, list) and len(data_assets) > 0:
+            not_found_data_assets = [
+                name
+                for name in data_assets
+                if name not in [da[0] for da in available_data_asset_name_list]
+            ]
+            if len(not_found_data_assets) > 0:
+                profiling_results = {
+                    "success": False,
+                    "error": {
+                        "code": self.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND,
+                        "not_found_data_assets": not_found_data_assets,
+                        "data_assets": available_data_asset_name_list,
+                    },
+                }
+                return profiling_results
+
+            data_assets.sort()
+            data_asset_names_to_profiled = data_assets
+            total_data_assets = len(available_data_asset_name_list)
+            if not dry_run:
+                logger.info(
+                    f"Profiling the white-listed data assets: {','.join(data_assets)}, alphabetically."
+                )
+        else:
+            if not profile_all_data_assets:
+                if total_data_assets > max_data_assets:
+                    profiling_results = {
+                        "success": False,
+                        "error": {
+                            "code": self.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS,
+                            "num_data_assets": total_data_assets,
+                            "data_assets": available_data_asset_name_list,
+                        },
+                    }
+                    return profiling_results
+
+            data_asset_names_to_profiled = [
+                name[0] for name in available_data_asset_name_list
+            ]
+        if not dry_run:
+            logger.info(
+                f"Profiling all {len(available_data_asset_name_list)} data assets from batch kwargs generator {batch_kwargs_generator_name}"
+            )
+        else:
+            logger.info(
+                f"Found {len(available_data_asset_name_list)} data assets from batch kwargs generator {batch_kwargs_generator_name}"
+            )
+
+        profiling_results["success"] = True
+
+        if not dry_run:
+            profiling_results["results"] = []
+            total_columns, total_expectations, total_rows, skipped_data_assets = (
+                0,
+                0,
+                0,
+                0,
+            )
+            total_start_time = datetime.datetime.now()
+
+            for name in data_asset_names_to_profiled:
+                logger.info(f"\tProfiling '{name}'...")
+                try:
+                    profiling_results["results"].append(
+                        self.profile_data_asset(
+                            datasource_name=datasource_name,
+                            batch_kwargs_generator_name=batch_kwargs_generator_name,
+                            data_asset_name=name,
+                            profiler=profiler,
+                            profiler_configuration=profiler_configuration,
+                            run_id=run_id,
+                            additional_batch_kwargs=additional_batch_kwargs,
+                            run_name=run_name,
+                            run_time=run_time,
+                        )["results"][0]
+                    )
+
+                except ge_exceptions.ProfilerError as err:
+                    logger.warning(err.message)
+                except OSError as err:
+                    logger.warning(
+                        f"IOError while profiling {name[1]}. (Perhaps a loading error?) Skipping."
+                    )
+                    logger.debug(str(err))
+                    skipped_data_assets += 1
+                except SQLAlchemyError as e:
+                    logger.warning(
+                        f"SqlAlchemyError while profiling {name[1]}. Skipping."
+                    )
+                    logger.debug(str(e))
+                    skipped_data_assets += 1
+
+            total_duration = (
+                datetime.datetime.now() - total_start_time
+            ).total_seconds()
+            logger.info(
+                f"""
+    Profiled {len(data_asset_names_to_profiled)} of {total_data_assets} named data assets, with {total_rows} total rows and {total_columns} columns in {total_duration:.2f} seconds.
+    Generated, evaluated, and stored {total_expectations} Expectations during profiling. Please review results using data-docs."""
+            )
+            if skipped_data_assets > 0:
+                logger.warning(
+                    f"Skipped {skipped_data_assets} data assets due to errors."
+                )
+
+        profiling_results["success"] = True
+        return profiling_results
+
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS,
+    )
+    def build_data_docs(
+        self,
+        site_names=None,
+        resource_identifiers=None,
+        dry_run=False,
+        build_index: bool = True,
+    ):
+        """
+        Build Data Docs for your project.
+
+        These make it simple to visualize data quality in your project. These
+        include Expectations, Validations & Profiles. The are built for all
+        Datasources from JSON artifacts in the local repo including validations
+        & profiles from the uncommitted directory.
+
+        :param site_names: if specified, build data docs only for these sites, otherwise,
+                            build all the sites specified in the context's config
+        :param resource_identifiers: a list of resource identifiers (ExpectationSuiteIdentifier,
+                            ValidationResultIdentifier). If specified, rebuild HTML
+                            (or other views the data docs sites are rendering) only for
+                            the resources in this list. This supports incremental build
+                            of data docs sites (e.g., when a new validation result is created)
+                            and avoids full rebuild.
+        :param dry_run: a flag, if True, the method returns a structure containing the
+                            URLs of the sites that *would* be built, but it does not build
+                            these sites. The motivation for adding this flag was to allow
+                            the CLI to display the the URLs before building and to let users
+                            confirm.
+
+        :param build_index: a flag if False, skips building the index page
+
+        Returns:
+            A dictionary with the names of the updated data documentation sites as keys and the the location info
+            of their index.html files as values
+        """
+        logger.debug("Starting DataContext.build_data_docs")
+
+        index_page_locator_infos = {}
+
+        sites = self.variables.data_docs_sites
+        if sites:
+            logger.debug("Found data_docs_sites. Building sites...")
+
+            for site_name, site_config in sites.items():
+                logger.debug(
+                    f"Building Data Docs Site {site_name}",
+                )
+
+                if (site_names and (site_name in site_names)) or not site_names:
+                    complete_site_config = site_config
+                    module_name = "great_expectations.render.renderer.site_builder"
+                    site_builder: SiteBuilder = (
+                        self._init_site_builder_for_data_docs_site_creation(
+                            site_name=site_name,
+                            site_config=site_config,
+                        )
+                    )
+                    if not site_builder:
+                        raise ge_exceptions.ClassInstantiationError(
+                            module_name=module_name,
+                            package_name=None,
+                            class_name=complete_site_config["class_name"],
+                        )
+                    if dry_run:
+                        index_page_locator_infos[
+                            site_name
+                        ] = site_builder.get_resource_url(only_if_exists=False)
+                    else:
+                        index_page_resource_identifier_tuple = site_builder.build(
+                            resource_identifiers,
+                            build_index=build_index,
+                        )
+                        if index_page_resource_identifier_tuple:
+                            index_page_locator_infos[
+                                site_name
+                            ] = index_page_resource_identifier_tuple[0]
+
+        else:
+            logger.debug("No data_docs_config found. No site(s) built.")
+
+        return index_page_locator_infos
+
+    def _init_site_builder_for_data_docs_site_creation(
+        self,
+        site_name: str,
+        site_config: dict,
+    ) -> SiteBuilder:
+        site_builder: SiteBuilder = instantiate_class_from_config(
+            config=site_config,
+            runtime_environment={
+                "data_context": self,
+                "root_directory": self.root_directory,
+                "site_name": site_name,
+            },
+            config_defaults={
+                "module_name": "great_expectations.render.renderer.site_builder"
+            },
+        )
+        return site_builder
