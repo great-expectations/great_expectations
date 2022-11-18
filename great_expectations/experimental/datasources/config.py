@@ -15,6 +15,7 @@ from great_expectations.experimental.datasources.interfaces import Datasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
 
 yaml = YAML(typ="safe")
+# NOTE (kilo59): the following settings appear to be what we use in existing codebase
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
