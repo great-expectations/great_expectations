@@ -1,3 +1,4 @@
+import functools
 import json
 import pathlib
 from typing import Callable
@@ -9,8 +10,10 @@ from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Datasource
 
 try:
+    from devtools import PrettyFormat as pf
     from devtools import debug as pp
 except ImportError:
+    from pprint import pformat as pf  # type: ignore[assignment]
     from pprint import pprint as pp  # type: ignore[assignment]
 
 p = pytest.param
@@ -51,6 +54,7 @@ PG_COMPLEX_CONFIG_DICT = {
         }
     }
 }
+PG_COMPLEX_CONFIG_JSON = json.dumps(PG_COMPLEX_CONFIG_DICT)
 
 SIMPLE_DS_DICT = {
     "datasources": {
@@ -69,6 +73,7 @@ SIMPLE_DS_DICT = {
         p(GxConfig.parse_obj, SIMPLE_DS_DICT, id="simple pg config dict"),
         p(GxConfig.parse_raw, json.dumps(SIMPLE_DS_DICT), id="simple pg json"),
         p(GxConfig.parse_obj, PG_COMPLEX_CONFIG_DICT, id="pg complex dict"),
+        p(GxConfig.parse_raw, PG_COMPLEX_CONFIG_JSON, id="pg complex json"),
         p(GxConfig.parse_yaml, PG_CONFIG_YAML_FILE, id="pg_config.yaml file"),
         p(GxConfig.parse_yaml, PG_CONFIG_YAML_STR, id="pg_config yaml string"),
     ],
@@ -84,30 +89,34 @@ def test_load_config(inject_engine_lookup_double, load_method: Callable, input_)
 
 
 @pytest.fixture
-def from_dict_gx_config(request: FixtureRequest) -> GxConfig:
-    cache_name = "from_dict_gx_config"
-    gx_config = request.config.cache.get(cache_name, None)  # type: ignore[union-attr]
-    if not gx_config:
-        gx_config = GxConfig.parse_obj(PG_COMPLEX_CONFIG_DICT)
-        request.config.cache.set(cache_name, gx_config)  # type: ignore[union-attr]
+@functools.lru_cache(maxsize=1)
+def from_dict_gx_config() -> GxConfig:
+    gx_config = GxConfig.parse_obj(PG_COMPLEX_CONFIG_DICT)
+    assert gx_config
     return gx_config
 
 
 @pytest.fixture
+@functools.lru_cache(maxsize=1)
+def from_json_gx_config() -> GxConfig:
+    gx_config = GxConfig.parse_raw(PG_COMPLEX_CONFIG_JSON)
+    assert gx_config
+    return gx_config
+
+
+@pytest.fixture
+@functools.lru_cache(maxsize=1)
 def from_yaml_gx_config(request: FixtureRequest) -> GxConfig:
-    cache_name = "from_yaml_gx_config"
-    gx_config = request.config.cache.get(cache_name, None)  # type: ignore[union-attr]
-    if not gx_config:
-        gx_config = GxConfig.parse_yaml(PG_CONFIG_YAML_STR)
-        request.config.cache.set(cache_name, gx_config)  # type: ignore[union-attr]
+    gx_config = GxConfig.parse_yaml(PG_CONFIG_YAML_STR)
+    assert gx_config
     return gx_config
 
 
 def test_dict_config_round_trip(
     inject_engine_lookup_double, from_dict_gx_config: GxConfig
 ):
-    dumped: str = from_yaml_gx_config.dict()
-    print(f"  Dumped Dict\n\n{dumped}")
+    dumped: dict = from_dict_gx_config.dict()
+    print(f"  Dumped Dict ->\n\n{pf(dumped)}")
 
     re_loaded: GxConfig = GxConfig.parse_obj(dumped)
     pp(re_loaded)
@@ -116,11 +125,24 @@ def test_dict_config_round_trip(
     assert from_dict_gx_config == re_loaded
 
 
+def test_json_config_round_trip(
+    inject_engine_lookup_double, from_json_gx_config: GxConfig
+):
+    dumped: str = from_json_gx_config.json()
+    print(f"  Dumped JSON ->\n\n{dumped}")
+
+    re_loaded: GxConfig = GxConfig.parse_raw(dumped)
+    pp(re_loaded)
+    assert re_loaded
+
+    assert from_json_gx_config == re_loaded
+
+
 def test_yaml_config_round_trip(
     inject_engine_lookup_double, from_yaml_gx_config: GxConfig
 ):
     dumped: str = from_yaml_gx_config.yaml()
-    print(f"  Dumped YAML\n\n{dumped}")
+    print(f"  Dumped YAML ->\n\n{dumped}")
 
     re_loaded: GxConfig = GxConfig.parse_yaml(dumped)
     pp(re_loaded)
