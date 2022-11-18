@@ -4,7 +4,6 @@ import warnings
 from typing import Any, Dict, List, Optional
 
 import numpy as np
-import sqlalchemy.sql
 from dateutil.parser import parse
 from packaging import version
 
@@ -914,7 +913,7 @@ def sql_post_compile_to_string(
     Used by _sqlalchemy_map_condition_index() in map_metric_provider
 
     Args:
-        engine (sqlalchemy.engine.Engine): Egreat_expectations/expectations/expectation.pyngine used to do the compilation
+        engine (sqlalchemy.engine.Engine): great_expectations/expectations/expectation.pyngine used to do the compilation
         select_statement (sqlalchemy.sql.Select): Select statement to compile into string.
 
     Returns:
