@@ -155,6 +155,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     --ge-feature-maturity-info--
     """
 
+    UNCOMMITTED_DIRECTORIES = ["data_docs", "validations"]
     GE_UNCOMMITTED_DIR = "uncommitted"
     BASE_DIRECTORIES = [
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
