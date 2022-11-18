@@ -29,10 +29,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.core.util import (
-    convert_to_json_serializable,
-    get_datetime_string_from_strftime_format,
-)
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable
@@ -1000,6 +997,8 @@ class ExecutionEngineConfigSchema(Schema):
     # https://googleapis.dev/python/sqlalchemy-bigquery/latest/README.html#connection-string-parameters
     credentials_info = fields.Dict(required=False, allow_none=True)
 
+    create_temp_table = fields.Boolean(required=False, allow_none=True)
+
     # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -1541,7 +1540,7 @@ class ConcurrencyConfigSchema(Schema):
     enabled = fields.Boolean(default=False)
 
 
-class GeCloudConfig(DictDot):
+class GXCloudConfig(DictDot):
     def __init__(
         self,
         base_url: str,
@@ -1838,9 +1837,9 @@ class BaseStoreBackendDefaults(DictDot):
         checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
         profiler_store_name: str = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
         data_docs_site_name: str = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value,
-        validation_operators: dict = None,
-        stores: dict = None,
-        data_docs_sites: dict = None,
+        validation_operators: Optional[dict] = None,
+        stores: Optional[dict] = None,
+        data_docs_sites: Optional[dict] = None,
     ) -> None:
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
@@ -3013,9 +3012,8 @@ class CheckpointConfig(BaseYamlConfig):
             )
 
         if run_name is None and run_name_template is not None:
-            run_name = get_datetime_string_from_strftime_format(
-                format_str=run_name_template, datetime_obj=run_time  # type: ignore[arg-type]
-            )
+            if isinstance(run_time, datetime.datetime):
+                run_name = run_time.strftime(run_name_template)
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 

@@ -1,0 +1,25 @@
+datasources:
+  my_pg_ds:
+    type: postgres
+    name: my_pg_ds
+    connection_string: "postgres://foo.bar"
+    assets:
+      my_table_asset_wo_splitters:
+        type: table
+        name: my_table_asset_wo_splitters
+        table_name: my_table
+      with_splitters:
+        type: table
+        name: with_splitters
+        table_name: another_table
+        column_splitter:
+              method_name: foobar_it
+              column_name: my_column
+              name: my_splitter
+              param_defaults:
+                alpha:
+                  - fizz
+                  - bizz
+                bravo:
+                  - foo
+                  - bar

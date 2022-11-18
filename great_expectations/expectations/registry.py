@@ -315,7 +315,7 @@ def get_metric_kwargs(
 
 
 def get_domain_metrics_dict_by_name(
-    metrics: Dict[Tuple[str, str, str], Any], metric_domain_kwargs: IDDict
+    metrics: Dict[Tuple[str, str, str], MetricValue], metric_domain_kwargs: IDDict
 ):
     return {
         metric_edge_key_id_tuple[0]: metric_value
@@ -346,7 +346,7 @@ def get_expectation_impl(expectation_name: str):
 
 
 def list_registered_expectation_implementations(
-    expectation_root: Type[Expectation] = None,
+    expectation_root: Optional[Type[Expectation]] = None,
 ) -> List[str]:
     registered_expectation_implementations = []
     for (

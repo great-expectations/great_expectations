@@ -86,7 +86,6 @@ def test_histogram_single_batch_parameter_builder_alice(
                 "metric_name": "column.histogram",
                 "domain_kwargs": {"column": "user_id"},
                 "metric_value_kwargs": {"bins": [397433.0, 4942918.5, 9488404.0]},
-                "metric_dependencies": None,
             },
             "num_batches": 1,
         },
@@ -219,7 +218,6 @@ def test_histogram_single_batch_parameter_builder_alice_nan_valued_bins(
                     "metric_name": "column.histogram",
                     "domain_kwargs": {"column": "my_column"},
                     "metric_value_kwargs": {"bins": [None]},
-                    "metric_dependencies": None,
                 },
                 "num_batches": 1,
             },
@@ -380,7 +378,6 @@ def test_histogram_single_batch_parameter_builder_alice_reduced_bins_count(
                     "metric_value_kwargs": {
                         "bins": bins,
                     },
-                    "metric_dependencies": None,
                 },
                 "num_batches": 1,
             },

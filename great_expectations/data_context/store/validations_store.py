@@ -6,17 +6,15 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationSuiteValidationResultSchema,
 )
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
-)
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
 )
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import load_class
@@ -205,8 +203,8 @@ class ValidationsStore(Store):
         )
 
         if self.ge_cloud_mode:
-            test_key: GeCloudIdentifier = self.key_class(
-                resource_type=GeCloudRESTResource.CHECKPOINT,
+            test_key: GXCloudIdentifier = self.key_class(
+                resource_type=GXCloudRESTResource.CHECKPOINT,
                 ge_cloud_id=str(uuid.uuid4()),
             )
 
