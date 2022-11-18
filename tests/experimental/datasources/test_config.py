@@ -149,3 +149,20 @@ def test_yaml_config_round_trip(
     assert re_loaded
 
     assert from_yaml_gx_config == re_loaded
+
+
+def test_yaml_file_config_round_trip(
+    inject_engine_lookup_double, tmp_path: pathlib.Path, from_yaml_gx_config: GxConfig
+):
+    yaml_file = tmp_path / "test.yaml"
+    assert not yaml_file.exists()
+
+    result_path = from_yaml_gx_config.yaml(yaml_file)
+    assert yaml_file.exists()
+    assert result_path == yaml_file
+
+    re_loaded: GxConfig = GxConfig.parse_yaml(yaml_file)
+    pp(re_loaded)
+    assert re_loaded
+
+    assert from_yaml_gx_config == re_loaded
