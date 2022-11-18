@@ -245,7 +245,7 @@ def _deep_convert_properties_iterable_to_domain_kwargs(source: dict) -> DomainKw
             element: Any
             source[key] = data_type(
                 [
-                    deep_convert_properties_iterable_to_kwargs(source=element)
+                    deep_convert_properties_iterable_to_domain_kwargs(source=element)
                     for element in value
                 ]
             )
