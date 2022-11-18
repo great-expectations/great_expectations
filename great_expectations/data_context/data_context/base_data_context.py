@@ -37,10 +37,8 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GXCloudIdentifier,
 )
-from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.rule_based_profiler import RuleBasedProfiler
 
 logger = logging.getLogger(__name__)
@@ -169,8 +167,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     GE_YML = "great_expectations.yml"  # TODO: migrate this to FileDataContext. Still needed by DataContext
     GE_EDIT_NOTEBOOK_DIR = GE_UNCOMMITTED_DIR
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
-
-    _data_context = None
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT___INIT__,
