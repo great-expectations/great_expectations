@@ -6,15 +6,18 @@ import pytest
 from typing_extensions import ClassVar
 
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.zep.context import get_context
-from great_expectations.zep.interfaces import (
+from great_expectations.experimental.context import get_context
+from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     BatchRequestOptions,
     DataAsset,
     Datasource,
 )
-from great_expectations.zep.metadatasource import MetaDatasource
-from great_expectations.zep.sources import TypeRegistrationError, _SourceFactories
+from great_expectations.experimental.datasources.metadatasource import MetaDatasource
+from great_expectations.experimental.datasources.sources import (
+    TypeRegistrationError,
+    _SourceFactories,
+)
 
 
 class DummyDataAsset(DataAsset):

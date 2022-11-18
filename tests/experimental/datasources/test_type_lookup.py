@@ -3,7 +3,11 @@ from typing import Hashable, Iterable, Mapping, Optional, Tuple
 
 import pytest
 
-from great_expectations.zep.type_lookup import TypeLookup, TypeLookupError, ValidTypes
+from great_expectations.experimental.datasources.type_lookup import (
+    TypeLookup,
+    TypeLookupError,
+    ValidTypes,
+)
 
 pytestmark = [pytest.mark.unit]
 param = pytest.param

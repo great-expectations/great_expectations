@@ -20,34 +20,7 @@ import NoteExplicitConfiguredAssetsMulti from '../filesystem_components/_note_ex
 
 And the full configuration for your Datasource should look like:
 
-```python
-datasource_config = {
-    "name": "my_datasource_name",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "class_name": "SparkDFExecutionEngine",
-        "module_name": "great_expectations.execution_engine",
-    },
-    "data_connectors": {
-        "name_of_my_configured_data_connector": {
-            "class_name": "ConfiguredAssetFilesystemDataConnector",
-            "base_directory": "../data",
-            "assets": {
-                "yellow_tripdata_jan": {
-                  "pattern": "yellow_tripdata_sample_2020-(01)\\.csv",
-                  "group_names": ["month"],
-                }
-            },
-            "batch_spec_passthrough": {
-                "reader_method": "csv",
-                "reader_options": {
-                    "header": True,
-                    "inferSchema": True,
-            },
-        }
-    }
-}
+```python name="full datasource_config for configured spark single batch datasource"
 ```
 
 <NoteExplicitConfiguredAssetsSingle />
@@ -60,30 +33,7 @@ datasource_config = {
 
 And the full configuration for your Datasource should look like:
 
-```python
-datasource_config = {
-    "name": "my_datasource_name",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "class_name": "SparkDFExecutionEngine",
-        "module_name": "great_expectations.execution_engine",
-    },
-    "data_connectors": {
-        "name_of_my_configured_data_connector": {
-            "class_name": "ConfiguredAssetFilesystemDataConnector",
-            "base_directory": "../data",
-            "assets": {
-                "yellow_tripdata_jan": {
-                  "pattern": "yellow_tripdata_sample_2020-(.*)\\.csv",
-                  "group_names": ["month"],
-                },
-            },
-            "batch_spec_passthrough": {},
-            }
-        }
-    }
-}
+```python name="full datasource_config for configured spark multi batch datasource"
 ```
 
 <NoteExplicitConfiguredAssetsMulti />

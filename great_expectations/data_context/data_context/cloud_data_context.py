@@ -34,7 +34,9 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions.exceptions import DataContextError
+from great_expectations.render.renderer.site_builder import SiteBuilder
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import Checkpoint
@@ -648,3 +650,27 @@ class CloudDataContext(AbstractDataContext):
             checkpoint_config=checkpoint_config, data_context=self  # type: ignore[arg-type]
         )
         return checkpoint
+
+    def _init_site_builder_for_data_docs_site_creation(
+        self, site_name: str, site_config: dict
+    ) -> SiteBuilder:
+        """
+        Note that this explicitly overriding the `AbstractDataContext` helper method called
+        in `self.build_data_docs()`.
+
+        The only difference here is the inclusion of `ge_cloud_mode` in the `runtime_environment`
+        used in `SiteBuilder` instantiation.
+        """
+        site_builder: SiteBuilder = instantiate_class_from_config(
+            config=site_config,
+            runtime_environment={
+                "data_context": self,
+                "root_directory": self.root_directory,
+                "site_name": site_name,
+                "ge_cloud_mode": self.ge_cloud_mode,
+            },
+            config_defaults={
+                "module_name": "great_expectations.render.renderer.site_builder"
+            },
+        )
+        return site_builder
