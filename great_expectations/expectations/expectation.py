@@ -2329,6 +2329,18 @@ class ColumnMapExpectation(TableExpectation, ABC):
                     metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 )
+                metric_kwargs = get_metric_kwargs(
+                    f"{self.map_metric}.unexpected_index_query",
+                    configuration=configuration,
+                    runtime_configuration=runtime_configuration,
+                )
+                metric_dependencies[
+                    f"{self.map_metric}.unexpected_index_query"
+                ] = MetricConfiguration(
+                    metric_name=f"{self.map_metric}.unexpected_index_query",
+                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                )
         return dependencies
 
     def _validate(
@@ -2362,6 +2374,9 @@ class ColumnMapExpectation(TableExpectation, ABC):
         unexpected_index_list: Optional[List[int]] = metrics.get(
             f"{self.map_metric}.unexpected_index_list"
         )
+        unexpected_index_query: Optional[str] = metrics.get(
+            f"{self.map_metric}.unexpected_index_query"
+        )
         unexpected_rows = None
         if include_unexpected_rows:
             unexpected_rows = metrics.get(f"{self.map_metric}.unexpected_rows")
@@ -2392,6 +2407,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
             unexpected_list=unexpected_values,
             unexpected_index_list=unexpected_index_list,
             unexpected_rows=unexpected_rows,
+            unexpected_index_query=unexpected_index_query,
         )
 
 
@@ -2577,7 +2593,6 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         filtered_row_count: Optional[int] = metrics.get(
             f"{self.map_metric}.filtered_row_count"
         )
-
         if (
             total_count is None
             or unexpected_count is None
@@ -2785,7 +2800,6 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         filtered_row_count: Optional[int] = metrics.get(
             f"{self.map_metric}.filtered_row_count"
         )
-
         if (
             total_count is None
             or unexpected_count is None
@@ -2823,6 +2837,7 @@ def _format_map_output(
     unexpected_count: Optional[int] = None,
     unexpected_list: Optional[List[Any]] = None,
     unexpected_index_list: Optional[List[int]] = None,
+    unexpected_index_query: Optional[str] = None,
     unexpected_rows=None,
 ) -> Dict:
     """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
@@ -2947,7 +2962,8 @@ def _format_map_output(
         return_obj["result"].update({"unexpected_list": unexpected_list})
     if unexpected_index_list is not None:
         return_obj["result"].update({"unexpected_index_list": unexpected_index_list})
-
+    if unexpected_index_query is not None:
+        return_obj["result"].update({"unexpected_index_query": unexpected_index_query})
     if result_format["result_format"] == "COMPLETE":
         return return_obj
 
