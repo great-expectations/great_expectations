@@ -57,10 +57,10 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
         Returns:
             Optional custom list of "Rule" objects implementing particular "DataAssistant" functionality.
         """
-        columns_rule: Rule = self._build_columns_rule()
+        numeric_rule: Rule = self._build_numeric_rule()
 
         return [
-            columns_rule,
+            numeric_rule,
         ]
 
     def _build_data_assistant_result(
@@ -79,11 +79,10 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
         )
 
     @staticmethod
-    def _build_columns_rule() -> Rule:
+    def _build_numeric_rule() -> Rule:
         """
         This method builds "Rule" object configured to emit "ExpectationConfiguration" objects for column "Domain" type.
         """
-        # Step-1: Instantiate "ColumnDomainBuilder" for selecting all columns (no exclusions, no semantic filtering).
 
         column_domain_builder: ColumnDomainBuilder = ColumnDomainBuilder(
             include_column_names=None,
@@ -97,8 +96,6 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
             data_context=None,
         )
 
-        # Step-2: Declare "ParameterBuilder" for every metric of interest.
-
         data_profiler_profile_report_metric_single_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_metric_single_batch_parameter_builder(
             metric_name="data_profiler.column_profile_report",
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
@@ -107,11 +104,7 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
             },
         )
 
-        # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
-
         data_profiler_profile_report_metric_single_batch_parameter_builder_for_validations: ParameterBuilder = data_profiler_profile_report_metric_single_batch_parameter_builder_for_metrics
-
-        # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
 
         validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
@@ -172,24 +165,25 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
             },
         )
 
-        # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
-
         variables: dict = {
             "strict_min": False,
             "strict_max": False,
             "profile_path": "default_profiler_path",
         }
+
         parameter_builders: List[ParameterBuilder] = [
             data_profiler_profile_report_metric_single_batch_parameter_builder_for_metrics,
         ]
+
         expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
             expect_column_min_to_be_between_expectation_configuration_builder,
             expect_column_max_to_be_between_expectation_configuration_builder,
             expect_column_mean_to_be_between_expectation_configuration_builder,
             expect_column_stddev_to_be_between_expectation_configuration_builder,
         ]
+
         rule = Rule(
-            name="columns_rule",
+            name="numeric_rule",
             variables=variables,
             domain_builder=column_domain_builder,
             parameter_builders=parameter_builders,
