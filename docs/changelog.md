@@ -2,6 +2,16 @@
 title: Changelog
 ---
 
+### 0.15.34
+* [BUGFIX] Ensure `packaging_and_installation` CI tests against latest tag (#6386)
+* [BUGFIX] Fixed missing comma in pydantic constraints (#6391) (thanks @awburgess)
+* [BUGFIX] fix pydantic dev req file entries (#6396)
+* [DOCS] DOC-379 bring spark datasource configuration example scripts under test (#6362)
+* [MAINTENANCE] Handle both `ExpectationConfiguration` and `ExpectationValidationResult` in default Atomic renderers and cleanup `include_column_name` (#6380)
+* [MAINTENANCE] Add type annotations to all existing atomic renderer signatures (#6385)
+* [MAINTENANCE] move `zep` -> `experimental` package (#6378)
+* [MAINTENANCE] Migrate additional methods from `BaseDataContext` to other parts of context hierarchy (#6388)
+
 ### 0.15.33
 * [FEATURE] POC ZEP Config Loading (#6320)
 * [BUGFIX] Fix issue with misaligned indentation in docs snippets (#6339)

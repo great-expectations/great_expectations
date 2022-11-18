@@ -56,7 +56,6 @@ from great_expectations.exceptions import (
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
-from great_expectations.expectations.registry import _registered_expectations
 
 if TYPE_CHECKING:
     # needed until numpy min version 1.20
@@ -1787,6 +1786,8 @@ def is_list_of_strings(_list) -> TypeGuard[List[str]]:
 
 def generate_library_json_from_registered_expectations():
     """Generate the JSON object used to populate the public gallery"""
+    from great_expectations.expectations.registry import _registered_expectations
+
     library_json = {}
 
     for expectation_name, expectation in _registered_expectations.items():

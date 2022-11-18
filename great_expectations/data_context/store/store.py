@@ -145,7 +145,8 @@ class Store:
     def get(self, key: DataContextKey) -> Optional[Any]:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.get(key)
-        elif self.ge_cloud_mode:
+
+        if self.ge_cloud_mode:
             self._validate_key(key)
             value = self._store_backend.get(self.key_to_tuple(key))
             # TODO [Robby] MER-285: Handle non-200 http errors
@@ -157,8 +158,8 @@ class Store:
 
         if value:
             return self.deserialize(value)
-        else:
-            return None
+
+        return None
 
     def set(self, key: DataContextKey, value: Any, **kwargs) -> None:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
