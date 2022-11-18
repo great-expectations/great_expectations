@@ -1,6 +1,9 @@
 from typing import Dict, Optional
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.core.expectation_configuration import parse_result_format
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
@@ -95,10 +98,10 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
@@ -156,10 +159,10 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
@@ -209,10 +212,10 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         result_dict = result.result

@@ -4,15 +4,5 @@ import PartAddADictionaryAsTheValueOfTheDataConnectorsKey from '../components/_p
 
 Your current configuration should look like:
 
-```python
-datasource_config: dict = {
-    "name": "my_datasource_name",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "class_name": "SparkDFExecutionEngine",
-        "module_name": "great_expectations.execution_engine",
-    },
-    "data_connectors": {}
-}
+```python name="spark datasource_config up to adding an empty data_connectors dictionary"
 ```

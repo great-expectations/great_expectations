@@ -5,12 +5,15 @@ from typing import TYPE_CHECKING, Callable, Dict, List, Type, Union
 
 from typing_extensions import ClassVar
 
-from great_expectations.zep.type_lookup import TypeLookup
+from great_expectations.experimental.datasources.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
     from great_expectations.data_context import DataContext as GXDataContext
-    from great_expectations.zep.context import DataContext
-    from great_expectations.zep.interfaces import DataAsset, Datasource
+    from great_expectations.experimental.datasources.context import DataContext
+    from great_expectations.experimental.datasources.interfaces import (
+        DataAsset,
+        Datasource,
+    )
 
 SourceFactoryFn = Callable[..., "Datasource"]
 

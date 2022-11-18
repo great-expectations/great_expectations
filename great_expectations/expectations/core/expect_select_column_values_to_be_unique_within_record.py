@@ -1,6 +1,9 @@
 from typing import Optional
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
     add_values_with_json_schema_from_list_in_params,
@@ -93,10 +96,10 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
@@ -189,10 +192,10 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
