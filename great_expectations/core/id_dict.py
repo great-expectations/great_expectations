@@ -33,9 +33,11 @@ class IDDict(dict):
         return _result_hash
 
 
-def convert_dictionary_to_id_dict(source: Union[T, dict]) -> Union[T, IDDict]:
+def deep_convert_properties_iterable_to_id_dict(
+    source: Union[T, dict]
+) -> Union[T, IDDict]:
     if isinstance(source, dict):
-        return _convert_dictionary_to_id_dict(source=IDDict(source))
+        return _deep_convert_properties_iterable_to_id_dict(source=IDDict(source))
 
     # Must allow for non-dictionary source types, since their internal nested structures may contain dictionaries.
     if isinstance(source, (list, set, tuple)):
@@ -43,24 +45,30 @@ def convert_dictionary_to_id_dict(source: Union[T, dict]) -> Union[T, IDDict]:
 
         element: Any
         return data_type(
-            [convert_dictionary_to_id_dict(source=element) for element in source]
+            [
+                deep_convert_properties_iterable_to_id_dict(source=element)
+                for element in source
+            ]
         )
 
     return source
 
 
-def _convert_dictionary_to_id_dict(source: dict) -> IDDict:
+def _deep_convert_properties_iterable_to_id_dict(source: dict) -> IDDict:
     key: str
     value: Any
     for key, value in source.items():
         if isinstance(value, dict):
-            source[key] = _convert_dictionary_to_id_dict(source=value)
+            source[key] = _deep_convert_properties_iterable_to_id_dict(source=value)
         elif isinstance(value, (list, set, tuple)):
             data_type: type = type(value)
 
             element: Any
             source[key] = data_type(
-                [convert_dictionary_to_id_dict(source=element) for element in value]
+                [
+                    deep_convert_properties_iterable_to_id_dict(source=element)
+                    for element in value
+                ]
             )
 
     return IDDict(source)

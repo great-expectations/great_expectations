@@ -81,8 +81,8 @@ not supported).
         elif isinstance(domain_kwargs, dict):
             domain_kwargs = DomainKwargs(domain_kwargs)
 
-        domain_kwargs_dot_dict: DomainKwargs = convert_dictionary_to_domain_kwargs(
-            source=domain_kwargs
+        domain_kwargs_dot_dict: DomainKwargs = (
+            deep_convert_properties_iterable_to_domain_kwargs(source=domain_kwargs)
         )
 
         if details is None:
@@ -208,11 +208,13 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
         return deep_filter_properties_iterable(properties=json_dict, clean_falsy=True)
 
 
-def convert_dictionary_to_domain_kwargs(
+def deep_convert_properties_iterable_to_domain_kwargs(
     source: Union[T, dict]
 ) -> Union[T, DomainKwargs]:
     if isinstance(source, dict):
-        return _convert_dictionary_to_domain_kwargs(source=DomainKwargs(source))
+        return _deep_convert_properties_iterable_to_domain_kwargs(
+            source=DomainKwargs(source)
+        )
 
     # Must allow for non-dictionary source types, since their internal nested structures may contain dictionaries.
     if isinstance(source, (list, set, tuple)):
@@ -220,25 +222,30 @@ def convert_dictionary_to_domain_kwargs(
 
         element: Any
         return data_type(
-            [convert_dictionary_to_domain_kwargs(source=element) for element in source]
+            [
+                deep_convert_properties_iterable_to_domain_kwargs(source=element)
+                for element in source
+            ]
         )
 
     return source
 
 
-def _convert_dictionary_to_domain_kwargs(source: dict) -> DomainKwargs:
+def _deep_convert_properties_iterable_to_domain_kwargs(source: dict) -> DomainKwargs:
     key: str
     value: Any
     for key, value in source.items():
         if isinstance(value, dict):
-            source[key] = _convert_dictionary_to_domain_kwargs(source=value)
+            source[key] = _deep_convert_properties_iterable_to_domain_kwargs(
+                source=value
+            )
         elif isinstance(value, (list, set, tuple)):
             data_type: type = type(value)
 
             element: Any
             source[key] = data_type(
                 [
-                    convert_dictionary_to_domain_kwargs(source=element)
+                    deep_convert_properties_iterable_to_kwargs(source=element)
                     for element in value
                 ]
             )
