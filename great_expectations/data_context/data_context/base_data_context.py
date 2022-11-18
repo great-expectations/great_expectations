@@ -31,7 +31,10 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     GXCloudConfig,
 )
-from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
+from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
+    GXCloudIdentifier,
+)
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 
@@ -225,8 +228,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 project_config=project_data_context_config,
                 runtime_environment=runtime_environment,
             )
-
-        assert self._data_context is not None
 
         # NOTE: <DataContextRefactor> This will ensure that parameters set in _data_context are persisted to self.
         # It is rather clunky and we should explore other ways of ensuring that BaseDataContext has all of the
@@ -571,6 +572,12 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         self._synchronize_self_with_underlying_data_context()
         return checkpoint
+
+    def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+        return self._data_context.list_checkpoints()
+
+    def list_profilers(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+        return self._data_context.list_profilers()
 
     def list_expectation_suites(
         self,

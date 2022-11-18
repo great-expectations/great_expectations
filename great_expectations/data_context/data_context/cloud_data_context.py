@@ -40,6 +40,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.render.renderer.site_builder import SiteBuilder
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import Checkpoint
@@ -653,6 +654,14 @@ class CloudDataContext(AbstractDataContext):
             checkpoint_config=checkpoint_config, data_context=self  # type: ignore[arg-type]
         )
         return checkpoint
+
+    def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+        return self.checkpoint_store.list_checkpoints(ge_cloud_mode=self.ge_cloud_mode)
+
+    def list_profilers(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+        return RuleBasedProfiler.list_profilers(
+            profiler_store=self.profiler_store, ge_cloud_mode=self.ge_cloud_mode
+        )
 
     def _init_site_builder_for_data_docs_site_creation(
         self, site_name: str, site_config: dict
