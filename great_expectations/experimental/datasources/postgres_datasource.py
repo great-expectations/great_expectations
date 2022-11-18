@@ -4,11 +4,12 @@ import dataclasses
 import itertools
 from datetime import datetime
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Type, cast
+from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Type, Union, cast
 
 import dateutil.tz
 from pydantic import Field
 from pydantic import dataclasses as pydantic_dc
+from pydantic import validator as pydantic_validator
 from typing_extensions import ClassVar, Literal
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
@@ -45,11 +46,15 @@ class ColumnSplitter:
     # param_defaults is a Dict where the keys are the parameters of the splitter and the values are the default
     # values are the default values if a batch request using the splitter leaves the parameter unspecified.
     # template_params: List[str]
-    param_defaults: Dict[str, Iterable] = Field(default_factory=dict)
+    param_defaults: Dict[str, Union[List, Iterable]] = Field(default_factory=dict)
 
     @property
     def param_names(self) -> List[str]:
         return list(self.param_defaults.keys())
+
+    @pydantic_validator("param_defaults", pre=True)
+    def param_defaults_iter_to_list(cls, v: Dict[str, Union[List, Iterable]]):
+        return {key: list(iter_) for key, iter_ in v.items()}
 
 
 class TableAsset(DataAsset):
