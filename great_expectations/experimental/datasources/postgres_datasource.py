@@ -12,7 +12,7 @@ from pydantic import dataclasses as pydantic_dc
 from typing_extensions import ClassVar, Literal
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.zep.interfaces import (
+from great_expectations.experimental.datasources.interfaces import (
     Batch,
     BatchRequest,
     BatchRequestOptions,
