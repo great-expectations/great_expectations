@@ -164,6 +164,8 @@ def test_yaml_file_config_round_trip(
     assert yaml_file.exists()
     assert result_path == yaml_file
 
+    print(f"  yaml_file -> \n\n{yaml_file.read_text()}")
+
     re_loaded: GxConfig = GxConfig.parse_yaml(yaml_file)
     pp(re_loaded)
     assert re_loaded
