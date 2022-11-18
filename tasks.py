@@ -362,13 +362,15 @@ def docker(
 @invoke.task(
     help={
         "clean": "Clean out existing documentation first. Defaults to True.",
-        "remove_html": "Remove temporary generated html. Defaults to True."
+        "remove_html": "Remove temporary generated html. Defaults to True.",
+        "overwrite_static": "Overwrite static files generated for api docs (e.g. css). Defaults to True."
     }
 )
 def docs(
     ctx,
     clean=True,
     remove_html=True,
+    overwrite_static=True,
 ):
     """Build documentation. Note: Currently only builds the sphinx based api docs, please build docusaurus docs separately."""
     filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
@@ -426,12 +428,33 @@ def docs(
         with open(html_file, "r") as f:
             soup = BeautifulSoup(f.read(), "html.parser")
             doc = soup.find("section")
+            # Add class="sphinx-api-doc" to section tag to reference in css
+            doc["class"] = "sphinx-api-doc"
             doc_str = str(doc)
 
             output_path = curdir / pathlib.Path("docs/reference/api") / html_file.relative_to(static_html_file_path).with_suffix(".mdx")
             output_path.parent.mkdir(parents=True, exist_ok=True)
             with open(output_path, "w") as fout:
                 fout.write(doc_str)
+
+    # Copy over CSS
+
+    # NOTE: These stylesheets and ancillary files are from the pydata-sphinx-theme.
+    #   Change the stylesheets list if you are using a different sphinx theme.
+    #   Copy over file.png since it is referenced in the stylesheet.
+
+    stylesheet_base_path = static_html_file_path / "_static"
+    stylesheets = ("basic.css", "pygments.css",)
+    ancillary_files = ("file.png", )
+
+    site_css_path = filedir / pathlib.Path("src/css")
+
+    for stylesheet in stylesheets:
+        stylesheet_with_sass_extension = stylesheet.replace(".css", ".scss")
+        shutil.copy(stylesheet_base_path / stylesheet, site_css_path / stylesheet_with_sass_extension)
+
+    for ancillary_file in ancillary_files:
+        shutil.copy(stylesheet_base_path / ancillary_file, site_css_path / ancillary_file)
 
     # Remove temp build dir
     if remove_html:
