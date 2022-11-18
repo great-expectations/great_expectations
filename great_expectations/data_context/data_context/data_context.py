@@ -612,3 +612,15 @@ class DataContext(BaseDataContext):
         ) as e:
             logger.debug(e)
         return None
+
+    def _save_project_config(self) -> None:
+        """Save the current project to disk."""
+        logger.debug("Starting DataContext._save_project_config")
+
+        config_filepath = os.path.join(self.root_directory, self.GE_YML)  # type: ignore[arg-type]
+
+        try:
+            with open(config_filepath, "w") as outfile:
+                self.config.to_yaml(outfile)
+        except PermissionError as e:
+            logger.warning(f"Could not save project config to disk: {e}")

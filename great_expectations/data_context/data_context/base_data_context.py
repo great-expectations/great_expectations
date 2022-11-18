@@ -309,18 +309,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
         self._assistants = self._data_context._assistants
 
-    def _save_project_config(self) -> None:
-        """Save the current project to disk."""
-        logger.debug("Starting DataContext._save_project_config")
-
-        config_filepath = os.path.join(self.root_directory, self.GE_YML)  # type: ignore[arg-type]
-
-        try:
-            with open(config_filepath, "w") as outfile:
-                self.config.to_yaml(outfile)
-        except PermissionError as e:
-            logger.warning(f"Could not save project config to disk: {e}")
-
     #####
     #
     # Internal helper methods
