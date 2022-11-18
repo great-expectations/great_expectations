@@ -3005,26 +3005,25 @@ def _format_map_output(
                 {"error": "partial_exception_counts requires a hashable type"}
             ]
         finally:
+            if unexpected_index_list is not None:
+                return_obj["result"].update(
+                    {
+                        "partial_unexpected_index_list": unexpected_index_list[
+                            : result_format["partial_unexpected_count"]
+                        ],
+                    }
+                )
             return_obj["result"].update(
-                {
-                    "partial_unexpected_index_list": unexpected_index_list[
-                        : result_format["partial_unexpected_count"]
-                    ]
-                    if unexpected_index_list is not None
-                    else None,
-                    "partial_unexpected_counts": partial_unexpected_counts,
-                }
+                {"partial_unexpected_counts": partial_unexpected_counts}
             )
 
     if result_format["result_format"] == "SUMMARY":
         return return_obj
 
-    return_obj["result"].update(
-        {
-            "unexpected_list": unexpected_list,
-            "unexpected_index_list": unexpected_index_list,
-        }
-    )
+    if unexpected_list is not None:
+        return_obj["result"].update({"unexpected_list": unexpected_list})
+    if unexpected_index_list is not None:
+        return_obj["result"].update({"unexpected_index_list": unexpected_index_list})
 
     if result_format["result_format"] == "COMPLETE":
         return return_obj
