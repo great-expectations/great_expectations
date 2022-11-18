@@ -70,10 +70,9 @@ def sqlite_table_for_unexpected_rows_with_index(test_backends):
             sqlite_engine = sa.create_engine(f"sqlite:///{sqlite_path}")
             df = pd.DataFrame(
                 {
-                    "pk_1": [0, 1, 2, 3, 4, 5],
-                    "pk_2": ["zero", "one", "two", "three", "four", "five"],
-                    "numbers_with_duplicates": [1, 5, 22, 3, 5, 10],
-                    "animal_names_no_duplicates": [
+                    "key_1": [0, 1, 2, 3, 4, 5],
+                    "key_2": ["zero", "one", "two", "three", "four", "five"],
+                    "animals": [
                         "cat",
                         "fish",
                         "dog",
@@ -94,7 +93,7 @@ def sqlite_table_for_unexpected_rows_with_index(test_backends):
             # # may need this later for creating temp tables
             # sqlite_engine.execute("""CREATE INDEX index_name ON test_temp (pk_1);""")
             df.to_sql(
-                name="test_temp", con=sqlite_engine, index=False, if_exists="replace"
+                name="animal_names", con=sqlite_engine, index=False, if_exists="replace"
             )
             return sqlite_engine
         except ImportError:
@@ -921,8 +920,8 @@ def test_sqlite_single_column_complete_result_format(
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
-            "column": "numbers_with_duplicates",
-            "value_set": [1, 5, 22],
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "COMPLETE",
             },
@@ -941,7 +940,7 @@ def test_sqlite_single_column_complete_result_format(
             execution_engine=execution_engine,
             assets={
                 "my_asset": {
-                    "table_name": "test_temp",
+                    "table_name": "animal_names",
                 },
             },
         )
@@ -966,18 +965,19 @@ def test_sqlite_single_column_complete_result_format(
     result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
-        "unexpected_count": 2,
-        "unexpected_percent": 33.33333333333333,
-        "partial_unexpected_list": [3, 10],
-        "unexpected_list": [3, 10],
-        "partial_unexpected_counts": [
-            {"value": 3, "count": 1},
-            {"value": 10, "count": 1},
-        ],
         "missing_count": 0,
         "missing_percent": 0.0,
-        "unexpected_percent_total": 33.33333333333333,
-        "unexpected_percent_nonmissing": 33.33333333333333,
+        "partial_unexpected_counts": [
+            {"count": 1, "value": "giraffe"},
+            {"count": 1, "value": "lion"},
+            {"count": 1, "value": "zebra"},
+        ],
+        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_count": 3,
+        "unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_percent": 50.0,
+        "unexpected_percent_nonmissing": 50.0,
+        "unexpected_percent_total": 50.0,
     }
 
 
@@ -987,11 +987,11 @@ def test_sqlite_single_unexpected_index_column_names_complete_result_format(
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
-            "column": "numbers_with_duplicates",
-            "value_set": [1, 5, 22],
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "COMPLETE",
-                "unexpected_index_column_names": ["pk_1"],  # Single column
+                "unexpected_index_column_names": ["key_1"],
             },
         },
     )
@@ -1008,7 +1008,7 @@ def test_sqlite_single_unexpected_index_column_names_complete_result_format(
             execution_engine=execution_engine,
             assets={
                 "my_asset": {
-                    "table_name": "test_temp",
+                    "table_name": "animal_names",
                 },
             },
         )
@@ -1036,21 +1036,22 @@ def test_sqlite_single_unexpected_index_column_names_complete_result_format(
         "missing_count": 0,
         "missing_percent": 0.0,
         "partial_unexpected_counts": [
-            {"count": 1, "value": 3},
-            {"count": 1, "value": 10},
+            {"count": 1, "value": "giraffe"},
+            {"count": 1, "value": "lion"},
+            {"count": 1, "value": "zebra"},
         ],
-        "partial_unexpected_index_list": [{"pk_1": 3}, {"pk_1": 5}],
-        "partial_unexpected_list": [3, 10],
-        "unexpected_count": 2,
-        "unexpected_index_list": [{"pk_1": 3}, {"pk_1": 5}],
-        "unexpected_index_query": "SELECT numbers_with_duplicates, pk_1 \n"
-        "FROM test_temp \n"
-        "WHERE numbers_with_duplicates IS NOT NULL AND "
-        "(numbers_with_duplicates NOT IN (1, 5, 22))",
-        "unexpected_list": [3, 10],
-        "unexpected_percent": 33.33333333333333,
-        "unexpected_percent_nonmissing": 33.33333333333333,
-        "unexpected_percent_total": 33.33333333333333,
+        "partial_unexpected_index_list": [{"key_1": 3}, {"key_1": 4}, {"key_1": 5}],
+        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_count": 3,
+        "unexpected_index_list": [{"key_1": 3}, {"key_1": 4}, {"key_1": 5}],
+        "unexpected_index_query": "SELECT animals, key_1 \n"
+        "FROM animal_names \n"
+        "WHERE animals IS NOT NULL AND (animals NOT IN "
+        "('cat', 'fish', 'dog'))",
+        "unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_percent": 50.0,
+        "unexpected_percent_nonmissing": 50.0,
+        "unexpected_percent_total": 50.0,
     }
 
 
@@ -1060,11 +1061,11 @@ def test_sqlite_single_unexpected_index_column_names_summary_result_format(
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
-            "column": "numbers_with_duplicates",
-            "value_set": [1, 5, 22],
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "SUMMARY",
-                "unexpected_index_column_names": ["pk_1"],  # Single column
+                "unexpected_index_column_names": ["key_1"],  # Single column
             },
         },
     )
@@ -1081,7 +1082,7 @@ def test_sqlite_single_unexpected_index_column_names_summary_result_format(
             execution_engine=execution_engine,
             assets={
                 "my_asset": {
-                    "table_name": "test_temp",
+                    "table_name": "animal_names",
                 },
             },
         )
@@ -1106,25 +1107,19 @@ def test_sqlite_single_unexpected_index_column_names_summary_result_format(
     result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
-        "unexpected_count": 2,
-        "partial_unexpected_index_list": [
-            {
-                "pk_1": 3,
-            },
-            {
-                "pk_1": 5,
-            },
-        ],  # Dicts since a column was provided
-        "unexpected_percent": 33.33333333333333,
-        "partial_unexpected_list": [3, 10],
-        "partial_unexpected_counts": [
-            {"value": 3, "count": 1},
-            {"value": 10, "count": 1},
-        ],
         "missing_count": 0,
         "missing_percent": 0.0,
-        "unexpected_percent_total": 33.33333333333333,
-        "unexpected_percent_nonmissing": 33.33333333333333,
+        "partial_unexpected_counts": [
+            {"count": 1, "value": "giraffe"},
+            {"count": 1, "value": "lion"},
+            {"count": 1, "value": "zebra"},
+        ],
+        "partial_unexpected_index_list": [{"key_1": 3}, {"key_1": 4}, {"key_1": 5}],
+        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_count": 3,
+        "unexpected_percent": 50.0,
+        "unexpected_percent_nonmissing": 50.0,
+        "unexpected_percent_total": 50.0,
     }
 
 
@@ -1134,11 +1129,11 @@ def test_sqlite_multiple_unexpected_index_column_names_complete_result_format(
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
-            "column": "numbers_with_duplicates",
-            "value_set": [1, 5, 22],
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "COMPLETE",
-                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
+                "unexpected_index_column_names": ["key_1", "key_2"],  # Multiple columns
             },
         },
     )
@@ -1155,7 +1150,7 @@ def test_sqlite_multiple_unexpected_index_column_names_complete_result_format(
             execution_engine=execution_engine,
             assets={
                 "my_asset": {
-                    "table_name": "test_temp",
+                    "table_name": "animal_names",
                 },
             },
         )
@@ -1183,27 +1178,30 @@ def test_sqlite_multiple_unexpected_index_column_names_complete_result_format(
         "missing_count": 0,
         "missing_percent": 0.0,
         "partial_unexpected_counts": [
-            {"count": 1, "value": 3},
-            {"count": 1, "value": 10},
+            {"count": 1, "value": "giraffe"},
+            {"count": 1, "value": "lion"},
+            {"count": 1, "value": "zebra"},
         ],
         "partial_unexpected_index_list": [
-            {"pk_1": 3, "pk_2": "three"},
-            {"pk_1": 5, "pk_2": "five"},
+            {"key_1": 3, "key_2": "three"},
+            {"key_1": 4, "key_2": "four"},
+            {"key_1": 5, "key_2": "five"},
         ],
-        "partial_unexpected_list": [3, 10],
-        "unexpected_count": 2,
+        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_count": 3,
         "unexpected_index_list": [
-            {"pk_1": 3, "pk_2": "three"},
-            {"pk_1": 5, "pk_2": "five"},
+            {"key_1": 3, "key_2": "three"},
+            {"key_1": 4, "key_2": "four"},
+            {"key_1": 5, "key_2": "five"},
         ],
-        "unexpected_index_query": "SELECT numbers_with_duplicates, pk_1, pk_2 \n"
-        "FROM test_temp \n"
-        "WHERE numbers_with_duplicates IS NOT NULL AND "
-        "(numbers_with_duplicates NOT IN (1, 5, 22))",
-        "unexpected_list": [3, 10],
-        "unexpected_percent": 33.33333333333333,
-        "unexpected_percent_nonmissing": 33.33333333333333,
-        "unexpected_percent_total": 33.33333333333333,
+        "unexpected_index_query": "SELECT animals, key_1, key_2 \n"
+        "FROM animal_names \n"
+        "WHERE animals IS NOT NULL AND (animals NOT IN "
+        "('cat', 'fish', 'dog'))",
+        "unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_percent": 50.0,
+        "unexpected_percent_nonmissing": 50.0,
+        "unexpected_percent_total": 50.0,
     }
 
 
@@ -1213,11 +1211,11 @@ def test_sql_multiple_unexpected_index_column_names_complete_result_format_limit
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
-            "column": "numbers_with_duplicates",
-            "value_set": [1, 5, 22],
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "COMPLETE",
-                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
+                "unexpected_index_column_names": ["key_1", "key_2"],  # Multiple columns
                 "partial_unexpected_count": 1,
             },
         },
@@ -1235,7 +1233,7 @@ def test_sql_multiple_unexpected_index_column_names_complete_result_format_limit
             execution_engine=execution_engine,
             assets={
                 "my_asset": {
-                    "table_name": "test_temp",
+                    "table_name": "animal_names",
                 },
             },
         )
@@ -1262,22 +1260,23 @@ def test_sql_multiple_unexpected_index_column_names_complete_result_format_limit
         "element_count": 6,
         "missing_count": 0,
         "missing_percent": 0.0,
-        "partial_unexpected_counts": [{"count": 1, "value": 3}],
-        "partial_unexpected_index_list": [{"pk_1": 3, "pk_2": "three"}],
-        "partial_unexpected_list": [3],
-        "unexpected_count": 2,
+        "partial_unexpected_counts": [{"count": 1, "value": "giraffe"}],
+        "partial_unexpected_index_list": [{"key_1": 3, "key_2": "three"}],
+        "partial_unexpected_list": ["giraffe"],
+        "unexpected_count": 3,
         "unexpected_index_list": [
-            {"pk_1": 3, "pk_2": "three"},
-            {"pk_1": 5, "pk_2": "five"},
+            {"key_1": 3, "key_2": "three"},
+            {"key_1": 4, "key_2": "four"},
+            {"key_1": 5, "key_2": "five"},
         ],
-        "unexpected_index_query": "SELECT numbers_with_duplicates, pk_1, pk_2 \n"
-        "FROM test_temp \n"
-        "WHERE numbers_with_duplicates IS NOT NULL AND "
-        "(numbers_with_duplicates NOT IN (1, 5, 22))",
-        "unexpected_list": [3, 10],
-        "unexpected_percent": 33.33333333333333,
-        "unexpected_percent_nonmissing": 33.33333333333333,
-        "unexpected_percent_total": 33.33333333333333,
+        "unexpected_index_query": "SELECT animals, key_1, key_2 \n"
+        "FROM animal_names \n"
+        "WHERE animals IS NOT NULL AND (animals NOT IN "
+        "('cat', 'fish', 'dog'))",
+        "unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_percent": 50.0,
+        "unexpected_percent_nonmissing": 50.0,
+        "unexpected_percent_total": 50.0,
     }
 
 
@@ -1287,11 +1286,11 @@ def test_sql_multiple_unexpected_index_column_names_summary_result_format(
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
-            "column": "numbers_with_duplicates",
-            "value_set": [1, 5, 22],
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "SUMMARY",  # SUMMARY will include partial_unexpected* values only
-                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
+                "unexpected_index_column_names": ["key_1", "key_2"],  # Multiple columns
             },
         },
     )
@@ -1308,7 +1307,7 @@ def test_sql_multiple_unexpected_index_column_names_summary_result_format(
             execution_engine=execution_engine,
             assets={
                 "my_asset": {
-                    "table_name": "test_temp",
+                    "table_name": "animal_names",
                 },
             },
         )
@@ -1333,35 +1332,38 @@ def test_sql_multiple_unexpected_index_column_names_summary_result_format(
     result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
-        "unexpected_count": 2,
-        "partial_unexpected_index_list": [
-            {"pk_1": 3, "pk_2": "three"},
-            {"pk_1": 5, "pk_2": "five"},
-        ],  # Dicts since columns were provided
-        "unexpected_percent": 33.33333333333333,
-        "partial_unexpected_list": [3, 10],
-        "partial_unexpected_counts": [
-            {"value": 3, "count": 1},
-            {"value": 10, "count": 1},
-        ],
         "missing_count": 0,
         "missing_percent": 0.0,
-        "unexpected_percent_total": 33.33333333333333,
-        "unexpected_percent_nonmissing": 33.33333333333333,
+        "partial_unexpected_counts": [
+            {"count": 1, "value": "giraffe"},
+            {"count": 1, "value": "lion"},
+            {"count": 1, "value": "zebra"},
+        ],
+        "partial_unexpected_index_list": [
+            {"key_1": 3, "key_2": "three"},
+            {"key_1": 4, "key_2": "four"},
+            {"key_1": 5, "key_2": "five"},
+        ],
+        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_count": 3,
+        "unexpected_percent": 50.0,
+        "unexpected_percent_nonmissing": 50.0,
+        "unexpected_percent_total": 50.0,
     }
 
 
 def test_sql_multiple_unexpected_index_column_names_summary_result_format_limit_1(
     sa, sqlite_table_for_unexpected_rows_with_index
 ):
+
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
-            "column": "numbers_with_duplicates",
-            "value_set": [1, 5, 22],
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "SUMMARY",  # SUMMARY will include partial_unexpected* values only
-                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
+                "unexpected_index_column_names": ["key_1", "key_2"],  # Multiple columns
                 "partial_unexpected_count": 1,
             },
         },
@@ -1379,7 +1381,7 @@ def test_sql_multiple_unexpected_index_column_names_summary_result_format_limit_
             execution_engine=execution_engine,
             assets={
                 "my_asset": {
-                    "table_name": "test_temp",
+                    "table_name": "animal_names",
                 },
             },
         )
@@ -1404,19 +1406,15 @@ def test_sql_multiple_unexpected_index_column_names_summary_result_format_limit_
     result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
-        "unexpected_count": 2,
-        "partial_unexpected_index_list": [
-            {"pk_1": 3, "pk_2": "three"},
-        ],  # Dicts since columns were provided
-        "unexpected_percent": 33.33333333333333,
-        "partial_unexpected_list": [3],
-        "partial_unexpected_counts": [
-            {"value": 3, "count": 1},
-        ],
         "missing_count": 0,
         "missing_percent": 0.0,
-        "unexpected_percent_total": 33.33333333333333,
-        "unexpected_percent_nonmissing": 33.33333333333333,
+        "partial_unexpected_counts": [{"count": 1, "value": "giraffe"}],
+        "partial_unexpected_index_list": [{"key_1": 3, "key_2": "three"}],
+        "partial_unexpected_list": ["giraffe"],
+        "unexpected_count": 3,
+        "unexpected_percent": 50.0,
+        "unexpected_percent_nonmissing": 50.0,
+        "unexpected_percent_total": 50.0,
     }
 
 
@@ -1426,11 +1424,11 @@ def test_sql_multiple_unexpected_index_column_names_basic_result_format(
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
-            "column": "numbers_with_duplicates",
-            "value_set": [1, 5, 22],
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "BASIC",  # SUMMARY will include partial_unexpected_list only, which means unexpected_index_column_names will have no effect
-                "unexpected_index_column_names": ["pk_1", "pk_2"],
+                "unexpected_index_column_names": ["key_1", "key_2"],
             },
         },
     )
@@ -1447,7 +1445,7 @@ def test_sql_multiple_unexpected_index_column_names_basic_result_format(
             execution_engine=execution_engine,
             assets={
                 "my_asset": {
-                    "table_name": "test_temp",
+                    "table_name": "animal_names",
                 },
             },
         )
@@ -1472,13 +1470,13 @@ def test_sql_multiple_unexpected_index_column_names_basic_result_format(
     result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
-        "unexpected_count": 2,
-        "unexpected_percent": 33.33333333333333,
-        "partial_unexpected_list": [3, 10],
         "missing_count": 0,
         "missing_percent": 0.0,
-        "unexpected_percent_total": 33.33333333333333,
-        "unexpected_percent_nonmissing": 33.33333333333333,
+        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_count": 3,
+        "unexpected_percent": 50.0,
+        "unexpected_percent_nonmissing": 50.0,
+        "unexpected_percent_total": 50.0,
     }
 
 
@@ -1488,8 +1486,8 @@ def test_sql_single_unexpected_index_column_names_complete_result_format_non_exi
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
-            "column": "numbers_with_duplicates",
-            "value_set": [1, 5, 22],
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "COMPLETE",
                 "unexpected_index_column_names": ["i_dont_exist"],  # Single column
@@ -1509,7 +1507,7 @@ def test_sql_single_unexpected_index_column_names_complete_result_format_non_exi
             execution_engine=execution_engine,
             assets={
                 "my_asset": {
-                    "table_name": "test_temp",
+                    "table_name": "animal_names",
                 },
             },
         )
@@ -1546,12 +1544,12 @@ def test_sql_multiple_unexpected_index_column_names_complete_result_format_non_e
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
-            "column": "numbers_with_duplicates",
-            "value_set": [1, 5, 22],
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "COMPLETE",
                 "unexpected_index_column_names": [
-                    "pk_1",
+                    "key_1",
                     "i_dont_exist",
                 ],  # Only 1 column is valid
             },
@@ -1569,7 +1567,7 @@ def test_sql_multiple_unexpected_index_column_names_complete_result_format_non_e
             execution_engine=execution_engine,
             assets={
                 "my_asset": {
-                    "table_name": "test_temp",
+                    "table_name": "animal_names",
                 },
             },
         )
