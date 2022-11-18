@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import os
-from collections import OrderedDict
 from typing import Any, List, Mapping, Optional, Union
 
 from ruamel.yaml import YAML
@@ -38,10 +37,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GXCloudIdentifier,
 )
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-    parse_substitution_variable,
-)
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.render.renderer.site_builder import SiteBuilder
@@ -161,7 +157,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     --ge-feature-maturity-info--
     """
 
-    UNCOMMITTED_DIRECTORIES = ["data_docs", "validations"]
     GE_UNCOMMITTED_DIR = "uncommitted"
     BASE_DIRECTORIES = [
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
@@ -326,46 +321,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     # Internal helper methods
     #
     #####
-
-    def escape_all_config_variables(
-        self,
-        value: Union[str, dict, list],
-        dollar_sign_escape_string: str = DOLLAR_SIGN_ESCAPE_STRING,
-        skip_if_substitution_variable: bool = True,
-    ) -> Union[str, dict, list]:
-        """
-        Replace all `$` characters with the DOLLAR_SIGN_ESCAPE_STRING
-
-        Args:
-            value: config variable value
-            dollar_sign_escape_string: replaces instances of `$`
-            skip_if_substitution_variable: skip if the value is of the form ${MYVAR} or $MYVAR
-
-        Returns:
-            input value with all `$` characters replaced with the escape string
-        """
-        if isinstance(value, dict) or isinstance(value, OrderedDict):
-            return {
-                k: self.escape_all_config_variables(
-                    v, dollar_sign_escape_string, skip_if_substitution_variable
-                )
-                for k, v in value.items()
-            }
-
-        elif isinstance(value, list):
-            return [
-                self.escape_all_config_variables(
-                    v, dollar_sign_escape_string, skip_if_substitution_variable
-                )
-                for v in value
-            ]
-        if skip_if_substitution_variable:
-            if parse_substitution_variable(value) is None:
-                return value.replace("$", dollar_sign_escape_string)
-            else:
-                return value
-        else:
-            return value.replace("$", dollar_sign_escape_string)
 
     def save_config_variable(
         self,
@@ -564,95 +519,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             return self._data_context._context_root_directory  # type: ignore[union-attr]
         return None
 
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS,
-    )
-    def build_data_docs(
-        self,
-        site_names=None,
-        resource_identifiers=None,
-        dry_run=False,
-        build_index: bool = True,
-    ):
-        """
-        Build Data Docs for your project.
-
-        These make it simple to visualize data quality in your project. These
-        include Expectations, Validations & Profiles. The are built for all
-        Datasources from JSON artifacts in the local repo including validations
-        & profiles from the uncommitted directory.
-
-        :param site_names: if specified, build data docs only for these sites, otherwise,
-                            build all the sites specified in the context's config
-        :param resource_identifiers: a list of resource identifiers (ExpectationSuiteIdentifier,
-                            ValidationResultIdentifier). If specified, rebuild HTML
-                            (or other views the data docs sites are rendering) only for
-                            the resources in this list. This supports incremental build
-                            of data docs sites (e.g., when a new validation result is created)
-                            and avoids full rebuild.
-        :param dry_run: a flag, if True, the method returns a structure containing the
-                            URLs of the sites that *would* be built, but it does not build
-                            these sites. The motivation for adding this flag was to allow
-                            the CLI to display the the URLs before building and to let users
-                            confirm.
-
-        :param build_index: a flag if False, skips building the index page
-
-        Returns:
-            A dictionary with the names of the updated data documentation sites as keys and the the location info
-            of their index.html files as values
-        """
-        logger.debug("Starting DataContext.build_data_docs")
-
-        index_page_locator_infos = {}
-
-        sites = self.variables.data_docs_sites
-        if sites:
-            logger.debug("Found data_docs_sites. Building sites...")
-
-            for site_name, site_config in sites.items():
-                logger.debug(
-                    f"Building Data Docs Site {site_name}",
-                )
-
-                if (site_names and (site_name in site_names)) or not site_names:
-                    complete_site_config = site_config
-                    module_name = "great_expectations.render.renderer.site_builder"
-                    site_builder: SiteBuilder = instantiate_class_from_config(
-                        config=complete_site_config,
-                        runtime_environment={
-                            "data_context": self,
-                            "root_directory": self.root_directory,
-                            "site_name": site_name,
-                            "ge_cloud_mode": self.ge_cloud_mode,
-                        },
-                        config_defaults={"module_name": module_name},
-                    )
-                    if not site_builder:
-                        raise ge_exceptions.ClassInstantiationError(
-                            module_name=module_name,
-                            package_name=None,
-                            class_name=complete_site_config["class_name"],
-                        )
-                    if dry_run:
-                        index_page_locator_infos[
-                            site_name
-                        ] = site_builder.get_resource_url(only_if_exists=False)
-                    else:
-                        index_page_resource_identifier_tuple = site_builder.build(
-                            resource_identifiers,
-                            build_index=(build_index and not self.ge_cloud_mode),
-                        )
-                        if index_page_resource_identifier_tuple:
-                            index_page_locator_infos[
-                                site_name
-                            ] = index_page_resource_identifier_tuple[0]
-
-        else:
-            logger.debug("No data_docs_config found. No site(s) built.")
-
-        return index_page_locator_infos
-
     def add_checkpoint(
         self,
         name: str,
@@ -721,8 +587,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     ) -> RuleBasedProfiler:
         name = profiler.name
         ge_cloud_id = profiler.ge_cloud_id
-
-        key: Union[GXCloudIdentifier, ConfigurationIdentifier]
         if self.ge_cloud_mode:
             key = GXCloudIdentifier(
                 resource_type=GXCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id

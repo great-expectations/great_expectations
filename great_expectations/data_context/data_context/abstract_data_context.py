@@ -11,6 +11,7 @@ import uuid
 import warnings
 import webbrowser
 from abc import ABC, abstractmethod
+from collections import OrderedDict
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -89,6 +90,7 @@ from great_expectations.data_context.util import (
     PasswordMasker,
     build_store_from_config,
     instantiate_class_from_config,
+    parse_substitution_variable,
 )
 from great_expectations.dataset.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
@@ -3650,3 +3652,43 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             },
         )
         return site_builder
+
+    def escape_all_config_variables(
+        self,
+        value: Union[str, dict, list],
+        dollar_sign_escape_string: str = DOLLAR_SIGN_ESCAPE_STRING,
+        skip_if_substitution_variable: bool = True,
+    ) -> Union[str, dict, list]:
+        """
+        Replace all `$` characters with the DOLLAR_SIGN_ESCAPE_STRING
+
+        Args:
+            value: config variable value
+            dollar_sign_escape_string: replaces instances of `$`
+            skip_if_substitution_variable: skip if the value is of the form ${MYVAR} or $MYVAR
+
+        Returns:
+            input value with all `$` characters replaced with the escape string
+        """
+        if isinstance(value, dict) or isinstance(value, OrderedDict):
+            return {
+                k: self.escape_all_config_variables(
+                    v, dollar_sign_escape_string, skip_if_substitution_variable
+                )
+                for k, v in value.items()
+            }
+
+        elif isinstance(value, list):
+            return [
+                self.escape_all_config_variables(
+                    v, dollar_sign_escape_string, skip_if_substitution_variable
+                )
+                for v in value
+            ]
+        if skip_if_substitution_variable:
+            if parse_substitution_variable(value) is None:
+                return value.replace("$", dollar_sign_escape_string)
+            else:
+                return value
+        else:
+            return value.replace("$", dollar_sign_escape_string)
