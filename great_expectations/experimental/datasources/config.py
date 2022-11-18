@@ -51,6 +51,7 @@ class GxConfig(BaseModel):
             loaded_datasources[datasource.name] = datasource
 
             # TODO: move this to a different 'validator' method
+            # attach the datasource to the nested assets, avoiding recursion errors
             for asset in datasource.assets.values():
                 asset._datasource = datasource
 
