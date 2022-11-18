@@ -577,30 +577,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._synchronize_self_with_underlying_data_context()
         return checkpoint
 
-    def save_profiler(
-        self,
-        profiler: RuleBasedProfiler,
-    ) -> RuleBasedProfiler:
-        name = profiler.name
-        ge_cloud_id = profiler.ge_cloud_id
-        if self.ge_cloud_mode:
-            key = GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
-            )
-        else:
-            key = ConfigurationIdentifier(configuration_key=name)
-
-        response = self.profiler_store.set(key=key, value=profiler.config)  # type: ignore[func-returns-value]
-        if isinstance(response, GXCloudResourceRef):
-            ge_cloud_id = response.ge_cloud_id
-
-        # If an id is present, we want to prioritize that as our key for object retrieval
-        if ge_cloud_id:
-            name = None  # type: ignore[assignment]
-
-        profiler = self.get_profiler(name=name, ge_cloud_id=ge_cloud_id)
-        return profiler
-
     def list_expectation_suites(
         self,
     ) -> Optional[Union[List[str], List[GXCloudIdentifier]]]:

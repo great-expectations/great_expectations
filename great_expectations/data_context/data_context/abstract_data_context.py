@@ -80,7 +80,10 @@ from great_expectations.data_context.types.base import (
     dataContextConfigSchema,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.types.refs import GXCloudIDAwareRef
+from great_expectations.data_context.types.refs import (
+    GXCloudIDAwareRef,
+    GXCloudResourceRef,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
@@ -986,6 +989,30 @@ class AbstractDataContext(ABC):
 
     def list_profilers(self) -> Union[List[str], List[ConfigurationIdentifier]]:
         return RuleBasedProfiler.list_profilers(self.profiler_store)
+
+    def save_profiler(
+        self,
+        profiler: RuleBasedProfiler,
+    ) -> RuleBasedProfiler:
+        name = profiler.name
+        ge_cloud_id = profiler.ge_cloud_id
+        key = self._determine_key_for_profiler_save(name=name, id=ge_cloud_id)
+
+        response = self.profiler_store.set(key=key, value=profiler.config)  # type: ignore[func-returns-value]
+        if isinstance(response, GXCloudResourceRef):
+            ge_cloud_id = response.ge_cloud_id
+
+        # If an id is present, we want to prioritize that as our key for object retrieval
+        if ge_cloud_id:
+            name = None  # type: ignore[assignment]
+
+        profiler = self.get_profiler(name=name, ge_cloud_id=ge_cloud_id)
+        return profiler
+
+    def _determine_key_for_profiler_save(
+        self, name: str, id: Optional[str]
+    ) -> Union[ConfigurationIdentifier, GXCloudIdentifier]:
+        return ConfigurationIdentifier(configuration_key=name)
 
     def get_datasource(
         self, datasource_name: str = "default"
