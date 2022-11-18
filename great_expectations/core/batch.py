@@ -533,7 +533,7 @@ BatchDataType = Union[BatchData, pd.DataFrame, SparkDataFrame]
 class Batch(SerializableDictDot):
     def __init__(
         self,
-        data: BatchDataType,
+        data: Optional[BatchDataType] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         batch_definition: Optional[BatchDefinition] = None,
         batch_spec: Optional[BatchSpec] = None,
