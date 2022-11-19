@@ -71,16 +71,11 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
                 :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
             Notes:
-                These fields in the result object are customized for this expectation:
-                ::
-
-                    {
-                        "observed_value": (int) The number of unique values in the column
-                    }
-
                 * min_value and max_value are both inclusive.
                 * If min_value is None, then max_value is treated as an upper bound
                 * If max_value is None, then min_value is treated as a lower bound
+                * observed_value field in the result object is customized for this expectation to be an int \
+                  representing the number of unique values the column
 
             See Also:
                 :func:`expect_column_proportion_of_unique_values_to_be_between \

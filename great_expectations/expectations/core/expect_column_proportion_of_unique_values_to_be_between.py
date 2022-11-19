@@ -78,16 +78,11 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
     Notes:
-        These fields in the result object are customized for this expectation:
-        ::
-
-            {
-                "observed_value": (float) The proportion of unique values in the column
-            }
-
         * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
         * If min_value is None, then max_value is treated as an upper bound
         * If max_value is None, then min_value is treated as a lower bound
+        * observed_value field in the result object is customized for this expectation to be a float \
+          representing the proportion of unique values in the column
 
     See Also:
         :func:`expect_column_unique_value_count_to_be_between \

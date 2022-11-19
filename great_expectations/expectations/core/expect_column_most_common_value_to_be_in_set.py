@@ -58,17 +58,10 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnExpectation):
                 :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
             Notes:
-                These fields in the result object are customized for this expectation:
-                ::
-
-                    {
-                        "observed_value": (list) The most common values in the column
-                    }
-
-                `observed_value` contains a list of the most common values.
-                Often, this will just be a single element. But if there's a tie for most common among multiple values,
-                `observed_value` will contain a single copy of each most common value.
-
+                * observed_value field in the result object is customized for this expectation to be a list \
+                  representing the most common values in the column, which is often a single element... if there \
+                  is a tie for most common among multiple values, observed_value will contain a single copy of each \
+                  most common value
             """
 
     # This dictionary contains metadata for display in the public gallery
