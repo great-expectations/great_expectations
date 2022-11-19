@@ -23,7 +23,8 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
     Expect the values for each record to be unique across the columns listed.
     Note that records can be duplicated.
 
-    For example::
+    For example:
+    ::
 
         A B C
         1 1 2 Fail

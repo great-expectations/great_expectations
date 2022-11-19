@@ -23,7 +23,8 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
      Expect that the columns are unique together, e.g. a multi-column primary key
      Note that all instances of any duplicates are considered failed
 
-     For example::
+     For example:
+     ::
 
          A B C
          1 1 2 Fail
