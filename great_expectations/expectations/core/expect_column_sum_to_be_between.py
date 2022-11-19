@@ -44,9 +44,9 @@ class ExpectColumnSumToBeBetween(ColumnExpectation):
                    The minimal sum allowed.
                max_value (comparable type or None): \
                    The maximal sum allowed.
-               strict_min (boolean):
+               strict_min (boolean): \
                    If True, the minimal sum must be strictly larger than min_value, default=False
-               strict_max (boolean):
+               strict_max (boolean): \
                    If True, the maximal sum must be strictly smaller than max_value, default=False
 
            Other Parameters:

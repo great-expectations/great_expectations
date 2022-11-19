@@ -48,6 +48,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
            :func:`column_aggregate_expectation
            <great_expectations.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.
 
+
            Args:
                column (str): \
                    The column name
@@ -55,9 +56,9 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
                    The minimum number of unique values allowed.
                max_value (comparable type or None): \
                    The maximum number of unique values allowed.
-               strict_min (boolean):
+               strict_min (boolean): \
                    If True, the minimal column minimum must be strictly larger than min_value, default=False
-               strict_max (boolean):
+               strict_max (boolean): \
                    If True, the maximal column minimum must be strictly smaller than max_value, default=False
 
            Keyword Args:

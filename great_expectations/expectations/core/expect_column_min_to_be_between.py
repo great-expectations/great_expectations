@@ -48,9 +48,9 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
                     The minimal column minimum allowed.
                 max_value (comparable type or None): \
                     The maximal column minimum allowed.
-                strict_min (boolean):
+                strict_min (boolean): \
                     If True, the minimal column minimum must be strictly larger than min_value, default=False
-                strict_max (boolean):
+                strict_max (boolean): \
                     If True, the maximal column minimum must be strictly smaller than max_value, default=False
 
             Keyword Args:

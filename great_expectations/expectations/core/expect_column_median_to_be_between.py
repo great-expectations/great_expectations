@@ -44,9 +44,9 @@ class ExpectColumnMedianToBeBetween(ColumnExpectation):
                     The minimum value for the column median.
                 max_value (int or None): \
                     The maximum value for the column median.
-                strict_min (boolean):
+                strict_min (boolean): \
                     If True, the column median must be strictly larger than min_value, default=False
-                strict_max (boolean):
+                strict_max (boolean): \
                     If True, the column median must be strictly smaller than max_value, default=False
 
             Other Parameters:

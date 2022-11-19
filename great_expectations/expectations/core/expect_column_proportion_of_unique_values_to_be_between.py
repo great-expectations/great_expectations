@@ -52,9 +52,9 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
             The minimum proportion of unique values. (Proportions are on the range 0 to 1)
         max_value (float or None): \
             The maximum proportion of unique values. (Proportions are on the range 0 to 1)
-        strict_min (boolean):
+        strict_min (boolean): \
             If True, the minimum proportion of unique values must be strictly larger than min_value, default=False
-        strict_max (boolean):
+        strict_max (boolean): \
             If True, the maximum proportion of unique values must be strictly smaller than max_value, default=False
 
     Other Parameters:

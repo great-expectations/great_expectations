@@ -48,9 +48,9 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
                     The minimum value for the column mean.
                 max_value (float or None): \
                     The maximum value for the column mean.
-                strict_min (boolean):
+                strict_min (boolean): \
                     If True, the column mean must be strictly larger than min_value, default=False
-                strict_max (boolean):
+                strict_max (boolean): \
                     If True, the column mean must be strictly smaller than max_value, default=False
 
             Other Parameters:

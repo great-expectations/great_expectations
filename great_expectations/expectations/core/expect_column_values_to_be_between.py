@@ -42,9 +42,9 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             The column name.
         min_value (comparable type or None): The minimum value for a column entry.
         max_value (comparable type or None): The maximum value for a column entry.
-        strict_min (boolean):
+        strict_min (boolean): \
             If True, values must be strictly larger than min_value, default=False
-        strict_max (boolean):
+        strict_max (boolean): \
             If True, values must be strictly smaller than max_value, default=False
 
     Keyword Args:
