@@ -47,22 +47,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     # noinspection PyUnresolvedReferences
     """Expect the specific provided column quantiles to be between a minimum value and a maximum value.
 
-           ``quantile_ranges`` must be a dictionary with two keys:
-
-               * ``quantiles``: (list of float) increasing ordered list of desired quantile values
-
-               * ``value_ranges``: (list of lists): Each element in this list consists of a list with two values, a lower \
-                 and upper bound (inclusive) for the corresponding quantile. These values must be [min, max] ordered.
-
-
-           For each provided range:
-
-               * min_value and max_value are both inclusive.
-               * If min_value is None, then max_value is treated as an upper bound only
-               * If max_value is None, then min_value is treated as a lower bound only
-
-           The length of the quantiles list and quantile_values list must be equal.
-
            For example:
            ::
 
@@ -100,8 +84,11 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
            Args:
                column (str): \
                    The column name.
-               quantile_ranges (dictionary): \
-                   Quantiles and associated value ranges for the column. See above for details.
+               quantile_ranges (dictionary with keys 'quantiles' and 'value_ranges'): \
+                   Key 'quantiles' is an increasingly ordered list of desired quantile values (floats). \
+                   Key 'value_ranges' is a list of 2-value lists that specify a lower and upper bound (inclusive) \
+                   for the corresponding quantile (with [min, max] ordering). The length of the 'quantiles' list \
+                   and the 'value_ranges' list must be equal.
                allow_relative_error (boolean or string): \
                    Whether to allow relative error in quantile communications on backends that support or require it.
 
@@ -126,9 +113,10 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
            Notes:
-               These fields in the result object are customized for this expectation:
-               ::
-               details.success_details
+               * min_value and max_value are both inclusive.
+               * If min_value is None, then max_value is treated as an upper bound only
+               * If max_value is None, then min_value is treated as a lower bound only
+               * details.success_details field in the result object is customized for this expectation
 
            See Also:
                :func:`expect_column_min_to_be_between \

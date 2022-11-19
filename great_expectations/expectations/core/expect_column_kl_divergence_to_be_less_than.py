@@ -117,18 +117,14 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                 :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
             Notes:
-                These fields in the result object are customized for this expectation:
-                ::
-
-                    {
-                      "observed_value": (float) The true KL divergence (relative entropy) or None if the value is \
-                      calculated as infinity, -infinity, or NaN
-                      "details": {
-                        "observed_partition": (dict) The partition observed in the data
-                        "expected_partition": (dict) The partition against which the data were compared,
-                                                after applying specified weight holdouts.
-                      }
-                    }
+                * observed_value field in the result object is customized for this expectation to be a float \
+                  representing the true KL divergence (relative entropy) or None if the value is calculated \
+                  as infinity, -infinity, or NaN
+                * details.observed_partition in the result object is customized for this expectation to be a \
+                  dict representing the partition observed in the data
+                * details.expected_partition in the result object is customized for this expectation to be a \
+                  dict representing the partition against which the data were compared, after applying \
+                  specified weight holdouts
 
                 If the partition_object is categorical, this expectation will expect the values in column to also be \
                 categorical.
@@ -156,11 +152,11 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                     * If tail_weight_holdout is specified, that value will be appended to the tails of the bins \
                     ((-Infinity, min(bins)) and (max(bins), Infinity).
 
-              If relative entropy/kl divergence goes to infinity for any of the reasons mentioned above, the observed
-              value\
-              will be set to None. This is because inf, -inf, Nan, are not json serializable and cause some json
-              parsers to\
-              crash when encountered. The python None token will be serialized to null in json.
+                If relative entropy/kl divergence goes to infinity for any of the reasons mentioned above, the observed
+                value\
+                will be set to None. This is because inf, -inf, Nan, are not json serializable and cause some json
+                parsers to\
+                crash when encountered. The python None token will be serialized to null in json.
 
             See also:
                 :func:`expect_column_chisquare_test_p_value_to_be_greater_than \
