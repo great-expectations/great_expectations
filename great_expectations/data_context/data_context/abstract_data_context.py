@@ -155,7 +155,7 @@ logger = logging.getLogger(__name__)
 yaml = YAMLHandler()
 
 
-T = TypeVar("T", str, dict, list)
+T = TypeVar("T", bound=Union[dict, list, str])
 
 
 class AbstractDataContext(ABC):
@@ -3702,24 +3702,32 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             input value with all `$` characters replaced with the escape string
         """
         if isinstance(value, dict) or isinstance(value, OrderedDict):
-            return {
-                k: self.escape_all_config_variables(
-                    v, dollar_sign_escape_string, skip_if_substitution_variable
-                )
-                for k, v in value.items()
-            }
+            return cast(
+                T,
+                {
+                    k: self.escape_all_config_variables(
+                        value=v,
+                        dollar_sign_escape_string=dollar_sign_escape_string,
+                        skip_if_substitution_variable=skip_if_substitution_variable,
+                    )
+                    for k, v in value.items()
+                },
+            )
 
         elif isinstance(value, list):
-            return [
-                self.escape_all_config_variables(
-                    v, dollar_sign_escape_string, skip_if_substitution_variable
-                )
-                for v in value
-            ]
+            return cast(
+                T,
+                [
+                    self.escape_all_config_variables(
+                        value=v,
+                        dollar_sign_escape_string=dollar_sign_escape_string,
+                        skip_if_substitution_variable=skip_if_substitution_variable,
+                    )
+                    for v in value
+                ],
+            )
         if skip_if_substitution_variable:
             if parse_substitution_variable(value) is None:
                 return value.replace("$", dollar_sign_escape_string)
-            else:
-                return value
-        else:
-            return value.replace("$", dollar_sign_escape_string)
+            return value
+        return value.replace("$", dollar_sign_escape_string)
