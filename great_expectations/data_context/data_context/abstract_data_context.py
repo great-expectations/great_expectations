@@ -22,6 +22,7 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
+    TypeVar,
     Union,
     cast,
 )
@@ -152,6 +153,9 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 yaml = YAMLHandler()
+
+
+T = TypeVar("T", str, dict, list)
 
 
 class AbstractDataContext(ABC):
@@ -3682,10 +3686,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def escape_all_config_variables(
         self,
-        value: Union[str, dict, list],
+        value: T,
         dollar_sign_escape_string: str = DOLLAR_SIGN_ESCAPE_STRING,
         skip_if_substitution_variable: bool = True,
-    ) -> Union[str, dict, list]:
+    ) -> T:
         """
         Replace all `$` characters with the DOLLAR_SIGN_ESCAPE_STRING
 
