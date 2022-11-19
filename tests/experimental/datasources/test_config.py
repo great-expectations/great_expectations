@@ -137,9 +137,6 @@ def test_json_config_round_trip(
     assert from_json_gx_config == re_loaded
 
 
-# TODO (kilo59): low-priority - test for the correct yaml style??
-
-
 def test_yaml_config_round_trip(
     inject_engine_lookup_double, from_yaml_gx_config: GxConfig
 ):
@@ -170,3 +167,12 @@ def test_yaml_file_config_round_trip(
     assert re_loaded
 
     assert from_yaml_gx_config == re_loaded
+
+
+@pytest.mark.xfail(reason="Key Ordering needs to be implemented")
+def test_yaml_config_round_trip_ordering(
+    inject_engine_lookup_double, from_yaml_gx_config: GxConfig
+):
+    dumped: str = from_yaml_gx_config.yaml()
+
+    assert PG_CONFIG_YAML_STR == dumped
