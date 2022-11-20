@@ -11,6 +11,7 @@ import uuid
 import warnings
 import webbrowser
 from abc import ABC, abstractmethod
+from collections import OrderedDict
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -21,6 +22,7 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
+    TypeVar,
     Union,
     cast,
 )
@@ -79,8 +81,12 @@ from great_expectations.data_context.types.base import (
     dataContextConfigSchema,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.types.refs import GXCloudIDAwareRef
+from great_expectations.data_context.types.refs import (
+    GXCloudIDAwareRef,
+    GXCloudResourceRef,
+)
 from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
@@ -88,6 +94,7 @@ from great_expectations.data_context.util import (
     PasswordMasker,
     build_store_from_config,
     instantiate_class_from_config,
+    parse_substitution_variable,
 )
 from great_expectations.dataset.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
@@ -146,6 +153,9 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 yaml = YAMLHandler()
+
+
+T = TypeVar("T", dict, list, str)
 
 
 class AbstractDataContext(ABC):
@@ -977,6 +987,36 @@ class AbstractDataContext(ABC):
             for store in self.list_stores()
             if store.get("name") in active_store_names  # type: ignore[arg-type,operator]
         ]
+
+    def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+        return self.checkpoint_store.list_checkpoints()
+
+    def list_profilers(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+        return RuleBasedProfiler.list_profilers(self.profiler_store)
+
+    def save_profiler(
+        self,
+        profiler: RuleBasedProfiler,
+    ) -> RuleBasedProfiler:
+        name = profiler.name
+        ge_cloud_id = profiler.ge_cloud_id
+        key = self._determine_key_for_profiler_save(name=name, id=ge_cloud_id)
+
+        response = self.profiler_store.set(key=key, value=profiler.config)  # type: ignore[func-returns-value]
+        if isinstance(response, GXCloudResourceRef):
+            ge_cloud_id = response.ge_cloud_id
+
+        # If an id is present, we want to prioritize that as our key for object retrieval
+        if ge_cloud_id:
+            name = None  # type: ignore[assignment]
+
+        profiler = self.get_profiler(name=name, ge_cloud_id=ge_cloud_id)
+        return profiler
+
+    def _determine_key_for_profiler_save(
+        self, name: str, id: Optional[str]
+    ) -> Union[ConfigurationIdentifier, GXCloudIdentifier]:
+        return ConfigurationIdentifier(configuration_key=name)
 
     def get_datasource(
         self, datasource_name: str = "default"
@@ -3643,3 +3683,44 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             },
         )
         return site_builder
+
+    def escape_all_config_variables(
+        self,
+        value: T,
+        dollar_sign_escape_string: str = DOLLAR_SIGN_ESCAPE_STRING,
+        skip_if_substitution_variable: bool = True,
+    ) -> T:
+        """
+        Replace all `$` characters with the DOLLAR_SIGN_ESCAPE_STRING
+
+        Args:
+            value: config variable value
+            dollar_sign_escape_string: replaces instances of `$`
+            skip_if_substitution_variable: skip if the value is of the form ${MYVAR} or $MYVAR
+
+        Returns:
+            input value with all `$` characters replaced with the escape string
+        """
+        if isinstance(value, dict) or isinstance(value, OrderedDict):
+            return {  # type: ignore[return-value] # recursive call expects str
+                k: self.escape_all_config_variables(
+                    value=v,
+                    dollar_sign_escape_string=dollar_sign_escape_string,
+                    skip_if_substitution_variable=skip_if_substitution_variable,
+                )
+                for k, v in value.items()
+            }
+        elif isinstance(value, list):
+            return [
+                self.escape_all_config_variables(
+                    value=v,
+                    dollar_sign_escape_string=dollar_sign_escape_string,
+                    skip_if_substitution_variable=skip_if_substitution_variable,
+                )
+                for v in value
+            ]
+        if skip_if_substitution_variable:
+            if parse_substitution_variable(value) is None:
+                return value.replace("$", dollar_sign_escape_string)
+            return value
+        return value.replace("$", dollar_sign_escape_string)
