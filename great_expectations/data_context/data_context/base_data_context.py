@@ -2,17 +2,15 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any, List, Mapping, Optional, Union
+from typing import List, Mapping, Optional, Union
 
 from ruamel.yaml import YAML
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
-    save_expectation_suite_usage_statistics,
     usage_statistics_enabled_method,
 )
 from great_expectations.data_context.data_context.cloud_data_context import (
@@ -24,7 +22,6 @@ from great_expectations.data_context.data_context.ephemeral_data_context import 
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
@@ -296,72 +293,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
         self._assistants = self._data_context._assistants
 
-    def _save_project_config(self) -> None:
-        """Save the current project to disk."""
-        logger.debug("Starting DataContext._save_project_config")
-
-        config_filepath = os.path.join(self.root_directory, self.GE_YML)  # type: ignore[arg-type]
-
-        try:
-            with open(config_filepath, "w") as outfile:
-                self.config.to_yaml(outfile)
-        except PermissionError as e:
-            logger.warning(f"Could not save project config to disk: {e}")
-
     #####
     #
     # Internal helper methods
     #
     #####
-
-    def save_config_variable(
-        self,
-        config_variable_name: str,
-        value: Any,
-        skip_if_substitution_variable: bool = True,
-    ) -> None:
-        r"""Save config variable value
-        Escapes $ unless they are used in substitution variables e.g. the $ characters in ${SOME_VAR} or $SOME_VAR are not escaped
-
-        Args:
-            config_variable_name: name of the property
-            value: the value to save for the property
-            skip_if_substitution_variable: set to False to escape $ in values in substitution variable form e.g. ${SOME_VAR} -> r"\${SOME_VAR}" or $SOME_VAR -> r"\$SOME_VAR"
-
-        Returns:
-            None
-        """
-        config_variables = self.config_variables
-        value = self.escape_all_config_variables(
-            value,
-            self.DOLLAR_SIGN_ESCAPE_STRING,
-            skip_if_substitution_variable=skip_if_substitution_variable,
-        )
-        config_variables[config_variable_name] = value
-        # Required to call _variables instead of variables property because we don't want to trigger substitutions
-        config = self._variables.config
-        config_variables_filepath = config.config_variables_file_path
-        if not config_variables_filepath:
-            raise ge_exceptions.InvalidConfigError(
-                "'config_variables_file_path' property is not found in config - setting it is required to use this feature"
-            )
-
-        config_variables_filepath = os.path.join(
-            self.root_directory, config_variables_filepath  # type: ignore[arg-type]
-        )
-
-        os.makedirs(os.path.dirname(config_variables_filepath), exist_ok=True)
-        if not os.path.isfile(config_variables_filepath):
-            logger.info(
-                "Creating new substitution_variables file at {config_variables_filepath}".format(
-                    config_variables_filepath=config_variables_filepath
-                )
-            )
-            with open(config_variables_filepath, "w") as template:
-                template.write(CONFIG_VARIABLES_TEMPLATE)
-
-        with open(config_variables_filepath, "w") as config_variables_file:
-            yaml.dump(config_variables, config_variables_file)
 
     def delete_datasource(  # type: ignore[override]
         self, datasource_name: str, save_changes: Optional[bool] = None
@@ -466,10 +402,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._synchronize_self_with_underlying_data_context()
         return res
 
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
-        args_payload_fn=save_expectation_suite_usage_statistics,
-    )
     def save_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
