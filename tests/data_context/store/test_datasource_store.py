@@ -12,13 +12,14 @@ from great_expectations.core.serializer import (
     JsonConfigSerializer,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
 from great_expectations.data_context.store.datasource_store import DatasourceStore
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
+from great_expectations.data_context.store.gx_cloud_store_backend import (
+    GXCloudStoreBackend,
 )
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
@@ -189,9 +190,9 @@ def test_datasource_store_set_cloud_mode(
     ge_cloud_organization_id: str,
 ) -> None:
     ge_cloud_store_backend_config: dict = {
-        "class_name": "GeCloudStoreBackend",
+        "class_name": GXCloudStoreBackend.__name__,
         "ge_cloud_base_url": ge_cloud_base_url,
-        "ge_cloud_resource_type": GeCloudRESTResource.DATASOURCE,
+        "ge_cloud_resource_type": GXCloudRESTResource.DATASOURCE,
         "ge_cloud_credentials": {
             "access_token": ge_cloud_access_token,
             "organization_id": ge_cloud_organization_id,
@@ -336,14 +337,18 @@ def test_datasource_store_retrieve_by_name(
 
 
 @pytest.mark.unit
-def test_datasource_store_delete_by_name(
-    fake_datasource_name,
+def test_datasource_store_delete(
+    datasource_config: DatasourceConfig,
     datasource_store_with_single_datasource: DatasourceStore,
 ) -> None:
-    assert len(datasource_store_with_single_datasource.list_keys()) == 1
+    initial_keys = datasource_store_with_single_datasource.list_keys()
+    assert len(initial_keys) == 1
 
-    datasource_store_with_single_datasource.delete_by_name(
-        datasource_name=fake_datasource_name
+    datasource_name = initial_keys[0][0]
+    datasource_config.name = datasource_name
+
+    datasource_store_with_single_datasource.delete(
+        datasource_config=datasource_config,
     )
 
     assert len(datasource_store_with_single_datasource.list_keys()) == 0

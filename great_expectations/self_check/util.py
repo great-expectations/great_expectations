@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import locale
 import logging
@@ -202,14 +204,14 @@ except ImportError:
             from collections import namedtuple
 
             BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))  # type: ignore[misc]
-            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)  # type: ignore[assignment]
+            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
             BIGQUERY_TYPES = {}
 
     except (ImportError, AttributeError):
         sqla_bigquery = None
-        bigquery_types_tuple = None  # type: ignore[assignment]
+        bigquery_types_tuple = None
         BigQueryDialect = None
-        pybigquery = None  # type: ignore[var-annotated]
+        pybigquery = None
         BIGQUERY_TYPES = {}
 
 
@@ -1209,7 +1211,7 @@ def get_test_validator_with_data(  # noqa: C901 - 31
     sqlite_db_path=None,
     extra_debug_info="",
     debug_logger: Optional[logging.Logger] = None,
-    context: Optional["DataContext"] = None,  # noqa: F821
+    context: Optional[DataContext] = None,
 ):
     """Utility to create datasets for json-formatted tests."""
 
@@ -1389,7 +1391,7 @@ def get_test_validator_with_data(  # noqa: C901 - 31
 def build_pandas_validator_with_data(
     df: pd.DataFrame,
     batch_definition: Optional[BatchDefinition] = None,
-    context: Optional["DataContext"] = None,  # noqa: F821
+    context: Optional[DataContext] = None,
 ) -> Validator:
     batch = Batch(data=df, batch_definition=batch_definition)
     return Validator(
@@ -1411,7 +1413,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     extra_debug_info="",
     batch_definition: Optional[BatchDefinition] = None,
     debug_logger: Optional[logging.Logger] = None,
-    context: Optional["DataContext"] = None,
+    context: Optional[DataContext] = None,
 ):
     _debug = lambda x: x  # noqa: E731
     if debug_logger:
@@ -1684,7 +1686,7 @@ def build_sa_engine(
 def build_spark_engine(
     spark: SparkSession,
     df: Union[pd.DataFrame, SparkDataFrame],
-    schema: StructType = None,
+    schema: Optional[StructType] = None,
     batch_id: Optional[str] = None,
     batch_definition: Optional[BatchDefinition] = None,
 ) -> SparkDFExecutionEngine:
@@ -1736,7 +1738,9 @@ def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
         return getter in []
 
 
-def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
+def candidate_test_is_on_temporary_notimplemented_list_v2_api(
+    context, expectation_type
+):
     if context in SQL_DIALECT_NAMES:
         expectations_not_implemented_v2_sql = [
             "expect_column_values_to_be_increasing",
@@ -1751,12 +1755,12 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
             "expect_column_pair_values_to_be_equal",
             "expect_column_pair_values_A_to_be_greater_than_B",
-            "expect_column_pair_values_to_be_in_set",
             "expect_select_column_values_to_be_unique_within_record",
             "expect_compound_columns_to_be_unique",
             "expect_multicolumn_values_to_be_unique",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_multicolumn_sum_to_equal",
+            "expect_column_value_z_scores_to_be_less_than",
         ]
         if context in ["bigquery"]:
             ###
@@ -1798,16 +1802,20 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_compound_columns_to_be_unique",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_table_row_count_to_equal_other_table",
+            "expect_column_value_z_scores_to_be_less_than",
         ]
     if context == "PandasDataset":
         return expectation_type in [
             "expect_table_row_count_to_equal_other_table",
+            "expect_column_value_z_scores_to_be_less_than",
         ]
     return False
 
 
-def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_type):
-    candidate_test_is_on_temporary_notimplemented_list_cfe_trino = [
+def candidate_test_is_on_temporary_notimplemented_list_v3_api(
+    context, expectation_type
+):
+    candidate_test_is_on_temporary_notimplemented_list_v3_api_trino = [
         "expect_column_distinct_values_to_contain_set",
         "expect_column_max_to_be_between",
         "expect_column_mean_to_be_between",
@@ -1843,7 +1851,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
         "expect_table_row_count_to_be_between",
         "expect_table_row_count_to_equal",
     ]
-    candidate_test_is_on_temporary_notimplemented_list_cfe_other_sql = [
+    candidate_test_is_on_temporary_notimplemented_list_v3_api_other_sql = [
         "expect_column_values_to_be_increasing",
         "expect_column_values_to_be_decreasing",
         "expect_column_values_to_match_strftime_format",
@@ -1871,8 +1879,10 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
     ]
     if context in ["trino"]:
         return expectation_type in set(
-            candidate_test_is_on_temporary_notimplemented_list_cfe_trino
-        ).union(set(candidate_test_is_on_temporary_notimplemented_list_cfe_other_sql))
+            candidate_test_is_on_temporary_notimplemented_list_v3_api_trino
+        ).union(
+            set(candidate_test_is_on_temporary_notimplemented_list_v3_api_other_sql)
+        )
     if context in SQL_DIALECT_NAMES:
         expectations_not_implemented_v3_sql = [
             "expect_column_values_to_be_increasing",
@@ -2618,7 +2628,7 @@ def sort_unexpected_values(test_value_list, result_value_list):
     return test_value_list, result_value_list
 
 
-def evaluate_json_test(data_asset, expectation_type, test) -> None:
+def evaluate_json_test_v2_api(data_asset, expectation_type, test) -> None:
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
@@ -2679,7 +2689,7 @@ def evaluate_json_test(data_asset, expectation_type, test) -> None:
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
 
-def evaluate_json_test_cfe(validator, expectation_type, test, raise_exception=True):
+def evaluate_json_test_v3_api(validator, expectation_type, test, raise_exception=True):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 

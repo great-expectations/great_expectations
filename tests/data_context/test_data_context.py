@@ -3176,7 +3176,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
             name=AtomicPrescriptiveRendererType.FAILED,
             value=renderedAtomicValueSchema.load(
                 {
-                    "template": "Rendering of Expectation Configuration failed for $expectation_type(**$kwargs).",
+                    "template": "Rendering failed for Expectation: $expectation_type(**$kwargs).",
                     "params": {
                         "expectation_type": {
                             "schema": {"type": "string"},

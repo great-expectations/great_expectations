@@ -404,6 +404,217 @@ class MetaSqlAlchemyDataset(Dataset):
 
         return inner_wrapper
 
+    @classmethod
+    def column_pair_map_expectation(cls, func):
+        """For SqlAlchemy, this decorator allows pair-wise column_map_expectations to return the filter
+        that describes the expected condition on their data.
+
+        The decorator will then use that filter to obtain unexpected elements, relevant counts, and return the formatted
+        object.
+        """
+
+        argspec = inspect.getfullargspec(func)[0][
+            1:
+        ]  # Get the names and default values of a Python function’s parameters.
+
+        @cls.expectation(argspec)  # found in data_asset.py
+        @wraps(func)
+        def inner_wrapper(
+            self,
+            column_A,
+            column_B,
+            mostly=None,
+            ignore_row_if="both_values_are_missing",
+            result_format=None,
+            *args,
+            **kwargs,
+        ):
+            """Inner method of decorator."""
+
+            if self.batch_kwargs.get("use_quoted_name"):
+                column_A = quoted_name(column_A, quote=True)
+
+            if self.batch_kwargs.get("use_quoted_name"):
+                column_B = quoted_name(column_B, quote=True)
+
+            if result_format is None:
+                result_format = self.default_expectation_args["result_format"]
+            result_format = parse_result_format(result_format)
+
+            if result_format["result_format"] == "COMPLETE":
+                warnings.warn(
+                    "Setting result format to COMPLETE for a SqlAlchemyDataset can be dangerous because it will not limit the number of returned results."
+                )
+                unexpected_count_limit = None
+            else:
+                unexpected_count_limit = result_format["partial_unexpected_count"]
+
+            # return the expected condition which is used as a filter?
+            expected_condition: BinaryExpression = func(
+                self, column_A, column_B, *args, **kwargs
+            )
+
+            ignore_values_condition: BinaryExpression
+
+            if ignore_row_if == "both_values_are_missing":
+                ignore_values_condition = sa.and_(
+                    sa.column(column_A).is_(None), sa.column(column_B).is_(None)
+                )
+            elif ignore_row_if == "either_value_is_missing":
+                ignore_values_condition = sa.or_(
+                    sa.column(column_A).is_(None), sa.column(column_B).is_(None)
+                )
+            elif ignore_row_if == "never":
+                ignore_values_condition = BinaryExpression(
+                    sa.literal(False), sa.literal(True), custom_op("=")
+                )
+            else:
+                raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
+
+            count_value_query = sa.select(
+                [
+                    sa.func.sum(
+                        sa.case(
+                            [
+                                (
+                                    sa.or_(
+                                        sa.column(column_A) != (None),
+                                        sa.column(column_A) == (None),
+                                    ),
+                                    1,
+                                )
+                            ],
+                            else_=0,
+                        )
+                    ).label("column_A_count"),
+                    sa.func.sum(
+                        sa.case(
+                            [
+                                (
+                                    sa.or_(
+                                        sa.column(column_B) != (None),
+                                        sa.column(column_B) == (None),
+                                    ),
+                                    1,
+                                )
+                            ],
+                            else_=0,
+                        )
+                    ).label("column_B_count"),
+                ]
+            ).select_from(self._table)
+            count_value_query_results = dict(
+                self.engine.execute(count_value_query).fetchone()
+            )
+            assert (
+                count_value_query_results["column_A_count"]
+                == count_value_query_results["column_B_count"]
+            )
+
+            """
+            COUNT VALUES IN QUERY
+            """
+            count_query: Select
+            if self.sql_engine_dialect.name.lower() == "mssql":
+                count_query = self._get_count_query_mssql(
+                    expected_condition=expected_condition,
+                    ignore_values_condition=ignore_values_condition,
+                )
+            else:
+                count_query = self._get_count_query_generic_sqlalchemy(
+                    expected_condition=expected_condition,
+                    ignore_values_condition=ignore_values_condition,
+                )
+
+            count_results: dict = dict(self.engine.execute(count_query).fetchone())
+
+            # Handle case of empty table gracefully:
+            if (
+                "element_count" not in count_results
+                or count_results["element_count"] is None
+            ):
+                count_results["element_count"] = 0
+
+            if "null_count" not in count_results or count_results["null_count"] is None:
+                count_results["null_count"] = 0
+
+            if (
+                "unexpected_count" not in count_results
+                or count_results["unexpected_count"] is None
+            ):
+                count_results["unexpected_count"] = 0
+
+            # Some engines may return Decimal from count queries (lookin' at you MSSQL)
+            # Convert to integers
+            count_results["element_count"] = int(count_results["element_count"])
+            count_results["null_count"] = int(count_results["null_count"])
+            count_results["unexpected_count"] = int(count_results["unexpected_count"])
+
+            """
+            RETRIEVE UNEXPECTED_QUERY_RESULTS WITH SA
+            """
+            # limit doesn't compile properly for oracle so we will append rownum to query string later
+            if self.engine.dialect.name.lower() == "oracle":
+                raw_query = (
+                    sa.select([sa.column(column_A), sa.column(column_B)])
+                    .select_from(self._table)
+                    .where(
+                        sa.and_(
+                            sa.not_(expected_condition),
+                            sa.not_(ignore_values_condition),
+                        )
+                    )
+                )
+                query = str(
+                    raw_query.compile(
+                        self.engine, compile_kwargs={"literal_binds": True}
+                    )
+                )
+                query += "\nAND ROWNUM <= %d" % unexpected_count_limit
+            else:
+                query = (
+                    sa.select([sa.column(column_A), sa.column(column_B)])
+                    .select_from(self._table)
+                    .where(
+                        sa.and_(
+                            sa.not_(expected_condition),
+                            sa.not_(ignore_values_condition),
+                        )
+                    )
+                    .limit(unexpected_count_limit)
+                )
+
+            unexpected_query_results = self.engine.execute(query)
+
+            nonnull_count: int = (
+                count_results["element_count"] - count_results["null_count"]
+            )
+            maybe_limited_unexpected_list = []
+            for x in unexpected_query_results.fetchall():
+                maybe_limited_unexpected_list.append([x[column_A], x[column_B]])
+
+            success_count = nonnull_count - count_results["unexpected_count"]
+            success, percent_success = self._calc_map_expectation_success(
+                success_count, nonnull_count, mostly
+            )
+
+            return_obj = self._format_map_output(
+                result_format,
+                success,
+                count_results["element_count"],
+                nonnull_count,
+                count_results["unexpected_count"],
+                maybe_limited_unexpected_list,
+                None,
+            )
+
+            return return_obj
+
+        inner_wrapper.__name__ = func.__name__
+        inner_wrapper.__doc__ = func.__doc__
+
+        return inner_wrapper
+
     def _get_count_query_mssql(
         self,
         expected_condition: BinaryExpression,
@@ -2110,6 +2321,72 @@ WHERE
                 .having(sa.func.count(sa.column(column)) > 1)
             )
         return sa.column(column).notin_(dup_query)
+
+    @MetaSqlAlchemyDataset.column_pair_map_expectation
+    def expect_column_pair_values_to_be_in_set(
+        self,
+        column_A,
+        column_B,
+        value_pairs_set,
+        mostly=None,
+        parse_strings_as_datetimes=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        """Expect that column pair values are in set.
+
+        Expect that column_A, column_B matches one of the value pairs
+        in the set of `value_pairs_set`.
+        E.g. if value_pairs_set = {[1,1], [1,2]} and the data is:
+        column_A  column_B
+        1         1
+        1         2
+        2         1
+        Then the first two rows would pass and the third row would fail.
+        """
+        if value_pairs_set is None:
+            # vacuously true
+            return True
+
+        if parse_strings_as_datetimes:
+            parsed_value_set = self._parse_value_set(value_pairs_set)
+        else:
+            parsed_value_set = value_pairs_set
+
+        if len(parsed_value_set) == 0:
+            return False
+
+        if hasattr(sa.column(column_A), "is_not"):
+            conditions: List[BinaryExpression] = [
+                sa.and_(
+                    sa.and_(
+                        sa.column(column_A) == value[0],
+                        (sa.column(column_A) == value[0]).is_not(None),
+                    ),
+                    sa.and_(
+                        sa.column(column_B) == value[1],
+                        (sa.column(column_B) == value[1]).is_not(None),
+                    ),
+                )
+                for value in parsed_value_set
+            ]
+        else:
+            conditions: List[BinaryExpression] = [
+                sa.and_(
+                    sa.and_(
+                        sa.column(column_A) == value[0],
+                        (sa.column(column_A) == value[0]).isnot(None),
+                    ),
+                    sa.and_(
+                        sa.column(column_B) == value[1],
+                        (sa.column(column_B) == value[1]).isnot(None),
+                    ),
+                )
+                for value in parsed_value_set
+            ]
+        return sa.or_(*conditions)
 
     def _get_dialect_regex_expression(self, column, regex, positive=True):
         try:

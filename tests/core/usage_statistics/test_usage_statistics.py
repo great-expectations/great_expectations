@@ -83,7 +83,7 @@ def test_consistent_name_anonymization(
 
 
 @pytest.mark.base_data_context
-def test_opt_out_environment_variable_base_data_context(
+def test_global_override_environment_variable_base_data_context(
     in_memory_data_context_config_usage_stats_enabled, monkeypatch
 ):
     """Set the env variable GE_USAGE_STATS value to any of the following: FALSE, False, false, 0"""
@@ -98,7 +98,7 @@ def test_opt_out_environment_variable_base_data_context(
 
 
 @pytest.mark.base_data_context
-def test_opt_out_etc(
+def test_global_override_from_config_file_in_etc(
     in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch
 ):
     monkeypatch.delenv(
@@ -139,7 +139,7 @@ def test_opt_out_etc(
 
 
 @pytest.mark.base_data_context
-def test_opt_out_home_folder(
+def test_global_override_from_config_file_in_home_folder(
     in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch
 ):
     monkeypatch.delenv(
@@ -182,7 +182,7 @@ def test_opt_out_home_folder(
             assert project_config.anonymous_usage_statistics.enabled is False
 
 
-def test_opt_out_yml(tmp_path_factory, monkeypatch):
+def test_global_override_in_yml(tmp_path_factory, monkeypatch):
     monkeypatch.delenv(
         "GE_USAGE_STATS", raising=False
     )  # Undo the project-wide test default
@@ -206,344 +206,28 @@ def test_opt_out_yml(tmp_path_factory, monkeypatch):
     )
 
 
-# Test precedence: environment variable > home folder > /etc > yml
 @pytest.mark.base_data_context
-def test_opt_out_env_var_overrides_home_folder(
-    in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch
+def test_global_override_conf_overrides_yml_and_env_variable(
+    tmp_path_factory, monkeypatch
 ):
-    monkeypatch.delenv(
-        "GE_USAGE_STATS", raising=False
-    )  # Undo the project-wide test default
-    home_config_dir = tmp_path_factory.mktemp("home_dir")
-    home_config_dir = str(home_config_dir)
-    etc_config_dir = tmp_path_factory.mktemp("etc")
-    etc_config_dir = str(etc_config_dir)
-    config_dirs = [home_config_dir, etc_config_dir]
-    config_dirs = [
-        os.path.join(config_dir, "great_expectations.conf")
-        for config_dir in config_dirs
-    ]
+    """
+    What does this test and why?
 
-    enabled_config = configparser.ConfigParser()
-    enabled_config["anonymous_usage_statistics"] = {"enabled": "True"}
+    anonymous_usage_stats_enabled can be set in the following 3 places
+        - great_expectations.yml (YML)
+        - GE_USAGE_STATS environment variable (env)
+        - conf file (conf)
+    If it is set as `False` in *any* of the 3 places, the global value is set to `False`
 
-    with open(
-        os.path.join(home_config_dir, "great_expectations.conf"), "w"
-    ) as configfile:
-        enabled_config.write(configfile)
+    This test tests the following scenario:
+        - `True` in YML
+        - `True` in env
+        - `False` in conf
 
-    monkeypatch.setenv("GE_USAGE_STATS", "False")
+    Therefore the global value is set to `False`
+    """
+    monkeypatch.setenv("GE_USAGE_STATS", "True")
 
-    with mock.patch(
-        "great_expectations.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
-        config_dirs,
-    ):
-        assert (
-            in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.enabled
-            is True
-        )
-        context = BaseDataContext(in_memory_data_context_config_usage_stats_enabled)
-        project_config = context._project_config
-        assert project_config.anonymous_usage_statistics.enabled is False
-
-
-@pytest.mark.base_data_context
-def test_opt_out_env_var_overrides_etc(
-    in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch
-):
-    monkeypatch.delenv(
-        "GE_USAGE_STATS", raising=False
-    )  # Undo the project-wide test default
-    home_config_dir = tmp_path_factory.mktemp("home_dir")
-    home_config_dir = str(home_config_dir)
-    etc_config_dir = tmp_path_factory.mktemp("etc")
-    etc_config_dir = str(etc_config_dir)
-    config_dirs = [home_config_dir, etc_config_dir]
-    config_dirs = [
-        os.path.join(config_dir, "great_expectations.conf")
-        for config_dir in config_dirs
-    ]
-
-    enabled_config = configparser.ConfigParser()
-    enabled_config["anonymous_usage_statistics"] = {"enabled": "True"}
-
-    with open(
-        os.path.join(etc_config_dir, "great_expectations.conf"), "w"
-    ) as configfile:
-        enabled_config.write(configfile)
-
-    monkeypatch.setenv("GE_USAGE_STATS", "False")
-
-    with mock.patch(
-        "great_expectations.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
-        config_dirs,
-    ):
-        assert (
-            in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.enabled
-            is True
-        )
-        context = BaseDataContext(in_memory_data_context_config_usage_stats_enabled)
-        project_config = context._project_config
-        assert project_config.anonymous_usage_statistics.enabled is False
-
-
-def test_opt_out_env_var_overrides_yml(tmp_path_factory, monkeypatch):
-    monkeypatch.delenv(
-        "GE_USAGE_STATS", raising=False
-    )  # Undo the project-wide test default
-    project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(context_path, exist_ok=True)
-    fixture_dir = file_relative_path(__file__, "../../test_fixtures")
-
-    shutil.copy(
-        os.path.join(
-            fixture_dir, "great_expectations_basic_with_usage_stats_enabled.yml"
-        ),
-        str(os.path.join(context_path, "great_expectations.yml")),
-    )
-
-    assert (
-        DataContext(
-            context_root_dir=context_path
-        )._project_config.anonymous_usage_statistics.enabled
-        is True
-    )
-
-    monkeypatch.setenv("GE_USAGE_STATS", "False")
-    context = DataContext(context_root_dir=context_path)
-    project_config = context._project_config
-    assert project_config.anonymous_usage_statistics.enabled is False
-
-
-def test_opt_out_env_var_overrides_yml_v013(tmp_path_factory, monkeypatch):
-    monkeypatch.delenv(
-        "GE_USAGE_STATS", raising=False
-    )  # Undo the project-wide test default
-    project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(context_path, exist_ok=True)
-    fixture_dir = file_relative_path(__file__, "../../test_fixtures")
-
-    shutil.copy(
-        os.path.join(
-            fixture_dir, "great_expectations_v013_basic_with_usage_stats_enabled.yml"
-        ),
-        str(os.path.join(context_path, "great_expectations.yml")),
-    )
-
-    assert (
-        DataContext(
-            context_root_dir=context_path
-        )._project_config.anonymous_usage_statistics.enabled
-        is True
-    )
-
-    monkeypatch.setenv("GE_USAGE_STATS", "False")
-    context = DataContext(context_root_dir=context_path)
-    project_config = context._project_config
-    assert project_config.anonymous_usage_statistics.enabled is False
-
-
-@pytest.mark.base_data_context
-def test_opt_out_home_folder_overrides_etc(
-    in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch
-):
-    monkeypatch.delenv(
-        "GE_USAGE_STATS", raising=False
-    )  # Undo the project-wide test default
-    home_config_dir = tmp_path_factory.mktemp("home_dir")
-    home_config_dir = str(home_config_dir)
-    etc_config_dir = tmp_path_factory.mktemp("etc")
-    etc_config_dir = str(etc_config_dir)
-    config_dirs = [home_config_dir, etc_config_dir]
-    config_dirs = [
-        os.path.join(config_dir, "great_expectations.conf")
-        for config_dir in config_dirs
-    ]
-
-    enabled_config = configparser.ConfigParser()
-    enabled_config["anonymous_usage_statistics"] = {"enabled": "True"}
-
-    disabled_config = configparser.ConfigParser()
-    disabled_config["anonymous_usage_statistics"] = {"enabled": "False"}
-
-    with open(
-        os.path.join(home_config_dir, "great_expectations.conf"), "w"
-    ) as configfile:
-        disabled_config.write(configfile)
-    with open(
-        os.path.join(etc_config_dir, "great_expectations.conf"), "w"
-    ) as configfile:
-        enabled_config.write(configfile)
-
-    with mock.patch(
-        "great_expectations.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
-        config_dirs,
-    ):
-        assert (
-            in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.enabled
-            is True
-        )
-        context = BaseDataContext(in_memory_data_context_config_usage_stats_enabled)
-        project_config = context._project_config
-        assert project_config.anonymous_usage_statistics.enabled is False
-
-
-def test_opt_out_home_folder_overrides_yml(tmp_path_factory, monkeypatch):
-    monkeypatch.delenv(
-        "GE_USAGE_STATS", raising=False
-    )  # Undo the project-wide test default
-    home_config_dir = tmp_path_factory.mktemp("home_dir")
-    home_config_dir = str(home_config_dir)
-    etc_config_dir = tmp_path_factory.mktemp("etc")
-    etc_config_dir = str(etc_config_dir)
-    config_dirs = [home_config_dir, etc_config_dir]
-    config_dirs = [
-        os.path.join(config_dir, "great_expectations.conf")
-        for config_dir in config_dirs
-    ]
-
-    disabled_config = configparser.ConfigParser()
-    disabled_config["anonymous_usage_statistics"] = {"enabled": "False"}
-
-    with open(
-        os.path.join(home_config_dir, "great_expectations.conf"), "w"
-    ) as configfile:
-        disabled_config.write(configfile)
-
-    project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(context_path, exist_ok=True)
-    fixture_dir = file_relative_path(__file__, "../../test_fixtures")
-
-    shutil.copy(
-        os.path.join(
-            fixture_dir, "great_expectations_basic_with_usage_stats_enabled.yml"
-        ),
-        str(os.path.join(context_path, "great_expectations.yml")),
-    )
-
-    assert (
-        DataContext(
-            context_root_dir=context_path
-        )._project_config.anonymous_usage_statistics.enabled
-        is True
-    )
-
-    with mock.patch(
-        "great_expectations.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
-        config_dirs,
-    ):
-        context = DataContext(context_root_dir=context_path)
-        project_config = context._project_config
-        assert project_config.anonymous_usage_statistics.enabled is False
-
-
-def test_opt_out_home_folder_overrides_yml_v013(tmp_path_factory, monkeypatch):
-    monkeypatch.delenv(
-        "GE_USAGE_STATS", raising=False
-    )  # Undo the project-wide test default
-    home_config_dir = tmp_path_factory.mktemp("home_dir")
-    home_config_dir = str(home_config_dir)
-    etc_config_dir = tmp_path_factory.mktemp("etc")
-    etc_config_dir = str(etc_config_dir)
-    config_dirs = [home_config_dir, etc_config_dir]
-    config_dirs = [
-        os.path.join(config_dir, "great_expectations.conf")
-        for config_dir in config_dirs
-    ]
-
-    disabled_config = configparser.ConfigParser()
-    disabled_config["anonymous_usage_statistics"] = {"enabled": "False"}
-
-    with open(
-        os.path.join(home_config_dir, "great_expectations.conf"), "w"
-    ) as configfile:
-        disabled_config.write(configfile)
-
-    project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(context_path, exist_ok=True)
-    fixture_dir = file_relative_path(__file__, "../../test_fixtures")
-
-    shutil.copy(
-        os.path.join(
-            fixture_dir, "great_expectations_v013_basic_with_usage_stats_enabled.yml"
-        ),
-        str(os.path.join(context_path, "great_expectations.yml")),
-    )
-
-    assert (
-        DataContext(
-            context_root_dir=context_path
-        )._project_config.anonymous_usage_statistics.enabled
-        is True
-    )
-
-    with mock.patch(
-        "great_expectations.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
-        config_dirs,
-    ):
-        context = DataContext(context_root_dir=context_path)
-        project_config = context._project_config
-        assert project_config.anonymous_usage_statistics.enabled is False
-
-
-def test_opt_out_etc_overrides_yml(tmp_path_factory, monkeypatch):
-    monkeypatch.delenv(
-        "GE_USAGE_STATS", raising=False
-    )  # Undo the project-wide test default
-    home_config_dir = tmp_path_factory.mktemp("home_dir")
-    home_config_dir = str(home_config_dir)
-    etc_config_dir = tmp_path_factory.mktemp("etc")
-    etc_config_dir = str(etc_config_dir)
-    config_dirs = [home_config_dir, etc_config_dir]
-    config_dirs = [
-        os.path.join(config_dir, "great_expectations.conf")
-        for config_dir in config_dirs
-    ]
-
-    disabled_config = configparser.ConfigParser()
-    disabled_config["anonymous_usage_statistics"] = {"enabled": "False"}
-
-    with open(
-        os.path.join(etc_config_dir, "great_expectations.conf"), "w"
-    ) as configfile:
-        disabled_config.write(configfile)
-
-    project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(context_path, exist_ok=True)
-    fixture_dir = file_relative_path(__file__, "../../test_fixtures")
-
-    shutil.copy(
-        os.path.join(
-            fixture_dir, "great_expectations_basic_with_usage_stats_enabled.yml"
-        ),
-        str(os.path.join(context_path, "great_expectations.yml")),
-    )
-
-    assert (
-        DataContext(
-            context_root_dir=context_path
-        )._project_config.anonymous_usage_statistics.enabled
-        is True
-    )
-
-    with mock.patch(
-        "great_expectations.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
-        config_dirs,
-    ):
-        context = DataContext(context_root_dir=context_path)
-        project_config = context._project_config
-        assert project_config.anonymous_usage_statistics.enabled is False
-
-
-def test_opt_out_etc_overrides_yml_v013(tmp_path_factory, monkeypatch):
-    monkeypatch.delenv(
-        "GE_USAGE_STATS", raising=False
-    )  # Undo the project-wide test default
     home_config_dir = tmp_path_factory.mktemp("home_dir")
     home_config_dir = str(home_config_dir)
     etc_config_dir = tmp_path_factory.mktemp("etc")
@@ -579,6 +263,138 @@ def test_opt_out_etc_overrides_yml_v013(tmp_path_factory, monkeypatch):
             context_root_dir=context_path
         )._project_config.anonymous_usage_statistics.enabled
         is True
+    )
+
+    with mock.patch(
+        "great_expectations.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
+        config_dirs,
+    ):
+        context = DataContext(context_root_dir=context_path)
+        project_config = context._project_config
+        assert project_config.anonymous_usage_statistics.enabled is False
+
+
+@pytest.mark.base_data_context
+def test_global_override_env_overrides_yml_and_conf(tmp_path_factory, monkeypatch):
+    """
+    What does this test and why?
+
+    anonymous_usage_stats_enabled can be set in the following 3 places
+        - great_expectations.yml (YML)
+        - GE_USAGE_STATS environment variable (env)
+        - conf file (conf)
+    If it is set as `False` in *any* of the 3 places, the global value is set to `False`
+
+    This test tests the following scenario:
+        - `True` in YML
+        - `False` in env
+        - `True` in conf
+
+    Therefore the global value is set to `False`
+    """
+    monkeypatch.setenv("GE_USAGE_STATS", "False")
+
+    home_config_dir = tmp_path_factory.mktemp("home_dir")
+    home_config_dir = str(home_config_dir)
+    etc_config_dir = tmp_path_factory.mktemp("etc")
+    etc_config_dir = str(etc_config_dir)
+    config_dirs = [home_config_dir, etc_config_dir]
+    config_dirs = [
+        os.path.join(config_dir, "great_expectations.conf")
+        for config_dir in config_dirs
+    ]
+
+    disabled_config = configparser.ConfigParser()
+    disabled_config["anonymous_usage_statistics"] = {"enabled": "True"}
+
+    with open(
+        os.path.join(etc_config_dir, "great_expectations.conf"), "w"
+    ) as configfile:
+        disabled_config.write(configfile)
+
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(context_path, exist_ok=True)
+    fixture_dir = file_relative_path(__file__, "../../test_fixtures")
+
+    shutil.copy(
+        os.path.join(
+            fixture_dir, "great_expectations_v013_basic_with_usage_stats_enabled.yml"
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+
+    assert (
+        DataContext(
+            context_root_dir=context_path
+        )._project_config.anonymous_usage_statistics.enabled
+        is False
+    )
+
+    with mock.patch(
+        "great_expectations.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
+        config_dirs,
+    ):
+        context = DataContext(context_root_dir=context_path)
+        project_config = context._project_config
+        assert project_config.anonymous_usage_statistics.enabled is False
+
+
+@pytest.mark.base_data_context
+def test_global_override_yml_overrides_env_and_conf(tmp_path_factory, monkeypatch):
+    """
+    What does this test and why?
+
+    anonymous_usage_stats_enabled can be set in the following 3 places
+        - great_expectations.yml (YML)
+        - GE_USAGE_STATS environment variable (env)
+        - conf file (conf)
+    If it is set as `False` in *any* of the 3 places, the global value is set to `False`
+
+    This test tests the following scenario:
+        - `False` in YML
+        - `True` in env
+        - `True` in conf
+
+    Therefore the global value is set to `False`
+    """
+    monkeypatch.setenv("GE_USAGE_STATS", "True")
+
+    home_config_dir = tmp_path_factory.mktemp("home_dir")
+    home_config_dir = str(home_config_dir)
+    etc_config_dir = tmp_path_factory.mktemp("etc")
+    etc_config_dir = str(etc_config_dir)
+    config_dirs = [home_config_dir, etc_config_dir]
+    config_dirs = [
+        os.path.join(config_dir, "great_expectations.conf")
+        for config_dir in config_dirs
+    ]
+
+    disabled_config = configparser.ConfigParser()
+    disabled_config["anonymous_usage_statistics"] = {"enabled": "True"}
+
+    with open(
+        os.path.join(etc_config_dir, "great_expectations.conf"), "w"
+    ) as configfile:
+        disabled_config.write(configfile)
+
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(context_path, exist_ok=True)
+    fixture_dir = file_relative_path(__file__, "../../test_fixtures")
+
+    shutil.copy(
+        os.path.join(
+            fixture_dir, "great_expectations_basic_with_usage_stats_disabled.yml"
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+
+    assert (
+        DataContext(
+            context_root_dir=context_path
+        )._project_config.anonymous_usage_statistics.enabled
+        is False
     )
 
     with mock.patch(

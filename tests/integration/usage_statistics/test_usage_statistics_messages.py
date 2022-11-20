@@ -2710,7 +2710,7 @@ valid_usage_statistics_messages = {
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
     ],
-    UsageStatsEvents.CLOUD_MIGRATE.value: [cloud_migrate],
+    UsageStatsEvents.CLOUD_MIGRATE: [cloud_migrate],
 }
 
 test_messages = []

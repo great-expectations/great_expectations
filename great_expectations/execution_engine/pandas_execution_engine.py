@@ -22,6 +22,7 @@ from great_expectations.core.batch_spec import (
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import AzureUrl, GCSUrl, S3Url, sniff_s3_compression
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine.execution_engine import SplitDomainKwargs
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.execution_engine.split_and_sample.pandas_data_sampler import (
     PandasDataSampler,
@@ -112,9 +113,9 @@ Notes:
         self.discard_subset_failing_expectations = kwargs.pop(
             "discard_subset_failing_expectations", False
         )
-        boto3_options: dict = kwargs.pop("boto3_options", {})
-        azure_options: dict = kwargs.pop("azure_options", {})
-        gcs_options: dict = kwargs.pop("gcs_options", {})
+        boto3_options: Dict[str, dict] = kwargs.pop("boto3_options", {})
+        azure_options: Dict[str, dict] = kwargs.pop("azure_options", {})
+        gcs_options: Dict[str, dict] = kwargs.pop("gcs_options", {})
 
         # Instantiate cloud provider clients as None at first.
         # They will be instantiated if/when passed cloud-specific in BatchSpec is passed in
@@ -197,7 +198,7 @@ Notes:
 
         super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
 
-    def get_batch_data_and_markers(
+    def get_batch_data_and_markers(  # noqa: C901 - 22
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:  # batch_data
         # We need to build a batch_markers to be used in the dataframe
@@ -257,7 +258,7 @@ Notes:
             logger.debug(
                 f"Fetching s3 object. Bucket: {s3_url.bucket} Key: {s3_url.key}"
             )
-            reader_fn = self._get_reader_fn(reader_method, s3_url.key)
+            reader_fn: Callable = self._get_reader_fn(reader_method, s3_url.key)
             buf = BytesIO(s3_object["Body"].read())
             buf.seek(0)
             df = reader_fn(buf, **reader_options)
@@ -272,9 +273,9 @@ Notes:
                         but the ExecutionEngine does not have an Azure client configured. Please check your config."""
                 )
             azure_engine = self._azure
-            reader_method: str = batch_spec.reader_method
-            reader_options: dict = batch_spec.reader_options or {}
-            path: str = batch_spec.path
+            reader_method = batch_spec.reader_method
+            reader_options = batch_spec.reader_options or {}
+            path = batch_spec.path
             azure_url = AzureUrl(path)
             blob_client = azure_engine.get_blob_client(
                 container=azure_url.container, blob=azure_url.blob
@@ -299,8 +300,8 @@ Notes:
                 )
             gcs_engine = self._gcs
             gcs_url = GCSUrl(batch_spec.path)
-            reader_method: str = batch_spec.reader_method
-            reader_options: dict = batch_spec.reader_options or {}
+            reader_method = batch_spec.reader_method
+            reader_options = batch_spec.reader_options or {}
             try:
                 gcs_bucket = gcs_engine.get_bucket(gcs_url.bucket)
                 gcs_blob = gcs_bucket.blob(gcs_url.blob)
@@ -318,10 +319,10 @@ Bucket: {error}"""
             df = reader_fn(buf, **reader_options)
 
         elif isinstance(batch_spec, PathBatchSpec):
-            reader_method: str = batch_spec.reader_method
-            reader_options: dict = batch_spec.reader_options
-            path: str = batch_spec.path
-            reader_fn: Callable = self._get_reader_fn(reader_method, path)
+            reader_method = batch_spec.reader_method
+            reader_options = batch_spec.reader_options
+            path = batch_spec.path
+            reader_fn = self._get_reader_fn(reader_method, path)
             df = reader_fn(path, **reader_options)
 
         else:
@@ -443,13 +444,13 @@ not {batch_spec.__class__.__name__}"""
                 f'Unable to find reader_method "{reader_method}" in pandas.'
             )
 
-    def resolve_metric_bundle(
+    def resolve_metric_bundle(  # type: ignore[empty-body]
         self, metric_fn_bundle
     ) -> Dict[Tuple[str, str, str], Any]:
         """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
         pass  # This method is NO-OP for PandasExecutionEngine (no bundling for direct execution computational backend).
 
-    def get_domain_records(
+    def get_domain_records(  # noqa: C901 - 17
         self,
         domain_kwargs: dict,
     ) -> pd.DataFrame:
@@ -602,15 +603,15 @@ Please use "neither" instead.
               - a dictionary of accessor_domain_kwargs, describing any accessors needed to
                 identify the domain within the compute domain
         """
-        data = self.get_domain_records(domain_kwargs)
-
-        table = domain_kwargs.get("table", None)
+        table: str = domain_kwargs.get("table", None)
         if table:
             raise ValueError(
                 "PandasExecutionEngine does not currently support multiple named tables."
             )
 
-        split_domain_kwargs = self._split_domain_kwargs(
+        data: pd.DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
+
+        split_domain_kwargs: SplitDomainKwargs = self._split_domain_kwargs(
             domain_kwargs, domain_type, accessor_keys
         )
 

@@ -13,6 +13,8 @@ skip_gitignore = true
 extend_skip_glob = ['venv/*', 'docs/*']
 
 [tool.mypy]
+python_version = "3.7"
+plugins = ["pydantic.mypy"]
 files = [
     "great_expectations",
     # "contrib" # ignore entire `contrib` package
@@ -31,9 +33,9 @@ exclude = [
     # TODO: complete typing for the following modules and remove from exclude list
     # number is the current number of typing errors for the excluded pattern
     'checkpoint/actions\.py',  # 18
-    'checkpoint/checkpoint\.py',  # 26
+    'checkpoint/checkpoint\.py',  # 22
     'checkpoint/configurator\.py', # 2
-    'checkpoint/types',  # 34
+    'checkpoint/types/checkpoint_result\.py',  # 34
     'checkpoint/util\.py',  # 5
     'cli/batch_request\.py',  # 11
     'cli/checkpoint\.py',  # 9
@@ -52,27 +54,32 @@ exclude = [
     'core/expectation_configuration\.py', # 21
     'core/expectation_diagnostics', # 20
     'core/expectation_validation_result\.py', # 9
-    'core/usage_statistics/anonymizers', # 96
+    'core/usage_statistics/anonymizers/action_anonymizer\.py', # 1
+    'core/usage_statistics/anonymizers/anonymizer\.py', # 6
+    'core/usage_statistics/anonymizers/base\.py', # 8
+    'core/usage_statistics/anonymizers/batch_anonymizer\.py', # 10
+    'core/usage_statistics/anonymizers/batch_request_anonymizer\.py', # 16
+    'core/usage_statistics/anonymizers/checkpoint_anonymizer\.py', # 16
+    'core/usage_statistics/anonymizers/data_connector_anonymizer\.py', # 3
+    'core/usage_statistics/anonymizers/data_docs_anonymizer\.py', # 5
+    'core/usage_statistics/anonymizers/datasource_anonymizer\.py', # 9
+    'core/usage_statistics/anonymizers/expectation_anonymizer\.py', # 6
+    'core/usage_statistics/anonymizers/profiler_anonymizer\.py', # 2
+    'core/usage_statistics/anonymizers/store_anonymizer\.py', # 6
+    'core/usage_statistics/anonymizers/store_backend_anonymizer\.py', # 5
+    'core/usage_statistics/anonymizers/validation_operator_anonymizer\.py',  # 5
     'core/usage_statistics/usage_statistics\.py', # 19
     'core/usage_statistics/util\.py', # 2
     'core/util\.py', # 18
     'dataset/sparkdf_dataset\.py', # 3
     'dataset/sqlalchemy_dataset\.py', # 16
     'datasource/data_connector/configured_asset_sql_data_connector\.py',  # 47
-    'execution_engine/execution_engine\.py',  # 7
-    'execution_engine/pandas_execution_engine\.py',  # 9
-    'execution_engine/sparkdf_execution_engine\.py',  # 8
-    'execution_engine/split_and_sample/data_sampler\.py',  # 1
     'execution_engine/split_and_sample/data_splitter\.py',  # 6
     'execution_engine/split_and_sample/pandas_data_sampler\.py',  # 16
-    'execution_engine/split_and_sample/pandas_data_splitter\.py',  # 2
     'execution_engine/split_and_sample/sparkdf_data_sampler\.py',  # 11
     'execution_engine/split_and_sample/sparkdf_data_splitter\.py',  # 4
     'execution_engine/split_and_sample/sqlalchemy_data_sampler\.py',  # 10
     'execution_engine/split_and_sample/sqlalchemy_data_splitter\.py',  # 22
-    'execution_engine/sqlalchemy_batch_data\.py',  # 1
-    'execution_engine/sqlalchemy_dialect.py',  # 1
-    'execution_engine/sqlalchemy_execution_engine\.py',  # 8
     'expectations/core/expect_column_', # 214
     'expectations/core/expect_compound_columns_to_be_unique\.py', # 3
     'expectations/core/expect_multicolumn_sum_to_equal\.py', # 4
@@ -80,8 +87,12 @@ exclude = [
     'expectations/core/expect_select_column_values_to_be_unique_within_record\.py', # 3
     'expectations/core/expect_table_column', # 25
     'expectations/core/expect_table_row_count_to', # 5
-    'expectations/expectation\.py',  # 59
-    'expectations/metrics',  # 130
+    'expectations/metrics/column_aggregate_metrics/column_', # 21
+    'expectations/metrics/map_metric_provider\.py',  # 57
+    'expectations/metrics/metric_provider\.py',  # 12
+    'expectations/metrics/query_metrics/query_column_pair\.py', # 9
+    'expectations/metrics/query_metrics/query_column\.py', # 7
+    'expectations/metrics/util\.py', # 11
     'expectations/regex_based_column_map_expectation\.py',  # 3
     'expectations/registry\.py',  # 19
     'expectations/row_conditions\.py',  # 4
@@ -104,7 +115,7 @@ exclude = [
     'render/renderer/v3/suite_edit_notebook_renderer\.py',  # 11
     'render/renderer/v3/suite_profile_notebook_renderer\.py',  # 4
     'render/util\.py',  # 2
-    'render/view',  # 11
+    'render/view/view\.py',  # 11
     'rule_based_profiler/attributed_resolved_metrics\.py',  # 4
     'rule_based_profiler/builder\.py',  # 4
     'rule_based_profiler/config/base\.py',  # 13
@@ -121,7 +132,6 @@ exclude = [
     'rule_based_profiler/domain_builder/map_metric_column_domain_builder\.py',  # 8
     'rule_based_profiler/domain_builder/multi_column_domain_builder\.py',  # 4
     'rule_based_profiler/domain_builder/table_domain_builder\.py',  # 1
-    'rule_based_profiler/domain\.py', # 4
     'rule_based_profiler/estimators/bootstrap_numeric_range_estimator\.py',  # 8
     'rule_based_profiler/estimators/exact_numeric_range_estimator\.py',  # 3
     'rule_based_profiler/estimators/kde_numeric_range_estimator\.py',  # 7
@@ -146,14 +156,18 @@ exclude = [
     'rule_based_profiler/parameter_container\.py',  # 7
     'rule_based_profiler/rule_based_profiler_result\.py',  # 1
     'rule_based_profiler/rule_based_profiler\.py',  # 40
-    'rule_based_profiler/rule_state\.py',  # 5
     'rule_based_profiler/rule/rule.py',  # 5
     'validation_operators/types/validation_operator_result\.py', # 35
     'validation_operators/validation_operators\.py',  # 16
     'validator/exception_info\.py', # 1
-    'validator/validation_graph\.py',  # 2
     'validator/validator\.py', # 54
 ]
+
+[tool.pydantic-mypy]
+# https://pydantic-docs.helpmanual.io/mypy_plugin/#plugin-settings
+init_typed = true
+warn_required_dynamic_aliases = true
+warn_untyped_fields = true
 
 [tool.pytest.ini_options]
 filterwarnings = [

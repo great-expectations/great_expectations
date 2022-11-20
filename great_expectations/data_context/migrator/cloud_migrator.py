@@ -13,8 +13,8 @@ Usage:
 # Once tested, the boolean flag is to be flipped
 migrator = gx.CloudMigrator.migrate(context=context, test_migrate=True)
 
-# If any validations failed during the `migrate` call
-migrator.retry_unsuccessful_validations()
+# If the migrate process failed while processing validation results: (Optional)
+migrator.retry_migrate_validation_results()
 ```
 """
 from __future__ import annotations
@@ -29,6 +29,7 @@ from great_expectations.core.configuration import AbstractConfig
 from great_expectations.core.http import create_session
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
@@ -40,9 +41,8 @@ from great_expectations.data_context.migrator.configuration_bundle import (
     ConfigurationBundleJsonSerializer,
     ConfigurationBundleSchema,
 )
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-    GeCloudStoreBackend,
+from great_expectations.data_context.store.gx_cloud_store_backend import (
+    GXCloudStoreBackend,
     construct_json_payload,
     construct_url,
     get_user_friendly_error_message,
@@ -116,7 +116,7 @@ class CloudMigrator:
         Returns:
             CloudMigrator instance
         """
-        event = UsageStatsEvents.CLOUD_MIGRATE.value
+        event = UsageStatsEvents.CLOUD_MIGRATE
         event_payload = {"organization_id": ge_cloud_organization_id}
         try:
             cloud_migrator: CloudMigrator = cls(
@@ -147,7 +147,7 @@ class CloudMigrator:
                 "Migration failed. Please check the error message for more details."
             ) from e
 
-    def retry_unsuccessful_validations(self) -> None:
+    def retry_migrate_validation_results(self) -> None:
         if not self._unsuccessful_validations:
             print("No unsuccessful validations found!")
             return
@@ -310,14 +310,14 @@ class CloudMigrator:
     def _process_validation_results(
         self, serialized_validation_results: Dict[str, dict], test_migrate: bool
     ) -> None:
-        # 20220928 - Chetan - We want to use the static lookup tables in GeCloudStoreBackend
+        # 20220928 - Chetan - We want to use the static lookup tables in GXCloudStoreBackend
         # to ensure the appropriate URL and payload shape. This logic should be moved to
         # a more central location.
-        resource_type = GeCloudRESTResource.EXPECTATION_VALIDATION_RESULT
-        resource_name = GeCloudStoreBackend.RESOURCE_PLURALITY_LOOKUP_DICT[
+        resource_type = GXCloudRESTResource.EXPECTATION_VALIDATION_RESULT
+        resource_name = GXCloudStoreBackend.RESOURCE_PLURALITY_LOOKUP_DICT[
             resource_type
         ]
-        attributes_key = GeCloudStoreBackend.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
+        attributes_key = GXCloudStoreBackend.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
         unsuccessful_validations = {}
 
@@ -391,7 +391,7 @@ class CloudMigrator:
         print(
             "\nTo retry uploading these validation results, you can use the following "
             "code snippet:\n"
-            "  `migrator.retry_unsuccessful_validations()`"
+            "  `migrator.retry_migrate_validation_results()`"
         )
 
     def _print_migration_introduction_message(self) -> None:

@@ -35,7 +35,11 @@ from great_expectations.render import RenderedAtomicContent, RenderedAtomicConte
 from great_expectations.types import SerializableDictDot
 
 if TYPE_CHECKING:
+    from great_expectations.data_context import DataContext
+    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation import Expectation
     from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
+    from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -981,9 +985,7 @@ class ExpectationConfiguration(SerializableDictDot):
         self,
         evaluation_parameters,
         interactive_evaluation: bool = True,
-        data_context: Optional[
-            Any
-        ] = None,  # Can't type as DataContext due to import cycle
+        data_context: Optional[DataContext] = None,
     ) -> None:
         if self._raw_kwargs is not None:
             logger.debug(
@@ -1222,7 +1224,7 @@ class ExpectationConfiguration(SerializableDictDot):
         return runtime_kwargs
 
     def applies_to_same_domain(
-        self, other_expectation_configuration: "ExpectationConfiguration"  # noqa: F821
+        self, other_expectation_configuration: ExpectationConfiguration
     ) -> bool:
         if (
             not self.expectation_type
@@ -1237,7 +1239,7 @@ class ExpectationConfiguration(SerializableDictDot):
     # noinspection PyPep8Naming
     def isEquivalentTo(
         self,
-        other: Union[dict, "ExpectationConfiguration"],  # noqa: F821
+        other: Union[dict, ExpectationConfiguration],
         match_type: str = "success",
     ) -> bool:
         """ExpectationConfiguration equivalence does not include meta, and relies on *equivalence* of kwargs."""
@@ -1382,10 +1384,10 @@ class ExpectationConfiguration(SerializableDictDot):
 
     def validate(
         self,
-        validator: Any,  # Can't type as Validator due to import cycle
+        validator: Validator,
         runtime_configuration=None,
     ):
-        expectation_impl: "Expectation" = self._get_expectation_impl()  # noqa: F821
+        expectation_impl: Expectation = self._get_expectation_impl()
         return expectation_impl(self).validate(
             validator=validator,
             runtime_configuration=runtime_configuration,
@@ -1394,13 +1396,13 @@ class ExpectationConfiguration(SerializableDictDot):
     def metrics_validate(
         self,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: "ExecutionEngine" = None,  # noqa: F821
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
         **kwargs: dict,
     ):
-        expectation_impl: "Expectation" = self._get_expectation_impl()  # noqa: F821
+        expectation_impl: Expectation = self._get_expectation_impl()
         return expectation_impl(self).metrics_validate(
-            metrics,
+            metrics=metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,
         )
@@ -1428,7 +1430,7 @@ class ExpectationConfiguration(SerializableDictDot):
         Renders content using the atomic prescriptive renderer for this Expectation Configuration to
             ExpectationConfiguration.rendered_content.
         """
-        inline_renderer_config: "InlineRendererConfig" = {  # type: ignore[assignment]
+        inline_renderer_config: InlineRendererConfig = {
             "class_name": "InlineRenderer",
             "render_object": self,
         }

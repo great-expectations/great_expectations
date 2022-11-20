@@ -65,7 +65,7 @@ def test_column_partition_metric(
     For standard numerical data, test set contains 12 evenly spaced integers.
     For "datetime.datetime" data, test set contains 12 dates, starting with January 1, 2021, separated by 7 days.
 
-    Expected partion boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
+    Expected partition boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
     """
     validator_with_data: Validator = get_test_validator_with_data(
         execution_engine=backend,
@@ -90,7 +90,6 @@ def test_column_partition_metric(
             "n_bins": n_bins,
             "allow_relative_error": False,
         },
-        metric_dependencies=None,
     )
     results = metrics_calculator.compute_metrics(metric_configurations=[desired_metric])
 
@@ -110,7 +109,6 @@ def test_column_partition_metric(
             "n_bins": n_bins,
             "allow_relative_error": False,
         },
-        metric_dependencies=None,
     )
     results = metrics_calculator.compute_metrics(metric_configurations=[desired_metric])
 
@@ -148,8 +146,8 @@ def test_get_metric_calls_get_metrics_and_returns_correct_result():
     class DummyExecutionEngine:
         pass
 
-    dummy_execution_engine = cast(ExecutionEngine, DummyExecutionEngine)
-    metrics_calculator = MetricsCalculator(execution_engine=dummy_execution_engine)
+    execution_engine = cast(ExecutionEngine, DummyExecutionEngine)
+    metrics_calculator = MetricsCalculator(execution_engine=execution_engine)
 
     metric_name = "my_metric_name"
     actual_metric_value = "my_metric_value"

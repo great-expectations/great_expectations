@@ -1,14 +1,20 @@
 from typing import List, Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     InvalidExpectationConfigurationError,
+    render_evaluation_parameter_string,
 )
-from great_expectations.expectations.util import render_evaluation_parameter_string
-from great_expectations.render import LegacyDescriptiveRendererType, LegacyRendererType
+from great_expectations.render import (
+    LegacyDescriptiveRendererType,
+    LegacyRendererType,
+    RenderedStringTemplateContent,
+)
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -34,7 +40,9 @@ except ImportError:
 
 
 class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
-    """Expect column entries to be strings that do NOT match a given regular expression. The regex must not match \
+    """Expect the column entries to be strings that do NOT match a given regular expression.
+
+    The regex must not match \
     any portion of the provided string. For example, "[at]+" would identify the following strings as expected: \
     "fish", "dog", and the following as unexpected: "cat", "hat".
 
@@ -182,16 +190,15 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -260,16 +267,15 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -328,10 +334,10 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
     )
     def _descriptive_column_properties_table_regex_count_row_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         assert result, "Must pass in result."

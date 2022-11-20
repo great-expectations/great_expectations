@@ -3,6 +3,7 @@ from unittest import mock
 
 import pytest
 
+from great_expectations.core.config_provider import _ConfigurationProvider
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.data_context_variables import (
     DataContextVariables,
@@ -23,20 +24,31 @@ class StubDatasourceStore(DatasourceStore):
         pass
 
 
+class StubConfigurationProvider(_ConfigurationProvider):
+    def __init__(self, config_values=None) -> None:
+        self._config_values = config_values or {}
+        super().__init__()
+
+    def get_values(self):
+        return self._config_values
+
+
 class FakeAbstractDataContext(AbstractDataContext):
-    def __init__(self):
+    def __init__(
+        self, config_provider: StubConfigurationProvider = StubConfigurationProvider()
+    ) -> None:
         """Override __init__ with only the needed attributes."""
         self._datasource_store = StubDatasourceStore()
         self._variables: Optional[DataContextVariables] = None
         self._cached_datasources: dict = {}
+        self._usage_statistics_handler = None
+        self._config_provider = config_provider
 
     def _init_variables(self):
         """Using EphemeralDataContextVariables to store in memory."""
-        return EphemeralDataContextVariables(config=DataContextConfig())
-
-    def _determine_substitutions(self):
-        """No substitutions required for these tests."""
-        return {}
+        return EphemeralDataContextVariables(
+            config=DataContextConfig(), config_provider=self.config_provider
+        )
 
     def save_expectation_suite(self):
         """Abstract method. Only a stub is needed."""
@@ -119,3 +131,45 @@ def test_save_datasource_overwrites_on_name_collision(
         assert len(context._cached_datasources) == 1
 
     assert mock_set.call_count == 2
+
+
+@pytest.mark.unit
+def test_add_datasource_sanitizes_instantiated_objs_config(
+    datasource_config_with_names: DatasourceConfig,
+):
+    # Set up fake with desired env var
+    variable = "DATA_DIR"
+    value_associated_with_variable = "a/b/c"
+    config_values = {variable: value_associated_with_variable}
+    context = FakeAbstractDataContext(
+        config_provider=StubConfigurationProvider(config_values=config_values)
+    )
+
+    # Ensure that config references the above env var
+    data_connector_name = tuple(datasource_config_with_names.data_connectors.keys())[0]
+    datasource_config_dict = datasource_config_with_names.to_json_dict()
+    datasource_config_dict["data_connectors"][data_connector_name][
+        "base_directory"
+    ] = f"${variable}"
+
+    instantiated_datasource = context.add_datasource(
+        **datasource_config_dict, save_changes=False
+    )
+
+    # Runtime object should have the substituted value for downstream usage
+    assert instantiated_datasource.data_connectors[
+        data_connector_name
+    ].base_directory.endswith(value_associated_with_variable)
+
+    # Config attached to object should mirror the runtime object
+    assert instantiated_datasource.config["data_connectors"][data_connector_name][
+        "base_directory"
+    ].endswith(value_associated_with_variable)
+
+    # Raw config attached to object should reflect what needs to be persisted (no sensitive credentials!)
+    assert (
+        instantiated_datasource._raw_config["data_connectors"][data_connector_name][
+            "base_directory"
+        ]
+        == f"${variable}"
+    )

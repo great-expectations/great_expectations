@@ -4,7 +4,7 @@ import logging
 import os
 import shutil
 import warnings
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
@@ -26,12 +26,15 @@ from great_expectations.data_context.types.base import (
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
-    GeCloudConfig,
+    GXCloudConfig,
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource
-from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
+from great_expectations.experimental.datasources.interfaces import (
+    Datasource as XDatasource,
+)
+from great_expectations.experimental.datasources.sources import _SourceFactories
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -234,6 +237,7 @@ class DataContext(BaseDataContext):
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
+        self._sources: _SourceFactories = _SourceFactories(self)
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = self._init_ge_cloud_config(
             ge_cloud_mode=ge_cloud_mode,
@@ -260,13 +264,26 @@ class DataContext(BaseDataContext):
         if self._check_for_usage_stats_sync(project_config):
             self._save_project_config()
 
+    def _attach_datasource_to_context(self, datasource: XDatasource):
+        # We currently don't allow one to overwrite a datasource with this internal method
+        if datasource.name in self.datasources:
+            raise ge_exceptions.DataContextError(
+                f"Can not write the experimental datasource {datasource.name} because a datasource of that "
+                "name already exists in the data context."
+            )
+        self.datasources[datasource.name] = datasource
+
+    @property
+    def sources(self) -> _SourceFactories:
+        return self._sources
+
     def _init_ge_cloud_config(
         self,
         ge_cloud_mode: bool,
         ge_cloud_base_url: Optional[str],
         ge_cloud_access_token: Optional[str],
         ge_cloud_organization_id: Optional[str],
-    ) -> Optional[GeCloudConfig]:
+    ) -> Optional[GXCloudConfig]:
         if not ge_cloud_mode:
             return None
 
@@ -283,7 +300,6 @@ class DataContext(BaseDataContext):
                 context_root_dir
             )
         else:
-            # Determine the "context root directory" - this is the parent of "great_expectations" dir
             context_root_dir = (
                 self.find_context_root_dir()
                 if context_root_dir is None
@@ -412,7 +428,9 @@ class DataContext(BaseDataContext):
 
         new_datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
-        ] = super().add_datasource(name=name, save_changes=True, **kwargs)
+        ] = super().add_datasource(
+            name=name, **kwargs  # type: ignore[arg-type]
+        )
         return new_datasource
 
     def update_datasource(  # type: ignore[override]
@@ -429,35 +447,15 @@ class DataContext(BaseDataContext):
 
         super().update_datasource(
             datasource=datasource,
-            save_changes=True,
         )
 
     def delete_datasource(self, name: str) -> None:  # type: ignore[override]
         logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
-        super().delete_datasource(datasource_name=name, save_changes=True)
+        super().delete_datasource(datasource_name=name)
         self._save_project_config()
 
-    def add_profiler(
-        self,
-        name: str,
-        config_version: float,
-        rules: Dict[str, dict],
-        variables: Optional[dict] = None,
-    ) -> RuleBasedProfiler:
-        """
-        Constructs a RuleBasedProfiler instance just like the parent `BaseDataContext.add_profiler`
-        but also persists the result object utilizing the context's ProfilerStore instance.
-        """
-        profiler: RuleBasedProfiler = super().add_profiler(
-            name=name,
-            config_version=config_version,
-            rules=rules,
-            variables=variables,
-        )
-        return profiler
-
     @classmethod
-    def find_context_root_dir(cls):
+    def find_context_root_dir(cls) -> str:
         result = None
         yml_path = None
         ge_home_environment = os.getenv("GE_HOME")
@@ -479,10 +477,12 @@ class DataContext(BaseDataContext):
         return result
 
     @classmethod
-    def get_ge_config_version(cls, context_root_dir=None):
+    def get_ge_config_version(
+        cls, context_root_dir: Optional[str] = None
+    ) -> Optional[float]:
         yml_path = cls.find_context_yml_file(search_start_dir=context_root_dir)
         if yml_path is None:
-            return
+            return None
 
         with open(yml_path) as f:
             config_commented_map_from_yaml = yaml.load(f)
@@ -492,8 +492,11 @@ class DataContext(BaseDataContext):
 
     @classmethod
     def set_ge_config_version(
-        cls, config_version, context_root_dir=None, validate_config_version=True
-    ):
+        cls,
+        config_version: Union[int, float],
+        context_root_dir: Optional[str] = None,
+        validate_config_version: bool = True,
+    ) -> bool:
         if not isinstance(config_version, (int, float)):
             raise ge_exceptions.UnsupportedConfigVersionError(
                 "The argument `config_version` must be a number.",
@@ -527,7 +530,9 @@ class DataContext(BaseDataContext):
         return True
 
     @classmethod
-    def find_context_yml_file(cls, search_start_dir=None):
+    def find_context_yml_file(
+        cls, search_start_dir: Optional[str] = None
+    ) -> Optional[str]:
         """Search for the yml file starting here and moving upward."""
         yml_path = None
         if search_start_dir is None:
@@ -552,12 +557,12 @@ class DataContext(BaseDataContext):
         return yml_path
 
     @classmethod
-    def does_config_exist_on_disk(cls, context_root_dir):
+    def does_config_exist_on_disk(cls, context_root_dir: str) -> bool:
         """Return True if the great_expectations.yml exists on disk."""
         return os.path.isfile(os.path.join(context_root_dir, cls.GE_YML))
 
     @classmethod
-    def is_project_initialized(cls, ge_dir):
+    def is_project_initialized(cls, ge_dir: str) -> bool:
         """
         Return True if the project is initialized.
 
@@ -577,27 +582,27 @@ class DataContext(BaseDataContext):
         )
 
     @classmethod
-    def does_project_have_a_datasource_in_config_file(cls, ge_dir):
+    def does_project_have_a_datasource_in_config_file(cls, ge_dir: str) -> bool:
         if not cls.does_config_exist_on_disk(ge_dir):
             return False
         return cls._does_context_have_at_least_one_datasource(ge_dir)
 
     @classmethod
-    def _does_context_have_at_least_one_datasource(cls, ge_dir):
+    def _does_context_have_at_least_one_datasource(cls, ge_dir: str) -> bool:
         context = cls._attempt_context_instantiation(ge_dir)
         if not isinstance(context, DataContext):
             return False
         return len(context.list_datasources()) >= 1
 
     @classmethod
-    def _does_context_have_at_least_one_suite(cls, ge_dir):
+    def _does_context_have_at_least_one_suite(cls, ge_dir: str) -> bool:
         context = cls._attempt_context_instantiation(ge_dir)
         if not isinstance(context, DataContext):
             return False
-        return len(context.list_expectation_suites()) >= 1
+        return bool(context.list_expectation_suites())
 
     @classmethod
-    def _attempt_context_instantiation(cls, ge_dir):
+    def _attempt_context_instantiation(cls, ge_dir: str) -> Optional[DataContext]:
         try:
             context = DataContext(ge_dir)
             return context
@@ -606,3 +611,4 @@ class DataContext(BaseDataContext):
             ge_exceptions.InvalidDataContextConfigError,
         ) as e:
             logger.debug(e)
+        return None

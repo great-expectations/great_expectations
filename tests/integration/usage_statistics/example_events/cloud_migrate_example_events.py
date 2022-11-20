@@ -5,7 +5,7 @@ This file contains example events primarily for usage stats schema validation te
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 
 cloud_migrate: dict = {
-    "event": UsageStatsEvents.CLOUD_MIGRATE.value,
+    "event": UsageStatsEvents.CLOUD_MIGRATE,
     "event_payload": {"organization_id": "some_organization_id_probably_uuid"},
     "success": True,
     "version": "1.0.0",

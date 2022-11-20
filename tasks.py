@@ -138,6 +138,8 @@ def type_check(
     ctx,
     packages,
     install_types=False,
+    pretty=False,
+    warn_unused_ignores=False,
     daemon=False,
     clear_cache=False,
     report=False,
@@ -157,7 +159,7 @@ def type_check(
     else:
         bin = "mypy"
 
-    ge_pkgs = [f"great_expectations/{p}" for p in packages]
+    ge_pkgs = [f"great_expectations.{p}" for p in packages]
     cmds = [
         bin,
         *ge_pkgs,
@@ -169,6 +171,10 @@ def type_check(
         cmds.extend(["--follow-imports=normal"])
     if report:
         cmds.extend(["--txt-report", "type_cov", "--html-report", "type_cov"])
+    if pretty:
+        cmds.extend(["--pretty"])
+    if warn_unused_ignores:
+        cmds.extend(["--warn-unused-ignores"])
     # use pseudo-terminal for colorized output
     ctx.run(" ".join(cmds), echo=True, pty=True)
 

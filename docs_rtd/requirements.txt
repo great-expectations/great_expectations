@@ -82,7 +82,6 @@ sphinxcontrib-jsmath==1.0.1
 sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.4
 sybil==1.4.0
-termcolor==1.1.0
 terminado==0.8.3
 testpath==0.4.4
 toml==0.10.1

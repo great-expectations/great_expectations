@@ -429,13 +429,13 @@ class MetricResolutionError(MetricError):
         self.failed_metrics = failed_metrics
 
 
-class GeCloudError(GreatExpectationsError):
+class GXCloudError(GreatExpectationsError):
     """
     Generic error used to provide additional context around Cloud-specific issues.
     """
 
 
-class GeCloudConfigurationError(GreatExpectationsError):
+class GXCloudConfigurationError(GreatExpectationsError):
     """
     Error finding and verifying the required configuration values when preparing to connect to GX Cloud
     """

@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from great_expectations.core.batch import BatchData
 from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
@@ -25,19 +26,19 @@ class SqlAlchemyBatchData(BatchData):
     def __init__(
         self,
         execution_engine,
-        record_set_name: str = None,
+        record_set_name: Optional[str] = None,
         # Option 1
-        schema_name: str = None,
-        table_name: str = None,
+        schema_name: Optional[str] = None,
+        table_name: Optional[str] = None,
         # Option 2
-        query: str = None,
+        query: Optional[str] = None,
         # Option 3
         selectable=None,
         create_temp_table: bool = True,
-        temp_table_schema_name: str = None,
+        temp_table_schema_name: Optional[str] = None,
         use_quoted_name: bool = False,
-        source_schema_name: str = None,
-        source_table_name: str = None,
+        source_schema_name: Optional[str] = None,
+        source_table_name: Optional[str] = None,
     ) -> None:
         """A Constructor used to initialize and SqlAlchemy Batch, create an id for it, and verify that all necessary
         parameters have been provided. If a Query is given, also builds a temporary table for this query
@@ -113,7 +114,7 @@ class SqlAlchemyBatchData(BatchData):
         try:
             dialect = GESqlDialect(dialect_name)
         except ValueError:
-            dialect: GESqlDialect = GESqlDialect.OTHER
+            dialect = GESqlDialect.OTHER
 
         self._dialect = dialect
 
@@ -202,7 +203,7 @@ class SqlAlchemyBatchData(BatchData):
     def use_quoted_name(self):
         return self._use_quoted_name
 
-    def _create_temporary_table(
+    def _create_temporary_table(  # noqa: C901 - 18
         self, temp_table_name, query, temp_table_schema_name=None
     ) -> None:
         """

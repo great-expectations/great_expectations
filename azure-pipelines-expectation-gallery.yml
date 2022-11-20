@@ -41,7 +41,7 @@ resources:
     ports:
       - 1433:1433
   - container: trino
-    image: trinodb/trino:379
+    image: trinodb/trino:400
     ports:
       - 8088:8080
 
@@ -68,6 +68,8 @@ stages:
 
                 [GEChanged]
                 great_expectations/**/*.py
+                pyproject.toml
+                setup.cfg
                 tests/**
 
                 [ScriptsChanged]
@@ -102,7 +104,12 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install "google-cloud-bigquery-storage" -r requirements-dev-all-contrib-expectations.txt -e "contrib/cli" -e ".[dev]" -c constraints-dev.txt
+              pip install \
+                "google-cloud-bigquery-storage" \
+                --requirement reqs/requirements-dev-all-contrib-expectations.txt \
+                --editable "contrib/cli" \
+                --editable ".[dev]" \
+                --constraint constraints-dev.txt
             displayName: 'Install dependencies'
 
           - script: |
@@ -138,14 +145,7 @@ stages:
               secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
               retryCount: '2'
 
-          - task: DownloadSecureFile@1
-            name: aws_authkey
-            displayName: 'Download AWS Credentials'
-            inputs:
-              secureFile: 'aws_config_sandbox'
-              retryCount: '2'
-
-          - bash: python ./build_gallery.py --backends "pandas" --outfile-name "quick_check.json" ; exp_count=$(grep "^ *\"expect_" quick_check.json | wc -l); package_summary=$(grep "\"package\":" quick_check.json | sort | uniq -c | sort -nr) ; echo -e "\n\n$exp_count Expectations in quick_check.json\n";  echo -e "$package_summary"; [[ $exp_count -lt 298 ]] && echo "Fewer than 298 Expectations" && exit 1 ; [[ $(echo -e "$package_summary" | wc -l) -lt 6 ]] && echo "Fewer than 6 packages" && exit 1 ; echo "ok"
+          - bash: python ./build_gallery.py --backends "pandas" --outfile-name "quick_check.json" ; exp_count=$(grep "^ *\"expect_" quick_check.json | wc -l); package_summary=$(grep "\"package\":" quick_check.json | sort | uniq -c | sort -nr) ; echo -e "\n\n$exp_count Expectations in quick_check.json\n";  echo -e "$package_summary"; [[ $exp_count -lt 297 ]] && echo "Fewer than 297 Expectations" && exit 1 ; [[ $(echo -e "$package_summary" | wc -l) -lt 6 ]] && echo "Fewer than 6 packages" && exit 1 ; echo "ok"
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Build Gallery Quick Check'
 
@@ -169,7 +169,9 @@ stages:
               REDSHIFT_DATABASE: $(REDSHIFT_DATABASE)
               REDSHIFT_SSLMODE: $(REDSHIFT_SSLMODE)
               # AWS credentials
-              AWS_CONFIG_FILE: $(aws_authkey.secureFilePath)
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
               ATHENA_DB_NAME: $(ATHENA_DB_NAME)
               ATHENA_STAGING_S3: $(ATHENA_STAGING_S3)
               ATHENA_DATA_BUCKET: $(ATHENA_DATA_BUCKET)

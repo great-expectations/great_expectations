@@ -11,12 +11,12 @@ This validator evaluates YAML configurations of core Great Expectations componen
 """
 from __future__ import annotations
 
-import os
 import traceback
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
+from typing_extensions import Literal
 
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
@@ -29,13 +29,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 from great_expectations.data_context.store import Store
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
-    DataContextConfig,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-    substitute_all_config_variables,
-)
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
@@ -44,11 +40,6 @@ from great_expectations.util import filter_properties_dict
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
 
-try:
-    from typing import Literal
-except ImportError:
-    # Fallback for python < 3.8
-    from typing_extensions import Literal  # type: ignore[misc]
 
 # TODO: check if this can be refactored to use YAMLHandler class
 yaml = YAML()
@@ -137,7 +128,7 @@ class _YamlConfigValidator:
         class_name: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
         pretty_print: bool = True,
-        return_mode: Union[  # type: ignore[name-defined]
+        return_mode: Union[
             Literal["instantiated_class"], Literal["report_object"]
         ] = "instantiated_class",
         shorten_tracebacks: bool = False,
@@ -190,7 +181,12 @@ class _YamlConfigValidator:
 
         usage_stats_event_name: str = "data_context.test_yaml_config"
 
+        # Based on the particular object type we are attempting to instantiate,
+        # we may need the original config, the substituted config, or both.
         config = self._test_yaml_config_prepare_config(
+            yaml_config=yaml_config, usage_stats_event_name=usage_stats_event_name
+        )
+        config_with_substitutions = self._test_yaml_config_prepare_substituted_config(
             yaml_config, runtime_environment, usage_stats_event_name
         )
 
@@ -208,42 +204,50 @@ class _YamlConfigValidator:
                     instantiated_class,
                     usage_stats_event_payload,
                 ) = self._test_instantiation_of_store_from_yaml_config(
-                    name, class_name, config
+                    name=name, class_name=class_name, config=config_with_substitutions
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES:
                 (
                     instantiated_class,
                     usage_stats_event_payload,
                 ) = self._test_instantiation_of_datasource_from_yaml_config(
-                    name, class_name, config
+                    name=name,
+                    class_name=class_name,
+                    config=config,  # Uses original config as substitutions are done downstream
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES:
                 (
                     instantiated_class,
                     usage_stats_event_payload,
                 ) = self._test_instantiation_of_checkpoint_from_yaml_config(
-                    name, class_name, config
+                    name=name, class_name=class_name, config=config_with_substitutions
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES:
                 (
                     instantiated_class,
                     usage_stats_event_payload,
                 ) = self._test_instantiation_of_data_connector_from_yaml_config(
-                    name, class_name, config, runtime_environment
+                    name=name,
+                    class_name=class_name,
+                    config=config_with_substitutions,
+                    runtime_environment=runtime_environment,
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES:
                 (
                     instantiated_class,
                     usage_stats_event_payload,
                 ) = self._test_instantiation_of_profiler_from_yaml_config(
-                    name, class_name, config
+                    name=name, class_name=class_name, config=config_with_substitutions
                 )
             else:
                 (
                     instantiated_class,
                     usage_stats_event_payload,
                 ) = self._test_instantiation_of_misc_class_from_yaml_config(
-                    name, config, runtime_environment, usage_stats_event_payload
+                    name=name,
+                    config=config_with_substitutions,
+                    runtime_environment=runtime_environment,
+                    usage_stats_event_payload=usage_stats_event_payload,
                 )
 
             send_usage_message_from_handler(
@@ -293,31 +297,47 @@ class _YamlConfigValidator:
                 raise e
 
     def _test_yaml_config_prepare_config(
+        self, yaml_config: str, usage_stats_event_name: str
+    ) -> CommentedMap:
+        config = self._load_config_string_as_commented_map(
+            config_str=yaml_config,
+            usage_stats_event_name=usage_stats_event_name,
+        )
+        return config
+
+    def _test_yaml_config_prepare_substituted_config(
         self, yaml_config: str, runtime_environment: dict, usage_stats_event_name: str
     ) -> CommentedMap:
         """
         Performs variable substitution and conversion from YAML to CommentedMap.
         See `test_yaml_config` for more details.
         """
-        try:
-            substituted_config_variables: Union[
-                DataContextConfig, dict
-            ] = substitute_all_config_variables(
-                self.config_variables,
-                dict(os.environ),
+        config_str_with_substituted_variables = (
+            self._prepare_config_string_with_substituted_variables(
+                yaml_config=yaml_config,
+                runtime_environment=runtime_environment,
+                usage_stats_event_name=usage_stats_event_name,
             )
+        )
+        config = self._load_config_string_as_commented_map(
+            config_str=config_str_with_substituted_variables,
+            usage_stats_event_name=usage_stats_event_name,
+        )
+        return config
 
-            substitutions: dict = {
-                **substituted_config_variables,  # type: ignore[list-item]
-                **dict(os.environ),
-                **runtime_environment,
-            }
+    def _prepare_config_string_with_substituted_variables(
+        self, yaml_config: str, runtime_environment: dict, usage_stats_event_name: str
+    ) -> str:
+        try:
+            config_provider = self._data_context.config_provider
+            config_values = config_provider.get_values()
 
-            config_str_with_substituted_variables: Union[
-                DataContextConfig, dict
-            ] = substitute_all_config_variables(
-                yaml_config,
-                substitutions,
+            # While normally we'd just call `self.config_provider.substitute_config()`,
+            # we need to account for `runtime_environment` values that may have been passed.
+            config_values.update(runtime_environment)
+
+            return config_provider.substitute_config(
+                config=yaml_config, config_values=config_values
             )
         except Exception as e:
             usage_stats_event_payload: dict = {
@@ -331,9 +351,12 @@ class _YamlConfigValidator:
             )
             raise e
 
+    def _load_config_string_as_commented_map(
+        self, config_str: str, usage_stats_event_name: str
+    ) -> CommentedMap:
         try:
-            config: CommentedMap = yaml.load(config_str_with_substituted_variables)  # type: ignore[arg-type]
-            return config
+            substituted_config: CommentedMap = yaml.load(config_str)
+            return substituted_config
 
         except Exception as e:
             usage_stats_event_payload = {
@@ -364,7 +387,7 @@ class _YamlConfigValidator:
             ),
         )
         store_name = instantiated_class.store_name or store_name
-        self._data_context.config["stores"][store_name] = config  # type: ignore[index]
+        self._data_context.config["stores"][store_name] = config
 
         anonymizer = Anonymizer(self._data_context.data_context_id)
         usage_stats_event_payload = anonymizer.anonymize(

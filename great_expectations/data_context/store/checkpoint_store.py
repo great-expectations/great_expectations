@@ -9,21 +9,19 @@ from marshmallow import ValidationError
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.data_context_key import DataContextKey
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import ConfigurationStore
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     DataContextConfigDefaults,
 )
 from great_expectations.data_context.types.refs import (
-    GeCloudIdAwareRef,
-    GeCloudResourceRef,
+    GXCloudIDAwareRef,
+    GXCloudResourceRef,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
 )
 
 if TYPE_CHECKING:
@@ -63,8 +61,8 @@ class CheckpointStore(ConfigurationStore):
             **{"name": test_checkpoint_name}  # type: ignore[arg-type]
         )
         if self.ge_cloud_mode:
-            test_key: GeCloudIdentifier = self.key_class(  # type: ignore[call-arg,assignment]
-                resource_type=GeCloudRESTResource.CHECKPOINT,
+            test_key: GXCloudIdentifier = self.key_class(  # type: ignore[call-arg,assignment]
+                resource_type=GXCloudRESTResource.CHECKPOINT,
                 ge_cloud_id=str(uuid.uuid4()),
             )
         else:
@@ -118,7 +116,7 @@ class CheckpointStore(ConfigurationStore):
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> None:
-        key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
+        key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
             name=name, ge_cloud_id=ge_cloud_id
         )
         try:
@@ -131,7 +129,7 @@ class CheckpointStore(ConfigurationStore):
     def get_checkpoint(
         self, name: Optional[str], ge_cloud_id: Optional[str]
     ) -> CheckpointConfig:
-        key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
+        key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
             name=name, ge_cloud_id=ge_cloud_id
         )
         try:
@@ -170,12 +168,12 @@ class CheckpointStore(ConfigurationStore):
     def add_checkpoint(
         self, checkpoint: "Checkpoint", name: Optional[str], ge_cloud_id: Optional[str]
     ) -> None:
-        key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
+        key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
             name=name, ge_cloud_id=ge_cloud_id
         )
-        checkpoint_config: CheckpointConfig = checkpoint.get_config()  # type: ignore[assignment,func-returns-value]
+        checkpoint_config: CheckpointConfig = checkpoint.get_config()  # type: ignore[assignment]
         checkpoint_ref = self.set(key=key, value=checkpoint_config)  # type: ignore[func-returns-value]
-        if isinstance(checkpoint_ref, GeCloudIdAwareRef):
+        if isinstance(checkpoint_ref, GXCloudIDAwareRef):
             ge_cloud_id = checkpoint_ref.ge_cloud_id
             checkpoint.ge_cloud_id = uuid.UUID(ge_cloud_id)  # type: ignore[misc]
 
@@ -186,7 +184,7 @@ class CheckpointStore(ConfigurationStore):
             checkpoint_config: Config containing the checkpoint name.
 
         Returns:
-            None unless using GeCloudStoreBackend and if so the GeCloudResourceRef which contains the id
+            None unless using GXCloudStoreBackend and if so the GeCloudResourceRef which contains the id
             which was used to create the config in the backend.
         """
         # CheckpointConfig not an AbstractConfig??
@@ -195,8 +193,8 @@ class CheckpointStore(ConfigurationStore):
 
         # Make two separate requests to set and get in order to obtain any additional
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
-        ref: Optional[Union[bool, GeCloudResourceRef]] = self.set(key, checkpoint_config)  # type: ignore[func-returns-value]
-        if ref and isinstance(ref, GeCloudResourceRef):
+        ref: Optional[Union[bool, GXCloudResourceRef]] = self.set(key, checkpoint_config)  # type: ignore[func-returns-value]
+        if ref and isinstance(ref, GXCloudResourceRef):
             key.ge_cloud_id = ref.ge_cloud_id  # type: ignore[attr-defined]
 
         config = self.get(key=key)

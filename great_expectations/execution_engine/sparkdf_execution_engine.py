@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import logging
-import uuid
 import warnings
 from functools import reduce
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, cast
@@ -12,6 +13,7 @@ from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
     BatchSpec,
+    GlueDataCatalogBatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
 )
@@ -33,6 +35,7 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.bundled_metric_configuration import (
     BundledMetricConfiguration,
 )
+from great_expectations.execution_engine.execution_engine import SplitDomainKwargs
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.split_and_sample.sparkdf_data_sampler import (
     SparkDataSampler,
@@ -45,6 +48,7 @@ from great_expectations.expectations.row_conditions import (
     RowConditionParserType,
     parse_condition_to_spark,
 )
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -246,6 +250,12 @@ class SparkDFExecutionEngine(ExecutionEngine):
         """
 
         batch_data: Any
+        reader_method: str
+        reader_options: dict
+        path: str
+        schema: Optional[Union[pyspark.sql.types.StructType, dict, str]]
+        reader: DataFrameReader
+        reader_fn: Callable
         if isinstance(batch_spec, RuntimeDataBatchSpec):
             # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
             batch_data = batch_spec.batch_data
@@ -257,9 +267,9 @@ illegal.  Please check your config."""
             batch_spec.batch_data = "SparkDataFrame"
 
         elif isinstance(batch_spec, AzureBatchSpec):
-            reader_method: str = batch_spec.reader_method
-            reader_options: dict = batch_spec.reader_options or {}
-            path: str = batch_spec.path
+            reader_method = batch_spec.reader_method
+            reader_options = batch_spec.reader_options or {}
+            path = batch_spec.path
             azure_url = AzureUrl(path)
             # TODO <WILL> 202209 - Add `schema` definition to Azure like PathBatchSpec below (GREAT-1224)
             try:
@@ -273,8 +283,8 @@ illegal.  Please check your config."""
                     self.spark.conf.set(
                         f"fs.azure.account.key.{storage_account_url}", credential
                     )
-                reader: DataFrameReader = self.spark.read.options(**reader_options)
-                reader_fn: Callable = self._get_reader_fn(
+                reader = self.spark.read.options(**reader_options)
+                reader_fn = self._get_reader_fn(
                     reader=reader,
                     reader_method=reader_method,
                     path=path,
@@ -287,25 +297,21 @@ illegal.  Please check your config."""
                     """
                 )
 
-        elif isinstance(batch_spec, PathBatchSpec):
-            reader_method: str = batch_spec.reader_method
-            reader_options: dict = batch_spec.reader_options or {}
-            path: str = batch_spec.path
-            schema: Optional[
-                Union[pyspark.sql.types.StructType, dict, str]
-            ] = reader_options.get("schema")
+        elif isinstance(batch_spec, (PathBatchSpec, GlueDataCatalogBatchSpec)):
+            reader_method = batch_spec.reader_method
+            reader_options = batch_spec.reader_options or {}
+            path = batch_spec.path
+            schema = reader_options.get("schema")
 
             # schema can be a dict if it has been through serialization step,
             # either as part of the datasource configuration, or checkpoint config
             if isinstance(schema, dict):
-                schema: pyspark.sql.types.StructType = sparktypes.StructType.fromJson(
-                    schema
-                )
+                schema = sparktypes.StructType.fromJson(schema)
 
             # this can happen if we have not converted schema into json at Datasource-config level
             elif isinstance(schema, str):
                 raise ge_exceptions.ExecutionEngineError(
-                    f"""
+                    """
                                 Spark schema was not properly serialized.
                                 Please run the .jsonValue() method on the schema object before loading into GE.
                                 schema: your_schema.jsonValue()
@@ -314,12 +320,10 @@ illegal.  Please check your config."""
             # noinspection PyUnresolvedReferences
             try:
                 if schema:
-                    reader: DataFrameReader = self.spark.read.schema(schema).options(
-                        **reader_options
-                    )
+                    reader = self.spark.read.schema(schema).options(**reader_options)
                 else:
-                    reader: DataFrameReader = self.spark.read.options(**reader_options)
-                reader_fn: Callable = self._get_reader_fn(
+                    reader = self.spark.read.options(**reader_options)
+                reader_fn = self._get_reader_fn(
                     reader=reader,
                     reader_method=reader_method,
                     path=path,
@@ -350,6 +354,14 @@ illegal.  Please check your config."""
         return typed_batch_data, batch_markers
 
     def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
+        # Note this is to get a batch from tables in AWS Glue Data Catalog by its partitions
+        partitions: Optional[List[str]] = batch_spec.get("partitions")
+        if partitions:
+            batch_data = self._data_splitter.split_on_multi_column_values(
+                df=batch_data,
+                column_names=partitions,
+                batch_identifiers=batch_spec.get("batch_identifiers"),
+            )
 
         splitter_method_name: Optional[str] = batch_spec.get("splitter_method")
         if splitter_method_name:
@@ -423,7 +435,7 @@ illegal.  Please check your config."""
                 f"Unable to find reader_method {reader_method} in spark.",
             )
 
-    def get_domain_records(
+    def get_domain_records(  # noqa: C901 - 18
         self,
         domain_kwargs: dict,
     ) -> DataFrame:
@@ -603,15 +615,15 @@ illegal.  Please check your config."""
               - a dictionary of accessor_domain_kwargs, describing any accessors needed to
                 identify the domain within the compute domain
         """
-        data = self.get_domain_records(domain_kwargs)
-
-        table = domain_kwargs.get("table", None)
+        table: str = domain_kwargs.get("table", None)
         if table:
             raise ValueError(
                 "SparkDFExecutionEngine does not currently support multiple named tables."
             )
 
-        split_domain_kwargs = self._split_domain_kwargs(
+        data: DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
+
+        split_domain_kwargs: SplitDomainKwargs = self._split_domain_kwargs(
             domain_kwargs, domain_type, accessor_keys
         )
 
@@ -657,7 +669,7 @@ illegal.  Please check your config."""
     def resolve_metric_bundle(
         self,
         metric_fn_bundle: Iterable[BundledMetricConfiguration],
-    ) -> Dict[Tuple[str, str, str], Any]:
+    ) -> Dict[Tuple[str, str, str], MetricValue]:
         """For every metric in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds
         bundles of the metrics into one large query dictionary so that they are all executed simultaneously. Will fail
         if bundling the metrics together is not possible.
@@ -671,11 +683,11 @@ illegal.  Please check your config."""
             Returns:
                 A dictionary of "MetricConfiguration" IDs and their corresponding fully resolved values for domains.
         """
-        resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
         res: List[Row]
 
-        aggregates: Dict[Tuple, dict] = {}
+        aggregates: Dict[Tuple[str, str, str], dict] = {}
 
         aggregate: dict
 
@@ -683,7 +695,6 @@ illegal.  Please check your config."""
 
         bundled_metric_configuration: BundledMetricConfiguration
         for bundled_metric_configuration in metric_fn_bundle:
-            bundled_metric_configuration: BundledMetricConfiguration
             metric_to_resolve: MetricConfiguration = (
                 bundled_metric_configuration.metric_configuration
             )
@@ -691,58 +702,42 @@ illegal.  Please check your config."""
             compute_domain_kwargs: dict = (
                 bundled_metric_configuration.compute_domain_kwargs
             )
-
             if not isinstance(compute_domain_kwargs, IDDict):
                 compute_domain_kwargs = IDDict(compute_domain_kwargs)
 
-            domain_id = IDDict.convert_dictionary_to_id_dict(
-                data=convert_to_json_serializable(data=compute_domain_kwargs)
-            ).to_id()
+            domain_id = compute_domain_kwargs.to_id()
             if domain_id not in aggregates:
                 aggregates[domain_id] = {
                     "column_aggregates": [],
-                    "ids": [],
+                    "metric_ids": [],
                     "domain_kwargs": compute_domain_kwargs,
                 }
 
             aggregates[domain_id]["column_aggregates"].append(metric_fn)
-            aggregates[domain_id]["ids"].append(metric_to_resolve.id)
+            aggregates[domain_id]["metric_ids"].append(metric_to_resolve.id)
 
         for aggregate in aggregates.values():
             domain_kwargs: dict = aggregate["domain_kwargs"]
-            df: Optional[DataFrame] = self.get_domain_records(
-                domain_kwargs=domain_kwargs,
-            )
+            df: DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
 
-            assert len(aggregate["column_aggregates"]) == len(aggregate["ids"])
+            assert len(aggregate["column_aggregates"]) == len(aggregate["metric_ids"])
 
-            condition_ids: List[str] = []
-            aggregate_cols: List[str] = []
-
-            idx: int
-            for idx in range(len(aggregate["column_aggregates"])):
-                column_aggregate: Any = aggregate["column_aggregates"][idx]
-                aggregate_id: str = str(uuid.uuid4())
-                condition_ids.append(aggregate_id)
-                aggregate_cols.append(column_aggregate)
-
-            res = df.agg(*aggregate_cols).collect()
+            res = df.agg(*aggregate["column_aggregates"]).collect()
 
             logger.debug(
-                f"""SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id \
-{IDDict.convert_dictionary_to_id_dict(data=convert_to_json_serializable(data=domain_kwargs)).to_id()}"""
+                f"SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(domain_kwargs).to_id()}"
             )
 
             assert (
                 len(res) == 1
             ), "all bundle-computed metrics must be single-value statistics"
-            assert len(aggregate["ids"]) == len(
+            assert len(aggregate["metric_ids"]) == len(
                 res[0]
             ), "unexpected number of metrics returned"
 
             idx: int
             metric_id: Tuple[str, str, str]
-            for idx, metric_id in enumerate(aggregate["ids"]):
+            for idx, metric_id in enumerate(aggregate["metric_ids"]):
                 # Converting DataFrame.collect() results into JSON-serializable format produces simple data types,
                 # amenable for subsequent post-processing by higher-level "Metric" and "Expectation" layers.
                 resolved_metrics[metric_id] = convert_to_json_serializable(

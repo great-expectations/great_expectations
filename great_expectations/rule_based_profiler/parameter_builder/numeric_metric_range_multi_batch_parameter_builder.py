@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import itertools
 import logging
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Union
 
 import numpy as np
 
@@ -37,7 +39,6 @@ from great_expectations.rule_based_profiler.helpers.util import (
     integer_semantic_domain_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
-    MetricValue,
     MetricValues,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
@@ -57,6 +58,13 @@ from great_expectations.util import (
     is_ndarray_decimal_dtype,
     is_numeric,
 )
+from great_expectations.validator.computed_metric import MetricValue
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -125,7 +133,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         Args:
@@ -169,7 +177,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
                 ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
                 These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            data_context: BaseDataContext associated with this ParameterBuilder
+            data_context: AbstractDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
@@ -302,7 +310,7 @@ detected.
             Attributes object, containing computed parameter values and parameter computation details metadata.
 
          The algorithm operates according to the following steps:
-         1. Obtain batch IDs of interest using BaseDataContext and BatchRequest (unless passed explicitly as argument).
+         1. Obtain batch IDs of interest using AbstractDataContext and BatchRequest (unless passed explicitly as argument).
          2. Set up metric_domain_kwargs and metric_value_kwargs (using configuration and/or variables and parameters).
          3. Instantiate the Validator object corresponding to BatchRequest (with a temporary expectation_suite_name) in
             order to have access to all Batch objects, on each of which the specified metric_name will be computed.

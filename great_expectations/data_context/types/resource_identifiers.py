@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import warnings
 from typing import TYPE_CHECKING, Optional, Union
@@ -12,9 +14,7 @@ from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierS
 from great_expectations.exceptions import DataContextError, InvalidDataContextKeyError
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.store.ge_cloud_store_backend import (
-        GeCloudRESTResource,
-    )
+    from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +65,7 @@ class BatchIdentifier(DataContextKey):
     def __init__(
         self,
         batch_identifier: Union[BatchKwargs, dict, str],
-        data_asset_name: str = None,
+        data_asset_name: Optional[str] = None,
     ) -> None:
         super().__init__()
         # if isinstance(batch_identifier, (BatchKwargs, dict)):
@@ -200,10 +200,10 @@ class ValidationResultIdentifier(DataContextKey):
         )
 
 
-class GeCloudIdentifier(DataContextKey):
+class GXCloudIdentifier(DataContextKey):
     def __init__(
         self,
-        resource_type: "GeCloudRESTResource",
+        resource_type: GXCloudRESTResource,
         ge_cloud_id: Optional[str] = None,
         resource_name: Optional[str] = None,
     ) -> None:

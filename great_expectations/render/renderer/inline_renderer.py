@@ -1,6 +1,8 @@
 import logging
 from typing import Callable, List, Optional, Union
 
+from typing_extensions import TypedDict
+
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -17,11 +19,6 @@ from great_expectations.render import (
 )
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.render.renderer.renderer import Renderer
-
-try:
-    from typing import TypedDict  # type: ignore[attr-defined]
-except ImportError:
-    from typing_extensions import TypedDict
 
 logger = logging.getLogger(__name__)
 
@@ -119,9 +116,9 @@ class InlineRenderer(Renderer):
                     expectation_type=expectation_type,
                 )
                 rendered_content.append(renderer_rendered_content)
-            except Exception:
+            except Exception as e:
                 logger.info(
-                    f'Renderer "{renderer_name}" failed to render Expectation "{expectation_type}".'
+                    f'Renderer "{renderer_name}" failed to render Expectation "{expectation_type} with exception message: {str(e)}".'
                 )
                 failed_renderer_type: str
                 if isinstance(render_object, ExpectationConfiguration):

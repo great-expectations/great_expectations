@@ -11,19 +11,21 @@ from typing import Any, Dict, List, Union
 from great_expectations.core import ExpectationValidationResult
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import (
+    ColumnExpectation,
+    render_evaluation_parameter_string,
+)
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.expectations.util import render_evaluation_parameter_string
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
     RenderedBulletListContent,
     RenderedGraphContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
 )
+from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import substitute_none_for_missing
 
 
@@ -170,9 +172,8 @@ class ExpectColumnAverageToBeWithinRangeOfGivenPoint(ColumnExpectation):
         ]
     ]:
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(

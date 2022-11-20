@@ -13,11 +13,9 @@ checking and updating these static lists.
     files against the static lists returned via the methods above in the
     usage example and raise exceptions if there are discrepancies.
 """
-import os
+import pathlib
 import re
-from typing import List, Set
-
-from great_expectations.data_context.util import file_relative_path
+from typing import Dict, List, Set
 
 
 class GEDependencies:
@@ -50,13 +48,13 @@ class GEDependencies:
             "numpy",
             "packaging",
             "pandas",
+            "pydantic",
             "pyparsing",
             "python-dateutil",
             "pytz",
             "requests",
             "ruamel.yaml",
             "scipy",
-            "termcolor",
             "tqdm",
             "typing-extensions",
             "urllib3",
@@ -90,6 +88,7 @@ class GEDependencies:
             "openpyxl",
             "pre-commit",
             "psycopg2-binary",
+            "pydantic",  # dev dependency because of mypy plugin
             "pyarrow",
             "pyathena",
             "pyfakefs",
@@ -139,6 +138,7 @@ class GEDependencies:
         "mock-alchemy",
         "moto",
         "nbconvert",
+        "py",
         "pyfakefs",
         "pytest",
         "pytest-benchmark",
@@ -210,11 +210,25 @@ class GEDependencies:
         GE_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING
     )
 
-    def __init__(self, requirements_relative_base_dir: str = "../../../") -> None:
-        self._requirements_relative_base_dir = file_relative_path(
-            __file__, requirements_relative_base_dir
-        )
-        self._dev_requirements_prefix: str = "requirements-dev"
+    DEV_REQUIREMENTS_PREFIX = "requirements-dev"
+    PRIMARY_REQUIREMENTS_FILE = "requirements.txt"
+
+    def __init__(self) -> None:
+        self._requirements_paths = self._init_requirements_paths()
+
+    def _init_requirements_paths(self) -> Dict[str, pathlib.Path]:
+        project_root = pathlib.Path(__file__).parents[3]
+        reqs_dir = project_root.joinpath("reqs")
+        assert project_root.exists() and reqs_dir.exists()
+
+        pattern = "requirements*.txt"
+
+        req_dict = {}
+        req_files = list(project_root.glob(pattern)) + list(reqs_dir.glob(pattern))
+        for req_file in req_files:
+            req_dict[req_file.name] = req_file
+
+        return req_dict
 
     def get_required_dependency_names(self) -> List[str]:
         """Sorted list of required GE dependencies"""
@@ -233,7 +247,7 @@ class GEDependencies:
         return sorted(
             set(
                 self._get_dependency_names_from_requirements_file(
-                    self.required_requirements_path
+                    self._requirements_paths[self.PRIMARY_REQUIREMENTS_FILE]
                 )
             )
         )
@@ -244,49 +258,32 @@ class GEDependencies:
             List of string names of dev dependencies.
         """
         dev_dependency_names: Set[str] = set()
-        dev_dependency_filename: str
-        for dev_dependency_filename in self.dev_requirements_paths:
+        dev_dependency_paths: List[pathlib.Path] = [
+            path
+            for name, path in self._requirements_paths.items()
+            if name.startswith(self.DEV_REQUIREMENTS_PREFIX)
+        ]
+        for dev_dependency_path in dev_dependency_paths:
             dependency_names: List[
                 str
             ] = self._get_dependency_names_from_requirements_file(
-                os.path.join(
-                    self._requirements_relative_base_dir, dev_dependency_filename
-                )
+                dev_dependency_path.absolute()
             )
             dev_dependency_names.update(dependency_names)
         return sorted(dev_dependency_names)
 
-    @property
-    def required_requirements_path(self) -> str:
-        """Get path for requirements.txt
-
-        Returns:
-            String path of requirements.txt
-        """
-        return os.path.join(self._requirements_relative_base_dir, "requirements.txt")
-
-    @property
-    def dev_requirements_paths(self) -> List[str]:
-        """Get all paths for requirements-dev files with dependencies in them.
-        Returns:
-            List of string filenames for dev requirements files
-        """
-        return [
-            filename
-            for filename in os.listdir(self._requirements_relative_base_dir)
-            if filename.startswith(self._dev_requirements_prefix)
-        ]
-
-    def _get_dependency_names_from_requirements_file(self, filepath: str) -> List[str]:
+    def _get_dependency_names_from_requirements_file(
+        self, filepath: pathlib.Path
+    ) -> List[str]:
         """Load requirements file and parse to retrieve dependency names.
 
         Args:
-            filepath: String relative filepath of requirements file to parse.
+            filepath: Absolute filepath of requirements file to parse.
 
         Returns:
             List of string names of dependencies.
         """
-        with open(filepath) as f:
+        with filepath.open() as f:
             dependencies_with_versions = f.read().splitlines()
             return self._get_dependency_names(dependencies_with_versions)
 
@@ -322,9 +319,10 @@ def main() -> None:
         ge_dependencies.get_required_dependency_names()
         == ge_dependencies.get_required_dependency_names_from_requirements_file()
     ), "Mismatch between required dependencies in requirements files and in GEDependencies"
-    assert (
-        ge_dependencies.get_dev_dependency_names()
-        == ge_dependencies.get_dev_dependency_names_from_requirements_file()
+    assert ge_dependencies.get_dev_dependency_names() == set(
+        ge_dependencies.get_dev_dependency_names_from_requirements_file()
+    ) - set(
+        GEDependencies.GE_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING
     ), "Mismatch between dev dependencies in requirements files and in GEDependencies"
     print(
         "\n\nRequired and Dev dependencies in requirements files match those in GEDependencies"
