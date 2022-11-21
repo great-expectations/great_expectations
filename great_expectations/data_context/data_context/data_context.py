@@ -311,7 +311,7 @@ class DataContext(BaseDataContext):
         return ge_cloud_config
 
     def _init_context_root_directory(self, context_root_dir: Optional[str]) -> str:
-        if self.ge_cloud_mode and context_root_dir is None:
+        if self._ge_cloud_mode and context_root_dir is None:
             context_root_dir = CloudDataContext.determine_context_root_directory(
                 context_root_dir
             )
@@ -396,8 +396,8 @@ class DataContext(BaseDataContext):
 
         :return: the configuration object read from the file or template
         """
-        if self.ge_cloud_mode:
-            ge_cloud_config = self.ge_cloud_config
+        if self._ge_cloud_mode:
+            ge_cloud_config = self._ge_cloud_config
             assert ge_cloud_config is not None
             config = CloudDataContext.retrieve_data_context_config_from_ge_cloud(
                 ge_cloud_config=ge_cloud_config
@@ -433,7 +433,7 @@ class DataContext(BaseDataContext):
     def add_store(self, store_name, store_config):
         logger.debug(f"Starting DataContext.add_store for store {store_name}")
 
-        new_store = super().add_store(store_name, store_config)
+        new_store = self._data_context.add_store(store_name, store_config)
         self._save_project_config()
         return new_store
 
@@ -444,7 +444,7 @@ class DataContext(BaseDataContext):
 
         new_datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
-        ] = super().add_datasource(
+        ] = self._data_context.add_datasource(
             name=name, **kwargs  # type: ignore[arg-type]
         )
         return new_datasource
@@ -461,13 +461,13 @@ class DataContext(BaseDataContext):
             f"Starting DataContext.update_datasource for datasource {datasource.name}"
         )
 
-        super().update_datasource(
+        self._data_context.update_datasource(
             datasource=datasource,
         )
 
     def delete_datasource(self, name: str) -> None:  # type: ignore[override]
         logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
-        super().delete_datasource(datasource_name=name)
+        self._data_context.delete_datasource(datasource_name=name)
         self._save_project_config()
 
     @classmethod
