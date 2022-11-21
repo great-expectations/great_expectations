@@ -25,7 +25,7 @@ class RendererConfiguration:
         include_column_name: Union[bool, None] = None
         styling: Union[dict, None] = None
         if runtime_configuration:
-            include_column_name: bool = (
+            include_column_name = (
                 False
                 if runtime_configuration.get("include_column_name") is False
                 else True
