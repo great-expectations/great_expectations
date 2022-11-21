@@ -167,7 +167,7 @@ def test_get_datasource_cache_miss(
     with mock.patch(
         "great_expectations.data_context.store.DatasourceStore.has_key"
     ), mock.patch(
-        "great_expectations.data_context.data_context.BaseDataContext._instantiate_datasource_from_config"
+        "great_expectations.data_context.data_context.AbstractDataContext._instantiate_datasource_from_config"
     ), mock.patch(
         "great_expectations.data_context.types.base.datasourceConfigSchema.load",
     ), mock.patch(

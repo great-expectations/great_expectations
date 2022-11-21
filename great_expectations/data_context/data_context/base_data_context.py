@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Mapping, Optional, Union
+from typing import Any, Dict, Mapping, Optional, Union
 
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
@@ -175,20 +175,36 @@ class BaseDataContext(ConfigPeer):
             AbstractDataContext.get_or_create_data_context_config(project_config)
         )
 
+        self._ge_cloud_mode = ge_cloud_mode
+        self._ge_cloud_config = ge_cloud_config
         if context_root_dir is not None:
             context_root_dir = os.path.abspath(context_root_dir)
         # initialize runtime_environment as empty dict if None
         runtime_environment = runtime_environment or {}
-        if ge_cloud_mode:
+
+        # This should be replaced by a call to `get_context()` once that returns Union[EphemeralDataContext, FileDataContext, CloudDataContext]:
+        self._data_context = self._init_inner_data_context(
+            project_config=project_data_context_config,
+            runtime_environment=runtime_environment,
+            context_root_dir=context_root_dir,
+        )
+
+    def _init_inner_data_context(
+        self,
+        project_config: DataContextConfig,
+        runtime_environment: Dict[str, str],
+        context_root_dir: Optional[str],
+    ) -> Union[EphemeralDataContext, FileDataContext, CloudDataContext]:
+        if self.ge_cloud_mode:
             ge_cloud_base_url: Optional[str] = None
             ge_cloud_access_token: Optional[str] = None
             ge_cloud_organization_id: Optional[str] = None
-            if ge_cloud_config:
-                ge_cloud_base_url = ge_cloud_config.base_url
-                ge_cloud_access_token = ge_cloud_config.access_token
-                ge_cloud_organization_id = ge_cloud_config.organization_id
-            self._data_context = CloudDataContext(
-                project_config=project_data_context_config,
+            if self.ge_cloud_config:
+                ge_cloud_base_url = self.ge_cloud_config.base_url
+                ge_cloud_access_token = self.ge_cloud_config.access_token
+                ge_cloud_organization_id = self.ge_cloud_config.organization_id
+            return CloudDataContext(
+                project_config=project_config,
                 runtime_environment=runtime_environment,
                 context_root_dir=context_root_dir,
                 ge_cloud_base_url=ge_cloud_base_url,
@@ -196,16 +212,15 @@ class BaseDataContext(ConfigPeer):
                 ge_cloud_organization_id=ge_cloud_organization_id,
             )
         elif context_root_dir:
-            self._data_context = FileDataContext(  # type: ignore[assignment]
-                project_config=project_data_context_config,
+            return FileDataContext(
+                project_config=project_config,
                 context_root_dir=context_root_dir,  # type: ignore[arg-type]
                 runtime_environment=runtime_environment,
             )
-        else:
-            self._data_context = EphemeralDataContext(  # type: ignore[assignment]
-                project_config=project_data_context_config,
-                runtime_environment=runtime_environment,
-            )
+        return EphemeralDataContext(
+            project_config=project_config,
+            runtime_environment=runtime_environment,
+        )
 
     def __getattr__(self, attr: str) -> Any:
         if attr in self.__class__.__dict__:
@@ -215,3 +230,11 @@ class BaseDataContext(ConfigPeer):
     @property
     def config(self) -> BaseYamlConfig:
         return self._data_context.config
+
+    @property
+    def ge_cloud_config(self) -> Optional[GXCloudConfig]:
+        return self._ge_cloud_config
+
+    @property
+    def ge_cloud_mode(self) -> bool:
+        return self._ge_cloud_mode
