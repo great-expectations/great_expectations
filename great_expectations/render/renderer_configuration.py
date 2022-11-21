@@ -20,7 +20,7 @@ class RendererConfiguration:
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        kwargs_list: Optional[List, str] = None,
+        kwargs_list: Optional[List[str]] = None,
     ):
         include_column_name: Union[bool, None] = None
         styling: Union[dict, None] = None
@@ -38,7 +38,7 @@ class RendererConfiguration:
         kwargs: dict
         if configuration:
             kwargs = configuration.kwargs
-        elif result:
+        elif result and result.expectation_config:
             kwargs = result.expectation_config.kwargs
         else:
             kwargs = {}
