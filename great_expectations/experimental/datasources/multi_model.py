@@ -186,7 +186,7 @@ class Datasource(Protocol):
         **kwargs,
     ) -> None:
         """
-        Config validation errors are surfaces when trying to initialize the `DatasourceConfig`.
+        Config validation errors are surfaced when trying to initialize the `DatasourceConfig`.
         This logic can be simplified if we only accept either a `DatasourceConfig` or keyword arguments but not both.
         """
         if isinstance(config, DatasourceConfig):
