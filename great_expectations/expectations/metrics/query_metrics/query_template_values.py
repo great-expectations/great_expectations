@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Union
 
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
@@ -81,7 +81,7 @@ class QueryTemplateValues(QueryMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ) -> List[pyspark_sql_Row]:
-        query: Optional[Any] = metric_value_kwargs.get(
+        query = metric_value_kwargs.get(
             "query"
         ) or cls.default_kwarg_values.get("query")
 
