@@ -1,14 +1,10 @@
-from typing import TYPE_CHECKING, Optional
+from typing import List, Optional, Union
 
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.render.util import substitute_none_for_missing
-
-if TYPE_CHECKING:
-    from typing import List, Union
-
-    from great_expectations.core import (
-        ExpectationConfiguration,
-        ExpectationValidationResult,
-    )
 
 
 class RendererConfiguration:
