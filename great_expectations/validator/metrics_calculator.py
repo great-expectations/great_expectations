@@ -178,15 +178,15 @@ class MetricsCalculator:
                 runtime_configuration=None,
             )
 
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
-
-        # updates graph with aborted metrics
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
         aborted_metrics_info: Dict[
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ] = graph.resolve_validation_graph(
-            metrics=resolved_metrics,
+        ]
+        resolved_metrics, aborted_metrics_info = graph.resolve_validation_graph(
             runtime_configuration=None,
+            min_graph_edges_pbar_enable=0,
+            show_progress_bars=True,
         )
 
         if aborted_metrics_info:

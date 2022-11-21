@@ -111,7 +111,35 @@ class ValidationGraph:
                     runtime_configuration=runtime_configuration,
                 )
 
-    def resolve_validation_graph(  # noqa: C901 - complexity 16
+    def resolve_validation_graph(
+        self,
+        runtime_configuration: Optional[dict] = None,
+        min_graph_edges_pbar_enable: int = 0,
+        # Set to low number (e.g., 3) to suppress progress bar for small graphs.
+        show_progress_bars: bool = True,
+    ) -> Tuple[
+        Optional[Dict[Tuple[str, str, str], MetricValue]],
+        Dict[
+            Tuple[str, str, str],
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ],
+    ]:
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+
+        # updates graph with aborted metrics
+        aborted_metrics_info: Dict[
+            Tuple[str, str, str],
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ] = self._resolve_validation_graph(
+            metrics=resolved_metrics,
+            runtime_configuration=runtime_configuration,
+            min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
+            show_progress_bars=show_progress_bars,
+        )
+
+        return resolved_metrics, aborted_metrics_info
+
+    def _resolve_validation_graph(  # noqa: C901 - complexity 16
         self,
         metrics: Dict[Tuple[str, str, str], MetricValue],
         runtime_configuration: Optional[dict] = None,
@@ -121,6 +149,9 @@ class ValidationGraph:
         Tuple[str, str, str],
         Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
     ]:
+        if metrics is None:
+            metrics = {}
+
         if runtime_configuration is None:
             runtime_configuration = {}
 
