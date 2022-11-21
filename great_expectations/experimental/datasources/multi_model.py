@@ -187,6 +187,10 @@ class Datasource(Protocol):
     ) -> None:
         """
         Config validation errors are surfaced when trying to initialize the `DatasourceConfig`.
+
+        Optionally we could also leverage the type coercion of `pydantic.validate_arguments` to coerce compatible `dict`
+        objects into `DatasourceConfig` objects. Relying on `pydantic` to throw validation errors as appropriate.
+
         This logic can be simplified if we only accept either a `DatasourceConfig` or keyword arguments but not both.
         """
         if isinstance(config, DatasourceConfig):
