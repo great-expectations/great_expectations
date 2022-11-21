@@ -10,7 +10,7 @@ from great_expectations.expectations.expectation import (
 
 class ExpectQueriedColumnToBeUniqueWithCondition(QueryExpectation):
     """Expect column values to be unique, with an filter.
-    args:
+    Args:
     *****
     template_dict: dict with the following keys:
     column_to_check - column to check uniqueness on. can be multiple column names separated by comma
