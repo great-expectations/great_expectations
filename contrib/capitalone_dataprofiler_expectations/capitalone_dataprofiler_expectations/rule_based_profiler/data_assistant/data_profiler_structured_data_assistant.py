@@ -10,6 +10,7 @@ from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
 from great_expectations.rule_based_profiler.domain_builder import (
+    DomainBuilder,
     ColumnDomainBuilder,
 )
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
@@ -89,7 +90,7 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
         rule.
         """
 
-        column_domain_builder: ColumnDomainBuilder = ColumnDomainBuilder(
+        column_domain_builder: DomainBuilder = ColumnDomainBuilder(
             include_column_names=None,
             exclude_column_names=None,
             include_column_name_suffixes=None,
@@ -118,7 +119,7 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
                 **data_profiler_profile_report_metric_single_batch_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_column_min_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
+        expect_column_min_to_be_between_expectation_configuration_builder: ExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_min_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
@@ -131,7 +132,7 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
             },
         )
 
-        expect_column_max_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
+        expect_column_max_to_be_between_expectation_configuration_builder: ExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_max_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
@@ -144,7 +145,7 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
             },
         )
 
-        expect_column_mean_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
+        expect_column_mean_to_be_between_expectation_configuration_builder: ExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_mean_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
@@ -157,7 +158,7 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
             },
         )
 
-        expect_column_stddev_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
+        expect_column_stddev_to_be_between_expectation_configuration_builder: ExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_stdev_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
