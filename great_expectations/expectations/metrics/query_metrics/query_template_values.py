@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
@@ -33,6 +33,8 @@ class QueryTemplateValues(QueryMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
+        metrics: Dict[str, Any],
+        runtime_configuration: dict,
     ) -> List[sqlalchemy_engine_Row]:
         query: str = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
             "query"
@@ -76,6 +78,8 @@ class QueryTemplateValues(QueryMetricProvider):
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
+        metrics: Dict[str, Any],
+        runtime_configuration: dict,
     ) -> List[pyspark_sql_Row]:
         query: Optional[str] = metric_value_kwargs.get(
             "query"
