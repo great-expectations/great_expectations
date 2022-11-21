@@ -45,6 +45,9 @@ class QueryTemplateValues(QueryMetricProvider):
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
 
+        if not isinstance(query, str):
+            raise TypeError("Query must be supplied as a string")
+
         template_dict = metric_value_kwargs.get("template_dict")
         if not isinstance(template_dict, dict):
             raise TypeError("template_dict supplied by the expectation must be a dict")
