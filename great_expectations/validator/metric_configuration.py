@@ -14,14 +14,19 @@ class MetricConfiguration:
         metric_dependencies: Optional[dict] = None,
     ) -> None:
         self._metric_name = metric_name
+
         if not isinstance(metric_domain_kwargs, IDDict):
             metric_domain_kwargs = IDDict(metric_domain_kwargs)
-        self._metric_domain_kwargs = metric_domain_kwargs
+
+        self._metric_domain_kwargs: IDDict = metric_domain_kwargs
+
         if not isinstance(metric_value_kwargs, IDDict):
             if metric_value_kwargs is None:
                 metric_value_kwargs = {}
             metric_value_kwargs = IDDict(metric_value_kwargs)
-        self._metric_value_kwargs = metric_value_kwargs
+
+        self._metric_value_kwargs: IDDict = metric_value_kwargs
+
         if metric_dependencies is None:
             metric_dependencies = {}
         self._metric_dependencies = metric_dependencies
@@ -33,27 +38,27 @@ class MetricConfiguration:
         return self.__repr__()
 
     @property
-    def metric_name(self):
+    def metric_name(self) -> str:
         return self._metric_name
 
     @property
-    def metric_domain_kwargs(self):
+    def metric_domain_kwargs(self) -> IDDict:
         return self._metric_domain_kwargs
 
     @property
-    def metric_value_kwargs(self):
+    def metric_value_kwargs(self) -> IDDict:
         return self._metric_value_kwargs
 
     @property
-    def metric_domain_kwargs_id(self):
+    def metric_domain_kwargs_id(self) -> str:
         return self.metric_domain_kwargs.to_id()
 
     @property
-    def metric_value_kwargs_id(self):
+    def metric_value_kwargs_id(self) -> str:
         return self.metric_value_kwargs.to_id()
 
     @property
-    def metric_dependencies(self):
+    def metric_dependencies(self) -> Optional[dict]:
         return self._metric_dependencies
 
     @metric_dependencies.setter
