@@ -82,6 +82,11 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
     def _build_numeric_rule() -> Rule:
         """
         This method builds "Rule" object configured to emit "ExpectationConfiguration" objects for column "Domain" type.
+
+        This rule hold expectations which are associate with the numeric metrics in the data profiler report. There are
+        additional rules which are planned to be created, such as timestamp_rule, text_rule, categorical_rule, etc.
+        Currently, the numeric_rule uses ColumnDomainBuilder, so it doesn't discriminate by data type when apply the
+        rule.
         """
 
         column_domain_builder: ColumnDomainBuilder = ColumnDomainBuilder(
