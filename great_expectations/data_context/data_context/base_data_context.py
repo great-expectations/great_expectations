@@ -548,3 +548,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
         self._synchronize_self_with_underlying_data_context()
         return datasource
+
+    def _determine_key_for_profiler_save(
+        self, name: str, id: Optional[str]
+    ) -> Union[ConfigurationIdentifier, GXCloudIdentifier]:
+        return self._data_context._determine_key_for_profiler_save(name=name, id=id)
