@@ -1,14 +1,12 @@
 from __future__ import annotations
 
 import dataclasses
+import functools
 import itertools
 import logging
-from datetime import datetime
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
-    Any,
-    Callable,
     Dict,
     Iterable,
     List,
@@ -16,241 +14,39 @@ from typing import (
     Optional,
     Set,
     Type,
-    Union,
     cast,
+    overload,
 )
 
-import dateutil.tz
 import pydantic
-from pydantic import Field
-from pydantic import dataclasses as pydantic_dc
-from typing_extensions import ClassVar, Literal, Protocol, TypeAlias, runtime_checkable
+from typing_extensions import ClassVar, Literal, Protocol, runtime_checkable
 
-from great_expectations.core.batch import BatchDataType
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,
 )
-from great_expectations.experimental.datasources.type_lookup import TypeLookup
+from great_expectations.experimental.datasources.sources import _SourceFactories
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import DataContext as GXDataContext
-    from great_expectations.experimental.context import DataContext
+    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+    from great_expectations.experimental.datasources.interfaces import (
+        BatchRequest,
+        BatchRequestOptions,
+    )
+    from great_expectations.experimental.datasources.postgres_datasource import (
+        _DEFAULT_MONTH_RANGE,
+        _DEFAULT_YEAR_RANGE,
+        Batch,
+        BatchRequestError,
+        ColumnSplitter,
+    )
 
-
-logging.basicConfig(level=logging.DEBUG)  # TODO: remove me
+# logging.basicConfig(level=logging.DEBUG)  # TODO: remove me
 LOGGER = logging.getLogger(__name__)
 
 
-SourceFactoryFn = Callable[..., "Datasource"]
-
-
-class TypeRegistrationError(TypeError):
-    pass
-
-
-class _SourceFactories:
-    """
-    Contains a collection of datasource factory methods in the format `.add_<TYPE_NAME>()`
-
-    Contains a `.type_lookup` dict-like two way mapping between previously registered `Datasource`
-    or `DataAsset` types and a simplified name for those types.
-    """
-
-    # TODO (kilo59): split DataAsset & Datasource lookups
-    type_lookup: ClassVar = TypeLookup()
-    __source_factories: ClassVar[Dict[str, SourceFactoryFn]] = {}
-
-    _data_context: Union[DataContext, GXDataContext]
-
-    def __init__(self, data_context: Union[DataContext, GXDataContext]):
-        self._data_context = data_context
-
-    @classmethod
-    def register_types_and_ds_factory(
-        cls,
-        ds_type: Type[Datasource],
-        factory_fn: SourceFactoryFn,
-    ) -> None:
-        """
-        Add/Register a datasource factory function and all related `Datasource`,
-        `DataAsset` and `ExecutionEngine` types.
-
-        Creates mapping table between the `DataSource`/`DataAsset` classes and their
-        declared `type` string.
-
-
-        Example
-        -------
-
-        An `.add_pandas()` pandas factory method will be added to `context.sources`.
-
-        >>> class PandasDatasource(Datasource):
-        >>>     type: str = 'pandas'`
-        >>>     asset_types = [FileAsset]
-        >>>     execution_engine: PandasExecutionEngine
-        """
-
-        # TODO: check that the name is a valid python identifier (and maybe that it is snake_case?)
-        ds_type_name = ds_type.__fields__["type"].default
-        if not ds_type_name:
-            raise TypeRegistrationError(
-                f"`{ds_type.__name__}` is missing a `type` attribute with an assigned string value"
-            )
-
-        # rollback type registrations if exception occurs
-        with cls.type_lookup.transaction() as type_lookup:
-
-            # TODO: We should namespace the asset type to the datasource so different datasources can reuse asset types.
-            cls._register_assets(ds_type, asset_type_lookup=type_lookup)
-
-            cls._register_datasource_and_factory_method(
-                ds_type,
-                factory_fn=factory_fn,
-                ds_type_name=ds_type_name,
-                datasource_type_lookup=type_lookup,
-            )
-
-    @classmethod
-    def _register_datasource_and_factory_method(
-        cls,
-        ds_type: Type[Datasource],
-        factory_fn: SourceFactoryFn,
-        ds_type_name: str,
-        datasource_type_lookup: TypeLookup,
-    ) -> str:
-        """
-        Register the `Datasource` class and add a factory method for the class on `sources`.
-        The method name is pulled from the `Datasource.type` attribute.
-        """
-        method_name = f"add_{ds_type_name}"
-        LOGGER.info(
-            f"2a. Registering {ds_type.__name__} as {ds_type_name} with {method_name}() factory"
-        )
-
-        pre_existing = cls.__source_factories.get(method_name)
-        if pre_existing:
-            raise TypeRegistrationError(
-                f"'{ds_type_name}' - `sources.{method_name}()` factory already exists",
-            )
-
-        datasource_type_lookup[ds_type] = ds_type_name
-        LOGGER.info(f"'{ds_type_name}' added to `type_lookup`")
-        cls.__source_factories[method_name] = factory_fn
-        return ds_type_name
-
-    @classmethod
-    def _register_assets(cls, ds_type: Type[Datasource], asset_type_lookup: TypeLookup):
-
-        asset_types: List[Type[DataAsset]] = ds_type.asset_types
-
-        if not asset_types:
-            LOGGER.warning(
-                f"No `{ds_type.__name__}.asset_types` have be declared for the `Datasource`"
-            )
-
-        for t in asset_types:
-            try:
-                asset_type_name = t.__fields__["type"].default
-                if asset_type_name is None:
-                    raise TypeError(
-                        f"{t.__name__} `type` field must be assigned and cannot be `None`"
-                    )
-                LOGGER.info(
-                    f"2b. Registering `DataAsset` `{t.__name__}` as {asset_type_name}"
-                )
-                asset_type_lookup[t] = asset_type_name
-            except (AttributeError, KeyError, TypeError) as bad_field_exc:
-                raise TypeRegistrationError(
-                    f"No `type` field found for `{ds_type.__name__}.asset_types` -> `{t.__name__}` unable to register asset type",
-                ) from bad_field_exc
-
-    @property
-    def factories(self) -> List[str]:
-        return list(self.__source_factories.keys())
-
-    def __getattr__(self, attr_name: str):
-        try:
-            ds_constructor = self.__source_factories[attr_name]
-
-            def wrapped(name: str, **kwargs):
-                datasource = ds_constructor(name=name, **kwargs)
-                # TODO (bdirks): _attach_datasource_to_context to the AbstractDataContext class
-                self._data_context._attach_datasource_to_context(datasource)
-                return datasource
-
-            return wrapped
-        except KeyError:
-            raise AttributeError(f"No factory {attr_name} in {self.factories}")
-
-    def __dir__(self) -> List[str]:
-        """Preserves autocompletion for dynamic attributes."""
-        return [*self.factories, *super().__dir__()]
-
-
-class MetaDatasource(pydantic.main.ModelMetaclass):
-
-    __cls_set: Set[Type] = set()
-
-    def __new__(
-        meta_cls: Type[MetaDatasource], cls_name: str, bases: tuple[type], cls_dict
-    ) -> MetaDatasource:
-        """
-        MetaDatasource hook that runs when a new `Datasource` is defined.
-        This methods binds a factory method for the defined `Datasource` to `_SourceFactories` class which becomes
-        available as part of the `DataContext`.
-
-        Also binds asset adding methods according to the declared `asset_types`.
-        """
-        LOGGER.debug(f"1a. {meta_cls.__name__}.__new__() for `{cls_name}`")
-
-        cls = super().__new__(meta_cls, cls_name, bases, cls_dict)
-
-        if cls_name == "Datasource":
-            # NOTE: the above check is brittle and must be kept in-line with the Datasource.__name__
-            LOGGER.debug("1c. Skip factory registration of base `Datasource`")
-            return cls
-
-        LOGGER.debug(f"  {cls_name} __dict__ ->\n{pf(cls.__dict__, depth=3)}")
-
-        meta_cls.__cls_set.add(cls)
-        LOGGER.info(f"Datasources: {len(meta_cls.__cls_set)}")
-
-        def _datasource_factory(name: str, **kwargs) -> Datasource:
-            # TODO: update signature to match Datasource __init__ (ex update __signature__)
-            LOGGER.info(f"5. Adding '{name}' {cls_name}")
-            return cls(name=name, **kwargs)
-
-        # TODO: generate schemas from `cls` if needed
-
-        if cls.__module__ == "__main__":
-            LOGGER.warning(
-                f"Datasource `{cls_name}` should not be defined as part of __main__ this may cause typing lookup collisions"
-            )
-        _SourceFactories.register_types_and_ds_factory(cls, _datasource_factory)
-
-        return cls
-
-
-# BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
-# Batches one wants returned. The keys represent dimensions one can slice the data along
-# and the values are the realized. If a value is None or unspecified, the batch_request
-# will capture all data along this dimension. For example, if we have a year and month
-# splitter and we want to query all months in the year 2020, the batch request options
-# would look like:
-#   options = { "year": 2020 }
-BatchRequestOptions: TypeAlias = Dict[str, Any]
-
-
-@dataclasses.dataclass(frozen=True)
-class BatchRequest:
-    datasource_name: str
-    data_asset_name: str
-    options: BatchRequestOptions
-
-
-class DataAsset(ExperimentalBaseModel):
+class DataAssetConfig(ExperimentalBaseModel):
     name: str
     type: str
 
@@ -267,11 +63,29 @@ class DataAsset(ExperimentalBaseModel):
         assert isinstance(ds, Datasource)
         self._datasource = ds
 
+
+class DataAsset(Protocol):
+    name: str
+    datasource: Datasource
+    config: DataAssetConfig
+
+    def __init__(self, config: DataAssetConfig, datasource: Datasource) -> None:
+        if isinstance(config, DataAssetConfig):
+            self.config = config
+        else:
+            raise TypeError(
+                f"Expected {DataAssetConfig.__name__} got {type(config).__name__}"
+            )
+        self.datasource = datasource
+
     def get_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
         raise NotImplementedError
 
 
-class Datasource(ExperimentalBaseModel, metaclass=MetaDatasource):
+class DatasourceConfig(
+    ExperimentalBaseModel,
+    # metaclass=SomeDifferentMetaclass,
+):
 
     # class attrs
     asset_types: ClassVar[List[Type[DataAsset]]] = []
@@ -289,7 +103,7 @@ class Datasource(ExperimentalBaseModel, metaclass=MetaDatasource):
     # instance attrs
     type: str
     name: str
-    assets: Mapping[str, DataAsset] = {}
+    assets: Mapping[str, DataAssetConfig] = {}
     _execution_engine: ExecutionEngine = pydantic.PrivateAttr()
 
     def __init__(self, **kwargs):
@@ -334,6 +148,70 @@ class Datasource(ExperimentalBaseModel, metaclass=MetaDatasource):
             "One needs to implement 'execution_engine_type' on a Datasource subclass"
         )
 
+
+@runtime_checkable
+class Datasource(Protocol):
+    # instance attrs
+    name: str
+    assets: Dict[str, DataAsset]
+    execution_engine: ExecutionEngine
+    config: DatasourceConfig
+
+    @overload
+    def __init__(
+        self,
+        config: DatasourceConfig,
+    ) -> None:
+        ...
+
+    @overload
+    def __init__(
+        self,
+        config: None = ...,
+        type: str = ...,
+        name: str = ...,
+        execution_engine: ExecutionEngine = ...,
+        assets: Optional[Dict[str, DataAssetConfig]] = ...,
+        **kwargs,
+    ) -> None:
+        ...
+
+    def __init__(
+        self,
+        config: Optional[DatasourceConfig] = None,
+        type: Optional[str] = None,
+        name: Optional[str] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        assets: Optional[Dict[str, DataAssetConfig]] = None,
+        **kwargs,
+    ) -> None:
+        """
+        Config validation errors are surfaces when trying to initialize the `DatasourceConfig`.
+        This logic can be simplified if we only accept either a `DatasourceConfig` or keyword arguments but not both.
+        """
+        if isinstance(config, DatasourceConfig):
+            self.config = config
+        else:
+            self.config = DatasourceConfig(
+                type=type,
+                name=name,
+                assets=assets,
+                execution_engine=execution_engine,
+                **kwargs,
+            )
+
+        self.name = self.config.name
+        self.assets: Dict[str, DataAsset] = {}
+
+        # convert the DataAsset configs into runtime objects
+        for asset_name, asset_config in self.config.assets.items():
+            self.assets[asset_name] = self.asset_factory(asset_config, self)  # type: ignore[arg-type] # mypy confused about singledispatch instance method?
+
+    @functools.singledispatch
+    def asset_factory(self, asset_config: DataAssetConfig) -> DataAsset:
+        """Creates runtime asset objects from asset config models."""
+        raise NotImplementedError("No single dispatch functions have been registered")
+
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> List[Batch]:
@@ -358,101 +236,25 @@ class Datasource(ExperimentalBaseModel, metaclass=MetaDatasource):
             ) from exc
 
 
-class Batch:
-    # Instance variable declarations
-    _datasource: Datasource
-    _data_asset: DataAsset
-    _batch_request: BatchRequest
-    _data: BatchDataType
-    _id: str
-
-    def __init__(
-        self,
-        datasource: Datasource,
-        data_asset: DataAsset,
-        batch_request: BatchRequest,
-        # BatchDataType is Union[core.batch.BatchData, pd.DataFrame, SparkDataFrame].  core.batch.Batchdata is the
-        # implicit interface that Datasource implementers can use. We can make this explicit if needed.
-        data: BatchDataType,
-    ) -> None:
-        """This represents a batch of data.
-        This is usually not the data itself but a hook to the data on an external datastore such as
-        a spark or a sql database. An exception exists for pandas or any in-memory datastore.
-        """
-        # These properties are intended to be READ-ONLY
-        self._datasource: Datasource = datasource
-        self._data_asset: DataAsset = data_asset
-        self._batch_request: BatchRequest = batch_request
-        self._data: BatchDataType = data
-
-        # computed property
-        # We need to unique identifier. This will likely change as I get more input
-        self._id: str = "-".join([datasource.name, data_asset.name, str(batch_request)])
-
-    @property
-    def datasource(self) -> Datasource:
-        return self._datasource
-
-    @property
-    def data_asset(self) -> DataAsset:
-        return self._data_asset
-
-    @property
-    def batch_request(self) -> BatchRequest:
-        return self._batch_request
-
-    @property
-    def id(self) -> str:
-        return self._id
-
-    @property
-    def data(self) -> BatchDataType:
-        return self._data
-
-    @property
-    def execution_engine(self) -> ExecutionEngine:
-        return self.datasource.execution_engine
-
-
 # ######################################################################################
 # Postgres
 # ######################################################################################
 
 
-class PostgresDatasourceError(Exception):
-    pass
-
-
-class BatchRequestError(Exception):
-    pass
-
-
-# For our year splitter we default the range to the last 2 year.
-_CURRENT_YEAR = datetime.now(dateutil.tz.tzutc()).year
-_DEFAULT_YEAR_RANGE = range(_CURRENT_YEAR - 1, _CURRENT_YEAR + 1)
-_DEFAULT_MONTH_RANGE = range(1, 13)
-
-
-@pydantic_dc.dataclass(frozen=True)
-class ColumnSplitter:
-    method_name: str
-    column_name: str
-    # param_defaults is a Dict where the keys are the parameters of the splitter and the values are the default
-    # values are the default values if a batch request using the splitter leaves the parameter unspecified.
-    # template_params: List[str]
-    param_defaults: Dict[str, Iterable] = Field(default_factory=dict)
-
-    @property
-    def param_names(self) -> List[str]:
-        return list(self.param_defaults.keys())
+class TableAssetConfig(DataAssetConfig):
+    type: Literal["table"] = "table"
+    name: str
+    table_name: str
+    column_splitter: Optional[ColumnSplitter] = None
 
 
 class TableAsset(DataAsset):
-    # Instance fields
-    type: Literal["table"] = "table"
-    table_name: str
-    column_splitter: Optional[ColumnSplitter] = None
     name: str
+    table_name: str
+    column_splitter: Optional[ColumnSplitter]
+
+    datasource: PostgresDatasource
+    config: TableAssetConfig
 
     def get_batch_request(
         self, options: Optional[BatchRequestOptions] = None
@@ -475,7 +277,7 @@ class TableAsset(DataAsset):
                 f"but actually has the form:\n{pf(options)}\n"
             )
         return BatchRequest(
-            datasource_name=self._datasource.name,
+            datasource_name=self.datasource.name,
             data_asset_name=self.name,
             options=options or {},
         )
@@ -607,23 +409,29 @@ class TableAsset(DataAsset):
         return batch_requests
 
 
-class PostgresDatasource(Datasource):
-    # class var definitions
-    asset_types: ClassVar[List[Type[DataAsset]]] = [TableAsset]
-
-    # right side of the operator determines the type name
-    # left side enforces the names on instance creation
+class PostgresDatasourceConfig(DatasourceConfig):
     type: Literal["postgres"] = "postgres"
-    connection_string: str
-    assets: Dict[str, TableAsset] = {}
+    assets: Dict[str, TableAssetConfig]
 
-    def execution_engine_type(self) -> Type[ExecutionEngine]:
-        """Returns the default execution engine type."""
-        from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
-        return SqlAlchemyExecutionEngine
+# Assets must register an asset factory
+# Maybe this is handled by a new/updated Metaclass
+@Datasource.asset_factory.register(TableAssetConfig)
+def _table_asset_factory(  # type: ignore[misc] # mypy confused about self & singledispatch?
+    self: PostgresDatasource,
+    asset_config: TableAssetConfig,
+) -> TableAsset:
+    return TableAsset(config=asset_config, datasource=self)
 
-    def add_table_asset(self, name: str, table_name: str) -> TableAsset:
+
+class PostgresDatasource(Datasource):
+    # instance attrs
+    name: str
+    assets: Dict[str, TableAsset]  # type: ignore[assignment]
+    execution_engine: SqlAlchemyExecutionEngine
+    config: DatasourceConfig
+
+    def add_table_asset(self, config: TableAssetConfig) -> TableAsset:
         """Adds a table asset to this datasource.
 
         Args:
@@ -633,11 +441,8 @@ class PostgresDatasource(Datasource):
         Returns:
             The TableAsset that is added to the datasource.
         """
-        asset = TableAsset(name=name, table_name=table_name)
-        # TODO (kilo59): custom init for `DataAsset` to accept datasource in constructor?
-        # Will most DataAssets require a `Datasource` attribute?
-        asset._datasource = self
-        self.assets[name] = asset
+        asset = TableAsset(config=config, datasource=self)
+        self.assets[config.name] = asset
         return asset
 
     def get_asset(self, asset_name: str) -> TableAsset:
@@ -687,8 +492,8 @@ class PostgresDatasource(Datasource):
             )
             batch_list.append(
                 Batch(
-                    datasource=self,
-                    data_asset=data_asset,
+                    datasource=self,  # type: ignore[arg-type]
+                    data_asset=data_asset,  # type: ignore[arg-type]
                     batch_request=request,
                     data=data,
                 )
