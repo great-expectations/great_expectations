@@ -120,14 +120,19 @@ def test_profile_data_profiler_structured_data_assistant_result_serialization(
         bobby_profile_data_profiler_structured_data_assistant_result.to_dict()
     )
     assert (
-            set(profile_data_profiler_structured_data_assistant_result_as_dict.keys())
-            == DataAssistantResult.ALLOWED_KEYS
+        set(profile_data_profiler_structured_data_assistant_result_as_dict.keys())
+        == DataAssistantResult.ALLOWED_KEYS
     )
     assert (
-            bobby_profile_data_profiler_structured_data_assistant_result.to_json_dict()
-            == profile_data_profiler_structured_data_assistant_result_as_dict
+        bobby_profile_data_profiler_structured_data_assistant_result.to_json_dict()
+        == profile_data_profiler_structured_data_assistant_result_as_dict
     )
-    assert len(bobby_profile_data_profiler_structured_data_assistant_result.profiler_config.rules) == 1
+    assert (
+        len(
+            bobby_profile_data_profiler_structured_data_assistant_result.profiler_config.rules
+        )
+        == 1
+    )
 
 
 @pytest.mark.integration
@@ -136,8 +141,8 @@ def test_profile_data_profiler_structured_data_assistant_result_serialization(
 )
 @pytest.mark.slow  # 7.34s
 def test_profile_data_profiler_structured_data_assistant_result_get_expectation_suite(
-        mock_emit,
-        bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_enabled: DataProfilerStructuredDataAssistantResult,
+    mock_emit,
+    bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_enabled: DataProfilerStructuredDataAssistantResult,
 ):
     expectation_suite_name: str = "my_suite"
 
@@ -152,14 +157,14 @@ def test_profile_data_profiler_structured_data_assistant_result_get_expectation_
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
     assert (
-            actual_events[-1][0][0]["event"]
-            == UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE.value
+        actual_events[-1][0][0]["event"]
+        == UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE.value
     )
 
 
 @pytest.mark.integration
 def test_profile_data_profiler_structured_data_assistant_metrics_count(
-        bobby_profile_data_profiler_structured_data_assistant_result: DataProfilerStructuredDataAssistantResult,
+    bobby_profile_data_profiler_structured_data_assistant_result: DataProfilerStructuredDataAssistantResult,
 ) -> None:
     domain: Domain
     parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
@@ -171,9 +176,11 @@ def test_profile_data_profiler_structured_data_assistant_metrics_count(
 
     num_metrics = 0
     for (
-            domain,
-            parameter_values_for_fully_qualified_parameter_names,
-    ) in bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain.items():
+        domain,
+        parameter_values_for_fully_qualified_parameter_names,
+    ) in (
+        bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain.items()
+    ):
         if domain.is_superset(domain_key):
             num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
 
@@ -181,9 +188,11 @@ def test_profile_data_profiler_structured_data_assistant_metrics_count(
 
     num_metrics = 0
     for (
-            domain,
-            parameter_values_for_fully_qualified_parameter_names,
-    ) in bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain.items():
+        domain,
+        parameter_values_for_fully_qualified_parameter_names,
+    ) in (
+        bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain.items()
+    ):
         num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
 
     assert num_metrics == 14
@@ -191,7 +200,7 @@ def test_profile_data_profiler_structured_data_assistant_metrics_count(
 
 @pytest.mark.integration
 def test_profile_data_profiler_structured_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
-        bobby_profile_data_profiler_structured_data_assistant_result: DataProfilerStructuredDataAssistantResult,
+    bobby_profile_data_profiler_structured_data_assistant_result: DataProfilerStructuredDataAssistantResult,
 ):
     metrics_by_domain: Optional[
         Dict[Domain, Dict[str, ParameterNode]]
