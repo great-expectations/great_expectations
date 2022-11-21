@@ -8,6 +8,9 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Set, Type
 import pydantic
 from typing_extensions import ClassVar, TypeAlias
 
+from great_expectations.experimental.datasources.experimental_base_model import (
+    ExperimentalBaseModel,
+)
 from great_expectations.experimental.datasources.metadatasource import MetaDatasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
 
@@ -26,11 +29,6 @@ if TYPE_CHECKING:
 # would look like:
 #   options = { "year": 2020 }
 BatchRequestOptions: TypeAlias = Dict[str, Any]
-
-
-class ExperimentalBaseModel(pydantic.BaseModel):
-    class Config:
-        extra = pydantic.Extra.forbid
 
 
 @dataclasses.dataclass(frozen=True)
