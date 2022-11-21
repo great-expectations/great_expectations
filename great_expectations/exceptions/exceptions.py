@@ -2,7 +2,7 @@ import importlib
 import itertools
 import json
 from collections.abc import Iterable
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 from marshmallow import ValidationError
 
