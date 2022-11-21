@@ -42,7 +42,7 @@ test_root_path = os.path.dirname(
 
 @pytest.fixture
 def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_enabled(
-        bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
+    bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
 ) -> DataProfilerStructuredDataAssistantResult:
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
@@ -61,12 +61,12 @@ def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_ena
 
     data_assistant_result: DataAssistantResult = context.assistants.data_profiler.run(
         batch_request=batch_request,
-         numeric_rule={
+        numeric_rule={
             "profile_path": os.path.join(
-                                test_root_path,
-                                "data_profiler_files",
-                                "profile.pkl",
-                            ),
+                test_root_path,
+                "data_profiler_files",
+                "profile.pkl",
+            ),
         },
         exclude_column_names=exclude_column_names,
         estimation="flag_outliers",
@@ -77,7 +77,7 @@ def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_ena
 
 @pytest.fixture(scope="module")
 def bobby_profile_data_profiler_structured_data_assistant_result(
-        bobby_columnar_table_multi_batch_probabilistic_data_context: DataContext,
+    bobby_columnar_table_multi_batch_probabilistic_data_context: DataContext,
 ) -> DataProfilerStructuredDataAssistantResult:
     context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
@@ -100,20 +100,21 @@ def bobby_profile_data_profiler_structured_data_assistant_result(
         exclude_column_names=exclude_column_names,
         numeric_rule={
             "profile_path": os.path.join(
-                                test_root_path,
-                                "data_profiler_files",
-                                "profile.pkl",
-                            ),
+                test_root_path,
+                "data_profiler_files",
+                "profile.pkl",
+            ),
         },
         estimation="flag_outliers",
     )
 
     return cast(DataProfilerStructuredDataAssistantResult, data_assistant_result)
 
+
 @pytest.mark.integration
 @pytest.mark.slow  # 6.90s
 def test_profile_data_profiler_structured_data_assistant_result_serialization(
-        bobby_profile_data_profiler_structured_data_assistant_result: DataProfilerStructuredDataAssistantResult,
+    bobby_profile_data_profiler_structured_data_assistant_result: DataProfilerStructuredDataAssistantResult,
 ) -> None:
     profile_data_profiler_structured_data_assistant_result_as_dict: dict = (
         bobby_profile_data_profiler_structured_data_assistant_result.to_dict()
