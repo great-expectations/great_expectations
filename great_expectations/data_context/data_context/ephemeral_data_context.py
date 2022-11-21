@@ -1,8 +1,6 @@
 import logging
 from typing import Optional
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core import ExpectationSuite
 from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
@@ -13,9 +11,6 @@ from great_expectations.data_context.data_context_variables import (
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     datasourceConfigSchema,
-)
-from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier,
 )
 
 logger = logging.getLogger(__name__)
