@@ -36,7 +36,7 @@ class QueryTemplateValues(QueryMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ) -> List[sqlalchemy_engine_Row]:
-        query: str = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
+        query = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
             "query"
         )
 
@@ -45,7 +45,7 @@ class QueryTemplateValues(QueryMetricProvider):
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
 
-        template_dict: str = metric_value_kwargs.get("template_dict")
+        template_dict = metric_value_kwargs.get("template_dict")
         if not isinstance(template_dict, dict):
             raise TypeError("template_dict supplied by the expectation must be a dict")
 
@@ -81,9 +81,9 @@ class QueryTemplateValues(QueryMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ) -> List[pyspark_sql_Row]:
-        query: str = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
+        query: Optional[Any] = metric_value_kwargs.get(
             "query"
-        )
+        ) or cls.default_kwarg_values.get("query")
 
         df: pyspark_sql_DataFrame
         df, _, _ = execution_engine.get_compute_domain(
@@ -91,7 +91,7 @@ class QueryTemplateValues(QueryMetricProvider):
         )
 
         df.createOrReplaceTempView("tmp_view")
-        template_dict: str = metric_value_kwargs.get("template_dict")
+        template_dict = metric_value_kwargs.get("template_dict")
         if not isinstance(template_dict, dict):
             raise TypeError("template_dict supplied by the expectation must be a dict")
 
