@@ -408,7 +408,6 @@ def test_progress_bar_config(
         "great_expectations.validator.validation_graph.tqdm",
     ) as mock_tqdm:
         call_args = {
-            "metrics": {},
             "runtime_configuration": None,
         }
         if show_progress_bars is not None:

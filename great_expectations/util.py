@@ -364,7 +364,7 @@ def verify_dynamic_loading_support(
     """
     try:
         # noinspection PyUnresolvedReferences
-        module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(  # type: ignore[attr-defined]
+        module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(
             module_name, package=package_name
         )
     except ModuleNotFoundError:
