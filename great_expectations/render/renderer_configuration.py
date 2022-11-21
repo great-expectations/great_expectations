@@ -1,9 +1,9 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations.render.util import substitute_none_for_missing
 
 if TYPE_CHECKING:
-    from typing import List, Optional, Union
+    from typing import List, Union
 
     from great_expectations.core import (
         ExpectationConfiguration,
