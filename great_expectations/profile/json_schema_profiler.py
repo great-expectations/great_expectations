@@ -44,6 +44,7 @@ class JsonSchemaProfiler(Profiler):
         JsonSchemaTypes.INTEGER.value: ProfilerTypeMapping.INT_TYPE_NAMES,
         JsonSchemaTypes.NUMBER.value: ProfilerTypeMapping.FLOAT_TYPE_NAMES,
         JsonSchemaTypes.BOOLEAN.value: ProfilerTypeMapping.BOOLEAN_TYPE_NAMES,
+        JsonSchemaTypes.OBJECT.value: ProfilerTypeMapping.OBJECT_TYPE_NAMES,
     }
 
     def __init__(self, configuration: Optional[dict] = None) -> None:
@@ -66,7 +67,9 @@ class JsonSchemaProfiler(Profiler):
         validator.check_schema(schema)
         return True
 
-    def _profile(self, schema: Dict, suite_name: str = None) -> ExpectationSuite:
+    def _profile(
+        self, schema: Dict, suite_name: Optional[str] = None
+    ) -> ExpectationSuite:
         if not suite_name:
             raise ValueError("Please provide a suite name when using this profiler.")
         expectations = []

@@ -27,7 +27,7 @@ class TableColumnCount(TableMetricProvider):
         runtime_configuration: Dict,
     ):
         columns = metrics.get("table.columns")
-        return len(columns)
+        return len(columns)  # type: ignore[arg-type]
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
@@ -39,7 +39,7 @@ class TableColumnCount(TableMetricProvider):
         runtime_configuration: Dict,
     ):
         columns = metrics.get("table.columns")
-        return len(columns)
+        return len(columns)  # type: ignore[arg-type]
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
@@ -51,7 +51,7 @@ class TableColumnCount(TableMetricProvider):
         runtime_configuration: Dict,
     ):
         columns = metrics.get("table.columns")
-        return len(columns)
+        return len(columns)  # type: ignore[arg-type]
 
     @classmethod
     def _get_evaluation_dependencies(
@@ -74,6 +74,5 @@ class TableColumnCount(TableMetricProvider):
             metric_name="table.columns",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
-            metric_dependencies=None,
         )
         return dependencies

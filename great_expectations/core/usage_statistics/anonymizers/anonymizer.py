@@ -1,7 +1,12 @@
 import logging
-from typing import Any, Callable, Dict, List, Optional, Type
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
+
+if TYPE_CHECKING:
+    from great_expectations.core import ExpectationSuite
+    from great_expectations.data_context.store import Store
+    from great_expectations.validation_operators import ValidationOperator
 
 logger = logging.getLogger(__name__)
 
@@ -128,9 +133,7 @@ class Anonymizer(BaseAnonymizer):
 
         return anonymized_values
 
-    def _anonymize_stores_init_payload(
-        self, payload: Dict[str, "Store"]  # noqa: F821
-    ) -> List[dict]:
+    def _anonymize_stores_init_payload(self, payload: Dict[str, "Store"]) -> List[dict]:
         from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
             StoreAnonymizer,
         )
@@ -148,7 +151,7 @@ class Anonymizer(BaseAnonymizer):
         return anonymized_values
 
     def _anonymize_validation_operator_init_payload(
-        self, payload: Optional[Dict[str, "ValidationOperator"]] = None  # noqa: F821
+        self, payload: Optional[Dict[str, "ValidationOperator"]] = None
     ) -> List[dict]:
 
         from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import (
@@ -189,7 +192,7 @@ class Anonymizer(BaseAnonymizer):
         return anonymized_values
 
     def _anonymize_expectation_suite_init_payload(
-        self, payload: List["ExpectationSuite"]  # noqa: F821
+        self, payload: List["ExpectationSuite"]
     ) -> List[dict]:
         from great_expectations.core.usage_statistics.anonymizers.expectation_anonymizer import (
             ExpectationSuiteAnonymizer,

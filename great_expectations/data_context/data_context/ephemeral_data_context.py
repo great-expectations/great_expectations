@@ -1,5 +1,5 @@
 import logging
-from typing import Mapping, Optional, Union
+from typing import Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
@@ -32,7 +32,7 @@ class EphemeralDataContext(AbstractDataContext):
 
     def __init__(
         self,
-        project_config: Union[DataContextConfig, Mapping],
+        project_config: DataContextConfig,
         runtime_environment: Optional[dict] = None,
     ) -> None:
         """EphemeralDataContext constructor
@@ -45,13 +45,12 @@ class EphemeralDataContext(AbstractDataContext):
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
-        self._config_variables: dict = self._load_config_variables()
-        self._variables: EphemeralDataContextVariables = self._init_variables()
         super().__init__(runtime_environment=runtime_environment)
 
     def _init_variables(self) -> EphemeralDataContextVariables:
         variables = EphemeralDataContextVariables(
             config=self._project_config,
+            config_provider=self.config_provider,
         )
         return variables
 
@@ -118,4 +117,4 @@ class EphemeralDataContext(AbstractDataContext):
         )
         if include_rendered_content:
             expectation_suite.render()
-        return self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[arg-type]
+        return self.expectations_store.set(key, expectation_suite, **kwargs)

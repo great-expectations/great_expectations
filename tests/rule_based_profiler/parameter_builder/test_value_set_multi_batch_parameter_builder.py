@@ -104,11 +104,11 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
     expected_parameter_value: dict = {
         "value": expected_value_set,
         "details": {
+            "parse_strings_as_datetimes": False,
             "metric_configuration": {
                 "domain_kwargs": {"column": "event_type"},
                 "metric_name": "column.distinct_values",
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 1,
         },
@@ -184,11 +184,11 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
     expected_parameter_value: dict = {
         "value": expected_value_set,
         "details": {
+            "parse_strings_as_datetimes": False,
             "metric_configuration": {
                 "domain_kwargs": {"column": "user_agent"},
                 "metric_name": "column.distinct_values",
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 1,
         },
@@ -260,11 +260,11 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
     expected_parameter_value: dict = {
         "value": expected_value_set,
         "details": {
+            "parse_strings_as_datetimes": False,
             "metric_configuration": {
                 "metric_name": "column.distinct_values",
                 "domain_kwargs": {"column": "passenger_count"},
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
@@ -338,11 +338,11 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
     expected_parameter_value: dict = {
         "value": expected_value_set,
         "details": {
+            "parse_strings_as_datetimes": False,
             "metric_configuration": {
                 "metric_name": "column.distinct_values",
                 "domain_kwargs": {"column": "store_and_fwd_flag"},
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 3,
         },

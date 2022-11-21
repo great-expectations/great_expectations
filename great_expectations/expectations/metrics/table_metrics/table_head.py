@@ -8,6 +8,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.table_metric_provider import (
@@ -119,7 +120,7 @@ class TableHead(TableMetricProvider):
                     dialect=execution_engine.engine.dialect,
                     compile_kwargs={"literal_binds": True},
                 )
-            elif execution_engine.engine.dialect.name.lower() == "mssql":
+            elif execution_engine.engine.dialect.name.lower() == GESqlDialect.MSSQL:
                 # limit doesn't compile properly for mssql
                 sql = str(
                     stmt.compile(

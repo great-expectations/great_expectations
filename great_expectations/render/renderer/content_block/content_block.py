@@ -2,21 +2,22 @@ import logging
 import traceback
 from typing import Any, Callable, Optional, Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.core.expectation_validation_result import (
+from great_expectations.core import (
+    ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.expectations.registry import (
     _registered_renderers,
     get_renderer_impl,
 )
-from great_expectations.render.renderer.renderer import Renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
     CollapseContent,
+    LegacyRendererType,
     RenderedMarkdownContent,
     RenderedStringTemplateContent,
     TextContent,
 )
+from great_expectations.render.renderer.renderer import Renderer
 
 logger = logging.getLogger(__name__)
 
@@ -219,7 +220,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         expectation_type = cls._get_expectation_type(render_object)
 
         content_block_fn = get_renderer_impl(
-            object_name=expectation_type, renderer_type="renderer.prescriptive"
+            object_name=expectation_type, renderer_type=LegacyRendererType.PRESCRIPTIVE
         )
         content_block_fn = content_block_fn[1] if content_block_fn else None
         if content_block_fn is not None and not exception_list_content_block:
@@ -399,7 +400,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
     @classmethod
     def _get_content_block_fn(cls, expectation_type):
         content_block_fn = get_renderer_impl(
-            object_name=expectation_type, renderer_type="renderer.prescriptive"
+            object_name=expectation_type, renderer_type=LegacyRendererType.PRESCRIPTIVE
         )
         return content_block_fn[1] if content_block_fn else None
 
@@ -415,10 +416,10 @@ diagnose and repair the underlying issue.  Detailed information follows:
     @classmethod
     def _missing_content_block_fn(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         return []

@@ -35,3 +35,27 @@ To run this project, you will need to add the following environment variables to
 `ALGOLIA_PACKAGE_INDEX` : prod_packages
 
 `ALGOLIA_PACKAGE_EXPEC_INDEX` : prod_packages_expectations
+
+`ALGOLIA_EXPEC_REPLICA_ALPHA_ASC_INDEX` : prod_expectations_alpha_asc
+
+`ALGOLIA_EXPEC_REPLICA_ALPHA_DSC_INDEX` : prod_expectations_alpha_dsc
+
+`ALGOLIA_EXPEC_REPLICA_COVERAGE_ASC_INDEX` : prod_expectations_coverage_asc
+
+`ALGOLIA_EXPEC_REPLICA_COVERAGE_DSC_INDEX` : prod_expectations_coverage_dsc
+
+`ALGOLIA_EXPEC_REPLICA_CREATED_ASC_INDEX` : prod_expectations_created_asc
+
+`ALGOLIA_EXPEC_REPLICA_CREATED_DSC_INDEX` : prod_expectations_created_dsc
+
+`ALGOLIA_EXPEC_REPLICA_UPDATED_ASC_INDEX` : prod_expectations_updated_asc
+
+`ALGOLIA_EXPEC_REPLICA_UPDATED_DSC_INDEX` : prod_expectations_updated_dsc
+
+`ALGOLIA_PACK_EXPEC_REPLICA_ALPHA_ASC_INDEX` : prod_pack_expectations_alpha_asc
+
+`ALGOLIA_PACK_EXPEC_REPLICA_ALPHA_DSC_INDEX` : prod_pack_expectations_alpha_dsc
+
+`ALGOLIA_PACK_EXPEC_REPLICA_COVERAGE_ASC_INDEX` : prod_pack_expectations_coverage_asc
+
+`ALGOLIA_PACK_EXPEC_REPLICA_COVERAGE_DSC_INDEX` : prod_pack_expectations_coverage_dsc

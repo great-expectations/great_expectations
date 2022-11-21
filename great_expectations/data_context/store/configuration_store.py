@@ -5,15 +5,13 @@ from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
 )
 from great_expectations.data_context.util import load_class
 from great_expectations.util import (
@@ -95,7 +93,7 @@ class ConfigurationStore(Store):
 
     def serialize(self, value):
         if self.ge_cloud_mode:
-            # GeCloudStoreBackend expects a json str
+            # GXCloudStoreBackend expects a json str
             config_schema = value.get_schema_class()()
             return config_schema.dump(value)
         return value.to_yaml_str()
@@ -155,15 +153,15 @@ class ConfigurationStore(Store):
     @staticmethod
     def determine_key(
         name: Optional[str], ge_cloud_id: Optional[str]
-    ) -> Union[GeCloudIdentifier, ConfigurationIdentifier]:
+    ) -> Union[GXCloudIdentifier, ConfigurationIdentifier]:
         assert bool(name) ^ bool(
             ge_cloud_id
         ), "Must provide either name or ge_cloud_id."
 
-        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+        key: Union[GXCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
-            key = GeCloudIdentifier(
-                resource_type=GeCloudRESTResource.CHECKPOINT, ge_cloud_id=ge_cloud_id
+            key = GXCloudIdentifier(
+                resource_type=GXCloudRESTResource.CHECKPOINT, ge_cloud_id=ge_cloud_id
             )
         else:
             key = ConfigurationIdentifier(configuration_key=name)  # type: ignore[arg-type]

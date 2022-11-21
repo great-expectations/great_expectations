@@ -42,10 +42,10 @@ def build_batch_filter(
 "{str(data_connector_query_keys - BatchFilter.RECOGNIZED_KEYS)}" detected.
             """
         )
-    custom_filter_function: Callable = data_connector_query_dict.get(
+    custom_filter_function: Optional[Callable] = data_connector_query_dict.get(  # type: ignore[assignment]
         "custom_filter_function"
     )
-    if custom_filter_function and not isinstance(custom_filter_function, Callable):
+    if custom_filter_function and not isinstance(custom_filter_function, Callable):  # type: ignore[arg-type]
         raise ge_exceptions.BatchFilterError(
             f"""The type of a custom_filter must be a function (Python "Callable").  The type given is
 "{str(type(custom_filter_function))}", which is illegal.
@@ -53,7 +53,9 @@ def build_batch_filter(
         )
     batch_filter_parameters: Optional[
         Union[dict, IDDict]
-    ] = data_connector_query_dict.get("batch_filter_parameters")
+    ] = data_connector_query_dict.get(  # type: ignore[assignment]
+        "batch_filter_parameters"
+    )
     if batch_filter_parameters:
         if not isinstance(batch_filter_parameters, dict):
             raise ge_exceptions.BatchFilterError(
@@ -68,8 +70,10 @@ def build_batch_filter(
         batch_filter_parameters = IDDict(batch_filter_parameters)
     index: Optional[
         Union[int, list, tuple, slice, str]
-    ] = data_connector_query_dict.get("index")
-    limit: Optional[int] = data_connector_query_dict.get("limit")
+    ] = data_connector_query_dict.get(  # type: ignore[assignment]
+        "index"
+    )
+    limit: Optional[int] = data_connector_query_dict.get("limit")  # type: ignore[assignment]
     if limit and (not isinstance(limit, int) or limit < 0):
         raise ge_exceptions.BatchFilterError(
             f"""The type of a limit must be an integer (Python "int") that is greater than or equal to 0.  The
@@ -83,7 +87,7 @@ type and value given are "{str(type(limit))}" and "{limit}", respectively, which
     index = _parse_index(index=index)
     return BatchFilter(
         custom_filter_function=custom_filter_function,
-        batch_filter_parameters=batch_filter_parameters,
+        batch_filter_parameters=batch_filter_parameters,  # type: ignore[arg-type]
         index=index,
         limit=limit,
     )
@@ -112,9 +116,9 @@ def _parse_index(
     elif isinstance(index, str):
         if is_int(value=index):
             return _parse_index(index=int(index))
-        index_as_list: List[Optional[str, int]]
+        index_as_list: List[Union[str, int, None]]
         if index:
-            index_as_list = index.split(":")
+            index_as_list = index.split(":")  # type: ignore[assignment]
             if len(index_as_list) == 1:
                 index_as_list = [None, index_as_list[0]]
         else:
@@ -129,6 +133,7 @@ def _parse_index(
 The type given is "{str(type(index))}", which is illegal.
             """
         )
+    return None
 
 
 class BatchFilter:
@@ -141,10 +146,10 @@ class BatchFilter:
 
     def __init__(
         self,
-        custom_filter_function: Callable = None,
+        custom_filter_function: Optional[Callable] = None,
         batch_filter_parameters: Optional[IDDict] = None,
         index: Optional[Union[int, slice]] = None,
-        limit: int = None,
+        limit: Optional[int] = None,
     ) -> None:
         self._custom_filter_function = custom_filter_function
         self._batch_filter_parameters = batch_filter_parameters
@@ -152,7 +157,7 @@ class BatchFilter:
         self._limit = limit
 
     @property
-    def custom_filter_function(self) -> Callable:
+    def custom_filter_function(self) -> Optional[Callable]:
         return self._custom_filter_function
 
     @property
@@ -165,7 +170,7 @@ class BatchFilter:
 
     @property
     def limit(self) -> int:
-        return self._limit
+        return self._limit  # type: ignore[return-value]
 
     def __repr__(self) -> str:
         doc_fields_dict: dict = {

@@ -1,5 +1,6 @@
 import datetime
 import logging
+from typing import Dict, Tuple
 
 import numpy as np
 import pandas as pd
@@ -14,6 +15,7 @@ from great_expectations.expectations.row_conditions import (
     RowConditionParserType,
 )
 from great_expectations.self_check.util import build_spark_engine
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import create_files_in_directory
@@ -721,53 +723,53 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         batch_id="1234",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
 
     metrics.update(results)
 
-    desired_metric_1 = MetricConfiguration(
+    desired_aggregate_fn_metric_1 = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
-    desired_metric_2 = MetricConfiguration(
+    desired_aggregate_fn_metric_1.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    desired_aggregate_fn_metric_2 = MetricConfiguration(
         metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
-    desired_metric_3 = MetricConfiguration(
+    desired_aggregate_fn_metric_2.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    desired_aggregate_fn_metric_3 = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
-    desired_metric_4 = MetricConfiguration(
+    desired_aggregate_fn_metric_3.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    desired_aggregate_fn_metric_4 = MetricConfiguration(
         metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_aggregate_fn_metric_4.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(
-            desired_metric_1,
-            desired_metric_2,
-            desired_metric_3,
-            desired_metric_4,
+            desired_aggregate_fn_metric_1,
+            desired_aggregate_fn_metric_2,
+            desired_aggregate_fn_metric_3,
+            desired_aggregate_fn_metric_4,
         ),
         metrics=metrics,
     )
@@ -777,38 +779,38 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric_1,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric_1.metric_dependencies = {
+        "metric_partial_fn": desired_aggregate_fn_metric_1,
+        "table.columns": table_columns_metric,
+    }
     desired_metric_2 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric_2,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric_2.metric_dependencies = {
+        "metric_partial_fn": desired_aggregate_fn_metric_2,
+        "table.columns": table_columns_metric,
+    }
     desired_metric_3 = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric_3,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric_3.metric_dependencies = {
+        "metric_partial_fn": desired_aggregate_fn_metric_3,
+        "table.columns": table_columns_metric,
+    }
     desired_metric_4 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric_4,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric_4.metric_dependencies = {
+        "metric_partial_fn": desired_aggregate_fn_metric_4,
+        "table.columns": table_columns_metric,
+    }
     start = datetime.datetime.now()
     caplog.clear()
     caplog.set_level(logging.DEBUG, logger="great_expectations")
@@ -1157,28 +1159,28 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(
         batch_id="my_id",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
-    desired_metric = MetricConfiguration(
+    aggregate_fn_metric = MetricConfiguration(
         metric_name="column_values.length.max.aggregate_fn",
         metric_domain_kwargs={
             "column": "names",
             "batch_id": "my_id",
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
         metric_value_kwargs=None,
     )
+    aggregate_fn_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
 
     try:
-        results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+        results = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn_metric,))
     except ge_exceptions.MetricProviderError as e:
         assert False, str(e)
 
@@ -1188,10 +1190,10 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(
             "batch_id": "my_id",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "metric_partial_fn": aggregate_fn_metric,
+    }
 
     try:
         results = engine.resolve_metrics(

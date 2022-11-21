@@ -4,10 +4,12 @@
 ###
 
 
-# An anonymized string *must* be an md5 hash, so must have exactly 32 characters
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
+
+# An anonymized string *must* be an md5 hash, so must have exactly 32 characters
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.execution_environment import (
     InstallEnvironment,
 )
@@ -906,6 +908,17 @@ anonymized_rule_based_profiler_run_schema = {
     ],
 }
 
+cloud_migrate_schema = {
+    "$schema": SCHEMA,
+    "title": "cloud-migrate",
+    "type": "object",
+    "properties": {
+        "organization_id": {"type": "string", "maxLength": 256},
+    },
+    "required": ["organization_id"],
+    "additionalProperties": False,
+}
+
 anonymized_usage_statistics_record_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-usage-statistics-record",
@@ -943,6 +956,7 @@ anonymized_usage_statistics_record_schema = {
         "anonymized_rule": anonymized_rule_schema,
         "anonymized_rule_based_profiler_run": anonymized_rule_based_profiler_run_schema,
         "package_info": package_info_schema,
+        "cloud_migrate": cloud_migrate_schema,
     },
     "type": "object",
     "properties": {
@@ -1117,6 +1131,13 @@ anonymized_usage_statistics_record_schema = {
                 "event_payload": {
                     "$ref": "#/definitions/anonymized_rule_based_profiler_run"
                 },
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {"enum": [UsageStatsEvents.CLOUD_MIGRATE]},
+                "event_payload": {"$ref": "#/definitions/cloud_migrate"},
             },
         },
         {

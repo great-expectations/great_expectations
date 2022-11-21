@@ -130,7 +130,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                         "metric_name": "table.row_count",
                         "domain_kwargs": {},
                         "metric_value_kwargs": None,
-                        "metric_dependencies": None,
                     },
                     "num_batches": 36,
                 },
@@ -230,7 +229,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                         "metric_name": "column.distinct_values.count",
                         "domain_kwargs": {"column": "passenger_count"},
                         "metric_value_kwargs": None,
-                        "metric_dependencies": None,
                     },
                     "num_batches": 36,
                 },
@@ -330,7 +328,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                         "metric_name": "column.distinct_values.count",
                         "domain_kwargs": {"column": "store_and_fwd_flag"},
                         "metric_value_kwargs": None,
-                        "metric_dependencies": None,
                     },
                     "num_batches": 36,
                 },
@@ -430,7 +427,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                         "metric_name": "column.distinct_values.count",
                         "domain_kwargs": {"column": "payment_type"},
                         "metric_value_kwargs": None,
-                        "metric_dependencies": None,
                     },
                     "num_batches": 36,
                 },
@@ -530,7 +526,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                         "metric_name": "column.distinct_values.count",
                         "domain_kwargs": {"column": "extra"},
                         "metric_value_kwargs": None,
-                        "metric_dependencies": None,
                     },
                     "num_batches": 36,
                 },
@@ -630,7 +625,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                         "metric_name": "column.distinct_values.count",
                         "domain_kwargs": {"column": "mta_tax"},
                         "metric_value_kwargs": None,
-                        "metric_dependencies": None,
                     },
                     "num_batches": 36,
                 },
@@ -730,7 +724,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                         "metric_name": "column.distinct_values.count",
                         "domain_kwargs": {"column": "tolls_amount"},
                         "metric_value_kwargs": None,
-                        "metric_dependencies": None,
                     },
                     "num_batches": 36,
                 },
@@ -830,7 +823,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                         "metric_name": "column.distinct_values.count",
                         "domain_kwargs": {"column": "improvement_surcharge"},
                         "metric_value_kwargs": None,
-                        "metric_dependencies": None,
                     },
                     "num_batches": 36,
                 },
@@ -930,7 +922,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                         "metric_name": "column.distinct_values.count",
                         "domain_kwargs": {"column": "congestion_surcharge"},
                         "metric_value_kwargs": None,
-                        "metric_dependencies": None,
                     },
                     "num_batches": 36,
                 },
@@ -1051,17 +1042,19 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         "round_decimals": 15,
                     },
                     "domain_builder": {
-                        "allowed_semantic_types_passthrough": ["logic"],
-                        "class_name": "CategoricalColumnDomainBuilder",
-                        "cardinality_limit_mode": "$variables.cardinality_limit_mode",
+                        "exclude_column_name_suffixes": ["_id", "_ID"],
                         "module_name": "great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder",
+                        "allowed_semantic_types_passthrough": ["logic"],
                         "exclude_column_names": sorted(
                             [
                                 "id",
+                                "ID",
+                                "Id",
                             ]
                             + exclude_column_names
                         ),
-                        "exclude_column_name_suffixes": ["_id"],
+                        "class_name": "CategoricalColumnDomainBuilder",
+                        "cardinality_limit_mode": "$variables.cardinality_limit_mode",
                         "exclude_semantic_types": ["binary", "currency", "identifier"],
                     },
                     "parameter_builders": [
@@ -1155,7 +1148,6 @@ def quentin_expected_expectation_suite(
                             "metric_name": "table.row_count",
                             "domain_kwargs": {},
                             "metric_value_kwargs": None,
-                            "metric_dependencies": None,
                         },
                         "num_batches": 36,
                     },
@@ -1174,7 +1166,6 @@ def quentin_expected_expectation_suite(
                                 "metric_name": "column.distinct_values.count",
                                 "domain_kwargs": {"column": "passenger_count"},
                                 "metric_value_kwargs": None,
-                                "metric_dependencies": None,
                             },
                             "num_batches": 36,
                         }
@@ -1197,7 +1188,6 @@ def quentin_expected_expectation_suite(
                                 "metric_name": "column.distinct_values.count",
                                 "domain_kwargs": {"column": "store_and_fwd_flag"},
                                 "metric_value_kwargs": None,
-                                "metric_dependencies": None,
                             },
                             "num_batches": 36,
                         }
@@ -1220,7 +1210,6 @@ def quentin_expected_expectation_suite(
                                 "metric_name": "column.distinct_values.count",
                                 "domain_kwargs": {"column": "payment_type"},
                                 "metric_value_kwargs": None,
-                                "metric_dependencies": None,
                             },
                             "num_batches": 36,
                         }
@@ -1243,7 +1232,6 @@ def quentin_expected_expectation_suite(
                                 "metric_name": "column.distinct_values.count",
                                 "domain_kwargs": {"column": "extra"},
                                 "metric_value_kwargs": None,
-                                "metric_dependencies": None,
                             },
                             "num_batches": 36,
                         }
@@ -1266,7 +1254,6 @@ def quentin_expected_expectation_suite(
                                 "metric_name": "column.distinct_values.count",
                                 "domain_kwargs": {"column": "mta_tax"},
                                 "metric_value_kwargs": None,
-                                "metric_dependencies": None,
                             },
                             "num_batches": 36,
                         }
@@ -1289,7 +1276,6 @@ def quentin_expected_expectation_suite(
                                 "metric_name": "column.distinct_values.count",
                                 "domain_kwargs": {"column": "tolls_amount"},
                                 "metric_value_kwargs": None,
-                                "metric_dependencies": None,
                             },
                             "num_batches": 36,
                         }
@@ -1312,7 +1298,6 @@ def quentin_expected_expectation_suite(
                                 "metric_name": "column.distinct_values.count",
                                 "domain_kwargs": {"column": "improvement_surcharge"},
                                 "metric_value_kwargs": None,
-                                "metric_dependencies": None,
                             },
                             "num_batches": 36,
                         }
@@ -1335,7 +1320,6 @@ def quentin_expected_expectation_suite(
                                 "metric_name": "column.distinct_values.count",
                                 "domain_kwargs": {"column": "congestion_surcharge"},
                                 "metric_value_kwargs": None,
-                                "metric_dependencies": None,
                             },
                             "num_batches": 36,
                         }
@@ -1579,7 +1563,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
     import uuid
 
     import great_expectations as ge
-    from great_expectations.data_context import BaseDataContext
+    from great_expectations.data_context import AbstractDataContext
     from great_expectations.validator.validator import Validator
     from great_expectations.rule_based_profiler.data_assistant import (
         DataAssistant,
@@ -1691,7 +1675,7 @@ def test_volume_data_assistant_result_get_expectation_suite(
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
     assert (
         actual_events[-1][0][0]["event"]
-        == UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE.value
+        == UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE
     )
 
 
@@ -1753,14 +1737,20 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_insta
         == expected_expectation_suite.expectations
     )
 
-    assert deep_filter_properties_iterable(
-        properties=data_assistant_result.profiler_config.to_json_dict(),
-        delete_fields={"random_seed"},
-    ) == deep_filter_properties_iterable(
-        properties=quentin_expected_rule_based_profiler_configuration(
-            name=data_assistant_name,
-        ).to_json_dict(),
-        delete_fields={"random_seed"},
+    assert sorted(
+        deep_filter_properties_iterable(
+            properties=data_assistant_result.profiler_config.to_json_dict(),
+            delete_fields={"random_seed"},
+        ),
+        key=lambda element: element[0],
+    ) == sorted(
+        deep_filter_properties_iterable(
+            properties=quentin_expected_rule_based_profiler_configuration(
+                name=data_assistant_name,
+            ).to_json_dict(),
+            delete_fields={"random_seed"},
+        ),
+        key=lambda element: element[0],
     )
 
     data_assistant_result.citation.pop("profiler_config", None)
@@ -1837,9 +1827,12 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
             delete_fields={"random_seed"},
         )
     )
-    assert (
-        data_assistant_result_profiler_config_as_json_dict
-        == quentin_expected_rule_based_profiler_configuration_as_json_dict
+    assert sorted(
+        data_assistant_result_profiler_config_as_json_dict,
+        key=lambda element: element[0],
+    ) == sorted(
+        quentin_expected_rule_based_profiler_configuration_as_json_dict,
+        key=lambda element: element[0],
     )
 
     data_assistant_result.citation.pop("profiler_config", None)
@@ -1982,9 +1975,12 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
             "categorical_columns_rule"
         ]["domain_builder"]["exclude_semantic_types"]
     )
-    assert (
-        data_assistant_result_profiler_config_as_json_dict
-        == quentin_expected_rule_based_profiler_configuration_as_json_dict
+    assert sorted(
+        data_assistant_result_profiler_config_as_json_dict,
+        key=lambda element: element[0],
+    ) == sorted(
+        quentin_expected_rule_based_profiler_configuration_as_json_dict,
+        key=lambda element: element[0],
     )
 
     data_assistant_result.citation.pop("profiler_config", None)

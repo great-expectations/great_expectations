@@ -2,6 +2,7 @@ import datetime
 import logging
 import re
 import warnings
+from typing import Dict, Iterable
 
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
     BatchKwargsGenerator,
@@ -100,7 +101,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         if boto3_options is None:
             boto3_options = {}
         self._max_keys = max_keys
-        self._iterators = {}
+        self._iterators: Dict = {}
         try:
             self._s3 = boto3.client("s3", **boto3_options)
         except TypeError:
@@ -158,9 +159,9 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
 
     def _build_batch_kwargs_path_iter(
         self, path_list, reader_options=None, limit=None
-    ) -> None:
+    ) -> Iterable[S3BatchKwargs]:
         for path in path_list:
-            yield self._build_batch_kwargs(
+            yield self._build_batch_kwargs(  # type: ignore[call-arg] # no parameters `reader_options` or `limit`
                 path, reader_options=reader_options, limit=limit
             )
 
@@ -223,7 +224,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         reader_method=None,
         reader_options=None,
         limit=None,
-    ):
+    ) -> S3BatchKwargs:
         batch_kwargs = {
             "s3": f"s3a://{self.bucket}/{key}",
             "reader_options": self.reader_options,
@@ -245,7 +246,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
 
         return S3BatchKwargs(batch_kwargs)
 
-    def _get_asset_options(self, asset_config, iterator_dict) -> None:
+    def _get_asset_options(self, asset_config, iterator_dict) -> Iterable[str]:
         query_options = {
             "Bucket": self.bucket,
             "Delimiter": asset_config.get("delimiter", self._delimiter),
@@ -318,7 +319,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         reader_method=None,
         reader_options=None,
         limit=None,
-    ) -> None:
+    ) -> Iterable[S3BatchKwargs]:
         for key in self._get_asset_options(asset_config, iterator_dict):
             yield self._build_batch_kwargs_from_key(
                 key,

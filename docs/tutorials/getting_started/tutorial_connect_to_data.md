@@ -95,12 +95,12 @@ Please note that due to how data is serialized, the entry in your ```great_expec
   <div>
     <p>
 
-**ExecutionEngine** : The <TechnicalTag relative="../../" tag="execution_engine" text="Execution Engine" /> provides backend-specific computing resources that are used to read-in and perform validation on data.  For more information on <code>ExecutionEngines</code>, please refer to the following <a href="/docs/reference/execution_engine">Core Concepts document on ExecutionEngines</a>
+**ExecutionEngine** : The <TechnicalTag relative="../../" tag="execution_engine" text="Execution Engine" /> provides backend-specific computing resources that are used to read-in and perform validation on data.  For more information on <code>ExecutionEngines</code>, please refer to the following <a href="/docs/terms/execution_engine">Core Concepts document on ExecutionEngines</a>
 
 </p>
     <p>
 
-**DataConnectors** :  <TechnicalTag relative="../../" tag="data_connector" text="Data Connectors" /> facilitate access to external data stores, such as filesystems, databases, and cloud storage. The current configuration contains both an <code>InferredAssetFilesystemDataConnector</code>, which allows you to retrieve a batch of data by naming a data asset (which is the filename in our case), and a <code>RuntimeDataConnector</code>, which allows you to retrieve a batch of data by defining a filepath.  In this tutorial we will only be using the <code>InferredAssetFilesystemDataConnector</code>.  For more information on <code>DataConnectors</code>, please refer to the <a href="/docs/reference/datasources">Core Concepts document on Datasources</a>.
+**DataConnectors** :  <TechnicalTag relative="../../" tag="data_connector" text="Data Connectors" /> facilitate access to external data stores, such as filesystems, databases, and cloud storage. The current configuration contains both an <code>InferredAssetFilesystemDataConnector</code>, which allows you to retrieve a batch of data by naming a data asset (which is the filename in our case), and a <code>RuntimeDataConnector</code>, which allows you to retrieve a batch of data by defining a filepath.  In this tutorial we will only be using the <code>InferredAssetFilesystemDataConnector</code>.  For more information on <code>DataConnectors</code>, please refer to the <a href="/docs/terms/datasource">Core Concepts document on Datasources</a>.
 
 </p>
     <p>

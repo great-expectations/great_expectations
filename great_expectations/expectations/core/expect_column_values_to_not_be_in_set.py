@@ -3,18 +3,19 @@ from typing import Dict, Optional
 import numpy as np
 import pandas as pd
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     InvalidExpectationConfigurationError,
-)
-from great_expectations.expectations.util import (
     add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -138,16 +139,15 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -231,24 +231,27 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
+        if configuration:
+            kwargs = configuration.kwargs
+        elif result and result.expectation_config:
+            kwargs = result.expectation_config.kwargs
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            kwargs,
             [
                 "column",
                 "value_set",
@@ -307,20 +310,13 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             )
         ]
 
-    # @PandasExecutionEngine.column_map_metric(
-    #     metric_name="column_values.not_in_set",
-    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
-    #     metric_value_keys=("value_set",),
-    #     metric_dependencies=tuple(),
-    #     filter_column_isnull=True,
-    # )
     def _pandas_column_values_not_in_set(
         self,
         series: pd.Series,
         metrics: Dict,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
         filter_column_isnull: bool = True,
     ):
         value_set = metric_value_kwargs["value_set"]

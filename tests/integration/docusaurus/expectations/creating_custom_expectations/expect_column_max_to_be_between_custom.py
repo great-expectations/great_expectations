@@ -1,6 +1,7 @@
 from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -10,22 +11,21 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.execution_engine.execution_engine import MetricFunctionTypes
 from great_expectations.expectations.expectation import (
     ColumnExpectation,
     ExpectationValidationResult,
+    render_evaluation_parameter_string,
 )
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
-    MetricDomainTypes,
-    MetricFunctionTypes,
     column_aggregate_partial,
     column_aggregate_value,
-    metric_value,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.expectations.metrics.metric_provider import metric_value
+from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     handle_strict_min_max,
     parse_row_condition_string_pandas_engine,
@@ -245,9 +245,8 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
         ), "Must provide renderers either a configuration or result."
 
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         # get params dict with all expected kwargs

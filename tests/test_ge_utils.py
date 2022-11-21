@@ -12,7 +12,7 @@ import great_expectations as ge
 from great_expectations.core.util import nested_update
 from great_expectations.util import (
     convert_json_string_to_be_python_compliant,
-    convert_ndarray_datetime_to_float_dtype,
+    convert_ndarray_datetime_to_float_dtype_utc_timezone,
     convert_ndarray_float_to_datetime_tuple,
     convert_ndarray_to_datetime_dtype_best_effort,
     deep_filter_properties_iterable,
@@ -662,29 +662,29 @@ def test_is_ndarray_datetime_dtype(
     numeric_array,
 ):
     assert is_ndarray_datetime_dtype(
-        data=datetime_array, parse_strings_as_datetimes=False
+        data=datetime_array, parse_strings_as_datetimes=False, fuzzy=False
     )
     assert is_ndarray_datetime_dtype(
-        data=datetime_array, parse_strings_as_datetimes=True
+        data=datetime_array, parse_strings_as_datetimes=True, fuzzy=False
     )
 
     assert not is_ndarray_datetime_dtype(
-        data=datetime_string_array, parse_strings_as_datetimes=False
+        data=datetime_string_array, parse_strings_as_datetimes=False, fuzzy=False
     )
     assert is_ndarray_datetime_dtype(
-        data=datetime_string_array, parse_strings_as_datetimes=True
+        data=datetime_string_array, parse_strings_as_datetimes=True, fuzzy=False
     )
 
     assert not is_ndarray_datetime_dtype(
-        data=numeric_array, parse_strings_as_datetimes=False
+        data=numeric_array, parse_strings_as_datetimes=False, fuzzy=False
     )
     assert not is_ndarray_datetime_dtype(
-        data=numeric_array, parse_strings_as_datetimes=True
+        data=numeric_array, parse_strings_as_datetimes=True, fuzzy=False
     )
 
     datetime_string_array[-1] = "malformed_datetime_string"
     assert not is_ndarray_datetime_dtype(
-        data=datetime_string_array, parse_strings_as_datetimes=True
+        data=datetime_string_array, parse_strings_as_datetimes=True, fuzzy=False
     )
 
 
@@ -814,26 +814,30 @@ def test_convert_ndarray_to_datetime_dtype_best_effort(
 
 
 @pytest.mark.unit
-def test_convert_ndarray_datetime_to_float_dtype(
+def test_convert_ndarray_datetime_to_float_dtype_utc_timezone(
     datetime_array,
     datetime_string_array,
     numeric_array,
 ):
     element: Any
-
-    assert convert_ndarray_datetime_to_float_dtype(data=datetime_array).tolist() == [
-        element.timestamp() for element in datetime_array
+    assert convert_ndarray_datetime_to_float_dtype_utc_timezone(
+        data=datetime_array
+    ).tolist() == [
+        element.replace(tzinfo=datetime.timezone.utc).timestamp()
+        for element in datetime_array
     ]
 
     with pytest.raises(AttributeError) as e:
-        _ = convert_ndarray_datetime_to_float_dtype(data=numeric_array)
+        _ = convert_ndarray_datetime_to_float_dtype_utc_timezone(data=numeric_array)
 
-    assert str(e.value) == "'int' object has no attribute 'timestamp'"
+    assert "'int' object has no attribute 'replace'" in str(e.value)
 
-    with pytest.raises(AttributeError) as e:
-        _ = convert_ndarray_datetime_to_float_dtype(data=datetime_string_array)
+    with pytest.raises(TypeError) as e:
+        _ = convert_ndarray_datetime_to_float_dtype_utc_timezone(
+            data=datetime_string_array
+        )
 
-    assert str(e.value) == "'str' object has no attribute 'timestamp'"
+    assert "replace() takes no keyword arguments" in str(e.value)
 
 
 @pytest.mark.unit
@@ -841,9 +845,11 @@ def test_convert_ndarray_float_to_datetime_tuple(
     datetime_array,
 ):
     element: Any
-
     assert convert_ndarray_float_to_datetime_tuple(
-        data=[element.timestamp() for element in datetime_array]
+        data=[
+            element.replace(tzinfo=datetime.timezone.utc).timestamp()
+            for element in datetime_array
+        ]
     ) == tuple([element for element in datetime_array])
 
     with pytest.raises(TypeError) as e:

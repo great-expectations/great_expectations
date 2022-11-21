@@ -1,0 +1,11 @@
+black==22.3.0
+flake8==5.0.4
+invoke>=1.7.1
+isort==5.10.1
+mypy==0.991
+pre-commit>=2.6.0
+pydantic>=1.0,<2.0 # needed for mypy plugin support
+pytest-cov>=2.8.1
+pytest-order>=0.9.5
+pytest-random-order>=1.0.4
+pyupgrade==2.7.2

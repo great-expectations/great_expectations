@@ -1,5 +1,6 @@
 import logging
 import warnings
+from typing import Dict, Set
 
 from great_expectations.core.id_dict import BatchKwargs
 
@@ -162,12 +163,12 @@ class BatchKwargsGenerator:
     """
 
     _batch_kwargs_type = BatchKwargs
-    recognized_batch_parameters = set()
+    recognized_batch_parameters: Set = set()
 
     def __init__(self, name, datasource) -> None:
         self._name = name
         self._generator_config = {"class_name": self.__class__.__name__}
-        self._data_asset_iterators = {}
+        self._data_asset_iterators: Dict = {}
         if datasource is None:
             raise ValueError("datasource must be provided for a BatchKwargsGenerator")
         self._datasource = datasource
@@ -176,7 +177,7 @@ class BatchKwargsGenerator:
     def name(self):
         return self._name
 
-    def _get_iterator(self, data_asset_name, **kwargs) -> None:
+    def _get_iterator(self, data_asset_name, **kwargs):
         raise NotImplementedError
 
     def get_available_data_asset_names(self) -> None:

@@ -1,7 +1,7 @@
 import copy
 import pathlib
 from typing import Callable, List, Optional, cast
-from unittest.mock import patch
+from unittest import mock
 
 import pytest
 
@@ -12,13 +12,14 @@ from great_expectations.core.serializer import (
     JsonConfigSerializer,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
 from great_expectations.data_context.store.datasource_store import DatasourceStore
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
+from great_expectations.data_context.store.gx_cloud_store_backend import (
+    GXCloudStoreBackend,
 )
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
@@ -187,12 +188,11 @@ def test_datasource_store_set_cloud_mode(
     ge_cloud_base_url: str,
     ge_cloud_access_token: str,
     ge_cloud_organization_id: str,
-    shared_called_with_request_kwargs: dict,
 ) -> None:
     ge_cloud_store_backend_config: dict = {
-        "class_name": "GeCloudStoreBackend",
+        "class_name": GXCloudStoreBackend.__name__,
         "ge_cloud_base_url": ge_cloud_base_url,
-        "ge_cloud_resource_type": GeCloudRESTResource.DATASOURCE,
+        "ge_cloud_resource_type": GXCloudRESTResource.DATASOURCE,
         "ge_cloud_credentials": {
             "access_token": ge_cloud_access_token,
             "organization_id": ge_cloud_organization_id,
@@ -206,10 +206,14 @@ def test_datasource_store_set_cloud_mode(
         serializer=JsonConfigSerializer(schema=datasourceConfigSchema),
     )
 
-    with patch(
-        "requests.post", autospec=True, side_effect=mocked_datasource_post_response
-    ) as mock_post, patch(
-        "requests.get", autospec=True, side_effect=mocked_datasource_get_response
+    with mock.patch(
+        "requests.Session.post",
+        autospec=True,
+        side_effect=mocked_datasource_post_response,
+    ) as mock_post, mock.patch(
+        "requests.Session.get",
+        autospec=True,
+        side_effect=mocked_datasource_get_response,
     ):
 
         retrieved_datasource_config = store.set(key=None, value=datasource_config)
@@ -218,6 +222,7 @@ def test_datasource_store_set_cloud_mode(
         expected_datasource_config = serializer.serialize(datasource_config)
 
         mock_post.assert_called_with(
+            mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
             json={
                 "data": {
@@ -228,7 +233,6 @@ def test_datasource_store_set_cloud_mode(
                     },
                 }
             },
-            **shared_called_with_request_kwargs,
         )
 
         json_serializer = JsonDatasourceConfigSerializer(schema=datasourceConfigSchema)
@@ -333,14 +337,18 @@ def test_datasource_store_retrieve_by_name(
 
 
 @pytest.mark.unit
-def test_datasource_store_delete_by_name(
-    fake_datasource_name,
+def test_datasource_store_delete(
+    datasource_config: DatasourceConfig,
     datasource_store_with_single_datasource: DatasourceStore,
 ) -> None:
-    assert len(datasource_store_with_single_datasource.list_keys()) == 1
+    initial_keys = datasource_store_with_single_datasource.list_keys()
+    assert len(initial_keys) == 1
 
-    datasource_store_with_single_datasource.delete_by_name(
-        datasource_name=fake_datasource_name
+    datasource_name = initial_keys[0][0]
+    datasource_config.name = datasource_name
+
+    datasource_store_with_single_datasource.delete(
+        datasource_config=datasource_config,
     )
 
     assert len(datasource_store_with_single_datasource.list_keys()) == 0

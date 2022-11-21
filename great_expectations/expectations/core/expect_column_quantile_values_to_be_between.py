@@ -2,18 +2,28 @@ from typing import Dict, List, Optional
 
 import numpy as np
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.expectation import ColumnExpectation
-from great_expectations.expectations.util import render_evaluation_parameter_string
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
+from great_expectations.expectations.expectation import (
+    ColumnExpectation,
+    render_evaluation_parameter_string,
+)
+from great_expectations.render import (
+    AtomicDiagnosticRendererType,
+    AtomicPrescriptiveRendererType,
+    LegacyDescriptiveRendererType,
+    LegacyDiagnosticRendererType,
+    LegacyRendererType,
     RenderedAtomicContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
     renderedAtomicValueSchema,
 )
+from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
@@ -35,7 +45,7 @@ from great_expectations.util import isclose
 
 class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     # noinspection PyUnresolvedReferences
-    """Expect specific provided column quantiles to be between provided minimum and maximum values.
+    """Expect the specific provided column quantiles to be between a minimum value and a maximum value.
 
            ``quantile_ranges`` must be a dictionary with two keys:
 
@@ -138,6 +148,8 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     metric_dependencies = ("column.quantile_values",)
@@ -196,7 +208,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                         "lower_bound": None,
                         "upper_bound": None,
                     },
-                    "round_decimals": 1,
+                    "round_decimals": None,
                 },
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
@@ -276,16 +288,15 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -383,14 +394,14 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         )
 
     @classmethod
-    @renderer(renderer_type="atomic.prescriptive.summary")
+    @renderer(renderer_type=AtomicPrescriptiveRendererType.SUMMARY)
     @render_evaluation_parameter_string
     def _prescriptive_summary(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         """
@@ -420,25 +431,26 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             }
         )
         rendered = RenderedAtomicContent(
-            name="atomic.prescriptive.summary", value=value_obj, value_type="TableType"
+            name=AtomicPrescriptiveRendererType.SUMMARY,
+            value=value_obj,
+            value_type="TableType",
         )
         return rendered
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -509,13 +521,13 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         return [expectation_string_obj, quantile_range_table]
 
     @classmethod
-    @renderer(renderer_type="renderer.diagnostic.observed_value")
+    @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         if result.result is None or result.result.get("observed_value") is None:
@@ -554,10 +566,10 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     @classmethod
     def _atomic_diagnostic_observed_value_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         template_string = None
@@ -603,13 +615,13 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         return template_string, params_with_json_schema, table_header_row, table_rows
 
     @classmethod
-    @renderer(renderer_type="atomic.diagnostic.observed_value")
+    @renderer(renderer_type=AtomicDiagnosticRendererType.OBSERVED_VALUE)
     def _atomic_diagnostic_observed_value(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         (
@@ -642,19 +654,19 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                 }
             )
             return RenderedAtomicContent(
-                name="atomic.diagnostic.observed_value",
+                name=AtomicDiagnosticRendererType.OBSERVED_VALUE,
                 value=value_obj,
                 value_type="TableType",
             )
 
     @classmethod
-    @renderer(renderer_type="renderer.descriptive.quantile_table")
+    @renderer(renderer_type=LegacyDescriptiveRendererType.QUANTILE_TABLE)
     def _descriptive_quantile_table_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         assert result, "Must pass in result."
@@ -723,8 +735,8 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         quantile_vals = metrics.get("column.quantile_values")
         quantile_ranges = configuration.kwargs.get("quantile_ranges")
