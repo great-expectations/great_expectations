@@ -30,7 +30,7 @@ from great_expectations.render.util import (
 if TYPE_CHECKING:
     from typing import Dict, Optional, Union
 
-    from great_expectations.render import RendererConfiguration
+    from great_expectations.render.renderer_configuration import RendererConfiguration
 
 
 class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
