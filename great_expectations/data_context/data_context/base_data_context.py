@@ -402,41 +402,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._synchronize_self_with_underlying_data_context()
         return res
 
-    def save_expectation_suite(
-        self,
-        expectation_suite: ExpectationSuite,
-        expectation_suite_name: Optional[str] = None,
-        overwrite_existing: bool = True,
-        include_rendered_content: Optional[bool] = None,
-        **kwargs: Optional[dict],
-    ) -> None:
-        """Save the provided expectation suite into the DataContext.
-
-        Args:
-            expectation_suite: The suite to save.
-            expectation_suite_name: The name of this Expectation Suite. If no name is provided, the name will be read
-                from the suite.
-            overwrite_existing: Whether to overwrite the suite if it already exists.
-            include_rendered_content: Whether to save the prescriptive rendered content for each expectation.
-
-        Returns:
-            None
-        """
-        include_rendered_content = (
-            self._determine_if_expectation_suite_include_rendered_content(
-                include_rendered_content=include_rendered_content
-            )
-        )
-
-        self._data_context.save_expectation_suite(
-            expectation_suite,
-            expectation_suite_name,
-            overwrite_existing,
-            include_rendered_content,
-            **kwargs,
-        )
-        self._synchronize_self_with_underlying_data_context()
-
     @property
     def root_directory(self) -> Optional[str]:
         if hasattr(self._data_context, "_context_root_directory"):

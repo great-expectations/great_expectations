@@ -278,7 +278,6 @@ class AbstractDataContext(ABC):
         """
         self.variables.save_config()
 
-    @abstractmethod
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
         args_payload_fn=save_expectation_suite_usage_statistics,
@@ -294,7 +293,34 @@ class AbstractDataContext(ABC):
         """
         Each DataContext will define how ExpectationSuite will be saved.
         """
-        raise NotImplementedError
+        if expectation_suite_name is None:
+            key = ExpectationSuiteIdentifier(
+                expectation_suite_name=expectation_suite.expectation_suite_name
+            )
+        else:
+            expectation_suite.expectation_suite_name = expectation_suite_name
+            key = ExpectationSuiteIdentifier(
+                expectation_suite_name=expectation_suite_name
+            )
+        if (
+            self.expectations_store.has_key(key)  # noqa: @601
+            and not overwrite_existing
+        ):
+            raise ge_exceptions.DataContextError(
+                "expectation_suite with name {} already exists. If you would like to overwrite this "
+                "expectation_suite, set overwrite_existing=True.".format(
+                    expectation_suite_name
+                )
+            )
+        self._evaluation_parameter_dependencies_compiled = False
+        include_rendered_content = (
+            self._determine_if_expectation_suite_include_rendered_content(
+                include_rendered_content=include_rendered_content
+            )
+        )
+        if include_rendered_content:
+            expectation_suite.render()
+        return self.expectations_store.set(key, expectation_suite, **kwargs)
 
     # Properties
     @property
