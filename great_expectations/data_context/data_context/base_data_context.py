@@ -21,7 +21,6 @@ from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 from great_expectations.data_context.types.base import (
-    BaseYamlConfig,
     DataContextConfig,
     DataContextConfigDefaults,
     GXCloudConfig,
@@ -228,7 +227,7 @@ class BaseDataContext(ConfigPeer):
         return getattr(self._data_context, attr)
 
     @property
-    def config(self) -> BaseYamlConfig:
+    def config(self) -> DataContextConfig:
         return self._data_context.config
 
     @property
