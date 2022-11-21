@@ -181,17 +181,6 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
                 "condition_parser",
             ],
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            [
-                "column",
-                "value_set",
-                "parse_strings_as_datetimes",
-                "row_condition",
-                "condition_parser",
-            ],
-        )
 
         if params["value_set"] is None or len(params["value_set"]) == 0:
             values_string = "[ ]"

@@ -29,6 +29,7 @@ from .components import (
     TextContent,
     ValueListContent,
 )
+from .renderer_configuration import RendererConfiguration
 from .view import DefaultJinjaPageView
 
 renderedAtomicValueSchema = RenderedAtomicValueSchema()

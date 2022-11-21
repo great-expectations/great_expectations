@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import TYPE_CHECKING
 
 import altair as alt
 import pandas as pd
@@ -26,6 +26,11 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+
+if TYPE_CHECKING:
+    from typing import Dict, Optional, Union
+
+    from great_expectations.render import RendererConfiguration
 
 
 class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
@@ -222,16 +227,19 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        kwargs_list = ["column", "value_set", "row_condition", "condition_parser"]
+        renderer_configuration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            language=language,
+            runtime_configuration=runtime_configuration,
+            kwargs_list=kwargs_list,
         )
-        styling = runtime_configuration.get("styling")
-
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            ["column", "value_set", "row_condition", "condition_parser"],
-        )
+        params: Union[dict, None] = renderer_configuration.params
+        include_column_name: Union[
+            bool, None
+        ] = renderer_configuration.include_column_name
+        styling: Union[str, None] = renderer_configuration.styling
 
         if params["value_set"] is None or len(params["value_set"]) == 0:
             if include_column_name:
