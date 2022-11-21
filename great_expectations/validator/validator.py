@@ -1117,6 +1117,7 @@ class Validator:
                         runtime_configuration=runtime_configuration,
                     )
                     expectation_validation_graph.update(graph=graph)
+
                 expectation_validation_graphs.append(expectation_validation_graph)
                 processed_configurations.append(evaluated_config)
             except Exception as err:
