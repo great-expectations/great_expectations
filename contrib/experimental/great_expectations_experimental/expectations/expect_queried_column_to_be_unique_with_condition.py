@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
@@ -26,12 +26,15 @@ class ExpectQueriedColumnToBeUniqueWithCondition(QueryExpectation):
             HAVING count(1) > 1
             """
 
-    success_keys = (
-        "template_dict"
-        "query",
-    )
+    success_keys = ("template_dict" "query",)
 
-    domain_keys = ("query", "template_dict", "batch_id", "row_condition", "condition_parser")
+    domain_keys = (
+        "query",
+        "template_dict",
+        "batch_id",
+        "row_condition",
+        "condition_parser",
+    )
     default_kwarg_values = {
         "result_format": "BASIC",
         "include_config": True,
@@ -40,6 +43,24 @@ class ExpectQueriedColumnToBeUniqueWithCondition(QueryExpectation):
         "column": None,
         "query": query,
     }
+
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
+        """
+        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+        necessary configuration arguments have been provided for the validation of the expectation.
+
+        Args:
+            configuration (OPTIONAL[ExpectationConfiguration]): \
+                An optional Expectation Configuration entry that will be used to configure the expectation
+        Returns:
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+        """
+
+        super().validate_configuration(configuration)
+        if configuration is None:
+            configuration = self.configuration
 
     def _validate(
         self,
@@ -52,12 +73,18 @@ class ExpectQueriedColumnToBeUniqueWithCondition(QueryExpectation):
         query_result = metrics.get("query.template_values")
         query_result = dict(query_result)
         if not query_result:
-            return {"success": True}
+            return {
+                "info": "The column values are unique, under the condition",
+                "success": True,
+            }
 
         else:
             return {
                 "success": False,
-                "result": {"observed_value": query_result},
+                "result": {
+                    "info": "The column values are not unique, under the condition",
+                    "observed_value": query_result,
+                },
             }
 
     examples = [
@@ -77,7 +104,12 @@ class ExpectQueriedColumnToBeUniqueWithCondition(QueryExpectation):
                     "title": "basic_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"template_dict": {"column_to_check": "uuid", "condition": "is_open_2"}},
+                    "in": {
+                        "template_dict": {
+                            "column_to_check": "uuid",
+                            "condition": "is_open_2",
+                        }
+                    },
                     "out": {"success": True},
                     "only_for": ["sqlite"],
                 },
@@ -85,10 +117,15 @@ class ExpectQueriedColumnToBeUniqueWithCondition(QueryExpectation):
                     "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"template_dict": {"column_to_check": "uuid", "condition": "is_open"}},
+                    "in": {
+                        "template_dict": {
+                            "column_to_check": "uuid",
+                            "condition": "is_open",
+                        }
+                    },
                     "out": {"success": False},
                     "only_for": ["sqlite"],
-                }
+                },
             ],
         }
     ]
