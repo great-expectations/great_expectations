@@ -95,6 +95,8 @@ class QueryTemplateValues(QueryMetricProvider):
 
         df.createOrReplaceTempView("tmp_view")
         template_dict = metric_value_kwargs.get("template_dict")
+        if not isinstance(query, str):
+            raise TypeError("template_dict supplied by the expectation must be a dict")
         if not isinstance(template_dict, dict):
             raise TypeError("template_dict supplied by the expectation must be a dict")
 
