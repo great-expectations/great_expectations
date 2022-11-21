@@ -111,7 +111,7 @@ class ExpectQueriedColumnToBeUniqueWithCondition(QueryExpectation):
                         }
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite"],
+                    "only_for": ["sqlite", "spark"],
                 },
                 {
                     "title": "basic_negative_test",
@@ -124,7 +124,7 @@ class ExpectQueriedColumnToBeUniqueWithCondition(QueryExpectation):
                         }
                     },
                     "out": {"success": False},
-                    "only_for": ["sqlite"],
+                    "only_for": ["sqlite", "spark"],
                 },
             ],
         }
