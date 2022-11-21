@@ -1261,7 +1261,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     @staticmethod
     def list_profilers(
         profiler_store: ProfilerStore,
-        ge_cloud_mode: bool,
+        ge_cloud_mode: bool = False,
     ) -> List[str]:
         if ge_cloud_mode:
             return profiler_store.list_keys()

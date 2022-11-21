@@ -22,6 +22,7 @@ from great_expectations.render import (
     AtomicPrescriptiveRendererType,
     AtomicRendererType,
 )
+from great_expectations.validator.computed_metric import MetricValue
 
 if TYPE_CHECKING:
     from great_expectations.core import ExpectationConfiguration
@@ -268,7 +269,7 @@ def get_metric_kwargs(
     metric_name: str,
     configuration: Optional[ExpectationConfiguration] = None,
     runtime_configuration: Optional[dict] = None,
-) -> Dict:
+) -> dict:
     try:
         metric_definition = _registered_metrics.get(metric_name)
         if metric_definition is None:

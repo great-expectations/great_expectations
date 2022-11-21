@@ -4,7 +4,7 @@ import dataclasses
 import itertools
 from datetime import datetime
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Type, cast
+from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Type, Union, cast
 
 import dateutil.tz
 from pydantic import Field
@@ -12,7 +12,7 @@ from pydantic import dataclasses as pydantic_dc
 from typing_extensions import ClassVar, Literal
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.zep.interfaces import (
+from great_expectations.experimental.datasources.interfaces import (
     Batch,
     BatchRequest,
     BatchRequestOptions,
@@ -45,7 +45,8 @@ class ColumnSplitter:
     # param_defaults is a Dict where the keys are the parameters of the splitter and the values are the default
     # values are the default values if a batch request using the splitter leaves the parameter unspecified.
     # template_params: List[str]
-    param_defaults: Dict[str, Iterable] = Field(default_factory=dict)
+    # Union of List/Iterable for serialization
+    param_defaults: Dict[str, Union[List, Iterable]] = Field(default_factory=dict)
 
     @property
     def param_names(self) -> List[str]:
