@@ -83,7 +83,7 @@ try:
     import importlib.metadata as importlib_metadata
 except ModuleNotFoundError:
     # Fallback for python < 3.8
-    import importlib_metadata
+    import importlib_metadata  # type: ignore[no-redef]
 
 logger = logging.getLogger(__name__)
 
@@ -362,11 +362,11 @@ def verify_dynamic_loading_support(
     :param module_name: a possibly-relative name of a module
     :param package_name: the name of a package, to which the given module belongs
     """
+    # noinspection PyUnresolvedReferences
+    module_spec: Optional[importlib.machinery.ModuleSpec]
     try:
         # noinspection PyUnresolvedReferences
-        module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(
-            module_name, package=package_name
-        )
+        module_spec = importlib.util.find_spec(module_name, package=package_name)
     except ModuleNotFoundError:
         module_spec = None  # type: ignore[assignment]
     if not module_spec:
