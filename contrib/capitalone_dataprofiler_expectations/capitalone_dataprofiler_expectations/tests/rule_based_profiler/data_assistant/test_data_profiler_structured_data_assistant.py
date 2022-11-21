@@ -1,8 +1,19 @@
 import os
-import pytest
 from typing import Dict, List, Optional, cast
 from unittest import mock
 
+import pytest
+
+# noinspection PyUnresolvedReferences
+import contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics.data_profiler_metrics
+
+# noinspection PyUnresolvedReferences
+from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant import (
+    DataProfilerStructuredDataAssistant,
+)
+from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result import (
+    DataProfilerStructuredDataAssistantResult,
+)
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -15,25 +26,18 @@ from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     ParameterNode,
 )
-# noinspection PyUnresolvedReferences
-import contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics.data_profiler_metrics
-# noinspection PyUnresolvedReferences
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant import (
-    DataProfilerStructuredDataAssistant
-)
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result import (
-    DataProfilerStructuredDataAssistantResult
-)
 
 # noinspection PyUnresolvedReferences
 from tests.conftest import (
-    bobby_columnar_table_multi_batch_probabilistic_data_context,
     bobby_columnar_table_multi_batch_deterministic_data_context,
+    bobby_columnar_table_multi_batch_probabilistic_data_context,
     no_usage_stats,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 )
 
-test_root_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+test_root_path = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+)
 
 
 @pytest.fixture
@@ -82,7 +86,6 @@ def bobby_profile_data_profiler_structured_data_assistant_result(
         "data_connector_name": "monthly",
         "data_asset_name": "my_reports",
         "data_connector_query": {"index": -1},
-
     }
 
     exclude_column_names = [
