@@ -118,7 +118,7 @@ class ValidationGraph:
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
         show_progress_bars: bool = True,
     ) -> Tuple[
-        Optional[Dict[Tuple[str, str, str], MetricValue]],
+        Dict[Tuple[str, str, str], MetricValue],
         Dict[
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
