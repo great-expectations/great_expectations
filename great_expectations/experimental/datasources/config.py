@@ -6,19 +6,25 @@ import pathlib
 from pprint import pformat as pf
 from typing import Dict, Type, Union
 
-from pydantic import BaseModel, validator
+from pydantic import validator
 from ruamel.yaml import YAML
 
-from great_expectations.zep.interfaces import Datasource
-from great_expectations.zep.sources import _SourceFactories
+from great_expectations.experimental.datasources.experimental_base_model import (
+    ExperimentalBaseModel,
+)
+from great_expectations.experimental.datasources.interfaces import Datasource
+from great_expectations.experimental.datasources.sources import _SourceFactories
 
 yaml = YAML(typ="safe")
+# NOTE (kilo59): the following settings appear to be what we use in existing codebase
+yaml.indent(mapping=2, sequence=4, offset=2)
+yaml.default_flow_style = False
 
 
 LOGGER = logging.getLogger(__name__)
 
 
-class GxConfig(BaseModel):
+class GxConfig(ExperimentalBaseModel):
     datasources: Dict[str, Datasource]
 
     @classmethod
@@ -44,6 +50,7 @@ class GxConfig(BaseModel):
             loaded_datasources[datasource.name] = datasource
 
             # TODO: move this to a different 'validator' method
+            # attach the datasource to the nested assets, avoiding recursion errors
             for asset in datasource.assets.values():
                 asset._datasource = datasource
 

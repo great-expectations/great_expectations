@@ -8,8 +8,11 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Set, Type
 import pydantic
 from typing_extensions import ClassVar, TypeAlias
 
-from great_expectations.zep.metadatasource import MetaDatasource
-from great_expectations.zep.sources import _SourceFactories
+from great_expectations.experimental.datasources.experimental_base_model import (
+    ExperimentalBaseModel,
+)
+from great_expectations.experimental.datasources.metadatasource import MetaDatasource
+from great_expectations.experimental.datasources.sources import _SourceFactories
 
 LOGGER = logging.getLogger(__name__)
 
@@ -28,11 +31,6 @@ if TYPE_CHECKING:
 BatchRequestOptions: TypeAlias = Dict[str, Any]
 
 
-class ZepBaseModel(pydantic.BaseModel):
-    class Config:
-        extra = pydantic.Extra.forbid
-
-
 @dataclasses.dataclass(frozen=True)
 class BatchRequest:
     datasource_name: str
@@ -40,7 +38,7 @@ class BatchRequest:
     options: BatchRequestOptions
 
 
-class DataAsset(ZepBaseModel):
+class DataAsset(ExperimentalBaseModel):
     name: str
     type: str
 
@@ -61,7 +59,7 @@ class DataAsset(ZepBaseModel):
         raise NotImplementedError
 
 
-class Datasource(ZepBaseModel, metaclass=MetaDatasource):
+class Datasource(ExperimentalBaseModel, metaclass=MetaDatasource):
 
     # class attrs
     asset_types: ClassVar[List[Type[DataAsset]]] = []

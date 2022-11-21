@@ -104,7 +104,7 @@ class CheckpointStore(ConfigurationStore):
         return os.path.isdir(checkpoints_directory_path)
 
     def list_checkpoints(
-        self, ge_cloud_mode: bool
+        self, ge_cloud_mode: bool = False
     ) -> Union[List[str], List[ConfigurationIdentifier]]:
         keys: Union[List[str], List[ConfigurationIdentifier]] = self.list_keys()  # type: ignore[assignment]
         if ge_cloud_mode:

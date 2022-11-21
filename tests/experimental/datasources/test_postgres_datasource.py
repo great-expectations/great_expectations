@@ -3,11 +3,14 @@ from typing import Callable, ContextManager
 
 import pytest
 
-import great_expectations.zep.postgres_datasource as postgres_datasource
+import great_expectations.experimental.datasources.postgres_datasource as postgres_datasource
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.zep.fakes import sqlachemy_execution_engine_mock_cls
-from great_expectations.zep.interfaces import BatchRequest, BatchRequestOptions
+from great_expectations.experimental.datasources.interfaces import (
+    BatchRequest,
+    BatchRequestOptions,
+)
+from tests.experimental.datasources.conftest import sqlachemy_execution_engine_mock_cls
 
 
 @contextmanager
