@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import warnings
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Optional, Tuple, Union, cast
 from uuid import UUID
 
 from dateutil.parser import parse
@@ -386,8 +386,98 @@ class ConfigurationIdentifierSchema(Schema):
         return ConfigurationIdentifier(**data)
 
 
+class BatchMetricIdentifier(DataContextKey):
+    def __init__(
+        self,
+        batch_metric_key: Tuple[
+            Optional[Union[str, UUID]],
+            Optional[str],
+            Optional[Union[str, UUID]],
+            Optional[Union[str, UUID]],
+        ],
+    ) -> None:
+        super().__init__()
+        element: Optional[Union[str, UUID]]
+        batch_metric_key = tuple(
+            str(element) if isinstance(element, UUID) else element
+            for element in batch_metric_key
+        )
+        batch_metric_key = cast(
+            Tuple[
+                Optional[Union[str, UUID]],
+                Optional[str],
+                Optional[Union[str, UUID]],
+                Optional[Union[str, UUID]],
+            ],
+            batch_metric_key,
+        )
+        if any(not isinstance(element, str) for element in batch_metric_key):
+            types_detected: str = (
+                f"{[type(element).__name__ for element in batch_metric_key]}"
+            )
+            raise InvalidDataContextKeyError(
+                f"batch_metric_key tuple elements must be of string type; {types_detected} detected"
+            )
+
+        self._batch_metric_key = batch_metric_key
+
+    @property
+    def batch_metric_key(
+        self,
+    ) -> Tuple[
+        Optional[Union[str, UUID]],
+        Optional[str],
+        Optional[Union[str, UUID]],
+        Optional[Union[str, UUID]],
+    ]:
+        return self._batch_metric_key
+
+    def to_tuple(
+        self,
+    ) -> Tuple[
+        Optional[Union[str, UUID]],
+        Optional[str],
+        Optional[Union[str, UUID]],
+        Optional[Union[str, UUID]],
+    ]:
+        return self._batch_metric_key
+
+    def to_fixed_length_tuple(self) -> tuple:
+        # noinspection PyRedundantParentheses
+        return (self._batch_metric_key,)
+
+    @classmethod
+    def from_tuple(
+        cls,
+        value: Tuple[
+            Optional[Union[str, UUID]],
+            Optional[str],
+            Optional[Union[str, UUID]],
+            Optional[Union[str, UUID]],
+        ],
+    ) -> BatchMetricIdentifier:
+        return cls(batch_metric_key=value)
+
+    @classmethod
+    def from_fixed_length_tuple(cls, value: tuple) -> BatchMetricIdentifier:
+        return cls(batch_metric_key=value[0])
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}::{self._batch_metric_key}"
+
+
+class BatchMetricIdentifierSchema(Schema):
+    batch_metric_key = fields.Str()
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_batch_metric_identifier(self, data, **kwargs):
+        return BatchMetricIdentifier(**data)
+
+
 expectationSuiteIdentifierSchema = ExpectationSuiteIdentifierSchema()
 validationResultIdentifierSchema = ValidationResultIdentifierSchema()
 runIdentifierSchema = RunIdentifierSchema()
 batchIdentifierSchema = BatchIdentifierSchema()
 configurationIdentifierSchema = ConfigurationIdentifierSchema()
+batchMetricIdentifierSchema = BatchMetricIdentifierSchema()

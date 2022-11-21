@@ -90,6 +90,7 @@ from great_expectations.self_check.util import (
     generate_expectation_tests,
 )
 from great_expectations.util import camel_to_snake, is_parseable_date
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
@@ -966,11 +967,16 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration["result_format"] = validation_dependencies[  # type: ignore[index]
             "result_format"
         ]
-        requested_metrics = validation_dependencies["metrics"]
+        requested_metrics: Dict[str, MetricConfiguration] = validation_dependencies[
+            "metrics"
+        ]
 
-        provided_metrics = {}
-        for name, metric_edge_key in requested_metrics.items():
-            provided_metrics[name] = metrics[metric_edge_key.id]
+        metric_name: str
+        metric_configuration: MetricConfiguration
+        provided_metrics: Dict[str, MetricValue] = {
+            metric_name: metrics[metric_configuration.id]
+            for metric_name, metric_configuration in requested_metrics.items()
+        }
 
         expectation_validation_result: Union[
             ExpectationValidationResult, dict
@@ -1135,6 +1141,7 @@ class Expectation(metaclass=MetaExpectation):
         )
         evr: ExpectationValidationResult = validator.graph_validate(
             configurations=[configuration],
+            metrics=None,
             runtime_configuration=runtime_configuration,
         )[0]
         if include_rendered_content:

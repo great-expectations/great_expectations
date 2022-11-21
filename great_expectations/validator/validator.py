@@ -628,17 +628,11 @@ class Validator:
 
             meta["profiler_config"] = profiler.to_json_dict()
 
-            configuration = ExpectationConfiguration(
-                expectation_type=expectation_type,
-                kwargs=expectation_kwargs,
-                meta=meta,
-            )
-        else:
-            configuration = ExpectationConfiguration(
-                expectation_type=expectation_type,
-                kwargs=expectation_kwargs,
-                meta=meta,
-            )
+        configuration = ExpectationConfiguration(
+            expectation_type=expectation_type,
+            kwargs=expectation_kwargs,
+            meta=meta,
+        )
 
         return configuration
 
@@ -946,6 +940,9 @@ class Validator:
         Returns:
             A list of Validations, validating that all necessary metrics are available.
         """
+        if metrics is None:
+            metrics = {}
+
         if runtime_configuration is None:
             runtime_configuration = {}
 
@@ -969,9 +966,6 @@ class Validator:
             catch_exceptions=catch_exceptions,
             runtime_configuration=runtime_configuration,
         )
-
-        if metrics is None:
-            metrics = {}
 
         graph: ValidationGraph = (
             self._generate_suite_level_graph_from_expectation_level_sub_graphs(
@@ -1058,13 +1052,15 @@ class Validator:
             evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
 
             expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
-            validation_dependencies: dict = (
-                expectation_impl().get_validation_dependencies(
-                    configuration=evaluated_config,
-                    execution_engine=self._execution_engine,
-                    runtime_configuration=runtime_configuration,
-                )["metrics"]
-            )
+            validation_dependencies: Dict[
+                str, MetricConfiguration
+            ] = expectation_impl().get_validation_dependencies(
+                configuration=evaluated_config,
+                execution_engine=self._execution_engine,
+                runtime_configuration=runtime_configuration,
+            )[
+                "metrics"
+            ]
 
             try:
                 expectation_validation_graph: ExpectationValidationGraph = (

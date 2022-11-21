@@ -5,8 +5,21 @@ Revises:
 Create Date: 2022-11-16 15:27:13.202261
 
 """
-import sqlalchemy as sa
-from alembic import op
+import logging
+
+logger = logging.getLogger(__name__)
+
+try:
+    import sqlalchemy as sa
+except ImportError:
+    logger.debug("No SqlAlchemy module available.")
+    sa = None
+
+try:
+    from alembic import op
+except ImportError:
+    logger.debug("No alembic module available.")
+    op = None
 
 # revision identifiers, used by Alembic.
 revision = "9dccb6701dd6"
@@ -27,14 +40,14 @@ def upgrade() -> None:
         sa.Column(
             "created_at",
             sa.DateTime(),
-            server_default=sa.text("CURRENT_TIMESTAMP"),
             nullable=False,
+            server_default=sa.func.now(),
         ),
         sa.Column(
             "updated_at",
             sa.DateTime(),
-            server_default=sa.text("CURRENT_TIMESTAMP"),
             nullable=False,
+            server_default=sa.func.now(),
         ),
         sa.Column(
             "deleted_at",
@@ -48,11 +61,24 @@ def upgrade() -> None:
             default=False,
         ),
         sa.Column(
-            "status",
-            sa.Integer(),
-            nullable=False,
-            default=0,
+            "archived_at",
+            sa.DateTime(),
+            nullable=True,
         ),
+        sa.Column(
+            "archived",
+            sa.Boolean(),
+            nullable=False,
+            default=False,
+        ),
+        # TODO: <Alex>ALEX</Alex>
+        # sa.Column(
+        #     "status",
+        #     sa.Integer(),
+        #     nullable=False,
+        #     default=0,
+        # ),
+        # TODO: <Alex>ALEX</Alex>
         sa.Column(
             "data_context_uuid",
             sa.UnicodeText(),
@@ -84,7 +110,12 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column(
-            "metric_configuration_uuid",
+            "metric_domain_kwargs_uuid",
+            sa.UnicodeText(),
+            nullable=False,
+        ),
+        sa.Column(
+            "metric_value_kwargs_uuid",
             sa.UnicodeText(),
             nullable=False,
         ),
@@ -113,10 +144,26 @@ def upgrade() -> None:
         unique=False,
     )
     op.create_index(
-        op.f("idx_batch_metric_computations_metric_configuration_uuid"),
+        op.f("idx_batch_metric_computations_metric_name"),
         table_name="batch_metric_computations",
         columns=[
-            "metric_configuration_uuid",
+            "metric_name",
+        ],
+        unique=False,
+    )
+    op.create_index(
+        op.f("idx_batch_metric_computations_metric_domain_kwargs_uuid"),
+        table_name="batch_metric_computations",
+        columns=[
+            "metric_domain_kwargs_uuid",
+        ],
+        unique=False,
+    )
+    op.create_index(
+        op.f("idx_batch_metric_computations_metric_value_kwargs_uuid"),
+        table_name="batch_metric_computations",
+        columns=[
+            "metric_value_kwargs_uuid",
         ],
         unique=False,
     )
@@ -125,7 +172,9 @@ def upgrade() -> None:
         table_name="batch_metric_computations",
         columns=[
             "batch_uuid",
-            "metric_configuration_uuid",
+            "metric_name",
+            "metric_domain_kwargs_uuid",
+            "metric_value_kwargs_uuid",
         ],
         unique=False,
     )
