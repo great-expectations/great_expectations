@@ -81,9 +81,9 @@ class QueryTemplateValues(QueryMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ) -> List[pyspark_sql_Row]:
-        query = metric_value_kwargs.get(
+        query = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
             "query"
-        ) or cls.default_kwarg_values.get("query")
+        )
 
         df: pyspark_sql_DataFrame
         df, _, _ = execution_engine.get_compute_domain(
