@@ -960,6 +960,9 @@ class Expectation(metaclass=MetaExpectation):
         if not configuration:
             configuration = self.configuration
 
+        if runtime_configuration is None:
+            runtime_configuration = {}
+
         validation_dependencies: ValidationDependencies = (
             self.get_validation_dependencies(
                 configuration=configuration,
