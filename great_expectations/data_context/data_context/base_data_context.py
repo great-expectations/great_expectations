@@ -470,6 +470,22 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._synchronize_self_with_underlying_data_context()
         return checkpoint
 
+    def save_expectation_suite(
+        self,
+        expectation_suite: ExpectationSuite,
+        expectation_suite_name: Optional[str] = None,
+        overwrite_existing: bool = True,
+        include_rendered_content: Optional[bool] = None,
+        **kwargs: Optional[dict],
+    ) -> None:
+        self._data_context.save_expectation_suite(
+            expectation_suite,
+            expectation_suite_name=expectation_suite_name,
+            overwrite_existing=overwrite_existing,
+            include_rendered_content=include_rendered_content,
+            **kwargs,
+        )
+
     def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
         return self._data_context.list_checkpoints()
 
