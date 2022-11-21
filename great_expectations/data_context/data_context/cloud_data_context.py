@@ -14,6 +14,11 @@ from great_expectations.core.config_provider import (
     _ConfigurationProvider,
 )
 from great_expectations.core.serializer import JsonConfigSerializer
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.core.usage_statistics.usage_statistics import (
+    save_expectation_suite_usage_statistics,
+    usage_statistics_enabled_method,
+)
 from great_expectations.data_context.cloud_constants import (
     CLOUD_DEFAULT_BASE_URL,
     GXCloudEnvironmentVariable,
@@ -508,6 +513,10 @@ class CloudDataContext(AbstractDataContext):
             expectation_suite.render()
         return expectation_suite
 
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
+        args_payload_fn=save_expectation_suite_usage_statistics,
+    )
     def save_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
