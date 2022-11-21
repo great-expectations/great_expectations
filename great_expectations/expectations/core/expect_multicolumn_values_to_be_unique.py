@@ -23,6 +23,9 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
      Expect that the columns are unique together, e.g. a multi-column primary key
      Note that all instances of any duplicates are considered failed
 
+     expect_multicolumnvalues_to_be_unique is a \
+     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
+
      For example:
      ::
 
@@ -39,18 +42,23 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
      Keyword Args:
          ignore_row_if (str): "all_values_are_missing", "any_value_is_missing", "never"
 
-     Other Parameters:
-         result_format (str or None): \
-             Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-         include_config (boolean): \
-             If True, then include the expectation config as part of the result object. \
-         catch_exceptions (boolean or None): \
-             If True, then catch exceptions and include them as part of the result object. \
-         meta (dict or None): \
-             A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification.
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
      Returns:
-         An ExpectationSuiteValidationResult
+         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
+
+         Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
 
     library_metadata = {

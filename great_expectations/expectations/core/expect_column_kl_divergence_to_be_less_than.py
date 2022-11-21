@@ -52,24 +52,24 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             KL divergence compares two distributions. The higher the divergence value (relative entropy), the larger
             the \
             difference between the two distributions. A relative entropy of zero indicates that the data are \
-            distributed identically, `when binned according to the provided partition`.
+            distributed identically, when binned according to the provided partition.
 
             In many practical contexts, choosing a value between 0.5 and 1 will provide a useful test.
 
             This expectation works on both categorical and continuous partitions. See notes below for details.
 
-            ``expect_column_kl_divergence_to_be_less_than`` is a \
-            :func:`column_aggregate_expectation <great_expectations.dataset.MetaDataset.column_aggregate_expectation>`.
+            expect_column_kl_divergence_to_be_less_than is a \
+            [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
             Args:
                 column (str): \
                     The column name.
                 partition_object (dict): \
-                    The expected partition object (see :ref:`partition_object`).
+                    The expected partition object (see [partition_object](https://docs.greatexpectations.io/docs/reference/expectations/distributional_expectations/#partition-objects)).
                 threshold (float): \
-                    The maximum KL divergence to for which to return `success=True`. If KL divergence is larger than
+                    The maximum KL divergence to for which to return success=True. If KL divergence is larger than
                     the\
-                    provided threshold, the test will return `success=False`.
+                    provided threshold, the test will return success=False.
 
             Keyword Args:
                 internal_weight_holdout (float between 0 and 1 or None): \
@@ -98,23 +98,21 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
 
             Other Parameters:
                 result_format (str or None): \
-                    Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                    For more detail, see :ref:`result_format <result_format>`.
+                    Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY.
+                    For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
                 include_config (boolean): \
-                    If True, then include the expectation config as part of the result object. \
-                    For more detail, see :ref:`include_config`.
+                    If True, then include the expectation config as part of the result object.
                 catch_exceptions (boolean or None): \
                     If True, then catch exceptions and include them as part of the result object. \
-                    For more detail, see :ref:`catch_exceptions`.
+                    For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
                 meta (dict or None): \
                     A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-                    modification. For more detail, see :ref:`meta`.
+                    modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
             Returns:
-                An ExpectationSuiteValidationResult
+                An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-                Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-                :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+                Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
 
             Notes:
                 * observed_value field in the result object is customized for this expectation to be a float \
@@ -157,14 +155,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                 will be set to None. This is because inf, -inf, Nan, are not json serializable and cause some json
                 parsers to\
                 crash when encountered. The python None token will be serialized to null in json.
-
-            See also:
-                :func:`expect_column_chisquare_test_p_value_to_be_greater_than \
-                <great_expectations.dataset.dataset.Dataset.expect_column_unique_value_count_to_be_between>`
-
-                :func:`expect_column_bootstrapped_ks_test_p_value_to_be_greater_than \
-                <great_expectations.dataset.dataset.Dataset.expect_column_unique_value_count_to_be_between>`
-
             """
 
     # This dictionary contains metadata for display in the public gallery
