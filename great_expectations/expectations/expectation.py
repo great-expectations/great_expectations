@@ -90,8 +90,9 @@ from great_expectations.self_check.util import (
     generate_expectation_tests,
 )
 from great_expectations.util import camel_to_snake, is_parseable_date
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import Validator
+from great_expectations.validator.validator import ValidationDependencies, Validator
 
 if TYPE_CHECKING:
     from great_expectations.data_context import DataContext
@@ -947,6 +948,7 @@ class Expectation(metaclass=MetaExpectation):
             key_list.extend(list(cls.runtime_keys))
         return tuple(str(key) for key in key_list)
 
+    # noinspection PyUnusedLocal
     def metrics_validate(
         self,
         metrics: dict,
@@ -958,19 +960,27 @@ class Expectation(metaclass=MetaExpectation):
         if not configuration:
             configuration = self.configuration
 
-        validation_dependencies: dict = self.get_validation_dependencies(
-            configuration=configuration,
-            execution_engine=execution_engine,
-            runtime_configuration=runtime_configuration,
-        )
-        runtime_configuration["result_format"] = validation_dependencies[  # type: ignore[index]
-            "result_format"
-        ]
-        requested_metrics = validation_dependencies["metrics"]
+        if runtime_configuration is None:
+            runtime_configuration = {}
 
-        provided_metrics = {}
-        for name, metric_edge_key in requested_metrics.items():
-            provided_metrics[name] = metrics[metric_edge_key.id]
+        validation_dependencies: ValidationDependencies = (
+            self.get_validation_dependencies(
+                configuration=configuration,
+                execution_engine=execution_engine,
+                runtime_configuration=runtime_configuration,
+            )
+        )
+        runtime_configuration["result_format"] = validation_dependencies.result_format
+        requested_metrics: Dict[
+            str, MetricConfiguration
+        ] = validation_dependencies.metric_configurations
+
+        metric_name: str
+        metric_configuration: MetricConfiguration
+        provided_metrics: Dict[str, MetricValue] = {
+            metric_name: metrics[metric_configuration.id]
+            for metric_name, metric_configuration in requested_metrics.items()
+        }
 
         expectation_validation_result: Union[
             ExpectationValidationResult, dict
@@ -986,6 +996,7 @@ class Expectation(metaclass=MetaExpectation):
         )
         return evr
 
+    # noinspection PyUnusedLocal
     @staticmethod
     def _build_evr(
         raw_response: Union[ExpectationValidationResult, dict],
@@ -1012,7 +1023,7 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> Dict[str, dict]:
+    ) -> ValidationDependencies:
         """Returns the result format and metrics required to validate this Expectation using the provided result format."""
         runtime_configuration = self.get_runtime_kwargs(
             configuration=configuration,
@@ -1020,10 +1031,9 @@ class Expectation(metaclass=MetaExpectation):
         )
         result_format: dict = runtime_configuration["result_format"]
         result_format = parse_result_format(result_format=result_format)
-        return {
-            "result_format": result_format,
-            "metrics": {},
-        }
+        return ValidationDependencies(
+            metric_configurations={}, result_format=result_format
+        )
 
     def get_domain_kwargs(
         self, configuration: ExpectationConfiguration
@@ -1830,24 +1840,26 @@ class Expectation(metaclass=MetaExpectation):
         self,
         expectation_config: Optional[ExpectationConfiguration],
     ) -> List[ExpectationMetricDiagnostics]:
-        """Check to see which Metrics are upstream dependencies for this Expectation."""
+        """Check to see which Metrics are upstream validation_dependencies for this Expectation."""
 
         # NOTE: Abe 20210102: Strictly speaking, identifying upstream metrics shouldn't need to rely on an expectation config.
         # There's probably some part of get_validation_dependencies that can be factored out to remove the dependency.
 
         if not expectation_config:
             return []
-        validation_dependencies = self.get_validation_dependencies(
-            configuration=expectation_config
+
+        validation_dependencies: ValidationDependencies = (
+            self.get_validation_dependencies(configuration=expectation_config)
         )
 
-        metric_diagnostics_list = []
-        for metric in validation_dependencies["metrics"].keys():
-            new_metric_diagnostics = ExpectationMetricDiagnostics(
-                name=metric,
+        metric_name: str
+        metric_diagnostics_list: List[ExpectationMetricDiagnostics] = [
+            ExpectationMetricDiagnostics(
+                name=metric_name,
                 has_question_renderer=False,
             )
-            metric_diagnostics_list.append(new_metric_diagnostics)
+            for metric_name in validation_dependencies.get_metric_names()
+        ]
 
         return metric_diagnostics_list
 
@@ -1965,12 +1977,15 @@ class TableExpectation(Expectation, ABC):
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> Dict[str, dict]:
-        dependencies = super().get_validation_dependencies(
-            configuration=configuration,
-            execution_engine=execution_engine,
-            runtime_configuration=runtime_configuration,
+    ) -> ValidationDependencies:
+        validation_dependencies: ValidationDependencies = (
+            super().get_validation_dependencies(
+                configuration=configuration,
+                execution_engine=execution_engine,
+                runtime_configuration=runtime_configuration,
+            )
         )
+
         metric_name: str
         for metric_name in self.metric_dependencies:
             metric_kwargs = get_metric_kwargs(
@@ -1978,13 +1993,16 @@ class TableExpectation(Expectation, ABC):
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
-            dependencies["metrics"][metric_name] = MetricConfiguration(
+            validation_dependencies.set_metric_configuration(
                 metric_name=metric_name,
-                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                metric_configuration=MetricConfiguration(
+                    metric_name=metric_name,
+                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                ),
             )
 
-        return dependencies
+        return validation_dependencies
 
     @staticmethod
     def validate_metric_value_between_configuration(
@@ -2286,11 +2304,13 @@ class ColumnMapExpectation(TableExpectation, ABC):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
-    ) -> Dict[str, dict]:
-        dependencies = super().get_validation_dependencies(
-            configuration=configuration,
-            execution_engine=execution_engine,
-            runtime_configuration=runtime_configuration,
+    ) -> ValidationDependencies:
+        validation_dependencies: ValidationDependencies = (
+            super().get_validation_dependencies(
+                configuration=configuration,
+                execution_engine=execution_engine,
+                runtime_configuration=runtime_configuration,
+            )
         )
         assert isinstance(
             self.map_metric, str
@@ -2300,32 +2320,34 @@ class ColumnMapExpectation(TableExpectation, ABC):
         ), "ColumnMapExpectation must be configured using map_metric, and cannot have metric_dependencies declared."
         # convenient name for updates
 
-        metric_dependencies: Dict[str, MetricConfiguration] = dependencies["metrics"]
+        metric_kwargs: dict
 
-        metric_kwargs: Dict
         metric_kwargs = get_metric_kwargs(
             metric_name="column_values.nonnull.unexpected_count",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
-        metric_dependencies[
-            "column_values.nonnull.unexpected_count"
-        ] = MetricConfiguration(
-            "column_values.nonnull.unexpected_count",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        validation_dependencies.set_metric_configuration(
+            metric_name="column_values.nonnull.unexpected_count",
+            metric_configuration=MetricConfiguration(
+                "column_values.nonnull.unexpected_count",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
         )
+
         metric_kwargs = get_metric_kwargs(
             metric_name=f"{self.map_metric}.unexpected_count",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
-        metric_dependencies[
-            f"{self.map_metric}.unexpected_count"
-        ] = MetricConfiguration(
-            f"{self.map_metric}.unexpected_count",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        validation_dependencies.set_metric_configuration(
+            metric_name=f"{self.map_metric}.unexpected_count",
+            metric_configuration=MetricConfiguration(
+                f"{self.map_metric}.unexpected_count",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
         )
 
         metric_kwargs = get_metric_kwargs(
@@ -2333,33 +2355,37 @@ class ColumnMapExpectation(TableExpectation, ABC):
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
-        metric_dependencies["table.row_count"] = MetricConfiguration(
+        validation_dependencies.set_metric_configuration(
             metric_name="table.row_count",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            metric_configuration=MetricConfiguration(
+                metric_name="table.row_count",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
         )
 
-        result_format_str: Optional[str] = dependencies["result_format"].get(
+        result_format_str: Optional[str] = validation_dependencies.result_format.get(
             "result_format"
         )
-        include_unexpected_rows: Optional[bool] = dependencies["result_format"].get(
-            "include_unexpected_rows"
-        )
+        include_unexpected_rows: Optional[
+            bool
+        ] = validation_dependencies.result_format.get("include_unexpected_rows")
 
         if result_format_str == "BOOLEAN_ONLY":
-            return dependencies
+            return validation_dependencies
 
         metric_kwargs = get_metric_kwargs(
             f"{self.map_metric}.unexpected_values",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
-        metric_dependencies[
-            f"{self.map_metric}.unexpected_values"
-        ] = MetricConfiguration(
+        validation_dependencies.set_metric_configuration(
             metric_name=f"{self.map_metric}.unexpected_values",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            metric_configuration=MetricConfiguration(
+                metric_name=f"{self.map_metric}.unexpected_values",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
         )
 
         if include_unexpected_rows:
@@ -2368,12 +2394,13 @@ class ColumnMapExpectation(TableExpectation, ABC):
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
-            metric_dependencies[
-                f"{self.map_metric}.unexpected_rows"
-            ] = MetricConfiguration(
+            validation_dependencies.set_metric_configuration(
                 metric_name=f"{self.map_metric}.unexpected_rows",
-                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                metric_configuration=MetricConfiguration(
+                    metric_name=f"{self.map_metric}.unexpected_rows",
+                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                ),
             )
 
         if include_unexpected_rows:
@@ -2382,16 +2409,17 @@ class ColumnMapExpectation(TableExpectation, ABC):
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
-            metric_dependencies[
-                f"{self.map_metric}.unexpected_rows"
-            ] = MetricConfiguration(
+            validation_dependencies.set_metric_configuration(
                 metric_name=f"{self.map_metric}.unexpected_rows",
-                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                metric_configuration=MetricConfiguration(
+                    metric_name=f"{self.map_metric}.unexpected_rows",
+                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                ),
             )
 
         if result_format_str in ["BASIC"]:
-            return dependencies
+            return validation_dependencies
 
         # only for SUMMARY and COMPLETE
         if isinstance(execution_engine, PandasExecutionEngine):
@@ -2400,15 +2428,16 @@ class ColumnMapExpectation(TableExpectation, ABC):
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
-            metric_dependencies[
-                f"{self.map_metric}.unexpected_index_list"
-            ] = MetricConfiguration(
+            validation_dependencies.set_metric_configuration(
                 metric_name=f"{self.map_metric}.unexpected_index_list",
-                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                metric_configuration=MetricConfiguration(
+                    metric_name=f"{self.map_metric}.unexpected_index_list",
+                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                ),
             )
 
-        return dependencies
+        return validation_dependencies
 
     def _validate(
         self,
@@ -2520,11 +2549,13 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> Dict[str, dict]:
-        dependencies = super().get_validation_dependencies(
-            configuration=configuration,
-            execution_engine=execution_engine,
-            runtime_configuration=runtime_configuration,
+    ) -> ValidationDependencies:
+        validation_dependencies: ValidationDependencies = (
+            super().get_validation_dependencies(
+                configuration=configuration,
+                execution_engine=execution_engine,
+                runtime_configuration=runtime_configuration,
+            )
         )
         assert isinstance(
             self.map_metric, str
@@ -2534,20 +2565,20 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         ), "ColumnPairMapExpectation must be configured using map_metric, and cannot have metric_dependencies declared."
         # convenient name for updates
 
-        metric_dependencies: Dict[str, MetricConfiguration] = dependencies["metrics"]
+        metric_kwargs: dict
 
-        metric_kwargs: Dict
         metric_kwargs = get_metric_kwargs(
             metric_name=f"{self.map_metric}.unexpected_count",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
-        metric_dependencies[
-            f"{self.map_metric}.unexpected_count"
-        ] = MetricConfiguration(
-            f"{self.map_metric}.unexpected_count",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        validation_dependencies.set_metric_configuration(
+            metric_name=f"{self.map_metric}.unexpected_count",
+            metric_configuration=MetricConfiguration(
+                f"{self.map_metric}.unexpected_count",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
         )
 
         metric_kwargs = get_metric_kwargs(
@@ -2555,10 +2586,13 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
-        metric_dependencies["table.row_count"] = MetricConfiguration(
+        validation_dependencies.set_metric_configuration(
             metric_name="table.row_count",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            metric_configuration=MetricConfiguration(
+                metric_name="table.row_count",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
         )
 
         metric_kwargs = get_metric_kwargs(
@@ -2566,39 +2600,41 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
-        metric_dependencies[
-            f"{self.map_metric}.filtered_row_count"
-        ] = MetricConfiguration(
+        validation_dependencies.set_metric_configuration(
             metric_name=f"{self.map_metric}.filtered_row_count",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            metric_configuration=MetricConfiguration(
+                metric_name=f"{self.map_metric}.filtered_row_count",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
         )
 
-        result_format_str: Optional[str] = dependencies["result_format"].get(
+        result_format_str: Optional[str] = validation_dependencies.result_format.get(
             "result_format"
         )
-        include_unexpected_rows: Optional[bool] = dependencies["result_format"].get(
-            "include_unexpected_rows"
-        )
+        include_unexpected_rows: Optional[
+            bool
+        ] = validation_dependencies.result_format.get("include_unexpected_rows")
 
         if result_format_str == "BOOLEAN_ONLY":
-            return dependencies
+            return validation_dependencies
 
         metric_kwargs = get_metric_kwargs(
             f"{self.map_metric}.unexpected_values",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
-        metric_dependencies[
-            f"{self.map_metric}.unexpected_values"
-        ] = MetricConfiguration(
+        validation_dependencies.set_metric_configuration(
             metric_name=f"{self.map_metric}.unexpected_values",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            metric_configuration=MetricConfiguration(
+                metric_name=f"{self.map_metric}.unexpected_values",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
         )
 
         if result_format_str in ["BASIC", "SUMMARY"]:
-            return dependencies
+            return validation_dependencies
 
         if include_unexpected_rows:
             metric_kwargs = get_metric_kwargs(
@@ -2606,12 +2642,13 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
-            metric_dependencies[
-                f"{self.map_metric}.unexpected_rows"
-            ] = MetricConfiguration(
+            validation_dependencies.set_metric_configuration(
                 metric_name=f"{self.map_metric}.unexpected_rows",
-                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                metric_configuration=MetricConfiguration(
+                    metric_name=f"{self.map_metric}.unexpected_rows",
+                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                ),
             )
 
         if isinstance(execution_engine, PandasExecutionEngine):
@@ -2620,15 +2657,16 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
-            metric_dependencies[
-                f"{self.map_metric}.unexpected_index_list"
-            ] = MetricConfiguration(
+            validation_dependencies.set_metric_configuration(
                 metric_name=f"{self.map_metric}.unexpected_index_list",
-                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                metric_configuration=MetricConfiguration(
+                    metric_name=f"{self.map_metric}.unexpected_index_list",
+                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                ),
             )
 
-        return dependencies
+        return validation_dependencies
 
     def _validate(
         self,
@@ -2730,11 +2768,13 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> Dict[str, dict]:
-        dependencies = super().get_validation_dependencies(
-            configuration=configuration,
-            execution_engine=execution_engine,
-            runtime_configuration=runtime_configuration,
+    ) -> ValidationDependencies:
+        validation_dependencies: ValidationDependencies = (
+            super().get_validation_dependencies(
+                configuration=configuration,
+                execution_engine=execution_engine,
+                runtime_configuration=runtime_configuration,
+            )
         )
         assert isinstance(
             self.map_metric, str
@@ -2744,20 +2784,20 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         ), "MulticolumnMapExpectation must be configured using map_metric, and cannot have metric_dependencies declared."
         # convenient name for updates
 
-        metric_dependencies: Dict[str, MetricConfiguration] = dependencies["metrics"]
+        metric_kwargs: dict
 
-        metric_kwargs: Dict
         metric_kwargs = get_metric_kwargs(
             metric_name=f"{self.map_metric}.unexpected_count",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
-        metric_dependencies[
-            f"{self.map_metric}.unexpected_count"
-        ] = MetricConfiguration(
-            f"{self.map_metric}.unexpected_count",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        validation_dependencies.set_metric_configuration(
+            metric_name=f"{self.map_metric}.unexpected_count",
+            metric_configuration=MetricConfiguration(
+                f"{self.map_metric}.unexpected_count",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
         )
 
         metric_kwargs = get_metric_kwargs(
@@ -2765,10 +2805,13 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
-        metric_dependencies["table.row_count"] = MetricConfiguration(
+        validation_dependencies.set_metric_configuration(
             metric_name="table.row_count",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            metric_configuration=MetricConfiguration(
+                metric_name="table.row_count",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
         )
 
         metric_kwargs = get_metric_kwargs(
@@ -2776,39 +2819,41 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
-        metric_dependencies[
-            f"{self.map_metric}.filtered_row_count"
-        ] = MetricConfiguration(
+        validation_dependencies.set_metric_configuration(
             metric_name=f"{self.map_metric}.filtered_row_count",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            metric_configuration=MetricConfiguration(
+                metric_name=f"{self.map_metric}.filtered_row_count",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
         )
 
-        result_format_str: Optional[str] = dependencies["result_format"].get(
+        result_format_str: Optional[str] = validation_dependencies.result_format.get(
             "result_format"
         )
-        include_unexpected_rows: Optional[bool] = dependencies["result_format"].get(
-            "include_unexpected_rows"
-        )
+        include_unexpected_rows: Optional[
+            bool
+        ] = validation_dependencies.result_format.get("include_unexpected_rows")
 
         if result_format_str == "BOOLEAN_ONLY":
-            return dependencies
+            return validation_dependencies
 
         metric_kwargs = get_metric_kwargs(
             f"{self.map_metric}.unexpected_values",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
-        metric_dependencies[
-            f"{self.map_metric}.unexpected_values"
-        ] = MetricConfiguration(
+        validation_dependencies.set_metric_configuration(
             metric_name=f"{self.map_metric}.unexpected_values",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            metric_configuration=MetricConfiguration(
+                metric_name=f"{self.map_metric}.unexpected_values",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
         )
 
         if result_format_str in ["BASIC", "SUMMARY"]:
-            return dependencies
+            return validation_dependencies
 
         if include_unexpected_rows:
             metric_kwargs = get_metric_kwargs(
@@ -2816,12 +2861,13 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
-            metric_dependencies[
-                f"{self.map_metric}.unexpected_rows"
-            ] = MetricConfiguration(
+            validation_dependencies.set_metric_configuration(
                 metric_name=f"{self.map_metric}.unexpected_rows",
-                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                metric_configuration=MetricConfiguration(
+                    metric_name=f"{self.map_metric}.unexpected_rows",
+                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                ),
             )
 
         if isinstance(execution_engine, PandasExecutionEngine):
@@ -2830,15 +2876,16 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
-            metric_dependencies[
-                f"{self.map_metric}.unexpected_index_list"
-            ] = MetricConfiguration(
+            validation_dependencies.set_metric_configuration(
                 metric_name=f"{self.map_metric}.unexpected_index_list",
-                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                metric_configuration=MetricConfiguration(
+                    metric_name=f"{self.map_metric}.unexpected_index_list",
+                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                ),
             )
 
-        return dependencies
+        return validation_dependencies
 
     def _validate(
         self,
