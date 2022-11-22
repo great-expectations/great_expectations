@@ -27,9 +27,9 @@ class MetricConfiguration:
 
         self._metric_value_kwargs: IDDict = metric_value_kwargs
 
-        if metric_dependencies is None:
-            metric_dependencies = {}
-        self._metric_dependencies = metric_dependencies
+        self._metric_dependencies: IDDict = IDDict({})
+        if metric_dependencies is not None:
+            self._metric_dependencies = IDDict(metric_dependencies)
 
     def __repr__(self):
         return json.dumps(self.to_json_dict(), indent=2)
@@ -58,7 +58,7 @@ class MetricConfiguration:
         return self.metric_value_kwargs.to_id()
 
     @property
-    def metric_dependencies(self) -> Optional[dict]:
+    def metric_dependencies(self) -> IDDict:
         return self._metric_dependencies
 
     @metric_dependencies.setter
