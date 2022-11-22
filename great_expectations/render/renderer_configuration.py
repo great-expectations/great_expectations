@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, List, Optional, Union
 
 from great_expectations.render.util import substitute_none_for_missing
@@ -9,8 +10,9 @@ if TYPE_CHECKING:
     )
 
 
+@dataclass(frozen=True)
 class RendererConfiguration:
-    """Configuration object built by each renderer."""
+    """Configuration object built for each renderer."""
 
     def __init__(
         self,

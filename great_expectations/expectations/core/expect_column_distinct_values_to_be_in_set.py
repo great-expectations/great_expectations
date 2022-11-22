@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import Dict, Optional, Union
 
 import altair as alt
 import pandas as pd
@@ -22,13 +22,11 @@ from great_expectations.render import (
     RenderedStringTemplateContent,
 )
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import RendererConfiguration
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.render.renderer_configuration import RendererConfiguration
 
 
 class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
