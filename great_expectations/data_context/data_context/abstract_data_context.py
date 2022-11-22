@@ -136,10 +136,8 @@ except ImportError:
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-    from great_expectations.data_context.store import (
-        CheckpointStore,
-        EvaluationParameterStore,
-    )
+    from great_expectations.data_context.store import EvaluationParameterStore
+    from great_expectations.data_context.store.checkpoint_store import CheckpointStore
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
     )
@@ -417,7 +415,7 @@ class AbstractDataContext(ABC):
             )
 
             if CheckpointStore.default_checkpoints_exist(
-                directory_path=self.root_directory  # type: ignore[arg-type]
+                directory_path=self.root_directory
             ):
                 return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
             if self.root_directory:
@@ -458,7 +456,7 @@ class AbstractDataContext(ABC):
             )
 
             if CheckpointStore.default_checkpoints_exist(
-                directory_path=self.root_directory  # type: ignore[arg-type]
+                directory_path=self.root_directory
             ):
                 logger.warning(
                     f"Checkpoint store named '{checkpoint_store_name}' is not a configured store, "
@@ -2793,7 +2791,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _build_store_from_config(
         self, store_name: str, store_config: dict
-    ) -> Optional[Store]:
+    ) -> Union[Store, None]:
         module_name = "great_expectations.data_context.store"
         # Set expectations_store.store_backend_id to the data_context_id from the project_config if
         # the expectations_store does not yet exist by:
