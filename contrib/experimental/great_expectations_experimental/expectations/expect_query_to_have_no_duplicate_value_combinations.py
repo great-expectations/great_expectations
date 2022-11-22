@@ -20,7 +20,7 @@ from great_expectations.expectations.metrics.import_manager import (
 
 
 class ExpectQueryToHaveNoDuplicateValueCombinations(QueryExpectation):
-    """ Expect the data points given primary keys via columns to be unique """
+    """Expect the data points given primary keys via columns to be unique"""
 
     metric_dependencies = ("query.multiple_columns",)
 
@@ -57,10 +57,14 @@ class ExpectQueryToHaveNoDuplicateValueCombinations(QueryExpectation):
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
 
-        query_result: Union[sqlalchemy_engine_Row, pyspark_sql_Row] = metrics.get("query.multiple_columns")
+        query_result: Union[sqlalchemy_engine_Row, pyspark_sql_Row] = metrics.get(
+            "query.multiple_columns"
+        )
         success: bool = query_result == []
         columns = configuration["kwargs"].get("columns")
-        duplicates = [dict(zip(columns + ["no_occurrences"], row)) for row in query_result]
+        duplicates = [
+            dict(zip(columns + ["no_occurrences"], row)) for row in query_result
+        ]
 
         return {
             "success": success,
@@ -70,9 +74,10 @@ class ExpectQueryToHaveNoDuplicateValueCombinations(QueryExpectation):
     examples = [
         {
             "data": {
-                    "one": ["a", "a", "b"],
-                    "two": ["x", "x", "y"],
-                    "three": ["j", "k", "l"]},
+                "one": ["a", "a", "b"],
+                "two": ["x", "x", "y"],
+                "three": ["j", "k", "l"],
+            },
             "tests": [
                 {
                     "title": "basic_positive_test",

@@ -47,11 +47,17 @@ class QueryMultipleColumns(QueryMetricProvider):
 
         columns: str = metric_value_kwargs.get("columns")
         if isinstance(selectable, sa.Table):
-            query = query.format(**{f"col_{i}": entry for i, entry in enumerate(columns, 1)}, active_batch=selectable)
+            query = query.format(
+                **{f"col_{i}": entry for i, entry in enumerate(columns, 1)},
+                active_batch=selectable,
+            )
         elif isinstance(
             selectable, get_sqlalchemy_subquery_type()
         ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active bacth as a Subquery; sectioning the active batch off w/ parentheses ensures flow of operations doesn't break
-            query = query.format(**{f"col_{i}": entry for i, entry in enumerate(columns, 1)}, active_batch=f"({selectable})")
+            query = query.format(
+                **{f"col_{i}": entry for i, entry in enumerate(columns, 1)},
+                active_batch=f"({selectable})",
+            )
         elif isinstance(
             selectable, sa.sql.Select
         ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation & aliasing when formatting the parameterized query
@@ -60,7 +66,10 @@ class QueryMultipleColumns(QueryMetricProvider):
                 active_batch=f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',
             )
         else:
-            query = query.format(**{f"col_{i}": entry for i, entry in enumerate(columns, 1)}, active_batch=f"({selectable})")
+            query = query.format(
+                **{f"col_{i}": entry for i, entry in enumerate(columns, 1)},
+                active_batch=f"({selectable})",
+            )
 
         engine: sqlalchemy_engine_Engine = execution_engine.engine
         result: List[sqlalchemy_engine_Row] = engine.execute(sa.text(query)).fetchall()
@@ -87,7 +96,10 @@ class QueryMultipleColumns(QueryMetricProvider):
 
         df.createOrReplaceTempView("tmp_view")
         columns: str = metric_value_kwargs.get("columns")
-        query = query.format(**{f"col_{i}": entry for i, entry in enumerate(columns, 1)}, active_batch="tmp_view")
+        query = query.format(
+            **{f"col_{i}": entry for i, entry in enumerate(columns, 1)},
+            active_batch="tmp_view",
+        )
 
         engine: pyspark_sql_SparkSession = execution_engine.spark
         result: List[pyspark_sql_Row] = engine.sql(query).collect()
