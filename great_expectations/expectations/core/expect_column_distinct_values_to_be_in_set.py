@@ -233,7 +233,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         styling: Union[dict, None] = renderer_configuration.styling
 
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            renderer_configuration.kwargs,
             ["column", "value_set", "row_condition", "condition_parser"],
         )
 
