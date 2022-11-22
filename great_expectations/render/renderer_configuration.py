@@ -13,8 +13,8 @@ class RendererConfiguration:
 
     configuration: Union[ExpectationConfiguration, None]
     result: Union[ExpectationValidationResult, None]
-    language: Union[str, None]
-    runtime_configuration: Union[dict, None]
+    language: str = "en"
+    runtime_configuration: dict = field(default_factory=dict)
     include_column_name: Union[bool, None] = field(init=False)
     styling: Union[dict, None] = field(init=False)
 
