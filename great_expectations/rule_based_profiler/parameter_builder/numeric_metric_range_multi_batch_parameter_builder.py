@@ -127,7 +127,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         bw_method: Optional[Union[str, float, Callable]] = None,
         include_estimator_samples_histogram_in_details: Union[str, bool] = False,
         truncate_values: Optional[
-            Union[str, Dict[str, Union[Union[int, None], Union[float, None]]]]
+            Union[str, Dict[str, Union[int, float, None]]]
         ] = None,
         round_decimals: Optional[Union[str, int]] = None,
         evaluation_parameter_builder_configs: Optional[
