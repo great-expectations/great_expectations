@@ -1,14 +1,13 @@
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Union
+from typing import Union
 
-if TYPE_CHECKING:
-    from great_expectations.core import (
-        ExpectationConfiguration,
-        ExpectationValidationResult,
-    )
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 
 
-@dataclass
+@dataclass(frozen=True)
 class RendererConfiguration:
     """Configuration object built for each renderer."""
 
@@ -30,5 +29,5 @@ class RendererConfiguration:
             )
             styling = self.runtime_configuration.get("styling")
 
-        self.include_column_name = include_column_name
-        self.styling = styling
+        object.__setattr__(self, "include_column_name", include_column_name)
+        object.__setattr__(self, "styling", styling)
