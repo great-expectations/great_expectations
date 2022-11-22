@@ -15,7 +15,7 @@ import glob
 import logging
 import os
 import re
-from typing import List, Optional
+from typing import List, Union
 
 import click
 import requests

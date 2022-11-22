@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from contrib.experimental.great_expectations_experimental.rule_based_profiler.data_assistant_result import (
     GrowthNumericDataAssistantResult,

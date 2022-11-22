@@ -1,7 +1,7 @@
 import importlib
 import sys
 from types import ModuleType
-from typing import Optional
+from typing import Optional, Union
 
 import pkg_resources
 from pkg_resources import Distribution, WorkingSet

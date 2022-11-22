@@ -1,5 +1,5 @@
 import abc
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchSpec

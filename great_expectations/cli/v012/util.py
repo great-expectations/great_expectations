@@ -2,7 +2,7 @@ import importlib
 import re
 import sys
 from types import ModuleType
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import click
 import pkg_resources
@@ -121,7 +121,7 @@ def verify_library_dependent_modules(
     pip_library_name: str,
     module_names_to_reload: Optional[list] = None,
 ) -> bool:
-    library_status_code: Optional[int]
+    library_status_code: Union[int, None]
 
     library_status_code = library_install_load_check(
         python_import_name=python_import_name, pip_library_name=pip_library_name

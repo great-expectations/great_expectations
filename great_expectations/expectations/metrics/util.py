@@ -1,7 +1,7 @@
 import logging
 import re
 import warnings
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 from dateutil.parser import parse

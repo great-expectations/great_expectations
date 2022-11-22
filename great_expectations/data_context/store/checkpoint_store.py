@@ -167,7 +167,7 @@ class CheckpointStore(ConfigurationStore):
 
     def add_checkpoint(
         self,
-        checkpoint: "Checkpoint",
+        checkpoint: Checkpoint,
         name: Union[str, None],
         ge_cloud_id: Union[str, None],
     ) -> None:
