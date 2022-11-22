@@ -154,23 +154,12 @@ class MetricsCalculator:
             metric_configurations=metric_configurations,
             runtime_configuration=runtime_configuration,
         )
-
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
-        aborted_metrics_info: Dict[
-            Tuple[str, str, str],
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ]
-        resolved_metrics, aborted_metrics_info = graph.resolve_validation_graph(
+        resolved_metrics: Dict[
+            Tuple[str, str, str], MetricValue
+        ] = self.resolve_validation_graph(
+            graph=graph,
             runtime_configuration=runtime_configuration,
-            min_graph_edges_pbar_enable=0,
-            show_progress_bars=True,
         )
-
-        if aborted_metrics_info:
-            logger.warning(
-                f"Exceptions\n{str(aborted_metrics_info)}\noccurred while resolving metrics."
-            )
-
         return resolved_metrics
 
     def build_metric_dependency_graph(
@@ -201,3 +190,34 @@ class MetricsCalculator:
             )
 
         return graph
+
+    @staticmethod
+    def resolve_validation_graph(
+        graph: ValidationGraph,
+        runtime_configuration: Optional[dict] = None,
+    ) -> Dict[Tuple[str, str, str], MetricValue]:
+        """
+        Args:
+            graph: "ValidationGraph" object, containing "metric_edge" structures with "MetricConfiguration" objects.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
+
+        Returns:
+            Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
+        """
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
+        aborted_metrics_info: Dict[
+            Tuple[str, str, str],
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ]
+        resolved_metrics, aborted_metrics_info = graph.resolve_validation_graph(
+            runtime_configuration=runtime_configuration,
+            min_graph_edges_pbar_enable=0,
+            show_progress_bars=True,
+        )
+
+        if aborted_metrics_info:
+            logger.warning(
+                f"Exceptions\n{str(aborted_metrics_info)}\noccurred while resolving metrics."
+            )
+
+        return resolved_metrics
