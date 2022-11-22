@@ -5,7 +5,7 @@ import logging
 import pathlib
 from io import StringIO
 from pprint import pformat as pf
-from typing import Union, overload
+from typing import Type, TypeVar, Union, overload
 
 import pydantic
 from ruamel.yaml import YAML
@@ -17,13 +17,17 @@ yaml = YAML(typ="safe")
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
+# TODO (kilo59): replace this with `typing_extensions.Self` once mypy supports it
+# Taken from this SO answer https://stackoverflow.com/a/72182814/6304433
+_Self = TypeVar("_Self", bound="ExperimentalBaseModel")
+
 
 class ExperimentalBaseModel(pydantic.BaseModel):
     class Config:
         extra = pydantic.Extra.forbid
 
     @classmethod
-    def parse_yaml(cls, f: Union[pathlib.Path, str]) -> ExperimentalBaseModel:
+    def parse_yaml(cls: Type[_Self], f: Union[pathlib.Path, str]) -> _Self:
         loaded = yaml.load(f)
         LOGGER.debug(f"loaded from yaml ->\n{pf(loaded, depth=3)}\n")
         config = cls(**loaded)
