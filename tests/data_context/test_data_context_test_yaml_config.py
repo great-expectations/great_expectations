@@ -13,7 +13,7 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.config_validator.yaml_config_validator import (
     _YamlConfigValidator,
 )
-from great_expectations.data_context.store import CheckpointStore
+from great_expectations.data_context.store.checkpoint_store import CheckpointStore
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.util import get_sqlalchemy_url, load_class

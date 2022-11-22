@@ -11,7 +11,7 @@ from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.data_context import DataContext
-from great_expectations.data_context.store import CheckpointStore
+from great_expectations.data_context.store.checkpoint_store import CheckpointStore
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
