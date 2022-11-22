@@ -154,9 +154,6 @@ class MetricsCalculator:
 
         metric_configuration: MetricConfiguration
         for metric_configuration in metric_configurations:
-            graph.set_metric_configuration_default_kwargs_if_not_exist(
-                metric_configuration=metric_configuration
-            )
             graph.build_metric_dependency_graph(
                 metric_configuration=metric_configuration,
                 runtime_configuration=None,
