@@ -2,12 +2,10 @@
 from __future__ import annotations
 
 import logging
-import pathlib
 from pprint import pformat as pf
-from typing import Dict, Type, Union
+from typing import Dict, Type
 
 from pydantic import validator
-from ruamel.yaml import YAML
 
 from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,
@@ -15,24 +13,13 @@ from great_expectations.experimental.datasources.experimental_base_model import 
 from great_expectations.experimental.datasources.interfaces import Datasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
 
-yaml = YAML(typ="safe")
-# NOTE (kilo59): the following settings appear to be what we use in existing codebase
-yaml.indent(mapping=2, sequence=4, offset=2)
-yaml.default_flow_style = False
-
-
 LOGGER = logging.getLogger(__name__)
 
 
 class GxConfig(ExperimentalBaseModel):
-    datasources: Dict[str, Datasource]
+    """Represents the full new-style/experimental configuration file."""
 
-    @classmethod
-    def parse_yaml(cls, f: Union[pathlib.Path, str]) -> GxConfig:
-        loaded = yaml.load(f)
-        LOGGER.debug(f"loaded from yaml ->\n{pf(loaded, depth=3)}\n")
-        config = cls(**loaded)
-        return config
+    datasources: Dict[str, Datasource]
 
     @validator("datasources", pre=True)
     @classmethod
