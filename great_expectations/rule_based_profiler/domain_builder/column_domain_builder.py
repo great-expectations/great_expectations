@@ -97,9 +97,7 @@ class ColumnDomainBuilder(DomainBuilder):
         return self._include_column_names
 
     @include_column_names.setter
-    def include_column_names(
-        self, value: Union[str, Optional[List[str], None]]
-    ) -> None:
+    def include_column_names(self, value: Union[str, List[str], None]) -> None:
         self._include_column_names = value
 
     @property

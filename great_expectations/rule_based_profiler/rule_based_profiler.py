@@ -959,7 +959,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         rules_as_dict: Dict[str, Rule] = {rule.name: rule for rule in rules}
 
-        variables: Dict[str, Any, None]
+        variables: Union[Dict[str, Any], None]
         rule_variables_configs: Union[Dict[str, Any], None]
         for variables_directives in variables_directives_list:
             variables = variables_directives.variables or {}

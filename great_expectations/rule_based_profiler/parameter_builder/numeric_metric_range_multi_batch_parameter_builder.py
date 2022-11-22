@@ -289,7 +289,7 @@ detected.
     @property
     def truncate_values(
         self,
-    ) -> Union[str, Dict[str, Union[Union[int, None], Union[float, None]]], None]:
+    ) -> Union[str, Dict[str, Union[int, float, None]], None]:
         return self._truncate_values
 
     @property
@@ -715,10 +715,9 @@ detected.
         self,
         metric_values: np.ndarray,
         domain: Domain,
-        *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Dict[str, Union[Union[int, None], Union[float, None]]]:
+    ) -> Dict[str, Union[int, float, None]]:
         # Obtain truncate_values directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         truncate_values: Dict[
             str, Union[Number, None]
