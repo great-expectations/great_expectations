@@ -1145,6 +1145,7 @@ class Expectation(metaclass=MetaExpectation):
         )
         evr: ExpectationValidationResult = validator.graph_validate(
             configurations=[configuration],
+            metrics=None,
             runtime_configuration=runtime_configuration,
         )[0]
         if include_rendered_content:
