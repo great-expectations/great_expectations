@@ -17,6 +17,7 @@ from typing import (
 from tqdm.auto import tqdm
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core import IDDict
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.registry import get_metric_provider
@@ -144,13 +145,15 @@ class ValidationGraph:
             metric_name=metric_configuration.metric_name,
             execution_engine=self._execution_engine,
         )
-        self._set_default_domain_kwargs_if_not_exist(
-            metric_provider_klass=metric_impl_klass,
-            metric_configuration=metric_configuration,
+        self._set_default_metric_kwargs_if_not_exist(
+            default_kwarg_values=metric_impl_klass.default_kwarg_values,
+            metric_kwargs=metric_configuration.metric_domain_kwargs,
+            keys=metric_impl_klass.domain_keys,
         )
-        self._set_default_value_kwargs_if_not_exist(
-            metric_provider_klass=metric_impl_klass,
-            metric_configuration=metric_configuration,
+        self._set_default_metric_kwargs_if_not_exist(
+            default_kwarg_values=metric_impl_klass.default_kwarg_values,
+            metric_kwargs=metric_configuration.metric_value_kwargs,
+            keys=metric_impl_klass.value_keys,
         )
         return metric_impl_klass, metric_provider
 
@@ -323,33 +326,19 @@ class ValidationGraph:
         return maybe_ready - unmet_dependency, unmet_dependency
 
     @staticmethod
-    def _set_default_domain_kwargs_if_not_exist(
-        metric_provider_klass: MetricProvider,
-        metric_configuration: MetricConfiguration,
-    ) -> None:
-        for key in metric_provider_klass.domain_keys:
-            if (
-                key not in metric_configuration.metric_domain_kwargs
-                and key in metric_provider_klass.default_kwarg_values
-            ):
-                metric_configuration.metric_domain_kwargs[
-                    key
-                ] = metric_provider_klass.default_kwarg_values[key]
-
-    @staticmethod
-    def _set_default_value_kwargs_if_not_exist(
-        metric_provider_klass: MetricProvider,
-        metric_configuration: MetricConfiguration,
+    def _set_default_metric_kwargs_if_not_exist(
+        default_kwarg_values: dict,
+        metric_kwargs: IDDict,
+        keys: Tuple[str, ...],
     ) -> None:
         key: str
-        for key in metric_provider_klass.value_keys:
+        for key in keys:
             if (
-                key not in metric_configuration.metric_value_kwargs
-                and key in metric_provider_klass.default_kwarg_values
+                key not in metric_kwargs
+                and key in default_kwarg_values
+                and default_kwarg_values[key] is not None
             ):
-                metric_configuration.metric_value_kwargs[
-                    key
-                ] = metric_provider_klass.default_kwarg_values[key]
+                metric_kwargs[key] = default_kwarg_values[key]
 
 
 class ExpectationValidationGraph:

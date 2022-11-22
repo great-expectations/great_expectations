@@ -243,7 +243,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             ):
                 is_categorical = False
                 partition_metric_configuration = MetricConfiguration(
-                    "column.partition",
+                    metric_name="column.partition",
                     metric_domain_kwargs=domain_kwargs,
                     metric_value_kwargs={
                         "bins": "auto",
@@ -278,14 +278,14 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
 
                 bins = resolved_metrics[partition_metric_configuration.id]
                 hist_metric_configuration = MetricConfiguration(
-                    "column.histogram",
+                    metric_name="column.histogram",
                     metric_domain_kwargs=domain_kwargs,
                     metric_value_kwargs={
                         "bins": tuple(bins),
                     },
                 )
                 nonnull_configuration = MetricConfiguration(
-                    "column_values.nonnull.count",
+                    metric_name="column_values.nonnull.count",
                     metric_domain_kwargs=domain_kwargs,
                     metric_value_kwargs=None,
                 )
@@ -309,14 +309,14 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             else:
                 is_categorical = True
                 counts_configuration = MetricConfiguration(
-                    "column.value_counts",
+                    metric_name="column.value_counts",
                     metric_domain_kwargs=domain_kwargs,
                     metric_value_kwargs={
                         "sort": "value",
                     },
                 )
                 nonnull_configuration = MetricConfiguration(
-                    "column_values.nonnull.count",
+                    metric_name="column_values.nonnull.count",
                     metric_domain_kwargs=domain_kwargs,
                 )
                 validation_dependencies.set_metric_configuration(
@@ -335,7 +335,9 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                 metric_configuration=MetricConfiguration(
                     metric_name="column.value_counts",
                     metric_domain_kwargs=domain_kwargs,
-                    metric_value_kwargs={"sort": "value"},
+                    metric_value_kwargs={
+                        "sort": "value",
+                    },
                 ),
             )
             validation_dependencies.set_metric_configuration(
@@ -355,7 +357,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                 bins = partition_object["bins"]
 
             hist_metric_configuration = MetricConfiguration(
-                "column.histogram",
+                metric_name="column.histogram",
                 metric_domain_kwargs=domain_kwargs,
                 metric_value_kwargs={
                     "bins": bins,
