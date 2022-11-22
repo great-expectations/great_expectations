@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, Optiona, Union
 
 import altair as alt
 import pandas as pd
@@ -28,8 +28,6 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
-    from typing import Dict, Optional, Union
-
     from great_expectations.render.renderer_configuration import RendererConfiguration
 
 
