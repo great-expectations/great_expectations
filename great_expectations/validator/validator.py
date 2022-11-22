@@ -758,12 +758,12 @@ class Validator:
                     "Automatic Expectation argument estimation requires a Rule-Based Profiler to be provided."
                 )
 
-            profiler: Optional[BaseRuleBasedProfiler]
+            profiler: Union[BaseRuleBasedProfiler, None]
 
             if auto:
                 # Save custom Rule-Based Profiler configuration for reconciling it with optionally-specified default
                 # Rule-Based Profiler configuration as an override argument to "BaseRuleBasedProfiler.run()" method.
-                override_profiler_config: Optional[RuleBasedProfilerConfig]
+                override_profiler_config: Union[RuleBasedProfilerConfig, None]
                 if default_profiler_config:
                     override_profiler_config = copy.deepcopy(profiler_config)
                 else:

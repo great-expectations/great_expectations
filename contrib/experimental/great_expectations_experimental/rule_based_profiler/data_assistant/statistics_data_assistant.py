@@ -205,7 +205,7 @@ class StatisticsDataAssistant(DataAssistant):
 
         # Step-3: Declare "ParameterBuilder" configurations for all additional statistics needed.
 
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+        evaluation_parameter_builder_configs: Union[List[ParameterBuilderConfig], None]
 
         if total_count_metric_multi_batch_parameter_builder_for_evaluations is None:
             total_count_metric_multi_batch_parameter_builder_for_evaluations = (
@@ -479,7 +479,7 @@ class StatisticsDataAssistant(DataAssistant):
 
         # Step-3: Declare "ParameterBuilder" configurations for all additional statistics needed.
 
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+        evaluation_parameter_builder_configs: Union[List[ParameterBuilderConfig], None]
 
         evaluation_parameter_builder_configs = [
             ParameterBuilderConfig(
@@ -570,7 +570,7 @@ class StatisticsDataAssistant(DataAssistant):
 
         # Step-3: Declare "ParameterBuilder" configurations for all additional statistics needed.
 
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+        evaluation_parameter_builder_configs: Union[List[ParameterBuilderConfig], None]
 
         evaluation_parameter_builder_configs = [
             ParameterBuilderConfig(

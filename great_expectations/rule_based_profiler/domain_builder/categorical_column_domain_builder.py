@@ -172,7 +172,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
 
     @cardinality_limit_mode.setter
     def cardinality_limit_mode(
-        self, value: Optional[Union[str, CardinalityLimitMode, dict]]
+        self, value: Union[str, CardinalityLimitMode, dict, None]
     ) -> None:
         self._cardinality_limit_mode = value
 

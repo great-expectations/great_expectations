@@ -730,7 +730,7 @@ def get_or_create_spark_session(
             "Unable to load pyspark; install optional spark dependency for support."
         )
 
-    spark_session: Optional[SparkSession]
+    spark_session: Union[SparkSession, None]
     try:
         if spark_config is None:
             spark_config = {}

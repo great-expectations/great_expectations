@@ -42,7 +42,7 @@ def build_batch_filter(
 "{str(data_connector_query_keys - BatchFilter.RECOGNIZED_KEYS)}" detected.
             """
         )
-    custom_filter_function: Optional[Callable] = data_connector_query_dict.get(  # type: ignore[assignment]
+    custom_filter_function: Union[Callable, None] = data_connector_query_dict.get(  # type: ignore[assignment]
         "custom_filter_function"
     )
     if custom_filter_function and not isinstance(custom_filter_function, Callable):  # type: ignore[arg-type]
@@ -73,7 +73,7 @@ def build_batch_filter(
     ] = data_connector_query_dict.get(  # type: ignore[assignment]
         "index"
     )
-    limit: Optional[int] = data_connector_query_dict.get("limit")  # type: ignore[assignment]
+    limit: Union[int, None] = data_connector_query_dict.get("limit")  # type: ignore[assignment]
     if limit and (not isinstance(limit, int) or limit < 0):
         raise ge_exceptions.BatchFilterError(
             f"""The type of a limit must be an integer (Python "int") that is greater than or equal to 0.  The

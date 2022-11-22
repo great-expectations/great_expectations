@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
@@ -46,7 +46,7 @@ class DictionarySorter(Sorter):
 
     def get_batch_key(self, batch_definition: BatchDefinition) -> Any:
         batch_identifiers: dict = batch_definition.batch_identifiers
-        batch_keys: Optional[List[Any]]
+        batch_keys: Union[List[Any], None]
         if self._key_reference_list is None:
             batch_keys = sorted(
                 batch_identifiers[self.name].keys(), reverse=self.reverse_keys

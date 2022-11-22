@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Union
 
 import pytest
 
@@ -237,8 +237,8 @@ def test_semantic_domain_equivalence():
 
 @pytest.mark.unit
 def test_semantic_domain_comparisons_inclusion():
-    domain_a: Optional[Domain]
-    domain_b: Optional[Domain]
+    domain_a: Union[Domain, None]
+    domain_b: Union[Domain, None]
 
     domain_a = Domain(
         domain_type="column",
