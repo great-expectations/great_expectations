@@ -15,11 +15,11 @@ class RendererConfiguration:
     result: Union[ExpectationValidationResult, None]
     language: str = "en"
     runtime_configuration: dict = field(default_factory=dict)
-    include_column_name: Union[bool, None] = field(init=False)
+    include_column_name: bool = field(init=False)
     styling: Union[dict, None] = field(init=False)
 
     def __post_init__(self) -> None:
-        include_column_name: Union[bool, None] = None
+        include_column_name: bool = True
         styling: Union[dict, None] = None
         if self.runtime_configuration:
             include_column_name = (
