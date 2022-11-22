@@ -97,7 +97,7 @@ class ValidationGraph:
         (
             metric_impl_klass,
             metric_provider,
-        ) = self.set_metric_configuration_default_kwargs_if_not_exist(
+        ) = self.set_metric_configuration_default_kwargs_if_absent(
             metric_configuration=metric_configuration
         )
 
@@ -133,7 +133,7 @@ class ValidationGraph:
                     runtime_configuration=runtime_configuration,
                 )
 
-    def set_metric_configuration_default_kwargs_if_not_exist(
+    def set_metric_configuration_default_kwargs_if_absent(
         self, metric_configuration: MetricConfiguration
     ) -> Tuple[MetricProvider, Callable]:
         """
@@ -145,12 +145,12 @@ class ValidationGraph:
             metric_name=metric_configuration.metric_name,
             execution_engine=self._execution_engine,
         )
-        self._set_default_metric_kwargs_if_not_exist(
+        self._set_default_metric_kwargs_if_absent(
             default_kwarg_values=metric_impl_klass.default_kwarg_values,
             metric_kwargs=metric_configuration.metric_domain_kwargs,
             keys=metric_impl_klass.domain_keys,
         )
-        self._set_default_metric_kwargs_if_not_exist(
+        self._set_default_metric_kwargs_if_absent(
             default_kwarg_values=metric_impl_klass.default_kwarg_values,
             metric_kwargs=metric_configuration.metric_value_kwargs,
             keys=metric_impl_klass.value_keys,
@@ -326,7 +326,7 @@ class ValidationGraph:
         return maybe_ready - unmet_dependency, unmet_dependency
 
     @staticmethod
-    def _set_default_metric_kwargs_if_not_exist(
+    def _set_default_metric_kwargs_if_absent(
         default_kwarg_values: dict,
         metric_kwargs: IDDict,
         keys: Tuple[str, ...],
