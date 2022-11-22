@@ -48,6 +48,7 @@ from great_expectations.types.attributes import Attributes
 from great_expectations.util import is_parseable_date
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validation_graph import ValidationGraph
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
@@ -469,9 +470,16 @@ specified (empty "metric_name" value detected)."""
             parameters=parameters,
         )
 
+        graph: ValidationGraph = (
+            validator.metrics_calculator.build_metric_dependency_graph(
+                metric_configurations=metrics_to_resolve,
+                runtime_configuration=None,
+            )
+        )
+
         resolved_metrics: Dict[
             Tuple[str, str, str], MetricValue
-        ] = validator.compute_metrics(
+        ] = validator.metrics_calculator.compute_metrics(
             metric_configurations=metrics_to_resolve,
             runtime_configuration=None,
         )
@@ -566,6 +574,7 @@ specified (empty "metric_name" value detected)."""
 
         # Step-10: Build and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").
         return MetricComputationResult(
+            graph=graph,
             attributed_resolved_metrics=list(attributed_resolved_metrics_map.values()),
             details={
                 "metric_configuration": {

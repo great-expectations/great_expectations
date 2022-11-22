@@ -8,5 +8,5 @@ MetricValues = Union[
 ]
 MetricComputationDetails = Dict[str, Any]
 MetricComputationResult = make_dataclass(
-    "MetricComputationResult", ["attributed_resolved_metrics", "details"]
+    "MetricComputationResult", ["graph", "attributed_resolved_metrics", "details"]
 )
