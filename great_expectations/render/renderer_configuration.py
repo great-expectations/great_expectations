@@ -36,7 +36,7 @@ class RendererConfiguration:
         kwargs: dict
         if self.configuration:
             kwargs = self.configuration.kwargs
-        elif self.result:
+        elif self.result and self.result.expectation_config:
             kwargs = self.result.expectation_config.kwargs
         else:
             kwargs = {}
