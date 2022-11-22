@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, Optiona, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import altair as alt
 import pandas as pd
