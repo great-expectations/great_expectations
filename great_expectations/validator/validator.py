@@ -984,9 +984,6 @@ class Validator:
         Returns:
             A list of Validations, validating that all necessary metrics are available.
         """
-        if metrics is None:
-            metrics = {}
-
         if runtime_configuration is None:
             runtime_configuration = {}
 
