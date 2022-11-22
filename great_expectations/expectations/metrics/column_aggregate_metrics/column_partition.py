@@ -30,10 +30,10 @@ class ColumnPartition(ColumnAggregateMetricProvider):
     def _pandas(
         cls,
         execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         bins = metric_value_kwargs.get("bins", cls.default_kwarg_values["bins"])
         n_bins = metric_value_kwargs.get("n_bins", cls.default_kwarg_values["n_bins"])
@@ -45,10 +45,10 @@ class ColumnPartition(ColumnAggregateMetricProvider):
     def _sqlalchemy(
         cls,
         execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         bins = metric_value_kwargs.get("bins", cls.default_kwarg_values["bins"])
         n_bins = metric_value_kwargs.get("n_bins", cls.default_kwarg_values["n_bins"])
@@ -60,10 +60,10 @@ class ColumnPartition(ColumnAggregateMetricProvider):
     def _spark(
         cls,
         execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         bins = metric_value_kwargs.get("bins", cls.default_kwarg_values["bins"])
         n_bins = metric_value_kwargs.get("n_bins", cls.default_kwarg_values["n_bins"])
