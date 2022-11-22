@@ -15,6 +15,7 @@ class RendererConfiguration:
     result: Union[ExpectationValidationResult, None]
     language: str = "en"
     runtime_configuration: dict = field(default_factory=dict)
+    kwargs: dict = field(init=False)
     include_column_name: bool = field(init=False)
     styling: Union[dict, None] = field(init=False)
 
@@ -31,3 +32,13 @@ class RendererConfiguration:
 
         object.__setattr__(self, "include_column_name", include_column_name)
         object.__setattr__(self, "styling", styling)
+
+        kwargs: dict
+        if self.configuration:
+            kwargs = self.configuration.kwargs
+        elif self.result:
+            kwargs = self.result.expectation_config.kwargs
+        else:
+            kwargs = {}
+
+        object.__setattr__(self, "kwargs", kwargs)
