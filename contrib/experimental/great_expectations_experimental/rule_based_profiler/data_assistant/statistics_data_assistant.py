@@ -330,6 +330,7 @@ class StatisticsDataAssistant(DataAssistant):
         # Step-3: Declare "ParameterBuilder" configurations for all additional statistics needed.
 
         evaluation_parameter_builder_configs: Union[List[ParameterBuilderConfig], None]
+
         evaluation_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_min_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
