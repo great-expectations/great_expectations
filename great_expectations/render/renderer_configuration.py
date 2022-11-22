@@ -20,6 +20,16 @@ class RendererConfiguration:
     styling: Union[dict, None] = field(init=False)
 
     def __post_init__(self) -> None:
+        kwargs: dict
+        if self.configuration:
+            kwargs = self.configuration.kwargs
+        elif self.result and self.result.expectation_config:
+            kwargs = self.result.expectation_config.kwargs
+        else:
+            kwargs = {}
+
+        object.__setattr__(self, "kwargs", kwargs)
+
         include_column_name: bool = True
         styling: Union[dict, None] = None
         if self.runtime_configuration:
@@ -32,13 +42,3 @@ class RendererConfiguration:
 
         object.__setattr__(self, "include_column_name", include_column_name)
         object.__setattr__(self, "styling", styling)
-
-        kwargs: dict
-        if self.configuration:
-            kwargs = self.configuration.kwargs
-        elif self.result and self.result.expectation_config:
-            kwargs = self.result.expectation_config.kwargs
-        else:
-            kwargs = {}
-
-        object.__setattr__(self, "kwargs", kwargs)
