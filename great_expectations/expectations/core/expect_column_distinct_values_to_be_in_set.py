@@ -230,7 +230,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
             runtime_configuration=runtime_configuration,
         )
         include_column_name: bool = renderer_configuration.include_column_name
-        styling: Union[str, None] = renderer_configuration.styling
+        styling: Union[dict, None] = renderer_configuration.styling
 
         params = substitute_none_for_missing(
             configuration.kwargs,
