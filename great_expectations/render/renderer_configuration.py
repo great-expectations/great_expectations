@@ -14,10 +14,10 @@ class RendererConfiguration:
 
     def __init__(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
-        runtime_configuration: Optional[dict] = None,
+        configuration: Union[ExpectationConfiguration, None],
+        result: Union[ExpectationValidationResult, None],
+        language: Union[str, None],
+        runtime_configuration: Union[dict, None],
         kwargs_list: Optional[List[str]] = None,
     ):
         include_column_name: Union[bool, None] = None
