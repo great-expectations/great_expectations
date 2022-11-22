@@ -697,7 +697,7 @@ class CloudDataContext(AbstractDataContext):
         return site_builder
 
     def _determine_key_for_profiler_save(
-        self, name: str, id: Optional[str]
+        self, name: str, id: Union[str, None]
     ) -> Union[ConfigurationIdentifier, GXCloudIdentifier]:
         """
         Note that this explicitly overriding the `AbstractDataContext` helper method called

@@ -206,7 +206,7 @@ class BaseCheckpoint(ConfigPeer):
                 run_results = async_result.run_results
 
                 run_result: dict
-                validation_result: Optional[ExpectationSuiteValidationResult]
+                validation_result: Union[ExpectationSuiteValidationResult, None]
                 meta: ExpectationSuiteValidationResultMeta
                 for run_result in run_results.values():
                     validation_result = run_result.get("validation_result")
@@ -232,7 +232,7 @@ class BaseCheckpoint(ConfigPeer):
 
         config_kwargs: dict = self.get_config(mode=ConfigOutputModes.JSON_DICT)
 
-        template_name: Optional[str] = runtime_kwargs.get("template_name")
+        template_name: Union[str, None] = runtime_kwargs.get("template_name")
         if template_name:
             config_kwargs["template_name"] = template_name
 

@@ -79,7 +79,7 @@ def get_batch_request(
         "data_connector_name": data_connector_name,
     }
 
-    data_asset_name: Optional[str]
+    data_asset_name: Union[str, None]
 
     if isinstance(datasource, Datasource):
         msg_prompt_enter_data_asset_name: str = f'\nWhich data asset (accessible by data connector "{data_connector_name}") would you like to use?\n'

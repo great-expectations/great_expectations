@@ -71,7 +71,7 @@ def do_config_check(
 ) -> Tuple[bool, str, Union[DataContext, None]]:
     is_config_ok: bool = True
     upgrade_message: str = ""
-    context: Optional[DataContext]
+    context: Union[DataContext, None]
     try:
         context = DataContext(context_root_dir=target_directory)
         ge_config_version: int = context.get_config().config_version

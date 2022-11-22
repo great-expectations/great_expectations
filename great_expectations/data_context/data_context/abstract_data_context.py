@@ -626,7 +626,7 @@ class AbstractDataContext(ABC):
 
         module_name: str = kwargs.get("module_name", "great_expectations.datasource")  # type: ignore[assignment]
         verify_dynamic_loading_support(module_name=module_name)
-        class_name: Optional[str] = kwargs.get("class_name")  # type: ignore[assignment]
+        class_name: Union[str, None] = kwargs.get("class_name")  # type: ignore[assignment]
         datasource_class = load_class(module_name=module_name, class_name=class_name)  # type: ignore[arg-type]
 
         # For any class that should be loaded, it may control its configuration construction
@@ -1046,7 +1046,7 @@ class AbstractDataContext(ABC):
         return profiler
 
     def _determine_key_for_profiler_save(
-        self, name: str, id: Optional[str]
+        self, name: str, id: Union[str, None]
     ) -> Union[ConfigurationIdentifier, GXCloudIdentifier]:
         return ConfigurationIdentifier(configuration_key=name)
 
@@ -2634,7 +2634,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             raise
 
     def _normalize_absolute_or_relative_path(
-        self, path: Optional[str]
+        self, path: Union[str, None]
     ) -> Optional[str]:
         """
         Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it

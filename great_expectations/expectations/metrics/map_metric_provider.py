@@ -1734,7 +1734,7 @@ def _pandas_map_condition_index(
     df = df[boolean_mapped_unexpected_values]
 
     if "unexpected_index_column_names" in result_format:
-        unexpected_index_list: Optional[List[Dict[str, Any]]] = []
+        unexpected_index_list: List[Dict[str, Any]] = []
         unexpected_index_column_names: List[str] = result_format[
             "unexpected_index_column_names"
         ]

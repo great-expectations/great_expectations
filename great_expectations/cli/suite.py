@@ -195,7 +195,7 @@ def _process_suite_new_flags_and_prompt(
         Tuple with keys of processed parameters and boolean values
     """
 
-    interactive_mode: Optional[CLISuiteInteractiveFlagCombinations]
+    interactive_mode: Union[CLISuiteInteractiveFlagCombinations, None]
     interactive_mode = _suite_convert_flags_to_interactive_mode(
         interactive_flag, manual_flag
     )

@@ -329,7 +329,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             an ordered list of sorters required to sort splitter batches.
         """
         splitter_method_to_sorter_method_mapping: Dict[
-            str, Optional[Sorter]
+            str, Union[Sorter, None]
         ] = self.SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING
         splitter_method_name: str = self._get_splitter_method_name(
             splitter_method_name=splitter_method_name,

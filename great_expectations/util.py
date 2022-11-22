@@ -363,7 +363,7 @@ def verify_dynamic_loading_support(
     :param package_name: the name of a package, to which the given module belongs
     """
     # noinspection PyUnresolvedReferences
-    module_spec: Optional[importlib.machinery.ModuleSpec]
+    module_spec: Union[importlib.machinery.ModuleSpec, None]
     try:
         # noinspection PyUnresolvedReferences
         module_spec = importlib.util.find_spec(module_name, package=package_name)
@@ -386,7 +386,7 @@ def import_library_module(module_name: str) -> Optional[ModuleType]:
     :param module_name: a fully-qualified name of a module (e.g., "great_expectations.dataset.sqlalchemy_dataset")
     :return: raw source code of the module (if can be retrieved)
     """
-    module_obj: Optional[ModuleType]
+    module_obj: Union[ModuleType, None]
 
     try:
         module_obj = importlib.import_module(module_name)

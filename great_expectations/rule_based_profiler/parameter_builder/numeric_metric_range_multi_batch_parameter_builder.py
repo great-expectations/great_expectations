@@ -721,7 +721,7 @@ detected.
     ) -> Dict[str, Union[Union[int, None], Union[float, None]]]:
         # Obtain truncate_values directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         truncate_values: Dict[
-            str, Optional[Number]
+            str, Union[Number, None]
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.truncate_values,
@@ -730,7 +730,7 @@ detected.
             parameters=parameters,
         )
 
-        distribution_boundary: Optional[Union[int, float]]
+        distribution_boundary: Union[int, float, None]
         if not all(
             [
                 (

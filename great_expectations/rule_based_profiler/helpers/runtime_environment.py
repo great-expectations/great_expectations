@@ -63,7 +63,7 @@ def build_variables_directives(
     directives: Dict[str, Dict[str, Any]]
     if exact_estimation:
         directives = {}
-        rule_variables_configs: Optional[Dict[str, Any]]
+        rule_variables_configs: Union[Dict[str, Any], None]
         rule: Rule
         for rule in rules:
             rule_variables_configs = convert_variables_to_dict(variables=rule.variables)

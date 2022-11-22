@@ -201,7 +201,7 @@ def load_expectation_suite(
     if expectation_suite_name.endswith(".json"):
         expectation_suite_name = expectation_suite_name[:-5]
 
-    suite: Optional[ExpectationSuite]
+    suite: Union[ExpectationSuite, None]
     try:
         suite = data_context.get_expectation_suite(
             expectation_suite_name=expectation_suite_name
@@ -389,7 +389,7 @@ def load_data_context_with_error_handling(
     directory: str, from_cli_upgrade_command: bool = False
 ) -> Union[DataContext, None]:
     """Return a DataContext with good error handling and exit codes."""
-    context: Optional[DataContext]
+    context: Union[DataContext, None]
     ge_config_version: float
     try:
         directory = directory or DataContext.find_context_root_dir()
@@ -459,7 +459,7 @@ def upgrade_project_strictly_multiple_versions_increment(
         if ge_config_version
         else None
     )
-    context: Optional[DataContext]
+    context: Union[DataContext, None]
     if upgrade_helper_class and int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
         upgrade_project(
             context_root_dir=directory,
@@ -872,8 +872,8 @@ def parse_cli_config_file_location(config_file_location: str) -> dict:
 
         # If the file or directory exists, treat it appropriately
         # This handles files without extensions
-        filename: Optional[str]
-        directory: Optional[str]
+        filename: Union[str, None]
+        directory: Union[str, None]
         if config_file_location_path.is_file():
             filename = rf"{str(config_file_location_path.name)}"
             directory = rf"{str(config_file_location_path.parent)}"

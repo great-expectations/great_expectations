@@ -484,7 +484,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         self._metrics_parameter_builders_by_domain = {}
 
-        rules: Optional[List[Rule]] = self.get_rules() or []
+        rules: List[Rule] = self.get_rules() or []
 
         rule: Rule
         for rule in rules:
@@ -521,7 +521,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         Returns:
             DataAssistantResult: The result object for the DataAssistant
         """
-        usage_statistics_handler: Optional[UsageStatisticsHandler]
+        usage_statistics_handler: Union[UsageStatisticsHandler, None]
         if self._data_context is None:
             usage_statistics_handler = None
         else:

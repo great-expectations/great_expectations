@@ -4,7 +4,7 @@ import datetime
 import json
 import logging
 from copy import deepcopy
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List, Optional, Union
 
 try:
     from typing import TypedDict
@@ -381,12 +381,12 @@ class ExpectationSuiteValidationResultMeta(TypedDict):
     active_batch_definition: BatchDefinition
     batch_markers: BatchMarkers
     batch_spec: BatchSpec
-    checkpoint_id: Optional[str]
+    checkpoint_id: Union[str, None]
     checkpoint_name: str
     expectation_suite_name: str
     great_expectations_version: str
     run_id: RunIdentifier
-    validation_id: Optional[str]
+    validation_id: Union[str, None]
     validation_time: str
 
 

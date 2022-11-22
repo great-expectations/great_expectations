@@ -24,7 +24,7 @@ class Reference:
     origin_path: str
     origin_line: int
     target_path: str
-    target_lines: Optional[Tuple[int, int]]
+    target_lines: Union[Tuple[int, int], None]
 
 
 @dataclass
@@ -74,7 +74,7 @@ def _parse_reference(match: re.Match, file: str, line: int) -> Reference:
     while target_path.startswith("../"):
         target_path = target_path[3:]
 
-    target_lines: Optional[Tuple[int, int]]
+    target_lines: Union[Tuple[int, int], None]
     if len(parts) == 1:
         target_lines = None
     else:

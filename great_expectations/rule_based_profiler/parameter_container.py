@@ -275,7 +275,7 @@ def _deep_convert_properties_iterable_to_parameter_node(source: dict) -> Paramet
 
 
 def convert_parameter_node_to_dictionary(
-    source: Optional[Any],
+    source: Union[Any, None],
 ) -> Union[dict, None]:
     if source is None:
         return None
@@ -354,7 +354,7 @@ def build_parameter_container(
     In particular, if any ParameterNode object in the tree (starting with the root-level ParameterNode object) already
     exists, it is reused; in other words, ParameterNode objects are unique per part of fully-qualified parameter names.
     """
-    parameter_node: Optional[ParameterNode]
+    parameter_node: Union[ParameterNode, None]
     fully_qualified_parameter_name: str
     parameter_value: Any
     fully_qualified_parameter_name_as_list: List[str]

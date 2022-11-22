@@ -766,7 +766,7 @@ table_name = "YOUR_TABLE_NAME"'''
 
 
 def _get_sql_yaml_helper_class(
-    selected_database: SupportedDatabaseBackends, datasource_name: Optional[str]
+    selected_database: SupportedDatabaseBackends, datasource_name: Union[str, None]
 ) -> Union[
     MySQLCredentialYamlHelper,
     PostgresCredentialYamlHelper,

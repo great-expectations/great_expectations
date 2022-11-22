@@ -98,7 +98,7 @@ class ColumnDomainBuilder(DomainBuilder):
 
     @include_column_names.setter
     def include_column_names(
-        self, value: Optional[Union[str, Optional[List[str]]]]
+        self, value: Union[str, Optional[List[str], None]]
     ) -> None:
         self._include_column_names = value
 
@@ -107,9 +107,7 @@ class ColumnDomainBuilder(DomainBuilder):
         return self._exclude_column_names
 
     @exclude_column_names.setter
-    def exclude_column_names(
-        self, value: Optional[Union[str, Optional[List[str]]]]
-    ) -> None:
+    def exclude_column_names(self, value: Union[str, List[str], None]) -> None:
         self._exclude_column_names = value
 
     @property
@@ -120,7 +118,7 @@ class ColumnDomainBuilder(DomainBuilder):
 
     @include_column_name_suffixes.setter
     def include_column_name_suffixes(
-        self, value: Optional[Union[str, Iterable, List[str]]]
+        self, value: Union[str, Iterable, List[str], None]
     ) -> None:
         self._include_column_name_suffixes = value
 
@@ -132,7 +130,7 @@ class ColumnDomainBuilder(DomainBuilder):
 
     @exclude_column_name_suffixes.setter
     def exclude_column_name_suffixes(
-        self, value: Optional[Union[str, Iterable, List[str]]]
+        self, value: Union[str, Iterable, List[str], None]
     ) -> None:
         self._exclude_column_name_suffixes = value
 

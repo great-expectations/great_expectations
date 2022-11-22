@@ -84,7 +84,7 @@ def get_validator(
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> Union[Validator, None]:
-    validator: Optional[Validator]
+    validator: Union[Validator, None]
 
     expectation_suite_name: str = f"tmp.{purpose}"
     if domain is None:
