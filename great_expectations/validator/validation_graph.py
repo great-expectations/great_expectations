@@ -89,8 +89,14 @@ class ValidationGraph:
         metric_configuration: MetricConfiguration,
         runtime_configuration: Optional[dict] = None,
     ) -> None:
-        """Obtain domain and value keys for metrics and proceeds to add these metrics to the validation graph
-        until all metrics have been added."""
+        """
+        Obtain domain and value keys for metrics and proceeds to add these metrics to the validation graph
+        until all metrics have been added.
+
+        Args:
+            metric_configuration: Desired MetricConfiguration object to be resolved.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
+        """
 
         metric_impl_klass: MetricProvider
         metric_provider: Callable

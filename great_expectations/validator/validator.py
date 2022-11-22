@@ -175,7 +175,7 @@ class Validator:
         expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
         data_context: Optional[AbstractDataContext] = None,
-        batches: Optional[Sequence[Union[Batch, XBatch]]] = None,
+        batches: Optional[Union[List[Batch], Sequence[Union[Batch, XBatch]]]] = None,
         include_rendered_content: Optional[bool] = None,
         **kwargs,
     ) -> None:
@@ -352,6 +352,7 @@ class Validator:
     def compute_metrics(
         self,
         metric_configurations: List[MetricConfiguration],
+        runtime_configuration: Optional[dict] = None,
     ) -> Dict[Tuple[str, str, str], MetricValue]:
         """
         Convenience method that computes requested metrics (specified as elements of "MetricConfiguration" list).
@@ -360,12 +361,14 @@ class Validator:
 
         Args:
             metric_configurations: List of desired MetricConfiguration objects to be resolved.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
 
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
         """
         return self._metrics_calculator.compute_metrics(
-            metric_configurations=metric_configurations
+            metric_configurations=metric_configurations,
+            runtime_configuration=runtime_configuration,
         )
 
     def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:

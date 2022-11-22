@@ -592,7 +592,7 @@ class ExecutionEngine(ABC):
 
     @staticmethod
     def _split_table_metric_domain_kwargs(
-        domain_kwargs: Dict,
+        domain_kwargs: dict,
         domain_type: MetricDomainTypes,
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> SplitDomainKwargs:
@@ -641,7 +641,7 @@ class ExecutionEngine(ABC):
 
     @staticmethod
     def _split_column_metric_domain_kwargs(
-        domain_kwargs: Dict,
+        domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
         """Split domain_kwargs for column domain types into compute and accessor domain kwargs.
@@ -673,7 +673,7 @@ class ExecutionEngine(ABC):
 
     @staticmethod
     def _split_column_pair_metric_domain_kwargs(
-        domain_kwargs: Dict,
+        domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
         """Split domain_kwargs for column pair domain types into compute and accessor domain kwargs.
@@ -706,7 +706,7 @@ class ExecutionEngine(ABC):
 
     @staticmethod
     def _split_multi_column_metric_domain_kwargs(
-        domain_kwargs: Dict,
+        domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
         """Split domain_kwargs for multicolumn domain types into compute and accessor domain kwargs.
