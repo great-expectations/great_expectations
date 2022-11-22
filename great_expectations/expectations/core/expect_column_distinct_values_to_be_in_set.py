@@ -229,9 +229,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
             language=language,
             runtime_configuration=runtime_configuration,
         )
-        include_column_name: Union[
-            bool, None
-        ] = renderer_configuration.include_column_name
+        include_column_name: bool = renderer_configuration.include_column_name
         styling: Union[str, None] = renderer_configuration.styling
 
         params = substitute_none_for_missing(
