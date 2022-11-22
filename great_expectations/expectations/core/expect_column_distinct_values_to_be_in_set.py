@@ -210,7 +210,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
             param_key_with_list="value_set",
         )
 
-        return template_str, params_with_json_schema, styling
+        return (template_str, params_with_json_schema, styling)
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
@@ -240,12 +240,14 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         )
 
         if params["value_set"] is None or len(params["value_set"]) == 0:
+
             if include_column_name:
                 template_str = "$column distinct values must belong to this set: [ ]"
             else:
                 template_str = "distinct values must belong to a set, but that set is not specified."
 
         else:
+
             for i, v in enumerate(params["value_set"]):
                 params[f"v__{str(i)}"] = v
             values_string = " ".join(
