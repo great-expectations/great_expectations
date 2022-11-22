@@ -167,7 +167,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
     @property
     def cardinality_limit_mode(
         self,
-    ) -> Optional[Union[str, CardinalityLimitMode, dict]]:
+    ) -> Union[str, CardinalityLimitMode, dict, None]:
         return self._cardinality_limit_mode
 
     @cardinality_limit_mode.setter
@@ -177,15 +177,15 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         self._cardinality_limit_mode = value
 
     @property
-    def max_unique_values(self) -> Optional[Union[str, int]]:
+    def max_unique_values(self) -> Union[str, int, None]:
         return self._max_unique_values
 
     @property
-    def max_proportion_unique(self) -> Optional[Union[str, float]]:
+    def max_proportion_unique(self) -> Union[str, float, None]:
         return self._max_proportion_unique
 
     @property
-    def cardinality_checker(self) -> Optional[CardinalityChecker]:
+    def cardinality_checker(self) -> Union[CardinalityChecker, None]:
         return self._cardinality_checker
 
     def _get_domains(

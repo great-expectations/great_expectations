@@ -63,14 +63,14 @@ class GrowthNumericDataAssistant(DataAssistant):
             validator=validator,
         )
 
-    def get_variables(self) -> Optional[Dict[str, Any]]:
+    def get_variables(self) -> Union[Dict[str, Any], None]:
         """
         Returns:
             Optional "variables" configuration attribute name/value pairs (overrides), commonly-used in Builder objects.
         """
         return None
 
-    def get_rules(self) -> Optional[List[Rule]]:
+    def get_rules(self) -> Union[List[Rule], None]:
         """
         Returns:
             Optional custom list of "Rule" objects implementing particular "DataAssistant" functionality.

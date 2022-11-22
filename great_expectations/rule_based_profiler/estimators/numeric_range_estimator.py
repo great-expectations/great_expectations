@@ -45,7 +45,7 @@ class NumericRangeEstimator(ABC, SerializableDictDot):
         return self._name
 
     @property
-    def configuration(self) -> Optional[Attributes]:
+    def configuration(self) -> Union[Attributes, None]:
         return self._configuration
 
     @configuration.setter

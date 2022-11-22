@@ -100,7 +100,7 @@ class LinkChecker:
     def _is_anchor_link(self, link: str) -> bool:
         return link.startswith("#")
 
-    def _check_external_link(self, link: str, file: str) -> Optional[LinkReport]:
+    def _check_external_link(self, link: str, file: str) -> Union[LinkReport, None]:
         if self._skip_external:
             return None
 
@@ -148,7 +148,7 @@ class LinkChecker:
 
     def _check_absolute_link(
         self, link: str, file: str, path: str
-    ) -> Optional[LinkReport]:
+    ) -> Union[LinkReport, None]:
         logger.debug(f"Checking absolute link {link} in file {file}")
 
         # absolute links should point to files that exist (with the .md extension added)
@@ -164,7 +164,7 @@ class LinkChecker:
 
     def _check_absolute_image(
         self, link: str, file: str, path: str
-    ) -> Optional[LinkReport]:
+    ) -> Union[LinkReport, None]:
         logger.debug(f"Checking absolute image {link} in file {file}")
 
         image_file = self._get_absolute_path(path)
@@ -177,7 +177,7 @@ class LinkChecker:
 
     def _check_relative_link(
         self, link: str, file: str, path: str
-    ) -> Optional[LinkReport]:
+    ) -> Union[LinkReport, None]:
         logger.debug(f"Checking relative link {link} in file {file}")
 
         md_file = self._get_relative_path(file, path)
@@ -192,7 +192,7 @@ class LinkChecker:
 
     def _check_relative_image(
         self, link: str, file: str, path: str
-    ) -> Optional[LinkReport]:
+    ) -> Union[LinkReport, None]:
         logger.debug(f"Checking relative image {link} in file {file}")
 
         image_file = self._get_relative_path(file, path)
@@ -205,7 +205,7 @@ class LinkChecker:
 
     def _check_docroot_link(
         self, link: str, file: str, path: str
-    ) -> Optional[LinkReport]:
+    ) -> Union[LinkReport, None]:
         logger.debug(f"Checking docroot link {link} in file {file}")
 
         md_file = self._get_docroot_path(path)
@@ -216,7 +216,7 @@ class LinkChecker:
             logger.debug(f"Docroot link {link} in file {file} found")
             return None
 
-    def _check_link(self, match: re.Match, file: str) -> Optional[LinkReport]:
+    def _check_link(self, match: re.Match, file: str) -> Union[LinkReport, None]:
         """Checks that a link is valid. Valid links are:
         - Absolute links that begin with a forward slash and the specified site prefix (ex: /docs) with no suffix
         - Absolute images with an image suffix

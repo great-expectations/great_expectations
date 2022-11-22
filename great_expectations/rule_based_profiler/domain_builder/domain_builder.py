@@ -141,7 +141,7 @@ class DomainBuilder(ABC, Builder):
     def get_validator(
         self,
         variables: Optional[ParameterContainer] = None,
-    ) -> Optional[Validator]:
+    ) -> Union[Validator, None]:
         return get_validator_using_batch_list_or_batch_request(
             purpose="domain_builder",
             data_context=self.data_context,
@@ -155,7 +155,7 @@ class DomainBuilder(ABC, Builder):
     def get_batch_ids(
         self,
         variables: Optional[ParameterContainer] = None,
-    ) -> Optional[List[str]]:
+    ) -> Union[List[str], None]:
         return get_batch_ids_from_batch_list_or_batch_request(
             data_context=self.data_context,
             batch_list=self.batch_list,

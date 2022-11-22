@@ -58,7 +58,7 @@ class StoreBackend(metaclass=ABCMeta):
 
     def _construct_store_backend_id(
         self, suppress_warning: bool = False
-    ) -> Optional[str]:
+    ) -> Union[str, None]:
         """
         Create a store_backend_id if one does not exist, and return it if it exists
         If a valid UUID store_backend_id is passed in param manually_initialize_store_backend_id

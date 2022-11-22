@@ -147,11 +147,11 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             self._candidate_strings = DEFAULT_CANDIDATE_STRINGS
 
     @property
-    def metric_domain_kwargs(self) -> Optional[Union[str, dict]]:
+    def metric_domain_kwargs(self) -> Union[str, dict, None]:
         return self._metric_domain_kwargs
 
     @property
-    def metric_value_kwargs(self) -> Optional[Union[str, dict]]:
+    def metric_value_kwargs(self) -> Union[str, dict, None]:
         return self._metric_value_kwargs
 
     @metric_value_kwargs.setter

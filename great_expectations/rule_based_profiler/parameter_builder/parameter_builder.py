@@ -260,13 +260,13 @@ class ParameterBuilder(ABC, Builder):
     @property
     def evaluation_parameter_builders(
         self,
-    ) -> Optional[List[ParameterBuilder]]:
+    ) -> Union[List[ParameterBuilder], None]:
         return self._evaluation_parameter_builders
 
     @property
     def evaluation_parameter_builder_configs(
         self,
-    ) -> Optional[List[ParameterBuilderConfig]]:
+    ) -> Union[List[ParameterBuilderConfig], None]:
         return self._evaluation_parameter_builder_configs
 
     @property
@@ -288,7 +288,7 @@ class ParameterBuilder(ABC, Builder):
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Optional[Validator]:
+    ) -> Union[Validator, None]:
         return get_validator_using_batch_list_or_batch_request(
             purpose="parameter_builder",
             data_context=self.data_context,
@@ -305,7 +305,7 @@ class ParameterBuilder(ABC, Builder):
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Optional[List[str]]:
+    ) -> Union[List[str], None]:
         return get_batch_ids_from_batch_list_or_batch_request(
             data_context=self.data_context,
             batch_list=self.batch_list,
@@ -717,7 +717,7 @@ numeric-valued and datetime-valued metrics (value {metric_value} of type "{str(t
 def init_rule_parameter_builders(
     parameter_builder_configs: Optional[List[dict]] = None,
     data_context: Optional[AbstractDataContext] = None,
-) -> Optional[List[ParameterBuilder]]:
+) -> Union[List[ParameterBuilder], None]:
     if parameter_builder_configs is None:
         return None
 

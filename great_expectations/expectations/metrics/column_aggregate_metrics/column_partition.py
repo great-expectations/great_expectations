@@ -221,7 +221,7 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
 
 def _determine_bins_using_proper_units(
     ndarray_is_datetime_type: bool, n_bins: int, min_: Any, max_: Any
-) -> Optional[List[Any]]:
+) -> Union[List[Any], None]:
     if ndarray_is_datetime_type:
         if n_bins == 0:
             bins = [min_]

@@ -93,11 +93,11 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         self._metric_name = value
 
     @property
-    def metric_domain_kwargs(self) -> Optional[Union[str, dict]]:
+    def metric_domain_kwargs(self) -> Union[str, dict, None]:
         return self._metric_domain_kwargs
 
     @property
-    def metric_value_kwargs(self) -> Optional[Union[str, dict]]:
+    def metric_value_kwargs(self) -> Union[str, dict, None]:
         return self._metric_value_kwargs
 
     @metric_value_kwargs.setter

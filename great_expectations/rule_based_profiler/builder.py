@@ -48,7 +48,7 @@ class Builder(SerializableDictDot):
     """
 
     @property
-    def batch_list(self) -> Optional[List[Batch]]:
+    def batch_list(self) -> Union[List[Batch], None]:
         return self._batch_list
 
     @batch_list.setter
@@ -56,7 +56,7 @@ class Builder(SerializableDictDot):
         self._batch_list = value
 
     @property
-    def batch_request(self) -> Optional[Union[BatchRequestBase, dict]]:
+    def batch_request(self) -> Union[BatchRequestBase, dict, None]:
         return self._batch_request
 
     @batch_request.setter
@@ -67,7 +67,7 @@ class Builder(SerializableDictDot):
         self._batch_request = value
 
     @property
-    def data_context(self) -> Optional[AbstractDataContext]:
+    def data_context(self) -> Union[AbstractDataContext, None]:
         return self._data_context
 
     def set_batch_list_if_null_batch_request(

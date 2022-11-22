@@ -436,15 +436,15 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._data_sampler = SqlAlchemyDataSampler()
 
     @property
-    def credentials(self) -> Optional[dict]:
+    def credentials(self) -> Union[dict, None]:
         return self._credentials
 
     @property
-    def connection_string(self) -> Optional[str]:
+    def connection_string(self) -> Union[str, None]:
         return self._connection_string
 
     @property
-    def url(self) -> Optional[str]:
+    def url(self) -> Union[str, None]:
         return self._url
 
     @property

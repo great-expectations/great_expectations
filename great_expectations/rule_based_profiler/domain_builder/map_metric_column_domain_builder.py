@@ -124,11 +124,11 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         return self._max_unexpected_values
 
     @property
-    def max_unexpected_ratio(self) -> Optional[Union[str, float]]:
+    def max_unexpected_ratio(self) -> Union[str, float, None]:
         return self._max_unexpected_ratio
 
     @property
-    def min_max_unexpected_values_proportion(self) -> Optional[Union[str, float]]:
+    def min_max_unexpected_values_proportion(self) -> Union[str, float, None]:
         return self._min_max_unexpected_values_proportion
 
     def _get_domains(

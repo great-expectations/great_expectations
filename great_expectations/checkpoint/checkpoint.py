@@ -464,14 +464,14 @@ is run), with each validation having its own defined "action_list" attribute.
         return self._checkpoint_config
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> Union[str, None]:
         try:
             return self.config.name
         except AttributeError:
             return None
 
     @property
-    def config_version(self) -> Optional[float]:
+    def config_version(self) -> Union[float, None]:
         try:
             return self.config.config_version
         except AttributeError:
@@ -492,7 +492,7 @@ is run), with each validation having its own defined "action_list" attribute.
             return []
 
     @property
-    def ge_cloud_id(self) -> Optional[UUID]:
+    def ge_cloud_id(self) -> Union[UUID, None]:
         try:
             return self.config.ge_cloud_id
         except AttributeError:
@@ -911,11 +911,11 @@ class LegacyCheckpoint(Checkpoint):
         self._batches = batches
 
     @property
-    def validation_operator_name(self) -> Optional[str]:
+    def validation_operator_name(self) -> Union[str, None]:
         return self._validation_operator_name
 
     @property
-    def batches(self) -> Optional[List[dict]]:
+    def batches(self) -> Union[List[dict], None]:
         return self._batches
 
     def _run_default_validation_operator(

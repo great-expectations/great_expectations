@@ -214,7 +214,9 @@ class ParameterContainer(SerializableDictDot):
 
         self.parameter_nodes[parameter_name_root] = parameter_node
 
-    def get_parameter_node(self, parameter_name_root: str) -> Optional[ParameterNode]:
+    def get_parameter_node(
+        self, parameter_name_root: str
+    ) -> Union[ParameterNode, None]:
         if self.parameter_nodes is None:
             return None
 
@@ -274,7 +276,7 @@ def _deep_convert_properties_iterable_to_parameter_node(source: dict) -> Paramet
 
 def convert_parameter_node_to_dictionary(
     source: Optional[Any],
-) -> Optional[dict]:
+) -> Union[dict, None]:
     if source is None:
         return None
 
@@ -425,7 +427,7 @@ def get_parameter_value_by_fully_qualified_parameter_name(
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
-) -> Optional[Union[Any, ParameterNode]]:
+) -> Union[Any, ParameterNode, None]:
     """
     Get the parameter value from the current "rule state" using the fully-qualified parameter name.
     A fully-qualified parameter name must be a dot-delimited string, or the name of a parameter (without the dots).
@@ -497,7 +499,7 @@ def _get_parameter_value_from_parameter_container(
     fully_qualified_parameter_name: str,
     fully_qualified_parameter_name_as_list: List[str],
     parameter_container: ParameterContainer,
-) -> Optional[Union[Any, ParameterNode]]:
+) -> Union[Any, ParameterNode, None]:
     parameter_node: Optional[ParameterNode] = parameter_container.get_parameter_node(
         parameter_name_root=fully_qualified_parameter_name_as_list[0]
     )

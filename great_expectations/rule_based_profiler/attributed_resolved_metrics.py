@@ -99,7 +99,7 @@ class AttributedResolvedMetrics(SerializableDictDot):
     @staticmethod
     def get_conditioned_metric_values_from_attributed_metric_values(
         attributed_metric_values: Dict[str, MetricValue]
-    ) -> Optional[MetricValues]:
+    ) -> Union[MetricValues, None]:
         """
         Converts all "attributed_metric_values" as list (together) to Numpy array (recursively, wherever possible).
         """
@@ -125,7 +125,7 @@ class AttributedResolvedMetrics(SerializableDictDot):
         return self.metric_attributes.to_id()
 
     @property
-    def attributed_metric_values(self) -> Optional[Dict[str, MetricValue]]:
+    def attributed_metric_values(self) -> Union[Dict[str, MetricValue], None]:
         if self.metric_values_by_batch_id is None:
             return None
 

@@ -45,7 +45,7 @@ def verify_library_dependent_modules(
 
 def library_install_load_check(
     python_import_name: str, pip_library_name: str
-) -> Optional[int]:
+) -> Union[int, None]:
     """
     Dynamically load a module from strings, attempt a pip install or raise a helpful error.
 

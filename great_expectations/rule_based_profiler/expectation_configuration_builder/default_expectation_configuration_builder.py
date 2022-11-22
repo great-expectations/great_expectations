@@ -136,13 +136,13 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         return self._expectation_type
 
     @property
-    def condition(self) -> Optional[str]:
+    def condition(self) -> Union[str, None]:
         return self._condition
 
     @property
     def validation_parameter_builder_configs(
         self,
-    ) -> Optional[List[ParameterBuilderConfig]]:
+    ) -> Union[List[ParameterBuilderConfig], None]:
         return self._validation_parameter_builder_configs
 
     @property
@@ -348,7 +348,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Optional[ExpectationConfiguration]:
+    ) -> Union[ExpectationConfiguration, None]:
         """Returns either and ExpectationConfiguration object or None depending on evaluation of condition"""
         parameter_name: str
         fully_qualified_parameter_name: str

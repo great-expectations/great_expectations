@@ -98,7 +98,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         self._data_references_cache: Dict[str, List[dict]] = {}
 
     @property
-    def catalog_id(self) -> Optional[str]:
+    def catalog_id(self) -> Union[str, None]:
         return self._catalog_id
 
     @property
@@ -110,7 +110,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         return self._assets
 
     @property
-    def partitions(self) -> Optional[List[str]]:
+    def partitions(self) -> Union[List[str], None]:
         return self._partitions
 
     def build_batch_spec(

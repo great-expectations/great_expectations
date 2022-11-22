@@ -1,5 +1,5 @@
 import sys
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import click
 
@@ -66,7 +66,9 @@ def project_upgrade(ctx: click.Context) -> None:
         sys.exit(1)
 
 
-def do_config_check(target_directory: str) -> Tuple[bool, str, Optional[DataContext]]:
+def do_config_check(
+    target_directory: str,
+) -> Tuple[bool, str, Union[DataContext, None]]:
     is_config_ok: bool = True
     upgrade_message: str = ""
     context: Optional[DataContext]

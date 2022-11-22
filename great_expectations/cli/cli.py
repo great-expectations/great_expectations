@@ -46,7 +46,7 @@ class CLIState:
         return context
 
     @property
-    def data_context(self) -> Optional[DataContext]:
+    def data_context(self) -> Union[DataContext, None]:
         return self._data_context
 
     @data_context.setter
@@ -74,7 +74,7 @@ class CLI(click.MultiCommand):
 
         return commands
 
-    def get_command(self, ctx: click.Context, name: str) -> Optional[str]:
+    def get_command(self, ctx: click.Context, name: str) -> Union[str, None]:
         module_name = name.replace("-", "_")
         legacy_module = ""
         if not self.is_v3_api(ctx):

@@ -187,7 +187,7 @@ def load_expectation_suite(
     usage_event: str,
     suppress_usage_message: bool = False,
     create_if_not_exist: bool = True,
-) -> Optional[ExpectationSuite]:
+) -> Union[ExpectationSuite, None]:
     """
     Load an expectation suite from a given context.
 
@@ -387,7 +387,7 @@ def select_datasource(
 
 def load_data_context_with_error_handling(
     directory: str, from_cli_upgrade_command: bool = False
-) -> Optional[DataContext]:
+) -> Union[DataContext, None]:
     """Return a DataContext with good error handling and exit codes."""
     context: Optional[DataContext]
     ge_config_version: float
@@ -453,7 +453,7 @@ def load_data_context_with_error_handling(
 
 def upgrade_project_strictly_multiple_versions_increment(
     directory: str, ge_config_version: float, from_cli_upgrade_command: bool = False
-) -> Optional[DataContext]:
+) -> Union[DataContext, None]:
     upgrade_helper_class = (
         GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
         if ge_config_version
@@ -575,7 +575,7 @@ def upgrade_project_one_or_multiple_versions_increment(
     context: DataContext,
     ge_config_version: float,
     from_cli_upgrade_command: bool = False,
-) -> Optional[DataContext]:
+) -> Union[DataContext, None]:
     # noinspection PyBroadException
     try:
         send_usage_message(
@@ -658,7 +658,7 @@ def upgrade_project_zero_versions_increment(
     context: DataContext,
     ge_config_version: float,
     from_cli_upgrade_command: bool = False,
-) -> Optional[DataContext]:
+) -> Union[DataContext, None]:
     upgrade_helper_class = (
         GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
         if ge_config_version
@@ -928,7 +928,7 @@ def load_json_file_into_dict(
     filepath: str,
     data_context: DataContext,
     usage_event: Optional[str] = None,
-) -> Optional[Dict[str, Union[str, int, Dict[str, Any]]]]:
+) -> Union[Dict[str, Union[str, int, Dict[str, Any]]], None]:
     suppress_usage_message: bool = (usage_event is None) or (data_context is None)
 
     error_message: str
@@ -992,7 +992,7 @@ def load_json_file_into_dict(
 
 def get_batch_request_from_citations(
     expectation_suite: Optional[ExpectationSuite] = None,
-) -> Optional[Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]]:
+) -> Union[str, Dict[str, Union[str, int, Dict[str, Any]]], None]:
     batch_request_from_citation: Optional[
         Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
     ] = None
@@ -1031,7 +1031,7 @@ def get_batch_request_from_json_file(
     data_context: DataContext,
     usage_event: Optional[str] = None,
     suppress_usage_message: bool = False,
-) -> Optional[Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]]:
+) -> Union[str, Dict[str, Union[str, int, Dict[str, Any]]], None]:
     batch_request: Optional[
         Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
     ] = load_json_file_into_dict(
@@ -1065,7 +1065,7 @@ def get_batch_request_using_datasource_name(
     additional_batch_request_args: Optional[
         Dict[str, Union[str, int, Dict[str, Any]]]
     ] = None,
-) -> Optional[Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]]:
+) -> Union[str, Dict[str, Union[str, int, Dict[str, Any]]], None]:
     cli_message(
         string="\nA batch of data is required to edit the suite - let's help you to specify it.\n"
     )

@@ -93,7 +93,7 @@ class ColumnDomainBuilder(DomainBuilder):
     """
 
     @property
-    def include_column_names(self) -> Optional[Union[str, Optional[List[str]]]]:
+    def include_column_names(self) -> Union[str, List[str], None]:
         return self._include_column_names
 
     @include_column_names.setter
@@ -103,7 +103,7 @@ class ColumnDomainBuilder(DomainBuilder):
         self._include_column_names = value
 
     @property
-    def exclude_column_names(self) -> Optional[Union[str, Optional[List[str]]]]:
+    def exclude_column_names(self) -> Union[str, List[str], None]:
         return self._exclude_column_names
 
     @exclude_column_names.setter
@@ -115,7 +115,7 @@ class ColumnDomainBuilder(DomainBuilder):
     @property
     def include_column_name_suffixes(
         self,
-    ) -> Optional[Union[str, Iterable, List[str]]]:
+    ) -> Union[str, Iterable, List[str], None]:
         return self._include_column_name_suffixes
 
     @include_column_name_suffixes.setter
@@ -127,7 +127,7 @@ class ColumnDomainBuilder(DomainBuilder):
     @property
     def exclude_column_name_suffixes(
         self,
-    ) -> Optional[Union[str, Iterable, List[str]]]:
+    ) -> Union[str, Iterable, List[str], None]:
         return self._exclude_column_name_suffixes
 
     @exclude_column_name_suffixes.setter
@@ -137,11 +137,11 @@ class ColumnDomainBuilder(DomainBuilder):
         self._exclude_column_name_suffixes = value
 
     @property
-    def semantic_type_filter_module_name(self) -> Optional[str]:
+    def semantic_type_filter_module_name(self) -> Union[str, None]:
         return self._semantic_type_filter_module_name
 
     @property
-    def semantic_type_filter_class_name(self) -> Optional[str]:
+    def semantic_type_filter_class_name(self) -> Union[str, None]:
         return self._semantic_type_filter_class_name
 
     @property
@@ -179,7 +179,7 @@ class ColumnDomainBuilder(DomainBuilder):
         self._exclude_semantic_types = value
 
     @property
-    def semantic_type_filter(self) -> Optional[SemanticTypeFilter]:
+    def semantic_type_filter(self) -> Union[SemanticTypeFilter, None]:
         return self._semantic_type_filter
 
     def get_effective_column_names(

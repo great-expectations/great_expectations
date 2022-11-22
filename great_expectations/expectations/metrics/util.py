@@ -328,7 +328,7 @@ def is_column_present_in_table(
 
 def get_sqlalchemy_column_metadata(
     engine: Engine, table_selectable: Select, schema_name: Optional[str] = None
-) -> Optional[List[Dict[str, Any]]]:
+) -> Union[List[Dict[str, Any]], None]:
     try:
         columns: List[Dict[str, Any]]
 

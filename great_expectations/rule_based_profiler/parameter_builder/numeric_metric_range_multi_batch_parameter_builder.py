@@ -259,11 +259,11 @@ detected.
         return self._estimator
 
     @property
-    def n_resamples(self) -> Optional[Union[str, int]]:
+    def n_resamples(self) -> Union[str, int, None]:
         return self._n_resamples
 
     @property
-    def random_seed(self) -> Optional[Union[str, int]]:
+    def random_seed(self) -> Union[str, int, None]:
         return self._random_seed
 
     @property
@@ -275,11 +275,11 @@ detected.
         return self._quantile_bias_correction
 
     @property
-    def quantile_bias_std_error_ratio_threshold(self) -> Optional[Union[str, float]]:
+    def quantile_bias_std_error_ratio_threshold(self) -> Union[str, float, None]:
         return self._quantile_bias_std_error_ratio_threshold
 
     @property
-    def bw_method(self) -> Optional[Union[str, float, Callable]]:
+    def bw_method(self) -> Union[str, float, Callable, None]:
         return self._bw_method
 
     @property
@@ -289,11 +289,11 @@ detected.
     @property
     def truncate_values(
         self,
-    ) -> Optional[Union[str, Dict[str, Union[Union[int, None], Union[float, None]]]]]:
+    ) -> Union[str, Dict[str, Union[Union[int, None], Union[float, None]]], None]:
         return self._truncate_values
 
     @property
-    def round_decimals(self) -> Optional[Union[str, int]]:
+    def round_decimals(self) -> Union[str, int, None]:
         return self._round_decimals
 
     def _build_parameters(

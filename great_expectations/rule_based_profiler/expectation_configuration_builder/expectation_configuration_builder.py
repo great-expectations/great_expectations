@@ -143,7 +143,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         return self._expectation_type
 
     @property
-    def validation_parameter_builders(self) -> Optional[List[ParameterBuilder]]:
+    def validation_parameter_builders(self) -> Union[List[ParameterBuilder], None]:
         return self._validation_parameter_builders
 
 

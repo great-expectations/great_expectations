@@ -83,7 +83,7 @@ def get_validator(
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
-) -> Optional[Validator]:
+) -> Union[Validator, None]:
     validator: Optional[Validator]
 
     expectation_suite_name: str = f"tmp.{purpose}"
@@ -139,7 +139,7 @@ def get_batch_ids(
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
-) -> Optional[List[str]]:
+) -> Union[List[str], None]:
     batch: Batch
     if batch_list is None or all([batch is None for batch in batch_list]):
         if batch_request is None:
@@ -174,7 +174,7 @@ def build_batch_request(
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
-) -> Optional[Union[BatchRequest, RuntimeBatchRequest]]:
+) -> Union[BatchRequest, RuntimeBatchRequest, None]:
     if batch_request is None:
         return None
 

@@ -14,7 +14,7 @@ import time
 from functools import wraps
 from queue import Queue
 from types import FrameType
-from typing import TYPE_CHECKING, Callable, List, Optional
+from typing import TYPE_CHECKING, Callable, List, Optional, Union
 
 import jsonschema
 import requests
@@ -247,7 +247,9 @@ class UsageStatisticsHandler:
             logger.debug(log_message)
 
 
-def get_usage_statistics_handler(args_array: list) -> Optional[UsageStatisticsHandler]:
+def get_usage_statistics_handler(
+    args_array: list,
+) -> Union[UsageStatisticsHandler, None]:
     try:
         # If the object is usage_statistics-capable, then it will have a usage_statistics_handler
         handler = getattr(args_array[0], "_usage_statistics_handler", None)

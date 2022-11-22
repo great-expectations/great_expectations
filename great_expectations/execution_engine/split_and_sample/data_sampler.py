@@ -76,7 +76,7 @@ class DataSampler(abc.ABC):
         batch_spec: BatchSpec,
         sampling_kwargs_key: str,
         default_value: Optional[Any] = None,
-    ) -> Optional[Any]:
+    ) -> Union[Any, None]:
         """Get value from batch_spec or default if provided and key doesn't exist.
 
         Args:

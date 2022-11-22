@@ -84,11 +84,11 @@ class InferredAssetAWSGlueDataCatalogDataConnector(
         return self._data_asset_name_suffix
 
     @property
-    def excluded_tables(self) -> Optional[list]:
+    def excluded_tables(self) -> Union[list, None]:
         return self._excluded_tables
 
     @property
-    def included_tables(self) -> Optional[list]:
+    def included_tables(self) -> Union[list, None]:
         return self._included_tables
 
     @property
