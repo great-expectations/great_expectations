@@ -4,19 +4,19 @@ import errno
 import os
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from typing import Dict, Optional, Type, cast
+from typing import Any, Dict, Optional, Type, cast
 
+from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.types.base import GeCloudConfig
-from great_expectations.data_context.util import (
-    substitute_all_config_variables,
-    substitute_config_variable,
-)
+from great_expectations.data_context.types.base import GXCloudConfig
 
 yaml = YAMLHandler()
 
 
-class AbstractConfigurationProvider(ABC):
+class _AbstractConfigurationProvider(ABC):
+    def __init__(self) -> None:
+        self._substitutor = _ConfigurationSubstitutor()
+
     @abstractmethod
     def get_values(self) -> Dict[str, str]:
         """
@@ -24,8 +24,27 @@ class AbstractConfigurationProvider(ABC):
         """
         pass
 
+    def substitute_config(
+        self, config: Any, config_values: Optional[Dict[str, str]] = None
+    ) -> Any:
+        """
+        Utilizes the underlying ConfigurationSubstitutor instance to substitute any
+        $VARIABLES with their corresponding config variable value.
 
-class ConfigurationProvider(AbstractConfigurationProvider):
+        Args:
+            config: The config object to update.
+            config_values: The dictionary of values to use during the substitution process.
+                           If omitted, any values derived from registered providers will be used.
+
+        Returns:
+            The input config object with any $VARIABLES replaced with their corresponding config values.
+        """
+        if config_values is None:
+            config_values = self.get_values()
+        return self._substitutor.substitute_all_config_variables(config, config_values)
+
+
+class _ConfigurationProvider(_AbstractConfigurationProvider):
     """
     Wrapper class around the other environment-specific configuraiton provider classes.
 
@@ -38,10 +57,11 @@ class ConfigurationProvider(AbstractConfigurationProvider):
 
     def __init__(self) -> None:
         self._providers: OrderedDict[
-            Type[AbstractConfigurationProvider], AbstractConfigurationProvider
+            Type[_AbstractConfigurationProvider], _AbstractConfigurationProvider
         ] = OrderedDict()
+        super().__init__()
 
-    def register_provider(self, provider: AbstractConfigurationProvider) -> None:
+    def register_provider(self, provider: _AbstractConfigurationProvider) -> None:
         """
         Saves a configuration provider to the object's state for downstream usage.
         See `get_values()` for more information.
@@ -55,8 +75,8 @@ class ConfigurationProvider(AbstractConfigurationProvider):
         self._providers[type_] = provider
 
     def get_provider(
-        self, type_: Type[AbstractConfigurationProvider]
-    ) -> Optional[AbstractConfigurationProvider]:
+        self, type_: Type[_AbstractConfigurationProvider]
+    ) -> Optional[_AbstractConfigurationProvider]:
         """
         Retrieves a registered configuration provider (if available).
 
@@ -82,28 +102,32 @@ class ConfigurationProvider(AbstractConfigurationProvider):
         return values
 
 
-class RuntimeEnvironmentConfigurationProvider(AbstractConfigurationProvider):
+class _RuntimeEnvironmentConfigurationProvider(_AbstractConfigurationProvider):
     """
     Responsible for the management of the runtime_environment dictionary provided at runtime.
     """
 
     def __init__(self, runtime_environment: Dict[str, str]) -> None:
         self._runtime_environment = runtime_environment
+        super().__init__()
 
     def get_values(self) -> Dict[str, str]:
         return self._runtime_environment
 
 
-class EnvironmentConfigurationProvider(AbstractConfigurationProvider):
+class _EnvironmentConfigurationProvider(_AbstractConfigurationProvider):
     """
     Responsible for the management of environment variables.
     """
+
+    def __init__(self) -> None:
+        super().__init__()
 
     def get_values(self) -> Dict[str, str]:
         return dict(os.environ)
 
 
-class ConfigurationVariablesConfigurationProvider(AbstractConfigurationProvider):
+class _ConfigurationVariablesConfigurationProvider(_AbstractConfigurationProvider):
     """
     Responsible for the management of user-defined configuration variables.
 
@@ -115,12 +139,13 @@ class ConfigurationVariablesConfigurationProvider(AbstractConfigurationProvider)
     ) -> None:
         self._config_variables_file_path = config_variables_file_path
         self._root_directory = root_directory
+        super().__init__()
 
     def get_values(self) -> Dict[str, str]:
         env_vars = dict(os.environ)
         try:
             # If the user specifies the config variable path with an environment variable, we want to substitute it
-            defined_path: str = substitute_config_variable(  # type: ignore[assignment]
+            defined_path: str = self._substitutor.substitute_config_variable(  # type: ignore[assignment]
                 self._config_variables_file_path, env_vars
             )
             if not os.path.isabs(defined_path):
@@ -134,7 +159,8 @@ class ConfigurationVariablesConfigurationProvider(AbstractConfigurationProvider)
 
             variables = dict(yaml.load(contents)) or {}
             return cast(
-                Dict[str, str], substitute_all_config_variables(variables, env_vars)
+                Dict[str, str],
+                self._substitutor.substitute_all_config_variables(variables, env_vars),
             )
 
         except OSError as e:
@@ -143,7 +169,7 @@ class ConfigurationVariablesConfigurationProvider(AbstractConfigurationProvider)
             return {}
 
 
-class CloudConfigurationProvider(AbstractConfigurationProvider):
+class _CloudConfigurationProvider(_AbstractConfigurationProvider):
     """
     Responsible for the management of a user's GX Cloud credentials.
 
@@ -151,16 +177,16 @@ class CloudConfigurationProvider(AbstractConfigurationProvider):
     config provider when in a Cloud-backend environment.
     """
 
-    def __init__(self, cloud_config: GeCloudConfig) -> None:
+    def __init__(self, cloud_config: GXCloudConfig) -> None:
         self._cloud_config = cloud_config
 
     def get_values(self) -> Dict[str, str]:
         from great_expectations.data_context.cloud_constants import (
-            GECloudEnvironmentVariable,
+            GXCloudEnvironmentVariable,
         )
 
         return {
-            GECloudEnvironmentVariable.BASE_URL: self._cloud_config.base_url,
-            GECloudEnvironmentVariable.ACCESS_TOKEN: self._cloud_config.access_token,
-            GECloudEnvironmentVariable.ORGANIZATION_ID: self._cloud_config.organization_id,  # type: ignore[dict-item]
+            GXCloudEnvironmentVariable.BASE_URL: self._cloud_config.base_url,
+            GXCloudEnvironmentVariable.ACCESS_TOKEN: self._cloud_config.access_token,
+            GXCloudEnvironmentVariable.ORGANIZATION_ID: self._cloud_config.organization_id,  # type: ignore[dict-item]
         }

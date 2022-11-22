@@ -181,8 +181,9 @@ class DatabaseStoreBackend(StoreBackend):
         engine = sa.create_engine(options, **create_engine_kwargs)
         return engine
 
+    @staticmethod
     def _get_sqlalchemy_key_pair_auth_url(
-        self, drivername: str, credentials: dict
+        drivername: str, credentials: dict
     ) -> Tuple["URL", Dict]:
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided

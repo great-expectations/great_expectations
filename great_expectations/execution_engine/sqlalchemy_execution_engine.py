@@ -948,7 +948,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         res: List[Row]
 
         # We need a different query for each domain (where clause).
-        queries: Dict[Tuple, dict] = {}
+        queries: Dict[Tuple[str, str, str], dict] = {}
 
         query: dict
 
@@ -963,17 +963,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             compute_domain_kwargs: dict = (
                 bundled_metric_configuration.compute_domain_kwargs
             )
-
             if not isinstance(compute_domain_kwargs, IDDict):
                 compute_domain_kwargs = IDDict(compute_domain_kwargs)
 
-            domain_id = IDDict.convert_dictionary_to_id_dict(
-                data=convert_to_json_serializable(data=compute_domain_kwargs)
-            ).to_id()
+            domain_id = compute_domain_kwargs.to_id()
             if domain_id not in queries:
                 queries[domain_id] = {
                     "select": [],
-                    "ids": [],
+                    "metric_ids": [],
                     "domain_kwargs": compute_domain_kwargs,
                 }
 
@@ -990,7 +987,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     metric_fn.label(metric_to_resolve.metric_name)
                 )
 
-            queries[domain_id]["ids"].append(metric_to_resolve.id)
+            queries[domain_id]["metric_ids"].append(metric_to_resolve.id)
 
         for query in queries.values():
             domain_kwargs: dict = query["domain_kwargs"]
@@ -998,7 +995,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 domain_kwargs=domain_kwargs
             )
 
-            assert len(query["select"]) == len(query["ids"])
+            assert len(query["select"]) == len(query["metric_ids"])
 
             try:
                 """
@@ -1024,7 +1021,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
                 logger.debug(
                     f"""SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id \
-{IDDict.convert_dictionary_to_id_dict(data=convert_to_json_serializable(data=domain_kwargs)).to_id()}"""
+{IDDict(domain_kwargs).to_id()}"""
                 )
             except OperationalError as oe:
                 exception_message: str = "An SQL execution Exception occurred.  "
@@ -1036,13 +1033,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             assert (
                 len(res) == 1
             ), "all bundle-computed metrics must be single-value statistics"
-            assert len(query["ids"]) == len(
+            assert len(query["metric_ids"]) == len(
                 res[0]
             ), "unexpected number of metrics returned"
 
             idx: int
             metric_id: Tuple[str, str, str]
-            for idx, metric_id in enumerate(query["ids"]):
+            for idx, metric_id in enumerate(query["metric_ids"]):
                 # Converting SQL query execution results into JSON-serializable format produces simple data types,
                 # amenable for subsequent post-processing by higher-level "Metric" and "Expectation" layers.
                 resolved_metrics[metric_id] = convert_to_json_serializable(
