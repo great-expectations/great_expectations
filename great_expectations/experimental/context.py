@@ -25,6 +25,7 @@ class DataContext:
     """
 
     _context: ClassVar[Optional[DataContext]] = None
+    _config: ClassVar[Optional[GxConfig]] = None  # (kilo59) should this live  here?
 
     _datasources: Dict[str, Datasource]
     root_directory: Union[DirectoryPath, str, None]
@@ -42,8 +43,8 @@ class DataContext:
         if cls._context.root_directory:
             # load config and add/instantiate Datasources & Assets
             config_path = pathlib.Path(cls._context.root_directory) / _config_file
-            loaded_config = GxConfig.parse_yaml(config_path)
-            for ds_name, datasource in loaded_config.datasources.items():
+            cls._config = GxConfig.parse_yaml(config_path)
+            for ds_name, datasource in cls._config.datasources.items():
                 LOGGER.info(f"Loaded '{ds_name}' from config")
                 cls._context._attach_datasource_to_context(datasource)
                 # TODO: add assets?
