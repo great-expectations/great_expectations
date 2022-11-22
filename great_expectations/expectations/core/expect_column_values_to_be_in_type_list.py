@@ -36,6 +36,7 @@ from great_expectations.render.util import (
 )
 from great_expectations.util import get_pyathena_potential_type
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validator import ValidationDependencies
 
 logger = logging.getLogger(__name__)
 
@@ -472,14 +473,17 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
-    ):
-        # This calls TableExpectation.get_validation_dependencies to set baseline dependencies for the aggregate version
+        **kwargs,
+    ) -> ValidationDependencies:
+        # This calls TableExpectation.get_validation_dependencies to set baseline validation_dependencies for the aggregate version
         # of the expectation.
         # We need to keep this as super(ColumnMapExpectation, self), which calls
         # TableExpectation.get_validation_dependencies instead of ColumnMapExpectation.get_validation_dependencies.
         # This is because the map version of this expectation is only supported for Pandas, so we want the aggregate
         # version for the other backends.
-        dependencies = super(ColumnMapExpectation, self).get_validation_dependencies(
+        validation_dependencies: ValidationDependencies = super(
+            ColumnMapExpectation, self
+        ).get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
 
@@ -517,8 +521,8 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 and actual_column_type.type.__name__ == "object_"
                 and expected_types_list is not None
             ):
-                # this resets dependencies using  ColumnMapExpectation.get_validation_dependencies
-                dependencies = super().get_validation_dependencies(
+                # this resets validation_dependencies using  ColumnMapExpectation.get_validation_dependencies
+                validation_dependencies = super().get_validation_dependencies(
                     configuration, execution_engine, runtime_configuration
                 )
 
@@ -528,13 +532,16 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
-        dependencies["metrics"]["table.column_types"] = MetricConfiguration(
+        validation_dependencies.set_metric_configuration(
             metric_name="table.column_types",
-            metric_domain_kwargs=column_types_metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=column_types_metric_kwargs["metric_value_kwargs"],
+            metric_configuration=MetricConfiguration(
+                metric_name="table.column_types",
+                metric_domain_kwargs=column_types_metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=column_types_metric_kwargs["metric_value_kwargs"],
+            ),
         )
 
-        return dependencies
+        return validation_dependencies
 
     def _validate(
         self,

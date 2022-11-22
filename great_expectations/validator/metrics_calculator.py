@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.execution_engine import (
@@ -10,7 +8,6 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -27,9 +24,6 @@ except ImportError:
     logger.debug(
         "Unable to load pandas; install optional pandas dependency for support."
     )
-
-if TYPE_CHECKING:
-    from great_expectations.expectations.metrics.metric_provider import MetricProvider
 
 
 class MetricsCalculator:
@@ -146,47 +140,30 @@ class MetricsCalculator:
     def compute_metrics(
         self,
         metric_configurations: List[MetricConfiguration],
+        runtime_configuration: Optional[dict] = None,
     ) -> Dict[Tuple[str, str, str], MetricValue]:
         """
         Args:
             metric_configurations: List of desired MetricConfiguration objects to be resolved.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
 
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
         """
-        graph: ValidationGraph = ValidationGraph(
-            execution_engine=self._execution_engine
+        graph: ValidationGraph = self.build_metric_dependency_graph(
+            metric_configurations=metric_configurations,
+            runtime_configuration=runtime_configuration,
         )
 
-        metric_configuration: MetricConfiguration
-        for metric_configuration in metric_configurations:
-            provider_cls, _ = get_metric_provider(
-                metric_configuration.metric_name, self._execution_engine
-            )
-
-            self._get_default_domain_kwargs(
-                metric_provider_cls=provider_cls,
-                metric_configuration=metric_configuration,
-            )
-            self._get_default_value_kwargs(
-                metric_provider_cls=provider_cls,
-                metric_configuration=metric_configuration,
-            )
-
-            graph.build_metric_dependency_graph(
-                metric_configuration=metric_configuration,
-                runtime_configuration=None,
-            )
-
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
-
-        # updates graph with aborted metrics
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
         aborted_metrics_info: Dict[
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ] = graph.resolve_validation_graph(
-            metrics=resolved_metrics,
-            runtime_configuration=None,
+        ]
+        resolved_metrics, aborted_metrics_info = graph.resolve_validation_graph(
+            runtime_configuration=runtime_configuration,
+            min_graph_edges_pbar_enable=0,
+            show_progress_bars=True,
         )
 
         if aborted_metrics_info:
@@ -196,31 +173,31 @@ class MetricsCalculator:
 
         return resolved_metrics
 
-    @staticmethod
-    def _get_default_domain_kwargs(
-        metric_provider_cls: MetricProvider,
-        metric_configuration: MetricConfiguration,
-    ) -> None:
-        for key in metric_provider_cls.domain_keys:
-            if (
-                key not in metric_configuration.metric_domain_kwargs
-                and key in metric_provider_cls.default_kwarg_values
-            ):
-                metric_configuration.metric_domain_kwargs[
-                    key
-                ] = metric_provider_cls.default_kwarg_values[key]
+    def build_metric_dependency_graph(
+        self,
+        metric_configurations: List[MetricConfiguration],
+        runtime_configuration: Optional[dict] = None,
+    ) -> ValidationGraph:
+        """
+        Obtain domain and value keys for metrics and proceeds to add these metrics to the validation graph
+        until all metrics have been added.
 
-    @staticmethod
-    def _get_default_value_kwargs(
-        metric_provider_cls: MetricProvider,
-        metric_configuration: MetricConfiguration,
-    ) -> None:
-        key: str
-        for key in metric_provider_cls.value_keys:
-            if (
-                key not in metric_configuration.metric_value_kwargs
-                and key in metric_provider_cls.default_kwarg_values
-            ):
-                metric_configuration.metric_value_kwargs[
-                    key
-                ] = metric_provider_cls.default_kwarg_values[key]
+        Args:
+            metric_configurations: List of "MetricConfiguration" objects, for which to build combined "ValidationGraph".
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
+
+        Returns:
+            Resulting "ValidationGraph" object.
+        """
+        graph: ValidationGraph = ValidationGraph(
+            execution_engine=self._execution_engine
+        )
+
+        metric_configuration: MetricConfiguration
+        for metric_configuration in metric_configurations:
+            graph.build_metric_dependency_graph(
+                metric_configuration=metric_configuration,
+                runtime_configuration=runtime_configuration,
+            )
+
+        return graph

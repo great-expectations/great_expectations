@@ -37,9 +37,11 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validation_graph import ValidationGraph
+from great_expectations.validator.validator import ValidationDependencies
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -225,11 +227,12 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
-    ):
-        all_dependencies = super().get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
+    ) -> ValidationDependencies:
+        validation_dependencies: ValidationDependencies = (
+            super().get_validation_dependencies(
+                configuration, execution_engine, runtime_configuration
+            )
         )
-        dependencies = all_dependencies["metrics"]
         partition_object = configuration.kwargs["partition_object"]
         domain_kwargs = configuration.get_domain_kwargs()
         is_categorical = None
@@ -240,7 +243,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             ):
                 is_categorical = False
                 partition_metric_configuration = MetricConfiguration(
-                    "column.partition",
+                    metric_name="column.partition",
                     metric_domain_kwargs=domain_kwargs,
                     metric_value_kwargs={
                         "bins": "auto",
@@ -249,22 +252,23 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                 )
                 #
                 # Note: 20201116 - JPC - the execution engine doesn't provide capability to evaluate
-                # dependencies, so we use a validator
+                # validation_dependencies, so we use a validator
                 #
-                graph = ValidationGraph(execution_engine=execution_engine)
+                graph: ValidationGraph = ValidationGraph(
+                    execution_engine=execution_engine
+                )
                 graph.build_metric_dependency_graph(
                     metric_configuration=partition_metric_configuration,
                 )
-
-                resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
-
-                # updates graph with aborted metrics
+                resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
                 aborted_metrics_info: Dict[
                     Tuple[str, str, str],
                     Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-                ] = graph.resolve_validation_graph(
-                    metrics=resolved_metrics,
+                ]
+                resolved_metrics, aborted_metrics_info = graph.resolve_validation_graph(
                     runtime_configuration=None,
+                    min_graph_edges_pbar_enable=0,
+                    show_progress_bars=True,
                 )
 
                 if aborted_metrics_info:
@@ -274,50 +278,75 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
 
                 bins = resolved_metrics[partition_metric_configuration.id]
                 hist_metric_configuration = MetricConfiguration(
-                    "column.histogram",
+                    metric_name="column.histogram",
                     metric_domain_kwargs=domain_kwargs,
                     metric_value_kwargs={
                         "bins": tuple(bins),
                     },
                 )
                 nonnull_configuration = MetricConfiguration(
-                    "column_values.nonnull.count",
+                    metric_name="column_values.nonnull.count",
                     metric_domain_kwargs=domain_kwargs,
                     metric_value_kwargs=None,
                 )
                 #
                 # NOTE 20201117 - JPC - Would prefer not to include partition_metric_configuration here,
                 # since we have already evaluated it, and its result is in the kwargs for the histogram.
-                # However, currently the dependencies' configurations are not passed to the _validate method
+                # However, currently the validation_dependencies' configurations are not passed to the _validate method
                 #
-                dependencies["column.partition"] = partition_metric_configuration
-                dependencies["column.histogram"] = hist_metric_configuration
-                dependencies["column_values.nonnull.count"] = nonnull_configuration
+                validation_dependencies.set_metric_configuration(
+                    metric_name="column.partition",
+                    metric_configuration=partition_metric_configuration,
+                )
+                validation_dependencies.set_metric_configuration(
+                    metric_name="column.histogram",
+                    metric_configuration=hist_metric_configuration,
+                )
+                validation_dependencies.set_metric_configuration(
+                    metric_name="column_values.nonnull.count",
+                    metric_configuration=nonnull_configuration,
+                )
             else:
                 is_categorical = True
                 counts_configuration = MetricConfiguration(
-                    "column.value_counts",
+                    metric_name="column.value_counts",
                     metric_domain_kwargs=domain_kwargs,
                     metric_value_kwargs={
                         "sort": "value",
                     },
                 )
                 nonnull_configuration = MetricConfiguration(
-                    "column_values.nonnull.count",
+                    metric_name="column_values.nonnull.count",
                     metric_domain_kwargs=domain_kwargs,
                 )
-                dependencies["column.value_counts"] = counts_configuration
-                dependencies["column_values.nonnull.count"] = nonnull_configuration
+                validation_dependencies.set_metric_configuration(
+                    metric_name="column.value_counts",
+                    metric_configuration=counts_configuration,
+                )
+                validation_dependencies.set_metric_configuration(
+                    metric_name="column_values.nonnull.count",
+                    metric_configuration=nonnull_configuration,
+                )
         if is_categorical is True or is_valid_categorical_partition_object(
             partition_object
         ):
-            dependencies["column.value_counts"] = MetricConfiguration(
-                "column.value_counts",
-                metric_domain_kwargs=domain_kwargs,
-                metric_value_kwargs={"sort": "value"},
+            validation_dependencies.set_metric_configuration(
+                metric_name="column.value_counts",
+                metric_configuration=MetricConfiguration(
+                    metric_name="column.value_counts",
+                    metric_domain_kwargs=domain_kwargs,
+                    metric_value_kwargs={
+                        "sort": "value",
+                    },
+                ),
             )
-            dependencies["column_values.nonnull.count"] = MetricConfiguration(
-                "column_values.nonnull.count", domain_kwargs
+            validation_dependencies.set_metric_configuration(
+                metric_name="column_values.nonnull.count",
+                metric_configuration=MetricConfiguration(
+                    metric_name="column_values.nonnull.count",
+                    metric_domain_kwargs=domain_kwargs,
+                    metric_value_kwargs=None,
+                ),
             )
         else:
             if (
@@ -326,33 +355,45 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                 if not is_valid_partition_object(partition_object):
                     raise ValueError("Invalid partition_object provided")
                 bins = partition_object["bins"]
+
             hist_metric_configuration = MetricConfiguration(
-                "column.histogram",
+                metric_name="column.histogram",
                 metric_domain_kwargs=domain_kwargs,
                 metric_value_kwargs={
                     "bins": bins,
                 },
             )
+            validation_dependencies.set_metric_configuration(
+                metric_name="column.histogram",
+                metric_configuration=hist_metric_configuration,
+            )
             nonnull_configuration = MetricConfiguration(
-                "column_values.nonnull.count",
+                metric_name="column_values.nonnull.count",
                 metric_domain_kwargs=domain_kwargs,
                 metric_value_kwargs=None,
             )
-            dependencies["column.histogram"] = hist_metric_configuration
-            dependencies["column_values.nonnull.count"] = nonnull_configuration
+            validation_dependencies.set_metric_configuration(
+                metric_name="column_values.nonnull.count",
+                metric_configuration=nonnull_configuration,
+            )
             below_partition = MetricConfiguration(
-                "column_values.between.count",
+                metric_name="column_values.between.count",
                 metric_domain_kwargs=domain_kwargs,
                 metric_value_kwargs={"max_value": bins[0], "strict_max": True},
             )
+            validation_dependencies.set_metric_configuration(
+                metric_name="below_partition", metric_configuration=below_partition
+            )
             above_partition = MetricConfiguration(
-                "column_values.between.count",
+                metric_name="column_values.between.count",
                 metric_domain_kwargs=domain_kwargs,
                 metric_value_kwargs={"min_value": bins[-1], "strict_min": True},
             )
-            dependencies["below_partition"] = below_partition
-            dependencies["above_partition"] = above_partition
-        return all_dependencies
+            validation_dependencies.set_metric_configuration(
+                metric_name="above_partition", metric_configuration=above_partition
+            )
+
+        return validation_dependencies
 
     def _validate(
         self,

@@ -466,6 +466,7 @@ specified (empty "metric_name" value detected)."""
             Tuple[str, str, str], MetricValue
         ] = validator.compute_metrics(
             metric_configurations=metrics_to_resolve,
+            runtime_configuration=None,
         )
 
         # Step-6: Sort resolved metrics according to same sort order as was applied to "MetricConfiguration" directives.

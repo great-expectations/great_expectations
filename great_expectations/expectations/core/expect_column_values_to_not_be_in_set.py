@@ -314,8 +314,8 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         self,
         series: pd.Series,
         metrics: Dict,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         runtime_configuration: Optional[dict] = None,
         filter_column_isnull: bool = True,
     ):
