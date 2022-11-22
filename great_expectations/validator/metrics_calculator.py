@@ -140,24 +140,20 @@ class MetricsCalculator:
     def compute_metrics(
         self,
         metric_configurations: List[MetricConfiguration],
+        runtime_configuration: Optional[dict] = None,
     ) -> Dict[Tuple[str, str, str], MetricValue]:
         """
         Args:
             metric_configurations: List of desired MetricConfiguration objects to be resolved.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
 
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
         """
-        graph: ValidationGraph = ValidationGraph(
-            execution_engine=self._execution_engine
+        graph: ValidationGraph = self.build_metric_dependency_graph(
+            metric_configurations=metric_configurations,
+            runtime_configuration=runtime_configuration,
         )
-
-        metric_configuration: MetricConfiguration
-        for metric_configuration in metric_configurations:
-            graph.build_metric_dependency_graph(
-                metric_configuration=metric_configuration,
-                runtime_configuration=None,
-            )
 
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
         aborted_metrics_info: Dict[
@@ -165,7 +161,7 @@ class MetricsCalculator:
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ]
         resolved_metrics, aborted_metrics_info = graph.resolve_validation_graph(
-            runtime_configuration=None,
+            runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=0,
             show_progress_bars=True,
         )
@@ -176,3 +172,32 @@ class MetricsCalculator:
             )
 
         return resolved_metrics
+
+    def build_metric_dependency_graph(
+        self,
+        metric_configurations: List[MetricConfiguration],
+        runtime_configuration: Optional[dict] = None,
+    ) -> ValidationGraph:
+        """
+        Obtain domain and value keys for metrics and proceeds to add these metrics to the validation graph
+        until all metrics have been added.
+
+        Args:
+            metric_configurations: List of "MetricConfiguration" objects, for which to build combined "ValidationGraph".
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
+
+        Returns:
+            Resulting "ValidationGraph" object.
+        """
+        graph: ValidationGraph = ValidationGraph(
+            execution_engine=self._execution_engine
+        )
+
+        metric_configuration: MetricConfiguration
+        for metric_configuration in metric_configurations:
+            graph.build_metric_dependency_graph(
+                metric_configuration=metric_configuration,
+                runtime_configuration=runtime_configuration,
+            )
+
+        return graph
