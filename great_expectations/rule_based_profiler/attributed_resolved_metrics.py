@@ -1,5 +1,5 @@
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, Iterator, List, Optional, Sized
+from typing import Any, Dict, Iterator, List, Optional, Sized, Union
 
 import numpy as np
 import pandas as pd
