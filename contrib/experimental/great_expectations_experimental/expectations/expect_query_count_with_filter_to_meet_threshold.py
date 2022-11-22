@@ -22,7 +22,7 @@ from great_expectations.expectations.metrics.import_manager import (
 
 
 class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
-    """Expect Query given filter to contain at least as many entries as a given threshold  """
+    """Expect Query given filter to contain at least as many entries as a given threshold"""
 
     metric_dependencies = ("query.multiple_inputs",)
 
@@ -54,7 +54,9 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
 
         try:
             assert threshold is not None, "'threshold' must be specified"
-            assert isinstance(threshold, (int, float)), "'threshold' must be a valid float or int"
+            assert isinstance(
+                threshold, (int, float)
+            ), "'threshold' must be a valid float or int"
             assert threshold > 0, "'threshold' must be positive"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
@@ -67,7 +69,9 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
 
-        query_result: Union[sqlalchemy_engine_Row, pyspark_sql_Row] = metrics.get("query.multiple_inputs")
+        query_result: Union[sqlalchemy_engine_Row, pyspark_sql_Row] = metrics.get(
+            "query.multiple_inputs"
+        )
         threshold: Union[float, int] = configuration["kwargs"].get("threshold")
         count: int = query_result[0][0]
         success: bool = count >= threshold
@@ -79,18 +83,13 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
 
     examples = [
         {
-            "data": {
-                    "col1": [1, 1, 1, 2, 2, 2, 2, 2]},
+            "data": {"col1": [1, 1, 1, 2, 2, 2, 2, 2]},
             "tests": [
                 {
                     "title": "basic_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {
-                        "query_input": {"col": "col1",
-                                        "filter": 2},
-                        "threshold": 4
-                    },
+                    "in": {"query_input": {"col": "col1", "filter": 2}, "threshold": 4},
                     "out": {"success": True},
                     "only_for": ["sqlite", "spark"],
                 },
@@ -98,16 +97,12 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
                     "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {
-                        "query_input": {"col": "col1",
-                                        "filter": 1},
-                        "threshold": 4
-                    },
+                    "in": {"query_input": {"col": "col1", "filter": 1}, "threshold": 4},
                     "out": {"success": False},
                     "only_for": ["sqlite", "spark"],
-                    },
-                ],
-            },
+                },
+            ],
+        },
     ]
 
     library_metadata = {

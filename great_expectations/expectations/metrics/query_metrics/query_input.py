@@ -29,12 +29,12 @@ class QueryMultipleInputs(QueryMetricProvider):
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
-            cls,
-            execution_engine: SqlAlchemyExecutionEngine,
-            metric_domain_kwargs: dict,
-            metric_value_kwargs: dict,
-            metrics: Dict[str, Any],
-            runtime_configuration: dict,
+        cls,
+        execution_engine: SqlAlchemyExecutionEngine,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: Dict[str, Any],
+        runtime_configuration: dict,
     ) -> List[sqlalchemy_engine_Row]:
         query: Optional[str] = metric_value_kwargs.get(
             "query"
@@ -50,14 +50,15 @@ class QueryMultipleInputs(QueryMetricProvider):
         if isinstance(selectable, sa.Table):
             query = query.format(**query_input, active_batch=selectable)
         elif isinstance(
-                selectable, get_sqlalchemy_subquery_type()
+            selectable, get_sqlalchemy_subquery_type()
         ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active bacth as a Subquery; sectioning the active batch off w/ parentheses ensures flow of operations doesn't break
             query = query.format(**query_input, active_batch=f"({selectable})")
         elif isinstance(
-                selectable, sa.sql.Select
+            selectable, sa.sql.Select
         ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation & aliasing when formatting the parameterized query
             query = query.format(
-                **query_input, active_batch=f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',
+                **query_input,
+                active_batch=f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',
             )
         else:
             query = query.format(**query_input, active_batch=f"({selectable})")
@@ -69,12 +70,12 @@ class QueryMultipleInputs(QueryMetricProvider):
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
-            cls,
-            execution_engine: SparkDFExecutionEngine,
-            metric_domain_kwargs: dict,
-            metric_value_kwargs: dict,
-            metrics: Dict[str, Any],
-            runtime_configuration: dict,
+        cls,
+        execution_engine: SparkDFExecutionEngine,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: Dict[str, Any],
+        runtime_configuration: dict,
     ) -> List[pyspark_sql_Row]:
         query: Optional[str] = metric_value_kwargs.get(
             "query"
