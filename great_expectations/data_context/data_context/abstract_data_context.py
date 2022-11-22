@@ -1538,6 +1538,7 @@ class AbstractDataContext(ABC):
                 include_rendered_content=include_rendered_content
             )
         )
+
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
         execution_engine: ExecutionEngine
@@ -1549,6 +1550,7 @@ class AbstractDataContext(ABC):
             execution_engine = self.datasources[  # type: ignore[union-attr]
                 batch_list[-1].batch_definition.datasource_name
             ].execution_engine
+
         validator = Validator(
             execution_engine=execution_engine,
             interactive_evaluation=True,
@@ -1557,6 +1559,7 @@ class AbstractDataContext(ABC):
             batches=batch_list,
             include_rendered_content=include_rendered_content,
         )
+
         return validator
 
     @usage_statistics_enabled_method(

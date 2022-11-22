@@ -84,10 +84,10 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
     def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         parse_strings_as_datetimes: bool = (
             metric_value_kwargs.get("parse_strings_as_datetimes") or False
