@@ -223,19 +223,21 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
-        kwargs_list = ["column", "value_set", "row_condition", "condition_parser"]
         renderer_configuration = RendererConfiguration(
             configuration=configuration,
             result=result,
             language=language,
             runtime_configuration=runtime_configuration,
-            kwargs_list=kwargs_list,
         )
-        params: Union[dict, None] = renderer_configuration.params
         include_column_name: Union[
             bool, None
         ] = renderer_configuration.include_column_name
         styling: Union[str, None] = renderer_configuration.styling
+
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            ["column", "value_set", "row_condition", "condition_parser"],
+        )
 
         if params["value_set"] is None or len(params["value_set"]) == 0:
             if include_column_name:
