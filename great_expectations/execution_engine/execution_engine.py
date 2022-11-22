@@ -19,12 +19,6 @@ from typing import (
 )
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import (
-    BatchData,
-    BatchDataType,
-    BatchMarkers,
-    BatchSpec,
-)
 from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
@@ -37,10 +31,17 @@ from great_expectations.expectations.row_conditions import (
     RowConditionParserType,
 )
 from great_expectations.util import filter_properties_dict
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
-    from great_expectations.expectations.metrics import MetricProvider
+    from great_expectations.core.batch import (
+        BatchData,
+        BatchDataType,
+        BatchMarkers,
+        BatchSpec,
+    )
+    from great_expectations.expectations.metrics.metric_provider import MetricProvider
 
 logger = logging.getLogger(__name__)
 
@@ -307,9 +308,9 @@ class ExecutionEngine(ABC):
     def resolve_metrics(  # noqa: C901 - 16
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Optional[Dict[Tuple[str, str, str], MetricConfiguration]] = None,
+        metrics: Optional[Dict[Tuple[str, str, str], MetricValue]] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> Dict[Tuple[str, str, str], Any]:
+    ) -> Dict[Tuple[str, str, str], MetricValue]:
         """resolve_metrics is the main entrypoint for an execution engine. The execution engine will compute the value
         of the provided metrics.
 
@@ -324,7 +325,7 @@ class ExecutionEngine(ABC):
         if metrics is None:
             metrics = {}
 
-        resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
         metric_fn_bundle: List[BundledMetricConfiguration] = []
 
@@ -415,10 +416,9 @@ class ExecutionEngine(ABC):
         if len(metric_fn_bundle) > 0:
             try:
                 # an engine-specific way of computing metrics together
-                # NOTE: DH 20220328: This is where we can introduce the Batch Metrics Store (BMS)
                 new_resolved: Dict[
-                    Tuple[str, str, str], Any
-                ] = self.resolve_metric_bundle(metric_fn_bundle)
+                    Tuple[str, str, str], MetricValue
+                ] = self.resolve_metric_bundle(metric_fn_bundle=metric_fn_bundle)
                 resolved_metrics.update(new_resolved)
             except Exception as e:
                 raise ge_exceptions.MetricResolutionError(
@@ -433,7 +433,7 @@ class ExecutionEngine(ABC):
 
     def resolve_metric_bundle(
         self, metric_fn_bundle
-    ) -> Dict[Tuple[str, str, str], Any]:
+    ) -> Dict[Tuple[str, str, str], MetricValue]:
         """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
         raise NotImplementedError
 

@@ -14,8 +14,8 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.types.refs import GeCloudResourceRef
-from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
+from great_expectations.data_context.types.refs import GXCloudResourceRef
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.util import filter_properties_dict
 
 
@@ -64,7 +64,7 @@ class DatasourceStore(Store):
         )
         return keys_without_store_backend_id
 
-    def remove_key(self, key: Union[DataContextVariableKey, GeCloudIdentifier]) -> None:
+    def remove_key(self, key: Union[DataContextVariableKey, GXCloudIdentifier]) -> None:
         """
         See parent `Store.remove_key()` for more information
         """
@@ -115,7 +115,7 @@ class DatasourceStore(Store):
             ValueError if a DatasourceConfig is not found.
         """
         datasource_key: Union[
-            DataContextVariableKey, GeCloudIdentifier
+            DataContextVariableKey, GXCloudIdentifier
         ] = self.store_backend.build_key(name=datasource_name)
         if not self.has_key(datasource_key):  # noqa: W601
             raise ValueError(
@@ -136,7 +136,7 @@ class DatasourceStore(Store):
 
     def _build_key_from_config(  # type: ignore[override]
         self, datasource_config: DatasourceConfig
-    ) -> Union[GeCloudIdentifier, DataContextVariableKey]:
+    ) -> Union[GXCloudIdentifier, DataContextVariableKey]:
         return self.store_backend.build_key(
             name=datasource_config.name,
             id=datasource_config.id,
@@ -172,8 +172,8 @@ class DatasourceStore(Store):
 
         # Make two separate requests to set and get in order to obtain any additional
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
-        ref: Optional[Union[bool, GeCloudResourceRef]] = super().set(key, value)
-        if ref and isinstance(ref, GeCloudResourceRef):
+        ref: Optional[Union[bool, GXCloudResourceRef]] = super().set(key, value)
+        if ref and isinstance(ref, GXCloudResourceRef):
             key.ge_cloud_id = ref.ge_cloud_id  # type: ignore[attr-defined]
 
         return_value: DatasourceConfig = self.get(key)  # type: ignore[assignment]

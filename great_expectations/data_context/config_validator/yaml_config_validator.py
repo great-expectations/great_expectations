@@ -11,12 +11,12 @@ This validator evaluates YAML configurations of core Great Expectations componen
 """
 from __future__ import annotations
 
-import os
 import traceback
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
+from typing_extensions import Literal
 
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
@@ -29,13 +29,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 from great_expectations.data_context.store import Store
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
-    DataContextConfig,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-    substitute_all_config_variables,
-)
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
@@ -44,11 +40,6 @@ from great_expectations.util import filter_properties_dict
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
 
-try:
-    from typing import Literal
-except ImportError:
-    # Fallback for python < 3.8
-    from typing_extensions import Literal  # type: ignore[assignment]
 
 # TODO: check if this can be refactored to use YAMLHandler class
 yaml = YAML()
@@ -338,26 +329,16 @@ class _YamlConfigValidator:
         self, yaml_config: str, runtime_environment: dict, usage_stats_event_name: str
     ) -> str:
         try:
-            substituted_config_variables: Union[
-                DataContextConfig, dict
-            ] = substitute_all_config_variables(
-                self.config_variables,
-                dict(os.environ),
-            )
+            config_provider = self._data_context.config_provider
+            config_values = config_provider.get_values()
 
-            substitutions: dict = {
-                **substituted_config_variables,  # type: ignore[list-item]
-                **dict(os.environ),
-                **runtime_environment,
-            }
+            # While normally we'd just call `self.config_provider.substitute_config()`,
+            # we need to account for `runtime_environment` values that may have been passed.
+            config_values.update(runtime_environment)
 
-            config_str_with_substituted_variables: str = (
-                substitute_all_config_variables(
-                    yaml_config,
-                    substitutions,
-                )
+            return config_provider.substitute_config(
+                config=yaml_config, config_values=config_values
             )
-            return config_str_with_substituted_variables
         except Exception as e:
             usage_stats_event_payload: dict = {
                 "diagnostic_info": ["__substitution_error__"],

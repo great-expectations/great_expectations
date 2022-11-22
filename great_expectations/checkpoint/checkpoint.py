@@ -4,7 +4,6 @@ import copy
 import datetime
 import json
 import logging
-import os
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 from uuid import UUID
 
@@ -38,16 +37,13 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
 )
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.cloud_constants import GeCloudRESTResource
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointValidationConfig,
 )
-from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-    substitute_all_config_variables,
-)
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.util import (
     deep_filter_properties_iterable,
     filter_properties_dict,
@@ -300,23 +296,7 @@ class BaseCheckpoint(ConfigPeer):
         return self._substitute_config_variables(config=substituted_config)
 
     def _substitute_config_variables(self, config: dict) -> dict:
-        substituted_config_variables = substitute_all_config_variables(
-            self.data_context.config_variables,
-            dict(os.environ),
-            self.data_context.DOLLAR_SIGN_ESCAPE_STRING,
-        )
-
-        substitutions = {
-            **substituted_config_variables,
-            **dict(os.environ),
-            **self.data_context.runtime_environment,
-        }
-
-        return substitute_all_config_variables(
-            data=config,
-            replace_variables_dict=substitutions,
-            dollar_sign_escape_string=self.data_context.DOLLAR_SIGN_ESCAPE_STRING,
-        )
+        return self.data_context.config_provider.substitute_config(config)
 
     def _run_validation(
         self,
@@ -396,8 +376,8 @@ class BaseCheckpoint(ConfigPeer):
             )
             checkpoint_identifier = None
             if self.data_context.ge_cloud_mode:
-                checkpoint_identifier = GeCloudIdentifier(
-                    resource_type=GeCloudRESTResource.CHECKPOINT,
+                checkpoint_identifier = GXCloudIdentifier(
+                    resource_type=GXCloudRESTResource.CHECKPOINT,
                     ge_cloud_id=str(self.ge_cloud_id),
                 )
 

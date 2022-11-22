@@ -19,6 +19,7 @@ function constructSnippetMap (dir) {
         `A snippet named ${name} has already been defined elsewhere`
       )
     }
+    delete snippet.name // Remove duplicate filename to clean up stdout
     snippetMap[name] = snippet
   }
 
@@ -75,7 +76,6 @@ function parseFile (file) {
       if (stack.length === 0) {
         return
       }
-      text = sanitizeText(text)
 
       // If we have nested snippets, all snippets on the stack need to be updated
       // to reflect any nested content
@@ -93,6 +93,8 @@ function parseFile (file) {
       }
 
       const popped = stack.pop()
+      // Clean up formatting and identation before writing to result array
+      popped.contents = sanitizeText(popped.contents)
       snippets.push(popped)
     }
   })
@@ -121,7 +123,7 @@ function sanitizeText (text) {
     text = text.substring(1, text.length)
   }
 
-  // Determine indentation
+  // Calculate indentation to remove
   let indent = "";
   for (let i = 0; i < text.length; i++) {
     if (text[i] === " ") {
@@ -131,13 +133,6 @@ function sanitizeText (text) {
     }
   }
 
-  // Remove any Python comment remnants
-  text = text.trim()
-  if (text.endsWith('#')) {
-    text = text.substring(0, text.length - 1)
-  }
-
-  // Uniformly remove indentation across snippet
   function unindent(line) {
     if (line.startsWith(indent)) {
       line = line.substring(indent.length, text.length)
@@ -145,12 +140,47 @@ function sanitizeText (text) {
     return line
   }
 
+  // Apply unindent and misc cleanup
   return text
     .split('\n')
+    .filter((l) => !(l.trim() === "#")) // Remove any nested snippet remnants
     .map(unindent)
-    .filter((l) => !(l.includes('<snippet') || l.includes('snippet>')))
     .join('\n')
     .trim()
 }
+
+/**
+ * Organize parsed snippets by source filename.
+ * If provided, input filenames will filter this output.
+ *
+ * Note that this is what is run if this file is invoked by Node.
+ * An alias `yarn snippet-check` is defined in `package.json` for convenience.
+ */
+function main() {
+  const snippets = parseDirectory(".")
+  const targetFiles = process.argv.slice(2)
+
+  let out = {}
+  for (const snippet of snippets) {
+    // If no explicit args are provided, default to all snippets
+    // Else, ensure that the snippet's source file was requested by the user
+    const file = snippet.file
+    if (targetFiles.length > 0 && !(targetFiles.includes(file))) {
+      continue
+    }
+    if (!(file in out)) {
+      out[file] = []
+    }
+    delete snippet.file // Remove duplicate filename to clean up stdout
+    out[file].push(snippet)
+  }
+  console.log(out)
+}
+
+
+if (require.main === module) {
+  main();
+}
+
 
 module.exports = constructSnippetMap
