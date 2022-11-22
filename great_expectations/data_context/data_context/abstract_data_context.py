@@ -415,7 +415,7 @@ class AbstractDataContext(ABC):
             )
 
             if CheckpointStore.default_checkpoints_exist(
-                directory_path=self.root_directory
+                directory_path=self.root_directory  # type: ignore[arg-type]
             ):
                 return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
             if self.root_directory:
@@ -456,7 +456,7 @@ class AbstractDataContext(ABC):
             )
 
             if CheckpointStore.default_checkpoints_exist(
-                directory_path=self.root_directory
+                directory_path=self.root_directory  # type: ignore[arg-type]
             ):
                 logger.warning(
                     f"Checkpoint store named '{checkpoint_store_name}' is not a configured store, "

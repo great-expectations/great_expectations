@@ -660,7 +660,7 @@ class CloudDataContext(AbstractDataContext):
         )
 
         checkpoint = Checkpoint.instantiate_from_config_with_runtime_args(
-            checkpoint_config=checkpoint_config, data_context=self
+            checkpoint_config=checkpoint_config, data_context=self  # type: ignore[arg-type]
         )
         return checkpoint
 
