@@ -1,50 +1,11 @@
-from typing import Optional, Union, Dict, Any, List
+from typing import Any, Dict, List, Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.expectations.expectation import ExpectationValidationResult, QueryExpectation
-from great_expectations.expectations.metrics.import_manager import sa, sqlalchemy_engine_Engine, sqlalchemy_engine_Row
-from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.expectations.metrics.query_metric_provider import QueryMetricProvider
-from great_expectations.util import get_sqlalchemy_subquery_type
-
-
-class QueryMetricCompareTablesCustom(QueryMetricProvider):
-    metric_name = "query.metric_compare_tables_custom"
-    # values that you want to use in the metric
-    value_keys = ("second_table_full_name", "first_table_id_column", "second_table_id_column", "query")
-
-    @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(cls, execution_engine: SqlAlchemyExecutionEngine, metric_domain_kwargs: dict,
-                    metric_value_kwargs: dict, metrics: Dict[str, Any], runtime_configuration: dict) \
-            -> List[sqlalchemy_engine_Row]:
-        query: Optional[str] = metric_value_kwargs.get("query") or cls.default_kwarg_values.get("query")
-
-        selectable: Union[sa.sql.Selectable, str]
-        selectable, _, _ = execution_engine.get_compute_domain(metric_domain_kwargs,
-                                                               domain_type=MetricDomainTypes.TABLE)
-        # parameters sent by the user
-        second_table_full_name: str = metric_value_kwargs.get("second_table_full_name")
-        first_table_id_column: str = metric_value_kwargs.get("first_table_id_column")
-        second_table_id_column: str = metric_value_kwargs.get("second_table_id_column")
-
-        if isinstance(selectable, sa.Table):
-            query = query.format(second_table_full_name=second_table_full_name,
-                                 first_table_id_column=first_table_id_column,
-                                 second_table_id_column=second_table_id_column, active_batch=selectable)
-        elif isinstance(selectable, get_sqlalchemy_subquery_type()):
-            # Specifying a runtime query in a RuntimeBatchRequest returns the active bacth as a Subquery; sectioning
-            # the active batch off w/ parentheses ensures flow of operations doesn't break
-            query = query.format(
-                second_table_full_name=second_table_full_name, first_table_id_column=first_table_id_column,
-                second_table_id_column=second_table_id_column,
-                active_batch=f"({selectable})")
-
-        engine: sqlalchemy_engine_Engine = execution_engine.engine
-        result: List[sqlalchemy_engine_Row] = engine.execute(sa.text(query)).fetchall()
-        return result
+from great_expectations.expectations.expectation import (
+    ExpectationValidationResult,
+    QueryExpectation,
+)
 
 
 class ExpectAllIdsInFirstTableExistInSecondTableCustom(QueryExpectation):
@@ -64,15 +25,15 @@ class ExpectAllIdsInFirstTableExistInSecondTableCustom(QueryExpectation):
                     )       
     """
 
-    success_keys = (
-        "column",
-        "value",
+    success_keys = ("template_dict" "query",)
+
+    domain_keys = (
         "query",
+        "template_dict",
+        "batch_id",
+        "row_condition",
+        "condition_parser",
     )
-
-    domain_keys = ("second_table_full_name", "first_table_id_column", "second_table_id_column",
-                   "batch_id", "row_condition", "condition_parser",)
-
     default_kwarg_values = {
         "result_format": "BASIC",
         "include_config": True,
@@ -84,12 +45,15 @@ class ExpectAllIdsInFirstTableExistInSecondTableCustom(QueryExpectation):
     }
 
     def _validate(
-            self, configuration: ExpectationConfiguration,
-            metrics: dict, runtime_configuration: dict = None, execution_engine: ExecutionEngine = None) -> \
-            Union[ExpectationValidationResult, dict]:
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
+    ) -> Union[ExpectationValidationResult, dict]:
         success = False
 
-        query_result = metrics.get("query.metric_compare_tables_custom")
+        query_result = metrics.get("query.template_values")
         num_of_missing_rows = query_result[0][0]
 
         if num_of_missing_rows == 0:
@@ -98,7 +62,9 @@ class ExpectAllIdsInFirstTableExistInSecondTableCustom(QueryExpectation):
         return {
             "success": success,
             "result": {
-                'Rows with IDs in first table missing in second table': num_of_missing_rows}}
+                "Rows with IDs in first table missing in second table": num_of_missing_rows
+            },
+        }
 
     examples = [
         {
@@ -106,29 +72,47 @@ class ExpectAllIdsInFirstTableExistInSecondTableCustom(QueryExpectation):
                 {
                     "dataset_name": "test",
                     "data": {
-                        "msid": ["aaa", "aaa", "aaa",
-                                 "aaa", "aaa", "aaa",
-                                 "aaa", "aaa", "aaa"],
+                        "msid": [
+                            "aaa",
+                            "aaa",
+                            "aaa",
+                            "aaa",
+                            "aaa",
+                            "aaa",
+                            "aaa",
+                            "aaa",
+                            "bbb",
+                        ],
                     },
                 },
                 {
                     "dataset_name": "test_2",
                     "data": {
-                        "msid": ["aaa", "aaa", "aaa",
-                                 "aaa", "aaa", "aaa",
-                                 "aaa", "aaa", "aaa"],
+                        "msid": [
+                            "aaa",
+                            "aaa",
+                            "aaa",
+                            "aaa",
+                            "aaa",
+                            "aaa",
+                            "aaa",
+                            "aaa",
+                            "aaa",
+                        ],
                     },
                 },
             ],
             "tests": [
                 {
-                    "title": "basic_positive_test",
+                    "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "second_table_full_name": "test_2",
-                        "first_table_id_column": "msid",
-                        "second_table_id_column": "msid",
+                        "template_dict": {
+                            "second_table_full_name": "test_2",
+                            "first_table_id_column": "msid",
+                            "second_table_id_column": "msid",
+                        }
                     },
                     "out": {"success": False},
                     "only_for": ["sqlite", "spark"],
@@ -138,12 +122,13 @@ class ExpectAllIdsInFirstTableExistInSecondTableCustom(QueryExpectation):
                 {
                     "backend": "sqlalchemy",
                     "dialects": ["sqlite"],
-                }]
+                }
+            ],
         },
     ]
 
     def validate_configuration(
-            self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
         super().validate_configuration(configuration)
 
