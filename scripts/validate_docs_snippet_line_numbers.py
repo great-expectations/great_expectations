@@ -3,7 +3,7 @@ import glob
 import pprint
 import re
 from dataclasses import dataclass
-from typing import List, Optional, Tuple
+from typing import List, Tuple, Union
 
 # This should be reduced as snippets are added/fixed
 VIOLATION_THRESHOLD = 523
