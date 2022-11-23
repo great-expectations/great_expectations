@@ -7,6 +7,7 @@
 
 /* import Montserrat*/
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
 
 /* You can override the default Infima variables here. */
 :root {
@@ -47,10 +48,17 @@
 
 h1, h2, h3 {
     line-height: 1.4;
+    font-family: Monteserrat, sans-serif;
 }
 
-h4, h5, h6, p {
+h4, h5, h6 {
     line-height: 1.5;
+    font-family: Monteserrat, sans-serif;
+}
+
+p {
+    line-height: 1.5;
+    font-family: 'Source Sans Pro', sans-serif;
 }
 
 h3 {
