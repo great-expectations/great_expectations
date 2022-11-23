@@ -1,6 +1,6 @@
 import logging
 import pathlib
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Union
 
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.yaml_handler import YAMLHandler
