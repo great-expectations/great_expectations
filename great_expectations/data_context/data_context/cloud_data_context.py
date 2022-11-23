@@ -263,7 +263,7 @@ class CloudDataContext(AbstractDataContext):
         ge_cloud_base_url: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
-    ) -> Dict[GXCloudEnvironmentVariable, Union[str], None]:
+    ) -> Dict[GXCloudEnvironmentVariable, Union[str, None]]:
         ge_cloud_base_url = (
             ge_cloud_base_url
             or CloudDataContext._get_global_config_value(
