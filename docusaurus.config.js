@@ -28,21 +28,21 @@ module.exports = {
       apiKey: '16dae2c1fabc515311cada8ace06060a',
 
       indexName: 'docs-greatexpectations',
-      searchPagePath: 'search',
+      searchPagePath: 'search'
 
       // Optional: see doc section below
       // contextualSearch: true,
 
-       // Optional: Specify domains where the navigation should occur through window.location instead on history.push. Useful when our Algolia config crawls multiple documentation sites and we want to navigate with window.location.href to them.
+      // Optional: Specify domains where the navigation should occur through window.location instead on history.push. Useful when our Algolia config crawls multiple documentation sites and we want to navigate with window.location.href to them.
       // externalUrlRegex: 'external\\.com|domain\\.com',
 
-       // Optional: see doc section below
+      // Optional: see doc section below
       // appId: 'YOUR_APP_ID',
 
-       // Optional: Algolia search parameters
+      // Optional: Algolia search parameters
       // searchParameters: {},
 
-      //... other Algolia params
+      // ... other Algolia params
     },
     prism: {
       theme: require('prism-react-renderer/themes/vsDark')
@@ -69,7 +69,7 @@ module.exports = {
       items: [
         {
           type: 'search',
-          position: 'right',
+          position: 'right'
         },
         {
           label: 'Product',
@@ -149,11 +149,11 @@ module.exports = {
         },
         {
           href: 'https://greatexpectations.io/cloud',
-          label: "Early cloud access",
+          label: 'Early cloud access',
           position: 'right',
           className: 'header-cloud-link',
-          'aria-label': 'Early cloud access',
-        },
+          'aria-label': 'Early cloud access'
+        }
       ]
     },
     footer: {
@@ -192,7 +192,7 @@ module.exports = {
               href: 'https://www.youtube.com/c/GreatExpectationsData'
             }
           ]
-        },
+        }
       ],
       copyright: `Copyright © ${new Date().getFullYear()} Superconductive.`
     }
