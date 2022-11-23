@@ -51,7 +51,7 @@ class QueryMultipleInputs(QueryMetricProvider):
         query_input = metric_value_kwargs.get("query_input")
 
         if not isinstance(query_input, dict):
-            raise TypeError("query input must be supplied as a dict")
+            raise TypeError("Query input must be supplied as a dict")
 
         if isinstance(selectable, sa.Table):
             query = query.format(**query_input, active_batch=selectable)
@@ -99,7 +99,7 @@ class QueryMultipleInputs(QueryMetricProvider):
         query_input: dict = metric_value_kwargs.get("query_input")
 
         if not isinstance(query_input, dict):
-            raise TypeError("query input must be supplied as a dict")
+            raise TypeError("Query input must be supplied as a dict")
 
         query = query.format(**query_input, active_batch="tmp_view")
 
