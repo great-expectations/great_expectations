@@ -40,12 +40,19 @@ class QueryMultipleColumns(QueryMetricProvider):
             "query"
         )
 
+        if not isinstance(query, str):
+            raise TypeError("Query must be supplied as a string")
+
         selectable: Union[sa.sql.Selectable, str]
         selectable, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
 
         columns = metric_value_kwargs.get("columns")
+
+        if not isinstance(columns, list):
+            raise TypeError("Columns must be supplied as a list")
+
         if isinstance(selectable, sa.Table):
             query = query.format(
                 **{f"col_{i}": entry for i, entry in enumerate(columns, 1)},
@@ -89,13 +96,20 @@ class QueryMultipleColumns(QueryMetricProvider):
             "query"
         )
 
+        if not isinstance(query, str):
+            raise TypeError("Query must be supplied as a string")
+
         df: pyspark_sql_DataFrame
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
 
         df.createOrReplaceTempView("tmp_view")
-        columns: str = metric_value_kwargs.get("columns")
+        columns = metric_value_kwargs.get("columns")
+
+        if not isinstance(columns, list):
+            raise TypeError("Columns must be supplied as a list")
+
         query = query.format(
             **{f"col_{i}": entry for i, entry in enumerate(columns, 1)},
             active_batch="tmp_view",
