@@ -187,6 +187,7 @@ module.exports = {
             {
               label: 'GX OSS',
               to: 'https://greatexpectations.io/gx-oss'
+            }
           ]
         },
         {
@@ -226,7 +227,7 @@ module.exports = {
               `,
             },
           ]
-        }
+        },
       ],
       copyright: `Copyright © ${new Date().getFullYear()} Great Expectations. All Rights Reserved.`
     }
