@@ -500,7 +500,7 @@ def _get_parameter_value_from_parameter_container(
     fully_qualified_parameter_name_as_list: List[str],
     parameter_container: ParameterContainer,
 ) -> Union[Any, ParameterNode, None]:
-    parameter_node: Optional[ParameterNode] = parameter_container.get_parameter_node(
+    parameter_node: Union[ParameterNode, None] = parameter_container.get_parameter_node(
         parameter_name_root=fully_qualified_parameter_name_as_list[0]
     )
     if parameter_node is None:
@@ -508,8 +508,8 @@ def _get_parameter_value_from_parameter_container(
 
     parameter_name_part: Optional[str] = None
     attribute_value_reference: Optional[str] = None
-    return_value: Optional[Union[Any, ParameterNode]] = parameter_node
-    parent_parameter_node: Optional[ParameterNode] = None
+    return_value: Union[Any, ParameterNode, None] = parameter_node
+    parent_parameter_node: Union[ParameterNode, None] = None
     try:
         for parameter_name_part in fully_qualified_parameter_name_as_list:
             parsed_attribute_name: ParseResults = _parse_attribute_naming_pattern(
@@ -614,7 +614,7 @@ def _get_parameter_node_attribute_names(
 ) -> List[str]:
     attribute_names_as_lists: List[List[str]] = []
 
-    parameter_name_root_as_list: Optional[List[str]] = None
+    parameter_name_root_as_list: Union[List[str], None] = None
     if parameter_name_root:
         parameter_name_root_as_list = [parameter_name_root]
 
@@ -676,7 +676,7 @@ def _get_parameter_name_parts_up_to_including_reserved_literal(
     if not (set(attribute_name_as_list) & RESERVED_TERMINAL_LITERALS):
         return attribute_name_as_list
 
-    idx: Optional[int] = None
+    idx: Union[int, None] = None
     key: str
     for key in RESERVED_TERMINAL_LITERALS:
         try:

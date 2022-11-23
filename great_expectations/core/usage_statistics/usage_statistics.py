@@ -94,7 +94,7 @@ class UsageStatisticsHandler:
     def anonymizer(self) -> Anonymizer:
         return self._anonymizer
 
-    def _teardown(self, signum: int, frame: Optional[FrameType]) -> None:
+    def _teardown(self, signum: int, frame: Union[FrameType, None]) -> None:
         self._close_worker()
         if signum == signal.SIGTERM and self._sigterm_handler:
             self._sigterm_handler(signum, frame)
@@ -510,7 +510,7 @@ def get_checkpoint_run_usage_statistics(
     except AttributeError:
         data_context_id = None
 
-    anonymizer: Optional[Anonymizer] = _anonymizers.get(data_context_id, None)
+    anonymizer: Union[Anonymizer, None] = _anonymizers.get(data_context_id)
     if anonymizer is None:
         anonymizer = Anonymizer(data_context_id)
         _anonymizers[data_context_id] = anonymizer
@@ -555,7 +555,7 @@ def get_profiler_run_usage_statistics(
     if usage_statistics_handler:
         data_context_id = usage_statistics_handler._data_context_id
 
-    anonymizer: Optional[Anonymizer] = _anonymizers.get(data_context_id, None)
+    anonymizer: Union[Anonymizer, None] = _anonymizers.get(data_context_id)
     if anonymizer is None:
         anonymizer = Anonymizer(data_context_id)
         _anonymizers[data_context_id] = anonymizer
