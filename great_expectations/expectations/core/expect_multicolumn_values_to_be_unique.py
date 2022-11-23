@@ -63,7 +63,11 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
 
     library_metadata = {
         "maturity": "production",
-        "tags": ["core expectation", "multi-column expectation", "column map expectation"],
+        "tags": [
+            "core expectation",
+            "multi-column expectation",
+            "column map expectation",
+        ],
         "contributors": [
             "@great_expectations",
         ],

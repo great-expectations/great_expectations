@@ -360,12 +360,16 @@ def build_gallery(
                 expectation_docstrings.write(
                     "\n\n" + "=" * 80 + f"\n\n{expectation} ({group})\n"
                 )
-                expectation_docstrings.write(f"{diagnostics['description']['docstring']}\n")
+                expectation_docstrings.write(
+                    f"{diagnostics['description']['docstring']}\n"
+                )
                 diagnostics["description"]["docstring"] = format_docstring_to_markdown(
                     diagnostics["description"]["docstring"]
                 )
                 expectation_docstrings.write("\n" + "." * 80 + "\n\n")
-                expectation_docstrings.write(f"{diagnostics['description']['docstring']}\n")
+                expectation_docstrings.write(
+                    f"{diagnostics['description']['docstring']}\n"
+                )
         except Exception:
             logger.error(f"Failed to run diagnostics for: {expectation}")
             print(traceback.format_exc())

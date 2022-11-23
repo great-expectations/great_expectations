@@ -146,7 +146,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         "tags": [
             "core expectation",
             "column aggregate expectation",
-            "distributional expectation"
+            "distributional expectation",
         ],
         "contributors": ["@great_expectations"],
         "requirements": [],
