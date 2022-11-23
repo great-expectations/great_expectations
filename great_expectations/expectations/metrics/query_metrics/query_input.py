@@ -77,9 +77,9 @@ class QueryMultipleInputs(QueryMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ) -> List[pyspark_sql_Row]:
-        query: Optional[str] = metric_value_kwargs.get(
-            "query"
-        ) or cls.default_kwarg_values.get("query_input")
+        query = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
+            "query_input"
+        )
 
         df: pyspark_sql_DataFrame
         df, _, _ = execution_engine.get_compute_domain(
