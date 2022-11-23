@@ -40,12 +40,18 @@ class QueryMultipleInputs(QueryMetricProvider):
             "query"
         )
 
+        if not isinstance(query, str):
+            raise TypeError("Query must be supplied as a string")
+
         selectable: Union[sa.sql.Selectable, str]
         selectable, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
 
         query_input = metric_value_kwargs.get("query_input")
+
+        if not isinstance(query_input, dict):
+            raise TypeError("query input must be supplied as a dict")
 
         if isinstance(selectable, sa.Table):
             query = query.format(**query_input, active_batch=selectable)
