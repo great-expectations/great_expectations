@@ -9,7 +9,7 @@ from great_expectations import DataContext
 from great_expectations.cli.v012.upgrade_helpers.base_upgrade_helper import (
     BaseUpgradeHelper,
 )
-from great_expectations.data_context.store.checkpoint_store import CheckpointStore
+from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,

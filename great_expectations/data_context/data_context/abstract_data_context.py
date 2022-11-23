@@ -136,8 +136,10 @@ except ImportError:
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-    from great_expectations.data_context.store import EvaluationParameterStore
-    from great_expectations.data_context.store.checkpoint_store import CheckpointStore
+    from great_expectations.data_context.store import (
+        CheckpointStore,
+        EvaluationParameterStore,
+    )
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
     )
