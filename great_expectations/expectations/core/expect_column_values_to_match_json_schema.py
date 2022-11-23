@@ -60,7 +60,7 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
 
     See Also:
         [expect_column_values_to_be_json_parseable](https://greatexpectations.io/expectations/expect_column_values_to_be_json_parseable)
-        [The `JSON-schema docs](https://json-schema.org)
+        [The JSON-schema docs](https://json-schema.org)
     """
 
     # This dictionary contains metadata for display in the public gallery

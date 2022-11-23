@@ -13,17 +13,14 @@ from great_expectations.render.renderer.renderer import renderer
 
 
 class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
-    """
-    Expect that the sum of row values is the same for each row, summing only values in columns specified in \
-    column_list, and equal to the specific value, sum_total.
+    """Expect that the sum of row values in a specified column list is the same for each row, and equal to a specified sum total.
 
     expect_multicolumn_sum_to_equal is a \
     [Multicolumn Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_multicolumn_map_expectations).
 
     Args:
         column_list (tuple or list): Set of columns to be checked
-        sum_total (int): \
-            expected sum of columns
+        sum_total (int): expected sum of columns
 
     Keyword Args:
         ignore_row_if (str): "all_values_are_missing", "any_value_is_missing", "never"

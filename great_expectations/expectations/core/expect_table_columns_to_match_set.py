@@ -28,7 +28,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 
 
 class ExpectTableColumnsToMatchSet(TableExpectation):
-    """Expect the columns to match an *unordered* set.
+    """Expect the columns to match an unordered set.
 
     expect_table_columns_to_match_set is a \
     [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).

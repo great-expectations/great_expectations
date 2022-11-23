@@ -19,8 +19,7 @@ from great_expectations.render.util import (
 
 
 class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
-    """
-    Expect the values in column A to be the same as column B.
+    """Expect the values in column A to be the same as column B.
 
     expect_column_pair_values_to_be_equal is a \
     [Column Pair Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations).
@@ -56,7 +55,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         "maturity": "production",
         "tags": [
             "core expectation",
-            "multi-column expectation",
+            "column pair map expectation",
         ],
         "contributors": ["@great_expectations"],
         "requirements": [],

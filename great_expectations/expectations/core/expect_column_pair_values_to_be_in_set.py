@@ -8,49 +8,50 @@ from great_expectations.expectations.expectation import (
 
 
 class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
-    """
-    Expect the paired values from columns A and B to belong to a set of valid pairs.
+    """Expect the paired values from columns A and B to belong to a set of valid pairs.
 
     expect_column_pair_values_to_be_in_set is a \
     [Column Pair Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations).
 
-        For example:
-        ::
-            >>>d = {'fruit': ['appple','apple','apple','banana','banana'], 
-                    'color': ['red','green','yellow','yellow','red']}
-            >>>my_df = pd.DataFrame(data=d)
-            >>> my_df.expect_column_pair_values_to_be_in_set('fruit',
-                                                             'color',
-                                                            [ ('apple','red'),
-                                                              ('apple','green'),
-                                                              ('apple','yellow'),
-                                                              ('banana','yellow'),
-                                                            ]
-                                                            )
-            {
-                "success": false,
-                "meta": {},
-                "exception_info": {
-                    "raised_exception": false,
-                    "exception_traceback": null,
-                    "exception_message": null
-                },
-                "result": {
-                    "element_count": 5,
-                    "unexpected_count": 1,
-                    "unexpected_percent": 20.0,
-                    "partial_unexpected_list": [
+    For example:
+    ::
+        >>> d = {'fruit': ['appple','apple','apple','banana','banana'], 
+                'color': ['red','green','yellow','yellow','red']}
+        >>> my_df = pd.DataFrame(data=d)
+        >>> my_df.expect_column_pair_values_to_be_in_set(
+                'fruit',
+                'color',
+                [
+                    ('apple','red'),
+                    ('apple','green'),
+                    ('apple','yellow'),
+                    ('banana','yellow'),
+                ]
+        )
+        {
+            "success": false,
+            "meta": {},
+            "exception_info": {
+                "raised_exception": false,
+                "exception_traceback": null,
+                "exception_message": null
+            },
+            "result": {
+                "element_count": 5,
+                "unexpected_count": 1,
+                "unexpected_percent": 20.0,
+                "partial_unexpected_list": [
                     [
                         "banana",
                         "red"
                     ]
-                    ],
-                    "missing_count": 0,
-                    "missing_percent": 0.0,
-                    "unexpected_percent_total": 20.0,
-                    "unexpected_percent_nonmissing": 20.0
-                }
+                ],
+                "missing_count": 0,
+                "missing_percent": 0.0,
+                "unexpected_percent_total": 20.0,
+                "unexpected_percent_nonmissing": 20.0
             }
+        }
 
     Args:
         column_A (str): The first column name
@@ -77,7 +78,6 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
         Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
-
     """
 
     # This dictionary contains metadata for display in the public gallery
@@ -85,7 +85,7 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
         "maturity": "production",
         "tags": [
             "core expectation",
-            "multi-column expectation",
+            "column pair map expectation",
         ],
         "contributors": ["@great_expectations"],
         "requirements": [],

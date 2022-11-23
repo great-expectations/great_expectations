@@ -19,8 +19,8 @@ from great_expectations.render.util import (
 
 
 class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
-    """
-     Expect that the columns are unique together, e.g. a multi-column primary key
+    """Expect that the columns are unique together (e.g. a multi-column primary key)
+
      Note that all instances of any duplicates are considered failed
 
      expect_multicolumnvalues_to_be_unique is a \
@@ -63,7 +63,7 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
 
     library_metadata = {
         "maturity": "production",
-        "tags": ["core expectation", "multi-column expectation"],
+        "tags": ["core expectation", "multi-column expectation", "column map expectation"],
         "contributors": [
             "@great_expectations",
         ],

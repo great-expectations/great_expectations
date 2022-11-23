@@ -55,7 +55,6 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
 
         Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
 
-
     See Also:
         [expect_column_value_lengths_to_be_between](https://greatexpectations.io/expectations/expect_column_value_lengths_to_be_between)
     """

@@ -31,19 +31,19 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
 
         # my_df.my_col = [1,2,2,3,3,3]
         >>> my_df.expect_column_values_to_not_be_in_set(
-            "my_col",
-            [1,2]
-        )
+                "my_col",
+                [1,2]
+            )
         {
-          "success": false
-          "result": {
-            "unexpected_count": 3
-            "unexpected_percent": 50.0,
-            "unexpected_percent_nonmissing": 50.0,
-            "partial_unexpected_list": [
-              1, 2, 2
-            ],
-          },
+            "success": false
+            "result": {
+                "unexpected_count": 3
+                "unexpected_percent": 50.0,
+                "unexpected_percent_nonmissing": 50.0,
+                "partial_unexpected_list": [
+                    1, 2, 2
+                ],
+            },
         }
 
     expect_column_values_to_not_be_in_set is a \

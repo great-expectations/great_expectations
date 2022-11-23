@@ -19,8 +19,8 @@ from great_expectations.render.util import (
 
 
 class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
-    """
-    Expect the values for each record to be unique across the columns listed.
+    """Expect the values for each record to be unique across the columns listed.
+
     Note that records can be duplicated.
 
     expect_select_column_values_to_be_unique_within_record is a \

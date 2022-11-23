@@ -52,19 +52,19 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
         # my_df.my_col = [1,2,2,3,3,3]
         >>> my_df.expect_column_values_to_be_in_set(
-            "my_col",
-            [2,3]
-        )
+                "my_col",
+                [2,3]
+            )
         {
-          "success": false
-          "result": {
-            "unexpected_count": 1
-            "unexpected_percent": 16.66666666666666666,
-            "unexpected_percent_nonmissing": 16.66666666666666666,
-            "partial_unexpected_list": [
-              1
-            ],
-          },
+            "success": false
+            "result": {
+                "unexpected_count": 1
+                "unexpected_percent": 16.66666666666666666,
+                "unexpected_percent_nonmissing": 16.66666666666666666,
+                "partial_unexpected_list": [
+                    1
+                ],
+            },
         }
 
     expect_column_values_to_be_in_set is a \
