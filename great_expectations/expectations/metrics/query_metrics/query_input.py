@@ -96,7 +96,7 @@ class QueryMultipleInputs(QueryMetricProvider):
         )
 
         df.createOrReplaceTempView("tmp_view")
-        query_input: dict = metric_value_kwargs.get("query_input")
+        query_input = metric_value_kwargs.get("query_input")
 
         if not isinstance(query_input, dict):
             raise TypeError("Query input must be supplied as a dict")
