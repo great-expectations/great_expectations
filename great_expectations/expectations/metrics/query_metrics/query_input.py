@@ -87,6 +87,9 @@ class QueryMultipleInputs(QueryMetricProvider):
             "query_input"
         )
 
+        if not isinstance(query, str):
+            raise TypeError("Query must be supplied as a string")
+
         df: pyspark_sql_DataFrame
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
@@ -94,6 +97,10 @@ class QueryMultipleInputs(QueryMetricProvider):
 
         df.createOrReplaceTempView("tmp_view")
         query_input: dict = metric_value_kwargs.get("query_input")
+
+        if not isinstance(query_input, dict):
+            raise TypeError("query input must be supplied as a dict")
+
         query = query.format(**query_input, active_batch="tmp_view")
 
         engine: pyspark_sql_SparkSession = execution_engine.spark
