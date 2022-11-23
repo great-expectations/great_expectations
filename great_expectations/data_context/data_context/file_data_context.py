@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, Union
 
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
