@@ -105,7 +105,6 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         def row_generator_fn(
             configuration=None,
             result=None,
-            language=None,
             runtime_configuration=None,
             **kwargs,
         ):
