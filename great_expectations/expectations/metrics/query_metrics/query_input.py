@@ -36,16 +36,16 @@ class QueryMultipleInputs(QueryMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ) -> List[sqlalchemy_engine_Row]:
-        query: Optional[str] = metric_value_kwargs.get(
+        query = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
             "query"
-        ) or cls.default_kwarg_values.get("query")
+        )
 
         selectable: Union[sa.sql.Selectable, str]
         selectable, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
 
-        query_input: dict = metric_value_kwargs.get("query_input")
+        query_input = metric_value_kwargs.get("query_input")
 
         if isinstance(selectable, sa.Table):
             query = query.format(**query_input, active_batch=selectable)
