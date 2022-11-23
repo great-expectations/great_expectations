@@ -94,14 +94,18 @@ def expected_evr_without_unexpected_rows():
 
 def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
     mp = ColumnMax()
-    metric = MetricConfiguration("column.max", {}, {})
+    metric = MetricConfiguration(
+        metric_name="column.max", metric_domain_kwargs={}, metric_value_kwargs=None
+    )
     dependencies = mp.get_evaluation_dependencies(
         metric, execution_engine=SqlAlchemyExecutionEngine(engine=empty_sqlite_db)
     )
     assert dependencies["metric_partial_fn"].id[0] == "column.max.aggregate_fn"
 
     mp = ColumnMax()
-    metric = MetricConfiguration("column.max", {}, {})
+    metric = MetricConfiguration(
+        metric_name="column.max", metric_domain_kwargs={}, metric_value_kwargs=None
+    )
     dependencies = mp.get_evaluation_dependencies(
         metric, execution_engine=PandasExecutionEngine()
     )
@@ -123,7 +127,11 @@ def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
 
 def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_engine):
     mp = ColumnValuesNonNull()
-    metric = MetricConfiguration("column_values.nonnull.unexpected_count", {}, {})
+    metric = MetricConfiguration(
+        metric_name="column_values.nonnull.unexpected_count",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
     dependencies = mp.get_evaluation_dependencies(
         metric, execution_engine=PandasExecutionEngine()
     )
@@ -131,7 +139,11 @@ def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_
         dependencies["unexpected_condition"].id[0] == "column_values.nonnull.condition"
     )
 
-    metric = MetricConfiguration("column_values.nonnull.unexpected_count", {}, {})
+    metric = MetricConfiguration(
+        metric_name="column_values.nonnull.unexpected_count",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
     dependencies = mp.get_evaluation_dependencies(
         metric, execution_engine=basic_spark_df_execution_engine
     )
@@ -141,7 +153,9 @@ def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_
     )
 
     metric = MetricConfiguration(
-        "column_values.nonnull.unexpected_count.aggregate_fn", {}, {}
+        metric_name="column_values.nonnull.unexpected_count.aggregate_fn",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
     )
     dependencies = mp.get_evaluation_dependencies(metric)
     assert (
@@ -151,23 +165,43 @@ def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_
 
 def test_get_map_metric_dependencies():
     mp = ColumnMapMetricProvider()
-    metric = MetricConfiguration("foo.unexpected_count", {}, {})
+    metric = MetricConfiguration(
+        metric_name="foo.unexpected_count",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
     dependencies = mp.get_evaluation_dependencies(metric)
     assert dependencies["unexpected_condition"].id[0] == "foo.condition"
 
-    metric = MetricConfiguration("foo.unexpected_rows", {}, {})
+    metric = MetricConfiguration(
+        metric_name="foo.unexpected_rows",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
     dependencies = mp.get_evaluation_dependencies(metric)
     assert dependencies["unexpected_condition"].id[0] == "foo.condition"
 
-    metric = MetricConfiguration("foo.unexpected_values", {}, {})
+    metric = MetricConfiguration(
+        metric_name="foo.unexpected_values",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
     dependencies = mp.get_evaluation_dependencies(metric)
     assert dependencies["unexpected_condition"].id[0] == "foo.condition"
 
-    metric = MetricConfiguration("foo.unexpected_value_counts", {}, {})
+    metric = MetricConfiguration(
+        metric_name="foo.unexpected_value_counts",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
     dependencies = mp.get_evaluation_dependencies(metric)
     assert dependencies["unexpected_condition"].id[0] == "foo.condition"
 
-    metric = MetricConfiguration("foo.unexpected_index_list", {}, {})
+    metric = MetricConfiguration(
+        metric_name="foo.unexpected_index_list",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
     dependencies = mp.get_evaluation_dependencies(metric)
     assert dependencies["unexpected_condition"].id[0] == "foo.condition"
 
@@ -183,7 +217,7 @@ def test_is_sqlalchemy_metric_selectable():
 
 
 def test_pandas_unexpected_rows_basic_result_format(dataframe_for_unexpected_rows):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "b",
@@ -196,7 +230,7 @@ def test_pandas_unexpected_rows_basic_result_format(dataframe_for_unexpected_row
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
     batch = Batch(data=dataframe_for_unexpected_rows)
     engine = PandasExecutionEngine()
     validator = Validator(
@@ -223,7 +257,7 @@ def test_pandas_unexpected_rows_basic_result_format(dataframe_for_unexpected_row
 def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_explicitly_false(
     dataframe_for_unexpected_rows,
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "b",
@@ -236,7 +270,7 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_explicitly
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
     batch = Batch(data=dataframe_for_unexpected_rows)
     engine = PandasExecutionEngine()
     validator = Validator(
@@ -267,7 +301,7 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_explicitly
 def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_including_unexpected_rows(
     dataframe_for_unexpected_rows,
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "b",
@@ -280,7 +314,7 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_including_
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
     batch = Batch(data=dataframe_for_unexpected_rows)
     engine = PandasExecutionEngine()
     validator = Validator(
@@ -310,7 +344,7 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_including_
 
 
 def test_pandas_unexpected_rows_complete_result_format(dataframe_for_unexpected_rows):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "a",
@@ -322,7 +356,7 @@ def test_pandas_unexpected_rows_complete_result_format(dataframe_for_unexpected_
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
     batch = Batch(data=dataframe_for_unexpected_rows)
     engine = PandasExecutionEngine()
     validator = Validator(
@@ -355,7 +389,7 @@ def test_pandas_unexpected_rows_complete_result_format(dataframe_for_unexpected_
 def test_pandas_default_complete_result_format(
     pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "numbers_with_duplicates",
@@ -366,7 +400,7 @@ def test_pandas_default_complete_result_format(
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
     batch: Batch = Batch(data=pandas_dataframe_for_unexpected_rows_with_index)
     engine = PandasExecutionEngine()
     validator = Validator(
@@ -401,7 +435,7 @@ def test_pandas_default_complete_result_format(
 def test_pandas_single_unexpected_index_column_names_complete_result_format(
     pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "numbers_with_duplicates",
@@ -413,7 +447,7 @@ def test_pandas_single_unexpected_index_column_names_complete_result_format(
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
     batch: Batch = Batch(data=pandas_dataframe_for_unexpected_rows_with_index)
     engine = PandasExecutionEngine()
     validator = Validator(
@@ -459,7 +493,7 @@ def test_pandas_single_unexpected_index_column_names_complete_result_format(
 def test_pandas_multiple_unexpected_index_column_names_complete_result_format(
     pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "numbers_with_duplicates",
@@ -471,7 +505,7 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format(
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
     batch: Batch = Batch(data=pandas_dataframe_for_unexpected_rows_with_index)
     engine = PandasExecutionEngine()
     validator = Validator(
@@ -509,7 +543,7 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format(
 def test_pandas_multiple_unexpected_index_column_names_complete_result_format_limit_1(
     pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "numbers_with_duplicates",
@@ -522,7 +556,7 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format_li
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
     batch: Batch = Batch(data=pandas_dataframe_for_unexpected_rows_with_index)
     engine = PandasExecutionEngine()
     validator = Validator(
@@ -558,7 +592,7 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format_li
 def test_pandas_multiple_unexpected_index_column_names_summary_result_format(
     pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "numbers_with_duplicates",
@@ -570,7 +604,7 @@ def test_pandas_multiple_unexpected_index_column_names_summary_result_format(
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
     batch: Batch = Batch(data=pandas_dataframe_for_unexpected_rows_with_index)
     engine = PandasExecutionEngine()
     validator = Validator(
@@ -603,7 +637,7 @@ def test_pandas_multiple_unexpected_index_column_names_summary_result_format(
 def test_pandas_multiple_unexpected_index_column_names_summary_result_format_limit_1(
     pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "numbers_with_duplicates",
@@ -616,7 +650,7 @@ def test_pandas_multiple_unexpected_index_column_names_summary_result_format_lim
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
     batch: Batch = Batch(data=pandas_dataframe_for_unexpected_rows_with_index)
     engine = PandasExecutionEngine()
     validator = Validator(
@@ -647,7 +681,7 @@ def test_pandas_multiple_unexpected_index_column_names_summary_result_format_lim
 def test_pandas_multiple_unexpected_index_column_names_basic_result_format(
     pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "numbers_with_duplicates",
@@ -659,7 +693,7 @@ def test_pandas_multiple_unexpected_index_column_names_basic_result_format(
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
     batch: Batch = Batch(data=pandas_dataframe_for_unexpected_rows_with_index)
     engine = PandasExecutionEngine()
     validator = Validator(
@@ -684,7 +718,7 @@ def test_pandas_multiple_unexpected_index_column_names_basic_result_format(
 def test_pandas_single_unexpected_index_column_names_complete_result_format_non_existing_column(
     pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "numbers_with_duplicates",
@@ -696,7 +730,7 @@ def test_pandas_single_unexpected_index_column_names_complete_result_format_non_
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
     batch: Batch = Batch(data=pandas_dataframe_for_unexpected_rows_with_index)
     engine = PandasExecutionEngine()
     validator = Validator(
@@ -710,14 +744,14 @@ def test_pandas_single_unexpected_index_column_names_complete_result_format_non_
     assert result.exception_info
     assert (
         result.exception_info["exception_message"]
-        == 'Error: The unexpected_index_column: "i_dont_exist" in does not exist in Dataframe. Please check your configuration and try again.'
+        == 'Error: The unexpected_index_column: "i_dont_exist" does not exist in Dataframe. Please check your configuration and try again.'
     )
 
 
 def test_pandas_multiple_unexpected_index_column_names_complete_result_format_non_existing_column(
     pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "numbers_with_duplicates",
@@ -731,7 +765,7 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format_no
             },
         },
     )
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
     batch: Batch = Batch(data=pandas_dataframe_for_unexpected_rows_with_index)
     engine = PandasExecutionEngine()
     validator = Validator(
@@ -745,7 +779,7 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format_no
     assert result.exception_info
     assert (
         result.exception_info["exception_message"]
-        == 'Error: The unexpected_index_column: "i_dont_exist" in does not exist in Dataframe. Please check your configuration and try again.'
+        == 'Error: The unexpected_index_column: "i_dont_exist" does not exist in Dataframe. Please check your configuration and try again.'
     )
 
 
@@ -779,7 +813,7 @@ def test_pandas_default_to_not_include_unexpected_rows(
 def test_pandas_specify_not_include_unexpected_rows(
     dataframe_for_unexpected_rows, expected_evr_without_unexpected_rows
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "a",
@@ -791,7 +825,7 @@ def test_pandas_specify_not_include_unexpected_rows(
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
     batch = Batch(data=dataframe_for_unexpected_rows)
     engine = PandasExecutionEngine()
     validator = Validator(
@@ -807,7 +841,7 @@ def test_pandas_specify_not_include_unexpected_rows(
 def test_include_unexpected_rows_without_explicit_result_format_raises_error(
     dataframe_for_unexpected_rows,
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "a",
@@ -818,7 +852,7 @@ def test_include_unexpected_rows_without_explicit_result_format_raises_error(
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
     batch = Batch(data=dataframe_for_unexpected_rows)
     engine = PandasExecutionEngine()
     validator = Validator(

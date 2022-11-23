@@ -17,6 +17,15 @@ jobs:
           displayName: 'Update pip'
 
         - script: |
+            # Get new tags from remote
+            git fetch --tags
+            # Get latest tag name
+            latest=$(git describe --tags `git rev-list --tags --max-count=1`)
+            # Checkout latest tag
+            git checkout $latest
+          displayName: 'Checkout latest tag'
+
+        - script: |
             pip install --requirement requirements-dev.txt --constraint constraints-dev.txt
             pip install .
           displayName: 'Install dependencies'
@@ -49,6 +58,15 @@ jobs:
 
         - bash: python -m pip install --upgrade pip==21.3.1
           displayName: 'Update pip'
+
+        - script: |
+            # Get new tags from remote
+            git fetch --tags
+            # Get latest tag name
+            latest=$(git describe --tags `git rev-list --tags --max-count=1`)
+            # Checkout latest tag
+            git checkout $latest
+          displayName: 'Checkout latest tag'
 
         - script: |
             pip install \

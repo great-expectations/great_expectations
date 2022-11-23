@@ -10,10 +10,15 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations import __version__
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.config_provider import (
-    CloudConfigurationProvider,
-    ConfigurationProvider,
+    _CloudConfigurationProvider,
+    _ConfigurationProvider,
 )
 from great_expectations.core.serializer import JsonConfigSerializer
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.core.usage_statistics.usage_statistics import (
+    save_expectation_suite_usage_statistics,
+    usage_statistics_enabled_method,
+)
 from great_expectations.data_context.cloud_constants import (
     CLOUD_DEFAULT_BASE_URL,
     GXCloudEnvironmentVariable,
@@ -33,9 +38,14 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GXCloudResourceRef
-from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
-from great_expectations.data_context.util import substitute_all_config_variables
+from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
+    GXCloudIdentifier,
+)
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions.exceptions import DataContextError
+from great_expectations.render.renderer.site_builder import SiteBuilder
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import Checkpoint
@@ -90,12 +100,11 @@ class CloudDataContext(AbstractDataContext):
         self._project_config = self._apply_global_config_overrides(
             config=project_data_context_config
         )
-        self._variables = self._init_variables()
         super().__init__(
             runtime_environment=runtime_environment,
         )
 
-    def _register_providers(self, config_provider: ConfigurationProvider) -> None:
+    def _register_providers(self, config_provider: _ConfigurationProvider) -> None:
         """
         To ensure that Cloud credentials are accessible downstream, we want to ensure that
         we register a CloudConfigurationProvider.
@@ -104,7 +113,7 @@ class CloudDataContext(AbstractDataContext):
         """
         super()._register_providers(config_provider)
         config_provider.register_provider(
-            CloudConfigurationProvider(self._ge_cloud_config)
+            _CloudConfigurationProvider(self._ge_cloud_config)
         )
 
     @classmethod
@@ -290,10 +299,13 @@ class CloudDataContext(AbstractDataContext):
         from great_expectations.data_context.store.datasource_store import (
             DatasourceStore,
         )
+        from great_expectations.data_context.store.gx_cloud_store_backend import (
+            GXCloudStoreBackend,
+        )
 
         store_name: str = "datasource_store"  # Never explicitly referenced but adheres
         # to the convention set by other internal Stores
-        store_backend: dict = {"class_name": "GeCloudStoreBackend"}
+        store_backend: dict = {"class_name": GXCloudStoreBackend.__name__}
         runtime_environment: dict = {
             "root_directory": self.root_directory,
             "ge_cloud_credentials": self.ge_cloud_config.to_dict(),  # type: ignore[union-attr]
@@ -331,6 +343,7 @@ class CloudDataContext(AbstractDataContext):
 
         variables = CloudDataContextVariables(
             config=self._project_config,
+            config_provider=self.config_provider,
             ge_cloud_base_url=ge_cloud_base_url,
             ge_cloud_organization_id=ge_cloud_organization_id,
             ge_cloud_access_token=ge_cloud_access_token,
@@ -360,7 +373,7 @@ class CloudDataContext(AbstractDataContext):
         if not config:
             config = self.config
 
-        substitutions: dict = self._determine_substitutions()
+        substitutions: dict = self.config_provider.get_values()
 
         ge_cloud_config_variable_defaults = {
             "plugins_directory": self._normalize_absolute_or_relative_path(
@@ -380,11 +393,7 @@ class CloudDataContext(AbstractDataContext):
                 )
                 substitutions[config_variable] = value
 
-        return DataContextConfig(
-            **substitute_all_config_variables(
-                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-            )
-        )
+        return DataContextConfig(**self.config_provider.substitute_config(config))
 
     def create_expectation_suite(
         self,
@@ -504,6 +513,10 @@ class CloudDataContext(AbstractDataContext):
             expectation_suite.render()
         return expectation_suite
 
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
+        args_payload_fn=save_expectation_suite_usage_statistics,
+    )
     def save_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
@@ -650,3 +663,49 @@ class CloudDataContext(AbstractDataContext):
             checkpoint_config=checkpoint_config, data_context=self  # type: ignore[arg-type]
         )
         return checkpoint
+
+    def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+        return self.checkpoint_store.list_checkpoints(ge_cloud_mode=self.ge_cloud_mode)
+
+    def list_profilers(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+        return RuleBasedProfiler.list_profilers(
+            profiler_store=self.profiler_store, ge_cloud_mode=self.ge_cloud_mode
+        )
+
+    def _init_site_builder_for_data_docs_site_creation(
+        self, site_name: str, site_config: dict
+    ) -> SiteBuilder:
+        """
+        Note that this explicitly overriding the `AbstractDataContext` helper method called
+        in `self.build_data_docs()`.
+
+        The only difference here is the inclusion of `ge_cloud_mode` in the `runtime_environment`
+        used in `SiteBuilder` instantiation.
+        """
+        site_builder: SiteBuilder = instantiate_class_from_config(
+            config=site_config,
+            runtime_environment={
+                "data_context": self,
+                "root_directory": self.root_directory,
+                "site_name": site_name,
+                "ge_cloud_mode": self.ge_cloud_mode,
+            },
+            config_defaults={
+                "module_name": "great_expectations.render.renderer.site_builder"
+            },
+        )
+        return site_builder
+
+    def _determine_key_for_profiler_save(
+        self, name: str, id: Optional[str]
+    ) -> Union[ConfigurationIdentifier, GXCloudIdentifier]:
+        """
+        Note that this explicitly overriding the `AbstractDataContext` helper method called
+        in `self.save_profiler()`.
+
+        The only difference here is the creation of a Cloud-specific `GXCloudIdentifier`
+        instead of the usual `ConfigurationIdentifier` for `Store` interaction.
+        """
+        return GXCloudIdentifier(
+            resource_type=GXCloudRESTResource.PROFILER, ge_cloud_id=id
+        )
