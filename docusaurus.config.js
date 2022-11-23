@@ -162,15 +162,11 @@ module.exports = {
           items: [
             {
               label: 'GX Cloud',
-              to: 'https://greatexpectations.io/cloud'
+              to: 'https://greatexpectations.io/gx-cloud'
             },
             {
               label: 'GX OSS',
-              to: 'https://greatexpectations.io/oss'
-            }
-                        {
-              label: 'Documentation',
-              to: 'https://docs.greatexpectations.io/'
+              to: 'https://greatexpectations.io/gx-oss'
             }
           ]
         },
@@ -194,7 +190,7 @@ module.exports = {
               href: 'https://www.youtube.com/c/GreatExpectationsData'
             }
           ]
-        }
+        },
       ],
       copyright: `Copyright © ${new Date().getFullYear()} Superconductive.`
     }
