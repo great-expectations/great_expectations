@@ -53,7 +53,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
         return self._semantic_types
 
     @property
-    def column_name_suffixes(self) -> Optional[List[str]]:
+    def column_name_suffixes(self) -> Union[List[str], None]:
         return self._column_name_suffixes
 
     def _get_domains(

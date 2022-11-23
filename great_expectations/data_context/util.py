@@ -3,7 +3,7 @@ import inspect
 import logging
 import os
 import warnings
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Optional, Union
 from urllib.parse import urlparse
 
 import pyparsing as pp
@@ -109,7 +109,7 @@ def build_store_from_config(
     store_config: Optional[dict] = None,
     module_name: str = "great_expectations.data_context.store",
     runtime_environment: Optional[dict] = None,
-) -> Optional["Store"]:
+) -> Union[Store]:
     if store_config is None or module_name is None:
         return None
 
@@ -158,7 +158,7 @@ def file_relative_path(dunderfile, relative_path):
     return os.path.join(os.path.dirname(dunderfile), relative_path)
 
 
-def parse_substitution_variable(substitution_variable: str) -> Optional[str]:
+def parse_substitution_variable(substitution_variable: str) -> Union[str, None]:
     """
     Parse and check whether the string contains a substitution variable of the case insensitive form ${SOME_VAR} or $SOME_VAR
     Args:

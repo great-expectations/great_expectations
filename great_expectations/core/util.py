@@ -596,7 +596,7 @@ class S3Url:
             return self._parsed.path.lstrip("/")
 
     @property
-    def suffix(self) -> Optional[str]:
+    def suffix(self) -> Union[str, None]:
         """
         Attempts to get a file suffix from the S3 key.
         If can't find one returns `None`.

@@ -142,7 +142,7 @@ class JsonSchemaProfiler(Profiler):
 
         return types_list
 
-    def _get_enum_list(self, details: dict) -> Optional[List[str]]:
+    def _get_enum_list(self, details: dict) -> Union[List[str], None]:
         enum = details.get("enum", None)
         any_of = details.get("anyOf", None)
 
@@ -181,7 +181,7 @@ class JsonSchemaProfiler(Profiler):
 
     def _create_type_expectation(
         self, key: str, details: dict
-    ) -> Optional[ExpectationConfiguration]:
+    ) -> Union[ExpectationConfiguration, None]:
         object_types = self._get_object_types(details=details)
         object_types = list(
             filter(
@@ -205,7 +205,7 @@ class JsonSchemaProfiler(Profiler):
 
     def _create_boolean_expectation(
         self, key: str, details: dict
-    ) -> Optional[ExpectationConfiguration]:
+    ) -> Union[ExpectationConfiguration, None]:
         """https://json-schema.org/understanding-json-schema/reference/boolean.html"""
         object_types = self._get_object_types(details=details)
 
@@ -218,7 +218,7 @@ class JsonSchemaProfiler(Profiler):
 
     def _create_range_expectation(
         self, key: str, details: dict
-    ) -> Optional[ExpectationConfiguration]:
+    ) -> Union[ExpectationConfiguration, None]:
         """https://json-schema.org/understanding-json-schema/reference/numeric.html#range"""
         object_types = self._get_object_types(details=details)
         object_types = filter(  # type: ignore[assignment]
@@ -279,7 +279,7 @@ class JsonSchemaProfiler(Profiler):
 
     def _create_string_length_expectation(
         self, key: str, details: dict
-    ) -> Optional[ExpectationConfiguration]:
+    ) -> Union[ExpectationConfiguration, None]:
         """https://json-schema.org/understanding-json-schema/reference/string.html#length"""
         object_types = self._get_object_types(details=details)
 
@@ -325,7 +325,7 @@ class JsonSchemaProfiler(Profiler):
 
     def _create_set_expectation(
         self, key: str, details: dict
-    ) -> Optional[ExpectationConfiguration]:
+    ) -> Union[ExpectationConfiguration, None]:
         """https://json-schema.org/understanding-json-schema/reference/generic.html#enumerated-values"""
         enum_list = self._get_enum_list(details=details)
 
@@ -341,7 +341,7 @@ class JsonSchemaProfiler(Profiler):
 
     def _create_null_or_not_null_column_expectation(
         self, key: str, details: dict
-    ) -> Optional[ExpectationConfiguration]:
+    ) -> Union[ExpectationConfiguration, None]:
         """https://json-schema.org/understanding-json-schema/reference/null.html"""
         object_types: Union[list, set] = self._get_object_types(details=details)
         enum_list = self._get_enum_list(details=details)
@@ -362,18 +362,18 @@ class JsonSchemaProfiler(Profiler):
 
     def _create_regex_expectation(
         self, key: str, details: dict
-    ) -> Optional[ExpectationConfiguration]:
+    ) -> Union[ExpectationConfiguration, None]:
         # TODO https://json-schema.org/understanding-json-schema/reference/regular_expressions.html
         raise NotImplementedError("regex are not yet implemented.")
 
     def _create_string_format_expectation(
         self, key: str, details: dict
-    ) -> Optional[ExpectationConfiguration]:
+    ) -> Union[ExpectationConfiguration, None]:
         # TODO https://json-schema.org/understanding-json-schema/reference/string.html#format
         raise NotImplementedError("string format are not yet implemented.")
 
     def _create_array_expectation(
         self, key: str, details: dict
-    ) -> Optional[ExpectationConfiguration]:
+    ) -> Union[ExpectationConfiguration, None]:
         # TODO Non tabular - how do we validate these? https://json-schema.org/understanding-json-schema/reference/array.html
         raise NotImplementedError("arrays are not yet implemented.")

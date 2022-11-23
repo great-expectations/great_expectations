@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional
+from typing import List, Optional, Union
 
 logger = logging.getLogger(__name__)
 
@@ -68,15 +68,15 @@ class Asset:
         return self._name
 
     @property
-    def base_directory(self) -> Optional[str]:
+    def base_directory(self) -> Union[str, None]:
         return self._base_directory
 
     @property
-    def glob_directive(self) -> Optional[str]:
+    def glob_directive(self) -> Union[str, None]:
         return self._glob_directive
 
     @property
-    def pattern(self) -> Optional[str]:
+    def pattern(self) -> Union[str, None]:
         return self._pattern
 
     @property

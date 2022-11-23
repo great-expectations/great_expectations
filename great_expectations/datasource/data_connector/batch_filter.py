@@ -95,7 +95,7 @@ type and value given are "{str(type(limit))}" and "{limit}", respectively, which
 
 def _parse_index(
     index: Optional[Union[int, list, tuple, slice, str]] = None
-) -> Optional[Union[int, slice]]:
+) -> Union[int, slice, None]:
     if index is None:
         return None
     elif isinstance(index, (int, slice)):
@@ -157,15 +157,15 @@ class BatchFilter:
         self._limit = limit
 
     @property
-    def custom_filter_function(self) -> Optional[Callable]:
+    def custom_filter_function(self) -> Union[Callable, None]:
         return self._custom_filter_function
 
     @property
-    def batch_filter_parameters(self) -> Optional[IDDict]:
+    def batch_filter_parameters(self) -> Union[IDDict, None]:
         return self._batch_filter_parameters
 
     @property
-    def index(self) -> Optional[Union[int, slice]]:
+    def index(self) -> Union[int, slice, None]:
         return self._index
 
     @property

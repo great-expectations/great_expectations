@@ -1045,7 +1045,7 @@ class ExpectationConfiguration(SerializableDictDot):
         return self
 
     @property
-    def ge_cloud_id(self) -> Optional[str]:
+    def ge_cloud_id(self) -> Union[str, None]:
         return self._ge_cloud_id
 
     @ge_cloud_id.setter
@@ -1053,7 +1053,7 @@ class ExpectationConfiguration(SerializableDictDot):
         self._ge_cloud_id = value
 
     @property
-    def expectation_context(self) -> Optional[ExpectationContext]:
+    def expectation_context(self) -> Union[ExpectationContext, None]:
         return self._expectation_context
 
     @expectation_context.setter
@@ -1073,7 +1073,7 @@ class ExpectationConfiguration(SerializableDictDot):
         self._kwargs = value
 
     @property
-    def rendered_content(self) -> Optional[List[RenderedAtomicContent]]:
+    def rendered_content(self) -> Union[List[RenderedAtomicContent], None]:
         return self._rendered_content
 
     @rendered_content.setter

@@ -76,14 +76,14 @@ class OnboardingDataAssistant(DataAssistant):
             validator=validator,
         )
 
-    def get_variables(self) -> Optional[Dict[str, Any]]:
+    def get_variables(self) -> Union[Dict[str, Any], None]:
         """
         Returns:
             Optional "variables" configuration attribute name/value pairs (overrides), commonly-used in Builder objects.
         """
         return None
 
-    def get_rules(self) -> Optional[List[Rule]]:
+    def get_rules(self) -> Union[List[Rule], None]:
         """
         Returns:
             Optional custom list of "Rule" objects implementing particular "DataAssistant" functionality.
@@ -223,7 +223,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
 
-        validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+        validation_parameter_builder_configs: Union[List[ParameterBuilderConfig], None]
 
         validation_parameter_builder_configs = [
             ParameterBuilderConfig(
@@ -346,7 +346,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
 
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+        evaluation_parameter_builder_configs: Union[List[ParameterBuilderConfig], None]
 
         evaluation_parameter_builder_configs = [
             ParameterBuilderConfig(
@@ -419,7 +419,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
 
-        validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+        validation_parameter_builder_configs: Union[List[ParameterBuilderConfig], None]
 
         validation_parameter_builder_configs = [
             ParameterBuilderConfig(
@@ -644,7 +644,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
 
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+        evaluation_parameter_builder_configs: Union[List[ParameterBuilderConfig], None]
 
         evaluation_parameter_builder_configs = [
             ParameterBuilderConfig(
@@ -670,7 +670,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
 
-        validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+        validation_parameter_builder_configs: Union[List[ParameterBuilderConfig], None]
 
         validation_parameter_builder_configs = [
             ParameterBuilderConfig(
@@ -801,7 +801,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
 
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+        evaluation_parameter_builder_configs: Union[List[ParameterBuilderConfig], None]
 
         evaluation_parameter_builder_configs = [
             ParameterBuilderConfig(
@@ -831,7 +831,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
 
-        validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+        validation_parameter_builder_configs: Union[List[ParameterBuilderConfig], None]
 
         validation_parameter_builder_configs = [
             ParameterBuilderConfig(
@@ -966,7 +966,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
 
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+        evaluation_parameter_builder_configs: Union[List[ParameterBuilderConfig], None]
 
         evaluation_parameter_builder_configs = [
             ParameterBuilderConfig(
@@ -986,7 +986,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
 
-        validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+        validation_parameter_builder_configs: Union[List[ParameterBuilderConfig], None]
 
         value_set_multi_batch_parameter_builder_for_validations: ParameterBuilder = (
             ValueSetMultiBatchParameterBuilder(

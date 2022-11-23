@@ -227,7 +227,7 @@ def get_parameter_value_and_validate_return_type(
     expected_return_type: Optional[Union[type, tuple]] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
-) -> Optional[Any]:
+) -> Union[Any, None]:
     """
     This method allows for the parameter_reference to be specified as an object (literal, dict, any typed object, etc.)
     or as a fully-qualified parameter name.  In either case, it can optionally validate the type of the return value.
@@ -258,7 +258,7 @@ def get_parameter_value(
     parameter_reference: Optional[Union[Any, str]] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
-) -> Optional[Any]:
+) -> Union[Any, None]:
     """
     This method allows for the parameter_reference to be specified as an object (literal, dict, any typed object, etc.)
     or as a fully-qualified parameter name.  Moreover, if the parameter_reference argument is an object of type "dict",

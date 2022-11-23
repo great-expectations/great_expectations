@@ -2,7 +2,7 @@ import datetime
 import hashlib
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 import pandas as pd
 
@@ -47,11 +47,11 @@ class TaxiTestData:
         return self._test_df
 
     @property
-    def test_column_name(self) -> Optional[str]:
+    def test_column_name(self) -> Union[str, None]:
         return self._test_column_name
 
     @property
-    def test_column_names(self) -> Optional[List[str]]:
+    def test_column_names(self) -> Union[List[str], None]:
         return self._test_column_names
 
     @staticmethod
@@ -115,7 +115,7 @@ class TaxiTestData:
             ),
         )
 
-    def get_test_column_values(self) -> List[Optional[Any]]:
+    def get_test_column_values(self) -> List[Union[Any, None]]:
         column_values: List[Optional[Any]] = self.test_df[
             self.test_column_name
         ].tolist()
@@ -132,7 +132,7 @@ class TaxiTestData:
         reverse: Optional[bool] = False,
         move_null_to_front: Optional[bool] = False,
         limit: Optional[int] = None,
-    ) -> List[Optional[Any]]:
+    ) -> List[Union[Any, None]]:
         column_values: List[Optional[Any]] = self.get_test_column_values()
         column_values = list(set(column_values))
         column_values = sorted(
@@ -200,7 +200,7 @@ class TaxiTestData:
 
     def get_divided_integer_test_column_values(
         self, divisor: int
-    ) -> List[Optional[Any]]:
+    ) -> List[Union[Any, None]]:
         column_values: List[Optional[Any]] = self.get_test_column_values()
 
         column_value: Any
@@ -208,7 +208,7 @@ class TaxiTestData:
 
         return list(set(column_values))
 
-    def get_mod_integer_test_column_values(self, mod: int) -> List[Optional[Any]]:
+    def get_mod_integer_test_column_values(self, mod: int) -> List[Union[Any, None]]:
         column_values: List[Optional[Any]] = self.get_test_column_values()
 
         column_value: Any
@@ -216,7 +216,7 @@ class TaxiTestData:
 
         return list(set(column_values))
 
-    def get_hashed_test_column_values(self, hash_digits: int) -> List[Optional[Any]]:
+    def get_hashed_test_column_values(self, hash_digits: int) -> List[Union[Any, None]]:
         """
         hashlib.md5(string).hexdigest()
         hashlib.md5(str(tuple_).encode("utf-8")).hexdigest()

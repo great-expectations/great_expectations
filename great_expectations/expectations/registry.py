@@ -252,7 +252,7 @@ def get_metric_provider(
 
 def get_metric_function_type(
     metric_name: str, execution_engine: ExecutionEngine
-) -> Optional[Union[MetricPartialFunctionTypes, MetricFunctionTypes]]:
+) -> Union[MetricPartialFunctionTypes, MetricFunctionTypes, None]:
     try:
         metric_definition = _registered_metrics[metric_name]
         provider_fn, provider_class = metric_definition["providers"][

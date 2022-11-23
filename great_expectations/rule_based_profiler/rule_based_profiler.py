@@ -146,7 +146,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         self._rule_states = []
 
     @property
-    def ge_cloud_id(self) -> Optional[str]:
+    def ge_cloud_id(self) -> Union[str, None]:
         return self._id
 
     @ge_cloud_id.setter
@@ -479,7 +479,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         self,
         variables: Optional[Dict[str, Any]] = None,
         reconciliation_strategy: ReconciliationStrategy = DEFAULT_RECONCILATION_DIRECTIVES.variables,
-    ) -> Optional[ParameterContainer]:
+    ) -> Union[ParameterContainer, None]:
         """
         Profiler "variables" reconciliation involves combining the variables, instantiated from Profiler configuration
         (e.g., stored in a YAML file managed by the Profiler store), with the variables overrides, provided at run time.
@@ -718,7 +718,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         rule: Rule,
         parameter_builder_configs: List[dict],
         reconciliation_strategy: ReconciliationStrategy = DEFAULT_RECONCILATION_DIRECTIVES.parameter_builder,
-    ) -> Optional[List[dict]]:
+    ) -> Union[List[dict], None]:
         """
         Rule "parameter builders" reconciliation involves combining the parameter builders, instantiated from Rule
         configuration (e.g., stored in a YAML file managed by the Profiler store), with the parameter builders
@@ -1029,7 +1029,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def _get_effective_domain_builder_property_value(
         dest_property_value: Optional[Any] = None,
         source_property_value: Optional[Any] = None,
-    ) -> Optional[Any]:
+    ) -> Union[Any, None]:
         # Property values of collections types must be unique (use set for "list"/"tuple" and "update" for dictionary).
 
         if isinstance(dest_property_value, list) and isinstance(
@@ -1301,7 +1301,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return self._config_version
 
     @property
-    def variables(self) -> Optional[ParameterContainer]:
+    def variables(self) -> Union[ParameterContainer, None]:
         # Returning a copy of the "self._variables" state variable in order to prevent write-before-read hazard.
         return copy.deepcopy(self._variables)
 

@@ -52,7 +52,7 @@ class RuleState:
         self._rule_execution_time = 0.0
 
     @property
-    def rule(self) -> Optional[Rule]:
+    def rule(self) -> Union[Rule, None]:
         return self._rule
 
     @rule.setter
@@ -68,7 +68,7 @@ class RuleState:
         self._domains = value
 
     @property
-    def variables(self) -> Optional[ParameterContainer]:
+    def variables(self) -> Union[ParameterContainer, None]:
         return self._variables
 
     @variables.setter

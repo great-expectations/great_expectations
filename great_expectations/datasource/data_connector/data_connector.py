@@ -81,7 +81,7 @@ class DataConnector:
         return self._name
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> Union[str, None]:
         return self._id
 
     @property
@@ -207,7 +207,7 @@ class DataConnector:
 
     def _map_data_reference_to_batch_definition_list(
         self, data_reference: Any, data_asset_name: Optional[str] = None
-    ) -> Optional[List[BatchDefinition]]:
+    ) -> Union[List[BatchDefinition], None]:
         raise NotImplementedError
 
     def _map_batch_definition_to_data_reference(

@@ -79,7 +79,7 @@ class FileDataContext(AbstractDataContext):
         self._datasource_store = datasource_store
 
     @property
-    def root_directory(self) -> Optional[str]:
+    def root_directory(self) -> Union[str, None]:
         """The root directory for configuration objects in the data context; the location in which
         ``great_expectations.yml`` is located.
 

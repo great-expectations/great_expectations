@@ -184,7 +184,7 @@ class Rule(SerializableDictDot):
         self._name = value
 
     @property
-    def variables(self) -> Optional[ParameterContainer]:
+    def variables(self) -> Union[ParameterContainer, None]:
         # Returning a copy of the "self._variables" state variable in order to prevent write-before-read hazard.
         return copy.deepcopy(self._variables)
 
@@ -193,17 +193,17 @@ class Rule(SerializableDictDot):
         self._variables = value
 
     @property
-    def domain_builder(self) -> Optional[DomainBuilder]:
+    def domain_builder(self) -> Union[DomainBuilder, None]:
         return self._domain_builder
 
     @property
-    def parameter_builders(self) -> Optional[List[ParameterBuilder]]:
+    def parameter_builders(self) -> Union[List[ParameterBuilder], None]:
         return self._parameter_builders
 
     @property
     def expectation_configuration_builders(
         self,
-    ) -> Optional[List[ExpectationConfigurationBuilder]]:
+    ) -> Union[List[ExpectationConfigurationBuilder], None]:
         return self._expectation_configuration_builders
 
     def to_dict(self) -> dict:

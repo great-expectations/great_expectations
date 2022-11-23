@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Union
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 
@@ -90,7 +90,7 @@ class Anonymizer(BaseAnonymizer):
     def can_handle(self, obj: object, **kwargs: Optional[dict]) -> bool:
         return self._get_anonymizer(obj=obj, **kwargs) is not None
 
-    def _get_anonymizer(self, obj: object, **kwargs) -> Optional[BaseAnonymizer]:
+    def _get_anonymizer(self, obj: object, **kwargs) -> Union[BaseAnonymizer, None]:
         for anonymizer in self._anonymizers.values():
             if anonymizer.can_handle(obj=obj, **kwargs):
                 return anonymizer

@@ -258,7 +258,7 @@ seconds."""
 
 
 # noinspection SpellCheckingInspection
-def get_project_distribution() -> Optional[Distribution]:
+def get_project_distribution() -> Union[Distribution, None]:
     ditr: Distribution
     for distr in importlib_metadata.distributions():
         relative_path: Path
@@ -381,7 +381,7 @@ templates, and assets is supported in your execution environment.  This error is
         raise FileNotFoundError(message)
 
 
-def import_library_module(module_name: str) -> Optional[ModuleType]:
+def import_library_module(module_name: str) -> Union[ModuleType, None]:
     """
     :param module_name: a fully-qualified name of a module (e.g., "great_expectations.dataset.sqlalchemy_dataset")
     :return: raw source code of the module (if can be retrieved)
@@ -1117,7 +1117,7 @@ def filter_properties_dict(
     clean_falsy: bool = False,
     keep_falsy_numerics: bool = True,
     inplace: bool = False,
-) -> Optional[dict]:
+) -> Union[dict, None]:
     """Filter the entries of the source dictionary according to directives concerning the existing keys and values.
 
     Args:

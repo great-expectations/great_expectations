@@ -114,7 +114,7 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
     regex_pattern: str,
     group_names: List[str],
     data_asset_name: Optional[str] = None,
-) -> Optional[List[BatchDefinition]]:
+) -> Union[List[BatchDefinition], None]:
     processed_data_reference: Optional[
         Tuple[str, IDDict]
     ] = convert_data_reference_string_to_batch_identifiers_using_regex(
@@ -143,7 +143,7 @@ def convert_data_reference_string_to_batch_identifiers_using_regex(
     data_reference: str,
     regex_pattern: str,
     group_names: List[str],
-) -> Optional[Tuple[str, IDDict]]:
+) -> Union[Tuple[str, IDDict], None]:
     # noinspection PyUnresolvedReferences
     pattern = re.compile(regex_pattern)
     matches: Optional[re.Match] = pattern.match(data_reference)
@@ -497,7 +497,7 @@ def list_s3_keys(
 # As a rule, this method should not be in "util", but in the specific high-level "DataConnector" class, where it is
 # called (and declared as private in that class).  Currently, this is "FilePathDataConnector".  However, since this
 # method is also used in tests, it can remain in the present "util" module (as an exception to the above stated rule).
-def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dict]:
+def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Union[dict, None]:
     sorter_dict: Dict[str, Sorter] = {}
     if config_list is not None:
         for sorter_config in config_list:

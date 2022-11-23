@@ -142,7 +142,7 @@ class Store:
     def deserialize(self, value: Any) -> Any:
         return value
 
-    def get(self, key: DataContextKey) -> Optional[Any]:
+    def get(self, key: DataContextKey) -> Union[Any, None]:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.get(key)
 

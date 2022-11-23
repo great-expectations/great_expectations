@@ -54,7 +54,7 @@ class YAMLHandler:
         data: dict,
         stream: Optional[Union[io.TextIOWrapper, io.StringIO, Path]] = None,
         **kwargs
-    ) -> Optional[str]:
+    ) -> Union[str, None]:
         """Converts a Python dictionary into a YAML string.
 
         Dump code has been adopted from:

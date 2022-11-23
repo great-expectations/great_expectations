@@ -263,7 +263,7 @@ class CloudDataContext(AbstractDataContext):
         ge_cloud_base_url: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
-    ) -> Dict[GXCloudEnvironmentVariable, Optional[str]]:
+    ) -> Dict[GXCloudEnvironmentVariable, Union[str], None]:
         ge_cloud_base_url = (
             ge_cloud_base_url
             or CloudDataContext._get_global_config_value(
@@ -329,7 +329,7 @@ class CloudDataContext(AbstractDataContext):
         return [suite_key.resource_name for suite_key in self.list_expectation_suites()]  # type: ignore[union-attr]
 
     @property
-    def ge_cloud_config(self) -> Optional[GXCloudConfig]:
+    def ge_cloud_config(self) -> Union[GXCloudConfig, None]:
         return self._ge_cloud_config
 
     @property
@@ -584,7 +584,7 @@ class CloudDataContext(AbstractDataContext):
             )
 
     @property
-    def root_directory(self) -> Optional[str]:
+    def root_directory(self) -> Union[str, None]:
         """The root directory for configuration objects in the data context; the location in which
         ``great_expectations.yml`` is located.
 

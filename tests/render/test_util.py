@@ -1,5 +1,5 @@
 import copy
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import nbformat
 import pytest
@@ -190,7 +190,7 @@ def replace_code_in_notebook(
     nb: NotebookNode,
     string_to_be_replaced: Optional[str] = None,
     replacement_string: Optional[str] = None,
-) -> Optional[NotebookNode]:
+) -> Union[NotebookNode, None]:
     cond_neither: bool = string_to_be_replaced is None and replacement_string is None
     cond_both: bool = not (string_to_be_replaced is None or replacement_string is None)
     if not (cond_neither or cond_both):
@@ -255,7 +255,7 @@ def load_notebook_from_path(
 def find_code_in_notebook(
     nb: NotebookNode,
     search_string: str,
-) -> Optional[Dict[int, dict]]:
+) -> Union[Dict[int, dict], None]:
     if (
         nb is None
         or not nb

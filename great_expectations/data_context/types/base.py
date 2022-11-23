@@ -331,11 +331,11 @@ class AssetConfig(SerializableDictDot):
             setattr(self, k, v)
 
     @property
-    def class_name(self) -> Optional[str]:
+    def class_name(self) -> Union[str, None]:
         return self._class_name
 
     @property
-    def module_name(self) -> Optional[str]:
+    def module_name(self) -> Union[str, None]:
         return self._module_name
 
     def to_json_dict(self) -> dict:

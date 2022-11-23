@@ -102,7 +102,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         return self._total_count_parameter_builder_name
 
     @property
-    def null_count_parameter_builder_name(self) -> Optional[str]:
+    def null_count_parameter_builder_name(self) -> Union[str, None]:
         return self._null_count_parameter_builder_name
 
     def _build_parameters(

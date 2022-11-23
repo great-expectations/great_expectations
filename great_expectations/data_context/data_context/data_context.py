@@ -299,7 +299,7 @@ class DataContext(BaseDataContext):
         ge_cloud_base_url: Union[str, None],
         ge_cloud_access_token: Union[str, None],
         ge_cloud_organization_id: Union[str, None],
-    ) -> Optional[GXCloudConfig]:
+    ) -> Union[GXCloudConfig, None]:
         if not ge_cloud_mode:
             return None
 
@@ -439,7 +439,7 @@ class DataContext(BaseDataContext):
 
     def add_datasource(  # type: ignore[override]
         self, name: str, **kwargs: dict
-    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
+    ) -> Union[LegacyDatasource, BaseDatasource, None]:
         logger.debug(f"Starting DataContext.add_datasource for datasource {name}")
 
         new_datasource: Optional[
@@ -495,7 +495,7 @@ class DataContext(BaseDataContext):
     @classmethod
     def get_ge_config_version(
         cls, context_root_dir: Optional[str] = None
-    ) -> Optional[float]:
+    ) -> Union[float, None]:
         yml_path = cls.find_context_yml_file(search_start_dir=context_root_dir)
         if yml_path is None:
             return None
@@ -548,7 +548,7 @@ class DataContext(BaseDataContext):
     @classmethod
     def find_context_yml_file(
         cls, search_start_dir: Optional[str] = None
-    ) -> Optional[str]:
+    ) -> Union[str, None]:
         """Search for the yml file starting here and moving upward."""
         yml_path = None
         if search_start_dir is None:
@@ -618,7 +618,7 @@ class DataContext(BaseDataContext):
         return bool(context.list_expectation_suites())
 
     @classmethod
-    def _attempt_context_instantiation(cls, ge_dir: str) -> Optional[DataContext]:
+    def _attempt_context_instantiation(cls, ge_dir: str) -> Union[DataContext, None]:
         try:
             context = DataContext(ge_dir)
             return context

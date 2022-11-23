@@ -122,7 +122,7 @@ class ValidationDependencies:
 
     def get_metric_configuration(
         self, metric_name: str
-    ) -> Optional[MetricConfiguration]:
+    ) -> Union[MetricConfiguration, None]:
         """
         Obtains "MetricConfiguration" for specified "metric_name" from "metric_configurations" dependencies dictionary.
         """
@@ -238,7 +238,7 @@ class Validator:
         return self._metrics_calculator
 
     @property
-    def data_context(self) -> Optional[AbstractDataContext]:
+    def data_context(self) -> Union[AbstractDataContext, None]:
         """Reference to DataContext object handle."""
         return self._data_context
 
@@ -258,7 +258,7 @@ class Validator:
         return self._execution_engine.batch_manager.loaded_batch_ids
 
     @property
-    def active_batch_data(self) -> Optional[BatchData]:
+    def active_batch_data(self) -> Union[BatchData, None]:
         """Getter for BatchData object from the currently-active Batch object (convenience property)."""
         return self._execution_engine.batch_manager.active_batch_data
 
@@ -273,27 +273,27 @@ class Validator:
         return self.batch_cache
 
     @property
-    def active_batch_id(self) -> Optional[str]:
+    def active_batch_id(self) -> Union[str, None]:
         """Getter for batch_id of active Batch (convenience property)"""
         return self._execution_engine.batch_manager.active_batch_id
 
     @property
-    def active_batch(self) -> Optional[Batch]:
+    def active_batch(self) -> Union[Batch, None]:
         """Getter for active Batch (convenience property)"""
         return self._execution_engine.batch_manager.active_batch
 
     @property
-    def active_batch_spec(self) -> Optional[BatchSpec]:
+    def active_batch_spec(self) -> Union[BatchSpec, None]:
         """Getter for batch_spec of active Batch (convenience property)"""
         return self._execution_engine.batch_manager.active_batch_spec
 
     @property
-    def active_batch_markers(self) -> Optional[BatchMarkers]:
+    def active_batch_markers(self) -> Union[BatchMarkers, None]:
         """Getter for batch_markers of active Batch (convenience property)"""
         return self._execution_engine.batch_manager.active_batch_markers
 
     @property
-    def active_batch_definition(self) -> Optional[BatchDefinition]:
+    def active_batch_definition(self) -> Union[BatchDefinition, None]:
         """Getter for batch_definition of active Batch (convenience property)"""
         return self._execution_engine.batch_manager.active_batch_definition
 
@@ -696,7 +696,7 @@ class Validator:
 
         def inst_rule_based_profiler(
             *args, **kwargs
-        ) -> Optional[BaseRuleBasedProfiler]:
+        ) -> Union[BaseRuleBasedProfiler, None]:
             if args is None:
                 args = tuple()
 

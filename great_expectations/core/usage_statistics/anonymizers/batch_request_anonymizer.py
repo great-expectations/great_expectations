@@ -97,7 +97,7 @@ class BatchRequestAnonymizer(BaseAnonymizer):
 
     def _anonymize_batch_request_properties(
         self, source: Optional[Any] = None
-    ) -> Optional[Union[str, dict]]:
+    ) -> Union[str, dict, None]:
         if source is None:
             return None
 

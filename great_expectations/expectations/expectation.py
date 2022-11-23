@@ -347,7 +347,7 @@ class Expectation(metaclass=MetaExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> Tuple[str, dict, Optional[dict]]:
+    ) -> Tuple[str, dict, Union[dict, None]]:
         """
         Template function that contains the logic that is shared by AtomicPrescriptiveRendererType.SUMMARY and
         LegacyRendererType.PRESCRIPTIVE
@@ -738,7 +738,7 @@ class Expectation(metaclass=MetaExpectation):
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
-    ) -> Optional[RenderedTableContent]:
+    ) -> Union[RenderedTableContent, None]:
         if result is None:
             return None
 
@@ -1037,7 +1037,7 @@ class Expectation(metaclass=MetaExpectation):
 
     def get_domain_kwargs(
         self, configuration: ExpectationConfiguration
-    ) -> Dict[str, Optional[str]]:
+    ) -> Dict[str, Union[str, None]]:
         domain_kwargs: Dict[str, Optional[str]] = {
             key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
             for key in self.domain_keys
@@ -1461,7 +1461,7 @@ class Expectation(metaclass=MetaExpectation):
     def _get_expectation_configuration_from_examples(
         self,
         examples: List[ExpectationTestDataCases],
-    ) -> Optional[ExpectationConfiguration]:
+    ) -> Union[ExpectationConfiguration, None]:
         """Return an ExpectationConfiguration instance using test input expected to succeed"""
         if examples:
             for example in examples:

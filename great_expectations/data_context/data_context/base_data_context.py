@@ -255,7 +255,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 )
 
     @property
-    def ge_cloud_config(self) -> Optional[GXCloudConfig]:
+    def ge_cloud_config(self) -> Union[GXCloudConfig, None]:
         return self._ge_cloud_config
 
     @property
@@ -319,7 +319,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         initialize: bool = True,
         save_changes: Optional[bool] = None,
         **kwargs: dict,
-    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
+    ) -> Union[LegacyDatasource, BaseDatasource, None]:
         """
         Add named datasource, with options to initialize (and return) the datasource and save_config.
 
@@ -403,7 +403,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         return res
 
     @property
-    def root_directory(self) -> Optional[str]:
+    def root_directory(self) -> Union[str, None]:
         if hasattr(self._data_context, "_context_root_directory"):
             return self._data_context._context_root_directory
         return None
@@ -494,7 +494,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     def list_expectation_suites(
         self,
-    ) -> Optional[Union[List[str], List[GXCloudIdentifier]]]:
+    ) -> Union[List[str], List[GXCloudIdentifier], None]:
         """
         See parent 'AbstractDataContext.list_expectation_suites()` for more information.
         """
@@ -511,7 +511,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         config: DatasourceConfig,
         initialize: bool,
         save_changes: bool,
-    ) -> Optional[Datasource]:
+    ) -> Union[Datasource, None]:
         """Instantiate datasource and optionally persist datasource config to store and/or initialize datasource for use.
 
         Args:

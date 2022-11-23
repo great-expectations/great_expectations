@@ -355,7 +355,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
 
     def _map_data_reference_to_batch_definition_list(
         self, data_reference, data_asset_name: Optional[str] = None
-    ) -> Optional[List[BatchDefinition]]:
+    ) -> Union[List[BatchDefinition], None]:
         # Note: data references *are* dictionaries, allowing us to invoke `IDDict(data_reference)`
         return [
             BatchDefinition(

@@ -228,7 +228,7 @@ def get_substituted_validation_dict(
 def get_substituted_batch_request(
     substituted_runtime_config: dict,
     validation_batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-) -> Optional[Union[BatchRequest, RuntimeBatchRequest]]:
+) -> Union[Union[BatchRequest, RuntimeBatchRequest], None]:
     substituted_runtime_batch_request = substituted_runtime_config.get("batch_request")
 
     if substituted_runtime_batch_request is None and validation_batch_request is None:
@@ -457,7 +457,7 @@ def batch_request_in_validations_contains_batch_data(
 
 def get_validations_with_batch_request_as_dict(
     validations: Optional[list] = None,
-) -> Optional[list]:
+) -> Union[list, None]:
     if validations:
         for value in validations:
             if "batch_request" in value:

@@ -199,6 +199,6 @@ class InlineStoreBackend(StoreBackend):
             logger.warning(f"Could not save project config to disk: {e}")
 
     @staticmethod
-    def _determine_resource_name(key: Tuple[str, ...]) -> Optional[str]:
+    def _determine_resource_name(key: Tuple[str, ...]) -> Union[str, None]:
         resource_name: Optional[str] = key[0] or None
         return resource_name
