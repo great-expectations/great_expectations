@@ -127,6 +127,10 @@ a.pagination-nav__link:hover {
     margin-left: 4px;
 }
 
+.navbar__items--right > :last-child {
+    padding-right: 16px;
+}
+
 .header-cloud-link {
     border: none;
     border-radius: 35px;
