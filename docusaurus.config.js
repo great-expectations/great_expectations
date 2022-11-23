@@ -65,58 +65,93 @@ module.exports = {
     navbar: {
       logo: {
         alt: 'Great Expectations',
-        src: 'img/great-expectations-logo-full-size.png',
+        src: 'img/gx-logo.svg',
         href: 'https://greatexpectations.io'
       },
       items: [
+        {
+          label: 'Product',
+          position: 'right',
+          items: [
+            {
+              label: 'GX ClOUD',
+              href: 'https://greatexpectations.io/gx-cloud'
+            },
+            {
+              label: 'GX OSS',
+              href: 'https://greatexpectations.io/gx-oss'
+            }
+          ]
+        },
         {
           label: 'Community',
           position: 'right',
           items: [
             {
-              label: 'Slack',
+              label: 'COMMUNITY HOME',
+              href: 'https://greatexpectations.io/community'
+            },
+            {
+              label: 'SLACK',
               href: 'https://greatexpectations.io/slack'
             },
             {
-              label: 'Github',
+              label: 'GITHUB',
               href: 'https://github.com/great-expectations/great_expectations'
             },
             {
-              label: 'Discussions',
-              href: 'https://github.com/great-expectations/great_expectations/discussions/'
-            },
-            {
-              label: 'Newsletter',
+              label: 'NEWSLETTER',
               href: 'https://greatexpectations.io/newsletter'
             }
           ]
         },
         {
-          label: 'Expectations',
-          position: 'right',
-          href: 'https://greatexpectations.io/expectations'
-        },
-        {
-          label: 'Documentation',
+          label: 'RESOURCES',
           position: 'right',
           items: [
             {
-              label: 'V2 Documentation',
-              href: 'https://legacy.docs.greatexpectations.io/en/latest'
-              // activeBasePath: 'docs',
+              label: 'INTEGRATIONS',
+              href: 'https://greatexpectations.io/integrations'
+            },
+            {
+              label: 'DOCUMENTATION',
+              href: 'https://docs.greatexpectations.io/docs/'
+            },
+            {
+              label: 'EXPECTATION GALLERY',
+              href: 'https://greatexpectations.io/expectations'
+            },
+            {
+              label: 'GREAT EXPECTATIONS BLOG',
+              href: 'https://greatexpectations.io/blog'
+            },
+            {
+              label: 'GREAT EXPECTATIONS CASE STUDIES',
+              href: 'https://greatexpectations.io/case-studies'
             }
           ]
         },
         {
-          label: 'Case Studies',
+          label: 'Company',
           position: 'right',
-          href: 'https://greatexpectations.io/case-studies'
+          items: [
+            {
+              label: 'ABOUT US',
+              href: 'https://greatexpectations.io/company'
+            },
+            {
+              label: 'CAREERS',
+              href: 'https://greatexpectations.io/case-studies'
+            }
+          ]
         },
         {
-          label: 'Blog',
+          href: 'https://greatexpectations.io/cloud',
+          label: "Early cloud access",
           position: 'right',
-          href: 'https://greatexpectations.io/blog'
-        }
+          className: 'header-cloud-link',
+          'aria-label': 'Early cloud access',
+        },
       ]
     },
     footer: {
