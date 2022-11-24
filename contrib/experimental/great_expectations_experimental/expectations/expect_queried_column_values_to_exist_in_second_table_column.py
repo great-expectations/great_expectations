@@ -98,11 +98,13 @@ class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
                             "aaa",
                             "aaa",
                             "bbb",
-                        ], "date_created":
-                    ['2022-02-02',
-                     '2022-02-02',
-                     '2022-02-02',
-                     '2022-02-02'],
+                        ],
+                        "date_created": [
+                            "2022-02-02",
+                            "2022-02-02",
+                            "2022-02-02",
+                            "2022-02-02",
+                        ],
                     },
                 },
             ],
@@ -116,9 +118,8 @@ class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
                             "second_table_full_name": "test_2",
                             "first_table_column": "msid",
                             "second_table_column": "msid",
-                            "condition": "1=1"
+                            "condition": "1=1",
                         },
-
                     },
                     "out": {"success": False},
                     "only_for": ["sqlite"],
@@ -132,7 +133,7 @@ class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
                             "second_table_full_name": "test_3",
                             "first_table_column": "msid",
                             "second_table_column": "msid",
-                            "condition": "date_created > date('2022-01-01')"
+                            "condition": "date_created > date('2022-01-01')",
                         }
                     },
                     "out": {"success": True},
