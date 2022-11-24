@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
@@ -8,39 +8,48 @@ from great_expectations.expectations.expectation import (
 )
 
 
-class ExpectAllIdsInFirstTableExistInSecondTableCustom(QueryExpectation):
-    """Expect the frequency of occurrences of a specified value in a queried column to be at least <threshold>
-    percent of values in that column."""
+class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
+    """Expect all values in a specific column to exist in another table's column.
+    Args:
+        template_dict: a dictionary containing the following keys:
+             "first_table_column" - name of the main table column
+             "second_table_column" - name of the column to compare to, in the second table
+             "second_table_full_name"
+             "condition": additional condition added in the where clause, provide "1=1" if not needed.
+    """
 
+    library_metadata = {
+        "tags": [
+            "query-based",
+        ],
+        "contributors": ["@itaise"],
+    }
     metric_dependencies = ("query.template_values",)
 
     query = """
     select count(1) from (
-    SELECT a.{first_table_id_column}
+    SELECT a.{first_table_column}
                     FROM {active_batch} a
                     LEFT JOIN {second_table_full_name} b
-                    ON (a.{first_table_id_column}=b.{second_table_id_column})
-                    WHERE b.{second_table_id_column} IS NULL
+                    ON a.{first_table_column}=b.{second_table_column}
+                    WHERE b.{second_table_column} IS NULL
+                    and {condition}
                     GROUP BY 1
-                    )       
+    )
     """
 
-    success_keys = ("template_dict" "query",)
-
+    success_keys = ("template_dict", "query")
     domain_keys = (
         "query",
         "template_dict",
         "batch_id",
-        "row_condition",
-        "condition_parser",
     )
+
     default_kwarg_values = {
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
         "meta": None,
-        "column": None,
-        "value": "dummy_value",
         "query": query,
     }
 
@@ -72,33 +81,28 @@ class ExpectAllIdsInFirstTableExistInSecondTableCustom(QueryExpectation):
                 {
                     "dataset_name": "test",
                     "data": {
-                        "msid": [
-                            "aaa",
-                            "aaa",
-                            "aaa",
-                            "aaa",
-                            "aaa",
-                            "aaa",
-                            "aaa",
-                            "aaa",
-                            "bbb",
-                        ],
+                        "msid": ["aaa", "bbb"],
                     },
                 },
                 {
                     "dataset_name": "test_2",
                     "data": {
+                        "msid": ["aaa", "aaa"],
+                    },
+                },
+                {
+                    "dataset_name": "test_3",
+                    "data": {
                         "msid": [
                             "aaa",
                             "aaa",
                             "aaa",
-                            "aaa",
-                            "aaa",
-                            "aaa",
-                            "aaa",
-                            "aaa",
-                            "aaa",
-                        ],
+                            "bbb",
+                        ], "date_created":
+                    ['2022-02-02',
+                     '2022-02-02',
+                     '2022-02-02',
+                     '2022-02-02'],
                     },
                 },
             ],
@@ -110,13 +114,30 @@ class ExpectAllIdsInFirstTableExistInSecondTableCustom(QueryExpectation):
                     "in": {
                         "template_dict": {
                             "second_table_full_name": "test_2",
-                            "first_table_id_column": "msid",
-                            "second_table_id_column": "msid",
-                        }
+                            "first_table_column": "msid",
+                            "second_table_column": "msid",
+                            "condition": "1=1"
+                        },
+
                     },
                     "out": {"success": False},
-                    "only_for": ["sqlite", "spark"],
-                }
+                    "only_for": ["sqlite"],
+                },
+                {
+                    "title": "basic_positive_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "template_dict": {
+                            "second_table_full_name": "test_3",
+                            "first_table_column": "msid",
+                            "second_table_column": "msid",
+                            "condition": "date_created > date('2022-01-01')"
+                        }
+                    },
+                    "out": {"success": True},
+                    "only_for": ["sqlite"],
+                },
             ],
             "test_backends": [
                 {
@@ -134,4 +155,4 @@ class ExpectAllIdsInFirstTableExistInSecondTableCustom(QueryExpectation):
 
 
 if __name__ == "__main__":
-    ExpectAllIdsInFirstTableExistInSecondTableCustom().print_diagnostic_checklist()
+    ExpectQueriedColumnValuesToExistInSecondTableColumn().print_diagnostic_checklist()
