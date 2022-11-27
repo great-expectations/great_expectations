@@ -13,8 +13,17 @@ from great_expectations.expectations.expectation import (
 
 
 class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
-    """Expect the frequency of occurrences of a specified value in a queried column to be at least <threshold>
-    percent of values in that column."""
+    """Expect Slowly changing table type II to have no gaps between the 'end date' of each row, and the next
+    'start date' in the next row.
+    Args:
+        template_dict: a dictionary containing the following keys:
+            "primary_key": primary key column name (or multiple columns, comma separated)
+            "open_date_column": name of the column representing open date
+            "close_date_column": name of the column representing clode date
+
+        threshold: an optional parameter - default is zero.
+            if the ratio of "gaps" to total table rows is higher than threshold - error will be raised.
+    """
 
     metric_dependencies = ("query.template_values",)
 
