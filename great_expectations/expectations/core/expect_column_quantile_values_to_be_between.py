@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -24,6 +24,7 @@ from great_expectations.render import (
     renderedAtomicValueSchema,
 )
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import RendererConfiguration
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
@@ -289,19 +290,13 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
-        styling = runtime_configuration.get("styling")
+        renderer_configuration: RendererConfiguration,
+    ) -> Tuple[str, dict, Union[dict, None], List[dict], List[List[dict]]]:
+        kwargs: dict = renderer_configuration.kwargs
+        include_column_name: bool = renderer_configuration.include_column_name
+        styling: Union[dict, None] = renderer_configuration.styling
         params = substitute_none_for_missing(
-            configuration["kwargs"],
+            kwargs,
             ["column", "quantile_ranges", "row_condition", "condition_parser"],
         )
 
@@ -403,11 +398,16 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
+    ) -> RenderedAtomicContent:
         """
         Rendering function that is utilized by GE Cloud Front-end
         """
+        renderer_configuration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            language=language,
+            runtime_configuration=runtime_configuration,
+        )
         (
             header_template_str,
             header_params_with_json_schema,
@@ -415,7 +415,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             table_header_row,
             table_rows,
         ) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, **kwargs
+            renderer_configuration=renderer_configuration
         )
         value_obj = renderedAtomicValueSchema.load(
             {
@@ -447,15 +447,17 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+    ) -> List[dict, RenderedTableContent]:
+        renderer_configuration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            language=language,
+            runtime_configuration=runtime_configuration,
         )
-        styling = runtime_configuration.get("styling")
+        kwargs: dict = renderer_configuration.kwargs
+        include_column_name: bool = renderer_configuration.include_column_name
         params = substitute_none_for_missing(
-            configuration["kwargs"],
+            kwargs,
             ["column", "quantile_ranges", "row_condition", "condition_parser"],
         )
         template_str = "quantiles must be within the following value ranges."
@@ -529,8 +531,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
+    ) -> Union[RenderedTableContent, str]:
         if result.result is None or result.result.get("observed_value") is None:
             return "--"
 
@@ -567,16 +568,19 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     @classmethod
     def _atomic_diagnostic_observed_value_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
+        renderer_configuration: RendererConfiguration,
+    ) -> Tuple[
+        Union[str, None],
+        Union[dict, None],
+        Union[List[dict], None],
+        Union[List[List[dict]], None],
+    ]:
         template_string = None
         params_with_json_schema = None
         table_header_row = None
         table_rows = None
+
+        result: ExpectationValidationResult = renderer_configuration.result
 
         if result.result is None or result.result.get("observed_value") is None:
             template_string = "--"
@@ -623,15 +627,20 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
+    ) -> RenderedAtomicContent:
+        renderer_configuration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            language=language,
+            runtime_configuration=runtime_configuration,
+        )
         (
             template_string,
             params_with_json_schema,
             table_header_row,
             table_rows,
         ) = cls._atomic_diagnostic_observed_value_template(
-            configuration, result, language, runtime_configuration, **kwargs
+            renderer_configuration=renderer_configuration
         )
         if template_string is not None:
             value_obj = renderedAtomicValueSchema.load(
@@ -668,8 +677,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
+    ) -> RenderedTableContent:
         assert result, "Must pass in result."
         table_rows = []
         quantiles = result.result["observed_value"]["quantiles"]
