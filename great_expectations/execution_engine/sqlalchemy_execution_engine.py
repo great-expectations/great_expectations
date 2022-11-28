@@ -494,7 +494,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def _get_sqlalchemy_key_pair_auth_url(
         drivername: str,
         credentials: dict,
-    ) -> Tuple["sa.engine.url.URL", Dict]:
+    ) -> Tuple["sa.engine.url.URL", dict]:
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
         values into a private key. If passphrase is incorrect, this will fail and an exception is raised.
@@ -544,7 +544,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def get_domain_records(  # noqa: C901 - 24
         self,
-        domain_kwargs: Dict,
+        domain_kwargs: dict,
     ) -> Selectable:
         """
         Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to
@@ -771,7 +771,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def get_compute_domain(
         self,
-        domain_kwargs: Dict,
+        domain_kwargs: dict,
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[Selectable, dict, dict]:
@@ -799,7 +799,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def _split_column_metric_domain_kwargs(  # type: ignore[override] # ExecutionEngine method is static
         self,
-        domain_kwargs: Dict,
+        domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
         """Split domain_kwargs for column domain types into compute and accessor domain kwargs.
@@ -817,8 +817,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             domain_type == MetricDomainTypes.COLUMN
         ), "This method only supports MetricDomainTypes.COLUMN"
 
-        compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
-        accessor_domain_kwargs: Dict = {}
+        compute_domain_kwargs: dict = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs: dict = {}
 
         if "column" not in compute_domain_kwargs:
             raise ge_exceptions.GreatExpectationsError(
@@ -839,7 +839,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def _split_column_pair_metric_domain_kwargs(  # type: ignore[override] # ExecutionEngine method is static
         self,
-        domain_kwargs: Dict,
+        domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
         """Split domain_kwargs for column pair domain types into compute and accessor domain kwargs.
@@ -857,8 +857,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             domain_type == MetricDomainTypes.COLUMN_PAIR
         ), "This method only supports MetricDomainTypes.COLUMN_PAIR"
 
-        compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
-        accessor_domain_kwargs: Dict = {}
+        compute_domain_kwargs: dict = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs: dict = {}
 
         if not (
             "column_A" in compute_domain_kwargs and "column_B" in compute_domain_kwargs
@@ -885,7 +885,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def _split_multi_column_metric_domain_kwargs(  # type: ignore[override] # ExecutionEngine method is static
         self,
-        domain_kwargs: Dict,
+        domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
         """Split domain_kwargs for multicolumn domain types into compute and accessor domain kwargs.
@@ -903,8 +903,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             domain_type == MetricDomainTypes.MULTICOLUMN
         ), "This method only supports MetricDomainTypes.MULTICOLUMN"
 
-        compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
-        accessor_domain_kwargs: Dict = {}
+        compute_domain_kwargs: dict = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs: dict = {}
 
         if "column_list" not in domain_kwargs:
             raise GreatExpectationsError("column_list not found within domain_kwargs")
@@ -963,13 +963,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             compute_domain_kwargs: dict = (
                 bundled_metric_configuration.compute_domain_kwargs
             )
-
             if not isinstance(compute_domain_kwargs, IDDict):
                 compute_domain_kwargs = IDDict(compute_domain_kwargs)
 
-            domain_id = IDDict.convert_dictionary_to_id_dict(
-                data=convert_to_json_serializable(data=compute_domain_kwargs)
-            ).to_id()
+            domain_id = compute_domain_kwargs.to_id()
             if domain_id not in queries:
                 queries[domain_id] = {
                     "select": [],
@@ -1024,7 +1021,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
                 logger.debug(
                     f"""SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id \
-{IDDict.convert_dictionary_to_id_dict(data=convert_to_json_serializable(data=domain_kwargs)).to_id()}"""
+{IDDict(domain_kwargs).to_id()}"""
                 )
             except OperationalError as oe:
                 exception_message: str = "An SQL execution Exception occurred.  "

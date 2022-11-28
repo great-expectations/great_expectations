@@ -41,6 +41,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     VARIABLES_KEY,
 )
 from great_expectations.util import isclose
+from great_expectations.validator.validator import ValidationDependencies
 
 
 class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
@@ -721,15 +722,19 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
-    ):
-        all_dependencies = super().get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
+    ) -> ValidationDependencies:
+        validation_dependencies: ValidationDependencies = (
+            super().get_validation_dependencies(
+                configuration, execution_engine, runtime_configuration
+            )
         )
         # column.quantile_values expects a "quantiles" key
-        all_dependencies["metrics"]["column.quantile_values"].metric_value_kwargs[
+        validation_dependencies.get_metric_configuration(
+            metric_name="column.quantile_values"
+        ).metric_value_kwargs["quantiles"] = configuration.kwargs["quantile_ranges"][
             "quantiles"
-        ] = configuration.kwargs["quantile_ranges"]["quantiles"]
-        return all_dependencies
+        ]
+        return validation_dependencies
 
     def _validate(
         self,
