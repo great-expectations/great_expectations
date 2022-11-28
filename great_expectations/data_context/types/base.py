@@ -235,19 +235,19 @@ class SorterConfigSchema(Schema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        missing="great_expectations.datasource.data_connector.sorter",
+        load_default="great_expectations.datasource.data_connector.sorter",
     )
     orderby = fields.String(
         required=False,
         allow_none=True,
-        missing="asc",
+        load_default="asc",
     )
 
     # allow_none = True because it is only used by some Sorters
     reference_list = fields.List(
         cls_or_instance=fields.Str(),
         required=False,
-        missing=None,
+        load_default=None,
         allow_none=True,
     )
     order_keys_by = fields.String(
@@ -257,12 +257,12 @@ class SorterConfigSchema(Schema):
     key_reference_list = fields.List(
         cls_or_instance=fields.Str(),
         required=False,
-        missing=None,
+        load_default=None,
         allow_none=True,
     )
     datetime_format = fields.String(
         required=False,
-        missing=None,
+        load_default=None,
         allow_none=True,
     )
 
@@ -359,12 +359,12 @@ class AssetConfigSchema(Schema):
     class_name = fields.String(
         required=False,
         allow_none=True,
-        missing="Asset",
+        load_default="Asset",
     )
     module_name = fields.String(
         required=False,
-        all_none=True,
-        missing="great_expectations.datasource.data_connector.asset",
+        metadata={"all_none": True},
+        load_default="great_expectations.datasource.data_connector.asset",
     )
     base_directory = fields.String(required=False, allow_none=True)
     glob_directive = fields.String(required=False, allow_none=True)
@@ -611,7 +611,7 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        missing="great_expectations.datasource.data_connector",
+        load_default="great_expectations.datasource.data_connector",
     )
 
     assets = fields.Dict(
@@ -976,7 +976,7 @@ class ExecutionEngineConfigSchema(Schema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        load_default="great_expectations.execution_engine",
+        dump_default="great_expectations.execution_engine",
     )
     connection_string = fields.String(required=False, allow_none=True)
     credentials = fields.Raw(required=False, allow_none=True)
@@ -1152,12 +1152,12 @@ class DatasourceConfigSchema(AbstractConfigSchema):
     class_name = fields.String(
         required=False,
         allow_none=True,
-        missing="Datasource",
+        load_default="Datasource",
     )
     module_name = fields.String(
         required=False,
         allow_none=True,
-        missing="great_expectations.datasource",
+        load_default="great_expectations.datasource",
     )
     force_reuse_spark_context = fields.Bool(required=False, allow_none=True)
     spark_config = fields.Raw(required=False, allow_none=True)
@@ -1310,7 +1310,7 @@ class AnonymizedUsageStatisticsConfig(DictDot):
 
 class AnonymizedUsageStatisticsConfigSchema(Schema):
     data_context_id = fields.UUID()
-    enabled = fields.Boolean(default=True)
+    enabled = fields.Boolean(dump_default=True)
     usage_statistics_url = fields.URL(allow_none=True)
     _explicit_url = fields.Boolean(required=False)
 
@@ -1395,9 +1395,9 @@ class NotebookConfig(DictDot):
 
 
 class NotebookConfigSchema(Schema):
-    class_name = fields.String(missing="SuiteEditNotebookRenderer")
+    class_name = fields.String(load_default="SuiteEditNotebookRenderer")
     module_name = fields.String(
-        missing="great_expectations.render.renderer.v3.suite_edit_notebook_renderer"
+        load_default="great_expectations.render.renderer.v3.suite_edit_notebook_renderer"
     )
     custom_templates_module = fields.String(allow_none=True)
 
@@ -1466,9 +1466,9 @@ class ProgressBarsConfig(DictDot):
 
 
 class ProgressBarsConfigSchema(Schema):
-    globally = fields.Boolean(default=True)
-    profilers = fields.Boolean(default=True)
-    metric_calculations = fields.Boolean(default=True)
+    globally = fields.Boolean(dump_default=True)
+    profilers = fields.Boolean(dump_default=True)
+    metric_calculations = fields.Boolean(dump_default=True)
 
 
 class IncludeRenderedContentConfig(DictDot):
@@ -1484,9 +1484,9 @@ class IncludeRenderedContentConfig(DictDot):
 
 
 class IncludeRenderedContentConfigSchema(Schema):
-    globally = fields.Boolean(default=False)
-    expectation_suite = fields.Boolean(default=False)
-    expectation_validation_result = fields.Boolean(default=False)
+    globally = fields.Boolean(dump_default=False)
+    expectation_suite = fields.Boolean(dump_default=False)
+    expectation_validation_result = fields.Boolean(dump_default=False)
 
 
 class ConcurrencyConfig(DictDot):
@@ -1537,7 +1537,7 @@ class ConcurrencyConfig(DictDot):
 class ConcurrencyConfigSchema(Schema):
     """WARNING: This class is experimental."""
 
-    enabled = fields.Boolean(default=False)
+    enabled = fields.Boolean(dump_default=False)
 
 
 class GXCloudConfig(DictDot):
@@ -2550,7 +2550,7 @@ class CheckpointConfigSchema(Schema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        missing="great_expectations.checkpoint",
+        load_default="great_expectations.checkpoint",
     )
     run_name_template = fields.String(required=False, allow_none=True)
     expectation_suite_name = fields.String(required=False, allow_none=True)
