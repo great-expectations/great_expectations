@@ -447,7 +447,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> List[dict, RenderedTableContent]:
+    ) -> List[Union[dict, RenderedTableContent]]:
         renderer_configuration = RendererConfiguration(
             configuration=configuration,
             result=result,
