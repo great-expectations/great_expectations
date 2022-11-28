@@ -177,7 +177,7 @@ class Batch:
         self._data_asset: DataAsset = data_asset
         self._batch_request: BatchRequest = batch_request
         self._data: BatchDataType = data
-        self.metadata = metadata if metadata is not None else {}
+        self.metadata = metadata or {}
 
         # computed property
         # We need to unique identifier. This will likely change as I get more input

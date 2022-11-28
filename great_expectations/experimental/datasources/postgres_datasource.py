@@ -273,7 +273,7 @@ class PostgresDatasource(Datasource):
         batch_list: List[Batch] = []
         column_splitter = data_asset.column_splitter
         for request in data_asset.fully_specified_batch_requests(batch_request):
-            batch_metadata = copy.copy(request.options)
+            batch_metadata = copy.deepcopy(request.options)
             batch_spec_kwargs = {
                 "type": "table",
                 "data_asset_name": data_asset.name,
