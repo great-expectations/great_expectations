@@ -84,6 +84,7 @@ from great_expectations.render import (
     renderedAtomicValueSchema,
 )
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import RendererConfiguration
 from great_expectations.render.util import num_to_str
 from great_expectations.self_check.util import (
     evaluate_json_test_v3_api,
@@ -288,41 +289,31 @@ class Expectation(metaclass=MetaExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ) -> RenderedAtomicContent:
         """
         Default rendering function that is utilized by GE Cloud Front-end if an implemented atomic renderer fails
         """
+        renderer_configuration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            language=language,
+            runtime_configuration=runtime_configuration,
+        )
+
         template_str = "Rendering failed for Expectation: "
 
-        expectation_type: str
-        expectation_kwargs: dict
-        if configuration:
-            expectation_type = configuration.expectation_type
-            expectation_kwargs = configuration.kwargs
-        else:
-            if not isinstance(result, ExpectationValidationResult):
-                expectation_validation_result_value_error_msg = (
-                    "Renderer requires an ExpectationConfiguration or ExpectationValidationResult to be passed in via "
-                    "configuration or result respectively."
-                )
-                raise ValueError(expectation_validation_result_value_error_msg)
-
-            if not isinstance(result.expectation_config, ExpectationConfiguration):
-                expectation_configuration_value_error_msg = (
-                    "Renderer requires an ExpectationConfiguration to be passed via "
-                    "configuration or result.expectation_config."
-                )
-                raise ValueError(expectation_configuration_value_error_msg)
-            expectation_type = result.expectation_config.expectation_type
-            expectation_kwargs = result.expectation_config.kwargs
+        kwargs: dict = renderer_configuration.kwargs
+        expectation_type: str = renderer_configuration.expectation_type
 
         params_with_json_schema = {
             "expectation_type": {
                 "schema": {"type": "string"},
                 "value": expectation_type,
             },
-            "kwargs": {"schema": {"type": "string"}, "value": expectation_kwargs},
+            "kwargs": {"schema": {"type": "string"}, "value": kwargs},
         }
         template_str += "$expectation_type(**$kwargs)."
 
@@ -343,41 +334,16 @@ class Expectation(metaclass=MetaExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
-        runtime_configuration: Optional[dict] = None,
-    ) -> Tuple[str, dict, Optional[dict]]:
+        renderer_configuration: RendererConfiguration,
+    ) -> Tuple[str, dict, Union[dict, None]]:
         """
         Template function that contains the logic that is shared by AtomicPrescriptiveRendererType.SUMMARY and
         LegacyRendererType.PRESCRIPTIVE
         """
-        if runtime_configuration is None:
-            runtime_configuration = {}
 
-        styling: Optional[dict] = runtime_configuration.get("styling")
-
-        expectation_type: str
-        expectation_kwargs: dict
-        if configuration:
-            expectation_type = configuration.expectation_type
-            expectation_kwargs = configuration.kwargs
-        else:
-            if not isinstance(result, ExpectationValidationResult):
-                expectation_validation_result_value_error_msg = (
-                    "Renderer requires an ExpectationConfiguration or ExpectationValidationResult to be passed in via "
-                    "configuration or result respectively."
-                )
-                raise ValueError(expectation_validation_result_value_error_msg)
-
-            if not isinstance(result.expectation_config, ExpectationConfiguration):
-                expectation_configuration_value_error_msg = (
-                    "Renderer requires an ExpectationConfiguration to be passed via "
-                    "configuration or result.expectation_config."
-                )
-                raise ValueError(expectation_configuration_value_error_msg)
-            expectation_type = result.expectation_config.expectation_type
-            expectation_kwargs = result.expectation_config.kwargs
+        expectation_type: str = renderer_configuration.expectation_type
+        kwargs: dict = renderer_configuration.kwargs
+        styling: Union[dict, None] = renderer_configuration.styling
 
         params_with_json_schema = {
             "expectation_type": {
@@ -386,7 +352,7 @@ class Expectation(metaclass=MetaExpectation):
             },
             "kwargs": {
                 "schema": {"type": "string"},
-                "value": expectation_kwargs,
+                "value": kwargs,
             },
         }
         template_str = "$expectation_type(**$kwargs)"
@@ -403,18 +369,23 @@ class Expectation(metaclass=MetaExpectation):
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
-    ):
+    ) -> RenderedAtomicContent:
         """
         Rendering function that is utilized by GE Cloud Front-end
         """
+        renderer_configuration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            language=language,
+            runtime_configuration=runtime_configuration,
+        )
+
         (
             template_str,
             params_with_json_schema,
             styling,
         ) = cls._atomic_prescriptive_template(
-            configuration=configuration,
-            result=result,
-            runtime_configuration=runtime_configuration,
+            renderer_configuration=renderer_configuration
         )
         value_obj = renderedAtomicValueSchema.load(
             {
@@ -439,28 +410,15 @@ class Expectation(metaclass=MetaExpectation):
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
-    ):
-        expectation_type: str
-        expectation_kwargs: dict
-        if configuration:
-            expectation_type = configuration.expectation_type
-            expectation_kwargs = configuration.kwargs
-        else:
-            if not isinstance(result, ExpectationValidationResult):
-                expectation_validation_result_value_error_msg = (
-                    "Renderer requires an ExpectationConfiguration or ExpectationValidationResult to be passed in via "
-                    "configuration or result respectively."
-                )
-                raise ValueError(expectation_validation_result_value_error_msg)
-
-            if not isinstance(result.expectation_config, ExpectationConfiguration):
-                expectation_configuration_value_error_msg = (
-                    "Renderer requires an ExpectationConfiguration to be passed via "
-                    "configuration or result.expectation_config."
-                )
-                raise ValueError(expectation_configuration_value_error_msg)
-            expectation_type = result.expectation_config.expectation_type
-            expectation_kwargs = result.expectation_config.kwargs
+    ) -> List[RenderedStringTemplateContent]:
+        renderer_configuration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            language=language,
+            runtime_configuration=runtime_configuration,
+        )
+        expectation_type: str = renderer_configuration.expectation_type
+        kwargs: dict = renderer_configuration.kwargs
         return [
             RenderedStringTemplateContent(
                 **{
@@ -470,7 +428,7 @@ class Expectation(metaclass=MetaExpectation):
                         "template": "$expectation_type(**$kwargs)",
                         "params": {
                             "expectation_type": expectation_type,
-                            "kwargs": expectation_kwargs,
+                            "kwargs": kwargs,
                         },
                         "styling": {
                             "params": {
@@ -552,7 +510,7 @@ class Expectation(metaclass=MetaExpectation):
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
-    ):
+    ) -> RenderedStringTemplateContent:
         assert result, "Must provide a result object."
         if result.exception_info["raised_exception"]:
             return RenderedStringTemplateContent(
@@ -738,7 +696,7 @@ class Expectation(metaclass=MetaExpectation):
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
-    ) -> Optional[RenderedTableContent]:
+    ) -> Union[RenderedTableContent, None]:
         if result is None:
             return None
 
@@ -843,33 +801,22 @@ class Expectation(metaclass=MetaExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ) -> RenderedAtomicContent:
         """
         Rendering function that is utilized by GE Cloud Front-end
         """
+        renderer_configuration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            language=language,
+            runtime_configuration=runtime_configuration,
+        )
 
-        expectation_type: str
-        expectation_kwargs: dict
-        if configuration:
-            expectation_type = configuration.expectation_type
-            expectation_kwargs = configuration.kwargs
-        else:
-            if not isinstance(result, ExpectationValidationResult):
-                expectation_validation_result_value_error_msg = (
-                    "Renderer requires an ExpectationConfiguration or ExpectationValidationResult to be passed in via "
-                    "configuration or result respectively."
-                )
-                raise ValueError(expectation_validation_result_value_error_msg)
-
-            if not isinstance(result.expectation_config, ExpectationConfiguration):
-                expectation_configuration_value_error_msg = (
-                    "Renderer requires an ExpectationConfiguration to be passed via "
-                    "configuration or result.expectation_config."
-                )
-                raise ValueError(expectation_configuration_value_error_msg)
-            expectation_type = result.expectation_config.expectation_type
-            expectation_kwargs = result.expectation_config.kwargs
+        expectation_type: str = renderer_configuration.expectation_type
+        kwargs: dict = renderer_configuration.kwargs
 
         params_with_json_schema = {
             "expectation_type": {
@@ -878,7 +825,7 @@ class Expectation(metaclass=MetaExpectation):
             },
             "kwargs": {
                 "schema": {"type": "string"},
-                "value": expectation_kwargs,
+                "value": kwargs,
             },
         }
         template_str = "Rendering failed for Expectation: $expectation_type(**$kwargs)."
@@ -1037,7 +984,7 @@ class Expectation(metaclass=MetaExpectation):
 
     def get_domain_kwargs(
         self, configuration: ExpectationConfiguration
-    ) -> Dict[str, Optional[str]]:
+    ) -> Dict[str, Union[str, None]]:
         domain_kwargs: Dict[str, Optional[str]] = {
             key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
             for key in self.domain_keys
@@ -1461,7 +1408,7 @@ class Expectation(metaclass=MetaExpectation):
     def _get_expectation_configuration_from_examples(
         self,
         examples: List[ExpectationTestDataCases],
-    ) -> Optional[ExpectationConfiguration]:
+    ) -> Union[ExpectationConfiguration, None]:
         """Return an ExpectationConfiguration instance using test input expected to succeed"""
         if examples:
             for example in examples:

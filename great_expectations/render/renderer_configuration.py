@@ -16,6 +16,7 @@ class RendererConfiguration:
     language: str = "en"
     runtime_configuration: dict = field(default_factory=dict)
     kwargs: dict = field(init=False)
+    expectation_type: str = field(init=False)
     include_column_name: bool = field(init=False)
     styling: Union[dict, None] = field(init=False)
 
@@ -23,12 +24,16 @@ class RendererConfiguration:
         kwargs: dict
         if self.configuration:
             kwargs = self.configuration.kwargs
+            expectation_type = self.configuration.expectation_type
         elif self.result and self.result.expectation_config:
             kwargs = self.result.expectation_config.kwargs
+            expectation_type = self.result.expectation_config.expectation_type
         else:
             kwargs = {}
+            expectation_type = ""
 
         object.__setattr__(self, "kwargs", kwargs)
+        object.__setattr__(self, "expectation_type", expectation_type)
 
         include_column_name: bool = True
         styling: Union[dict, None] = None
