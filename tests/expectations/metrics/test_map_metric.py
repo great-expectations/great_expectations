@@ -258,7 +258,7 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_explicitly
             "mostly": 0.9,
             "value_set": ["cat", "fish", "dog"],
             "result_format": {
-                "result_format": "SUMMARY",
+                "result_format": "SUMMARY",  # SUMMARY will include partial_unexpected* values only
                 "include_unexpected_rows": False,  # this is the default value, but making explicit for testing purposes
             },
         },
@@ -303,7 +303,7 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_including_
             "mostly": 0.9,
             "value_set": ["cat", "fish", "dog"],
             "result_format": {
-                "result_format": "SUMMARY",
+                "result_format": "SUMMARY",  # SUMMARY will include partial_unexpected* values only
                 "include_unexpected_rows": True,
             },
         },
@@ -469,10 +469,18 @@ def test_pandas_single_unexpected_index_column_names_complete_result_format(
             {"count": 1, "value": "lion"},
             {"count": 1, "value": "zebra"},
         ],
-        "partial_unexpected_index_list": [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}],
+        "partial_unexpected_index_list": [
+            {"pk_1": 3},
+            {"pk_1": 4},
+            {"pk_1": 5},
+        ],  # Dict since a column was provided
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
-        "unexpected_index_list": [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}],
+        "unexpected_index_list": [
+            {"pk_1": 3},
+            {"pk_1": 4},
+            {"pk_1": 5},
+        ],  # Dict since a column was provided
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
@@ -518,14 +526,14 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format(
             {"pk_1": 3, "pk_2": "three"},
             {"pk_1": 4, "pk_2": "four"},
             {"pk_1": 5, "pk_2": "five"},
-        ],
+        ],  # Dicts since columns were provided
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
         "unexpected_index_list": [
             {"pk_1": 3, "pk_2": "three"},
             {"pk_1": 4, "pk_2": "four"},
             {"pk_1": 5, "pk_2": "five"},
-        ],
+        ],  # Dicts since columns were provided
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
@@ -612,12 +620,12 @@ def test_pandas_multiple_unexpected_index_column_names_summary_result_format(
             {"count": 1, "value": "giraffe"},
             {"count": 1, "value": "lion"},
             {"count": 1, "value": "zebra"},
-        ],
+        ],  # Dicts since columns were provided
         "partial_unexpected_index_list": [
             {"pk_1": 3, "pk_2": "three"},
             {"pk_1": 4, "pk_2": "four"},
             {"pk_1": 5, "pk_2": "five"},
-        ],
+        ],  # Dicts since columns were provided
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
         "unexpected_percent": 50.0,
@@ -657,7 +665,9 @@ def test_pandas_multiple_unexpected_index_column_names_summary_result_format_lim
         "missing_count": 0,
         "missing_percent": 0.0,
         "partial_unexpected_counts": [{"count": 1, "value": "giraffe"}],
-        "partial_unexpected_index_list": [{"pk_1": 3, "pk_2": "three"}],
+        "partial_unexpected_index_list": [
+            {"pk_1": 3, "pk_2": "three"}
+        ],  # Dicts since columns were provided
         "partial_unexpected_list": ["giraffe"],
         "unexpected_count": 3,
         "unexpected_percent": 50.0,
@@ -675,7 +685,7 @@ def test_pandas_multiple_unexpected_index_column_names_basic_result_format(
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
             "result_format": {
-                "result_format": "BASIC",  # SUMMARY will include partial_unexpected_list only, which means unexpected_index_column_names will have no effect
+                "result_format": "BASIC",  # BASIC will not include index information
                 "unexpected_index_column_names": ["pk_1", "pk_2"],
             },
         },
