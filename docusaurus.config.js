@@ -10,7 +10,7 @@ module.exports = {
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
-  favicon: 'https://greatexpectations.io/favicon-32x32.png',
+  favicon: '/img/gx-mark.png',
   organizationName: 'great-expectations',
   projectName: 'great_expectations',
   plugins: [
@@ -149,7 +149,7 @@ module.exports = {
         },
         {
           href: 'https://greatexpectations.io/cloud',
-          label: 'Early cloud access',
+          label: 'Cloud early access',
           position: 'right',
           className: 'header-cloud-link',
           'aria-label': 'Early cloud access'
