@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -146,7 +145,6 @@ class ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage(
 
 if __name__ == "__main__":
     ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage().print_diagnostic_checklist()
-=======
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -294,4 +292,3 @@ class ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage(
 
 if __name__ == "__main__":
     ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage().print_diagnostic_checklist()
->>>>>>> 3e94cd6a8e19e52aa00a95973e2e568a0253f92f

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 """
 This is a template for creating custom RegexBasedColumnMapExpectations.
 For detailed instructions on how to use it, please see:
@@ -83,7 +82,6 @@ class ExpectColumnValuesToBeValidScientificNotation(RegexBasedColumnMapExpectati
 
 if __name__ == "__main__":
     ExpectColumnValuesToBeValidScientificNotation().print_diagnostic_checklist()
-=======
 """
 This is a template for creating custom RegexBasedColumnMapExpectations.
 For detailed instructions on how to use it, please see:
@@ -168,4 +166,3 @@ class ExpectColumnValuesToBeValidScientificNotation(RegexBasedColumnMapExpectati
 
 if __name__ == "__main__":
     ExpectColumnValuesToBeValidScientificNotation().print_diagnostic_checklist()
->>>>>>> 3e94cd6a8e19e52aa00a95973e2e568a0253f92f
