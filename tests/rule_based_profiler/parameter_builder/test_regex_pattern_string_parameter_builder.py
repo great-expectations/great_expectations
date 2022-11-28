@@ -167,7 +167,7 @@ def test_regex_pattern_string_parameter_builder_alice(
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder"
     )
-    expected_value: dict = {
+    expected_parameter_node_as_dict: dict = {
         "value": r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$",
         "details": {
             "evaluated_regexes": {
@@ -185,7 +185,7 @@ def test_regex_pattern_string_parameter_builder_alice(
             domain=domain,
             parameters=parameters,
         )
-        == expected_value
+        == expected_parameter_node_as_dict
     )
 
 
@@ -248,7 +248,7 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder"
     )
-    expected_value: dict = {
+    expected_parameter_node_as_dict: dict = {
         "value": r"^\d{1}$",
         "details": {
             "evaluated_regexes": {
@@ -266,8 +266,8 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
         parameters=parameters,
     )
     assert results is not None
-    assert sorted(results["value"]) == sorted(expected_value["value"])
-    assert results["details"] == expected_value["details"]
+    assert sorted(results["value"]) == sorted(expected_parameter_node_as_dict["value"])
+    assert results["details"] == expected_parameter_node_as_dict["details"]
 
 
 @pytest.mark.integration
@@ -320,7 +320,7 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder"
     )
-    expected_value: dict = {
+    expected_parameter_node_as_dict: dict = {
         "value": "-?\\d+",
         "details": {
             "evaluated_regexes": {
@@ -345,7 +345,7 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
             domain=domain,
             parameters=parameters,
         )
-        == expected_value
+        == expected_parameter_node_as_dict
     )
 
 

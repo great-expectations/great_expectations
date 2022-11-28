@@ -75,7 +75,7 @@ def test_histogram_single_batch_parameter_builder_alice(
         batch_request=batch_request,
     )
 
-    expected_parameter_value: dict = {
+    expected_parameter_node_as_dict: dict = {
         "value": {
             "bins": [397433.0, 4942918.5, 9488404.0],
             "weights": [0.6666666666666666, 0.3333333333333333],
@@ -88,6 +88,7 @@ def test_histogram_single_batch_parameter_builder_alice(
                 "metric_value_kwargs": {"bins": [397433.0, 4942918.5, 9488404.0]},
             },
             "num_batches": 1,
+            "graph": None,
         },
     }
 
@@ -99,7 +100,7 @@ def test_histogram_single_batch_parameter_builder_alice(
         parameters=parameters,
     )
 
-    assert parameter_node == expected_parameter_value
+    assert parameter_node == expected_parameter_node_as_dict
 
 
 @pytest.mark.integration
@@ -211,7 +212,7 @@ def test_histogram_single_batch_parameter_builder_alice_nan_valued_bins(
             batch_request=batch_request,
         )
 
-        expected_parameter_value: dict = {
+        expected_parameter_node_as_dict: dict = {
             "value": {"bins": [None], "weights": [], "tail_weights": [0.5, 0.5]},
             "details": {
                 "metric_configuration": {
@@ -220,6 +221,7 @@ def test_histogram_single_batch_parameter_builder_alice_nan_valued_bins(
                     "metric_value_kwargs": {"bins": [None]},
                 },
                 "num_batches": 1,
+                "graph": None,
             },
         }
 
@@ -231,7 +233,7 @@ def test_histogram_single_batch_parameter_builder_alice_nan_valued_bins(
             parameters=parameters,
         )
 
-        assert parameter_node == expected_parameter_value
+        assert parameter_node == expected_parameter_node_as_dict
 
 
 @pytest.mark.integration
@@ -350,7 +352,7 @@ def test_histogram_single_batch_parameter_builder_alice_reduced_bins_count(
 
     variables: Optional[ParameterContainer] = None
 
-    expected_parameter_value: dict
+    expected_parameter_node_as_dict: dict
     parameter_node: ParameterNode
 
     with mock.patch(
@@ -369,7 +371,7 @@ def test_histogram_single_batch_parameter_builder_alice_reduced_bins_count(
             batch_request=batch_request,
         )
 
-        expected_parameter_value = {
+        expected_parameter_node_as_dict = {
             "value": {"bins": bins, "weights": [], "tail_weights": [0.5, 0.5]},
             "details": {
                 "metric_configuration": {
@@ -380,6 +382,7 @@ def test_histogram_single_batch_parameter_builder_alice_reduced_bins_count(
                     },
                 },
                 "num_batches": 1,
+                "graph": None,
             },
         }
 
@@ -391,7 +394,7 @@ def test_histogram_single_batch_parameter_builder_alice_reduced_bins_count(
             parameters=parameters,
         )
 
-        assert parameter_node == expected_parameter_value
+        assert parameter_node == expected_parameter_node_as_dict
 
 
 @pytest.mark.integration

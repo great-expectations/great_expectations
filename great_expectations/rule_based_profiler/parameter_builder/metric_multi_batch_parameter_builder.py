@@ -17,12 +17,10 @@ from great_expectations.rule_based_profiler.parameter_builder import ParameterBu
 from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALIDATION_GRAPH_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     ParameterContainer,
 )
 from great_expectations.types.attributes import Attributes
-from great_expectations.validator.validation_graph import ValidationGraph
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
@@ -153,12 +151,12 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             limit=limit,
             enforce_numeric_metric=self.enforce_numeric_metric,
             replace_nan_with_zero=self.replace_nan_with_zero,
+            validation_graph_only=False,
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
         details: MetricComputationDetails = metric_computation_result.details
-        graph: ValidationGraph = metric_computation_result.graph
 
         # Obtain reduce_scalar_metric from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         reduce_scalar_metric: bool = get_parameter_value_and_validate_return_type(
@@ -190,7 +188,6 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             ):
                 return Attributes(
                     {
-                        FULLY_QUALIFIED_PARAMETER_NAME_VALIDATION_GRAPH_KEY: graph,
                         FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
                             0
                         ].conditioned_metric_values[
@@ -205,7 +202,6 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
 
             return Attributes(
                 {
-                    FULLY_QUALIFIED_PARAMETER_NAME_VALIDATION_GRAPH_KEY: graph,
                     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
                         0
                     ].conditioned_metric_values,
@@ -218,7 +214,6 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
 
         return Attributes(
             {
-                FULLY_QUALIFIED_PARAMETER_NAME_VALIDATION_GRAPH_KEY: graph,
                 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_computation_result.attributed_resolved_metrics,
                 FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: metric_computation_result.attributed_resolved_metrics,
                 FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,

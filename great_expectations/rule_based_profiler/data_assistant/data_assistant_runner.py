@@ -197,9 +197,11 @@ class DataAssistantRunner:
             self._get_method_signature_parameters_for_variables_directives()
         )
 
-        func_sig = Signature(
+        # TODO: <Alex>ALEX</Alex>
+        func_sig: Signature = Signature(
             parameters=parameters, return_annotation=DataAssistantResult
         )
+        # TODO: <Alex>ALEX</Alex>
         # override the runner docstring with the docstring defined in the implemented DataAssistant child-class
         run.__doc__ = self._data_assistant_cls.__doc__
         gen_func: Callable = create_function(func_signature=func_sig, func_impl=run)

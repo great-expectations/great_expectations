@@ -71,12 +71,15 @@ class ValidationGraph:
 
         self._edge_ids = {edge.id for edge in self._edges}
 
+    def __eq__(self, other: ValidationGraph) -> bool:
+        return self.edge_ids == other.edge_ids
+
     @property
-    def edges(self):
+    def edges(self) -> List[MetricEdge]:
         return self._edges
 
     @property
-    def edge_ids(self):
+    def edge_ids(self) -> Set[Tuple[str, str]]:
         return {edge.id for edge in self._edges}
 
     def add(self, edge: MetricEdge) -> None:

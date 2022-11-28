@@ -1111,16 +1111,16 @@ class Validator:
                         configuration=evaluated_config,
                     )
                 )
-                graph = ValidationGraph(execution_engine=self._execution_engine)
                 for (
                     metric_configuration
                 ) in validation_dependencies.get_metric_configurations():
+                    graph = ValidationGraph(execution_engine=self._execution_engine)
                     graph.build_metric_dependency_graph(
                         metric_configuration=metric_configuration,
                         runtime_configuration=runtime_configuration,
                     )
+                    expectation_validation_graph.update(graph=graph)
 
-                expectation_validation_graph.update(graph=graph)
                 expectation_validation_graphs.append(expectation_validation_graph)
                 processed_configurations.append(evaluated_config)
             except Exception as err:

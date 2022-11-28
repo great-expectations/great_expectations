@@ -80,7 +80,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
-    expected_value_dict: Dict[str, Optional[str]] = {
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "details": {
             "metric_configuration": {
@@ -89,6 +89,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
                 "metric_value_kwargs": None,
             },
             "num_batches": 3,
+            "graph": None,
         },
     }
 
@@ -107,7 +108,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     expected_value: np.ndarray = np.asarray([7510, 8806])
 
@@ -210,7 +211,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
     )
     assert len(parameter_nodes) == 1
 
-    expected_value_dict: Dict[str, Optional[str]] = {
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "details": {
             "metric_configuration": {
@@ -219,6 +220,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
                 "metric_value_kwargs": None,
             },
             "num_batches": 3,
+            "graph": None,
         },
     }
 
@@ -237,7 +239,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     actual_value_01_lower: float = actual_values_01[0]
     actual_value_01_upper: float = actual_values_01[1]
@@ -309,7 +311,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     actual_value_05_lower: float = actual_values_05[0]
     actual_value_05_upper: float = actual_values_05[1]
@@ -407,7 +409,7 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
     )
     assert len(parameter_nodes) == 1
 
-    expected_value_dict: Dict[str, Optional[str]] = {
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "details": {
             "metric_configuration": {
@@ -416,6 +418,7 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
                 "metric_value_kwargs": None,
             },
             "num_batches": 3,
+            "graph": None,
         },
     }
 
@@ -434,7 +437,7 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     actual_value_01_lower: float = actual_values_01[0]
     actual_value_01_upper: float = actual_values_01[1]
@@ -543,7 +546,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
     )
     assert len(parameter_nodes) == 1
 
-    expected_value_dict: Dict[str, Optional[str]] = {
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "details": {
             "metric_configuration": {
@@ -552,6 +555,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
                 "metric_value_kwargs": None,
             },
             "num_batches": 3,
+            "graph": None,
         },
     }
 
@@ -570,7 +574,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     actual_value_01_lower: float = actual_values_01[0]
     actual_value_01_upper: float = actual_values_01[1]
@@ -642,7 +646,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     actual_value_05_lower: float = actual_values_05[0]
     actual_value_05_upper: float = actual_values_05[1]
@@ -977,7 +981,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
-    expected_value_dict: Dict[str, Optional[str]] = {
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "details": {
             "metric_configuration": {
@@ -986,6 +990,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
                 "metric_value_kwargs": None,
             },
             "num_batches": 3,
+            "graph": None,
         },
     }
 
@@ -1004,7 +1009,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     expected_value: np.ndarray = np.asarray([6180, 10277])
 

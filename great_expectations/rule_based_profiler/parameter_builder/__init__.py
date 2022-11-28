@@ -2,6 +2,9 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_builder 
     ParameterBuilder,
     init_rule_parameter_builders,
 )
+from great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_validation_graph_parameter_builder import (  # isort:skip
+    MetricMultiBatchValidationGraphParameterBuilder,
+)
 from great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder import (  # isort:skip
     MetricMultiBatchParameterBuilder,
 )

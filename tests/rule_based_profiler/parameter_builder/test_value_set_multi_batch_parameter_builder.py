@@ -101,7 +101,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
     )
 
     expected_value_set: List[int] = [19, 22, 73]
-    expected_parameter_value: dict = {
+    expected_parameter_node_as_dict: dict = {
         "value": expected_value_set,
         "details": {
             "parse_strings_as_datetimes": False,
@@ -111,6 +111,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
                 "metric_value_kwargs": None,
             },
             "num_batches": 1,
+            "graph": None,
         },
     }
 
@@ -123,8 +124,8 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
         parameters=parameters,
     )
 
-    assert sorted(parameter_node.value) == expected_parameter_value["value"]
-    assert parameter_node.details == expected_parameter_value["details"]
+    assert sorted(parameter_node.value) == expected_parameter_node_as_dict["value"]
+    assert parameter_node.details == expected_parameter_node_as_dict["details"]
 
 
 @pytest.mark.integration
@@ -181,7 +182,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
     expected_value_set: List[str] = [
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36",
     ]
-    expected_parameter_value: dict = {
+    expected_parameter_node_as_dict: dict = {
         "value": expected_value_set,
         "details": {
             "parse_strings_as_datetimes": False,
@@ -191,6 +192,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
                 "metric_value_kwargs": None,
             },
             "num_batches": 1,
+            "graph": None,
         },
     }
 
@@ -203,8 +205,8 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
         parameters=parameters,
     )
 
-    assert sorted(parameter_node.value) == expected_parameter_value["value"]
-    assert parameter_node.details == expected_parameter_value["details"]
+    assert sorted(parameter_node.value) == expected_parameter_node_as_dict["value"]
+    assert parameter_node.details == expected_parameter_node_as_dict["details"]
 
 
 @pytest.mark.integration
@@ -257,7 +259,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
     )
 
     expected_value_set: List[int] = [0, 1, 2, 3, 4, 5, 6]
-    expected_parameter_value: dict = {
+    expected_parameter_node_as_dict: dict = {
         "value": expected_value_set,
         "details": {
             "parse_strings_as_datetimes": False,
@@ -267,6 +269,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
                 "metric_value_kwargs": None,
             },
             "num_batches": 3,
+            "graph": None,
         },
     }
 
@@ -281,8 +284,8 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
         parameters=parameters,
     )
 
-    assert sorted(parameter_node.value) == expected_parameter_value["value"]
-    assert parameter_node.details == expected_parameter_value["details"]
+    assert sorted(parameter_node.value) == expected_parameter_node_as_dict["value"]
+    assert parameter_node.details == expected_parameter_node_as_dict["details"]
 
 
 @pytest.mark.integration
@@ -335,7 +338,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
     )
 
     expected_value_set: List[str] = ["N", "Y"]
-    expected_parameter_value: dict = {
+    expected_parameter_node_as_dict: dict = {
         "value": expected_value_set,
         "details": {
             "parse_strings_as_datetimes": False,
@@ -345,6 +348,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
                 "metric_value_kwargs": None,
             },
             "num_batches": 3,
+            "graph": None,
         },
     }
 
@@ -359,8 +363,8 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
         parameters=parameters,
     )
 
-    assert sorted(parameter_node.value) == expected_parameter_value["value"]
-    assert parameter_node.details == expected_parameter_value["details"]
+    assert sorted(parameter_node.value) == expected_parameter_node_as_dict["value"]
+    assert parameter_node.details == expected_parameter_node_as_dict["details"]
 
 
 @pytest.mark.parametrize(

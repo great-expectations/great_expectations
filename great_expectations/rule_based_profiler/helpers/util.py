@@ -156,10 +156,33 @@ def get_batch_ids(
 
     batch_ids: List[str] = [batch.id for batch in batch_list]
 
-    if limit is not None:
-        batch_ids = batch_ids[0:limit]
-
     num_batch_ids: int = len(batch_ids)
+
+    print(
+        f"\n[ALEX_TEST] [RULE_BASED_PROFILER.HELPERS.UTIL.GET_BATCH_IDS()] BATCH_IDS:\n{batch_ids} ; TYPE: {str(type(batch_ids))}"
+    )
+    print(
+        f"\n[ALEX_TEST] [RULE_BASED_PROFILER.HELPERS.UTIL.GET_BATCH_IDS()] LEN(BATCH_IDS):\n{len(batch_ids)} ; TYPE: {str(type(len(batch_ids)))}"
+    )
+    print(
+        f"\n[ALEX_TEST] [RULE_BASED_PROFILER.HELPERS.UTIL.GET_BATCH_IDS()] LIMIT:\n{limit} ; TYPE: {str(type(limit))}"
+    )
+
+    # TODO: <Alex>ALEX</Alex>
+    # if limit is not None:
+    #     batch_ids = batch_ids[0:limit]
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    if limit is not None:
+        if not (isinstance(limit, int) and (0 <= limit <= num_batch_ids)):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""{__name__}.get_batch_ids() allows integer limit values between 0 and {num_batch_ids} \
+({limit} was requested).
+"""
+            )
+        batch_ids = batch_ids[-limit:]
+    # TODO: <Alex>ALEX</Alex>
+
     if num_batch_ids == 0:
         raise ge_exceptions.ProfilerExecutionError(
             message=f"""{__name__}.get_batch_ids() must return at least one batch_id ({num_batch_ids} were retrieved).
