@@ -13,7 +13,7 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.expectations.metrics.util import parse_value_set
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
-from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer import renderer
 from great_expectations.render.renderer_configuration import RendererConfiguration
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,

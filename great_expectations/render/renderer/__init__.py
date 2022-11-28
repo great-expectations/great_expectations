@@ -15,5 +15,6 @@ from .page_renderer import (
 from .profiling_results_overview_section_renderer import (
     ProfilingResultsOverviewSectionRenderer,
 )
+from .renderer import renderer
 from .site_index_page_renderer import SiteIndexPageRenderer
 from .slack_renderer import SlackRenderer

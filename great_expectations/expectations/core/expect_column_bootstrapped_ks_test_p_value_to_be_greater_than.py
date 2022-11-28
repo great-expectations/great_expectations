@@ -9,7 +9,7 @@ from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyDiagnosticRendererType, LegacyRendererType
-from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer import renderer
 
 
 class ExpectColumnBootstrappedKsTestPValueToBeGreaterThan(TableExpectation):
