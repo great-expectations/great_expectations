@@ -27,7 +27,7 @@ from great_expectations.data_context.types.base import (
 )
 
 
-class BaseDataContext(ConfigPeer):
+class BaseDataContext(AbstractDataContext, ConfigPeer):
     """
         This class implements most of the functionality of DataContext, with a few exceptions.
 
@@ -188,6 +188,17 @@ class BaseDataContext(ConfigPeer):
             context_root_dir=context_root_dir,
         )
 
+    def __getstate__(self):
+        return self.__dict__
+
+    def __setstate__(self, d):
+        self.__dict__.update(d)
+
+    def __getattr__(self, attr: str) -> Any:
+        if attr in self.__class__.__dict__:
+            return getattr(self, attr)
+        return getattr(self._data_context, attr)
+
     def _init_inner_data_context(
         self,
         project_config: DataContextConfig,
@@ -221,10 +232,11 @@ class BaseDataContext(ConfigPeer):
             runtime_environment=runtime_environment,
         )
 
-    def __getattr__(self, attr: str) -> Any:
-        if attr in self.__class__.__dict__:
-            return getattr(self, attr)
-        return getattr(self._data_context, attr)
+    def _init_datasource_store(self):
+        pass
+
+    def _init_variables(self):
+        pass
 
     @property
     def config(self) -> DataContextConfig:
