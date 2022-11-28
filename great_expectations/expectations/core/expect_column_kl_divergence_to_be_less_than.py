@@ -31,7 +31,7 @@ from great_expectations.render import (
     RenderedStringTemplateContent,
     renderedAtomicValueSchema,
 )
-from great_expectations.render.renderer import renderer
+from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import RendererConfiguration
 from great_expectations.render.util import (
     num_to_str,
