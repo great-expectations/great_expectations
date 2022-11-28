@@ -7,10 +7,10 @@ import logging
 import traceback
 import uuid
 import warnings
-from collections import Counter, UserDict, defaultdict, namedtuple
+from collections import Counter, defaultdict, namedtuple
 from collections.abc import Hashable
 from functools import wraps
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Any
 
 from dateutil.parser import parse
 from marshmallow import ValidationError
@@ -34,7 +34,6 @@ from great_expectations.data_asset.util import (
     recursively_convert_to_json_serializable,
 )
 from great_expectations.exceptions import GreatExpectationsError
-from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -1174,49 +1173,32 @@ class DataAsset:
         if result_format["result_format"] == "BASIC":
             return return_obj
 
-        class UnexpectedItem(UserDict, SerializableDictDot):  # type: ignore
-            def __init__(self, *args, **kwargs) -> None:
-                if args[0]:
-                    tmp = args[0]
-                    tmp.update(**kwargs)
-                else:
-                    tmp = kwargs
-                super().__init__(tmp)
-
-            def __ne__(self, o: object) -> bool:
-                if not isinstance(o, self.__class__):
-                    return NotImplemented
-                return not self.__eq__(o)
-
-            def __eq__(self, other: object) -> bool:
-                if not isinstance(other, self.__class__):
-                    return NotImplemented
-                for key, value in self.data.items():
-                    if (
-                        key not in other.data.keys()
-                        or self.data[key] != other.data[key]
-                    ):
-                        return False
-                return True
-
-            def __hash__(self) -> int:
-                data_values = self.data.values()
-                return hash(data_values)
-
-            def to_json_dict(self) -> dict:
-                return self.data
+        if unexpected_list is not None:
+            if len(unexpected_list) and isinstance(unexpected_list[0], dict):
+                # in the case of multicolumn map expectations `unexpected_list` contains dicts,
+                # which will throw an exception when we hash it to count unique members.
+                # As a workaround, we flatten the values out to tuples.
+                immutable_unexpected_list = [
+                    tuple([val for val in item.values()]) for item in unexpected_list
+                ]
+            else:
+                immutable_unexpected_list = unexpected_list
 
         # Try to return the most common values, if possible.
-        if 0 < result_format.get("partial_unexpected_count"):
+        partial_unexpected_count: Optional[int] = result_format.get(
+            "partial_unexpected_count"
+        )
+        partial_unexpected_counts: Optional[List[Dict[str, Any]]] = None
+
+        if partial_unexpected_count is not None and 0 < partial_unexpected_count:
             try:
-                unexpected_items = [UnexpectedItem(item) for item in unexpected_list]
                 partial_unexpected_counts = [
                     {"value": key, "count": value}
                     for key, value in sorted(
-                        Counter(unexpected_items).most_common(
+                        Counter(immutable_unexpected_list).most_common(
                             result_format["partial_unexpected_count"]
                         ),
-                        key=lambda x: (-x[1], str(x[0])),
+                        key=lambda x: (-x[1], x[0]),
                     )
                 ]
             except TypeError:
