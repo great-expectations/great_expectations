@@ -1057,7 +1057,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
     def _atomic_prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
-        **kwargs,
     ) -> Tuple[
         str,
         dict,
@@ -1166,7 +1165,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
     ) -> RenderedAtomicContent:
         """
         Rendering function that is utilized by GE Cloud Front-end
@@ -1186,7 +1184,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             distribution_table_rows,
             _,
         ) = cls._atomic_prescriptive_template(
-            renderer_configuration=renderer_configuration, **kwargs
+            renderer_configuration=renderer_configuration,
         )
 
         if chart is not None:
@@ -1236,7 +1234,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
     ) -> List[Union[dict, RenderedGraphContent]]:
         renderer_configuration = RendererConfiguration(
             configuration=configuration,
@@ -1294,7 +1291,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
     def _atomic_diagnostic_observed_value_template(
         cls,
         renderer_configuration: RendererConfiguration,
-        **kwargs,
     ) -> Tuple[
         str,
         dict,
@@ -1358,7 +1354,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
     ) -> RenderedAtomicContent:
         renderer_configuration = RendererConfiguration(
             configuration=configuration,
@@ -1388,7 +1383,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             distribution_table_header_row,
             distribution_table_rows,
         ) = cls._atomic_diagnostic_observed_value_template(
-            renderer_configuration=renderer_configuration, **kwargs
+            renderer_configuration=renderer_configuration,
         )
 
         if chart is not None:
@@ -1437,7 +1432,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
     ) -> Union[RenderedStringTemplateContent, RenderedContentBlockContainer, str]:
         if not result.result.get("details"):
             return "--"
@@ -1481,7 +1475,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
     ) -> Union[RenderedGraphContent, None]:
         assert result, "Must pass in result."
         observed_partition_object = result.result["details"]["observed_partition"]

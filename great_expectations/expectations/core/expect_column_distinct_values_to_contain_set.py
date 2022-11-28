@@ -159,7 +159,6 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
     ) -> List[RenderedStringTemplateContent]:
         renderer_configuration = RendererConfiguration(
             configuration=configuration,

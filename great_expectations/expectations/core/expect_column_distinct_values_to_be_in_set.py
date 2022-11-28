@@ -215,7 +215,6 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
     ):
         renderer_configuration = RendererConfiguration(
             configuration=configuration,
@@ -281,7 +280,6 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
     ) -> RenderedGraphContent:
         assert result, "Must pass in result."
         value_count_dicts = result.result["details"]["value_counts"]

@@ -226,7 +226,6 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
     def _atomic_prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
-        **kwargs,
     ) -> Tuple[str, dict, Union[dict, None]]:
         kwargs: dict = renderer_configuration.kwargs
         include_column_name: bool = renderer_configuration.include_column_name
@@ -317,7 +316,6 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
     ) -> List[RenderedStringTemplateContent]:
         renderer_configuration = RendererConfiguration(
             configuration=configuration,
@@ -391,7 +389,6 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
     ):
         assert result, "Must pass in result."
         return [
