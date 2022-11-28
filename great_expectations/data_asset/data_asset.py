@@ -1174,7 +1174,7 @@ class DataAsset:
         if result_format["result_format"] == "BASIC":
             return return_obj
 
-        class UnexpectedItem(UserDict, SerializableDictDot):
+        class UnexpectedItem(UserDict, SerializableDictDot):  # type: ignore
             def __init__(self, *args, **kwargs) -> None:
                 if args[0]:
                     tmp = args[0]
