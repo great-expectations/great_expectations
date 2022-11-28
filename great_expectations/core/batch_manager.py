@@ -10,7 +10,7 @@ from great_expectations.core.batch import (
     BatchDefinition,
     BatchMarkers,
 )
-from great_expectations.zep.interfaces import Batch as ZepBatch
+from great_expectations.experimental.datasources.interfaces import Batch as XBatch
 
 if TYPE_CHECKING:
     from great_expectations.core.id_dict import BatchSpec
@@ -152,7 +152,7 @@ class BatchManager:
         for batch in batch_list:
             try:
                 assert isinstance(
-                    batch, (Batch, ZepBatch)
+                    batch, (Batch, XBatch)
                 ), "Batch objects provided to BatchManager must be formal Great Expectations Batch typed objects."
             except AssertionError as e:
                 logger.error(str(e))

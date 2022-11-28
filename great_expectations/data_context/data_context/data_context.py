@@ -31,8 +31,10 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource
-from great_expectations.zep.context import _SourceFactories
-from great_expectations.zep.interfaces import Datasource as ZepDatasource
+from great_expectations.experimental.datasources.interfaces import (
+    Datasource as XDatasource,
+)
+from great_expectations.experimental.datasources.sources import _SourceFactories
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -262,11 +264,27 @@ class DataContext(BaseDataContext):
         if self._check_for_usage_stats_sync(project_config):
             self._save_project_config()
 
-    def _attach_datasource_to_context(self, datasource: ZepDatasource):
+    def _save_project_config(self) -> None:
+        """
+        See parent 'AbstractDataContext._save_project_config()` for more information.
+
+        Explicitly override base class implementation to retain legacy behavior.
+        """
+        logger.debug("Starting DataContext._save_project_config")
+
+        config_filepath = os.path.join(self.root_directory, self.GE_YML)  # type: ignore[arg-type]
+
+        try:
+            with open(config_filepath, "w") as outfile:
+                self.config.to_yaml(outfile)
+        except PermissionError as e:
+            logger.warning(f"Could not save project config to disk: {e}")
+
+    def _attach_datasource_to_context(self, datasource: XDatasource):
         # We currently don't allow one to overwrite a datasource with this internal method
         if datasource.name in self.datasources:
             raise ge_exceptions.DataContextError(
-                f"Can not write the ZEP datasource {datasource.name} because a datasource of that "
+                f"Can not write the experimental datasource {datasource.name} because a datasource of that "
                 "name already exists in the data context."
             )
         self.datasources[datasource.name] = datasource
