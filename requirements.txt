@@ -16,7 +16,7 @@ notebook>=6.4.10
 numpy>=1.18.5
 packaging
 pandas>=1.1.0
-pydantic>=1.0<2.0
+pydantic>=1.0,<2.0
 pyparsing>=2.4
 python-dateutil>=2.8.1
 pytz>=2021.3
