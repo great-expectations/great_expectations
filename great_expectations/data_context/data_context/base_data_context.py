@@ -188,17 +188,30 @@ class BaseDataContext(AbstractDataContext, ConfigPeer):
             context_root_dir=context_root_dir,
         )
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict:
+        """
+        Necessary override to make `BaseDataContext` work with copy/pickle.
+        """
         return self.__dict__
 
-    def __setstate__(self, d):
-        self.__dict__.update(d)
+    def __setstate__(self, state: dict) -> None:
+        """
+        Necessary override to make `BaseDataContext` work with copy/pickle.
+        """
+        self.__dict__.update(state)
 
     def __getattr__(self, attr: str) -> Any:
+        """
+        Necessary to enable facade design pattern.
+
+        If a requested attribute is a part of `BaseDataContext`, we want to leverage it.
+        Otherwise, we should utilize the underlying `self._data_context` instance.
+        """
         if attr in self.__class__.__dict__:
             return getattr(self, attr)
         return getattr(self._data_context, attr)
 
+    # Chetan - 20221128 - This is temporary and will be deleted in favor of using `gx.get_context()`
     def _init_inner_data_context(
         self,
         project_config: DataContextConfig,
@@ -233,13 +246,28 @@ class BaseDataContext(AbstractDataContext, ConfigPeer):
         )
 
     def _init_datasource_store(self):
-        pass
+        """
+        Only required to fulfill contract set by parent `AbstractDataContext`.
+
+        This should never actually be called since this class is leveraging the
+        underlying `self._data_context` instance for all actual behavior.
+        """
+        raise NotImplementedError
 
     def _init_variables(self):
-        pass
+        """
+        Only required to fulfill contract set by parent `AbstractDataContext`.
+
+        This should never actually be called since this class is leveraging the
+        underlying `self._data_context` instance for all actual behavior.
+        """
+        raise NotImplementedError
 
     @property
     def config(self) -> DataContextConfig:
+        """
+        Required to fulfill contract set by parent `ConfigPeer`.
+        """
         return self._data_context.config
 
     @property
