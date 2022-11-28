@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional, Tuple, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -15,6 +15,7 @@ from great_expectations.render import (
     RenderedTableContent,
 )
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import RendererConfiguration
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
 
@@ -57,21 +58,11 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
 
     @classmethod
     def _atomic_prescriptive_template(
-        cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs, ["column_A", "column_B"]
-        )
+        cls, renderer_configuration: RendererConfiguration
+    ) -> Tuple[str, dict, Union[dict, None]]:
+        kwargs: dict = renderer_configuration.kwargs
+        styling: Union[dict, None] = renderer_configuration.styling
+        params = substitute_none_for_missing(kwargs, ["column_A", "column_B"])
         if (params["column_A"] is None) or (params["column_B"] is None):
             template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."
         else:
@@ -81,7 +72,7 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
             "column_A": {"schema": {"type": "string"}, "value": params.get("column_A")},
             "column_B": {"schema": {"type": "string"}, "value": params.get("column_B")},
         }
-        return (template_str, params_with_json_schema, styling)
+        return template_str, params_with_json_schema, styling
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
@@ -92,16 +83,16 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+    ) -> List[RenderedStringTemplateContent]:
+        renderer_configuration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            language=language,
+            runtime_configuration=runtime_configuration,
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs, ["column_A", "column_B"]
-        )
+        kwargs: dict = renderer_configuration.kwargs
+        styling: Union[dict, None] = renderer_configuration.styling
+        params = substitute_none_for_missing(kwargs, ["column_A", "column_B"])
         if (params["column_A"] is None) or (params["column_B"] is None):
             template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."
         else:
@@ -128,8 +119,7 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
+    ) -> Union[RenderedTableContent, float, str]:
         observed_value = result.result.get("observed_value")
         column_A = result.expectation_config.kwargs["column_A"]
         column_B = result.expectation_config.kwargs["column_B"]
