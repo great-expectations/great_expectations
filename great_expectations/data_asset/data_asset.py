@@ -7,7 +7,7 @@ import logging
 import traceback
 import uuid
 import warnings
-from collections import Counter, defaultdict, namedtuple, UserDict
+from collections import Counter, UserDict, defaultdict, namedtuple
 from collections.abc import Hashable
 from functools import wraps
 from typing import Dict, List, Optional, Union
@@ -28,13 +28,13 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.types import SerializableDictDot
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.data_asset.util import (
     parse_result_format,
     recursively_convert_to_json_serializable,
 )
 from great_expectations.exceptions import GreatExpectationsError
+from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -1175,7 +1175,6 @@ class DataAsset:
             return return_obj
 
         class UnexpectedItem(UserDict, SerializableDictDot):
-
             def __init__(self, *args, **kwargs) -> None:
                 if args[0]:
                     tmp = args[0]
@@ -1193,7 +1192,10 @@ class DataAsset:
                 if not isinstance(other, self.__class__):
                     return NotImplemented
                 for key, value in self.data.items():
-                    if key not in other.data.keys() or self.data[key] != other.data[key]:
+                    if (
+                        key not in other.data.keys()
+                        or self.data[key] != other.data[key]
+                    ):
                         return False
                 return True
 
@@ -1203,6 +1205,7 @@ class DataAsset:
 
             def to_json_dict(self) -> dict:
                 return self.data
+
         # Try to return the most common values, if possible.
         if 0 < result_format.get("partial_unexpected_count"):
             try:
