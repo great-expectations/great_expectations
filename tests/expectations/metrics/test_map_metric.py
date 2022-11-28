@@ -109,7 +109,6 @@ def sqlite_table_for_unexpected_rows_with_index(
                     ],
                 }
             )
-            # TODO: see if this can be done using temp_tables, especially for other DB backends
             df.to_sql(
                 name="test_temp", con=sqlite_engine, index=False, if_exists="replace"
             )
