@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -11,6 +11,7 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import RendererConfiguration
 from great_expectations.render.util import (
     handle_strict_min_max,
     parse_row_condition_string_pandas_engine,
@@ -217,19 +218,14 @@ class ExpectColumnMedianToBeBetween(ColumnExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
-        runtime_configuration: Optional[dict] = None,
+        renderer_configuration: RendererConfiguration,
         **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
-        styling = runtime_configuration.get("styling")
+    ) -> Tuple[str, dict, Union[dict, None]]:
+        kwargs: dict = renderer_configuration.kwargs
+        include_column_name: bool = renderer_configuration.include_column_name
+        styling: Union[dict, None] = renderer_configuration.styling
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            kwargs,
             [
                 "column",
                 "min_value",
@@ -278,6 +274,8 @@ class ExpectColumnMedianToBeBetween(ColumnExpectation):
                 template_str = f"median must be {at_most_str} $max_value."
             elif params["max_value"] is None:
                 template_str = f"median must be {at_least_str} $min_value."
+            else:
+                template_str = ""
 
         if include_column_name:
             template_str = f"$column {template_str}"
@@ -292,7 +290,7 @@ class ExpectColumnMedianToBeBetween(ColumnExpectation):
             template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
-        return (template_str, params_with_json_schema, styling)
+        return template_str, params_with_json_schema, styling
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
@@ -304,14 +302,18 @@ class ExpectColumnMedianToBeBetween(ColumnExpectation):
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+    ) -> List[RenderedStringTemplateContent]:
+        renderer_configuration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            language=language,
+            runtime_configuration=runtime_configuration,
         )
-        styling = runtime_configuration.get("styling")
+        kwargs: dict = renderer_configuration.kwargs
+        include_column_name: bool = renderer_configuration.include_column_name
+        styling: Union[dict, None] = renderer_configuration.styling
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            kwargs,
             [
                 "column",
                 "min_value",
@@ -333,6 +335,8 @@ class ExpectColumnMedianToBeBetween(ColumnExpectation):
                 template_str = f"median must be {at_most_str} $max_value."
             elif params["max_value"] is None:
                 template_str = f"median must be {at_least_str} $min_value."
+            else:
+                template_str = ""
 
         if include_column_name:
             template_str = f"$column {template_str}"

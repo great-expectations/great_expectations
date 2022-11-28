@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Optional, Set, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 import altair as alt
 import numpy as np
@@ -32,6 +32,7 @@ from great_expectations.render import (
     renderedAtomicValueSchema,
 )
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import RendererConfiguration
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -756,7 +757,9 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         return return_obj
 
     @classmethod
-    def _get_kl_divergence_chart(cls, partition_object, header=None):
+    def _get_kl_divergence_chart(
+        cls, partition_object, header=None
+    ) -> RenderedGraphContent:
         weights = partition_object["weights"]
 
         if len(weights) > 60:
@@ -856,7 +859,9 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         return expected_distribution
 
     @classmethod
-    def _atomic_kl_divergence_chart_template(cls, partition_object: dict) -> tuple:
+    def _atomic_kl_divergence_chart_template(
+        cls, partition_object: dict
+    ) -> Tuple[dict, int]:
         weights = partition_object.get("weights")
         if weights is None:
             weights = []
@@ -1006,7 +1011,9 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             }
 
     @classmethod
-    def _atomic_partition_object_table_template(cls, partition_object: dict):
+    def _atomic_partition_object_table_template(
+        cls, partition_object: dict
+    ) -> Tuple[List[dict], List[List[dict]]]:
         table_rows = []
         fractions = partition_object["weights"]
 
@@ -1049,19 +1056,22 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
-        runtime_configuration: Optional[dict] = None,
+        renderer_configuration: RendererConfiguration,
         **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
-        styling = runtime_configuration.get("styling")
+    ) -> Tuple[
+        str,
+        dict,
+        Union[dict, None],
+        Union[int, None],
+        Union[List[dict], None],
+        Union[List[List[dict]], None],
+        Union[dict, None],
+    ]:
+        kwargs: dict = renderer_configuration.kwargs
+        include_column_name: bool = renderer_configuration.include_column_name
+        styling: Union[dict, None] = renderer_configuration.styling
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            kwargs,
             [
                 "column",
                 "partition_object",
@@ -1157,10 +1167,16 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
-    ):
+    ) -> RenderedAtomicContent:
         """
         Rendering function that is utilized by GE Cloud Front-end
         """
+        renderer_configuration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            language=language,
+            runtime_configuration=runtime_configuration,
+        )
         (
             header_template_str,
             header_params_with_json_schema,
@@ -1170,7 +1186,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             distribution_table_rows,
             _,
         ) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, **kwargs
+            renderer_configuration=renderer_configuration, **kwargs
         )
 
         if chart is not None:
@@ -1221,14 +1237,17 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+    ) -> List[Union[dict, RenderedGraphContent]]:
+        renderer_configuration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            language=language,
+            runtime_configuration=runtime_configuration,
         )
-        styling = runtime_configuration.get("styling")
+        kwargs: dict = renderer_configuration.kwargs
+        include_column_name: bool = renderer_configuration.include_column_name
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            kwargs,
             [
                 "column",
                 "partition_object",
@@ -1274,12 +1293,17 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
     @classmethod
     def _atomic_diagnostic_observed_value_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
-        runtime_configuration: Optional[dict] = None,
+        renderer_configuration: RendererConfiguration,
         **kwargs,
-    ):
+    ) -> Tuple[
+        str,
+        dict,
+        Union[dict, None],
+        Union[int, None],
+        Union[List[dict], None],
+        Union[List[List[dict]], None],
+    ]:
+        result: ExpectationValidationResult = renderer_configuration.result
         observed_partition_object = result.result.get("details", {}).get(
             "observed_partition", {}
         )
@@ -1335,7 +1359,13 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
-    ):
+    ) -> RenderedAtomicContent:
+        renderer_configuration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            language=language,
+            runtime_configuration=runtime_configuration,
+        )
         if not result.result.get("details"):
             value_obj = renderedAtomicValueSchema.load(
                 {
@@ -1358,7 +1388,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             distribution_table_header_row,
             distribution_table_rows,
         ) = cls._atomic_diagnostic_observed_value_template(
-            configuration, result, language, runtime_configuration, **kwargs
+            renderer_configuration=renderer_configuration, **kwargs
         )
 
         if chart is not None:
@@ -1408,7 +1438,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
-    ):
+    ) -> Union[RenderedStringTemplateContent, RenderedContentBlockContainer, str]:
         if not result.result.get("details"):
             return "--"
 
@@ -1452,7 +1482,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
-    ):
+    ) -> Union[RenderedGraphContent, None]:
         assert result, "Must pass in result."
         observed_partition_object = result.result["details"]["observed_partition"]
         weights = observed_partition_object["weights"]

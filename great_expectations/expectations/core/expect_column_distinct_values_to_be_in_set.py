@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Tuple, Union
 
 import altair as alt
 import pandas as pd
@@ -138,20 +138,14 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
-        styling = runtime_configuration.get("styling")
+        renderer_configuration: RendererConfiguration,
+    ) -> Tuple[str, dict, Union[dict, None]]:
+        kwargs: dict = renderer_configuration.kwargs
+        include_column_name: bool = renderer_configuration.include_column_name
+        styling: Union[dict, None] = renderer_configuration.styling
 
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            kwargs,
             ["column", "value_set", "row_condition", "condition_parser"],
         )
         params_with_json_schema = {
@@ -210,7 +204,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
             param_key_with_list="value_set",
         )
 
-        return (template_str, params_with_json_schema, styling)
+        return template_str, params_with_json_schema, styling
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
@@ -238,14 +232,11 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         )
 
         if params["value_set"] is None or len(params["value_set"]) == 0:
-
             if include_column_name:
                 template_str = "$column distinct values must belong to this set: [ ]"
             else:
                 template_str = "distinct values must belong to a set, but that set is not specified."
-
         else:
-
             for i, v in enumerate(params["value_set"]):
                 params[f"v__{str(i)}"] = v
             values_string = " ".join(
@@ -291,7 +282,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
-    ):
+    ) -> RenderedGraphContent:
         assert result, "Must pass in result."
         value_count_dicts = result.result["details"]["value_counts"]
         if isinstance(value_count_dicts, pd.Series):
@@ -385,7 +376,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
     def _validate(
         self,
         configuration: ExpectationConfiguration,
-        metrics: Dict,
+        metrics: dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
