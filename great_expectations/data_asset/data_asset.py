@@ -1112,7 +1112,7 @@ class DataAsset:
     #
     ###
 
-    def _format_map_output(
+    def _format_map_output(  # noqa: C901 - complexity 21
         self,
         result_format,
         success,
