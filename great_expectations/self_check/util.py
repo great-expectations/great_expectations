@@ -204,14 +204,14 @@ except ImportError:
             from collections import namedtuple
 
             BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))  # type: ignore[misc]
-            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)  # type: ignore[assignment]
+            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
             BIGQUERY_TYPES = {}
 
     except (ImportError, AttributeError):
         sqla_bigquery = None
-        bigquery_types_tuple = None  # type: ignore[assignment]
+        bigquery_types_tuple = None
         BigQueryDialect = None
-        pybigquery = None  # type: ignore[var-annotated]
+        pybigquery = None
         BIGQUERY_TYPES = {}
 
 
@@ -1413,7 +1413,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     extra_debug_info="",
     batch_definition: Optional[BatchDefinition] = None,
     debug_logger: Optional[logging.Logger] = None,
-    context: Optional["DataContext"] = None,
+    context: Optional[DataContext] = None,
 ):
     _debug = lambda x: x  # noqa: E731
     if debug_logger:
@@ -1686,7 +1686,7 @@ def build_sa_engine(
 def build_spark_engine(
     spark: SparkSession,
     df: Union[pd.DataFrame, SparkDataFrame],
-    schema: StructType = None,
+    schema: Optional[StructType] = None,
     batch_id: Optional[str] = None,
     batch_definition: Optional[BatchDefinition] = None,
 ) -> SparkDFExecutionEngine:
@@ -1760,6 +1760,7 @@ def candidate_test_is_on_temporary_notimplemented_list_v2_api(
             "expect_multicolumn_values_to_be_unique",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_multicolumn_sum_to_equal",
+            "expect_column_value_z_scores_to_be_less_than",
         ]
         if context in ["bigquery"]:
             ###
@@ -1801,10 +1802,12 @@ def candidate_test_is_on_temporary_notimplemented_list_v2_api(
             "expect_compound_columns_to_be_unique",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_table_row_count_to_equal_other_table",
+            "expect_column_value_z_scores_to_be_less_than",
         ]
     if context == "PandasDataset":
         return expectation_type in [
             "expect_table_row_count_to_equal_other_table",
+            "expect_column_value_z_scores_to_be_less_than",
         ]
     return False
 

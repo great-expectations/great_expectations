@@ -8,11 +8,14 @@ from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less
     ExpectColumnKlDivergenceToBeLessThan,
 )
 from great_expectations.expectations.registry import get_renderer_impl
-from great_expectations.render import LegacyDiagnosticRendererType, LegacyRendererType
+from great_expectations.render import (
+    LegacyDiagnosticRendererType,
+    LegacyRendererType,
+    RenderedTableContent,
+)
 from great_expectations.render.renderer.content_block.expectation_string import (
     ExpectationStringRenderer,
 )
-from great_expectations.render.types import RenderedTableContent
 
 logger = logging.getLogger(__name__)
 

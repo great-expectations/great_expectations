@@ -7,6 +7,7 @@ from unittest import mock
 
 import pytest
 
+from great_expectations.core.config_provider import _ConfigurationProvider
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
@@ -26,7 +27,7 @@ from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     ConcurrencyConfig,
     DataContextConfig,
-    GeCloudConfig,
+    GXCloudConfig,
     IncludeRenderedContentConfig,
     NotebookConfig,
     NotebookTemplateConfig,
@@ -34,6 +35,9 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
+)
+from tests.integration.usage_statistics.test_integration_usage_statistics import (
+    USAGE_STATISTICS_QA_URL,
 )
 
 yaml = YAMLHandler()
@@ -67,7 +71,7 @@ def data_context_config_dict() -> dict:
         "anonymous_usage_statistics": AnonymizedUsageStatisticsConfig(
             enabled=True,
             data_context_id="6a52bdfa-e182-455b-a825-e69f076e67d6",
-            usage_statistics_url="https://app.greatexpectations.io/",
+            usage_statistics_url=USAGE_STATISTICS_QA_URL,
         ),
         "notebooks": None,
         "concurrency": None,
@@ -87,11 +91,22 @@ def data_context_config(data_context_config_dict: dict) -> DataContextConfig:
     return config
 
 
+class StubConfigurationProvider(_ConfigurationProvider):
+    def __init__(self, config_values=None) -> None:
+        self._config_values = config_values or {}
+        super().__init__()
+
+    def get_values(self):
+        return self._config_values
+
+
 @pytest.fixture
 def ephemeral_data_context_variables(
     data_context_config: DataContextConfig,
 ) -> EphemeralDataContextVariables:
-    return EphemeralDataContextVariables(config=data_context_config)
+    return EphemeralDataContextVariables(
+        config=data_context_config, config_provider=StubConfigurationProvider()
+    )
 
 
 @pytest.fixture
@@ -99,7 +114,9 @@ def file_data_context_variables(
     data_context_config: DataContextConfig, empty_data_context: DataContext
 ) -> FileDataContextVariables:
     return FileDataContextVariables(
-        data_context=empty_data_context, config=data_context_config
+        data_context=empty_data_context,
+        config=data_context_config,
+        config_provider=StubConfigurationProvider(),
     )
 
 
@@ -115,6 +132,7 @@ def cloud_data_context_variables(
         ge_cloud_organization_id=ge_cloud_organization_id,
         ge_cloud_access_token=ge_cloud_access_token,
         config=data_context_config,
+        config_provider=StubConfigurationProvider(),
     )
 
 
@@ -135,7 +153,7 @@ def file_data_context(
 def cloud_data_context(
     tmp_path: pathlib.Path,
     data_context_config: DataContextConfig,
-    ge_cloud_config_e2e: GeCloudConfig,
+    ge_cloud_config_e2e: GXCloudConfig,
 ) -> CloudDataContext:
     project_path = tmp_path / "cloud_data_context"
     project_path.mkdir()
@@ -313,12 +331,12 @@ def test_data_context_variables_get_with_substitutions(
         DataContextVariableSchema.CONFIG_VERSION
     ] = f"${env_var_name}"
     config: DataContextConfig = DataContextConfig(**data_context_config_dict)
-    substitutions: dict = {
+    config_values: dict = {
         env_var_name: value_associated_with_env_var,
     }
-
     variables: DataContextVariables = EphemeralDataContextVariables(
-        config=config, substitutions=substitutions
+        config=config,
+        config_provider=StubConfigurationProvider(config_values=config_values),
     )
     assert variables.config_version == value_associated_with_env_var
 
@@ -494,10 +512,9 @@ def test_data_context_variables_repr_and_str_only_reveal_config(
 ) -> None:
     config = data_context_config
 
-    substitutions_key = "my_sensitive_information"
-    substitutions = {substitutions_key: "*****"}
     variables = EphemeralDataContextVariables(
-        config=data_context_config, substitutions=substitutions
+        config=data_context_config,
+        config_provider=StubConfigurationProvider(),
     )
 
     variables_str = str(variables)
@@ -505,10 +522,6 @@ def test_data_context_variables_repr_and_str_only_reveal_config(
 
     assert variables_str == str(config)
     assert variables_repr == repr(config)
-    assert (
-        substitutions_key not in variables_str
-        and substitutions_key not in variables_repr
-    )
 
 
 @pytest.mark.integration

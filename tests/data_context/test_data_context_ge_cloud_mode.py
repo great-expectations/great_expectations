@@ -3,8 +3,8 @@ from unittest import mock
 import pytest
 
 from great_expectations.data_context import BaseDataContext, DataContext
-from great_expectations.data_context.store import GeCloudStoreBackend
-from great_expectations.exceptions import DataContextError, GeCloudError
+from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
+from great_expectations.exceptions import DataContextError, GXCloudError
 
 
 @pytest.mark.cloud
@@ -59,7 +59,7 @@ def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_e
     # Ensure that the request fails
     mock_request.return_value.status_code = 401
 
-    with pytest.raises(GeCloudError):
+    with pytest.raises(GXCloudError):
         DataContext(
             ge_cloud_mode=True,
             ge_cloud_base_url=ge_cloud_runtime_base_url,
@@ -86,7 +86,7 @@ def test_data_context_in_cloud_mode_passes_base_url_to_store_backend(
     context: BaseDataContext = empty_base_data_context_in_cloud_mode_custom_base_url
 
     # Assertions that the context fixture is set up properly
-    assert not context.ge_cloud_config.base_url == GeCloudStoreBackend.DEFAULT_BASE_URL
+    assert not context.ge_cloud_config.base_url == CLOUD_DEFAULT_BASE_URL
     assert not context.ge_cloud_config.base_url == ge_cloud_base_url
     assert (
         not context.ge_cloud_config.base_url == "https://app.test.greatexpectations.io"
@@ -95,7 +95,7 @@ def test_data_context_in_cloud_mode_passes_base_url_to_store_backend(
     # The DatasourceStore should not have the default base_url or commonly used test base urls
     assert (
         not context._datasource_store.store_backend.config["ge_cloud_base_url"]
-        == GeCloudStoreBackend.DEFAULT_BASE_URL
+        == CLOUD_DEFAULT_BASE_URL
     )
     assert (
         not context._datasource_store.store_backend.config["ge_cloud_base_url"]

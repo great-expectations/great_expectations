@@ -47,11 +47,12 @@ from great_expectations.util import (
     convert_ndarray_to_datetime_dtype_best_effort,
     numpy_quantile,
 )
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.data_context.base_data_context import (
-        BaseDataContext,
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
     )
     from great_expectations.validator.validator import Validator
 
@@ -76,7 +77,7 @@ RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS: set = {
 def get_validator(
     purpose: str,
     *,
-    data_context: Optional[BaseDataContext] = None,
+    data_context: Optional[AbstractDataContext] = None,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
@@ -131,7 +132,7 @@ def get_validator(
 
 
 def get_batch_ids(
-    data_context: Optional[BaseDataContext] = None,
+    data_context: Optional[AbstractDataContext] = None,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     limit: Optional[int] = None,
@@ -309,7 +310,7 @@ def get_parameter_value(
 def get_resolved_metrics_by_key(
     validator: Validator,
     metric_configurations_by_key: Dict[str, List[MetricConfiguration]],
-) -> Dict[str, Dict[Tuple[str, str, str], Any]]:
+) -> Dict[str, Dict[Tuple[str, str, str], MetricValue]]:
     """
     Compute (resolve) metrics for every column name supplied on input.
 
@@ -322,7 +323,7 @@ def get_resolved_metrics_by_key(
 
     Returns:
         Dictionary of the form {
-            "my_key": Dict[Tuple[str, str, str], Any],
+            "my_key": Dict[Tuple[str, str, str], MetricValue],
         }
     """
     key: str
@@ -331,7 +332,9 @@ def get_resolved_metrics_by_key(
 
     # Step 1: Gather "MetricConfiguration" objects corresponding to all possible key values/combinations.
     # and compute all metric values (resolve "MetricConfiguration" objects ) using a single method call.
-    resolved_metrics: Dict[Tuple[str, str, str], Any] = validator.compute_metrics(
+    resolved_metrics: Dict[
+        Tuple[str, str, str], MetricValue
+    ] = validator.compute_metrics(
         metric_configurations=[
             metric_configuration
             for key, metric_configurations_for_key in metric_configurations_by_key.items()
@@ -386,7 +389,7 @@ def get_resolved_metrics_by_key(
         )
     ]
 
-    resolved_metrics_by_key: Dict[str, Dict[Tuple[str, str, str], Any]] = {
+    resolved_metrics_by_key: Dict[str, Dict[Tuple[str, str, str], MetricValue]] = {
         key: {
             metric_configuration.id: resolved_metrics[metric_configuration.id]
             for metric_configuration in metric_configurations_by_key[key]
@@ -946,7 +949,7 @@ def convert_metric_values_to_float_dtype_best_effort(
 
 
 def get_validator_with_expectation_suite(
-    data_context: BaseDataContext,
+    data_context: AbstractDataContext,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
     expectation_suite: Optional[ExpectationSuite] = None,
@@ -980,7 +983,7 @@ def get_validator_with_expectation_suite(
 
 
 def get_or_create_expectation_suite(
-    data_context: BaseDataContext,
+    data_context: Optional[AbstractDataContext],
     expectation_suite: Optional[ExpectationSuite] = None,
     expectation_suite_name: Optional[str] = None,
     component_name: Optional[str] = None,

@@ -1,9 +1,7 @@
-import json
-from typing import Callable, Dict, Optional
-
-from numpy import array
+from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -11,7 +9,6 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.execution_engine.execution_engine import (
     ExecutionEngine,
-    MetricDomainTypes,
     MetricPartialFunctionTypes,
 )
 from great_expectations.expectations.expectation import (
@@ -22,19 +19,11 @@ from great_expectations.expectations.expectation import (
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
-    metric_partial,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.expectations.metrics.import_manager import F
+from great_expectations.expectations.metrics.metric_provider import metric_partial
+from great_expectations.render import CollapseContent, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
-    CollapseContent,
-    RenderedStringTemplateContent,
-)
-from great_expectations.render.util import (
-    handle_strict_min_max,
-    parse_row_condition_string_pandas_engine,
-    substitute_none_for_missing,
-)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
@@ -108,7 +97,6 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
             metric_value_kwargs={
                 "include_nested": True,
             },
-            metric_dependencies=None,
         )
 
         return dependencies

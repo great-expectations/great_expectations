@@ -3,7 +3,6 @@ from __future__ import annotations
 import configparser
 import copy
 import datetime
-import errno
 import json
 import logging
 import os
@@ -12,6 +11,7 @@ import uuid
 import warnings
 import webbrowser
 from abc import ABC, abstractmethod
+from collections import OrderedDict
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -20,28 +20,31 @@ from typing import (
     List,
     Mapping,
     Optional,
+    Sequence,
     Tuple,
+    TypeVar,
     Union,
     cast,
 )
 
-try:
-    from typing import Literal  # type: ignore[attr-defined]
-except ImportError:
-    # Fallback for python < 3.8
-    from typing_extensions import Literal  # type: ignore[misc]
-
 from dateutil.parser import parse
+from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
+from typing_extensions import Literal
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
-    BatchDefinition,
     BatchRequestBase,
     IDDict,
     get_batch_request_from_acceptable_arguments,
+)
+from great_expectations.core.config_provider import (
+    _ConfigurationProvider,
+    _ConfigurationVariablesConfigurationProvider,
+    _EnvironmentConfigurationProvider,
+    _RuntimeEnvironmentConfigurationProvider,
 )
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
@@ -63,6 +66,7 @@ from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.store.expectations_store import ExpectationsStore
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.store.validations_store import ValidationsStore
+from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     CURRENT_GE_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
@@ -75,10 +79,15 @@ from great_expectations.data_context.types.base import (
     NotebookConfig,
     ProgressBarsConfig,
     anonymizedUsageStatisticsSchema,
+    dataContextConfigSchema,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.types.refs import GeCloudIdAwareRef
+from great_expectations.data_context.types.refs import (
+    GXCloudIDAwareRef,
+    GXCloudResourceRef,
+)
 from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
@@ -86,8 +95,7 @@ from great_expectations.data_context.util import (
     PasswordMasker,
     build_store_from_config,
     instantiate_class_from_config,
-    substitute_all_config_variables,
-    substitute_config_variable,
+    parse_substitution_variable,
 )
 from great_expectations.dataset.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
@@ -112,9 +120,18 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # isort
     UsageStatisticsHandler,
     add_datasource_usage_statistics,
     get_batch_list_usage_statistics,
+    run_validation_operator_usage_statistics,
+    save_expectation_suite_usage_statistics,
     send_usage_message,
     usage_statistics_enabled_method,
 )
+
+try:
+    from sqlalchemy.exc import SQLAlchemyError
+except ImportError:
+    # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
+    # just fall through
+    SQLAlchemyError = ge_exceptions.ProfilerError
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
@@ -122,6 +139,13 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store import (
         CheckpointStore,
         EvaluationParameterStore,
+    )
+    from great_expectations.data_context.types.resource_identifiers import (
+        GXCloudIdentifier,
+    )
+    from great_expectations.experimental.datasources.interfaces import Batch as XBatch
+    from great_expectations.experimental.datasources.interfaces import (
+        Datasource as XDatasource,
     )
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.rule_based_profiler import RuleBasedProfilerResult
@@ -131,6 +155,9 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 yaml = YAMLHandler()
+
+
+T = TypeVar("T", dict, list, str)
 
 
 class AbstractDataContext(ABC):
@@ -151,6 +178,11 @@ class AbstractDataContext(ABC):
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
     MIGRATION_WEBSITE: str = "https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api"
 
+    PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
+    PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
+    PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND = 4
+    PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND = 5
+
     def __init__(self, runtime_environment: Optional[dict] = None) -> None:
         """
         Constructor for AbstractDataContext. Will handle instantiation logic that is common to all DataContext objects
@@ -163,9 +195,9 @@ class AbstractDataContext(ABC):
             runtime_environment = {}
         self.runtime_environment = runtime_environment
 
-        # These attributes that are set downstream.
-        self._variables: Optional[DataContextVariables] = None
-        self._config_variables: Optional[dict] = None
+        self._config_provider = self._init_config_provider()
+        self._config_variables = self._load_config_variables()
+        self._variables = self._init_variables()
 
         # Init plugin support
         if self.plugins_directory is not None and os.path.exists(
@@ -205,6 +237,34 @@ class AbstractDataContext(ABC):
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         self.validation_operators: dict = {}
 
+    def _init_config_provider(self) -> _ConfigurationProvider:
+        config_provider = _ConfigurationProvider()
+        self._register_providers(config_provider)
+        return config_provider
+
+    def _register_providers(self, config_provider: _ConfigurationProvider) -> None:
+        """
+        Registers any relevant ConfigurationProvider instances to self._config_provider.
+
+        Note that order matters here - if there is a namespace collision, later providers will overwrite
+        the values derived from previous ones. The order of precedence is as follows:
+            - Config variables
+            - Environment variables
+            - Runtime environment
+        """
+        config_variables_file_path = self._project_config.config_variables_file_path
+        if config_variables_file_path:
+            config_provider.register_provider(
+                _ConfigurationVariablesConfigurationProvider(
+                    config_variables_file_path=config_variables_file_path,
+                    root_directory=self.root_directory,
+                )
+            )
+        config_provider.register_provider(_EnvironmentConfigurationProvider())
+        config_provider.register_provider(
+            _RuntimeEnvironmentConfigurationProvider(self.runtime_environment)
+        )
+
     @abstractmethod
     def _init_variables(self) -> DataContextVariables:
         raise NotImplementedError
@@ -218,7 +278,10 @@ class AbstractDataContext(ABC):
         """
         self.variables.save_config()
 
-    @abstractmethod
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
+        args_payload_fn=save_expectation_suite_usage_statistics,
+    )
     def save_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
@@ -230,7 +293,34 @@ class AbstractDataContext(ABC):
         """
         Each DataContext will define how ExpectationSuite will be saved.
         """
-        raise NotImplementedError
+        if expectation_suite_name is None:
+            key = ExpectationSuiteIdentifier(
+                expectation_suite_name=expectation_suite.expectation_suite_name
+            )
+        else:
+            expectation_suite.expectation_suite_name = expectation_suite_name
+            key = ExpectationSuiteIdentifier(
+                expectation_suite_name=expectation_suite_name
+            )
+        if (
+            self.expectations_store.has_key(key)  # noqa: @601
+            and not overwrite_existing
+        ):
+            raise ge_exceptions.DataContextError(
+                "expectation_suite with name {} already exists. If you would like to overwrite this "
+                "expectation_suite, set overwrite_existing=True.".format(
+                    expectation_suite_name
+                )
+            )
+        self._evaluation_parameter_dependencies_compiled = False
+        include_rendered_content = (
+            self._determine_if_expectation_suite_include_rendered_content(
+                include_rendered_content=include_rendered_content
+            )
+        )
+        if include_rendered_content:
+            expectation_suite.render()
+        return self.expectations_store.set(key, expectation_suite, **kwargs)
 
     # Properties
     @property
@@ -261,6 +351,10 @@ class AbstractDataContext(ABC):
         # NOTE: <DataContextRefactor> _project_config is currently only defined in child classes.
         # See if this can this be also defined in AbstractDataContext as abstract property
         return self.variables.config
+
+    @property
+    def config_provider(self) -> _ConfigurationProvider:
+        return self._config_provider
 
     @property
     def root_directory(self) -> Optional[str]:
@@ -474,8 +568,11 @@ class AbstractDataContext(ABC):
         Returns:
             The datasource, after storing and retrieving the stored config.
         """
+        # Chetan - 20221103 - Directly accessing private attr in order to patch security vulnerabiliy around credential leakage.
+        # This is to be removed once substitution logic is migrated from the context to the individual object level.
+        config = datasource._raw_config
 
-        datasource_config_dict: dict = datasourceConfigSchema.dump(datasource.config)
+        datasource_config_dict: dict = datasourceConfigSchema.dump(config)
         # Manually need to add in class name to the config since it is not part of the runtime obj
         datasource_config_dict["class_name"] = datasource.__class__.__name__
 
@@ -494,7 +591,10 @@ class AbstractDataContext(ABC):
         )
         updated_datasource: Union[
             LegacyDatasource, BaseDatasource
-        ] = self._instantiate_datasource_from_config(config=substituted_config)
+        ] = self._instantiate_datasource_from_config(
+            raw_config=updated_datasource_config_from_store,
+            substituted_config=substituted_config,
+        )
         self._cached_datasources[datasource_name] = updated_datasource
         return updated_datasource
 
@@ -506,7 +606,7 @@ class AbstractDataContext(ABC):
         self,
         name: str,
         initialize: bool = True,
-        save_changes: bool = False,
+        save_changes: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         """Add a new datasource to the data context, with configuration provided as kwargs.
@@ -520,6 +620,8 @@ class AbstractDataContext(ABC):
         Returns:
             datasource (Datasource)
         """
+        save_changes = self._determine_save_changes_flag(save_changes)
+
         logger.debug(f"Starting BaseDataContext.add_datasource for {name}")
 
         module_name: str = kwargs.get("module_name", "great_expectations.datasource")  # type: ignore[assignment]
@@ -552,7 +654,7 @@ class AbstractDataContext(ABC):
     def update_datasource(
         self,
         datasource: Union[LegacyDatasource, BaseDatasource],
-        save_changes: bool = False,
+        save_changes: Optional[bool] = None,
     ) -> None:
         """
         Updates a DatasourceConfig that already exists in the store.
@@ -561,6 +663,8 @@ class AbstractDataContext(ABC):
             datasource_config: The config object to persist using the DatasourceStore.
             save_changes: do I save changes to disk?
         """
+        save_changes = self._determine_save_changes_flag(save_changes)
+
         datasource_config_dict: dict = datasourceConfigSchema.dump(datasource.config)
         datasource_config = DatasourceConfig(**datasource_config_dict)
         datasource_name: str = datasource.name
@@ -587,14 +691,7 @@ class AbstractDataContext(ABC):
         """
         if not config:
             config = self._project_config
-
-        substitutions: dict = self._determine_substitutions()
-
-        return DataContextConfig(
-            **substitute_all_config_variables(
-                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-            )
-        )
+        return DataContextConfig(**self.config_provider.substitute_config(config))
 
     def get_batch(
         self, arg1: Any = None, arg2: Any = None, arg3: Any = None, **kwargs
@@ -765,7 +862,7 @@ class AbstractDataContext(ABC):
         else:
             expectation_suite = self.get_expectation_suite(expectation_suite_name)
 
-        datasource = self.get_datasource(batch_kwargs.get("datasource"))  # type: ignore[union-attr,arg-type]
+        datasource = self.get_datasource(batch_kwargs.get("datasource"))  # type: ignore[arg-type]
         batch = datasource.get_batch(  # type: ignore[union-attr]
             batch_kwargs=batch_kwargs, batch_parameters=batch_parameters
         )
@@ -923,6 +1020,36 @@ class AbstractDataContext(ABC):
             if store.get("name") in active_store_names  # type: ignore[arg-type,operator]
         ]
 
+    def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+        return self.checkpoint_store.list_checkpoints()
+
+    def list_profilers(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+        return RuleBasedProfiler.list_profilers(self.profiler_store)
+
+    def save_profiler(
+        self,
+        profiler: RuleBasedProfiler,
+    ) -> RuleBasedProfiler:
+        name = profiler.name
+        ge_cloud_id = profiler.ge_cloud_id
+        key = self._determine_key_for_profiler_save(name=name, id=ge_cloud_id)
+
+        response = self.profiler_store.set(key=key, value=profiler.config)  # type: ignore[func-returns-value]
+        if isinstance(response, GXCloudResourceRef):
+            ge_cloud_id = response.ge_cloud_id
+
+        # If an id is present, we want to prioritize that as our key for object retrieval
+        if ge_cloud_id:
+            name = None  # type: ignore[assignment]
+
+        profiler = self.get_profiler(name=name, ge_cloud_id=ge_cloud_id)
+        return profiler
+
+    def _determine_key_for_profiler_save(
+        self, name: str, id: Optional[str]
+    ) -> Union[ConfigurationIdentifier, GXCloudIdentifier]:
+        return ConfigurationIdentifier(configuration_key=name)
+
     def get_datasource(
         self, datasource_name: str = "default"
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
@@ -946,17 +1073,18 @@ class AbstractDataContext(ABC):
             datasource_name=datasource_name
         )
 
-        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
-        substitutions: dict = self._determine_substitutions()
-        config = substitute_all_config_variables(
-            config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-        )
+        raw_config_dict: dict = dict(datasourceConfigSchema.dump(datasource_config))
+        raw_config = datasourceConfigSchema.load(raw_config_dict)
+
+        substituted_config = self.config_provider.substitute_config(raw_config_dict)
 
         # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
-        datasource_config = datasourceConfigSchema.load(config)
+        datasource_config = datasourceConfigSchema.load(substituted_config)
         datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
-        ] = self._instantiate_datasource_from_config(config=datasource_config)
+        ] = self._instantiate_datasource_from_config(
+            raw_config=raw_config, substituted_config=substituted_config
+        )
         self._cached_datasources[datasource_name] = datasource
         return datasource
 
@@ -972,14 +1100,10 @@ class AbstractDataContext(ABC):
         Returns:
             Dict of config with substitutions and sanitizations applied.
         """
-        substitutions: dict = self._determine_substitutions()
         datasource_dict: dict = serializer.serialize(datasource_config)
 
-        substituted_config: dict = cast(
-            dict,
-            substitute_all_config_variables(
-                datasource_dict, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-            ),
+        substituted_config = cast(
+            dict, self.config_provider.substitute_config(datasource_dict)
         )
         masked_config: dict = PasswordMasker.sanitize_config(substituted_config)
         return masked_config
@@ -1010,7 +1134,7 @@ class AbstractDataContext(ABC):
         datasource_config: Union[dict, DatasourceConfig]
         serializer = NamedDatasourceSerializer(schema=datasourceConfigSchema)
 
-        for datasource_name, datasource_config in self.config.datasources.items():  # type: ignore[union-attr,assignment]
+        for datasource_name, datasource_config in self.config.datasources.items():  # type: ignore[union-attr]
             if isinstance(datasource_config, dict):
                 datasource_config = DatasourceConfig(**datasource_config)
             datasource_config.name = datasource_name
@@ -1024,7 +1148,7 @@ class AbstractDataContext(ABC):
         return datasources
 
     def delete_datasource(
-        self, datasource_name: Optional[str], save_changes: bool = False
+        self, datasource_name: Optional[str], save_changes: Optional[bool] = None
     ) -> None:
         """Delete a datasource
         Args:
@@ -1033,6 +1157,8 @@ class AbstractDataContext(ABC):
         Raises:
             ValueError: If the datasource name isn't provided or cannot be found.
         """
+        save_changes = self._determine_save_changes_flag(save_changes)
+
         if not datasource_name:
             raise ValueError("Datasource names must be a datasource name")
 
@@ -1234,7 +1360,9 @@ class AbstractDataContext(ABC):
         sorted_expectation_suite_names.sort()
         return sorted_expectation_suite_names
 
-    def list_expectation_suites(self) -> Optional[List[str]]:
+    def list_expectation_suites(
+        self,
+    ) -> Optional[Union[List[str], List[GXCloudIdentifier]]]:
         """Return a list of available expectation suite keys."""
         try:
             keys = self.expectations_store.list_keys()
@@ -1349,7 +1477,7 @@ class AbstractDataContext(ABC):
                 batch_request_list = [batch_request]  # type: ignore[list-item]
 
             for batch_request in batch_request_list:
-                batch_list.extend(  # type: ignore[union-attr]
+                batch_list.extend(
                     self.get_batch_list(
                         datasource_name=datasource_name,
                         data_connector_name=data_connector_name,
@@ -1376,7 +1504,7 @@ class AbstractDataContext(ABC):
 
         return self.get_validator_using_batch_list(
             expectation_suite=expectation_suite,  # type: ignore[arg-type]
-            batch_list=batch_list,  # type: ignore[arg-type]
+            batch_list=batch_list,
             include_rendered_content=include_rendered_content,
         )
 
@@ -1384,7 +1512,7 @@ class AbstractDataContext(ABC):
     def get_validator_using_batch_list(
         self,
         expectation_suite: ExpectationSuite,
-        batch_list: List[Batch],
+        batch_list: Sequence[Union[Batch, XBatch]],
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Validator:
@@ -1410,12 +1538,19 @@ class AbstractDataContext(ABC):
                 include_rendered_content=include_rendered_content
             )
         )
+
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
-        batch_definition: BatchDefinition = batch_list[-1].batch_definition
-        execution_engine: ExecutionEngine = self.datasources[  # type: ignore[union-attr]
-            batch_definition.datasource_name
-        ].execution_engine
+        execution_engine: ExecutionEngine
+        if hasattr(batch_list[-1], "execution_engine"):
+            # 'XBatch's are execution engine aware. We just checked for this attr so we ignore the following
+            # attr defined mypy error
+            execution_engine = batch_list[-1].execution_engine
+        else:
+            execution_engine = self.datasources[  # type: ignore[union-attr]
+                batch_list[-1].batch_definition.datasource_name
+            ].execution_engine
+
         validator = Validator(
             execution_engine=execution_engine,
             interactive_evaluation=True,
@@ -1424,6 +1559,7 @@ class AbstractDataContext(ABC):
             batches=batch_list,
             include_rendered_content=include_rendered_content,
         )
+
         return validator
 
     @usage_statistics_enabled_method(
@@ -1562,7 +1698,7 @@ class AbstractDataContext(ABC):
                     expectation_suite_name
                 )
             )
-        self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[arg-type]
+        self.expectations_store.set(key, expectation_suite, **kwargs)
         return expectation_suite
 
     def delete_expectation_suite(
@@ -1791,6 +1927,84 @@ class AbstractDataContext(ABC):
         self.validation_operators[validation_operator_name] = new_validation_operator
         return new_validation_operator
 
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_VALIDATION_OPERATOR,
+        args_payload_fn=run_validation_operator_usage_statistics,
+    )
+    def run_validation_operator(
+        self,
+        validation_operator_name: str,
+        assets_to_validate: List,
+        run_id: Optional[Union[str, RunIdentifier]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        run_name: Optional[str] = None,
+        run_time: Optional[Union[str, datetime.datetime]] = None,
+        result_format: Optional[Union[str, dict]] = None,
+        **kwargs,
+    ):
+        """
+        Run a validation operator to validate data assets and to perform the business logic around
+        validation that the operator implements.
+
+        Args:
+            validation_operator_name: name of the operator, as appears in the context's config file
+            assets_to_validate: a list that specifies the data assets that the operator will validate. The members of
+                the list can be either batches, or a tuple that will allow the operator to fetch the batch:
+                (batch_kwargs, expectation_suite_name)
+            evaluation_parameters: $parameter_name syntax references to be evaluated at runtime
+            run_id: The run_id for the validation; if None, a default value will be used
+            run_name: The run_name for the validation; if None, a default value will be used
+            run_time: The date/time of the run
+            result_format: one of several supported formatting directives for expectation validation results
+            **kwargs: Additional kwargs to pass to the validation operator
+
+        Returns:
+            ValidationOperatorResult
+        """
+        result_format = result_format or {"result_format": "SUMMARY"}
+
+        if not assets_to_validate:
+            raise ge_exceptions.DataContextError(
+                "No batches of data were passed in. These are required"
+            )
+
+        for batch in assets_to_validate:
+            if not isinstance(batch, (tuple, DataAsset, Validator)):
+                raise ge_exceptions.DataContextError(
+                    "Batches are required to be of type DataAsset or Validator"
+                )
+        try:
+            validation_operator = self.validation_operators[validation_operator_name]
+        except KeyError:
+            raise ge_exceptions.DataContextError(
+                f"No validation operator `{validation_operator_name}` was found in your project. Please verify this in your great_expectations.yml"
+            )
+
+        if run_id is None and run_name is None:
+            run_name = datetime.datetime.now(datetime.timezone.utc).strftime(
+                "%Y%m%dT%H%M%S.%fZ"
+            )
+            logger.info(f"Setting run_name to: {run_name}")
+        if evaluation_parameters is None:
+            return validation_operator.run(
+                assets_to_validate=assets_to_validate,
+                run_id=run_id,
+                run_name=run_name,
+                run_time=run_time,
+                result_format=result_format,
+                **kwargs,
+            )
+        else:
+            return validation_operator.run(
+                assets_to_validate=assets_to_validate,
+                run_id=run_id,
+                evaluation_parameters=evaluation_parameters,
+                run_name=run_name,
+                run_time=run_time,
+                result_format=result_format,
+                **kwargs,
+            )
+
     def list_validation_operators(self):
         """List currently-configured Validation Operators on this context"""
 
@@ -1959,7 +2173,7 @@ class AbstractDataContext(ABC):
             value=validation_results,
         )
 
-        if isinstance(validation_ref, GeCloudIdAwareRef):
+        if isinstance(validation_ref, GXCloudIDAwareRef):
             ge_cloud_id = validation_ref.ge_cloud_id
             validation_results.ge_cloud_id = uuid.UUID(ge_cloud_id)
 
@@ -1995,6 +2209,28 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         profiling_results["success"] = True
         return profiling_results
+
+    def add_batch_kwargs_generator(
+        self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
+    ):
+        """
+        Add a batch kwargs generator to the named datasource, using the provided
+        configuration.
+
+        Args:
+            datasource_name: name of datasource to which to add the new batch kwargs generator
+            batch_kwargs_generator_name: name of the generator to add
+            class_name: class of the batch kwargs generator to add
+            **kwargs: batch kwargs generator configuration, provided as kwargs
+
+        Returns:
+
+        """
+        datasource_obj = self.get_datasource(datasource_name)
+        generator = datasource_obj.add_batch_kwargs_generator(
+            name=batch_kwargs_generator_name, class_name=class_name, **kwargs
+        )
+        return generator
 
     def get_available_data_asset_names(
         self, datasource_names=None, batch_kwargs_generator_names=None
@@ -2382,6 +2618,21 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         return metric_configurations_list
 
+    @classmethod
+    def get_or_create_data_context_config(
+        cls, project_config: Union[DataContextConfig, Mapping]
+    ) -> DataContextConfig:
+        if isinstance(project_config, DataContextConfig):
+            return project_config
+        try:
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+            project_config_dict = dataContextConfigSchema.dump(project_config)
+            project_config_dict = dataContextConfigSchema.load(project_config_dict)
+            context_config: DataContextConfig = DataContextConfig(**project_config_dict)
+            return context_config
+        except ValidationError:
+            raise
+
     def _normalize_absolute_or_relative_path(
         self, path: Optional[str]
     ) -> Optional[str]:
@@ -2396,7 +2647,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             return os.path.join(self.root_directory, path)  # type: ignore[arg-type]
 
     def _apply_global_config_overrides(
-        self, config: Union[DataContextConfig, Mapping]
+        self, config: DataContextConfig
     ) -> DataContextConfig:
 
         """
@@ -2412,12 +2663,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             DataContextConfig with the appropriate overrides
         """
         validation_errors: dict = {}
-        config_with_global_config_overrides: DataContextConfig = copy.deepcopy(config)  # type: ignore[assignment]
-        usage_stats_opted_out: bool = self._check_global_usage_statistics_opt_out()
-        # if usage_stats_opted_out then usage_statistics is false
-        # NOTE: <DataContextRefactor> 202207 Refactor so that this becomes usage_stats_enabled
-        # (and we don't have to flip a boolean in our minds)
-        if usage_stats_opted_out:
+        config_with_global_config_overrides: DataContextConfig = copy.deepcopy(config)
+        usage_stats_enabled: bool = self._is_usage_stats_enabled()
+        if not usage_stats_enabled:
             logger.info(
                 "Usage statistics is disabled globally. Applying override to project_config."
             )
@@ -2468,53 +2716,31 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return config_with_global_config_overrides
 
     def _load_config_variables(self) -> Dict:
+        config_var_provider = self.config_provider.get_provider(
+            _ConfigurationVariablesConfigurationProvider
+        )
+        if config_var_provider:
+            return config_var_provider.get_values()
+        return {}
+
+    @staticmethod
+    def _is_usage_stats_enabled() -> bool:
         """
-        Get all config variables from the default location. For Data Contexts in GE Cloud mode, config variables
-        have already been interpolated before being sent from the Cloud API.
-
-        """
-        config_variables_file_path = self._project_config.config_variables_file_path
-        if config_variables_file_path:
-            try:
-                # If the user specifies the config variable path with an environment variable, we want to substitute it
-                defined_path: str = substitute_config_variable(  # type: ignore[assignment]
-                    config_variables_file_path, dict(os.environ)
-                )
-                if not os.path.isabs(defined_path) and hasattr(self, "root_directory"):
-                    # A BaseDataContext will not have a root directory; in that case use the current directory
-                    # for any non-absolute path
-                    root_directory: str = self.root_directory or os.curdir
-                else:
-                    root_directory = ""
-                var_path = os.path.join(root_directory, defined_path)
-                with open(var_path) as config_variables_file:
-                    contents = config_variables_file.read()
-
-                variables = yaml.load(contents) or {}
-                return dict(variables)
-
-            except OSError as e:
-                if e.errno != errno.ENOENT:
-                    raise
-                return {}
-        else:
-            return {}
-
-    def _check_global_usage_statistics_opt_out(self) -> bool:
-        """
-        Method to retrieve config value.
-        This method can be overridden in child classes (like FileDataContext) when we need to look for
-        config values in other locations like config files.
+        Checks the following locations to see if usage_statistics is disabled in any of the following locations:
+            - GE_USAGE_STATS, which is an environment_variable
+            - GLOBAL_CONFIG_PATHS
+        If GE_USAGE_STATS exists AND its value is one of the FALSEY_STRINGS, usage_statistics is disabled (return False)
+        Also checks GLOBAL_CONFIG_PATHS to see if config file contains override for anonymous_usage_statistics
+        Returns True otherwise
 
         Returns:
-            bool that tells you whether usage_statistics is opted out
+            bool that tells you whether usage_statistics is on or off
         """
-        # NOTE: <DataContextRefactor> Refactor so that opt_out is no longer used, and we don't have to flip boolean in
-        # our minds.
+        usage_statistics_enabled: bool = True
         if os.environ.get("GE_USAGE_STATS", False):
             ge_usage_stats = os.environ.get("GE_USAGE_STATS")
             if ge_usage_stats in AbstractDataContext.FALSEY_STRINGS:
-                return True
+                usage_statistics_enabled = False
             else:
                 logger.warning(
                     "GE_USAGE_STATS environment variable must be one of: {}".format(
@@ -2532,12 +2758,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             config.BOOLEAN_STATES = states  # type: ignore[misc] # Cannot assign to class variable via instance
             config.read(config_path)
             try:
-                if config.getboolean("anonymous_usage_statistics", "enabled") is False:
-                    # If stats are disabled, then opt out is true
-                    return True
+                if not config.getboolean("anonymous_usage_statistics", "enabled"):
+                    usage_statistics_enabled = False
+
             except (ValueError, configparser.Error):
                 pass
-        return False
+        return usage_statistics_enabled
 
     def _get_data_context_id_override(self) -> Optional[str]:
         """
@@ -2605,12 +2831,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def variables(self) -> DataContextVariables:
         if self._variables is None:
             self._variables = self._init_variables()
-
-        # By always recalculating substitutions with each call, we ensure we stay up-to-date
-        # with the latest changes to env vars and config vars
-        substitutions: dict = self._determine_substitutions()
-        self._variables.substitutions = substitutions
-
         return self._variables
 
     @property
@@ -2634,7 +2854,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return self.variables.notebooks  # type: ignore[return-value]
 
     @property
-    def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
+    def datasources(
+        self,
+    ) -> Dict[str, Union[LegacyDatasource, BaseDatasource, XDatasource]]:
         """A single holder for all Datasources in this context"""
         return self._cached_datasources
 
@@ -2674,27 +2896,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         self._config_variables = self._load_config_variables()
 
-    def _determine_substitutions(self) -> Dict:
-        """Aggregates substitutions from the project's config variables file, any environment variables, and
-        the runtime environment.
-
-        Returns: A dictionary containing all possible substitutions that can be applied to a given object
-                 using `substitute_all_config_variables`.
-        """
-        substituted_config_variables: dict = substitute_all_config_variables(
-            self.config_variables,
-            dict(os.environ),
-            self.DOLLAR_SIGN_ESCAPE_STRING,
-        )
-
-        substitutions: dict = {
-            **substituted_config_variables,
-            **dict(os.environ),
-            **self.runtime_environment,
-        }
-
-        return substitutions
-
     def _initialize_usage_statistics(
         self, usage_statistics_config: AnonymizedUsageStatisticsConfig
     ) -> None:
@@ -2712,9 +2913,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""
-        config: DataContextConfig = self.get_config_with_variables_substituted(
-            self.config
-        )
+        config: DataContextConfig = self.config
         datasources: Dict[str, DatasourceConfig] = cast(
             Dict[str, DatasourceConfig], config.datasources
         )
@@ -2722,11 +2921,21 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         for datasource_name, datasource_config in datasources.items():
             try:
                 config = copy.deepcopy(datasource_config)  # type: ignore[assignment]
-                config_dict = dict(datasourceConfigSchema.dump(config))
-                datasource_config = datasourceConfigSchema.load(config_dict)
-                datasource_config.name = datasource_name
+
+                raw_config_dict = dict(datasourceConfigSchema.dump(config))
+                substituted_config_dict: dict = self.config_provider.substitute_config(
+                    raw_config_dict
+                )
+
+                raw_datasource_config = datasourceConfigSchema.load(raw_config_dict)
+                substituted_datasource_config = datasourceConfigSchema.load(
+                    substituted_config_dict
+                )
+                substituted_datasource_config.name = datasource_name
+
                 datasource = self._instantiate_datasource_from_config(
-                    config=datasource_config
+                    raw_config=raw_datasource_config,
+                    substituted_config=substituted_datasource_config,
                 )
                 self._cached_datasources[datasource_name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
@@ -2737,7 +2946,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 pass
 
     def _instantiate_datasource_from_config(
-        self, config: DatasourceConfig
+        self,
+        raw_config: DatasourceConfig,
+        substituted_config: DatasourceConfig,
     ) -> Datasource:
         """Instantiate a new datasource.
         Args:
@@ -2750,14 +2961,18 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             DatasourceInitializationError
         """
         try:
-            datasource: Datasource = self._build_datasource_from_config(config=config)
+            datasource: Datasource = self._build_datasource_from_config(
+                raw_config=raw_config, substituted_config=substituted_config
+            )
         except Exception as e:
             raise ge_exceptions.DatasourceInitializationError(
-                datasource_name=config.name, message=str(e)
+                datasource_name=substituted_config.name, message=str(e)
             )
         return datasource
 
-    def _build_datasource_from_config(self, config: DatasourceConfig) -> Datasource:
+    def _build_datasource_from_config(
+        self, raw_config: DatasourceConfig, substituted_config: DatasourceConfig
+    ) -> Datasource:
         """Instantiate a Datasource from a config.
 
         Args:
@@ -2771,17 +2986,19 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         # We convert from the type back to a dictionary for purposes of instantiation
         serializer = DictConfigSerializer(schema=datasourceConfigSchema)
-        config_dict: dict = serializer.serialize(config)
+        substituted_config_dict: dict = serializer.serialize(substituted_config)
 
         # While the new Datasource classes accept "data_context_root_directory", the Legacy Datasource classes do not.
-        if config_dict["class_name"] in [
+        if substituted_config_dict["class_name"] in [
             "BaseDatasource",
             "Datasource",
         ]:
-            config_dict.update({"data_context_root_directory": self.root_directory})  # type: ignore[union-attr]
+            substituted_config_dict.update(
+                {"data_context_root_directory": self.root_directory}
+            )
         module_name: str = "great_expectations.datasource"
         datasource: Datasource = instantiate_class_from_config(
-            config=config_dict,
+            config=substituted_config_dict,
             runtime_environment={"data_context": self, "concurrency": self.concurrency},
             config_defaults={"module_name": module_name},
         )
@@ -2789,8 +3006,14 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             raise ge_exceptions.ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
-                class_name=config["class_name"],
+                class_name=substituted_config_dict["class_name"],
             )
+
+        # Chetan - 20221103 - Directly accessing private attr in order to patch security vulnerabiliy around credential leakage.
+        # This is to be removed once substitution logic is migrated from the context to the individual object level.
+        raw_config_dict: dict = serializer.serialize(raw_config)
+        datasource._raw_config = raw_config_dict
+
         return datasource
 
     def _perform_substitutions_on_datasource_config(
@@ -2806,13 +3029,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Returns:
             Datasource Config with substitutions performed.
         """
-        substitutions: dict = self._determine_substitutions()
-
         substitution_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
         raw_config: dict = substitution_serializer.serialize(config)
 
-        substituted_config_dict: dict = substitute_all_config_variables(
-            raw_config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+        substituted_config_dict: dict = self.config_provider.substitute_config(
+            raw_config
         )
 
         substituted_config: DatasourceConfig = datasourceConfigSchema.load(
@@ -2824,8 +3045,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def _instantiate_datasource_from_config_and_update_project_config(
         self,
         config: DatasourceConfig,
-        initialize: bool = True,
-        save_changes: bool = False,
+        initialize: bool,
+        save_changes: bool,
     ) -> Optional[Datasource]:
         """Perform substitutions and optionally initialize the Datasource and/or store the config.
 
@@ -2851,7 +3072,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         if initialize:
             try:
                 datasource = self._instantiate_datasource_from_config(
-                    config=substituted_config
+                    raw_config=config, substituted_config=substituted_config
                 )
                 self._cached_datasources[config.name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
@@ -3091,6 +3312,28 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 return False
         return include_rendered_content
 
+    @staticmethod
+    def _determine_save_changes_flag(save_changes: Optional[bool]) -> bool:
+        """
+        This method is meant to enable the gradual deprecation of the `save_changes` boolean
+        flag on various Datasource CRUD methods. Moving forward, we will always persist changes
+        made by these CRUD methods (a.k.a. the behavior created by save_changes=True).
+
+        As part of this effort, `save_changes` has been set to `None` as a default value
+        and will be automatically converted to `True` within this method. If a user passes in a boolean
+        value (thereby bypassing the default arg of `None`), a deprecation warning will be raised.
+        """
+        if save_changes is not None:
+            # deprecated-v0.15.32
+            warnings.warn(
+                'The parameter "save_changes" is deprecated as of v0.15.32; moving forward, '
+                "changes made to Datasources will always be persisted by Store implementations. "
+                "As support will be removed in v0.18, please omit the argument moving forward.",
+                DeprecationWarning,
+            )
+            return save_changes
+        return True
+
     def test_yaml_config(  # noqa: C901 - complexity 17
         self,
         yaml_config: str,
@@ -3150,3 +3393,418 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             return_mode=return_mode,
             shorten_tracebacks=shorten_tracebacks,
         )
+
+    def profile_datasource(  # noqa: C901 - complexity 25
+        self,
+        datasource_name,
+        batch_kwargs_generator_name=None,
+        data_assets=None,
+        max_data_assets=20,
+        profile_all_data_assets=True,
+        profiler=BasicDatasetProfiler,
+        profiler_configuration=None,
+        dry_run=False,
+        run_id=None,
+        additional_batch_kwargs=None,
+        run_name=None,
+        run_time=None,
+    ):
+        """Profile the named datasource using the named profiler.
+
+        Args:
+            datasource_name: the name of the datasource for which to profile data_assets
+            batch_kwargs_generator_name: the name of the batch kwargs generator to use to get batches
+            data_assets: list of data asset names to profile
+            max_data_assets: if the number of data assets the batch kwargs generator yields is greater than this max_data_assets,
+                profile_all_data_assets=True is required to profile all
+            profile_all_data_assets: when True, all data assets are profiled, regardless of their number
+            profiler: the profiler class to use
+            profiler_configuration: Optional profiler configuration dict
+            dry_run: when true, the method checks arguments and reports if can profile or specifies the arguments that are missing
+            additional_batch_kwargs: Additional keyword arguments to be provided to get_batch when loading the data asset.
+        Returns:
+            A dictionary::
+
+                {
+                    "success": True/False,
+                    "results": List of (expectation_suite, EVR) tuples for each of the data_assets found in the datasource
+                }
+
+            When success = False, the error details are under "error" key
+        """
+
+        # We don't need the datasource object, but this line serves to check if the datasource by the name passed as
+        # an arg exists and raise an error if it does not.
+        datasource = self.get_datasource(datasource_name)
+        assert datasource
+
+        if not dry_run:
+            logger.info(f"Profiling '{datasource_name}' with '{profiler.__name__}'")
+
+        profiling_results = {}
+
+        # Build the list of available data asset names (each item a tuple of name and type)
+
+        data_asset_names_dict = self.get_available_data_asset_names(datasource_name)
+
+        available_data_asset_name_list = []
+        try:
+            datasource_data_asset_names_dict = data_asset_names_dict[datasource_name]
+        except KeyError:
+            # KeyError will happen if there is not datasource
+            raise ge_exceptions.ProfilerError(f"No datasource {datasource_name} found.")
+
+        if batch_kwargs_generator_name is None:
+            # if no generator name is passed as an arg and the datasource has only
+            # one generator with data asset names, use it.
+            # if ambiguous, raise an exception
+            for name in datasource_data_asset_names_dict.keys():
+                if batch_kwargs_generator_name is not None:
+                    profiling_results = {
+                        "success": False,
+                        "error": {
+                            "code": self.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND
+                        },
+                    }
+                    return profiling_results
+
+                if len(datasource_data_asset_names_dict[name]["names"]) > 0:
+                    available_data_asset_name_list = datasource_data_asset_names_dict[
+                        name
+                    ]["names"]
+                    batch_kwargs_generator_name = name
+
+            if batch_kwargs_generator_name is None:
+                profiling_results = {
+                    "success": False,
+                    "error": {
+                        "code": self.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND
+                    },
+                }
+                return profiling_results
+        else:
+            # if the generator name is passed as an arg, get this generator's available data asset names
+            try:
+                available_data_asset_name_list = datasource_data_asset_names_dict[
+                    batch_kwargs_generator_name
+                ]["names"]
+            except KeyError:
+                raise ge_exceptions.ProfilerError(
+                    "batch kwargs Generator {} not found. Specify the name of a generator configured in this datasource".format(
+                        batch_kwargs_generator_name
+                    )
+                )
+
+        available_data_asset_name_list = sorted(
+            available_data_asset_name_list, key=lambda x: x[0]
+        )
+
+        if len(available_data_asset_name_list) == 0:
+            raise ge_exceptions.ProfilerError(
+                "No Data Assets found in Datasource {}. Used batch kwargs generator: {}.".format(
+                    datasource_name, batch_kwargs_generator_name
+                )
+            )
+        total_data_assets = len(available_data_asset_name_list)
+
+        if isinstance(data_assets, list) and len(data_assets) > 0:
+            not_found_data_assets = [
+                name
+                for name in data_assets
+                if name not in [da[0] for da in available_data_asset_name_list]
+            ]
+            if len(not_found_data_assets) > 0:
+                profiling_results = {
+                    "success": False,
+                    "error": {
+                        "code": self.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND,
+                        "not_found_data_assets": not_found_data_assets,
+                        "data_assets": available_data_asset_name_list,
+                    },
+                }
+                return profiling_results
+
+            data_assets.sort()
+            data_asset_names_to_profiled = data_assets
+            total_data_assets = len(available_data_asset_name_list)
+            if not dry_run:
+                logger.info(
+                    f"Profiling the white-listed data assets: {','.join(data_assets)}, alphabetically."
+                )
+        else:
+            if not profile_all_data_assets:
+                if total_data_assets > max_data_assets:
+                    profiling_results = {
+                        "success": False,
+                        "error": {
+                            "code": self.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS,
+                            "num_data_assets": total_data_assets,
+                            "data_assets": available_data_asset_name_list,
+                        },
+                    }
+                    return profiling_results
+
+            data_asset_names_to_profiled = [
+                name[0] for name in available_data_asset_name_list
+            ]
+        if not dry_run:
+            logger.info(
+                f"Profiling all {len(available_data_asset_name_list)} data assets from batch kwargs generator {batch_kwargs_generator_name}"
+            )
+        else:
+            logger.info(
+                f"Found {len(available_data_asset_name_list)} data assets from batch kwargs generator {batch_kwargs_generator_name}"
+            )
+
+        profiling_results["success"] = True
+
+        if not dry_run:
+            profiling_results["results"] = []
+            total_columns, total_expectations, total_rows, skipped_data_assets = (
+                0,
+                0,
+                0,
+                0,
+            )
+            total_start_time = datetime.datetime.now()
+
+            for name in data_asset_names_to_profiled:
+                logger.info(f"\tProfiling '{name}'...")
+                try:
+                    profiling_results["results"].append(
+                        self.profile_data_asset(
+                            datasource_name=datasource_name,
+                            batch_kwargs_generator_name=batch_kwargs_generator_name,
+                            data_asset_name=name,
+                            profiler=profiler,
+                            profiler_configuration=profiler_configuration,
+                            run_id=run_id,
+                            additional_batch_kwargs=additional_batch_kwargs,
+                            run_name=run_name,
+                            run_time=run_time,
+                        )["results"][0]
+                    )
+
+                except ge_exceptions.ProfilerError as err:
+                    logger.warning(err.message)
+                except OSError as err:
+                    logger.warning(
+                        f"IOError while profiling {name[1]}. (Perhaps a loading error?) Skipping."
+                    )
+                    logger.debug(str(err))
+                    skipped_data_assets += 1
+                except SQLAlchemyError as e:
+                    logger.warning(
+                        f"SqlAlchemyError while profiling {name[1]}. Skipping."
+                    )
+                    logger.debug(str(e))
+                    skipped_data_assets += 1
+
+            total_duration = (
+                datetime.datetime.now() - total_start_time
+            ).total_seconds()
+            logger.info(
+                f"""
+    Profiled {len(data_asset_names_to_profiled)} of {total_data_assets} named data assets, with {total_rows} total rows and {total_columns} columns in {total_duration:.2f} seconds.
+    Generated, evaluated, and stored {total_expectations} Expectations during profiling. Please review results using data-docs."""
+            )
+            if skipped_data_assets > 0:
+                logger.warning(
+                    f"Skipped {skipped_data_assets} data assets due to errors."
+                )
+
+        profiling_results["success"] = True
+        return profiling_results
+
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS,
+    )
+    def build_data_docs(
+        self,
+        site_names=None,
+        resource_identifiers=None,
+        dry_run=False,
+        build_index: bool = True,
+    ):
+        """
+        Build Data Docs for your project.
+
+        These make it simple to visualize data quality in your project. These
+        include Expectations, Validations & Profiles. The are built for all
+        Datasources from JSON artifacts in the local repo including validations
+        & profiles from the uncommitted directory.
+
+        :param site_names: if specified, build data docs only for these sites, otherwise,
+                            build all the sites specified in the context's config
+        :param resource_identifiers: a list of resource identifiers (ExpectationSuiteIdentifier,
+                            ValidationResultIdentifier). If specified, rebuild HTML
+                            (or other views the data docs sites are rendering) only for
+                            the resources in this list. This supports incremental build
+                            of data docs sites (e.g., when a new validation result is created)
+                            and avoids full rebuild.
+        :param dry_run: a flag, if True, the method returns a structure containing the
+                            URLs of the sites that *would* be built, but it does not build
+                            these sites. The motivation for adding this flag was to allow
+                            the CLI to display the the URLs before building and to let users
+                            confirm.
+
+        :param build_index: a flag if False, skips building the index page
+
+        Returns:
+            A dictionary with the names of the updated data documentation sites as keys and the the location info
+            of their index.html files as values
+        """
+        logger.debug("Starting DataContext.build_data_docs")
+
+        index_page_locator_infos = {}
+
+        sites = self.variables.data_docs_sites
+        if sites:
+            logger.debug("Found data_docs_sites. Building sites...")
+
+            for site_name, site_config in sites.items():
+                logger.debug(
+                    f"Building Data Docs Site {site_name}",
+                )
+
+                if (site_names and (site_name in site_names)) or not site_names:
+                    complete_site_config = site_config
+                    module_name = "great_expectations.render.renderer.site_builder"
+                    site_builder: SiteBuilder = (
+                        self._init_site_builder_for_data_docs_site_creation(
+                            site_name=site_name,
+                            site_config=site_config,
+                        )
+                    )
+                    if not site_builder:
+                        raise ge_exceptions.ClassInstantiationError(
+                            module_name=module_name,
+                            package_name=None,
+                            class_name=complete_site_config["class_name"],
+                        )
+                    if dry_run:
+                        index_page_locator_infos[
+                            site_name
+                        ] = site_builder.get_resource_url(only_if_exists=False)
+                    else:
+                        index_page_resource_identifier_tuple = site_builder.build(
+                            resource_identifiers,
+                            build_index=build_index,
+                        )
+                        if index_page_resource_identifier_tuple:
+                            index_page_locator_infos[
+                                site_name
+                            ] = index_page_resource_identifier_tuple[0]
+
+        else:
+            logger.debug("No data_docs_config found. No site(s) built.")
+
+        return index_page_locator_infos
+
+    def _init_site_builder_for_data_docs_site_creation(
+        self,
+        site_name: str,
+        site_config: dict,
+    ) -> SiteBuilder:
+        site_builder: SiteBuilder = instantiate_class_from_config(
+            config=site_config,
+            runtime_environment={
+                "data_context": self,
+                "root_directory": self.root_directory,
+                "site_name": site_name,
+            },
+            config_defaults={
+                "module_name": "great_expectations.render.renderer.site_builder"
+            },
+        )
+        return site_builder
+
+    def escape_all_config_variables(
+        self,
+        value: T,
+        dollar_sign_escape_string: str = DOLLAR_SIGN_ESCAPE_STRING,
+        skip_if_substitution_variable: bool = True,
+    ) -> T:
+        """
+        Replace all `$` characters with the DOLLAR_SIGN_ESCAPE_STRING
+
+        Args:
+            value: config variable value
+            dollar_sign_escape_string: replaces instances of `$`
+            skip_if_substitution_variable: skip if the value is of the form ${MYVAR} or $MYVAR
+
+        Returns:
+            input value with all `$` characters replaced with the escape string
+        """
+        if isinstance(value, dict) or isinstance(value, OrderedDict):
+            return {  # type: ignore[return-value] # recursive call expects str
+                k: self.escape_all_config_variables(
+                    value=v,
+                    dollar_sign_escape_string=dollar_sign_escape_string,
+                    skip_if_substitution_variable=skip_if_substitution_variable,
+                )
+                for k, v in value.items()
+            }
+        elif isinstance(value, list):
+            return [
+                self.escape_all_config_variables(
+                    value=v,
+                    dollar_sign_escape_string=dollar_sign_escape_string,
+                    skip_if_substitution_variable=skip_if_substitution_variable,
+                )
+                for v in value
+            ]
+        if skip_if_substitution_variable:
+            if parse_substitution_variable(value) is None:
+                return value.replace("$", dollar_sign_escape_string)
+            return value
+        return value.replace("$", dollar_sign_escape_string)
+
+    def save_config_variable(
+        self,
+        config_variable_name: str,
+        value: Any,
+        skip_if_substitution_variable: bool = True,
+    ) -> None:
+        r"""Save config variable value
+        Escapes $ unless they are used in substitution variables e.g. the $ characters in ${SOME_VAR} or $SOME_VAR are not escaped
+
+        Args:
+            config_variable_name: name of the property
+            value: the value to save for the property
+            skip_if_substitution_variable: set to False to escape $ in values in substitution variable form e.g. ${SOME_VAR} -> r"\${SOME_VAR}" or $SOME_VAR -> r"\$SOME_VAR"
+
+        Returns:
+            None
+        """
+        config_variables = self.config_variables
+        value = self.escape_all_config_variables(
+            value,
+            self.DOLLAR_SIGN_ESCAPE_STRING,
+            skip_if_substitution_variable=skip_if_substitution_variable,
+        )
+        config_variables[config_variable_name] = value
+        # Required to call _variables instead of variables property because we don't want to trigger substitutions
+        config = self._variables.config
+        config_variables_filepath = config.config_variables_file_path
+        if not config_variables_filepath:
+            raise ge_exceptions.InvalidConfigError(
+                "'config_variables_file_path' property is not found in config - setting it is required to use this feature"
+            )
+
+        config_variables_filepath = os.path.join(
+            self.root_directory, config_variables_filepath  # type: ignore[arg-type]
+        )
+
+        os.makedirs(os.path.dirname(config_variables_filepath), exist_ok=True)
+        if not os.path.isfile(config_variables_filepath):
+            logger.info(
+                "Creating new substitution_variables file at {config_variables_filepath}".format(
+                    config_variables_filepath=config_variables_filepath
+                )
+            )
+            with open(config_variables_filepath, "w") as template:
+                template.write(CONFIG_VARIABLES_TEMPLATE)
+
+        with open(config_variables_filepath, "w") as config_variables_file:
+            yaml.dump(config_variables, config_variables_file)

@@ -19,13 +19,13 @@ from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
     RenderedBulletListContent,
     RenderedGraphContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
 )
+from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import substitute_none_for_missing
 
 
@@ -172,9 +172,8 @@ class ExpectColumnAverageToBeWithinRangeOfGivenPoint(ColumnExpectation):
         ]
     ]:
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(

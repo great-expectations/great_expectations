@@ -1,3 +1,4 @@
+[![PyPI](https://img.shields.io/pypi/v/great_expectations)](https://pypi.org/project/great-expectations/#history)
 [![Build Status](https://dev.azure.com/great-expectations/great_expectations/_apis/build/status/great_expectations?branchName=develop&stageName=required)](https://dev.azure.com/great-expectations/great_expectations/_build/latest?definitionId=1&branchName=develop)
 ![Coverage](https://img.shields.io/azure-devops/coverage/great-expectations/great_expectations/1/main)
 [![Documentation Status](https://readthedocs.org/projects/great-expectations/badge/?version=latest)](http://great-expectations.readthedocs.io/en/latest/?badge=latest)
@@ -7,7 +8,7 @@
 
 
 
-<img align="right" src="./generic_dickens_protagonist.png">
+<img align="right" src="./static/img/generic_dickens_protagonist.png">
 
 Great Expectations
 ================================================================================
@@ -177,6 +178,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://www.sqlalchemy.org/img/sqla_logo.png" />                                         </td><td style="width: 200px;">Other SQL Relational DBs </td><td>Most RDBMS are supported via SQLalchemy</td></tr>
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://jupyter.org/assets/logos/rectanglelogo-greytext-orangebody-greymoons.svg" />                                             </td><td style="width: 200px;">Jupyter Notebooks        </td><td>The best way to build Expectations</td></tr>
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://cdn.brandfolder.io/5H442O3W/as/pl546j-7le8zk-5guop3/Slack_RGB.png" />            </td><td style="width: 200px;">Slack                    </td><td> Get automatic data quality notifications!</td></tr>
+		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://github.com/zenml-io/zenml/raw/main/docs/book/assets/zenml_logo.png" />            </td><td style="width: 200px;">ZenML                    </td><td> Tool agnostic, open-source ML pipeline framework.</td></tr>
 	</tbody>
 </table>
 

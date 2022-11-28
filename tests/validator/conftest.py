@@ -26,5 +26,4 @@ def column_histogram_metric_config() -> MetricConfiguration:
         metric_value_kwargs={
             "bins": 5,
         },
-        metric_dependencies=None,
     )

@@ -29,10 +29,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.core.util import (
-    convert_to_json_serializable,
-    get_datetime_string_from_strftime_format,
-)
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable
@@ -40,7 +37,7 @@ from great_expectations.util import deep_filter_properties_iterable
 try:
     from pyspark.sql.types import StructType
 except ImportError:
-    StructType = None  # type: ignore
+    StructType = None
 
 if TYPE_CHECKING:
     from io import TextIOWrapper
@@ -62,7 +59,7 @@ DEFAULT_USAGE_STATISTICS_URL = (
 )
 
 
-def object_to_yaml_str(obj):  # type: ignore[no-untyped-def]
+def object_to_yaml_str(obj):
     output_str: str
     with StringIO() as string_stream:
         yaml.dump(obj, string_stream)
@@ -153,16 +150,16 @@ class BaseYamlConfig(SerializableDictDot):
         return self._get_schema_validated_updated_commented_map()
 
     @classmethod
-    def get_config_class(cls):  # type: ignore[no-untyped-def]
+    def get_config_class(cls):
         raise NotImplementedError
 
     @classmethod
-    def get_schema_class(cls):  # type: ignore[no-untyped-def]
+    def get_schema_class(cls):
         raise NotImplementedError
 
 
 class SorterConfig(DictDot):
-    def __init__(  # type: ignore[no-untyped-def]
+    def __init__(
         self,
         name,
         class_name=None,
@@ -194,35 +191,35 @@ class SorterConfig(DictDot):
             self._datetime_format = datetime_format
 
     @property
-    def name(self):  # type: ignore[no-untyped-def]
+    def name(self):
         return self._name
 
     @property
-    def module_name(self):  # type: ignore[no-untyped-def]
+    def module_name(self):
         return self._module_name
 
     @property
-    def class_name(self):  # type: ignore[no-untyped-def]
+    def class_name(self):
         return self._class_name
 
     @property
-    def orderby(self):  # type: ignore[no-untyped-def]
+    def orderby(self):
         return self._orderby
 
     @property
-    def reference_list(self):  # type: ignore[no-untyped-def]
+    def reference_list(self):
         return self._reference_list
 
     @property
-    def order_keys_by(self):  # type: ignore[no-untyped-def]
+    def order_keys_by(self):
         return self._order_keys_by
 
     @property
-    def key_reference_list(self):  # type: ignore[no-untyped-def]
+    def key_reference_list(self):
         return self._key_reference_list
 
     @property
-    def datetime_format(self):  # type: ignore[no-untyped-def]
+    def datetime_format(self):
         return self._datetime_format
 
 
@@ -422,7 +419,7 @@ class AssetConfigSchema(Schema):
     reader_options = fields.Dict(keys=fields.Str(), required=False, allow_none=True)
 
     @validates_schema
-    def validate_schema(self, data, **kwargs) -> None:  # type: ignore[no-untyped-def]
+    def validate_schema(self, data, **kwargs) -> None:
         pass
 
     @pre_dump
@@ -448,7 +445,7 @@ class AssetConfigSchema(Schema):
 
     # noinspection PyUnusedLocal
     @post_load
-    def make_asset_config(self, data, **kwargs):  # type: ignore[no-untyped-def]
+    def make_asset_config(self, data, **kwargs):
         return AssetConfig(**data)
 
 
@@ -979,7 +976,7 @@ class ExecutionEngineConfigSchema(Schema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        missing="great_expectations.execution_engine",
+        load_default="great_expectations.execution_engine",
     )
     connection_string = fields.String(required=False, allow_none=True)
     credentials = fields.Raw(required=False, allow_none=True)
@@ -999,6 +996,8 @@ class ExecutionEngineConfigSchema(Schema):
     # BigQuery Service Account Credentials
     # https://googleapis.dev/python/sqlalchemy-bigquery/latest/README.html#connection-string-parameters
     credentials_info = fields.Dict(required=False, allow_none=True)
+
+    create_temp_table = fields.Boolean(required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
     @validates_schema
@@ -1541,7 +1540,7 @@ class ConcurrencyConfigSchema(Schema):
     enabled = fields.Boolean(default=False)
 
 
-class GeCloudConfig(DictDot):
+class GXCloudConfig(DictDot):
     def __init__(
         self,
         base_url: str,
@@ -1621,7 +1620,7 @@ class DataContextConfigSchema(Schema):
                 data.pop(key)
         return data
 
-    def handle_error(self, exc, data, **kwargs) -> None:  # type: ignore[override]
+    def handle_error(self, exc, data, **kwargs) -> None:
         """Log and raise our custom exception when (de)serialization fails."""
         if (
             exc
@@ -1838,9 +1837,9 @@ class BaseStoreBackendDefaults(DictDot):
         checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
         profiler_store_name: str = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
         data_docs_site_name: str = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value,
-        validation_operators: dict = None,
-        stores: dict = None,
-        data_docs_sites: dict = None,
+        validation_operators: Optional[dict] = None,
+        stores: Optional[dict] = None,
+        data_docs_sites: Optional[dict] = None,
     ) -> None:
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
@@ -2378,11 +2377,11 @@ class DataContextConfig(BaseYamlConfig):
 
     # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
     @classmethod
-    def get_config_class(cls):  # type: ignore[no-untyped-def]
+    def get_config_class(cls):
         return cls  # DataContextConfig
 
     @classmethod
-    def get_schema_class(cls):  # type: ignore[no-untyped-def]
+    def get_schema_class(cls):
         return DataContextConfigSchema
 
     @property
@@ -2461,7 +2460,7 @@ class CheckpointValidationConfigSchema(AbstractConfigSchema):
 
     id = fields.String(required=False, allow_none=False)
 
-    def dump(self, obj: dict, *, many: Optional[bool] = None) -> dict:  # type: ignore[override]
+    def dump(self, obj: dict, *, many: Optional[bool] = None) -> dict:
         """
         Chetan - 20220803 - By design, Marshmallow accepts unknown fields through the
         `unknown = INCLUDE` directive but only upon load. When dumping, it validates
@@ -2696,11 +2695,11 @@ class CheckpointConfig(BaseYamlConfig):
 
     # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
     @classmethod
-    def get_config_class(cls):  # type: ignore[no-untyped-def]
+    def get_config_class(cls):
         return cls  # CheckpointConfig
 
     @classmethod
-    def get_schema_class(cls):  # type: ignore[no-untyped-def]
+    def get_schema_class(cls):
         return CheckpointConfigSchema
 
     @property
@@ -3013,9 +3012,8 @@ class CheckpointConfig(BaseYamlConfig):
             )
 
         if run_name is None and run_name_template is not None:
-            run_name = get_datetime_string_from_strftime_format(
-                format_str=run_name_template, datetime_obj=run_time  # type: ignore[arg-type]
-            )
+            if isinstance(run_time, datetime.datetime):
+                run_name = run_time.strftime(run_name_template)
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 

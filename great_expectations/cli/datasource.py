@@ -39,6 +39,7 @@ class SupportedDatabaseBackends(enum.Enum):
     REDSHIFT = "Redshift"
     SNOWFLAKE = "Snowflake"
     BIGQUERY = "BigQuery"
+    TRINO = "Trino"
     OTHER = "other - Do you have a working SQLAlchemy connection string?"
     # TODO MSSQL
 
@@ -687,20 +688,50 @@ schema_name = ""  # or dataset name
 table_name = ""'''
 
     def verify_libraries_installed(self) -> bool:
-        pybigquery_ok = verify_library_dependent_modules(
-            python_import_name="pybigquery.sqlalchemy_bigquery",
-            pip_library_name="pybigquery",
-            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
-        )
         sqlalchemy_bigquery_ok = verify_library_dependent_modules(
             python_import_name="sqlalchemy_bigquery",
             pip_library_name="sqlalchemy_bigquery",
             module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
         )
-        return pybigquery_ok or sqlalchemy_bigquery_ok
+        return sqlalchemy_bigquery_ok
 
     def _yaml_innards(self) -> str:
         return "\n  connection_string: {connection_string}"
+
+
+class TrinoCredentialYamlHelper(SQLCredentialYamlHelper):
+    def __init__(self, datasource_name: Optional[str]) -> None:
+        super().__init__(
+            database="YOUR_TRINO_CATALOG",
+            datasource_name=datasource_name,
+            usage_stats_payload={
+                "type": "sqlalchemy",
+                "db": SupportedDatabaseBackends.TRINO.value,
+                "api_version": "v3",
+            },
+            driver="trino",
+        )
+
+    def verify_libraries_installed(self) -> bool:
+        return verify_library_dependent_modules(
+            python_import_name="trino.sqlalchemy.dialect",
+            pip_library_name="trino",
+            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        )
+
+    def credentials_snippet(self) -> str:
+        return f'''\
+host = "{self.host}"
+port = "{self.port}"
+username = "{self.username}"
+password = "{self.password}"
+
+# Trino has a concept of catalog which maps to database
+database = "{self.database}"
+schema_name = "{self.schema_name}"
+
+# A table that you would like to add initially as a Data Asset
+table_name = "{self.table_name}"'''
 
 
 class ConnectionStringCredentialYamlHelper(SQLCredentialYamlHelper):
@@ -750,6 +781,7 @@ def _get_sql_yaml_helper_class(
         SupportedDatabaseBackends.REDSHIFT: RedshiftCredentialYamlHelper,
         SupportedDatabaseBackends.SNOWFLAKE: SnowflakeCredentialYamlHelper,
         SupportedDatabaseBackends.BIGQUERY: BigqueryCredentialYamlHelper,
+        SupportedDatabaseBackends.TRINO: TrinoCredentialYamlHelper,
         SupportedDatabaseBackends.OTHER: ConnectionStringCredentialYamlHelper,
     }
     helper_class = helper_class_by_backend[selected_database]

@@ -46,7 +46,7 @@ resources:
     ports:
       - 1433:1433
   - container: trino
-    image: trinodb/trino:379
+    image: trinodb/trino:400
     ports:
       - 8088:8080
 
@@ -88,7 +88,7 @@ stages:
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - script: |
-          pip install mypy invoke # Prereq for type hint script
+          pip install --requirement reqs/requirements-dev-contrib.txt
           invoke type-coverage
         name: TypeHintChecker
 
@@ -96,8 +96,8 @@ stages:
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - script: |
-          pip install mypy invoke
-          invoke type-check --install-types
+          pip install --requirement reqs/requirements-dev-contrib.txt
+          invoke type-check --install-types --warn-unused-ignores --pretty
         name: StaticTypeCheck
 
     - job: docstring_checker
@@ -110,7 +110,7 @@ stages:
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - script: |
-          pip install flake8
+          pip install --requirement reqs/requirements-dev-contrib.txt
           # https://www.flake8rules.com/rules/F401.html - Prunes the dgtest graph to improve accuracy
           flake8 --select F401 great_expectations tests
         name: UnusedImportChecker
@@ -308,9 +308,8 @@ stages:
               PYTEST+="--network=host --mount type=bind,source=${PWD}/script,target=/script "
               PYTEST+="greatexpectations/test:${DOCKER_TAG} /bin/bash -c \""
               PYTEST+="mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < /script/mysql_setup.sql && "
-              PYTEST+="pytest --mysql --random-order --ignore=tests/cli --ignore=tests/integration/usage_statistics "
               # The last \" closes the quote from bash -c \".
-              PYTEST+="--ignore=tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py\""
+              PYTEST+="pytest --mysql --random-order tests/test_definitions tests/expectations\""
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest MySQL'
@@ -345,8 +344,7 @@ stages:
               PYTEST="docker run -e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) "
               PYTEST+="-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) -e AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION) "
               PYTEST+="--network=host greatexpectations/test:${DOCKER_TAG} "
-              PYTEST+="pytest --trino --random-order --ignore=tests/cli --ignore=tests/integration/usage_statistics "
-              PYTEST+="--ignore=tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py"
+              PYTEST+="pytest --trino --random-order tests/test_definitions tests/expectations"
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest Trino'
@@ -512,9 +510,13 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines pytest-random-order
-              pytest --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml \
-                  --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics \
-                  --ignore=tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py
+              pytest tests/test_definitions tests/expectations \
+                --mssql \
+                --napoleon-docstrings \
+                --junitxml=junit/test-results.xml \
+                --cov=. \
+                --cov-report=xml \
+                --cov-report=html
             displayName: 'Pytest mssql'
 
   - stage: deploy

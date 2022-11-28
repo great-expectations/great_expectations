@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import json
@@ -6,6 +8,7 @@ import warnings
 from collections import defaultdict, namedtuple
 from dataclasses import asdict, dataclass, field
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -68,6 +71,9 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
 
+if TYPE_CHECKING:
+    from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+
 ColumnDataFrame = namedtuple("ColumnDataFrame", ["column", "df"])
 
 
@@ -129,7 +135,7 @@ class DataAssistantResult(SerializableDictDot):
     _batch_id_to_batch_identifier_display_name_map: Optional[
         Dict[str, Set[Tuple[str, Any]]]
     ] = field(default=None)
-    profiler_config: Optional["RuleBasedProfilerConfig"] = None  # noqa: F821
+    profiler_config: Optional[RuleBasedProfilerConfig] = None
     profiler_execution_time: Optional[
         float
     ] = None  # Effective Rule-Based Profiler overall execution time (in seconds).
