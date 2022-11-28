@@ -11,6 +11,7 @@ import uuid
 import warnings
 import webbrowser
 from abc import ABC, abstractmethod
+from collections import OrderedDict
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -21,6 +22,7 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
+    TypeVar,
     Union,
     cast,
 )
@@ -64,6 +66,7 @@ from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.store.expectations_store import ExpectationsStore
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.store.validations_store import ValidationsStore
+from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     CURRENT_GE_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
@@ -79,8 +82,12 @@ from great_expectations.data_context.types.base import (
     dataContextConfigSchema,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.types.refs import GXCloudIDAwareRef
+from great_expectations.data_context.types.refs import (
+    GXCloudIDAwareRef,
+    GXCloudResourceRef,
+)
 from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
@@ -88,6 +95,7 @@ from great_expectations.data_context.util import (
     PasswordMasker,
     build_store_from_config,
     instantiate_class_from_config,
+    parse_substitution_variable,
 )
 from great_expectations.dataset.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
@@ -113,6 +121,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # isort
     add_datasource_usage_statistics,
     get_batch_list_usage_statistics,
     run_validation_operator_usage_statistics,
+    save_expectation_suite_usage_statistics,
     send_usage_message,
     usage_statistics_enabled_method,
 )
@@ -146,6 +155,9 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 yaml = YAMLHandler()
+
+
+T = TypeVar("T", dict, list, str)
 
 
 class AbstractDataContext(ABC):
@@ -266,7 +278,10 @@ class AbstractDataContext(ABC):
         """
         self.variables.save_config()
 
-    @abstractmethod
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
+        args_payload_fn=save_expectation_suite_usage_statistics,
+    )
     def save_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
@@ -278,7 +293,34 @@ class AbstractDataContext(ABC):
         """
         Each DataContext will define how ExpectationSuite will be saved.
         """
-        raise NotImplementedError
+        if expectation_suite_name is None:
+            key = ExpectationSuiteIdentifier(
+                expectation_suite_name=expectation_suite.expectation_suite_name
+            )
+        else:
+            expectation_suite.expectation_suite_name = expectation_suite_name
+            key = ExpectationSuiteIdentifier(
+                expectation_suite_name=expectation_suite_name
+            )
+        if (
+            self.expectations_store.has_key(key)  # noqa: @601
+            and not overwrite_existing
+        ):
+            raise ge_exceptions.DataContextError(
+                "expectation_suite with name {} already exists. If you would like to overwrite this "
+                "expectation_suite, set overwrite_existing=True.".format(
+                    expectation_suite_name
+                )
+            )
+        self._evaluation_parameter_dependencies_compiled = False
+        include_rendered_content = (
+            self._determine_if_expectation_suite_include_rendered_content(
+                include_rendered_content=include_rendered_content
+            )
+        )
+        if include_rendered_content:
+            expectation_suite.render()
+        return self.expectations_store.set(key, expectation_suite, **kwargs)
 
     # Properties
     @property
@@ -978,6 +1020,36 @@ class AbstractDataContext(ABC):
             if store.get("name") in active_store_names  # type: ignore[arg-type,operator]
         ]
 
+    def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+        return self.checkpoint_store.list_checkpoints()
+
+    def list_profilers(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+        return RuleBasedProfiler.list_profilers(self.profiler_store)
+
+    def save_profiler(
+        self,
+        profiler: RuleBasedProfiler,
+    ) -> RuleBasedProfiler:
+        name = profiler.name
+        ge_cloud_id = profiler.ge_cloud_id
+        key = self._determine_key_for_profiler_save(name=name, id=ge_cloud_id)
+
+        response = self.profiler_store.set(key=key, value=profiler.config)  # type: ignore[func-returns-value]
+        if isinstance(response, GXCloudResourceRef):
+            ge_cloud_id = response.ge_cloud_id
+
+        # If an id is present, we want to prioritize that as our key for object retrieval
+        if ge_cloud_id:
+            name = None  # type: ignore[assignment]
+
+        profiler = self.get_profiler(name=name, ge_cloud_id=ge_cloud_id)
+        return profiler
+
+    def _determine_key_for_profiler_save(
+        self, name: str, id: Optional[str]
+    ) -> Union[ConfigurationIdentifier, GXCloudIdentifier]:
+        return ConfigurationIdentifier(configuration_key=name)
+
     def get_datasource(
         self, datasource_name: str = "default"
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
@@ -1466,6 +1538,7 @@ class AbstractDataContext(ABC):
                 include_rendered_content=include_rendered_content
             )
         )
+
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
         execution_engine: ExecutionEngine
@@ -1477,6 +1550,7 @@ class AbstractDataContext(ABC):
             execution_engine = self.datasources[  # type: ignore[union-attr]
                 batch_list[-1].batch_definition.datasource_name
             ].execution_engine
+
         validator = Validator(
             execution_engine=execution_engine,
             interactive_evaluation=True,
@@ -1485,6 +1559,7 @@ class AbstractDataContext(ABC):
             batches=batch_list,
             include_rendered_content=include_rendered_content,
         )
+
         return validator
 
     @usage_statistics_enabled_method(
@@ -3643,3 +3718,93 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             },
         )
         return site_builder
+
+    def escape_all_config_variables(
+        self,
+        value: T,
+        dollar_sign_escape_string: str = DOLLAR_SIGN_ESCAPE_STRING,
+        skip_if_substitution_variable: bool = True,
+    ) -> T:
+        """
+        Replace all `$` characters with the DOLLAR_SIGN_ESCAPE_STRING
+
+        Args:
+            value: config variable value
+            dollar_sign_escape_string: replaces instances of `$`
+            skip_if_substitution_variable: skip if the value is of the form ${MYVAR} or $MYVAR
+
+        Returns:
+            input value with all `$` characters replaced with the escape string
+        """
+        if isinstance(value, dict) or isinstance(value, OrderedDict):
+            return {  # type: ignore[return-value] # recursive call expects str
+                k: self.escape_all_config_variables(
+                    value=v,
+                    dollar_sign_escape_string=dollar_sign_escape_string,
+                    skip_if_substitution_variable=skip_if_substitution_variable,
+                )
+                for k, v in value.items()
+            }
+        elif isinstance(value, list):
+            return [
+                self.escape_all_config_variables(
+                    value=v,
+                    dollar_sign_escape_string=dollar_sign_escape_string,
+                    skip_if_substitution_variable=skip_if_substitution_variable,
+                )
+                for v in value
+            ]
+        if skip_if_substitution_variable:
+            if parse_substitution_variable(value) is None:
+                return value.replace("$", dollar_sign_escape_string)
+            return value
+        return value.replace("$", dollar_sign_escape_string)
+
+    def save_config_variable(
+        self,
+        config_variable_name: str,
+        value: Any,
+        skip_if_substitution_variable: bool = True,
+    ) -> None:
+        r"""Save config variable value
+        Escapes $ unless they are used in substitution variables e.g. the $ characters in ${SOME_VAR} or $SOME_VAR are not escaped
+
+        Args:
+            config_variable_name: name of the property
+            value: the value to save for the property
+            skip_if_substitution_variable: set to False to escape $ in values in substitution variable form e.g. ${SOME_VAR} -> r"\${SOME_VAR}" or $SOME_VAR -> r"\$SOME_VAR"
+
+        Returns:
+            None
+        """
+        config_variables = self.config_variables
+        value = self.escape_all_config_variables(
+            value,
+            self.DOLLAR_SIGN_ESCAPE_STRING,
+            skip_if_substitution_variable=skip_if_substitution_variable,
+        )
+        config_variables[config_variable_name] = value
+        # Required to call _variables instead of variables property because we don't want to trigger substitutions
+        config = self._variables.config
+        config_variables_filepath = config.config_variables_file_path
+        if not config_variables_filepath:
+            raise ge_exceptions.InvalidConfigError(
+                "'config_variables_file_path' property is not found in config - setting it is required to use this feature"
+            )
+
+        config_variables_filepath = os.path.join(
+            self.root_directory, config_variables_filepath  # type: ignore[arg-type]
+        )
+
+        os.makedirs(os.path.dirname(config_variables_filepath), exist_ok=True)
+        if not os.path.isfile(config_variables_filepath):
+            logger.info(
+                "Creating new substitution_variables file at {config_variables_filepath}".format(
+                    config_variables_filepath=config_variables_filepath
+                )
+            )
+            with open(config_variables_filepath, "w") as template:
+                template.write(CONFIG_VARIABLES_TEMPLATE)
+
+        with open(config_variables_filepath, "w") as config_variables_file:
+            yaml.dump(config_variables, config_variables_file)
