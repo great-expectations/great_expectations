@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from typing import Optional
 
 from price_parser import Price
@@ -133,7 +132,6 @@ class ExpectColumnValuesToBeValidPrice(ColumnMapExpectation):
 
 if __name__ == "__main__":
     ExpectColumnValuesToBeValidPrice().print_diagnostic_checklist()
-=======
 from typing import Optional
 
 from price_parser import Price
@@ -268,4 +266,3 @@ class ExpectColumnValuesToBeValidPrice(ColumnMapExpectation):
 
 if __name__ == "__main__":
     ExpectColumnValuesToBeValidPrice().print_diagnostic_checklist()
->>>>>>> 3e94cd6a8e19e52aa00a95973e2e568a0253f92f

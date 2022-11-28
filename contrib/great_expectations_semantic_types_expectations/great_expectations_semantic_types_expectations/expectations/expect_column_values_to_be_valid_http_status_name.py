@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from http import HTTPStatus
 from typing import Optional
 
@@ -132,7 +131,6 @@ class ExpectColumnValuesToBeValidHttpStatusName(ColumnMapExpectation):
 
 if __name__ == "__main__":
     ExpectColumnValuesToBeValidHttpStatusName().print_diagnostic_checklist()
-=======
 from http import HTTPStatus
 from typing import Optional
 
@@ -266,4 +264,3 @@ class ExpectColumnValuesToBeValidHttpStatusName(ColumnMapExpectation):
 
 if __name__ == "__main__":
     ExpectColumnValuesToBeValidHttpStatusName().print_diagnostic_checklist()
->>>>>>> 3e94cd6a8e19e52aa00a95973e2e568a0253f92f

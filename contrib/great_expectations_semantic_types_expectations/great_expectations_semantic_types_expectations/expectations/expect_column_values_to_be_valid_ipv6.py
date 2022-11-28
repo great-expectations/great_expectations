@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import ipaddress
 from typing import Optional
 
@@ -143,7 +142,6 @@ class ExpectColumnValuesToBeValidIpv6(ColumnMapExpectation):
 
 if __name__ == "__main__":
     ExpectColumnValuesToBeValidIpv6().print_diagnostic_checklist()
-=======
 import ipaddress
 from typing import Optional
 
@@ -288,4 +286,3 @@ class ExpectColumnValuesToBeValidIpv6(ColumnMapExpectation):
 
 if __name__ == "__main__":
     ExpectColumnValuesToBeValidIpv6().print_diagnostic_checklist()
->>>>>>> 3e94cd6a8e19e52aa00a95973e2e568a0253f92f

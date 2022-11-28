@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from typing import Optional
 
 import yahoo_fin.stock_info as si
@@ -135,7 +134,6 @@ class ExpectColumnValuesToBeValidNasdaqTicker(ColumnMapExpectation):
 
 if __name__ == "__main__":
     ExpectColumnValuesToBeValidNasdaqTicker().print_diagnostic_checklist()
-=======
 from typing import Optional
 
 import yahoo_fin.stock_info as si
@@ -272,4 +270,3 @@ class ExpectColumnValuesToBeValidNasdaqTicker(ColumnMapExpectation):
 
 if __name__ == "__main__":
     ExpectColumnValuesToBeValidNasdaqTicker().print_diagnostic_checklist()
->>>>>>> 3e94cd6a8e19e52aa00a95973e2e568a0253f92f

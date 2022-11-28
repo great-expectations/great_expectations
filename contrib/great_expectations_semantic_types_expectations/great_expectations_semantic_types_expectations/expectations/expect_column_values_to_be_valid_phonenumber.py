@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from typing import Optional
 
 import phonenumbers
@@ -137,7 +136,6 @@ class ExpectColumnValuesToBeValidPhonenumber(ColumnMapExpectation):
 
 if __name__ == "__main__":
     ExpectColumnValuesToBeValidPhonenumber().print_diagnostic_checklist()
-=======
 from typing import Optional
 
 import phonenumbers
@@ -276,4 +274,3 @@ class ExpectColumnValuesToBeValidPhonenumber(ColumnMapExpectation):
 
 if __name__ == "__main__":
     ExpectColumnValuesToBeValidPhonenumber().print_diagnostic_checklist()
->>>>>>> 3e94cd6a8e19e52aa00a95973e2e568a0253f92f
