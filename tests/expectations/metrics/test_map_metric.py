@@ -958,8 +958,6 @@ def test_spark_single_column_complete_result_format(
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "unexpected_count": 2,
-        "unexpected_index_list": None,
-        "partial_unexpected_index_list": None,
         "unexpected_percent": 33.33333333333333,
         "partial_unexpected_list": [3, 10],
         "unexpected_list": [3, 10],
@@ -1000,7 +998,6 @@ def test_spark_single_column_summary_result_format(
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "unexpected_count": 2,
-        "partial_unexpected_index_list": None,
         "unexpected_percent": 33.33333333333333,
         "partial_unexpected_list": [3, 10],
         "unexpected_list": [3, 10],
