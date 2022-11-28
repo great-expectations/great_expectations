@@ -445,11 +445,18 @@ specified (empty "metric_name" value detected)."""
         # Step-4: Sort "MetricConfiguration" directives by "metric_value_kwargs_id" and "batch_id" (in that order).
         # This precise sort order enables pairing every metric value with its respective "batch_id" (e.g., for display).
 
+        batch_id_idx: int
+        batch_id_ordering: Dict[str, int] = {
+            batch_id: batch_id_idx for batch_id_idx, batch_id in enumerate(batch_ids)
+        }
+
         metrics_to_resolve = sorted(
             metrics_to_resolve,
             key=lambda metric_configuration_element: (
                 metric_configuration_element.metric_value_kwargs_id,
-                metric_configuration_element.metric_domain_kwargs["batch_id"],
+                batch_id_ordering[
+                    metric_configuration_element.metric_domain_kwargs["batch_id"]
+                ],
             ),
         )
 
@@ -466,6 +473,7 @@ specified (empty "metric_name" value detected)."""
             Tuple[str, str, str], MetricValue
         ] = validator.compute_metrics(
             metric_configurations=metrics_to_resolve,
+            runtime_configuration=None,
         )
 
         # Step-6: Sort resolved metrics according to same sort order as was applied to "MetricConfiguration" directives.
@@ -474,7 +482,7 @@ specified (empty "metric_name" value detected)."""
 
         metric_configuration: MetricConfiguration
 
-        resolved_metric_value: Any
+        resolved_metric_value: MetricValue
 
         for metric_configuration in metrics_to_resolve:
             if metric_configuration.id not in resolved_metrics:

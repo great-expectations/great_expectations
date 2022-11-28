@@ -17,6 +17,8 @@ from great_expectations.render import (
 )
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
+from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validator import ValidationDependencies
 
 
 class ExpectTableRowCountToEqualOtherTable(TableExpectation):
@@ -167,28 +169,37 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
-    ):
-        dependencies = super().get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
+    ) -> ValidationDependencies:
+        validation_dependencies: ValidationDependencies = (
+            super().get_validation_dependencies(
+                configuration, execution_engine, runtime_configuration
+            )
         )
         other_table_name = configuration.kwargs.get("other_table_name")
         # create copy of table.row_count metric and modify "table" metric domain kwarg to be other table name
-        table_row_count_metric_config_other = deepcopy(
-            dependencies["metrics"]["table.row_count"]
+        table_row_count_metric_config_other: MetricConfiguration = deepcopy(
+            validation_dependencies.get_metric_configuration(
+                metric_name="table.row_count"
+            )
         )
         table_row_count_metric_config_other.metric_domain_kwargs[
             "table"
         ] = other_table_name
         # rename original "table.row_count" metric to "table.row_count.self"
-        dependencies["metrics"]["table.row_count.self"] = dependencies["metrics"].pop(
-            "table.row_count"
+        validation_dependencies.set_metric_configuration(
+            metric_name="table.row_count.self",
+            metric_configuration=validation_dependencies.get_metric_configuration(
+                metric_name="table.row_count"
+            ),
+        )
+        validation_dependencies.remove_metric_configuration(
+            metric_name="table.row_count"
         )
         # add a new metric dependency named "table.row_count.other" with modified metric config
-        dependencies["metrics"][
-            "table.row_count.other"
-        ] = table_row_count_metric_config_other
-
-        return dependencies
+        validation_dependencies.set_metric_configuration(
+            "table.row_count.other", table_row_count_metric_config_other
+        )
+        return validation_dependencies
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]

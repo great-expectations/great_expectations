@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 import altair as alt
 import pandas as pd
@@ -22,6 +22,7 @@ from great_expectations.render import (
     RenderedStringTemplateContent,
 )
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import RendererConfiguration
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
@@ -222,14 +223,17 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        renderer_configuration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            language=language,
+            runtime_configuration=runtime_configuration,
         )
-        styling = runtime_configuration.get("styling")
+        include_column_name: bool = renderer_configuration.include_column_name
+        styling: Union[dict, None] = renderer_configuration.styling
 
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            renderer_configuration.kwargs,
             ["column", "value_set", "row_condition", "condition_parser"],
         )
 
