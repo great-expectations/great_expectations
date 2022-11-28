@@ -71,15 +71,22 @@ class ValidationGraph:
 
         self._edge_ids = {edge.id for edge in self._edges}
 
+    def __eq__(self, other: ValidationGraph) -> bool:
+        """Supports comparing two "ValidationGraph" objects."""
+        return self.edge_ids == other.edge_ids
+
     @property
-    def edges(self):
+    def edges(self) -> List[MetricEdge]:
+        """Returns "MetricEdge" objects, contained within this "ValidationGraph" object (as list)."""
         return self._edges
 
     @property
-    def edge_ids(self):
+    def edge_ids(self) -> Set[Tuple[str, str]]:
+        """Returns "MetricEdge" objects, contained within this "ValidationGraph" object (as set of two-tuples)."""
         return {edge.id for edge in self._edges}
 
     def add(self, edge: MetricEdge) -> None:
+        """Adds supplied "MetricEdge" object to this "ValidationGraph" object (if not already present)."""
         if edge.id not in self._edge_ids:
             self._edges.append(edge)
             self._edge_ids.add(edge.id)
