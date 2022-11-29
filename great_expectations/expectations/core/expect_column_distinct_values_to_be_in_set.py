@@ -172,10 +172,12 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
 
         else:
 
-            for i, v in enumerate(params.value_set):
-                params[f"v__{str(i)}"] = v
+            for i, v in enumerate(params.value_set.value):
+                renderer_configuration.add_param(
+                    name=f"v__{str(i)}", schema_type="string", value=v
+                )
             values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params.value_set)]
+                [f"$v__{str(i)}" for i, v in enumerate(params.value_set.value)]
             )
 
             if renderer_configuration.include_column_name:
@@ -217,8 +219,6 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
             language=language,
             runtime_configuration=runtime_configuration,
         )
-        include_column_name: bool = renderer_configuration.include_column_name
-        styling: Union[dict, None] = renderer_configuration.styling
 
         params = substitute_none_for_missing(
             renderer_configuration.kwargs,
@@ -226,7 +226,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         )
 
         if params["value_set"] is None or len(params["value_set"]) == 0:
-            if include_column_name:
+            if renderer_configuration.include_column_name:
                 template_str = "$column distinct values must belong to this set: [ ]"
             else:
                 template_str = "distinct values must belong to a set, but that set is not specified."
@@ -237,7 +237,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                 [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
             )
 
-            if include_column_name:
+            if renderer_configuration.include_column_name:
                 template_str = (
                     f"$column distinct values must belong to this set: {values_string}."
                 )
@@ -261,7 +261,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                     "string_template": {
                         "template": template_str,
                         "params": params,
-                        "styling": styling,
+                        "styling": renderer_configuration.styling,
                     },
                 }
             )
