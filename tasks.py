@@ -399,7 +399,7 @@ def docs(
         cmds = ["make clean"]
         ctx.run(" ".join(cmds), echo=True, pty=True)
 
-    # Build html api documentation in docusaurus static folder
+    # Build html api documentation in temporary folder
     cmds = ["sphinx-build -M html ./ ../../temp_docs_build_dir/sphinx_api_docs"]
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
@@ -443,15 +443,23 @@ def docs(
     #   Change the stylesheets list if you are using a different sphinx theme.
     #   Copy over file.png since it is referenced in the stylesheet.
 
+    # TODO: AJB 20221118 Clean up this section after choosing a theme
     stylesheet_base_path = static_html_file_path / "_static"
-    stylesheets = ("basic.css", "pygments.css",)
+    stylesheets = ("basic.css", "pygments.css", "pydata-sphinx-theme.css")
+    # stylesheets = ("basic.css", "debug.css", "pygments.css", "skeleton.css", "furo.css", "furo-extensions.css")
+    # stylesheets = ("alabaster.css", "basic.css", "pygments.css", )
     ancillary_files = ("file.png", )
 
     site_css_path = filedir / pathlib.Path("src/css")
 
     for stylesheet in stylesheets:
-        stylesheet_with_sass_extension = stylesheet.replace(".css", ".scss")
-        shutil.copy(stylesheet_base_path / stylesheet, site_css_path / stylesheet_with_sass_extension)
+        # TODO: AJB 20221118 Clean up this logic.
+        stylesheet_with_sass_extension = pathlib.Path(stylesheet.replace(".css", ".scss"))
+        if stylesheet == "pydata-sphinx-theme.css":
+            stylesheet = "styles/pydata-sphinx-theme.css"
+        if stylesheet in ("furo.css", "furo-extensions.css"):
+            stylesheet = f"styles/{stylesheet}"
+        shutil.copy(stylesheet_base_path / pathlib.Path(stylesheet), site_css_path / stylesheet_with_sass_extension)
 
     for ancillary_file in ancillary_files:
         shutil.copy(stylesheet_base_path / ancillary_file, site_css_path / ancillary_file)
