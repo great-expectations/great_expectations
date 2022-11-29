@@ -1,6 +1,6 @@
 from typing import Any, Union
 
-from pydantic import BaseModel, Field, create_model, root_validator
+from pydantic import BaseModel, Field, create_model
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -59,7 +59,7 @@ class RendererConfiguration(BaseModel):
     def add_param(self, name: str, schema_type: str, value: Union[Any, None]):
         renderer_param = create_model(
             name,
-            renderer_schema=Field(dict, alias="schema"),
+            renderer_schema=(dict, Field(..., alias="schema")),
             value=(Union[Any, None], ...),
             __base__=RendererParam,
         )
@@ -68,6 +68,7 @@ class RendererConfiguration(BaseModel):
             "RendererParams", **renderer_param_definition, __base__=self.params
         )
         renderer_params_definition = {
-            name: renderer_param(renderer_schema={"type": schema_type}, value=value)
+            name: renderer_param(schema={"type": schema_type}, value=value)
         }
-        self.params = renderer_params(**renderer_params_definition)
+        params = renderer_params(**renderer_params_definition)
+        self.params = params

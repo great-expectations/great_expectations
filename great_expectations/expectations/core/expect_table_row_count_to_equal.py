@@ -114,6 +114,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
         renderer_configuration.add_param(
             name="value", schema_type="number", value=kwargs.get("value")
         )
+        test = renderer_configuration.params.dict(by_alias=True)
         return (
             template_str,
             renderer_configuration.params.dict(by_alias=True),
