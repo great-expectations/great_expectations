@@ -8,6 +8,12 @@ from great_expectations.core import (
 )
 
 
+class RendererParam(BaseModel):
+    class Config:
+        validate_assignment = True
+        arbitrary_types_allowed = True
+
+
 class RendererConfiguration(BaseModel):
     """Configuration object built for each renderer."""
 
@@ -57,7 +63,7 @@ class RendererConfiguration(BaseModel):
             name,
             renderer_schema=Field(dict, alias="schema"),
             value=(Union[Any, None], ...),
-            __config__=self.Config,
+            __base__=RendererParam,
         )
         renderer_param_definition = {name: (renderer_param, ...)}
         renderer_params = create_model(
