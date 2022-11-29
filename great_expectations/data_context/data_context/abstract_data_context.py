@@ -3172,7 +3172,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         --Public API--
 
         --Documentation--
+
             https://docs.greatexpectations.io/docs/terms/data_context
+
             https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config
 
         Args:
@@ -3181,7 +3183,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             pretty_print: Determines whether to print human-readable output
             return_mode: Determines what type of object test_yaml_config will return.
                 Valid modes are "instantiated_class" and "report_object"
-            shorten_tracebacks:If true, catch any errors during instantiation and print only the
+            shorten_tracebacks: If true, catch any errors during instantiation and print only the
                 last element of the traceback stack. This can be helpful for
                 rapid iteration on configs in a notebook, because it can remove
                 the need to scroll up and down a lot.
