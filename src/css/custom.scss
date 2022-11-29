@@ -46,6 +46,10 @@
     font-size: var(--ifm-h1-font-size) !important;
 }
 
+p > a {
+    text-decoration: underline;
+}
+
 h1, h2, h3 {
     line-height: 1.4;
     font-family: Monteserrat, sans-serif;
