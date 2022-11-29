@@ -48,6 +48,7 @@ html_static_path = ['_static']
 
 # Skip autodoc unless part of the Public API
 WHITELISTED_TAG = "--Public API--"
+DOCUMENTATION_TAG = "--Documentation--"
 def skip_if_not_whitelisted(app, what, name, obj, would_skip, options):
     """Skip rendering documentation for docstrings that are not whitelisted.
 
@@ -65,6 +66,11 @@ def remove_whitelist_tag(app, what, name, obj, options, lines):
     for idx, line in enumerate(lines):
         if WHITELISTED_TAG in line:
             trimmed_line = line.replace(WHITELISTED_TAG, "")
+            lines[idx] = trimmed_line
+
+    for idx, line in enumerate(lines):
+        if DOCUMENTATION_TAG in line:
+            trimmed_line = line.replace(DOCUMENTATION_TAG, "Relevant Documentation Links")
             lines[idx] = trimmed_line
 
 
