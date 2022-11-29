@@ -8885,7 +8885,8 @@ a.text-dark:focus, a.text-dark:hover {
   }
 }
 
-:root {
+// Changed to * to apply to all elements since this file is imported under a selector
+* {
   --pst-header-height: 3rem;
   --pst-header-article-height: calc(var(--pst-header-height) * 2 / 3);
   --pst-sidebar-secondary: 17rem;
@@ -8938,7 +8939,8 @@ a.text-dark:focus, a.text-dark:hover {
   --pst-icon-versionmodified-deprecated: var(--pst-icon-exclamation-circle)
 }
 
-html[data-theme=light] {
+// Changed to * to apply to all elements since this file is imported under a selector
+* {
   --pst-color-text-base: #323232;
   --pst-color-text-muted: #646464;
   --pst-color-shadow: #d8d8d8;
@@ -8989,7 +8991,8 @@ html[data-theme=dark] .MathJax_SVG * {
   fill: var(--pst-color-text-base)
 }
 
-html {
+// Changed to * to apply to all elements since this file is imported under a selector
+* {
   font-size: var(--pst-font-size-base);
   scroll-padding-top: calc(var(--pst-header-height) + 12px)
 }
@@ -11170,7 +11173,8 @@ div.nblast.container {
   table-layout: auto
 }
 
-html[data-theme=light] {
+// Changed to * to apply to all elements since this file is imported under a selector
+* {
   --pst-color-primary: #459db9;
   --pst-color-primary-text: #fff;
   --pst-color-primary-highlight: #306e81;
