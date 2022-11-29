@@ -29,7 +29,14 @@ from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_partial,
 )
-from great_expectations.expectations.metrics.util import Engine, Insert, Label, Select
+from great_expectations.expectations.metrics.util import (
+    Engine,
+    Insert,
+    Label,
+    Select,
+    get_sqlalchemy_source_table_and_schema_selectable,
+    sql_post_compile_to_string,
+)
 from great_expectations.expectations.registry import (
     get_metric_provider,
     register_metric,
@@ -2329,6 +2336,137 @@ def _sqlalchemy_map_condition_rows(
         )
 
 
+def _sqlalchemy_map_condition_query(
+    cls,
+    execution_engine: SqlAlchemyExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+) -> Optional[str]:
+    """
+    Returns indicies of the metric values which do not meet an expected Expectation condition for instances
+    of ColumnMapExpectation.
+    """
+    (
+        # boolean_mapped_unexpected_values,
+        unexpected_condition,
+        compute_domain_kwargs,
+        accessor_domain_kwargs,
+    ) = metrics.get("unexpected_condition")
+
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    """
+    The query we want to build :
+        - domain column + pk columns that are given
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
+    # boo this is not what we want
+    selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
+    result_format = metric_value_kwargs["result_format"]
+    # original
+    column_selector: List[sa.Column] = [sa.column(domain_kwargs["column"])]
+    # can this also be a list more than one item?
+    all_table_columns: List[str] = metrics.get("table.columns")
+    # maybe we will add this back later
+    # column_selector.append(sa.column(domain_kwargs["column"]))
+    unexpected_index_column_names: List[str] = result_format.get(
+        "unexpected_index_column_names"
+    )
+    for column_name in unexpected_index_column_names:
+        if column_name not in all_table_columns:
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                message=f'Error: The unexpected_index_column: "{column_name}" in does not exist in SQL Table. '
+                f"Please check your configuration and try again."
+            )
+        column_selector.append(sa.column(column_name))
+    # at this point we have the columns to select
+    query = sa.select(column_selector).where(unexpected_condition)
+    # TODO: not a temp table but the original one
+    # execution_engine.batch_manager.active_batch_data.source_schema_name
+    # execution_engine.batch_manager.active_batch_data.source_table_name
+    selectable = get_sqlalchemy_source_table_and_schema_selectable(execution_engine)
+
+    new_selectable = get_sqlalchemy_selectable(selectable)
+    new_query = query.select_from(new_selectable)
+    # query: this is going to be a sepraate metric
+    query_as_string: str = sql_post_compile_to_string(
+        engine=execution_engine.engine, select_statement=new_query
+    )
+    return query_as_string
+
+
+def _sqlalchemy_map_condition_index(
+    cls,
+    execution_engine: PandasExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+) -> List[Dict[str, Any]]:
+    """
+    Returns indicies of the metric values which do not meet an expected Expectation condition for instances
+    of ColumnMapExpectation.
+    """
+    (
+        # boolean_mapped_unexpected_values,
+        unexpected_condition,
+        compute_domain_kwargs,
+        accessor_domain_kwargs,
+    ) = metrics.get("unexpected_condition")
+
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    """
+    The query we want to build :
+        - domain column + pk columns that are given
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
+    selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
+    result_format = metric_value_kwargs["result_format"]
+
+    column_selector: List[sa.Column] = []
+    # can this also be a list more than one item?
+    all_table_columns: List[str] = metrics.get("table.columns")
+    # maybe we will add this back later
+    # column_selector.append(sa.column(domain_kwargs["column"]))
+    unexpected_index_column_names: List[str] = result_format.get(
+        "unexpected_index_column_names"
+    )
+    for column_name in unexpected_index_column_names:
+        if column_name not in all_table_columns:
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                message=f'Error: The unexpected_index_column: "{column_name}" in does not exist in SQL Table. '
+                f"Please check your configuration and try again."
+            )
+        column_selector.append(sa.column(column_name))
+    # at this point we have the columns to select
+    query = sa.select(column_selector).where(unexpected_condition)
+    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        selectable = get_sqlalchemy_selectable(selectable)
+        query = query.select_from(selectable)
+    # you get a list of tuples
+    result: List[tuple] = execution_engine.engine.execute(query).fetchall()
+
+    # how do we return this statement?
+    unexpected_index_list: Optional[List[Dict[str, Any]]] = []
+    for row in result:
+        primary_key_dict: Dict[str, Any] = {}
+        for index in range(len(unexpected_index_column_names)):
+            name: str = unexpected_index_column_names[index]
+            primary_key_dict[name] = row[index]
+        unexpected_index_list.append(primary_key_dict)
+    # formatting it for the output
+    if result_format["result_format"] == "COMPLETE":
+        return unexpected_index_list
+    return unexpected_index_list[: result_format["partial_unexpected_count"]]
+
+
 def _spark_map_condition_unexpected_count_aggregate_fn(
     cls,
     execution_engine: SparkDFExecutionEngine,
@@ -3143,6 +3281,7 @@ class MapMetricProvider(MetricProvider):
         for metric_suffix in [
             ".unexpected_count.aggregate_fn",
             ".unexpected_value_counts",
+            ".unexpected_index_query",
             ".unexpected_index_list",
             ".filtered_row_count",
             ".unexpected_values",
