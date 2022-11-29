@@ -61,21 +61,12 @@ def skip_if_not_whitelisted(app, what, name, obj, would_skip, options):
     return True
 
 def custom_process_docstring(app, what, name, obj, options, lines):
-    remove_whitelist_tag(app=app, what=what, name=name, obj=obj, options=options, lines=lines)
-    process_relevant_documentation_tag(app=app, what=what, name=name, obj=obj, options=options, lines=lines)
-    process_docstring_markdown(app=app, what=what, name=name, obj=obj, options=options, lines=lines)
+    """Custom processing for use during docstring processing."""
+    _remove_whitelist_tag(app=app, what=what, name=name, obj=obj, options=options, lines=lines)
+    _process_relevant_documentation_tag(app=app, what=what, name=name, obj=obj, options=options, lines=lines)
 
 
-def process_docstring_markdown(app, what, name, obj, options, lines):
-    """Convert docstring from markdown to reStructuredText"""
-    md = '\n'.join(lines)
-    ast = commonmark.Parser().parse(md)
-    rst = commonmark.ReStructuredTextRenderer().render(ast)
-    lines.clear()
-    lines += rst.splitlines()
-
-
-def remove_whitelist_tag(app, what, name, obj, options, lines):
+def _remove_whitelist_tag(app, what, name, obj, options, lines):
     """Remove the whitelisted tag from documentation before rendering.
 
     Note: This method modifies lines in place per sphinx documentation.
@@ -85,7 +76,7 @@ def remove_whitelist_tag(app, what, name, obj, options, lines):
             trimmed_line = line.replace(WHITELISTED_TAG, "")
             lines[idx] = trimmed_line
 
-def process_relevant_documentation_tag(app, what, name, obj, options, lines):
+def _process_relevant_documentation_tag(app, what, name, obj, options, lines):
     """Remove and replace documentation tag from documentation before rendering.
 
     Note: This method modifies lines in place per sphinx documentation.
