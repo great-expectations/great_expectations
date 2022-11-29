@@ -116,8 +116,8 @@ def expected_evr_without_unexpected_rows():
         expectation_config={
             "expectation_type": "expect_column_values_to_be_in_set",
             "kwargs": {
-                "column": "a",
-                "value_set": [1, 5, 22],
+                "column": "animals",
+                "value_set": ["cat", "fish", "dog"],
             },
             "meta": {},
         },
@@ -961,18 +961,19 @@ def test_spark_single_column_complete_result_format(
     result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
-        "unexpected_count": 2,
-        "unexpected_percent": 33.33333333333333,
-        "partial_unexpected_list": [3, 10],
-        "unexpected_list": [3, 10],
+        "unexpected_count": 3,
+        "unexpected_percent": 50.0,
+        "partial_unexpected_list": [3, 4, 5],
+        "unexpected_list": [3, 4, 5],
         "partial_unexpected_counts": [
-            {"value": 3, "count": 1},
-            {"value": 10, "count": 1},
+            {"count": 1, "value": "giraffe"},
+            {"count": 1, "value": "lion"},
+            {"count": 1, "value": "zebra"},
         ],
         "missing_count": 0,
         "missing_percent": 0.0,
-        "unexpected_percent_total": 33.33333333333333,
-        "unexpected_percent_nonmissing": 33.33333333333333,
+        "unexpected_percent_total": 50.0,
+        "unexpected_percent_nonmissing": 50.0,
     }
 
 
@@ -1001,17 +1002,18 @@ def test_spark_single_column_summary_result_format(
     result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
-        "unexpected_count": 2,
-        "unexpected_percent": 33.33333333333333,
-        "partial_unexpected_list": [3, 10],
-        "partial_unexpected_counts": [
-            {"value": 3, "count": 1},
-            {"value": 10, "count": 1},
-        ],
         "missing_count": 0,
         "missing_percent": 0.0,
-        "unexpected_percent_total": 33.33333333333333,
-        "unexpected_percent_nonmissing": 33.33333333333333,
+        "partial_unexpected_counts": [
+            {"count": 1, "value": "giraffe"},
+            {"count": 1, "value": "lion"},
+            {"count": 1, "value": "zebra"},
+        ],
+        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_count": 3,
+        "unexpected_percent": 50.0,
+        "unexpected_percent_nonmissing": 50.0,
+        "unexpected_percent_total": 50.0,
     }
 
 
