@@ -316,7 +316,7 @@ class Expectation(metaclass=MetaExpectation):
         value_obj = renderedAtomicValueSchema.load(
             {
                 "template": template_str,
-                "params": renderer_configuration.params,
+                "params": renderer_configuration.params.dict(),
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
         )
@@ -347,10 +347,11 @@ class Expectation(metaclass=MetaExpectation):
         renderer_configuration.add_param(
             name="kwargs", schema_type="string", value=renderer_configuration.kwargs
         )
+        params_with_json_schema: dict = renderer_configuration.params.dict()
 
         return (
             template_str,
-            renderer_configuration.params,
+            params_with_json_schema,
             renderer_configuration.styling,
         )
 
@@ -816,10 +817,12 @@ class Expectation(metaclass=MetaExpectation):
             name="kwargs", schema_type="string", value=renderer_configuration.kwargs
         )
 
+        params_with_json_schema: dict = renderer_configuration.params.dict()
+
         value_obj = renderedAtomicValueSchema.load(
             {
                 "template": template_str,
-                "params": renderer_configuration.params,
+                "params": params_with_json_schema,
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
         )
