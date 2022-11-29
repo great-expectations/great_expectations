@@ -130,8 +130,10 @@ class MetricsCalculator:
             Tuple[str, str, str], MetricValue
         ] = self.compute_metrics(
             metric_configurations=list(metrics.values()),
+            runtime_configuration=None,
+            min_graph_edges_pbar_enable=0,
+            show_progress_bars=True,
         )
-
         return {
             metric_configuration.metric_name: resolved_metrics[metric_configuration.id]
             for metric_configuration in metrics.values()
@@ -161,7 +163,7 @@ class MetricsCalculator:
         )
         resolved_metrics: Dict[
             Tuple[str, str, str], MetricValue
-        ] = self.resolve_validation_graph(
+        ] = self.resolve_validation_graph_and_handle_aborted_metrics_info(
             graph=graph,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
@@ -199,7 +201,7 @@ class MetricsCalculator:
         return graph
 
     @staticmethod
-    def resolve_validation_graph(
+    def resolve_validation_graph_and_handle_aborted_metrics_info(
         graph: ValidationGraph,
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,
@@ -224,7 +226,7 @@ class MetricsCalculator:
         (
             resolved_metrics,
             aborted_metrics_info,
-        ) = MetricsCalculator.resolve_validation_graph_and_report_aborted_metrics_info(
+        ) = MetricsCalculator.resolve_validation_graph(
             graph=graph,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
@@ -239,7 +241,7 @@ class MetricsCalculator:
         return resolved_metrics
 
     @staticmethod
-    def resolve_validation_graph_and_report_aborted_metrics_info(
+    def resolve_validation_graph(
         graph: ValidationGraph,
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,
@@ -253,6 +255,8 @@ class MetricsCalculator:
         ],
     ]:
         """
+        Calls "ValidationGraph.resolve()" method with supplied arguments.
+
         Args:
             graph: "ValidationGraph" object, containing "metric_edge" structures with "MetricConfiguration" objects.
             runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
@@ -268,7 +272,7 @@ class MetricsCalculator:
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ]
-        resolved_metrics, aborted_metrics_info = graph.resolve_validation_graph(
+        resolved_metrics, aborted_metrics_info = graph.resolve(
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
             show_progress_bars=show_progress_bars,

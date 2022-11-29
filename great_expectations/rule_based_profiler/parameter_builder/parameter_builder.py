@@ -48,6 +48,7 @@ from great_expectations.types.attributes import Attributes
 from great_expectations.util import is_parseable_date
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validation_graph import ValidationGraph
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
@@ -442,25 +443,7 @@ specified (empty "metric_name" value detected)."""
             for kwargs_pair_cursor in kwargs_combinations
         ]
 
-        # Step-4: Sort "MetricConfiguration" directives by "metric_value_kwargs_id" and "batch_id" (in that order).
-        # This precise sort order enables pairing every metric value with its respective "batch_id" (e.g., for display).
-
-        batch_id_idx: int
-        batch_id_ordering: Dict[str, int] = {
-            batch_id: batch_id_idx for batch_id_idx, batch_id in enumerate(batch_ids)
-        }
-
-        metrics_to_resolve = sorted(
-            metrics_to_resolve,
-            key=lambda metric_configuration_element: (
-                metric_configuration_element.metric_value_kwargs_id,
-                batch_id_ordering[
-                    metric_configuration_element.metric_domain_kwargs["batch_id"]
-                ],
-            ),
-        )
-
-        # Step-5: Resolve all metrics in one operation simultaneously.
+        # Step-4: Resolve all metrics in one operation simultaneously.
 
         # The Validator object used for metric calculation purposes.
         validator: Validator = self.get_validator(
@@ -469,38 +452,29 @@ specified (empty "metric_name" value detected)."""
             parameters=parameters,
         )
 
-        resolved_metrics: Dict[
-            Tuple[str, str, str], MetricValue
-        ] = validator.compute_metrics(
-            metric_configurations=metrics_to_resolve,
-            runtime_configuration=None,
+        graph: ValidationGraph = (
+            validator.metrics_calculator.build_metric_dependency_graph(
+                metric_configurations=metrics_to_resolve,
+                runtime_configuration=None,
+            )
         )
 
-        # Step-6: Sort resolved metrics according to same sort order as was applied to "MetricConfiguration" directives.
+        resolved_metrics: Dict[
+            Tuple[str, str, str], MetricValue
+        ] = validator.metrics_calculator.resolve_validation_graph_and_handle_aborted_metrics_info(
+            graph=graph,
+            runtime_configuration=None,
+            min_graph_edges_pbar_enable=0,
+            show_progress_bars=True,
+        )
 
-        resolved_metrics_sorted: Dict[Tuple[str, str, str], MetricValue] = {}
-
-        metric_configuration: MetricConfiguration
-
-        resolved_metric_value: MetricValue
-
-        for metric_configuration in metrics_to_resolve:
-            if metric_configuration.id not in resolved_metrics:
-                logger.warning(
-                    f"{metric_configuration.id[0]} was not found in the resolved Metrics for ParameterBuilder."
-                )
-                continue
-
-            resolved_metrics_sorted[metric_configuration.id] = resolved_metrics[
-                metric_configuration.id
-            ]
-
-        # Step-7: Map resolved metrics to their attributes for identification and recovery by receiver.
+        # Step-5: Map resolved metrics to their attributes for identification and recovery by receiver.
 
         attributed_resolved_metrics_map: Dict[str, AttributedResolvedMetrics] = {}
 
+        resolved_metric_value: MetricValue
         attributed_resolved_metrics: AttributedResolvedMetrics
-
+        metric_configuration: MetricConfiguration
         for metric_configuration in metrics_to_resolve:
             attributed_resolved_metrics = attributed_resolved_metrics_map.get(
                 metric_configuration.metric_value_kwargs_id
@@ -517,16 +491,19 @@ specified (empty "metric_name" value detected)."""
                     metric_configuration.metric_value_kwargs_id
                 ] = attributed_resolved_metrics
 
-            if metric_configuration.id in resolved_metrics_sorted:
-                resolved_metric_value = resolved_metrics_sorted[metric_configuration.id]
+            if metric_configuration.id in resolved_metrics:
+                resolved_metric_value = resolved_metrics[metric_configuration.id]
                 attributed_resolved_metrics.add_resolved_metric(
                     batch_id=metric_configuration.metric_domain_kwargs["batch_id"],
                     value=resolved_metric_value,
                 )
             else:
+                logger.warning(
+                    f"{metric_configuration.id[0]} was not found in the resolved Metrics for ParameterBuilder."
+                )
                 continue
 
-        # Step-8: Convert scalar metric values to vectors to enable uniformity of processing in subsequent operations.
+        # Step-6: Convert scalar metric values to vectors to enable uniformity of processing in subsequent operations.
 
         metric_attributes_id: str
         for (
@@ -535,7 +512,8 @@ specified (empty "metric_name" value detected)."""
         ) in attributed_resolved_metrics_map.items():
             if (
                 isinstance(
-                    attributed_resolved_metrics.conditioned_metric_values, np.ndarray
+                    attributed_resolved_metrics.conditioned_metric_values,
+                    np.ndarray,
                 )
                 and attributed_resolved_metrics.conditioned_metric_values.ndim == 1
             ):
@@ -547,7 +525,7 @@ specified (empty "metric_name" value detected)."""
                     metric_attributes_id
                 ] = attributed_resolved_metrics
 
-        # Step-9: Apply numeric/hygiene flags (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
+        # Step-7: Apply numeric/hygiene flags (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
 
         for (
             metric_attributes_id,
@@ -564,19 +542,21 @@ specified (empty "metric_name" value detected)."""
                 parameters=parameters,
             )
 
-        # Step-10: Build and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").
+        # Step-8: Build and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").
+
+        details: dict = {
+            "metric_configuration": {
+                "metric_name": metric_name,
+                "domain_kwargs": domain_kwargs,
+                "metric_value_kwargs": metric_value_kwargs[0]
+                if len(metric_value_kwargs) == 1
+                else metric_value_kwargs,
+            },
+            "num_batches": len(batch_ids),
+        }
         return MetricComputationResult(
             attributed_resolved_metrics=list(attributed_resolved_metrics_map.values()),
-            details={
-                "metric_configuration": {
-                    "metric_name": metric_name,
-                    "domain_kwargs": domain_kwargs,
-                    "metric_value_kwargs": metric_value_kwargs[0]
-                    if len(metric_value_kwargs) == 1
-                    else metric_value_kwargs,
-                },
-                "num_batches": len(batch_ids),
-            },
+            details=details,
         )
 
     @staticmethod
