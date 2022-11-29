@@ -2059,7 +2059,8 @@ def _sqlalchemy_column_map_condition_values(
             "if your data contains more than 10000 columns your results will be truncated."
         )
         query = query.limit(10000)  # BigQuery upper bound on query parameters
-
+    # query
+    raise Exception(f"this is the query: {str(query)}")
     return [
         val.unexpected_values
         for val in execution_engine.engine.execute(query).fetchall()
