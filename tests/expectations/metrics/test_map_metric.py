@@ -999,7 +999,6 @@ def test_spark_single_column_summary_result_format(
         "unexpected_count": 2,
         "unexpected_percent": 33.33333333333333,
         "partial_unexpected_list": [3, 10],
-        "unexpected_list": [3, 10],
         "partial_unexpected_counts": [
             {"value": 3, "count": 1},
             {"value": 10, "count": 1},
