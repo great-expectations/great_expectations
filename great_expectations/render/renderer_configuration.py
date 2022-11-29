@@ -82,7 +82,9 @@ class RendererConfiguration(BaseModel):
         validate_assignment = True
         arbitrary_types_allowed = True
 
-    def add_param(self, name: str, schema_type: str, value: Union[Any, None]):
+    def add_param(
+        self, name: str, schema_type: str, value: Union[Any, None]
+    ) -> BaseModel:
         renderer_param = create_model(
             name,
             renderer_schema=(dict, Field(..., alias="schema")),
@@ -102,3 +104,4 @@ class RendererConfiguration(BaseModel):
             name: renderer_param(schema={"type": schema_type}, value=value)
         }
         self.params = renderer_params(**renderer_params_definition)
+        return self.params

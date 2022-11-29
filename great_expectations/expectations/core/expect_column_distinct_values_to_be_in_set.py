@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Tuple, Union
+from typing import Optional, Tuple, Union
 
 import altair as alt
 import pandas as pd
@@ -141,44 +141,44 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> Tuple[str, dict, Union[dict, None]]:
         kwargs: dict = renderer_configuration.kwargs
-        include_column_name: bool = renderer_configuration.include_column_name
 
-        params = substitute_none_for_missing(
-            kwargs,
-            ["column", "value_set", "row_condition", "condition_parser"],
+        renderer_configuration = (
+            renderer_configuration.add_param(
+                name="column", schema_type="string", value=kwargs.get("column")
+            )
+            .add_param(
+                name="value_set", schema_type="array", value=kwargs.get("value_set")
+            )
+            .add_param(
+                name="row_condition",
+                schema_type="string",
+                value=kwargs.get("row_condition"),
+            )
+            .add_param(
+                name="condition_parser",
+                schema_type="string",
+                value=kwargs.get("condition_parser"),
+            )
         )
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "value_set": {
-                "schema": {"type": "array"},
-                "value": params.get("value_set"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-        }
 
-        if params["value_set"] is None or len(params["value_set"]) == 0:
+        params = renderer_configuration.params
 
-            if include_column_name:
+        if params.value_set is None or len(params.value_set.value) == 0:
+
+            if renderer_configuration.include_column_name:
                 template_str = "$column distinct values must belong to this set: [ ]"
             else:
                 template_str = "distinct values must belong to a set, but that set is not specified."
 
         else:
 
-            for i, v in enumerate(params["value_set"]):
+            for i, v in enumerate(params.value_set):
                 params[f"v__{str(i)}"] = v
             values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
+                [f"$v__{str(i)}" for i, v in enumerate(params.value_set)]
             )
 
-            if include_column_name:
+            if renderer_configuration.include_column_name:
                 template_str = (
                     f"$column distinct values must belong to this set: {values_string}."
                 )
@@ -187,21 +187,17 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                     f"distinct values must belong to this set: {values_string}."
                 )
 
-        if params["row_condition"] is not None:
+        params_with_json_schema: dict = params.dict()
+
+        if params.row_condition is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
+                params.row_condition.dict(), with_schema=True
             )
             template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
-
-        params_with_json_schema = add_values_with_json_schema_from_list_in_params(
-            params=params,
-            params_with_json_schema=params_with_json_schema,
-            param_key_with_list="value_set",
-        )
 
         return template_str, params_with_json_schema, renderer_configuration.styling
 
