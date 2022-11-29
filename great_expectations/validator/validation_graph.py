@@ -167,7 +167,7 @@ class ValidationGraph:
         )
         return metric_impl_klass, metric_provider
 
-    def resolve_validation_graph(
+    def resolve(
         self,
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,
@@ -186,7 +186,7 @@ class ValidationGraph:
         aborted_metrics_info: Dict[
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ] = self._resolve_validation_graph(
+        ] = self._resolve(
             metrics=resolved_metrics,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
@@ -195,7 +195,7 @@ class ValidationGraph:
 
         return resolved_metrics, aborted_metrics_info
 
-    def _resolve_validation_graph(  # noqa: C901 - complexity 16
+    def _resolve(  # noqa: C901 - complexity 16
         self,
         metrics: Dict[Tuple[str, str, str], MetricValue],
         runtime_configuration: Optional[dict] = None,
