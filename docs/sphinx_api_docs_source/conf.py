@@ -8,6 +8,8 @@
 import os
 import sys
 
+import commonmark
+
 
 def _prepend_base_repository_dir_to_sys_path():
     """Add great_expectations base repo dir to the front of sys path. Used for docs processing."""
@@ -58,6 +60,21 @@ def skip_if_not_whitelisted(app, what, name, obj, would_skip, options):
         return False
     return True
 
+def custom_process_docstring(app, what, name, obj, options, lines):
+    remove_whitelist_tag(app=app, what=what, name=name, obj=obj, options=options, lines=lines)
+    process_relevant_documentation_tag(app=app, what=what, name=name, obj=obj, options=options, lines=lines)
+    process_docstring_markdown(app=app, what=what, name=name, obj=obj, options=options, lines=lines)
+
+
+def process_docstring_markdown(app, what, name, obj, options, lines):
+    """Convert docstring from markdown to reStructuredText"""
+    md = '\n'.join(lines)
+    ast = commonmark.Parser().parse(md)
+    rst = commonmark.ReStructuredTextRenderer().render(ast)
+    lines.clear()
+    lines += rst.splitlines()
+
+
 def remove_whitelist_tag(app, what, name, obj, options, lines):
     """Remove the whitelisted tag from documentation before rendering.
 
@@ -68,12 +85,17 @@ def remove_whitelist_tag(app, what, name, obj, options, lines):
             trimmed_line = line.replace(WHITELISTED_TAG, "")
             lines[idx] = trimmed_line
 
+def process_relevant_documentation_tag(app, what, name, obj, options, lines):
+    """Remove and replace documentation tag from documentation before rendering.
+
+    Note: This method modifies lines in place per sphinx documentation.
+    """
     for idx, line in enumerate(lines):
         if DOCUMENTATION_TAG in line:
-            trimmed_line = line.replace(DOCUMENTATION_TAG, "Relevant Documentation Links")
+            trimmed_line = line.replace(DOCUMENTATION_TAG, "Relevant Documentation Links\n")
             lines[idx] = trimmed_line
 
 
 def setup(app):
     app.connect("autodoc-skip-member", skip_if_not_whitelisted)
-    app.connect("autodoc-process-docstring", remove_whitelist_tag)
+    app.connect("autodoc-process-docstring", custom_process_docstring)
