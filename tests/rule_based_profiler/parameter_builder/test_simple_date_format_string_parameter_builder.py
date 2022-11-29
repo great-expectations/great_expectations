@@ -123,7 +123,7 @@ def test_simple_date_format_parameter_builder_alice(
     assert len(parameter_container.parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_date_format"
-    expected_value: dict = {
+    expected_parameter_node_as_dict: dict = {
         "value": "%Y-%m-%d %H:%M:%S",
         "details": {
             "success_ratio": 1.0,
@@ -198,7 +198,7 @@ def test_simple_date_format_parameter_builder_alice(
         parameters=parameters,
     )
 
-    assert parameter_node == expected_value
+    assert parameter_node == expected_parameter_node_as_dict
 
 
 @pytest.mark.integration
