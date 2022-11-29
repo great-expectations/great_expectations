@@ -24,7 +24,10 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     RegexPatternStringParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     ParameterContainer,
+    ParameterNode,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
 from great_expectations.validator.validator import Validator
@@ -339,13 +342,31 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
         },
     }
 
-    assert (
+    parameter_node: ParameterNode = (
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
             domain=domain,
             parameters=parameters,
         )
-        == expected_parameter_node_as_dict
+    )
+
+    assert parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY] in [
+        r"\d+",
+        r"-?\d+",
+        r"-?\d+(?:\.\d*)?",
+        r"[A-Za-z0-9\.,;:!?()\"'%\-]+",
+    ]
+    assert (
+        parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY].items()
+        == expected_parameter_node_as_dict[
+            FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+        ].items()
+    )
+    assert (
+        parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY].success_ratio
+        == expected_parameter_node_as_dict[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY][
+            "success_ratio"
+        ]
     )
 
 
