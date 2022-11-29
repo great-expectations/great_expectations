@@ -24,7 +24,7 @@ from great_expectations.expectations.metrics.import_manager import (
 class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
     """Expect Query given filter to contain at least as many entries as a given threshold"""
 
-    metric_dependencies = ("query.multiple_inputs",)
+    metric_dependencies = ("query.template_values",)
 
     query = """
                 SELECT COUNT(*) n
@@ -32,7 +32,7 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
                 WHERE {col} = {filter}
             """
 
-    success_keys = ("query", "query_input")
+    success_keys = ("query", "template_values")
 
     domain_keys = ("batch_id", "row_condition", "condition_parser")
 
@@ -70,7 +70,7 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
     ) -> Union[ExpectationValidationResult, dict]:
 
         query_result: Union[sqlalchemy_engine_Row, pyspark_sql_Row] = metrics.get(
-            "query.multiple_inputs"
+            "query.template_dict"
         )
         threshold: Union[float, int] = configuration["kwargs"].get("threshold")
         count: int = query_result[0][0]
@@ -89,7 +89,7 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
                     "title": "basic_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"query_input": {"col": "col1", "filter": 2}, "threshold": 4},
+                    "in": {"template_dict": {"col": "col1", "filter": 2}, "threshold": 4},
                     "out": {"success": True},
                     "only_for": ["sqlite", "spark"],
                 },
@@ -97,7 +97,7 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
                     "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"query_input": {"col": "col1", "filter": 1}, "threshold": 4},
+                    "in": {"template_dict": {"col": "col1", "filter": 1}, "threshold": 4},
                     "out": {"success": False},
                     "only_for": ["sqlite", "spark"],
                 },
