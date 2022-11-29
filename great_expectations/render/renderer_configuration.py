@@ -29,30 +29,28 @@ class RendererConfiguration(BaseModel):
     styling: Union[dict, None] = Field(None, allow_mutation=False)
     params: Union[BaseModel, None] = Field(None, allow_mutation=True)
 
-    @classmethod
-    @root_validator(pre=False)
-    def _set_fields(cls, values: dict) -> dict:
-        if values["configuration"]:
-            values["expectation_type"] = values["configuration"].expectation_type
-            values["kwargs"] = values["configuration"].kwargs
-        elif values["result"] and values["result"].expectation_config:
-            values["expectation_type"] = values[
+    def __init__(self, **kwargs):
+        if kwargs["configuration"]:
+            kwargs["expectation_type"] = kwargs["configuration"].expectation_type
+            kwargs["kwargs"] = kwargs["configuration"].kwargs
+        elif kwargs["result"] and kwargs["result"].expectation_config:
+            kwargs["expectation_type"] = kwargs[
                 "result"
             ].expectation_config.expectation_type
-            values["kwargs"] = values["result"].expectation_config.kwargs
+            kwargs["kwargs"] = kwargs["result"].expectation_config.kwargs
         else:
-            values["expectation_type"] = ""
-            values["kwargs"] = {}
+            kwargs["expectation_type"] = ""
+            kwargs["kwargs"] = {}
 
-        if values["runtime_configuration"]:
-            values["include_column_name"] = (
+        if kwargs["runtime_configuration"]:
+            kwargs["include_column_name"] = (
                 False
-                if values["runtime_configuration"].get("include_column_name") is False
+                if kwargs["runtime_configuration"].get("include_column_name") is False
                 else True
             )
-            values["styling"] = values["runtime_configuration"].get("styling")
+            kwargs["styling"] = kwargs["runtime_configuration"].get("styling")
 
-        return values
+        super().__init__(**kwargs)
 
     class Config:
         validate_assignment = True
