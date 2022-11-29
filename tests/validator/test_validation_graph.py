@@ -300,8 +300,8 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true():
             """
             This stub method implementation insures that specified "MetricConfiguration", designed to fail, will cause
             appropriate exception to be raised, while its dependencies resolve to actual values ("my_value" is used here
-            as placeholder).  This makes "ValidationGraph.resolve_validation_graph()" -- method under test -- evaluate
-            every "MetricConfiguration" of parsed "ValidationGraph" successfully, except "failed" "MetricConfiguration".
+            as placeholder).  This makes "ValidationGraph.resolve()" -- method under test -- evaluate every
+            "MetricConfiguration" of parsed "ValidationGraph" successfully, except "failed" "MetricConfiguration".
             """
             metric_configuration: MetricConfiguration
             if failed_metric_configuration.id in [
@@ -337,7 +337,7 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true():
         Tuple[str, str, str],
         Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
     ]
-    resolved_metrics, aborted_metrics_info = graph.resolve_validation_graph(
+    resolved_metrics, aborted_metrics_info = graph.resolve(
         runtime_configuration=runtime_configuration,
         min_graph_edges_pbar_enable=0,
         show_progress_bars=True,
@@ -377,7 +377,7 @@ def test_progress_bar_config(
 ):
     """
     This test creates mocked environment for progress bar tests; it then executes the method under test that utilizes
-    the progress bar, "ValidationGraph.resolve_validation_graph()", with composed arguments, and verifies result.
+    the progress bar, "ValidationGraph.resolve()", with composed arguments, and verifies result.
     """
 
     class DummyMetricConfiguration:
@@ -424,9 +424,7 @@ def test_progress_bar_config(
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ]
         # noinspection PyUnusedLocal
-        resolved_metrics, aborted_metrics_info = graph.resolve_validation_graph(
-            **call_args
-        )
+        resolved_metrics, aborted_metrics_info = graph.resolve(**call_args)
         assert mock_tqdm.called is True
         assert mock_tqdm.call_args[1]["disable"] is are_progress_bars_disabled
 

@@ -191,6 +191,18 @@ def assert_batch_specs_correct_with_year_month_splitter_defaults(batch_specs):
             assert spec in batch_specs
 
 
+def assert_batches_correct_with_year_month_splitter_defaults(batches):
+    # We should have 1 batch_spec per (year, month) pair
+    expected_batch_spec_num = len(list(postgres_datasource._DEFAULT_YEAR_RANGE)) * len(
+        list(postgres_datasource._DEFAULT_MONTH_RANGE)
+    )
+    assert len(batches) == expected_batch_spec_num
+    metadatas = [batch.metadata for batch in batches]
+    for year in postgres_datasource._DEFAULT_YEAR_RANGE:
+        for month in postgres_datasource._DEFAULT_MONTH_RANGE:
+            assert {"year": year, "month": month} in metadatas
+
+
 @pytest.mark.unit
 def test_datasource_gets_batch_list_splitter_with_unspecified_batch_request_options(
     create_source,
@@ -205,8 +217,9 @@ def test_datasource_gets_batch_list_splitter_with_unspecified_batch_request_opti
         asset.add_year_and_month_splitter(column_name="my_col")
         empty_batch_request = asset.get_batch_request()
         assert empty_batch_request.options == {}
-        source.get_batch_list_from_batch_request(empty_batch_request)
+        batches = source.get_batch_list_from_batch_request(empty_batch_request)
         assert_batch_specs_correct_with_year_month_splitter_defaults(batch_specs)
+        assert_batches_correct_with_year_month_splitter_defaults(batches)
 
 
 @pytest.mark.unit
@@ -225,9 +238,10 @@ def test_datasource_gets_batch_list_splitter_with_batch_request_options_set_to_n
             asset.batch_request_options_template()
         )
         assert batch_request_with_none.options == {"year": None, "month": None}
-        source.get_batch_list_from_batch_request(batch_request_with_none)
+        batches = source.get_batch_list_from_batch_request(batch_request_with_none)
         # We should have 1 batch_spec per (year, month) pair
         assert_batch_specs_correct_with_year_month_splitter_defaults(batch_specs)
+        assert_batches_correct_with_year_month_splitter_defaults(batches)
 
 
 @pytest.mark.unit
@@ -242,10 +256,10 @@ def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_requ
     with create_source(collect_batch_spec) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
-        source.get_batch_list_from_batch_request(
+        batches = source.get_batch_list_from_batch_request(
             asset.get_batch_request({"year": 2022})
         )
-        assert len(batch_specs) == 12
+        assert len(batch_specs) == len(postgres_datasource._DEFAULT_MONTH_RANGE)
         for month in postgres_datasource._DEFAULT_MONTH_RANGE:
             spec = {
                 "type": "table",
@@ -256,6 +270,12 @@ def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_requ
                 "splitter_kwargs": {"column_name": "my_col"},
             }
             assert spec in batch_specs
+
+        assert len(batches) == len(postgres_datasource._DEFAULT_MONTH_RANGE)
+        metadatas = [batch.metadata for batch in batches]
+        for month in postgres_datasource._DEFAULT_MONTH_RANGE:
+            expected_metadata = {"month": month, "year": 2022}
+            expected_metadata in metadatas
 
 
 @pytest.mark.unit
@@ -275,9 +295,11 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_request_options(
     with create_source(validate_batch_spec) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
-        source.get_batch_list_from_batch_request(
+        batches = source.get_batch_list_from_batch_request(
             asset.get_batch_request({"month": 1, "year": 2022})
         )
+        assert 1 == len(batches)
+        assert batches[0].metadata == {"month": 1, "year": 2022}
 
 
 @pytest.mark.unit

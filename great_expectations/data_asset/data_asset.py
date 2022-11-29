@@ -10,7 +10,7 @@ import warnings
 from collections import Counter, defaultdict, namedtuple
 from collections.abc import Hashable
 from functools import wraps
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from dateutil.parser import parse
 from marshmallow import ValidationError
@@ -1111,7 +1111,7 @@ class DataAsset:
     #
     ###
 
-    def _format_map_output(
+    def _format_map_output(  # noqa: C901 - complexity 21
         self,
         result_format,
         success,
@@ -1173,16 +1173,32 @@ class DataAsset:
         if result_format["result_format"] == "BASIC":
             return return_obj
 
+        if unexpected_list is not None:
+            if len(unexpected_list) and isinstance(unexpected_list[0], dict):
+                # in the case of multicolumn map expectations `unexpected_list` contains dicts,
+                # which will throw an exception when we hash it to count unique members.
+                # As a workaround, we flatten the values out to tuples.
+                immutable_unexpected_list = [
+                    tuple([val for val in item.values()]) for item in unexpected_list
+                ]
+            else:
+                immutable_unexpected_list = unexpected_list
+
         # Try to return the most common values, if possible.
-        if 0 < result_format.get("partial_unexpected_count"):
+        partial_unexpected_count: Optional[int] = result_format.get(
+            "partial_unexpected_count"
+        )
+        partial_unexpected_counts: Optional[List[Dict[str, Any]]] = None
+
+        if partial_unexpected_count is not None and 0 < partial_unexpected_count:
             try:
                 partial_unexpected_counts = [
                     {"value": key, "count": value}
                     for key, value in sorted(
-                        Counter(unexpected_list).most_common(
+                        Counter(immutable_unexpected_list).most_common(
                             result_format["partial_unexpected_count"]
                         ),
-                        key=lambda x: (-x[1], str(x[0])),
+                        key=lambda x: (-x[1], x[0]),
                     )
                 ]
             except TypeError:

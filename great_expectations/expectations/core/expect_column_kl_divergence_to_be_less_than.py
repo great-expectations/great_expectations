@@ -266,7 +266,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                     Tuple[str, str, str],
                     Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
                 ]
-                resolved_metrics, aborted_metrics_info = graph.resolve_validation_graph(
+                resolved_metrics, aborted_metrics_info = graph.resolve(
                     runtime_configuration=None,
                     min_graph_edges_pbar_enable=0,
                     show_progress_bars=True,
