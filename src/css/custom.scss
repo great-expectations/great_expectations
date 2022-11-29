@@ -161,6 +161,16 @@ a.pagination-nav__link:hover {
     margin-bottom: 15px;
 }
 
+.footer__icon {
+    height: 24px;
+    width: 24px;
+    color: white;
+}
+
+.footer__icon:hover {
+    color: var(--ifm-color-primary);
+}
+
 /* change the carat in the top menu to open carat */
 .dropdown > .navbar__link:after,
 .menu__link--sublist:after{
