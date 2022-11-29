@@ -11,7 +11,6 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnExpectation,
     InvalidExpectationConfigurationError,
-    add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
 from great_expectations.expectations.metrics.util import parse_value_set
@@ -142,23 +141,21 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
     ) -> Tuple[str, dict, Union[dict, None]]:
         kwargs: dict = renderer_configuration.kwargs
 
-        renderer_configuration = (
-            renderer_configuration.add_param(
-                name="column", schema_type="string", value=kwargs.get("column")
-            )
-            .add_param(
-                name="value_set", schema_type="array", value=kwargs.get("value_set")
-            )
-            .add_param(
-                name="row_condition",
-                schema_type="string",
-                value=kwargs.get("row_condition"),
-            )
-            .add_param(
-                name="condition_parser",
-                schema_type="string",
-                value=kwargs.get("condition_parser"),
-            )
+        renderer_configuration.add_param(
+            name="column", schema_type="string", value=kwargs.get("column")
+        )
+        renderer_configuration.add_param(
+            name="value_set", schema_type="array", value=kwargs.get("value_set")
+        )
+        renderer_configuration.add_param(
+            name="row_condition",
+            schema_type="string",
+            value=kwargs.get("row_condition"),
+        )
+        renderer_configuration.add_param(
+            name="condition_parser",
+            schema_type="string",
+            value=kwargs.get("condition_parser"),
         )
 
         params = renderer_configuration.params

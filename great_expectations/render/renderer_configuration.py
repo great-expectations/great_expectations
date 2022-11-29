@@ -53,7 +53,7 @@ class RendererConfiguration(BaseModel):
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
     styling: Union[dict, None] = Field(None, allow_mutation=False)
-    params: Union[BaseModel, None] = Field(None, allow_mutation=True)
+    params: RendererParams = Field(default_factory=RendererParams, allow_mutation=True)
 
     def __init__(self, **kwargs):
         if kwargs["configuration"]:
@@ -82,9 +82,7 @@ class RendererConfiguration(BaseModel):
         validate_assignment = True
         arbitrary_types_allowed = True
 
-    def add_param(
-        self, name: str, schema_type: str, value: Union[Any, None]
-    ) -> BaseModel:
+    def add_param(self, name: str, schema_type: str, value: Union[Any, None]) -> None:
         renderer_param = create_model(
             name,
             renderer_schema=(dict, Field(..., alias="schema")),
@@ -93,15 +91,13 @@ class RendererConfiguration(BaseModel):
         )
         renderer_param_definition = {name: (renderer_param, ...)}
 
-        if self.params:
-            base = self.params
-        else:
-            base = RendererParams
         renderer_params = create_model(
-            "RendererParams", **renderer_param_definition, __base__=base
+            "RendererParams",
+            **renderer_param_definition,
+            __base__=self.params.__class__
         )
         renderer_params_definition = {
-            name: renderer_param(schema={"type": schema_type}, value=value)
+            **self.params.dict(),
+            name: renderer_param(schema={"type": schema_type}, value=value),
         }
         self.params = renderer_params(**renderer_params_definition)
-        return self.params

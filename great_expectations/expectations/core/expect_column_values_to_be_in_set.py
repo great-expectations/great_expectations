@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -16,6 +16,7 @@ from great_expectations.render import (
     ValueListContent,
 )
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import RendererConfiguration
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -39,7 +40,6 @@ try:
 except ImportError:
     pass
 from great_expectations.expectations.expectation import (
-    add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
 
@@ -190,65 +190,56 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
-        runtime_configuration: Optional[dict] = None,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        renderer_configuration: RendererConfiguration,
+    ) -> Tuple[str, dict, Union[dict, None]]:
+        kwargs: dict = renderer_configuration.kwargs
+        renderer_configuration.add_param(
+            name="column", schema_type="string", value=kwargs.get("column")
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            [
-                "column",
-                "value_set",
-                "mostly",
-                "parse_strings_as_datetimes",
-                "row_condition",
-                "condition_parser",
-            ],
+        renderer_configuration.add_param(
+            name="value_set", schema_type="array", value=kwargs.get("value_set")
         )
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "value_set": {
-                "schema": {"type": "array"},
-                "value": params.get("value_set"),
-            },
-            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
-            "mostly_pct": {
-                "schema": {"type": "string"},
-                "value": params.get("mostly_pct"),
-            },
-            "parse_strings_as_datetimes": {
-                "schema": {"type": "boolean"},
-                "value": params.get("parse_strings_as_datetimes"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-        }
+        renderer_configuration.add_param(
+            name="mostly", schema_type="number", value=kwargs.get("mostly")
+        )
+        renderer_configuration.add_param(
+            name="mostly_pct", schema_type="string", value=kwargs.get("mostly_pct")
+        )
+        renderer_configuration.add_param(
+            name="parse_strings_as_datetimes",
+            schema_type="boolean",
+            value=kwargs.get("parse_strings_as_datetimes"),
+        )
+        renderer_configuration.add_param(
+            name="row_condition",
+            schema_type="string",
+            value=kwargs.get("row_condition"),
+        )
+        renderer_configuration.add_param(
+            name="condition_parser",
+            schema_type="string",
+            value=kwargs.get("condition_parser"),
+        )
 
-        if params["value_set"] is None or len(params["value_set"]) == 0:
+        params = renderer_configuration.params
+
+        if not params.value_set.value or len(params.value_set.value) == 0:
             values_string = "[ ]"
         else:
-            for i, v in enumerate(params["value_set"]):
-                params[f"v__{str(i)}"] = v
+            for i, v in enumerate(params.value_set.value):
+                renderer_configuration.add_param(
+                    name=f"v__{str(i)}", schema_type="string", value=v
+                )
 
             values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
+                [f"$v__{str(i)}" for i, v in enumerate(params.value_set.value)]
             )
 
         template_str = f"values must belong to this set: {values_string}"
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:
+        params_with_json_schema: dict = params.dict()
+
+        if params.mostly.value and params.mostly.value < 1.0:
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
@@ -257,29 +248,23 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         else:
             template_str += "."
 
-        if params.get("parse_strings_as_datetimes"):
+        if params.parse_strings_as_datetimes.value:
             template_str += " Values should be parsed as datetimes."
 
-        if include_column_name:
+        if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
-        if params["row_condition"] is not None:
+        if params.row_condition.value:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
+                params.row_condition.value, with_schema=True
             )
             template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
-        params_with_json_schema = add_values_with_json_schema_from_list_in_params(
-            params=params,
-            params_with_json_schema=params_with_json_schema,
-            param_key_with_list="value_set",
-        )
-
-        return (template_str, params_with_json_schema, styling)
+        return template_str, params_with_json_schema, renderer_configuration.styling
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
@@ -290,13 +275,13 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+    ) -> List[RenderedStringTemplateContent]:
+        renderer_configuration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            language=language,
+            runtime_configuration=runtime_configuration,
         )
-        styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
             [
@@ -333,7 +318,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
 
-        if include_column_name:
+        if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
@@ -351,7 +336,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                     "string_template": {
                         "template": template_str,
                         "params": params,
-                        "styling": styling,
+                        "styling": renderer_configuration.styling,
                     },
                 }
             )
@@ -365,8 +350,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
+    ) -> Union[RenderedBulletListContent, ValueListContent]:
         assert result, "Must pass in result."
         if "partial_unexpected_counts" in result.result:
             partial_unexpected_counts = result.result["partial_unexpected_counts"]
