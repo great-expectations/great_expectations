@@ -69,16 +69,11 @@ class DataContext(BaseDataContext):
     store Expectations, Profilers, Checkpoints, Metrics, Validation Results and Data Docs and how those Stores are
     configured. Take a look at our documentation for more configuration options.
 
-    You can create or load a DataContext from disk via the following:
-    ```
-    import great_expectations as ge
-    ge.get_context()
-    ```
-
     --Public API--
 
     --Documentation--
-        https://docs.greatexpectations.io/docs/terms/data_context
+        - https://docs.greatexpectations.io/docs/terms/data_context
+
     """
 
     @classmethod
@@ -97,7 +92,7 @@ class DataContext(BaseDataContext):
         --Public API--
 
         --Documentation--
-            https://docs.greatexpectations.io/docs/terms/data_context
+            - https://docs.greatexpectations.io/docs/terms/data_context
 
         Args:
             project_root_dir: path to the root directory in which to create a new great_expectations directory
