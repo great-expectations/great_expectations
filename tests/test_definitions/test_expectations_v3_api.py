@@ -33,7 +33,7 @@ def pytest_generate_tests(metafunc):
         for dir_ in os.listdir(dir_path)
         if os.path.isdir(os.path.join(dir_path, dir_))
     ]
-    # expectation_dirs = [""]
+    expectation_dirs = [""]
     parametrized_tests = []
     ids = []
     backends = build_test_backends_list_v3_api(metafunc)
@@ -43,9 +43,6 @@ def pytest_generate_tests(metafunc):
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )
-        test_configuration_files = [
-            "tests/test_definitions/column_map_expectations/expect_column_values_to_be_between_tz_informed.json"
-        ]
         for c in backends:
             for filename in test_configuration_files:
                 file = open(filename)
