@@ -432,6 +432,21 @@ def docs(
             doc["class"] = "sphinx-api-doc"
             doc_str = str(doc)
 
+            # title = soup.find("h1")
+            # title_no_a = title.clear("a")
+            # title_str = str(title_no_a)
+            title_str = "DataContext"
+
+            # Add metadata
+            # TODO: AJB 20221129 Generate this programatically and change doc_front_matter string definition
+            doc_front_matter = (
+                "---\n"
+                f"sidebar_label: {title_str}\n"
+                "---\n"
+                "\n"
+            )
+            doc_str = doc_front_matter + doc_str
+
             output_path = curdir / pathlib.Path("docs/reference/api") / html_file.relative_to(static_html_file_path).with_suffix(".mdx")
             output_path.parent.mkdir(parents=True, exist_ok=True)
             with open(output_path, "w") as fout:
