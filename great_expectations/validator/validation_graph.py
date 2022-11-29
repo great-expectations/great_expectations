@@ -69,8 +69,6 @@ class ValidationGraph:
         else:
             self._edges = []
 
-        self._edge_ids = {edge.id for edge in self._edges}
-
     def __eq__(self, other) -> bool:
         """Supports comparing two "ValidationGraph" objects."""
         return self.edge_ids == other.edge_ids
@@ -87,9 +85,8 @@ class ValidationGraph:
 
     def add(self, edge: MetricEdge) -> None:
         """Adds supplied "MetricEdge" object to this "ValidationGraph" object (if not already present)."""
-        if edge.id not in self._edge_ids:
+        if edge.id not in self.edge_ids:
             self._edges.append(edge)
-            self._edge_ids.add(edge.id)
 
     def build_metric_dependency_graph(
         self,

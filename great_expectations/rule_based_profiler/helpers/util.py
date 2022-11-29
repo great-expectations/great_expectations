@@ -159,7 +159,8 @@ def get_batch_ids(
     num_batch_ids: int = len(batch_ids)
 
     if limit is not None:
-        if not (isinstance(limit, int) and (0 <= limit <= num_batch_ids)):
+        # No need to verify that type of "limit" is "integer", because static type checking already ascertains this.
+        if not (0 <= limit <= num_batch_ids):
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"""{__name__}.get_batch_ids() allows integer limit values between 0 and {num_batch_ids} \
 ({limit} was requested).
