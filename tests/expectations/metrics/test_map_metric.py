@@ -961,19 +961,19 @@ def test_spark_single_column_complete_result_format(
     result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
-        "unexpected_count": 3,
-        "unexpected_percent": 50.0,
-        "partial_unexpected_list": [3, 4, 5],
-        "unexpected_list": [3, 4, 5],
+        "missing_count": 0,
+        "missing_percent": 0.0,
         "partial_unexpected_counts": [
             {"count": 1, "value": "giraffe"},
             {"count": 1, "value": "lion"},
             {"count": 1, "value": "zebra"},
         ],
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "unexpected_percent_total": 50.0,
+        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_count": 3,
+        "unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
+        "unexpected_percent_total": 50.0,
     }
 
 
