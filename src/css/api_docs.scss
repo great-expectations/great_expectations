@@ -2,31 +2,11 @@
  * Styles to be applied only to sphinx generated API docs.
  */
 
-
 .sphinx-api-doc {
 
-    @import "pydata-sphinx-theme-modified.scss";
-    @import "basic.scss";
     @import "pygments.scss";
-
-
-    //.sig-name.descname {
-    //    //color: var(--pst-color-inline-code)
-    //    color: #E83E8C;
-    //}
-    //
-    //blockquote {
-    //    border-left:none;
-    //    margin:0 0 .3em;
-    //    padding-left:30px;
-    //    color: #646464;
-    //    background: #f8f9fb;
-    //}
-    //
-    //blockquote.p {
-    //    background-color: red;
-    //}
-
+    @import "basic.scss";
+    @import "pydata-sphinx-theme-modified.scss";
 
 }
 
