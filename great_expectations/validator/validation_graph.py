@@ -71,7 +71,7 @@ class ValidationGraph:
 
         self._edge_ids = {edge.id for edge in self._edges}
 
-    def __eq__(self, other: ValidationGraph) -> bool:
+    def __eq__(self, other) -> bool:
         """Supports comparing two "ValidationGraph" objects."""
         return self.edge_ids == other.edge_ids
 
