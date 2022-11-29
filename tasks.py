@@ -427,20 +427,20 @@ def docs(
         print("processing:", html_file.absolute())
         with open(html_file, "r") as f:
             soup = BeautifulSoup(f.read(), "html.parser")
-            doc = soup.find("section")
+
+            # Retrieve and remove the title
+            title = soup.find("h1").extract()
+            title_str = title.get_text(strip=True)
+            title_str = title_str.replace("#", "")
+
             # Add class="sphinx-api-doc" to section tag to reference in css
+            doc = soup.find("section")
             doc["class"] = "sphinx-api-doc"
             doc_str = str(doc)
 
-            # title = soup.find("h1")
-            # title_no_a = title.clear("a")
-            # title_str = str(title_no_a)
-            title_str = "DataContext"
-
-            # Add metadata
-            # TODO: AJB 20221129 Generate this programatically and change doc_front_matter string definition
             doc_front_matter = (
                 "---\n"
+                f"title: {title_str}\n"
                 f"sidebar_label: {title_str}\n"
                 "---\n"
                 "\n"
