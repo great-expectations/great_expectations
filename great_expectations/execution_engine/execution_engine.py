@@ -19,12 +19,6 @@ from typing import (
 )
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import (
-    BatchData,
-    BatchDataType,
-    BatchMarkers,
-    BatchSpec,
-)
 from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
@@ -41,7 +35,13 @@ from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
-    from great_expectations.expectations.metrics import MetricProvider
+    from great_expectations.core.batch import (
+        BatchData,
+        BatchDataType,
+        BatchMarkers,
+        BatchSpec,
+    )
+    from great_expectations.expectations.metrics.metric_provider import MetricProvider
 
 logger = logging.getLogger(__name__)
 
@@ -416,10 +416,9 @@ class ExecutionEngine(ABC):
         if len(metric_fn_bundle) > 0:
             try:
                 # an engine-specific way of computing metrics together
-                # NOTE: DH 20220328: This is where we can introduce the Batch Metrics Store (BMS)
                 new_resolved: Dict[
                     Tuple[str, str, str], MetricValue
-                ] = self.resolve_metric_bundle(metric_fn_bundle)
+                ] = self.resolve_metric_bundle(metric_fn_bundle=metric_fn_bundle)
                 resolved_metrics.update(new_resolved)
             except Exception as e:
                 raise ge_exceptions.MetricResolutionError(
@@ -593,7 +592,7 @@ class ExecutionEngine(ABC):
 
     @staticmethod
     def _split_table_metric_domain_kwargs(
-        domain_kwargs: Dict,
+        domain_kwargs: dict,
         domain_type: MetricDomainTypes,
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> SplitDomainKwargs:
@@ -642,7 +641,7 @@ class ExecutionEngine(ABC):
 
     @staticmethod
     def _split_column_metric_domain_kwargs(
-        domain_kwargs: Dict,
+        domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
         """Split domain_kwargs for column domain types into compute and accessor domain kwargs.
@@ -674,7 +673,7 @@ class ExecutionEngine(ABC):
 
     @staticmethod
     def _split_column_pair_metric_domain_kwargs(
-        domain_kwargs: Dict,
+        domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
         """Split domain_kwargs for column pair domain types into compute and accessor domain kwargs.
@@ -707,7 +706,7 @@ class ExecutionEngine(ABC):
 
     @staticmethod
     def _split_multi_column_metric_domain_kwargs(
-        domain_kwargs: Dict,
+        domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
         """Split domain_kwargs for multicolumn domain types into compute and accessor domain kwargs.
