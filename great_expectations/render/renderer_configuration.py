@@ -67,10 +67,7 @@ class RendererConfiguration(BaseModel):
         )
         renderer_param_definition = {name: (renderer_param, ...)}
         renderer_params = create_model(
-            "RendererParams",
-            **renderer_param_definition,
-            __config__=self.Config,
-            __base__=self.params
+            "RendererParams", **renderer_param_definition, __base__=self.params
         )
         renderer_params_definition = {
             name: renderer_param(renderer_schema={"type": schema_type}, value=value)
