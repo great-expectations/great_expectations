@@ -26,7 +26,7 @@ from great_expectations.validator.validator import Validator
 
 
 @pytest.fixture
-def pandas_animals_dataframe():
+def pandas_animals_dataframe_for_unexpected_rows_and_index():
     return pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -206,7 +206,9 @@ def test_is_sqlalchemy_metric_selectable():
     )
 
 
-def test_pandas_unexpected_rows_basic_result_format(pandas_animals_dataframe):
+def test_pandas_unexpected_rows_basic_result_format(
+    pandas_animals_dataframe_for_unexpected_rows_and_index,
+):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
@@ -221,7 +223,7 @@ def test_pandas_unexpected_rows_basic_result_format(pandas_animals_dataframe):
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch = Batch(data=pandas_animals_dataframe)
+    batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
@@ -249,7 +251,7 @@ def test_pandas_unexpected_rows_basic_result_format(pandas_animals_dataframe):
 
 
 def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_explicitly_false(
-    pandas_animals_dataframe,
+    pandas_animals_dataframe_for_unexpected_rows_and_index,
 ):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -265,7 +267,7 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_explicitly
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch = Batch(data=pandas_animals_dataframe)
+    batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
@@ -294,7 +296,7 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_explicitly
 
 
 def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_including_unexpected_rows(
-    pandas_animals_dataframe,
+    pandas_animals_dataframe_for_unexpected_rows_and_index,
 ):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -310,7 +312,7 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_including_
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch = Batch(data=pandas_animals_dataframe)
+    batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
@@ -343,7 +345,9 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_including_
     }
 
 
-def test_pandas_unexpected_rows_complete_result_format(pandas_animals_dataframe):
+def test_pandas_unexpected_rows_complete_result_format(
+    pandas_animals_dataframe_for_unexpected_rows_and_index,
+):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
@@ -357,7 +361,7 @@ def test_pandas_unexpected_rows_complete_result_format(pandas_animals_dataframe)
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch = Batch(data=pandas_animals_dataframe)
+    batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
@@ -392,7 +396,7 @@ def test_pandas_unexpected_rows_complete_result_format(pandas_animals_dataframe)
 
 
 def test_pandas_default_complete_result_format(
-    pandas_animals_dataframe: pd.DataFrame,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -406,7 +410,7 @@ def test_pandas_default_complete_result_format(
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch: Batch = Batch(data=pandas_animals_dataframe)
+    batch: Batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
@@ -436,7 +440,7 @@ def test_pandas_default_complete_result_format(
 
 
 def test_pandas_single_unexpected_index_column_names_complete_result_format(
-    pandas_animals_dataframe: pd.DataFrame,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -451,7 +455,7 @@ def test_pandas_single_unexpected_index_column_names_complete_result_format(
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch: Batch = Batch(data=pandas_animals_dataframe)
+    batch: Batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
@@ -489,7 +493,7 @@ def test_pandas_single_unexpected_index_column_names_complete_result_format(
 
 
 def test_pandas_multiple_unexpected_index_column_names_complete_result_format(
-    pandas_animals_dataframe: pd.DataFrame,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -504,7 +508,7 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format(
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch: Batch = Batch(data=pandas_animals_dataframe)
+    batch: Batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
@@ -542,7 +546,7 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format(
 
 
 def test_pandas_multiple_unexpected_index_column_names_complete_result_format_limit_1(
-    pandas_animals_dataframe: pd.DataFrame,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -558,7 +562,7 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format_li
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch: Batch = Batch(data=pandas_animals_dataframe)
+    batch: Batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
@@ -588,7 +592,7 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format_li
 
 
 def test_pandas_multiple_unexpected_index_column_names_summary_result_format(
-    pandas_animals_dataframe: pd.DataFrame,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -603,7 +607,7 @@ def test_pandas_multiple_unexpected_index_column_names_summary_result_format(
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch: Batch = Batch(data=pandas_animals_dataframe)
+    batch: Batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
@@ -635,7 +639,7 @@ def test_pandas_multiple_unexpected_index_column_names_summary_result_format(
 
 
 def test_pandas_multiple_unexpected_index_column_names_summary_result_format_limit_1(
-    pandas_animals_dataframe: pd.DataFrame,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -651,7 +655,7 @@ def test_pandas_multiple_unexpected_index_column_names_summary_result_format_lim
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch: Batch = Batch(data=pandas_animals_dataframe)
+    batch: Batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
@@ -677,7 +681,7 @@ def test_pandas_multiple_unexpected_index_column_names_summary_result_format_lim
 
 
 def test_pandas_multiple_unexpected_index_column_names_basic_result_format(
-    pandas_animals_dataframe: pd.DataFrame,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -692,7 +696,7 @@ def test_pandas_multiple_unexpected_index_column_names_basic_result_format(
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch: Batch = Batch(data=pandas_animals_dataframe)
+    batch: Batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
@@ -714,7 +718,7 @@ def test_pandas_multiple_unexpected_index_column_names_basic_result_format(
 
 
 def test_pandas_single_unexpected_index_column_names_complete_result_format_non_existing_column(
-    pandas_animals_dataframe: pd.DataFrame,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -729,7 +733,7 @@ def test_pandas_single_unexpected_index_column_names_complete_result_format_non_
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch: Batch = Batch(data=pandas_animals_dataframe)
+    batch: Batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
@@ -747,7 +751,7 @@ def test_pandas_single_unexpected_index_column_names_complete_result_format_non_
 
 
 def test_pandas_multiple_unexpected_index_column_names_complete_result_format_non_existing_column(
-    pandas_animals_dataframe: pd.DataFrame,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -764,7 +768,7 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format_no
         },
     )
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch: Batch = Batch(data=pandas_animals_dataframe)
+    batch: Batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
@@ -782,7 +786,8 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format_no
 
 
 def test_pandas_default_to_not_include_unexpected_rows(
-    pandas_animals_dataframe, expected_evr_without_unexpected_rows
+    pandas_animals_dataframe_for_unexpected_rows_and_index,
+    expected_evr_without_unexpected_rows,
 ):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -796,7 +801,7 @@ def test_pandas_default_to_not_include_unexpected_rows(
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch = Batch(data=pandas_animals_dataframe)
+    batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
@@ -809,7 +814,8 @@ def test_pandas_default_to_not_include_unexpected_rows(
 
 
 def test_pandas_specify_not_include_unexpected_rows(
-    pandas_animals_dataframe, expected_evr_without_unexpected_rows
+    pandas_animals_dataframe_for_unexpected_rows_and_index,
+    expected_evr_without_unexpected_rows,
 ):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -824,7 +830,7 @@ def test_pandas_specify_not_include_unexpected_rows(
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch = Batch(data=pandas_animals_dataframe)
+    batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
@@ -837,7 +843,7 @@ def test_pandas_specify_not_include_unexpected_rows(
 
 
 def test_include_unexpected_rows_without_explicit_result_format_raises_error(
-    pandas_animals_dataframe,
+    pandas_animals_dataframe_for_unexpected_rows_and_index,
 ):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -851,7 +857,7 @@ def test_include_unexpected_rows_without_explicit_result_format_raises_error(
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch = Batch(data=pandas_animals_dataframe)
+    batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
