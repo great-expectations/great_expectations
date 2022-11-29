@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional, Tuple, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -12,7 +12,7 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import substitute_none_for_missing
+from great_expectations.render.renderer_configuration import RendererConfiguration
 
 
 class ExpectTableRowCountToEqual(TableExpectation):
@@ -107,30 +107,18 @@ class ExpectTableRowCountToEqual(TableExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            ["value"],
-        )
-        params_with_json_schema = {
-            "value": {
-                "schema": {"type": "number"},
-                "value": params.get("value"),
-            },
-        }
+        renderer_configuration: RendererConfiguration,
+    ) -> Tuple[str, dict, Union[dict, None]]:
+        kwargs: dict = renderer_configuration.kwargs
         template_str = "Must have exactly $value rows."
-
-        return (template_str, params_with_json_schema, styling)
+        renderer_configuration.add_param(
+            name="value", schema_type="number", value=kwargs.get("value")
+        )
+        return (
+            template_str,
+            renderer_configuration.params.dict(by_alias=True),
+            renderer_configuration.styling,
+        )
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
@@ -141,16 +129,12 @@ class ExpectTableRowCountToEqual(TableExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            ["value"],
+    ) -> List[RenderedStringTemplateContent]:
+        renderer_configuration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            language=language,
+            runtime_configuration=runtime_configuration,
         )
         template_str = "Must have exactly $value rows."
 
@@ -160,8 +144,8 @@ class ExpectTableRowCountToEqual(TableExpectation):
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": template_str,
-                        "params": params,
-                        "styling": styling,
+                        "params": renderer_configuration.params.dict(),
+                        "styling": renderer_configuration.styling,
                     },
                 }
             )

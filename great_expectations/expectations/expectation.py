@@ -302,24 +302,21 @@ class Expectation(metaclass=MetaExpectation):
             runtime_configuration=runtime_configuration,
         )
 
-        template_str = "Rendering failed for Expectation: "
+        template_str = "Rendering failed for Expectation: $expectation_type(**$kwargs)."
 
-        kwargs: dict = renderer_configuration.kwargs
-        expectation_type: str = renderer_configuration.expectation_type
-
-        params_with_json_schema = {
-            "expectation_type": {
-                "schema": {"type": "string"},
-                "value": expectation_type,
-            },
-            "kwargs": {"schema": {"type": "string"}, "value": kwargs},
-        }
-        template_str += "$expectation_type(**$kwargs)."
+        renderer_configuration.add_param(
+            name="expectation_type",
+            schema_type="string",
+            value=renderer_configuration.expectation_type,
+        )
+        renderer_configuration.add_param(
+            name="kwargs", schema_type="string", value=renderer_configuration.kwargs
+        )
 
         value_obj = renderedAtomicValueSchema.load(
             {
                 "template": template_str,
-                "params": params_with_json_schema,
+                "params": renderer_configuration.params,
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
         )
@@ -340,23 +337,22 @@ class Expectation(metaclass=MetaExpectation):
         LegacyRendererType.PRESCRIPTIVE
         """
 
-        expectation_type: str = renderer_configuration.expectation_type
-        kwargs: dict = renderer_configuration.kwargs
-        styling: Union[dict, None] = renderer_configuration.styling
-
-        params_with_json_schema = {
-            "expectation_type": {
-                "schema": {"type": "string"},
-                "value": expectation_type,
-            },
-            "kwargs": {
-                "schema": {"type": "string"},
-                "value": kwargs,
-            },
-        }
         template_str = "$expectation_type(**$kwargs)"
 
-        return template_str, params_with_json_schema, styling
+        renderer_configuration.add_param(
+            name="expectation_type",
+            schema_type="string",
+            value=renderer_configuration.expectation_type,
+        )
+        renderer_configuration.add_param(
+            name="kwargs", schema_type="string", value=renderer_configuration.kwargs
+        )
+
+        return (
+            template_str,
+            renderer_configuration.params,
+            renderer_configuration.styling,
+        )
 
     @classmethod
     @renderer(renderer_type=AtomicPrescriptiveRendererType.SUMMARY)
@@ -809,25 +805,21 @@ class Expectation(metaclass=MetaExpectation):
             runtime_configuration=runtime_configuration,
         )
 
-        expectation_type: str = renderer_configuration.expectation_type
-        kwargs: dict = renderer_configuration.kwargs
-
-        params_with_json_schema = {
-            "expectation_type": {
-                "schema": {"type": "string"},
-                "value": expectation_type,
-            },
-            "kwargs": {
-                "schema": {"type": "string"},
-                "value": kwargs,
-            },
-        }
         template_str = "Rendering failed for Expectation: $expectation_type(**$kwargs)."
+
+        renderer_configuration.add_param(
+            name="expectation_type",
+            schema_type="string",
+            value=renderer_configuration.expectation_type,
+        )
+        renderer_configuration.add_param(
+            name="kwargs", schema_type="string", value=renderer_configuration.kwargs
+        )
 
         value_obj = renderedAtomicValueSchema.load(
             {
                 "template": template_str,
-                "params": params_with_json_schema,
+                "params": renderer_configuration.params,
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
         )

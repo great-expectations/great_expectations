@@ -142,7 +142,6 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
     ) -> Tuple[str, dict, Union[dict, None]]:
         kwargs: dict = renderer_configuration.kwargs
         include_column_name: bool = renderer_configuration.include_column_name
-        styling: Union[dict, None] = renderer_configuration.styling
 
         params = substitute_none_for_missing(
             kwargs,
@@ -204,7 +203,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
             param_key_with_list="value_set",
         )
 
-        return template_str, params_with_json_schema, styling
+        return template_str, params_with_json_schema, renderer_configuration.styling
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)

@@ -1,5 +1,6 @@
-from dataclasses import dataclass, field
-from typing import Union
+from typing import Any, Union
+
+from pydantic import BaseModel, Field, create_model, root_validator
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -7,43 +8,65 @@ from great_expectations.core import (
 )
 
 
-@dataclass(frozen=True)
-class RendererConfiguration:
+class RendererConfiguration(BaseModel):
     """Configuration object built for each renderer."""
 
-    configuration: Union[ExpectationConfiguration, None]
-    result: Union[ExpectationValidationResult, None]
-    language: str = "en"
-    runtime_configuration: dict = field(default_factory=dict)
-    kwargs: dict = field(init=False)
-    expectation_type: str = field(init=False)
-    include_column_name: bool = field(init=False)
-    styling: Union[dict, None] = field(init=False)
+    configuration: Union[ExpectationConfiguration, None] = Field(
+        ..., allow_mutation=False
+    )
+    result: Union[ExpectationValidationResult, None] = Field(..., allow_mutation=False)
+    language: Union[str, None] = Field("", allow_mutation=False)
+    runtime_configuration: Union[dict, None] = Field({}, allow_mutation=False)
+    expectation_type: str = Field("", allow_mutation=False)
+    kwargs: dict = Field({}, allow_mutation=False)
+    include_column_name: bool = Field(True, allow_mutation=False)
+    styling: Union[dict, None] = Field(None, allow_mutation=False)
+    params: Union[BaseModel, None] = Field(None, allow_mutation=True)
 
-    def __post_init__(self) -> None:
-        kwargs: dict
-        if self.configuration:
-            kwargs = self.configuration.kwargs
-            expectation_type = self.configuration.expectation_type
-        elif self.result and self.result.expectation_config:
-            kwargs = self.result.expectation_config.kwargs
-            expectation_type = self.result.expectation_config.expectation_type
+    @classmethod
+    @root_validator(pre=False)
+    def _set_fields(cls, values: dict) -> dict:
+        if values["configuration"]:
+            values["expectation_type"] = values["configuration"].expectation_type
+            values["kwargs"] = values["configuration"].kwargs
+        elif values["result"] and values["result"].expectation_config:
+            values["expectation_type"] = values[
+                "result"
+            ].expectation_config.expectation_type
+            values["kwargs"] = values["result"].expectation_config.kwargs
         else:
-            kwargs = {}
-            expectation_type = ""
+            values["expectation_type"] = ""
+            values["kwargs"] = {}
 
-        object.__setattr__(self, "kwargs", kwargs)
-        object.__setattr__(self, "expectation_type", expectation_type)
-
-        include_column_name: bool = True
-        styling: Union[dict, None] = None
-        if self.runtime_configuration:
-            include_column_name = (
+        if values["runtime_configuration"]:
+            values["include_column_name"] = (
                 False
-                if self.runtime_configuration.get("include_column_name") is False
+                if values["runtime_configuration"].get("include_column_name") is False
                 else True
             )
-            styling = self.runtime_configuration.get("styling")
+            values["styling"] = values["runtime_configuration"].get("styling")
 
-        object.__setattr__(self, "include_column_name", include_column_name)
-        object.__setattr__(self, "styling", styling)
+        return values
+
+    class Config:
+        validate_assignment = True
+        arbitrary_types_allowed = True
+
+    def add_param(self, name: str, schema_type: str, value: Union[Any, None]):
+        renderer_param = create_model(
+            name,
+            renderer_schema=Field(dict, alias="schema"),
+            value=(Union[Any, None], ...),
+            __config__=self.Config,
+        )
+        renderer_param_definition = {name: (renderer_param, ...)}
+        renderer_params = create_model(
+            "RendererParams",
+            **renderer_param_definition,
+            __config__=self.Config,
+            __base__=self.params
+        )
+        renderer_params_definition = {
+            name: renderer_param(renderer_schema={"type": schema_type}, value=value)
+        }
+        self.params = renderer_params(**renderer_params_definition)
