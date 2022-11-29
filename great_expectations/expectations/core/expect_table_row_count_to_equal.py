@@ -114,10 +114,9 @@ class ExpectTableRowCountToEqual(TableExpectation):
         renderer_configuration.add_param(
             name="value", schema_type="number", value=kwargs.get("value")
         )
-        test = renderer_configuration.params.dict(by_alias=True)
         return (
             template_str,
-            renderer_configuration.params.dict(by_alias=True),
+            renderer_configuration.params.dict(),
             renderer_configuration.styling,
         )
 
@@ -145,7 +144,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": template_str,
-                        "params": renderer_configuration.params.dict(by_alias=True),
+                        "params": renderer_configuration.params.dict(),
                         "styling": renderer_configuration.styling,
                     },
                 }

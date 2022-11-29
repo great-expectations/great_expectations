@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 from pydantic import BaseModel, Field, create_model
 
@@ -12,6 +12,32 @@ class RendererParam(BaseModel):
     class Config:
         validate_assignment = True
         arbitrary_types_allowed = True
+
+
+class RendererParams(BaseModel):
+    class Config:
+        validate_assignment = True
+        arbitrary_types_allowed = True
+
+    def dict(
+        self,
+        include: Optional[Union["AbstractSetIntStr", "MappingIntStrAny"]] = None,
+        exclude: Optional[Union["AbstractSetIntStr", "MappingIntStrAny"]] = None,
+        by_alias: bool = True,
+        skip_defaults: Optional[bool] = None,
+        exclude_unset: bool = False,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+    ) -> "DictStrAny":
+        return super().dict(
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            skip_defaults=skip_defaults,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+        )
 
 
 class RendererConfiguration(BaseModel):
@@ -64,11 +90,15 @@ class RendererConfiguration(BaseModel):
             __base__=RendererParam,
         )
         renderer_param_definition = {name: (renderer_param, ...)}
+
+        if self.params:
+            base = self.params
+        else:
+            base = RendererParams
         renderer_params = create_model(
-            "RendererParams", **renderer_param_definition, __base__=self.params
+            "RendererParams", **renderer_param_definition, __base__=base
         )
         renderer_params_definition = {
             name: renderer_param(schema={"type": schema_type}, value=value)
         }
-        params = renderer_params(**renderer_params_definition)
-        self.params = params
+        self.params = renderer_params(**renderer_params_definition)
