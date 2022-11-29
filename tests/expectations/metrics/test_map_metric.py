@@ -67,8 +67,7 @@ def spark_dataframe_for_unexpected_rows_with_index(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
             "pk_2": ["zero", "one", "two", "three", "four", "five"],
-            "numbers_with_duplicates": [1, 5, 22, 3, 5, 10],
-            "animal_names_no_duplicates": [
+            "animals": [
                 "cat",
                 "fish",
                 "dog",
@@ -98,8 +97,7 @@ def sqlite_table_for_unexpected_rows_with_index(
                 {
                     "pk_1": [0, 1, 2, 3, 4, 5],
                     "pk_2": ["zero", "one", "two", "three", "four", "five"],
-                    "numbers_with_duplicates": [1, 5, 22, 3, 5, 10],
-                    "animal_names_no_duplicates": [
+                    "animals": [
                         "cat",
                         "fish",
                         "dog",
@@ -110,7 +108,10 @@ def sqlite_table_for_unexpected_rows_with_index(
                 }
             )
             df.to_sql(
-                name="test_temp", con=sqlite_engine, index=False, if_exists="replace"
+                name="animals_table",
+                con=sqlite_engine,
+                index=False,
+                if_exists="replace",
             )
             return sqlite_engine
         except ImportError:
@@ -937,8 +938,8 @@ def test_spark_single_column_complete_result_format(
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
-            "column": "numbers_with_duplicates",
-            "value_set": [1, 5, 22],
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "COMPLETE",
             },
@@ -977,8 +978,8 @@ def test_spark_single_column_summary_result_format(
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
-            "column": "numbers_with_duplicates",
-            "value_set": [1, 5, 22],
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "SUMMARY",
             },
@@ -1016,8 +1017,8 @@ def test_sqlite_single_column_complete_result_format(
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
-            "column": "numbers_with_duplicates",
-            "value_set": [1, 5, 22],
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "COMPLETE",
             },
@@ -1035,7 +1036,7 @@ def test_sqlite_single_column_complete_result_format(
             execution_engine=execution_engine,
             assets={
                 "my_asset": {
-                    "table_name": "test_temp",
+                    "table_name": "animals_table",
                 },
             },
         )
@@ -1064,15 +1065,16 @@ def test_sqlite_single_column_complete_result_format(
         "missing_count": 0,
         "missing_percent": 0.0,
         "partial_unexpected_counts": [
-            {"count": 1, "value": 3},
-            {"count": 1, "value": 10},
+            {"count": 1, "value": "giraffe"},
+            {"count": 1, "value": "lion"},
+            {"count": 1, "value": "zebra"},
         ],
-        "partial_unexpected_list": [3, 10],
-        "unexpected_count": 2,
-        "unexpected_list": [3, 10],
-        "unexpected_percent": 33.33333333333333,
-        "unexpected_percent_nonmissing": 33.33333333333333,
-        "unexpected_percent_total": 33.33333333333333,
+        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_count": 3,
+        "unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_percent": 50.0,
+        "unexpected_percent_nonmissing": 50.0,
+        "unexpected_percent_total": 50.0,
     }
 
 
@@ -1082,8 +1084,8 @@ def test_sqlite_single_column_summary_result_format(
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
-            "column": "numbers_with_duplicates",
-            "value_set": [1, 5, 22],
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "SUMMARY",
             },
@@ -1101,7 +1103,7 @@ def test_sqlite_single_column_summary_result_format(
             execution_engine=execution_engine,
             assets={
                 "my_asset": {
-                    "table_name": "test_temp",
+                    "table_name": "animals_table",
                 },
             },
         )
@@ -1130,12 +1132,13 @@ def test_sqlite_single_column_summary_result_format(
         "missing_count": 0,
         "missing_percent": 0.0,
         "partial_unexpected_counts": [
-            {"count": 1, "value": 3},
-            {"count": 1, "value": 10},
+            {"count": 1, "value": "giraffe"},
+            {"count": 1, "value": "lion"},
+            {"count": 1, "value": "zebra"},
         ],
-        "partial_unexpected_list": [3, 10],
-        "unexpected_count": 2,
-        "unexpected_percent": 33.33333333333333,
-        "unexpected_percent_nonmissing": 33.33333333333333,
-        "unexpected_percent_total": 33.33333333333333,
+        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_count": 3,
+        "unexpected_percent": 50.0,
+        "unexpected_percent_nonmissing": 50.0,
+        "unexpected_percent_total": 50.0,
     }
