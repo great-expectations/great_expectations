@@ -144,7 +144,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": template_str,
-                        "params": renderer_configuration.params.dict(),
+                        "params": renderer_configuration.params.dict(by_alias=True),
                         "styling": renderer_configuration.styling,
                     },
                 }
