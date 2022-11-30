@@ -20,7 +20,6 @@ if TYPE_CHECKING:
     from great_expectations.core.batch import BatchDataType
     from great_expectations.execution_engine import ExecutionEngine
 
-
 # BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
 # Batches one wants returned. The keys represent dimensions one can slice the data along
 # and the values are the realized. If a value is None or unspecified, the batch_request
@@ -60,7 +59,6 @@ class DataAsset(ExperimentalBaseModel):
 
 
 class Datasource(ExperimentalBaseModel, metaclass=MetaDatasource):
-
     # class attrs
     asset_types: ClassVar[List[Type[DataAsset]]] = []
     # Datasource instance attrs but these will be fed into the `execution_engine` constructor
@@ -155,6 +153,9 @@ class Batch:
     _batch_request: BatchRequest
     _data: BatchDataType
     _id: str
+    # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata
+    # to a batch so developers may want to namespace any custom metadata they add.
+    metadata: Dict[str, Any]
 
     def __init__(
         self,
@@ -164,6 +165,7 @@ class Batch:
         # BatchDataType is Union[core.batch.BatchData, pd.DataFrame, SparkDataFrame].  core.batch.Batchdata is the
         # implicit interface that Datasource implementers can use. We can make this explicit if needed.
         data: BatchDataType,
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         """This represents a batch of data.
 
@@ -175,6 +177,7 @@ class Batch:
         self._data_asset: DataAsset = data_asset
         self._batch_request: BatchRequest = batch_request
         self._data: BatchDataType = data
+        self.metadata = metadata or {}
 
         # computed property
         # We need to unique identifier. This will likely change as I get more input

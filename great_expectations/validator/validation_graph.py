@@ -71,15 +71,22 @@ class ValidationGraph:
 
         self._edge_ids = {edge.id for edge in self._edges}
 
+    def __eq__(self, other) -> bool:
+        """Supports comparing two "ValidationGraph" objects."""
+        return self.edge_ids == other.edge_ids
+
     @property
-    def edges(self):
+    def edges(self) -> List[MetricEdge]:
+        """Returns "MetricEdge" objects, contained within this "ValidationGraph" object (as list)."""
         return self._edges
 
     @property
-    def edge_ids(self):
+    def edge_ids(self) -> Set[Tuple[str, str]]:
+        """Returns "MetricEdge" objects, contained within this "ValidationGraph" object (as set of two-tuples)."""
         return {edge.id for edge in self._edges}
 
     def add(self, edge: MetricEdge) -> None:
+        """Adds supplied "MetricEdge" object to this "ValidationGraph" object (if not already present)."""
         if edge.id not in self._edge_ids:
             self._edges.append(edge)
             self._edge_ids.add(edge.id)
@@ -163,7 +170,7 @@ class ValidationGraph:
         )
         return metric_impl_klass, metric_provider
 
-    def resolve_validation_graph(
+    def resolve(
         self,
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,
@@ -182,7 +189,7 @@ class ValidationGraph:
         aborted_metrics_info: Dict[
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ] = self._resolve_validation_graph(
+        ] = self._resolve(
             metrics=resolved_metrics,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
@@ -191,7 +198,7 @@ class ValidationGraph:
 
         return resolved_metrics, aborted_metrics_info
 
-    def _resolve_validation_graph(  # noqa: C901 - complexity 16
+    def _resolve(  # noqa: C901 - complexity 16
         self,
         metrics: Dict[Tuple[str, str, str], MetricValue],
         runtime_configuration: Optional[dict] = None,
