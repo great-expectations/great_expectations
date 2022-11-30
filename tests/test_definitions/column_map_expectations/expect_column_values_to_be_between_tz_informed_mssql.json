@@ -5,7 +5,7 @@
       "ts": [
         "1970-01-01T12:00:01.000000+05:30",
         "1999-12-31T12:00:01.012345+08:00",
-        "2021-01-01T12:00:01.678900-08:30"
+        "2020-01-01T12:00:01.678900-08:30"
       ]
     },
     "schemas": {
@@ -15,7 +15,7 @@
     },
     "tests": [
       {
-        "title": "basic_positive_test_with_timestamps_tz_informed",
+        "title": "basic_positive_test_with_timestamps_tz_informed_mssql",
         "only_for": ["mssql"],
         "exact_match_out": false,
         "out": {
@@ -31,7 +31,7 @@
         }
       },
       {
-        "title": "basic_negative_test_with_timestamps_tz_informed",
+        "title": "basic_negative_test_with_timestamps_tz_informed_mssql",
         "only_for": ["mssql"],
         "exact_match_out": false,
         "out": {
