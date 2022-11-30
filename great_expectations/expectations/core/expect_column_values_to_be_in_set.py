@@ -43,7 +43,6 @@ try:
 except ImportError:
     pass
 from great_expectations.expectations.expectation import (
-    add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
 
@@ -203,43 +202,39 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             result=result,
             runtime_configuration=runtime_configuration,
         )
-        kwargs: dict = renderer_configuration.kwargs
         renderer_configuration.add_param(
-            name="column", schema_type="string", value=kwargs.get("column")
+            name="column",
+            schema_type="string",
         )
         renderer_configuration.add_param(
-            name="value_set", schema_type="array", value=kwargs.get("value_set")
+            name="value_set",
+            schema_type="array",
         )
         renderer_configuration.add_param(
             name="mostly",
             schema_type="number",
-            value=kwargs.get("mostly"),
         )
         renderer_configuration.add_param(
             name="mostly_pct",
             schema_type="string",
-            value=kwargs.get("mostly_pct"),
         )
         renderer_configuration.add_param(
             name="parse_strings_as_datetimes",
             schema_type="boolean",
-            value=kwargs.get("parse_strings_as_datetimes"),
         )
         renderer_configuration.add_param(
             name="row_condition",
             schema_type="string",
-            value=kwargs.get("row_condition"),
         )
         renderer_configuration.add_param(
             name="condition_parser",
             schema_type="string",
-            value=kwargs.get("condition_parser"),
         )
 
         params: RendererParams
         params = renderer_configuration.params
 
-        if not params.value_set.value or len(params.value_set.value) == 0:
+        if not params.value_set or len(params.value_set.value) == 0:
             values_string = "[ ]"
         else:
             for i, v in enumerate(params.value_set.value):
@@ -257,7 +252,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
         params_with_json_schema: dict = params.dict()
 
-        if params.mostly.value and params.mostly.value < 1.0:
+        if params.mostly and params.mostly.value < 1.0:
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params.mostly.value * 100, precision=15, no_scientific=True
             )
@@ -265,13 +260,13 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         else:
             template_str += "."
 
-        if params.parse_strings_as_datetimes.value:
+        if params.parse_strings_as_datetimes:
             template_str += " Values should be parsed as datetimes."
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
-        if params.row_condition.value:
+        if params.row_condition:
             (
                 conditional_template_str,
                 conditional_params,

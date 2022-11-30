@@ -90,7 +90,7 @@ class RendererConfiguration(BaseModel):
         return kwargs
 
     class RendererParam(BaseModel):
-        value: Union[Any, None]
+        value: Optional[Any]
 
         class Config:
             validate_assignment = True
@@ -104,10 +104,15 @@ class RendererConfiguration(BaseModel):
             else:
                 return self.value == other
 
-    def add_param(self, name: str, schema_type: str, value: Union[Any, None]) -> None:
+        def __bool__(self):
+            return bool(self.value)
+
+    def add_param(
+        self, name: str, schema_type: str, value: Optional[Any] = None
+    ) -> None:
         renderer_param: Type[BaseModel] = create_model(
             name,
-            renderer_schema=(dict, Field(..., alias="schema")),
+            renderer_schema=(Dict[str, str], Field(..., alias="schema")),
             value=(Union[Any, None], ...),
             __base__=RendererConfiguration.RendererParam,
         )
@@ -120,6 +125,10 @@ class RendererConfiguration(BaseModel):
             **renderer_param_definition,
             __base__=self.params.__class__,
         )
+
+        if value is None:
+            value = self.kwargs.get(name)
+
         renderer_params_definition: Dict[str, Any] = {
             **self.params.dict(),
             name: renderer_param(schema={"type": schema_type}, value=value),

@@ -149,28 +149,27 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
             result=result,
             runtime_configuration=runtime_configuration,
         )
-        kwargs: dict = renderer_configuration.kwargs
         renderer_configuration.add_param(
-            name="column", schema_type="string", value=kwargs.get("column")
+            name="column",
+            schema_type="string",
         )
         renderer_configuration.add_param(
-            name="value_set", schema_type="array", value=kwargs.get("value_set")
+            name="value_set",
+            schema_type="array",
         )
         renderer_configuration.add_param(
             name="row_condition",
             schema_type="string",
-            value=kwargs.get("row_condition"),
         )
         renderer_configuration.add_param(
             name="condition_parser",
             schema_type="string",
-            value=kwargs.get("condition_parser"),
         )
 
         params: RendererParams
         params = renderer_configuration.params
 
-        if not params.value_set.value or len(params.value_set.value) == 0:
+        if not params.value_set or len(params.value_set.value) == 0:
             if renderer_configuration.include_column_name:
                 template_str = "$column distinct values must belong to this set: [ ]"
             else:
@@ -199,7 +198,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
 
         params_with_json_schema: dict = params.dict()
 
-        if params.row_condition.value:
+        if params.row_condition:
             (
                 conditional_template_str,
                 conditional_params,
