@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Generic, Optional, Type, TypeVar, Union
 
 from pydantic import BaseModel, Field, create_model
 from pydantic.generics import GenericModel
@@ -14,12 +14,6 @@ if TYPE_CHECKING:
     from pydantic.typing import AbstractSetIntStr, DictStrAny, MappingIntStrAny
 
 RendererParams = TypeVar("RendererParams")
-
-
-class RendererParam(BaseModel):
-    class Config:
-        validate_assignment = True
-        arbitrary_types_allowed = True
 
 
 class RendererParamsBase(BaseModel):
@@ -99,24 +93,31 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             kwargs["styling"] = kwargs["runtime_configuration"].get("styling")
         return kwargs
 
+    class RendererParam(BaseModel):
+        class Config:
+            validate_assignment = True
+            arbitrary_types_allowed = True
+
     def add_param(self, name: str, schema_type: str, value: Union[Any, None]) -> None:
-        renderer_param: BaseModel = create_model(
+        renderer_param: Type[name] = create_model(
             name,
             renderer_schema=(dict, Field(..., alias="schema")),
             value=(Union[Any, None], ...),
-            __base__=RendererParam,
+            __base__=RendererConfiguration.RendererParam,
         )
         renderer_param_definition = {name: (renderer_param, ...)}
 
         # As of Nov 30, 2022 there is a bug in autocompletion for pydantic dynamic models
         # See: https://github.com/pydantic/pydantic/issues/3930
-        renderer_params: BaseModel = create_model(
+        renderer_params: Type[RendererParams] = create_model(
             "RendererParams",
             **renderer_param_definition,
             __base__=self.params.__class__,
         )
         renderer_params_definition = {
             **self.params.dict(),
-            name: renderer_param(schema={"type": schema_type}, value=value),
+            name: renderer_param(
+                renderer_schema={"type": schema_type}, value=value
+            ).dict(),
         }
-        self.params: RendererParams = renderer_params(**renderer_params_definition)
+        self.params: RendererParamsBase = renderer_params(**renderer_params_definition)
