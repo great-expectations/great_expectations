@@ -7,6 +7,12 @@ import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.data_context import BaseDataContext, CloudDataContext
 from great_expectations.data_context.cloud_constants import GXCloudEnvironmentVariable
+from great_expectations.data_context.data_context.ephemeral_data_context import (
+    EphemeralDataContext,
+)
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.exceptions import ConfigNotFoundError
 from tests.test_utils import working_directory
@@ -39,7 +45,7 @@ def clear_env_vars(monkeypatch):
 
 
 @pytest.mark.unit
-def test_base_context(clear_env_vars):
+def test_ephemeral_context(clear_env_vars):
     config: DataContextConfig = DataContextConfig(
         config_version=3.0,
         plugins_directory=None,
@@ -55,18 +61,18 @@ def test_base_context(clear_env_vars):
         data_docs_sites={},
         validation_operators={},
     )
-    assert isinstance(gx.get_context(project_config=config), BaseDataContext)
+    assert isinstance(gx.get_context(project_config=config), EphemeralDataContext)
 
 
 @pytest.mark.unit
-def test_base_context__with_overridden_yml(tmp_path: pathlib.Path, clear_env_vars):
+def test_file_context__with_overridden_yml(tmp_path: pathlib.Path, clear_env_vars):
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path_str = str(project_path)
     gx.data_context.DataContext.create(project_path_str)
     context_path = project_path / "great_expectations"
     context = gx.get_context(context_root_dir=context_path)
-    assert isinstance(context, DataContext)
+    assert isinstance(context, FileDataContext)
     assert context.expectations_store_name == "expectations_store"
 
     config: DataContextConfig = DataContextConfig(
@@ -87,22 +93,22 @@ def test_base_context__with_overridden_yml(tmp_path: pathlib.Path, clear_env_var
         validation_operators={},
     )
     context = gx.get_context(project_config=config, context_root_dir=context_path)
-    assert isinstance(context, BaseDataContext)
+    assert isinstance(context, FileDataContext)
     assert context.expectations_store_name == "new_expectations_store"
 
 
 @pytest.mark.unit
-def test_data_context(tmp_path: pathlib.Path, clear_env_vars):
+def test_file_context(tmp_path: pathlib.Path, clear_env_vars):
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path_str = str(project_path)
     gx.data_context.DataContext.create(project_path_str)
     with working_directory(project_path_str):
-        assert isinstance(gx.get_context(), DataContext)
+        assert isinstance(gx.get_context(), FileDataContext)
 
 
 @pytest.mark.unit
-def test_data_context_root_dir_returns_data_context(
+def test_data_context_root_dir_returns_file_context(
     tmp_path: pathlib.Path,
     clear_env_vars,
 ):
@@ -111,11 +117,13 @@ def test_data_context_root_dir_returns_data_context(
     project_path_str = str(project_path)
     gx.data_context.DataContext.create(project_path_str)
     context_path = project_path / "great_expectations"
-    assert isinstance(gx.get_context(context_root_dir=str(context_path)), DataContext)
+    assert isinstance(
+        gx.get_context(context_root_dir=str(context_path)), FileDataContext
+    )
 
 
 @pytest.mark.unit
-def test_base_context_invalid_root_dir(clear_env_vars):
+def test_file_context_invalid_root_dir(clear_env_vars):
     config: DataContextConfig = DataContextConfig(
         config_version=3.0,
         plugins_directory=None,
@@ -133,7 +141,7 @@ def test_base_context_invalid_root_dir(clear_env_vars):
     )
     assert isinstance(
         gx.get_context(project_config=config, context_root_dir="i/dont/exist"),
-        BaseDataContext,
+        FileDataContext,
     )
 
 
