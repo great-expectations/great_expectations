@@ -1635,7 +1635,9 @@ def test_map_of_type_sa(sa):
     )
 
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    # noinspection PyTypeChecker
     assert results[desired_metric.id][0]["name"] == "a"
+    # noinspection PyTypeChecker
     assert isinstance(results[desired_metric.id][0]["type"], sa.FLOAT)
 
 

@@ -2,7 +2,6 @@ import logging
 from functools import wraps
 from typing import Any, Callable, Dict, Optional, Type
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.execution_engine.execution_engine import (
@@ -24,6 +23,7 @@ from great_expectations.expectations.metrics.metric_provider import (
 from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
+from great_expectations.expectations.metrics.util import get_typed_column_names
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -73,10 +73,11 @@ def column_aggregate_value(
 
                 column_name = accessor_domain_kwargs["column"]
 
-                if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
-                        message=f'Error: The column "{column_name}" in BatchData does not exist.'
-                    )
+                column_name = get_typed_column_names(
+                    column_names=column_name,
+                    batch_columns_list=metrics["table.columns"],
+                    execution_engine=execution_engine,
+                )
 
                 if filter_column_isnull:
                     df = df[df[column_name].notnull()]
@@ -146,12 +147,13 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
 
                 column_name: str = accessor_domain_kwargs["column"]
 
-                sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
+                column_name = get_typed_column_names(
+                    column_names=column_name,
+                    batch_columns_list=metrics["table.columns"],
+                    execution_engine=execution_engine,
+                )
 
-                if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
-                        message=f'Error: The column "{column_name}" in BatchData does not exist.'
-                    )
+                sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
 
                 dialect = sqlalchemy_engine.dialect
                 metric_aggregate = metric_fn(
@@ -209,10 +211,11 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
 
                 column_name = accessor_domain_kwargs["column"]
 
-                if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
-                        message=f'Error: The column "{column_name}" in BatchData does not exist.'
-                    )
+                column_name = get_typed_column_names(
+                    column_names=column_name,
+                    batch_columns_list=metrics["table.columns"],
+                    execution_engine=execution_engine,
+                )
 
                 column = data[column_name]
                 metric_aggregate = metric_fn(
