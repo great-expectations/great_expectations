@@ -32,6 +32,7 @@ from typing_extensions import Literal
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,
@@ -3145,6 +3146,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             return save_changes
         return True
 
+    @public_api
     def test_yaml_config(  # noqa: C901 - complexity 17
         self,
         yaml_config: str,
@@ -3157,7 +3159,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         ] = "instantiated_class",
         shorten_tracebacks: bool = False,
     ):
-        """Convenience method for testing yaml configs
+        """
+        Convenience method for testing yaml configs
 
         test_yaml_config is a convenience method for configuring the moving
         parts of a Great Expectations deployment. It allows you to quickly
@@ -3168,8 +3171,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Expectations) are the only ones you'll need.
 
         `test_yaml_config` is mainly intended for use within notebooks and tests.
-
-        --Public API--
 
         --Documentation--
             - https://docs.greatexpectations.io/docs/terms/data_context

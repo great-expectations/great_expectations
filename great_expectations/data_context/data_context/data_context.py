@@ -10,6 +10,7 @@ from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
@@ -77,6 +78,7 @@ class DataContext(BaseDataContext):
     """
 
     @classmethod
+    @public_api
     def create(
         cls,
         project_root_dir: Optional[str] = None,
@@ -88,8 +90,6 @@ class DataContext(BaseDataContext):
 
         `create` will create a new "great_expectations" directory in the provided folder, provided one does not
         already exist. Then, it will initialize a new DataContext in that folder and write the resulting config.
-
-        --Public API--
 
         --Documentation--
             - https://docs.greatexpectations.io/docs/terms/data_context

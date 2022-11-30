@@ -8,14 +8,12 @@
 import os
 import sys
 
-import commonmark
+from great_expectations.core._docs_decorators import WHITELISTED_TAG
 
 
 def _prepend_base_repository_dir_to_sys_path():
     """Add great_expectations base repo dir to the front of sys path. Used for docs processing."""
     sys.path.insert(0, os.path.abspath("../../"))
-    sys.path.insert(0, os.path.abspath("../"))
-
 
 _prepend_base_repository_dir_to_sys_path()
 
@@ -49,7 +47,6 @@ html_static_path = ['_static']
 
 
 # Skip autodoc unless part of the Public API
-WHITELISTED_TAG = "--Public API--"
 DOCUMENTATION_TAG = "--Documentation--"
 def skip_if_not_whitelisted(app, what, name, obj, would_skip, options):
     """Skip rendering documentation for docstrings that are not whitelisted.
@@ -64,7 +61,6 @@ def custom_process_docstring(app, what, name, obj, options, lines):
     """Custom processing for use during docstring processing."""
     _remove_whitelist_tag(app=app, what=what, name=name, obj=obj, options=options, lines=lines)
     _process_relevant_documentation_tag(app=app, what=what, name=name, obj=obj, options=options, lines=lines)
-
 
 def _remove_whitelist_tag(app, what, name, obj, options, lines):
     """Remove the whitelisted tag from documentation before rendering.

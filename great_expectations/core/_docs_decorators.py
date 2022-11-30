@@ -10,7 +10,6 @@ def public_api(func) -> Callable:
 
     existing_docstring = func.__doc__ if func.__doc__ else ""
 
-    # TODO: AJB 20221113 insert this tag where it does not affect styling.
-    func.__doc__ = " ".join([existing_docstring, "\n\n", WHITELISTED_TAG])
+    func.__doc__ = " ".join([WHITELISTED_TAG + "\n\n", existing_docstring])
 
     return func
