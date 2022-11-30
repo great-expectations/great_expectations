@@ -433,13 +433,21 @@ def test_alice_expect_column_values_to_match_regex_auto_yes_default_profiler_con
     assert result.success
 
     expectation_config_kwargs: dict = result.expectation_config.kwargs
+
+    assert expectation_config_kwargs["regex"] in [
+        r"\d+",
+        r"-?\d+",
+        r"-?\d+(?:\.\d*)?",
+        r"[A-Za-z0-9\.,;:!?()\"'%\-]+",
+    ]
+
+    expectation_config_kwargs.pop("regex")
     assert expectation_config_kwargs == {
         "auto": True,
         "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
         "column": "id",
         "include_config": True,
         "mostly": 1.0,
-        "regex": "-?\\d+",
         "result_format": "SUMMARY",
     }
 
@@ -463,13 +471,21 @@ def test_alice_expect_column_values_to_not_match_regex_auto_yes_default_profiler
     assert not result.success
 
     expectation_config_kwargs: dict = result.expectation_config.kwargs
+
+    assert expectation_config_kwargs["regex"] in [
+        r"\d+",
+        r"-?\d+",
+        r"-?\d+(?:\.\d*)?",
+        r"[A-Za-z0-9\.,;:!?()\"'%\-]+",
+    ]
+
+    expectation_config_kwargs.pop("regex")
     assert expectation_config_kwargs == {
         "auto": True,
         "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
         "column": "id",
         "include_config": True,
         "mostly": 1.0,
-        "regex": "-?\\d+",
         "result_format": "SUMMARY",
     }
 
