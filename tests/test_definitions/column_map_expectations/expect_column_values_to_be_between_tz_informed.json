@@ -25,9 +25,6 @@
       "postgresql": {
         "ts": "TIMESTAMP"
       },
-      "mssql": {
-        "ts": "DATETIME"
-      },
       "mysql": {
         "ts": "TIMESTAMP"
       },
