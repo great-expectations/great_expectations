@@ -1,44 +1,122 @@
-from dataclasses import dataclass, field
-from typing import Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar, Union
+
+from pydantic import BaseModel, Field, create_model
+from pydantic.generics import GenericModel
 
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
 
+if TYPE_CHECKING:
+    from pydantic.typing import AbstractSetIntStr, DictStrAny, MappingIntStrAny
 
-@dataclass(frozen=True)
-class RendererConfiguration:
+RendererParams = TypeVar("RendererParams")
+
+
+class RendererParam(BaseModel):
+    class Config:
+        validate_assignment = True
+        arbitrary_types_allowed = True
+
+
+class RendererParamsBase(BaseModel):
+    class Config:
+        validate_assignment = True
+        arbitrary_types_allowed = True
+
+    def dict(
+        self,
+        include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
+        exclude: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
+        by_alias: bool = True,
+        skip_defaults: Optional[bool] = None,
+        exclude_unset: bool = False,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+    ) -> DictStrAny:
+        return super().dict(
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            skip_defaults=skip_defaults,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+        )
+
+
+class RendererConfiguration(GenericModel, Generic[RendererParams]):
     """Configuration object built for each renderer."""
 
-    configuration: Union[ExpectationConfiguration, None]
-    result: Union[ExpectationValidationResult, None]
-    language: str = "en"
-    runtime_configuration: dict = field(default_factory=dict)
-    kwargs: dict = field(init=False)
-    include_column_name: bool = field(init=False)
-    styling: Union[dict, None] = field(init=False)
+    configuration: Union[ExpectationConfiguration, None] = Field(
+        ..., allow_mutation=False
+    )
+    result: Union[ExpectationValidationResult, None] = Field(..., allow_mutation=False)
+    language: Union[str, None] = Field("", allow_mutation=False)
+    runtime_configuration: Union[dict, None] = Field({}, allow_mutation=False)
+    expectation_type: str = Field("", allow_mutation=False)
+    kwargs: dict = Field({}, allow_mutation=False)
+    include_column_name: bool = Field(True, allow_mutation=False)
+    styling: Union[dict, None] = Field(None, allow_mutation=False)
+    params: RendererParams = Field(
+        default_factory=RendererParamsBase, allow_mutation=True
+    )
 
-    def __post_init__(self) -> None:
-        kwargs: dict
-        if self.configuration:
-            kwargs = self.configuration.kwargs
-        elif self.result and self.result.expectation_config:
-            kwargs = self.result.expectation_config.kwargs
-        else:
-            kwargs = {}
+    class Config:
+        validate_assignment = True
+        arbitrary_types_allowed = True
 
-        object.__setattr__(self, "kwargs", kwargs)
+    def __init__(self, **kwargs):
+        kwargs = RendererConfiguration._set_expectation_type_and_kwargs(kwargs=kwargs)
+        kwargs = RendererConfiguration._set_include_column_name_and_styling(
+            kwargs=kwargs
+        )
+        super().__init__(**kwargs)
 
-        include_column_name: bool = True
-        styling: Union[dict, None] = None
-        if self.runtime_configuration:
-            include_column_name = (
+    @staticmethod
+    def _set_expectation_type_and_kwargs(kwargs: dict) -> dict:
+        if kwargs["configuration"]:
+            kwargs["expectation_type"] = kwargs["configuration"].expectation_type
+            kwargs["kwargs"] = kwargs["configuration"].kwargs
+        elif kwargs["result"] and kwargs["result"].expectation_config:
+            kwargs["expectation_type"] = kwargs[
+                "result"
+            ].expectation_config.expectation_type
+            kwargs["kwargs"] = kwargs["result"].expectation_config.kwargs
+        return kwargs
+
+    @staticmethod
+    def _set_include_column_name_and_styling(kwargs: dict) -> dict:
+        if kwargs["runtime_configuration"]:
+            kwargs["include_column_name"] = (
                 False
-                if self.runtime_configuration.get("include_column_name") is False
+                if kwargs["runtime_configuration"].get("include_column_name") is False
                 else True
             )
-            styling = self.runtime_configuration.get("styling")
+            kwargs["styling"] = kwargs["runtime_configuration"].get("styling")
+            return kwargs
 
-        object.__setattr__(self, "include_column_name", include_column_name)
-        object.__setattr__(self, "styling", styling)
+    def add_param(self, name: str, schema_type: str, value: Union[Any, None]) -> None:
+        renderer_param = create_model(
+            name,
+            renderer_schema=(dict, Field(..., alias="schema")),
+            value=(Union[Any, None], ...),
+            __base__=RendererParam,
+        )
+        renderer_param_definition = {name: (renderer_param, ...)}
+
+        # As of Nov 30, 2022 there is a bug in autocompletion for pydantic dynamic models
+        # See: https://github.com/pydantic/pydantic/issues/3930
+        renderer_params = create_model(
+            "RendererParams",
+            **renderer_param_definition,
+            __base__=self.params.__class__,
+        )
+        renderer_params_definition = {
+            **self.params.dict(),
+            name: renderer_param(schema={"type": schema_type}, value=value),
+        }
+        self.params = renderer_params(**renderer_params_definition)
