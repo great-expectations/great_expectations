@@ -184,15 +184,15 @@ module.exports = {
           items: [
             {
               label: 'Careers',
-              href: 'https://jobs.superconductive.com/'
+              to: 'https://jobs.superconductive.com/'
             },
                         {
               label: 'DPA',
-              href: 'https://greatexpectations.io/dpa'
+              to: 'https://greatexpectations.io/dpa'
             },
                         {
               label: 'Terms of Service',
-              href: 'https://greatexpectations.io/terms'
+              to: 'https://greatexpectations.io/terms'
             },
           ]
         },
