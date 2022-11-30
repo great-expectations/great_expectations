@@ -102,7 +102,7 @@ class TableAsset(DataAsset):
         # I `pop("order_by", None) or []` instead of `pop("order_by", [])` because if someone
         # passes in `order_by=None`, I want this variable to be `[]` and not `None`.
         # `pop("order_by", [])` will return None since the order_by key exists in this case.
-        order_by = cast(BatchSortersDefinition, kwargs.pop("order_by", None) or [])
+        order_by = kwargs.pop("order_by", None) or []
         self._order_by = _batch_sorter_from_list(order_by)
         super().__init__(**kwargs)
 
