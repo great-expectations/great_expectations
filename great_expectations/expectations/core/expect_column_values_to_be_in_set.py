@@ -201,7 +201,6 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         renderer_configuration = RendererConfiguration(
             configuration=configuration,
             result=result,
-            language=language,
             runtime_configuration=runtime_configuration,
         )
         kwargs: dict = renderer_configuration.kwargs
@@ -296,7 +295,6 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         renderer_configuration = RendererConfiguration(
             configuration=configuration,
             result=result,
-            language=language,
             runtime_configuration=runtime_configuration,
         )
         params = substitute_none_for_missing(

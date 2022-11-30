@@ -48,7 +48,6 @@ class RendererConfiguration(BaseModel):
         ..., allow_mutation=False
     )
     result: Union[ExpectationValidationResult, None] = Field(..., allow_mutation=False)
-    language: Union[str, None] = Field("", allow_mutation=False)
     runtime_configuration: Union[dict, None] = Field({}, allow_mutation=False)
     expectation_type: str = Field("", allow_mutation=False)
     kwargs: dict = Field({}, allow_mutation=False)
