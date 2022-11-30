@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import cProfile
 import datetime
@@ -51,6 +53,7 @@ from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
     PluginClassNotFoundError,
@@ -62,9 +65,9 @@ if TYPE_CHECKING:
     import numpy.typing as npt
 
     from great_expectations.data_context.data_context import (
-        BaseDataContext,
         CloudDataContext,
-        DataContext,
+        EphemeralDataContext,
+        FileDataContext,
     )
     from great_expectations.data_context.types.base import DataContextConfig
 
@@ -1670,14 +1673,14 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
 
 
 def get_context(
-    project_config: Optional[Union["DataContextConfig", Mapping]] = None,
+    project_config: Optional[Union[DataContextConfig, Mapping]] = None,
     context_root_dir: Optional[str] = None,
     runtime_environment: Optional[dict] = None,
     ge_cloud_base_url: Optional[str] = None,
     ge_cloud_access_token: Optional[str] = None,
     ge_cloud_organization_id: Optional[str] = None,
     ge_cloud_mode: Optional[bool] = None,
-) -> Union["DataContext", "BaseDataContext", "CloudDataContext"]:
+) -> Union[EphemeralDataContext, FileDataContext, CloudDataContext]:
     """
     Method to return the appropriate DataContext depending on parameters and environment.
 
@@ -1686,17 +1689,14 @@ def get_context(
         my_context = gx.get_context([parameters])
 
     1. If gx.get_context() is run in a filesystem where `great_expectations init` has been run, then it will return a
-        DataContext
+        FileDataContext
 
     2. If gx.get_context() is passed in a `context_root_dir` (which contains great_expectations.yml) then it will return
-         a DataContext
+         a FileDataContext
 
-    3. If gx.get_context() is passed in an in-memory `project_config` then it will return BaseDataContext.
-        `context_root_dir` can also be passed in, but the configurations from the in-memory config will override the
-        configurations in the `great_expectations.yml` file.
+    3. If gx.get_context() is passed in an in-memory `project_config` then it will return EphemeralDataContext.
 
-
-    4. If GX is being run in the cloud, and the information needed for ge_cloud_config (ie ge_cloud_base_url,
+    4. If GX is being run in the Cloud, and the information needed for ge_cloud_config (ie ge_cloud_base_url,
         ge_cloud_access_token, ge_cloud_organization_id) are passed in as parameters to get_context(), configured as
         environment variables, or in a .conf file, then get_context() will return a CloudDataContext.
 
@@ -1708,8 +1708,6 @@ def get_context(
     | (ge_cloud_mode=True)  | Exception!          | Cloud         |
     | (ge_cloud_mode=False) | Local               | Local         |
     +-----------------------+---------------------+---------------+
-
-    TODO: This method will eventually return FileDataContext and EphemeralDataContext, rather than DataContext and Base
 
     Args:
         project_config (dict or DataContextConfig): In-memory configuration for DataContext.
@@ -1725,18 +1723,17 @@ def get_context(
         ge_cloud_mode (bool): bool flag to specify whether to run GE in cloud mode (default is None).
 
     Returns:
-        DataContext. Either a DataContext, BaseDataContext, or CloudDataContext depending on environment and/or
+        DataContext. Either a EphemeralDataContext, FileDataContext, or CloudDataContext depending on environment and/or
         parameters
 
     """
     from great_expectations.data_context.data_context import (
-        BaseDataContext,
         CloudDataContext,
-        DataContext,
+        EphemeralDataContext,
+        FileDataContext,
     )
 
     # First, check for ge_cloud conditions
-
     config_available = CloudDataContext.is_ge_cloud_config_available(
         ge_cloud_base_url=ge_cloud_base_url,
         ge_cloud_access_token=ge_cloud_access_token,
@@ -1760,15 +1757,19 @@ def get_context(
         )
 
     # Second, check for which type of local
+    # If no context_root_dir was provided, look around the local filesystem for an existing one
+    # If one is found, we create a FileDataContext - else, we defer to EphemeralDataContext
+    if context_root_dir is None:
+        try:
+            context_root_dir = FileDataContext.find_context_root_dir()
+        except ge_exceptions.ConfigNotFoundError:
+            return EphemeralDataContext(
+                project_config=project_config,
+                runtime_environment=runtime_environment,
+            )
 
-    if project_config is not None:
-        return BaseDataContext(
-            project_config=project_config,
-            context_root_dir=context_root_dir,
-            runtime_environment=runtime_environment,
-        )
-
-    return DataContext(
+    return FileDataContext(
+        project_config=project_config,
         context_root_dir=context_root_dir,
         runtime_environment=runtime_environment,
     )
