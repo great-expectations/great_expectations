@@ -16,9 +16,6 @@ class ExpectationSuiteAnonymizer(BaseAnonymizer):
     def anonymize(
         self, obj: Optional["ExpectationSuite"] = None, **kwargs  # noqa: F821
     ) -> dict:
-        if obj is None:
-            raise ValueError("Cannot anonymize a null payload")
-
         expectation_suite = obj
         anonymized_info_dict = {}
         anonymized_expectation_counts = list()
