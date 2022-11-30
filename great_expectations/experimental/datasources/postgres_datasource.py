@@ -47,7 +47,9 @@ class ColumnSplitter:
     # values are the default values if a batch request using the splitter leaves the parameter unspecified.
     # template_params: List[str]
     # Union of List/Iterable for serialization
-    param_defaults: Dict[str, Union[List, Iterable]] = pydantic.Field(default_factory=dict)
+    param_defaults: Dict[str, Union[List, Iterable]] = pydantic.Field(
+        default_factory=dict
+    )
 
     @property
     def param_names(self) -> List[str]:
@@ -61,6 +63,15 @@ class BatchSorter:
 
 
 BatchSortersDefinition: TypeAlias = Union[List[BatchSorter], List[str]]
+
+
+def _batch_sorter_from_list(sorters: BatchSortersDefinition) -> List[BatchSorter]:
+    if len(sorters) == 0 or isinstance(sorters[0], BatchSorter):
+        # mypy gets confused here. Since BatchSortersDefinition has all elements of the
+        # same type in the list so if the first on is BatchSorter so are the others.
+        return cast(List[BatchSorter], sorters)
+    # Likewise, sorters must be List[str] here.
+    return [_batch_sorter_from_str(sorter) for sorter in cast(List[str], sorters)]
 
 
 def _batch_sorter_from_str(sort_key: str) -> BatchSorter:
@@ -79,12 +90,6 @@ def _batch_sorter_from_str(sort_key: str) -> BatchSorter:
         return BatchSorter(metadata_key=sort_key, reverse=False)
 
 
-def _batch_sorter_from_list(sorters: BatchSortersDefinition) -> List[BatchSorter]:
-    if len(sorters) == 0 or isinstance(sorters[0], BatchSorter):
-        return sorters
-    return [_batch_sorter_from_str(sorter) for sorter in sorters]
-
-
 class TableAsset(DataAsset):
     # Instance fields
     type: Literal["table"] = "table"
@@ -97,7 +102,7 @@ class TableAsset(DataAsset):
         # I `pop("order_by", None) or []` instead of `pop("order_by", [])` because if someone
         # passes in `order_by=None`, I want this variable to be `[]` and not `None`.
         # `pop("order_by", [])` will return None since the order_by key exists in this case.
-        order_by: BatchSortersDefinition = kwargs.pop("order_by", None) or []
+        order_by = cast(BatchSortersDefinition, kwargs.pop("order_by", None) or [])
         self._order_by = _batch_sorter_from_list(order_by)
         super().__init__(**kwargs)
 
@@ -269,7 +274,10 @@ class TableAsset(DataAsset):
         """
         for sorter in reversed(self.order_by):
             try:
-                batch_list.sort(key=lambda b: b.metadata[sorter.metadata_key], reverse=sorter.reverse)
+                batch_list.sort(
+                    key=lambda b: b.metadata[sorter.metadata_key],
+                    reverse=sorter.reverse,
+                )
             except KeyError as e:
                 raise KeyError(
                     f"Trying to sort {self.name} table asset batches on key {sorter.metadata_key} "
@@ -293,8 +301,12 @@ class PostgresDatasource(Datasource):
 
         return SqlAlchemyExecutionEngine
 
-    def add_table_asset(self, name: str, table_name: str,
-                        order_by: Optional[List[BatchSorter], List[str]]=None) -> TableAsset:
+    def add_table_asset(
+        self,
+        name: str,
+        table_name: str,
+        order_by: Optional[BatchSortersDefinition] = None,
+    ) -> TableAsset:
         """Adds a table asset to this datasource.
 
         Args:
