@@ -450,7 +450,7 @@ stages:
               pip install pytest-cov pytest-azurepipelines
 
               # Run pytest
-              pytest -s -v tests/test_definitions tests/expectations \
+              pytest tests/test_definitions tests/expectations \
                 --mssql \
                 --napoleon-docstrings \
                 --junitxml=junit/test-results.xml \

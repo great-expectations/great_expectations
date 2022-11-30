@@ -35,7 +35,7 @@
         "only_for": ["mssql"],
         "exact_match_out": false,
         "out": {
-          "unexpected_index_list": [0, 8, 9],
+          "unexpected_index_list": [0,1],
           "success": false
         },
         "in": {
