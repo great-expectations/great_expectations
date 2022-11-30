@@ -97,7 +97,7 @@ def sqlite_table_for_unexpected_rows_with_index(
                 }
             )
             df.to_sql(
-                name="animals_table",
+                name="animal_names",
                 con=sqlite_engine,
                 index=False,
                 if_exists="replace",

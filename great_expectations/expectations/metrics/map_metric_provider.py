@@ -3000,6 +3000,24 @@ class MapMetricProvider(MetricProvider):
                         metric_provider=_sqlalchemy_map_condition_rows,
                         metric_fn_type=MetricFunctionTypes.VALUE,
                     )
+                    register_metric(
+                        metric_name=f"{metric_name}.unexpected_index_list",
+                        metric_domain_keys=metric_domain_keys,
+                        metric_value_keys=(*metric_value_keys, "result_format"),
+                        execution_engine=engine,
+                        metric_class=cls,
+                        metric_provider=_sqlalchemy_map_condition_index,
+                        metric_fn_type=MetricFunctionTypes.VALUE,
+                    )
+                    register_metric(
+                        metric_name=f"{metric_name}.unexpected_index_query",
+                        metric_domain_keys=metric_domain_keys,
+                        metric_value_keys=(*metric_value_keys, "result_format"),
+                        execution_engine=engine,
+                        metric_class=cls,
+                        metric_provider=_sqlalchemy_map_condition_query,
+                        metric_fn_type=MetricFunctionTypes.VALUE,
+                    )
                     if metric_fn_type == MetricPartialFunctionTypes.MAP_CONDITION_FN:
                         if domain_type == MetricDomainTypes.COLUMN:
                             register_metric(

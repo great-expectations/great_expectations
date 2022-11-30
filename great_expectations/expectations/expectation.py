@@ -2505,6 +2505,9 @@ class ColumnMapExpectation(TableExpectation, ABC):
         unexpected_index_list: Optional[List[int]] = metrics.get(
             f"{self.map_metric}.unexpected_index_list"
         )
+        unexpected_index_query: Optional[str] = metrics.get(
+            f"{self.map_metric}.unexpected_index_query"
+        )
         unexpected_rows = None
         if include_unexpected_rows:
             unexpected_rows = metrics.get(f"{self.map_metric}.unexpected_rows")
@@ -2535,6 +2538,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
             unexpected_list=unexpected_values,
             unexpected_index_list=unexpected_index_list,
             unexpected_rows=unexpected_rows,
+            unexpected_index_query=unexpected_index_query,
         )
 
 
