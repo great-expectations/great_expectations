@@ -145,7 +145,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                     compute_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: str = accessor_domain_kwargs["column"]
+                column_name = accessor_domain_kwargs["column"]
 
                 column_name = get_typed_column_names(
                     column_names=column_name,

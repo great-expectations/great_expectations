@@ -616,6 +616,23 @@ def get_typed_column_names(
     batch_columns_list: List[Any],
     execution_engine: ExecutionEngine,
 ) -> Union[List[Any], Any]:
+    """
+    Case non-sensitivity is expressed in upper case by common DBMS backends and in lower case by SQLAlchemy, with any
+    deviations enclosed with double quotes.
+
+    SQLAlchemy enables correct translation to/from DBMS backends through "sqlalchemy.sql.elements.quoted_name" class
+    where necessary by insuring that column names of correct type (i.e., "str" or "sqlalchemy.sql.elements.quoted_name")
+    are returned by "sqlalchemy.inspect(sqlalchemy.engine.Engine).get_columns(table_name, schema)" ("table.columns"
+    metric is based on this method).  Columns of precise type (string or "quoted_name" as appropriate) are returned.
+
+    Args:
+        column_names: Single string-valued column name or list of string-valued column names
+        batch_columns_list: Properly typed column names (output of "table.columns" metric)
+        execution_engine: "ExecutionEngine" (here, of interest is whether or not "SqlAlchemyExecutionEngine" is used)
+
+    Returns:
+        Single property-typed column name object or list of property-typed column name objects (depending on input).
+    """
     verify_column_names_exist(
         column_names=column_names, batch_columns_list=batch_columns_list
     )
@@ -650,6 +667,13 @@ def get_typed_column_names(
 def verify_column_names_exist(
     column_names: Union[List[str], str], batch_columns_list: List[Any]
 ) -> None:
+    """
+    Insures that column name or column names (supplied as argument using "str" representation) exist in "Batch" object.
+
+    Args:
+        column_names: Single string-valued column name or list of string-valued column names
+        batch_columns_list: Properly typed column names (output of "table.columns" metric)
+    """
     column_names_list: Union[List[str], str]
     if isinstance(column_names, list):
         column_names_list = column_names

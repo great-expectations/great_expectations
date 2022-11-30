@@ -1,4 +1,4 @@
-from typing import Any, Dict, cast
+from typing import Any, Dict, Optional, cast
 
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import GreatExpectationsError
@@ -54,7 +54,7 @@ class ColumnTypes(TableMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ):
-        batch_id: str = metric_domain_kwargs.get("batch_id")
+        batch_id: Optional[str] = metric_domain_kwargs.get("batch_id")
         if batch_id is None:
             if execution_engine.batch_manager.active_batch_data_id is not None:
                 batch_id = execution_engine.batch_manager.active_batch_data_id
