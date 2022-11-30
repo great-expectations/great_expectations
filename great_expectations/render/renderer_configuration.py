@@ -99,7 +99,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             arbitrary_types_allowed = True
 
     def add_param(self, name: str, schema_type: str, value: Union[Any, None]) -> None:
-        renderer_param: Type[name] = create_model(
+        renderer_param: Type[BaseModel] = create_model(
             name,
             renderer_schema=(dict, Field(..., alias="schema")),
             value=(Union[Any, None], ...),
@@ -109,7 +109,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
         # As of Nov 30, 2022 there is a bug in autocompletion for pydantic dynamic models
         # See: https://github.com/pydantic/pydantic/issues/3930
-        renderer_params: Type[RendererParams] = create_model(
+        renderer_params: Type[BaseModel] = create_model(
             "RendererParams",
             **renderer_param_definition,
             __base__=self.params.__class__,
