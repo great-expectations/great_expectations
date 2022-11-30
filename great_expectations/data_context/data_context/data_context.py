@@ -433,7 +433,7 @@ class DataContext(BaseDataContext):
     def add_store(self, store_name, store_config):
         logger.debug(f"Starting DataContext.add_store for store {store_name}")
 
-        new_store = self._data_context.add_store(store_name, store_config)
+        new_store = super().add_store(store_name, store_config)
         self._save_project_config()
         return new_store
 
@@ -444,7 +444,7 @@ class DataContext(BaseDataContext):
 
         new_datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
-        ] = self._data_context.add_datasource(
+        ] = super().add_datasource(
             name=name, **kwargs  # type: ignore[arg-type]
         )
         return new_datasource
@@ -461,13 +461,13 @@ class DataContext(BaseDataContext):
             f"Starting DataContext.update_datasource for datasource {datasource.name}"
         )
 
-        self._data_context.update_datasource(
+        super().update_datasource(
             datasource=datasource,
         )
 
     def delete_datasource(self, name: str) -> None:  # type: ignore[override]
         logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
-        self._data_context.delete_datasource(datasource_name=name)
+        super().delete_datasource(datasource_name=name)
         self._save_project_config()
 
     @classmethod
