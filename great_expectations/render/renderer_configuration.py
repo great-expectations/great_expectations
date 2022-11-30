@@ -86,9 +86,6 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 "result"
             ].expectation_config.expectation_type
             kwargs["kwargs"] = kwargs["result"].expectation_config.kwargs
-        else:
-            kwargs["expectation_type"] = ""
-            kwargs["kwargs"] = {}
         return kwargs
 
     @staticmethod
