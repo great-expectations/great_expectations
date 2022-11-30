@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar, Union
 
 from pydantic import BaseModel, Field, create_model
+from pydantic.generics import GenericModel
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -12,6 +13,8 @@ from great_expectations.core import (
 if TYPE_CHECKING:
     from pydantic.typing import AbstractSetIntStr, DictStrAny, MappingIntStrAny
 
+RendererParams = TypeVar("RendererParams")
+
 
 class RendererParam(BaseModel):
     class Config:
@@ -19,7 +22,7 @@ class RendererParam(BaseModel):
         arbitrary_types_allowed = True
 
 
-class RendererParams(BaseModel):
+class RendererParamsBase(BaseModel):
     class Config:
         validate_assignment = True
         arbitrary_types_allowed = True
@@ -45,7 +48,7 @@ class RendererParams(BaseModel):
         )
 
 
-class RendererConfiguration(BaseModel):
+class RendererConfiguration(GenericModel, Generic[RendererParams]):
     """Configuration object built for each renderer."""
 
     configuration: Union[ExpectationConfiguration, None] = Field(
@@ -58,7 +61,9 @@ class RendererConfiguration(BaseModel):
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
     styling: Union[dict, None] = Field(None, allow_mutation=False)
-    params: RendererParams = Field(default_factory=RendererParams, allow_mutation=True)
+    params: RendererParams = Field(
+        default_factory=RendererParamsBase, allow_mutation=True
+    )
 
     def __init__(self, **kwargs):
         if kwargs["configuration"]:
