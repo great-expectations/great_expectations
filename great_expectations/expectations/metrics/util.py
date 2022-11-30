@@ -896,25 +896,3 @@ def is_valid_continuous_partition_object(partition_object):
         and np.all(np.diff(partition_object["bins"]) > 0)
         and np.allclose(np.sum(comb_weights), 1.0)
     )
-
-
-def sql_post_compile_to_string(
-    engine: "sqlalchemy.engine.Engine", select_statement: "sqlalchemy.sql.Select"
-) -> str:
-    """
-    Util method to compile SQL select statement with post-compile parameters into a string. Logic lifted directly
-    from sqlalchemy documentation.
-    https://docs.sqlalchemy.org/en/14/faq/sqlexpressions.html#rendering-postcompile-parameters-as-bound-parameters
-    Used by _sqlalchemy_map_condition_index() in map_metric_provider
-    Args:
-        engine (sqlalchemy.engine.Engine): great_expectations/expectations/expectation.pyngine used to do the compilation
-        select_statement (sqlalchemy.sql.Select): Select statement to compile into string.
-    Returns:
-        String representation of select_statement
-    """
-    compiled = select_statement.compile(
-        engine, compile_kwargs={"render_postcompile": True}
-    )
-    params = (repr(compiled.params[name]) for name in compiled.positiontup)
-    query_as_string = re.sub(r"\?", lambda m: next(params), str(compiled))
-    return query_as_string

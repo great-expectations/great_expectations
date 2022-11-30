@@ -29,13 +29,7 @@ from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_partial,
 )
-from great_expectations.expectations.metrics.util import (
-    Engine,
-    Insert,
-    Label,
-    Select,
-    sql_post_compile_to_string,
-)
+from great_expectations.expectations.metrics.util import Engine, Insert, Label, Select
 from great_expectations.expectations.registry import (
     get_metric_provider,
     register_metric,
@@ -2065,12 +2059,6 @@ def _sqlalchemy_column_map_condition_values(
             "if your data contains more than 10000 columns your results will be truncated."
         )
         query = query.limit(10000)  # BigQuery upper bound on query parameters
-    # query
-    print(f"this is the query: {str(query)}")
-    sql_compiled = sql_post_compile_to_string(
-        engine=execution_engine.engine, select_statement=query
-    )
-    print(f"this is sql_compiled: {sql_compiled}")
     return [
         val.unexpected_values
         for val in execution_engine.engine.execute(query).fetchall()
