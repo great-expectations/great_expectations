@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Generic, Optional, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type, TypeVar, Union
 
 from pydantic import BaseModel, Field, create_model
-from pydantic.generics import GenericModel
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -42,7 +41,7 @@ class RendererParamsBase(BaseModel):
         )
 
 
-class RendererConfiguration(GenericModel, Generic[RendererParams]):
+class RendererConfiguration(BaseModel):
     """Configuration object built for each renderer."""
 
     configuration: Union[ExpectationConfiguration, None] = Field(
@@ -55,9 +54,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
     styling: Union[dict, None] = Field(None, allow_mutation=False)
-    params: RendererParams = Field(  # type: ignore[assignment] # see: https://github.com/python/mypy/issues/12385
-        default_factory=RendererParamsBase, allow_mutation=True
-    )
+    params: BaseModel = Field(default_factory=RendererParamsBase, allow_mutation=True)
 
     class Config:
         validate_assignment = True
@@ -94,6 +91,8 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         return kwargs
 
     class RendererParam(BaseModel):
+        value: Union[Any, None]
+
         class Config:
             validate_assignment = True
             arbitrary_types_allowed = True
@@ -113,7 +112,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             value=(Union[Any, None], ...),
             __base__=RendererConfiguration.RendererParam,
         )
-        renderer_param_definition = {name: (renderer_param, ...)}
+        renderer_param_definition: Dict[str, Any] = {name: (renderer_param, ...)}
 
         # As of Nov 30, 2022 there is a bug in autocompletion for pydantic dynamic models
         # See: https://github.com/pydantic/pydantic/issues/3930
@@ -122,8 +121,8 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             **renderer_param_definition,
             __base__=self.params.__class__,
         )
-        renderer_params_definition = {
+        renderer_params_definition: Dict[str, Any] = {
             **self.params.dict(),
             name: renderer_param(schema={"type": schema_type}, value=value),
         }
-        self.params: RendererParams = renderer_params(**renderer_params_definition)
+        self.params: BaseModel = renderer_params(**renderer_params_definition)
