@@ -110,6 +110,24 @@ class RendererConfiguration(BaseModel):
     def add_param(
         self, name: str, schema_type: str, value: Optional[Any] = None
     ) -> None:
+        """RendererConfiguration add_param method.
+
+        This method will add a param that can be substituted into a template string during rendering.
+
+        Attributes:
+            name (str): A name for the attribute to be added to this RendererConfiguration instance.
+            schema_type (str): The type of value being substituted. One of:
+                - string
+                - number
+                - boolean
+                - array
+            value: Optional[Any]: The value to be substituted into the template string. If no value is
+                provided, a value lookup will be attempted in RendererConfiguration.kwargs using the
+                provided name.
+
+        Returns:
+            None
+        """
         renderer_param: Type[BaseModel] = create_model(
             name,
             renderer_schema=(Dict[str, str], Field(..., alias="schema")),
