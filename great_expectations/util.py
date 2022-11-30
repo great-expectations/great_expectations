@@ -1764,12 +1764,12 @@ def get_context(
             context_root_dir = FileDataContext.find_context_root_dir()
         except ge_exceptions.ConfigNotFoundError:
             return EphemeralDataContext(
-                project_config=project_config,
+                project_config=project_config,  # type: ignore[arg-type]
                 runtime_environment=runtime_environment,
             )
 
     return FileDataContext(
-        project_config=project_config,
+        project_config=project_config,  # type: ignore[arg-type]
         context_root_dir=context_root_dir,
         runtime_environment=runtime_environment,
     )
