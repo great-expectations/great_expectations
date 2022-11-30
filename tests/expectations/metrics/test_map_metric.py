@@ -781,7 +781,7 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format_no
     assert result.exception_info
     assert (
         result.exception_info["exception_message"]
-        == 'Error: The unexpected_index_column: "i_dont_exist" does not exist in Dataframe. Please check your configuration and try again.'
+        == 'Error: The unexpected_index_column "i_dont_exist" does not exist in Dataframe. Please check your configuration and try again.'
     )
 
 
