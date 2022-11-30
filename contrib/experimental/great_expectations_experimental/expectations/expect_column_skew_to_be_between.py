@@ -415,7 +415,6 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
     #     cls,
     #     configuration=None,
     #     result=None,
-    #     language=None,
     #     runtime_configuration=None,
     #     **kwargs,
     # ):
