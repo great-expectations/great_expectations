@@ -163,8 +163,8 @@ module.exports = {
         alt: 'Great Expectations',
         src: 'img/gx-logo-dark.svg',
         href: 'https://greatexpectations.io',
-        width: 160,
-        height: 51,
+        width: "100%",
+        height: "auto",
       },
       links: [
         {
