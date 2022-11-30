@@ -3117,8 +3117,7 @@ def _format_map_output(
         return_obj["result"].update({"unexpected_list": unexpected_list})
     if unexpected_index_list is not None:
         return_obj["result"].update({"unexpected_index_list": unexpected_index_list})
-    if unexpected_index_query is not None:
-        return_obj["result"].update({"unexpected_index_query": unexpected_index_query})
+
     if result_format["result_format"] == "COMPLETE":
         return return_obj
 
