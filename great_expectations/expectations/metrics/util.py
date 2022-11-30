@@ -615,6 +615,7 @@ def get_typed_column_names(
     column_names: Union[List[str], str],
     batch_columns_list: List[Any],
     execution_engine: ExecutionEngine,
+    error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
 ) -> Union[List[Any], Any]:
     """
     Case non-sensitivity is expressed in upper case by common DBMS backends and in lower case by SQLAlchemy, with any
@@ -629,12 +630,15 @@ def get_typed_column_names(
         column_names: Single string-valued column name or list of string-valued column names
         batch_columns_list: Properly typed column names (output of "table.columns" metric)
         execution_engine: "ExecutionEngine" (here, of interest is whether or not "SqlAlchemyExecutionEngine" is used)
+        error_message_template: String template to output error message if any column cannot be found in "Batch" object.
 
     Returns:
         Single property-typed column name object or list of property-typed column name objects (depending on input).
     """
     verify_column_names_exist(
-        column_names=column_names, batch_columns_list=batch_columns_list
+        column_names=column_names,
+        batch_columns_list=batch_columns_list,
+        error_message_template=error_message_template,
     )
 
     column_names_list: Union[List[str], str]
@@ -665,7 +669,9 @@ def get_typed_column_names(
 
 
 def verify_column_names_exist(
-    column_names: Union[List[str], str], batch_columns_list: List[Any]
+    column_names: Union[List[str], str],
+    batch_columns_list: List[Any],
+    error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
 ) -> None:
     """
     Insures that column name or column names (supplied as argument using "str" representation) exist in "Batch" object.
@@ -673,6 +679,7 @@ def verify_column_names_exist(
     Args:
         column_names: Single string-valued column name or list of string-valued column names
         batch_columns_list: Properly typed column names (output of "table.columns" metric)
+        error_message_template: String template to output error message if any column cannot be found in "Batch" object.
     """
     column_names_list: Union[List[str], str]
     if isinstance(column_names, list):
@@ -687,7 +694,7 @@ def verify_column_names_exist(
     for column_name in column_names_list:
         if column_name not in batch_columns_list:
             raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
-                message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                message=error_message_template.format(column_name=column_name)
             )
 
 

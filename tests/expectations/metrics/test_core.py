@@ -1480,6 +1480,7 @@ def test_max_metric_column_does_not_exist_sa(sa):
             metrics_to_resolve=(partial_metric,), metrics=metrics
         )
         metrics.update(results)
+
     assert (
         'Error: The column "non_existent_column" in BatchData does not exist.'
         in str(eee.value)

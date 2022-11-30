@@ -1771,6 +1771,7 @@ def _pandas_map_condition_index(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
+                    error_message_template='Error: The unexpected_index_column "{column_name:s}" does not exist in Dataframe. Please check your configuration and try again.',
                 )
                 primary_key_dict[column_name] = df.at[index, column_name]
 
