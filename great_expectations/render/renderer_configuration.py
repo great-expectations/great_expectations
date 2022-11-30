@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Any, Optional, Union
 
 from pydantic import BaseModel, Field, create_model
@@ -97,7 +99,7 @@ class RendererConfiguration(BaseModel):
         renderer_params = create_model(
             "RendererParams",
             **renderer_param_definition,
-            __base__=self.params.__class__
+            __base__=self.params.__class__,
         )
         renderer_params_definition = {
             **self.params.dict(),
