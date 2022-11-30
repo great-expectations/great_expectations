@@ -97,10 +97,10 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 else True
             )
             kwargs["styling"] = kwargs["runtime_configuration"].get("styling")
-            return kwargs
+        return kwargs
 
     def add_param(self, name: str, schema_type: str, value: Union[Any, None]) -> None:
-        renderer_param = create_model(
+        renderer_param: BaseModel = create_model(
             name,
             renderer_schema=(dict, Field(..., alias="schema")),
             value=(Union[Any, None], ...),
@@ -110,7 +110,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
         # As of Nov 30, 2022 there is a bug in autocompletion for pydantic dynamic models
         # See: https://github.com/pydantic/pydantic/issues/3930
-        renderer_params = create_model(
+        renderer_params: BaseModel = create_model(
             "RendererParams",
             **renderer_param_definition,
             __base__=self.params.__class__,
@@ -119,4 +119,4 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             **self.params.dict(),
             name: renderer_param(schema={"type": schema_type}, value=value),
         }
-        self.params = renderer_params(**renderer_params_definition)
+        self.params: RendererParams = renderer_params(**renderer_params_definition)
