@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Tuple, Union
 
 import altair as alt
 import pandas as pd
@@ -22,7 +22,10 @@ from great_expectations.render import (
     RenderedStringTemplateContent,
 )
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.renderer_configuration import RendererConfiguration
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererParams,
+)
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
@@ -138,54 +141,48 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        renderer_configuration: RendererConfiguration,
+    ) -> Tuple[str, dict, Union[dict, None]]:
+        kwargs: dict = renderer_configuration.kwargs
+        renderer_configuration.add_param(
+            name="column", schema_type="string", value=kwargs.get("column")
         )
-        styling = runtime_configuration.get("styling")
-
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            ["column", "value_set", "row_condition", "condition_parser"],
+        renderer_configuration.add_param(
+            name="value_set", schema_type="array", value=kwargs.get("value_set")
         )
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "value_set": {
-                "schema": {"type": "array"},
-                "value": params.get("value_set"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-        }
+        renderer_configuration.add_param(
+            name="row_condition",
+            schema_type="string",
+            value=kwargs.get("row_condition"),
+        )
+        renderer_configuration.add_param(
+            name="condition_parser",
+            schema_type="string",
+            value=kwargs.get("condition_parser"),
+        )
 
-        if params["value_set"] is None or len(params["value_set"]) == 0:
+        params: RendererParams
+        params = renderer_configuration.params
 
-            if include_column_name:
+        if not params.value_set.value or len(params.value_set.value) == 0:
+            if renderer_configuration.include_column_name:
                 template_str = "$column distinct values must belong to this set: [ ]"
             else:
                 template_str = "distinct values must belong to a set, but that set is not specified."
 
         else:
+            for i, v in enumerate(params.value_set.value):
+                renderer_configuration.add_param(
+                    name=f"v__{str(i)}", schema_type="string", value=v
+                )
 
-            for i, v in enumerate(params["value_set"]):
-                params[f"v__{str(i)}"] = v
+            params = renderer_configuration.params
+
             values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
+                [f"$v__{str(i)}" for i, v in enumerate(params.value_set.value)]
             )
 
-            if include_column_name:
+            if renderer_configuration.include_column_name:
                 template_str = (
                     f"$column distinct values must belong to this set: {values_string}."
                 )
@@ -194,23 +191,19 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                     f"distinct values must belong to this set: {values_string}."
                 )
 
-        if params["row_condition"] is not None:
+        params_with_json_schema: dict = params.dict()
+
+        if params.row_condition.value:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
+                params.row_condition.value, with_schema=True
             )
             template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
-        params_with_json_schema = add_values_with_json_schema_from_list_in_params(
-            params=params,
-            params_with_json_schema=params_with_json_schema,
-            param_key_with_list="value_set",
-        )
-
-        return (template_str, params_with_json_schema, styling)
+        return template_str, params_with_json_schema, renderer_configuration.styling
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
@@ -221,17 +214,13 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
+    ) -> List[RenderedStringTemplateContent]:
         renderer_configuration = RendererConfiguration(
             configuration=configuration,
             result=result,
             language=language,
             runtime_configuration=runtime_configuration,
         )
-        include_column_name: bool = renderer_configuration.include_column_name
-        styling: Union[dict, None] = renderer_configuration.styling
-
         params = substitute_none_for_missing(
             renderer_configuration.kwargs,
             ["column", "value_set", "row_condition", "condition_parser"],
@@ -239,7 +228,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
 
         if params["value_set"] is None or len(params["value_set"]) == 0:
 
-            if include_column_name:
+            if renderer_configuration.include_column_name:
                 template_str = "$column distinct values must belong to this set: [ ]"
             else:
                 template_str = "distinct values must belong to a set, but that set is not specified."
@@ -252,7 +241,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                 [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
             )
 
-            if include_column_name:
+            if renderer_configuration.include_column_name:
                 template_str = (
                     f"$column distinct values must belong to this set: {values_string}."
                 )
@@ -276,7 +265,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                     "string_template": {
                         "template": template_str,
                         "params": params,
-                        "styling": styling,
+                        "styling": renderer_configuration.styling,
                     },
                 }
             )
@@ -290,8 +279,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
+    ) -> Optional[RenderedGraphContent]:
         assert result, "Must pass in result."
         value_count_dicts = result.result["details"]["value_counts"]
         if isinstance(value_count_dicts, pd.Series):
