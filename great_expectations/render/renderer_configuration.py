@@ -55,7 +55,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
     styling: Union[dict, None] = Field(None, allow_mutation=False)
-    params: RendererParams = Field(  # types: ignore[assignment] see: https://github.com/python/mypy/issues/12385
+    params: RendererParams = Field(  # type: ignore[assignment] # see: https://github.com/python/mypy/issues/12385
         default_factory=RendererParamsBase, allow_mutation=True
     )
 
@@ -98,6 +98,14 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             validate_assignment = True
             arbitrary_types_allowed = True
 
+        def __eq__(self, other: Any) -> bool:
+            if isinstance(other, BaseModel):
+                return self.dict() == other.dict()
+            elif isinstance(other, dict):
+                return self.dict() == other
+            else:
+                return self.value == other
+
     def add_param(self, name: str, schema_type: str, value: Union[Any, None]) -> None:
         renderer_param: Type[BaseModel] = create_model(
             name,
@@ -118,4 +126,4 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             **self.params.dict(),
             name: renderer_param(schema={"type": schema_type}, value=value),
         }
-        self.params: BaseModel = renderer_params(**renderer_params_definition)
+        self.params: RendererParams = renderer_params(**renderer_params_definition)
