@@ -3167,7 +3167,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         For many deployments of Great Expectations, these components (plus
         Expectations) are the only ones you'll need.
 
-        test_yaml_config is mainly intended for use within notebooks and tests.
+        `test_yaml_config` is mainly intended for use within notebooks and tests.
 
         --Public API--
 
