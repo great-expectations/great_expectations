@@ -77,11 +77,11 @@ module.exports = {
           items: [
             {
               label: 'GX ClOUD',
-              href: 'https://greatexpectations.io/gx-cloud'
+              to: 'https://greatexpectations.io/gx-cloud'
             },
             {
               label: 'GX OSS',
-              href: 'https://greatexpectations.io/gx-oss'
+              to: 'https://greatexpectations.io/gx-oss'
             }
           ]
         },
@@ -91,19 +91,19 @@ module.exports = {
           items: [
             {
               label: 'COMMUNITY HOME',
-              href: 'https://greatexpectations.io/community'
+              to: 'https://greatexpectations.io/community'
             },
             {
               label: 'SLACK',
-              href: 'https://greatexpectations.io/slack'
+              to: 'https://greatexpectations.io/slack'
             },
             {
               label: 'GITHUB',
-              href: 'https://github.com/great-expectations/great_expectations'
+              to: 'https://github.com/great-expectations/great_expectations'
             },
             {
               label: 'NEWSLETTER',
-              href: 'https://greatexpectations.io/newsletter'
+              to: 'https://greatexpectations.io/newsletter'
             }
           ]
         },
@@ -113,23 +113,23 @@ module.exports = {
           items: [
             {
               label: 'INTEGRATIONS',
-              href: 'https://greatexpectations.io/integrations'
+              to: 'https://greatexpectations.io/integrations'
             },
             {
               label: 'DOCUMENTATION',
-              href: 'https://docs.greatexpectations.io/docs/'
+              to: 'https://docs.greatexpectations.io/docs/'
             },
             {
               label: 'EXPECTATION GALLERY',
-              href: 'https://greatexpectations.io/expectations'
+              to: 'https://greatexpectations.io/expectations'
             },
             {
               label: 'GREAT EXPECTATIONS BLOG',
-              href: 'https://greatexpectations.io/blog'
+              to: 'https://greatexpectations.io/blog'
             },
             {
               label: 'GREAT EXPECTATIONS CASE STUDIES',
-              href: 'https://greatexpectations.io/case-studies'
+              to: 'https://greatexpectations.io/case-studies'
             }
           ]
         },
@@ -139,16 +139,16 @@ module.exports = {
           items: [
             {
               label: 'ABOUT US',
-              href: 'https://greatexpectations.io/company'
+              to: 'https://greatexpectations.io/company'
             },
             {
               label: 'CAREERS',
-              href: 'https://greatexpectations.io/case-studies'
+              to: 'https://greatexpectations.io/case-studies'
             }
           ]
         },
         {
-          href: 'https://greatexpectations.io/cloud',
+          to: 'https://greatexpectations.io/cloud',
           label: 'Cloud early access',
           position: 'right',
           className: 'header-cloud-link',
