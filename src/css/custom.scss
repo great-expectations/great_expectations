@@ -152,13 +152,45 @@ a.pagination-nav__link:hover {
 
 /*footer*/
 
+.footer {
+    font-family:'Source Sans Pro', sans-serif ;
+}
+
+.footer__items {
+    box-sizing: border-box;
+    margin: 0;
+    min-width: 0;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+}
+
+.footer__item {
+    padding: 3px 0;
+    font-family:'Source Sans Pro', sans-serif ;
+}
+
 .footer__link-item {
-    font-size: 18px;
+    font-size: 14px;
+    font-weight: 600;
 }
 
 .footer__title {
-    font-size: 20px;
-    margin-bottom: 15px;
+    box-sizing: border-box;
+    margin: 0;
+    min-width: 0;
+    font-family: Montserrat,'Open Sans',Verdana,sans‑serif;
+    letter-spacing: 0;
+    color: var(--ifm-color-primary);
+    text-align: left;
+    padding-left: 0;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.5;
 }
 
 .footer__icon {
