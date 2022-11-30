@@ -7,6 +7,7 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.metrics.metric_provider import metric_value
+from great_expectations.expectations.metrics.util import get_typed_column_names
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 from .data_profiler_profile_metric_provider import DataProfilerProfileMetricProvider
@@ -32,10 +33,11 @@ class DataProfilerColumnProfileReport(DataProfilerProfileMetricProvider):
 
         column_name = accessor_domain_kwargs["column"]
 
-        if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
-                message=f'Error: The column "{column_name}" in BatchData does not exist.'
-            )
+        column_name = get_typed_column_names(
+            column_names=column_name,
+            batch_columns_list=metrics["table.columns"],
+            execution_engine=execution_engine,
+        )
 
         profile_path = metric_value_kwargs["profile_path"]
         try:
