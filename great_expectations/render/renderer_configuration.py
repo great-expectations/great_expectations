@@ -116,8 +116,6 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         )
         renderer_params_definition = {
             **self.params.dict(),
-            name: renderer_param(
-                renderer_schema={"type": schema_type}, value=value
-            ).dict(),
+            name: renderer_param(schema={"type": schema_type}, value=value),
         }
         self.params: RendererParamsBase = renderer_params(**renderer_params_definition)

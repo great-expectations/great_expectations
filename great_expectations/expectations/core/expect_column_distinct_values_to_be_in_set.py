@@ -140,8 +140,17 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        renderer_configuration: RendererConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> Tuple[str, dict, Union[dict, None]]:
+        renderer_configuration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            language=language,
+            runtime_configuration=runtime_configuration,
+        )
         kwargs: dict = renderer_configuration.kwargs
         renderer_configuration.add_param(
             name="column", schema_type="string", value=kwargs.get("column")
