@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -34,6 +34,9 @@ from great_expectations.rule_based_profiler.parameter_container import (
     PARAMETER_KEY,
     VARIABLES_KEY,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import RendererParams
 
 try:
     import sqlalchemy as sa  # noqa: F401
@@ -221,7 +224,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             value=kwargs.get("condition_parser"),
         )
 
-        params = renderer_configuration.params
+        params: RendererParams = renderer_configuration.params
 
         if not params.value_set.value or len(params.value_set.value) == 0:
             values_string = "[ ]"
@@ -237,7 +240,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
         template_str = f"values must belong to this set: {values_string}"
 
-        params_with_json_schema: dict = params.dict()
+        params_with_json_schema: dict = renderer_configuration.params.dict()
 
         if params.mostly.value and params.mostly.value < 1.0:
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
