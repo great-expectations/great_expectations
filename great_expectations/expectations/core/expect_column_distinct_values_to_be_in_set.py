@@ -142,7 +142,6 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> Tuple[str, dict, Union[dict, None]]:
         renderer_configuration = RendererConfiguration(
@@ -220,13 +219,11 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[RenderedStringTemplateContent]:
         renderer_configuration = RendererConfiguration(
             configuration=configuration,
             result=result,
-            language=language,
             runtime_configuration=runtime_configuration,
         )
         params = substitute_none_for_missing(
@@ -285,7 +282,6 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> Optional[RenderedGraphContent]:
         assert result, "Must pass in result."
