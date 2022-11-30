@@ -101,6 +101,8 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         )
         renderer_param_definition = {name: (renderer_param, ...)}
 
+        # As of Nov 30, 2022 there is a bug in autocompletion for pydantic dynamic models
+        # See: https://github.com/pydantic/pydantic/issues/3930
         renderer_params = create_model(
             "RendererParams",
             **renderer_param_definition,
