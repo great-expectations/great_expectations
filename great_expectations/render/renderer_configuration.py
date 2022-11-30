@@ -65,7 +65,19 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         default_factory=RendererParamsBase, allow_mutation=True
     )
 
+    class Config:
+        validate_assignment = True
+        arbitrary_types_allowed = True
+
     def __init__(self, **kwargs):
+        kwargs = RendererConfiguration._set_expectation_type_and_kwargs(kwargs=kwargs)
+        kwargs = RendererConfiguration._set_include_column_name_and_styling(
+            kwargs=kwargs
+        )
+        super().__init__(**kwargs)
+
+    @staticmethod
+    def _set_expectation_type_and_kwargs(kwargs: dict) -> dict:
         if kwargs["configuration"]:
             kwargs["expectation_type"] = kwargs["configuration"].expectation_type
             kwargs["kwargs"] = kwargs["configuration"].kwargs
@@ -77,7 +89,10 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         else:
             kwargs["expectation_type"] = ""
             kwargs["kwargs"] = {}
+        return kwargs
 
+    @staticmethod
+    def _set_include_column_name_and_styling(kwargs: dict) -> dict:
         if kwargs["runtime_configuration"]:
             kwargs["include_column_name"] = (
                 False
@@ -85,12 +100,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 else True
             )
             kwargs["styling"] = kwargs["runtime_configuration"].get("styling")
-
-        super().__init__(**kwargs)
-
-    class Config:
-        validate_assignment = True
-        arbitrary_types_allowed = True
+        return kwargs
 
     def add_param(self, name: str, schema_type: str, value: Union[Any, None]) -> None:
         renderer_param = create_model(
