@@ -924,7 +924,7 @@ def sql_post_compile_to_string(
 
 def get_sqlalchemy_source_table_and_schema_selectable(
     engine: SqlAlchemyExecutionEngine,
-) -> Table:
+) -> "Table":
     """
     Util method to extract table when temp_table is being used.  This allows you to get the source_table_name
     even if a temp_temp table is created.
