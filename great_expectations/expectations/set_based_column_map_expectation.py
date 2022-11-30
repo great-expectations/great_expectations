@@ -96,9 +96,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     # question, descriptive, prescriptive, diagnostic
     @classmethod
     @renderer(renderer_type=LegacyRendererType.QUESTION)
-    def _question_renderer(
-        cls, configuration, result=None, language=None, runtime_configuration=None
-    ):
+    def _question_renderer(cls, configuration, result=None, runtime_configuration=None):
         column = configuration.kwargs.get("column")
         mostly = configuration.kwargs.get("mostly")
         set_ = getattr(cls, "set_")
@@ -118,7 +116,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.ANSWER)
     def _answer_renderer(
-        cls, configuration=None, result=None, language=None, runtime_configuration=None
+        cls, configuration=None, result=None, runtime_configuration=None
     ):
         column = result.expectation_config.kwargs.get("column")
         mostly = result.expectation_config.kwargs.get("mostly")
@@ -149,7 +147,6 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -228,7 +225,6 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):

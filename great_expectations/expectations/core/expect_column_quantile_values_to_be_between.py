@@ -270,7 +270,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -380,7 +379,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -394,7 +392,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             table_header_row,
             table_rows,
         ) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, **kwargs
+            configuration, result, runtime_configuration, **kwargs
         )
         value_obj = renderedAtomicValueSchema.load(
             {
@@ -424,7 +422,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -506,7 +503,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -548,7 +544,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -600,7 +595,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -610,7 +604,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             table_header_row,
             table_rows,
         ) = cls._atomic_diagnostic_observed_value_template(
-            configuration, result, language, runtime_configuration, **kwargs
+            configuration, result, runtime_configuration, **kwargs
         )
         if template_string is not None:
             value_obj = renderedAtomicValueSchema.load(
@@ -645,7 +639,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):

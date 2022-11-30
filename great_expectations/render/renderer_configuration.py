@@ -13,7 +13,6 @@ class RendererConfiguration:
 
     configuration: Union[ExpectationConfiguration, None]
     result: Union[ExpectationValidationResult, None]
-    language: str = "en"
     runtime_configuration: dict = field(default_factory=dict)
     kwargs: dict = field(init=False)
     include_column_name: bool = field(init=False)

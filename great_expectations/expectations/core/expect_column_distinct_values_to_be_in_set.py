@@ -137,7 +137,6 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -216,14 +215,12 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         renderer_configuration = RendererConfiguration(
             configuration=configuration,
             result=result,
-            language=language,
             runtime_configuration=runtime_configuration,
         )
         include_column_name: bool = renderer_configuration.include_column_name
@@ -285,7 +282,6 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
