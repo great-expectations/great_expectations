@@ -149,6 +149,10 @@ stages:
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Build Gallery Quick Check'
 
+          - bash: touch gallery-tracebacks.txt; cat gallery-tracebacks.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show quick check tracebacks'
+
           - bash: python ./build_gallery.py --outfile-name "expectation_library_v2--staging.json" 2>&1 | tee output--build_gallery.txt ; grep -o "Took .* seconds to .*" output--build_gallery.txt | sort -k2,2nr > testing-times.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt; touch gallery-tracebacks.txt; grep -o "Expectation type.*" output--build_gallery.txt | sort > gallery-exp-types.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Build Gallery'
