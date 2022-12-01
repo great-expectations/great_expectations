@@ -1,8 +1,8 @@
 import logging
 from typing import Optional
 
-from great_expectations.data_context.data_context.abstract_data_context import (
-    AbstractDataContext,
+from great_expectations.data_context.data_context._serializable_data_context import (
+    _SerializableDataContext,
 )
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
@@ -19,7 +19,7 @@ from great_expectations.datasource.datasource_serializer import (
 logger = logging.getLogger(__name__)
 
 
-class FileDataContext(AbstractDataContext):
+class FileDataContext(_SerializableDataContext):
     """
     Extends AbstractDataContext, contains only functionality necessary to hydrate state from disk.
 
@@ -44,11 +44,12 @@ class FileDataContext(AbstractDataContext):
             runtime_environment (Optional[dict]): a dictionary of config variables that override both those set in
                 config_variables.yml and the environment
         """
-        self._context_root_directory = context_root_dir
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
-        super().__init__(runtime_environment=runtime_environment)
+        super().__init__(
+            context_root_dir=context_root_dir, runtime_environment=runtime_environment
+        )
 
     def _init_datasource_store(self) -> None:
         from great_expectations.data_context.store.datasource_store import (
