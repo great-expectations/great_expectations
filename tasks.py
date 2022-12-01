@@ -359,18 +359,17 @@ def docker(
 
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
+
 @invoke.task(
     help={
         "clean": "Clean out existing documentation first. Defaults to True.",
         "remove_html": "Remove temporary generated html. Defaults to True.",
-        "overwrite_static": "Overwrite static files generated for api docs (e.g. css). Defaults to True."
     }
 )
 def docs(
     ctx,
     clean=True,
     remove_html=True,
-    overwrite_static=True,
 ):
     """Build documentation. Note: Currently only builds the sphinx based api docs, please build docusaurus docs separately."""
     filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
@@ -416,12 +415,17 @@ def docs(
     sphinx_api_docs_build_dir = temp_docs_build_dir / "sphinx_api_docs"
 
     static_html_file_path = pathlib.Path(sphinx_api_docs_build_dir) / "html"
-    paths = static_html_file_path.glob('**/*.html')
-    files = [p for p in paths if p.is_file() and p.name not in ("genindex.html", "search.html", "index.html") and "_static" not in str(p)]
+    paths = static_html_file_path.glob("**/*.html")
+    files = [
+        p
+        for p in paths
+        if p.is_file()
+        and p.name not in ("genindex.html", "search.html", "index.html")
+        and "_static" not in str(p)
+    ]
 
-    # Read with beautiful soup
-    # Pull out content between <section> tag
-    # Write out to .mdx file in docs/reference/api using the relative file directory structure
+    # Read the generated html and process the content for conversion to mdx
+    # Write out to .mdx file using the relative file directory structure
     for html_file in files:
         print("processing:", html_file.absolute())
         with open(html_file, "r") as f:
@@ -446,37 +450,14 @@ def docs(
             )
             doc_str = doc_front_matter + doc_str
 
-            output_path = curdir / pathlib.Path("docs/reference/api") / html_file.relative_to(static_html_file_path).with_suffix(".mdx")
+            output_path = (
+                curdir
+                / pathlib.Path("docs/reference/api")
+                / html_file.relative_to(static_html_file_path).with_suffix(".mdx")
+            )
             output_path.parent.mkdir(parents=True, exist_ok=True)
             with open(output_path, "w") as fout:
                 fout.write(doc_str)
-
-    # Copy over CSS
-
-    # NOTE: These stylesheets and ancillary files are from the pydata-sphinx-theme.
-    #   Change the stylesheets list if you are using a different sphinx theme.
-    #   Copy over file.png since it is referenced in the stylesheet.
-
-    # TODO: AJB 20221118 Clean up this section after choosing a theme
-    stylesheet_base_path = static_html_file_path / "_static"
-    stylesheets = ("basic.css", "pygments.css", "pydata-sphinx-theme.css")
-    # stylesheets = ("basic.css", "debug.css", "pygments.css", "skeleton.css", "furo.css", "furo-extensions.css")
-    # stylesheets = ("alabaster.css", "basic.css", "pygments.css", )
-    ancillary_files = ("file.png", )
-
-    site_css_path = filedir / pathlib.Path("src/css")
-
-    for stylesheet in stylesheets:
-        # TODO: AJB 20221118 Clean up this logic.
-        stylesheet_with_sass_extension = pathlib.Path(stylesheet.replace(".css", ".scss"))
-        if stylesheet == "pydata-sphinx-theme.css":
-            stylesheet = "styles/pydata-sphinx-theme.css"
-        if stylesheet in ("furo.css", "furo-extensions.css"):
-            stylesheet = f"styles/{stylesheet}"
-        shutil.copy(stylesheet_base_path / pathlib.Path(stylesheet), site_css_path / stylesheet_with_sass_extension)
-
-    for ancillary_file in ancillary_files:
-        shutil.copy(stylesheet_base_path / ancillary_file, site_css_path / ancillary_file)
 
     # Remove temp build dir
     if remove_html:
