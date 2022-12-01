@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union, cast
 
 from pydantic import BaseModel, Field, create_model
 
@@ -59,7 +59,7 @@ class RendererConfiguration(BaseModel):
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
     styling: Union[dict, None] = Field(None, allow_mutation=False)
-    params: BaseModel = Field(default_factory=RendererParams, allow_mutation=True)
+    params: RendererParams = Field(default_factory=RendererParams, allow_mutation=True)
 
     class Config:
         validate_assignment = True
@@ -139,7 +139,8 @@ class RendererConfiguration(BaseModel):
             **self.params.dict(),
             name: renderer_param(schema={"type": schema_type}, value=value),
         }
-        self.params: BaseModel = renderer_params(**renderer_params_definition)
+        params: BaseModel = renderer_params(**renderer_params_definition)
+        self.params = cast(RendererParams, params)
 
     class RendererParam(BaseModel):
         value: Optional[Any]
