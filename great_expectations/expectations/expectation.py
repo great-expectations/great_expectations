@@ -339,6 +339,24 @@ class Expectation(metaclass=MetaExpectation):
         return rendered
 
     @classmethod
+    def atomic_prescriptive_template(
+        cls,
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        renderer_configuration.add_param(
+            name="expectation_type",
+            schema_type=ParamSchemaType.STRING,
+            value=renderer_configuration.expectation_type,
+        )
+        renderer_configuration.add_param(
+            name="kwargs",
+            schema_type=ParamSchemaType.STRING,
+            value=renderer_configuration.kwargs,
+        )
+        renderer_configuration.template_str = "$expectation_type(**$kwargs)"
+        return renderer_configuration
+
+    @classmethod
     def _atomic_prescriptive_template(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -354,21 +372,11 @@ class Expectation(metaclass=MetaExpectation):
             result=result,
             runtime_configuration=runtime_configuration,
         )
-        renderer_configuration.add_param(
-            name="expectation_type",
-            schema_type=ParamSchemaType.STRING,
-            value=renderer_configuration.expectation_type,
+        renderer_configuration = cls.atomic_prescriptive_template(
+            renderer_configuration=renderer_configuration,
         )
-        renderer_configuration.add_param(
-            name="kwargs",
-            schema_type=ParamSchemaType.STRING,
-            value=renderer_configuration.kwargs,
-        )
-
-        template_str = "$expectation_type(**$kwargs)"
-
         return (
-            template_str,
+            renderer_configuration.template_str,
             renderer_configuration.params.dict(),
             renderer_configuration.styling,
         )
@@ -390,19 +398,13 @@ class Expectation(metaclass=MetaExpectation):
             result=result,
             runtime_configuration=runtime_configuration,
         )
-        (
-            template_str,
-            params_with_json_schema,
-            styling,
-        ) = cls._atomic_prescriptive_template(
-            configuration=configuration,
-            result=result,
-            runtime_configuration=runtime_configuration,
+        renderer_configuration = cls.atomic_prescriptive_template(
+            renderer_configuration=renderer_configuration
         )
         value_obj = renderedAtomicValueSchema.load(
             {
-                "template": template_str,
-                "params": params_with_json_schema,
+                "template": renderer_configuration.template_str,
+                "params": renderer_configuration.params.dict(),
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
         )

@@ -31,6 +31,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     include_column_name: bool = Field(True, allow_mutation=False)
     styling: Union[dict, None] = Field(None, allow_mutation=False)
     params: RendererParams = Field(None, allow_mutation=True)  # type: ignore[assignment] # mypy bug see: https://github.com/python/mypy/issues/12385
+    template_str: Optional[str] = Field(None, allow_mutation=True)
 
     class Config:
         validate_assignment = True
@@ -170,14 +171,6 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 return self.dict() == other
             else:
                 return self.value == other
-
-        def __bool__(self):
-            """
-            RendererConfiguration.add_param() will always add a new attribute to RendererConfiguration.params.
-            In order to make the truthiness of a given attribute meaningful (not always True), we overload the
-            __bool__ and check the truthiness of .value.
-            """
-            return bool(self.value)
 
 
 class ParamSchemaType(str, Enum):
