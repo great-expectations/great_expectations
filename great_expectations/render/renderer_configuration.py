@@ -28,6 +28,13 @@ class RendererParams(BaseModel):
         exclude_defaults: bool = False,
         exclude_none: bool = False,
     ) -> DictStrAny:
+        """
+        Override BaseModel dict to make the default by_alias True instead of False.
+        We need by_alias to be set to True in RendererParams, because we have an existing
+        attribute named schema, and schema is already a Pydantic BaseModel attribute.
+        In practice this means the renderer implementer doesn't need to use
+        .dict(by_alias=True) everywhere.
+        """
         return super().dict(
             include=include,
             exclude=exclude,
@@ -103,6 +110,11 @@ class RendererConfiguration(BaseModel):
                 return self.value == other
 
         def __bool__(self):
+            """
+            RendererConfiguration.add_param() will always add a new attribute to RendererConfiguration.params.
+            In order to make the truthiness of a given attribute meaningful (not always True), we overload the
+            __bool__ and check the truthiness of .value.
+            """
             return bool(self.value)
 
     def add_param(
