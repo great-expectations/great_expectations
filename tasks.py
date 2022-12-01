@@ -16,11 +16,7 @@ import shutil
 import invoke
 
 from docs.sphinx_api_docs_source.build_sphinx_api_docs import (
-    _exit_with_error_if_docs_dependencies_are_not_installed,
-    _remove_existing_sphinx_api_docs,
-    _build_html_api_docs_in_temp_folder,
-    _process_and_create_docusaurus_mdx_files,
-    _remove_existing_api_docs,
+    SphinxInvokeDocsBuilder,
 )
 from scripts import check_type_hint_coverage
 
@@ -378,23 +374,25 @@ def docs(
 
     _exit_with_error_if_not_in_repo_root(task_name="docs")
 
-    _exit_with_error_if_docs_dependencies_are_not_installed()
+    doc_builder = SphinxInvokeDocsBuilder(ctx=ctx)
+
+    doc_builder.exit_with_error_if_docs_dependencies_are_not_installed()
 
     sphinx_api_docs_source_dir = "docs/sphinx_api_docs_source"
     os.chdir(sphinx_api_docs_source_dir)
 
     if clean:
-        _remove_existing_sphinx_api_docs(ctx=ctx)
+        doc_builder.remove_existing_sphinx_api_docs()
 
-    _build_html_api_docs_in_temp_folder(ctx=ctx)
+    doc_builder.build_html_api_docs_in_temp_folder()
 
     repo_root = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
 
-    _remove_existing_api_docs(repo_root=repo_root)
+    doc_builder.remove_existing_api_docs(repo_root=repo_root)
 
     temp_docs_build_dir = repo_root / pathlib.Path("temp_docs_build_dir")
 
-    _process_and_create_docusaurus_mdx_files(
+    doc_builder.process_and_create_docusaurus_mdx_files(
         repo_root=repo_root, temp_docs_build_dir=temp_docs_build_dir
     )
 
