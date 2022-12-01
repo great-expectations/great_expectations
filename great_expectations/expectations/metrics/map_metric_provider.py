@@ -2404,33 +2404,23 @@ def _sqlalchemy_map_condition_index(
     **kwargs,
 ) -> List[Dict[str, Any]]:
     """
-    Returns indicies of the metric values which do not meet an expected Expectation condition for instances
+    Returns indices of the metric values which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation.
+
+    Requires `unexpected_index_column_names` to be part of `result_format` dict to specify primary_key columns
+    to return.
     """
     (
-        # boolean_mapped_unexpected_values,
         unexpected_condition,
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition")
 
-    """
-    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
-    with all of the available "domain_kwargs" keys.
-    """
-    """
-    The query we want to build :
-        - domain column + pk columns that are given
-    """
-    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
-    result_format = metric_value_kwargs["result_format"]
+    domain_kwargs: dict = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
+    result_format: dict = metric_value_kwargs["result_format"]
 
     column_selector: List[sa.Column] = []
-    # can this also be a list more than one item?
     all_table_columns: List[str] = metrics.get("table.columns")
-    # maybe we will add this back later
-    # column_selector.append(sa.column(domain_kwargs["column"]))
     unexpected_index_column_names: List[str] = result_format.get(
         "unexpected_index_column_names"
     )
@@ -2441,26 +2431,40 @@ def _sqlalchemy_map_condition_index(
                 f"Please check your configuration and try again."
             )
         column_selector.append(sa.column(column_name))
-    # at this point we have the columns to select
-    query = sa.select(column_selector).where(unexpected_condition)
-    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
-        selectable = get_sqlalchemy_selectable(selectable)
-        query = query.select_from(selectable)
-    # you get a list of tuples
-    result: List[tuple] = execution_engine.engine.execute(query).fetchall()
 
-    # how do we return this statement?
+    domain_records_as_selectable: sa.Selectable = execution_engine.get_domain_records(
+        domain_kwargs=domain_kwargs
+    )
+    unexpected_condition_query_with_selected_columns: sa.select = sa.select(
+        column_selector
+    ).where(unexpected_condition)
+
+    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        domain_records_as_selectable: Union[
+            sa.Table, sa.Select
+        ] = get_sqlalchemy_selectable(domain_records_as_selectable)
+
+    final_query: sa.select = (
+        unexpected_condition_query_with_selected_columns.select_from(
+            domain_records_as_selectable
+        )
+    )
+    query_result: List[tuple] = execution_engine.engine.execute(final_query).fetchall()
+
     unexpected_index_list: Optional[List[Dict[str, Any]]] = []
-    for row in result:
+
+    # if the result_format is not COMPLETE (ie. SUMMARY), then we only process the first few query_results
+    if result_format["result_format"] != "COMPLETE":
+        query_result = query_result[: result_format["partial_unexpected_count"]]
+
+    for row in query_result:
         primary_key_dict: Dict[str, Any] = {}
         for index in range(len(unexpected_index_column_names)):
             name: str = unexpected_index_column_names[index]
             primary_key_dict[name] = row[index]
         unexpected_index_list.append(primary_key_dict)
-    # formatting it for the output
-    if result_format["result_format"] == "COMPLETE":
-        return unexpected_index_list
-    return unexpected_index_list[: result_format["partial_unexpected_count"]]
+
+    return unexpected_index_list
 
 
 def _spark_map_condition_unexpected_count_aggregate_fn(
