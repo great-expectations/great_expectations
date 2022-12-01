@@ -298,7 +298,7 @@ class Expectation(metaclass=MetaExpectation):
         """
         Default rendering function that is utilized by GE Cloud Front-end if an implemented atomic renderer fails
         """
-        renderer_configuration = RendererConfiguration(
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
@@ -378,7 +378,7 @@ class Expectation(metaclass=MetaExpectation):
         """
         Rendering function that is utilized by GE Cloud Front-end
         """
-        renderer_configuration = RendererConfiguration(
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
@@ -412,7 +412,7 @@ class Expectation(metaclass=MetaExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[RenderedStringTemplateContent]:
-        renderer_configuration = RendererConfiguration(
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
@@ -799,7 +799,7 @@ class Expectation(metaclass=MetaExpectation):
         """
         Rendering function that is utilized by GE Cloud Front-end
         """
-        renderer_configuration = RendererConfiguration(
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
