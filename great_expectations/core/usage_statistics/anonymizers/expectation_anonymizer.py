@@ -18,12 +18,12 @@ class ExpectationSuiteAnonymizer(BaseAnonymizer):
     ) -> dict:
         # Exit early if null
         expectation_suite = obj
-        if expectation_suite is None:
+        if not expectation_suite:
             return {}
 
         # Exit early if no expectations to anonymize
         expectations = expectation_suite.expectations
-        if expectations is None:
+        if not expectations:
             return {}
 
         anonymized_info_dict = {}
