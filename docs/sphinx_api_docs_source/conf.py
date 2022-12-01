@@ -7,7 +7,6 @@
 # -- Update syspath
 import os
 import sys
-from urllib.parse import urlparse
 
 from great_expectations.core._docs_decorators import WHITELISTED_TAG
 
@@ -16,39 +15,40 @@ def _prepend_base_repository_dir_to_sys_path():
     """Add great_expectations base repo dir to the front of sys path. Used for docs processing."""
     sys.path.insert(0, os.path.abspath("../../"))
 
+
 _prepend_base_repository_dir_to_sys_path()
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'great_expectations'
-copyright = '2022, The Great Expectations Team'
-author = 'The Great Expectations Team'
+project = "great_expectations"
+copyright = "2022, The Great Expectations Team"
+author = "The Great Expectations Team"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
     "myst_parser",
-    "nbsphinx",
 ]
 
-templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', "README.md"]
-
+templates_path = ["_templates"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "README.md"]
 
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'pydata_sphinx_theme'
-html_static_path = ['_static']
+html_theme = "pydata_sphinx_theme"
+html_static_path = ["_static"]
 
 
 # Skip autodoc unless part of the Public API
 DOCUMENTATION_TAG = "--Documentation--"
+
+
 def skip_if_not_whitelisted(app, what, name, obj, would_skip, options):
     """Skip rendering documentation for docstrings that are empty or not whitelisted.
 
@@ -58,11 +58,19 @@ def skip_if_not_whitelisted(app, what, name, obj, would_skip, options):
         return False
     return True
 
+
 def custom_process_docstring(app, what, name, obj, options, lines):
     """Custom processing for use during docstring processing."""
-    _remove_whitelist_tag(app=app, what=what, name=name, obj=obj, options=options, lines=lines)
-    _process_relevant_documentation_tag(app=app, what=what, name=name, obj=obj, options=options, lines=lines)
-    _remove_feature_maturity_info(app=app, what=what, name=name, obj=obj, options=options, lines=lines)
+    _remove_whitelist_tag(
+        app=app, what=what, name=name, obj=obj, options=options, lines=lines
+    )
+    _process_relevant_documentation_tag(
+        app=app, what=what, name=name, obj=obj, options=options, lines=lines
+    )
+    _remove_feature_maturity_info(
+        app=app, what=what, name=name, obj=obj, options=options, lines=lines
+    )
+
 
 def _remove_whitelist_tag(app, what, name, obj, options, lines):
     """Remove the whitelisted tag from documentation before rendering.
@@ -74,6 +82,7 @@ def _remove_whitelist_tag(app, what, name, obj, options, lines):
             trimmed_line = line.replace(WHITELISTED_TAG, "")
             lines[idx] = trimmed_line
 
+
 def _process_relevant_documentation_tag(app, what, name, obj, options, lines):
     """Remove and replace documentation tag from documentation before rendering.
 
@@ -81,10 +90,14 @@ def _process_relevant_documentation_tag(app, what, name, obj, options, lines):
     """
     for idx, line in enumerate(lines):
         if DOCUMENTATION_TAG in line:
-            trimmed_line = line.replace(DOCUMENTATION_TAG, "Relevant Documentation Links\n")
+            trimmed_line = line.replace(
+                DOCUMENTATION_TAG, "Relevant Documentation Links\n"
+            )
             lines[idx] = trimmed_line
 
+
 FEATURE_MATURITY_INFO_TAG = "--ge-feature-maturity-info--"
+
 
 def _remove_feature_maturity_info(app, what, name, obj, options, lines):
     """Remove feature maturity info if there are starting and ending tags.
@@ -101,7 +114,7 @@ def _remove_feature_maturity_info(app, what, name, obj, options, lines):
                 feature_maturity_info_end = idx
 
     if feature_maturity_info_start and feature_maturity_info_end:
-        del lines[feature_maturity_info_start:feature_maturity_info_end + 1]
+        del lines[feature_maturity_info_start : feature_maturity_info_end + 1]
 
 
 def setup(app):
