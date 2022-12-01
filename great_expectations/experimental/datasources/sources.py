@@ -154,6 +154,7 @@ class _SourceFactories:
                 self._data_context._attach_datasource_to_context(datasource)
                 return datasource
 
+            wrapped.__doc__ = ds_constructor.__doc__
             return wrapped
         except KeyError:
             raise AttributeError(f"No factory {attr_name} in {self.factories}")

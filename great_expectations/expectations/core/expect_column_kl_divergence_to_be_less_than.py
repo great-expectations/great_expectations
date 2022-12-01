@@ -265,7 +265,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                     Tuple[str, str, str],
                     Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
                 ]
-                resolved_metrics, aborted_metrics_info = graph.resolve_validation_graph(
+                resolved_metrics, aborted_metrics_info = graph.resolve(
                     runtime_configuration=None,
                     min_graph_edges_pbar_enable=0,
                     show_progress_bars=True,
@@ -1051,7 +1051,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -1154,7 +1153,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -1170,7 +1168,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             distribution_table_rows,
             _,
         ) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, **kwargs
+            configuration, result, runtime_configuration, **kwargs
         )
 
         if chart is not None:
@@ -1218,7 +1216,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -1276,7 +1273,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -1332,7 +1328,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -1358,7 +1353,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             distribution_table_header_row,
             distribution_table_rows,
         ) = cls._atomic_diagnostic_observed_value_template(
-            configuration, result, language, runtime_configuration, **kwargs
+            configuration, result, runtime_configuration, **kwargs
         )
 
         if chart is not None:
@@ -1405,7 +1400,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -1449,7 +1443,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):

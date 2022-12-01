@@ -186,9 +186,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.QUESTION)
-    def _question_renderer(
-        cls, configuration, result=None, language=None, runtime_configuration=None
-    ):
+    def _question_renderer(cls, configuration, result=None, runtime_configuration=None):
         column = configuration.kwargs.get("column")
         mostly = configuration.kwargs.get("mostly")
         regex = configuration.kwargs.get("regex")
@@ -198,7 +196,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.ANSWER)
     def _answer_renderer(
-        cls, configuration=None, result=None, language=None, runtime_configuration=None
+        cls, configuration=None, result=None, runtime_configuration=None
     ):
         column = result.expectation_config.kwargs.get("column")
         mostly = result.expectation_config.kwargs.get("mostly")
@@ -213,7 +211,6 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -281,7 +278,6 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):

@@ -440,7 +440,7 @@ stages:
   - stage: import_ge
     dependsOn: [lint]
     pool:
-      vmImage: 'ubuntu-18.04'
+      vmImage: 'ubuntu-latest'
     jobs:
       - job: import_ge
         condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
