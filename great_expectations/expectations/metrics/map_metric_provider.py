@@ -2444,21 +2444,17 @@ def _sqlalchemy_map_condition_index(
             sa.Table, sa.Select
         ] = get_sqlalchemy_selectable(domain_records_as_selectable)
 
+    # since SQL tables can be **very** large, truncate query_result values at 20, or at `partial_unexpected_count`
     final_query: sa.select = (
         unexpected_condition_query_with_selected_columns.select_from(
             domain_records_as_selectable
-        )
+        ).limit(result_format.get("partial_unexpected_count", 20))
     )
     query_result: List[tuple] = execution_engine.engine.execute(final_query).fetchall()
 
     unexpected_index_list: Optional[List[Dict[str, Any]]] = []
 
-    # since SQL tables can be **very** large, truncate query_result values at 20, or at `partial_unexpected_count`
-    truncate: int = result_format.get(["partial_unexpected_count"], 20)
-
-    truncated_query_result = query_result[:truncate]
-
-    for row in truncated_query_result:
+    for row in query_result:
         primary_key_dict: Dict[str, Any] = {}
         for index in range(len(unexpected_index_column_names)):
             name: str = unexpected_index_column_names[index]

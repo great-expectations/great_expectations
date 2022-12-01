@@ -1249,12 +1249,13 @@ def test_sqlite_single_unexpected_index_column_names_complete_result_format(
             },
         )
     )
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="my_test_datasource",
-            data_connector_name="my_sql_data_connector",
-            # data_asset_name="main.my_asset"
-            data_asset_name="my_asset",
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="my_asset",
+            )
         )
     )
     assert len(batch_definition_list) == 1
@@ -1323,12 +1324,13 @@ def test_sqlite_single_unexpected_index_column_names_summary_result_format(
             },
         )
     )
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="my_test_datasource",
-            data_connector_name="my_sql_data_connector",
-            # data_asset_name="main.my_asset"
-            data_asset_name="my_asset",
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="my_asset",
+            )
         )
     )
     assert len(batch_definition_list) == 1
@@ -1391,12 +1393,13 @@ def test_sqlite_multiple_unexpected_index_column_names_complete_result_format(
             },
         )
     )
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="my_test_datasource",
-            data_connector_name="my_sql_data_connector",
-            # data_asset_name="main.my_asset"
-            data_asset_name="my_asset",
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="my_asset",
+            )
         )
     )
     assert len(batch_definition_list) == 1
@@ -1474,12 +1477,13 @@ def test_sql_multiple_unexpected_index_column_names_complete_result_format_limit
             },
         )
     )
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="my_test_datasource",
-            data_connector_name="my_sql_data_connector",
-            # data_asset_name="main.my_asset"
-            data_asset_name="my_asset",
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="my_asset",
+            )
         )
     )
     assert len(batch_definition_list) == 1
@@ -1502,8 +1506,6 @@ def test_sql_multiple_unexpected_index_column_names_complete_result_format_limit
         "unexpected_count": 3,
         "unexpected_index_list": [
             {"pk_1": 3, "pk_2": "three"},
-            {"pk_1": 4, "pk_2": "four"},
-            {"pk_1": 5, "pk_2": "five"},
         ],
         "unexpected_index_query": "SELECT animals, pk_1, pk_2 \n"
         "FROM animal_names \n"
@@ -1548,12 +1550,13 @@ def test_sql_multiple_unexpected_index_column_names_summary_result_format(
             },
         )
     )
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="my_test_datasource",
-            data_connector_name="my_sql_data_connector",
-            # data_asset_name="main.my_asset"
-            data_asset_name="my_asset",
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="my_asset",
+            )
         )
     )
     assert len(batch_definition_list) == 1
@@ -1622,12 +1625,13 @@ def test_sql_multiple_unexpected_index_column_names_summary_result_format_limit_
             },
         )
     )
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="my_test_datasource",
-            data_connector_name="my_sql_data_connector",
-            # data_asset_name="main.my_asset"
-            data_asset_name="my_asset",
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="my_asset",
+            )
         )
     )
     assert len(batch_definition_list) == 1
@@ -1686,12 +1690,13 @@ def test_sql_multiple_unexpected_index_column_names_basic_result_format(
             },
         )
     )
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="my_test_datasource",
-            data_connector_name="my_sql_data_connector",
-            # data_asset_name="main.my_asset"
-            data_asset_name="my_asset",
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="my_asset",
+            )
         )
     )
     assert len(batch_definition_list) == 1
@@ -1748,12 +1753,13 @@ def test_sql_single_unexpected_index_column_names_complete_result_format_non_exi
             },
         )
     )
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="my_test_datasource",
-            data_connector_name="my_sql_data_connector",
-            # data_asset_name="main.my_asset"
-            data_asset_name="my_asset",
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="my_asset",
+            )
         )
     )
     assert len(batch_definition_list) == 1
@@ -1808,12 +1814,13 @@ def test_sql_multiple_unexpected_index_column_names_complete_result_format_non_e
             },
         )
     )
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="my_test_datasource",
-            data_connector_name="my_sql_data_connector",
-            # data_asset_name="main.my_asset"
-            data_asset_name="my_asset",
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="my_asset",
+            )
         )
     )
     assert len(batch_definition_list) == 1
