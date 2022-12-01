@@ -24,7 +24,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     OperationalError,
 )
 from great_expectations.expectations.metrics import MetaMetricProvider
-from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.expectations.metrics.import_manager import F, quoted_name, sa
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_partial,
@@ -34,7 +34,7 @@ from great_expectations.expectations.metrics.util import (
     Insert,
     Label,
     Select,
-    get_typed_column_names,
+    get_dbms_compatible_column_names,
     verify_column_names_exist,
 )
 from great_expectations.expectations.registry import (
@@ -103,9 +103,9 @@ def column_function_partial(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name = accessor_domain_kwargs["column"]
+                column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
-                column_name = get_typed_column_names(
+                column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
@@ -173,9 +173,9 @@ def column_function_partial(
                     domain_kwargs=compute_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name = accessor_domain_kwargs["column"]
+                column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
-                column_name = get_typed_column_names(
+                column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
@@ -243,9 +243,9 @@ def column_function_partial(
                     domain_kwargs=compute_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name = accessor_domain_kwargs["column"]
+                column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
-                column_name = get_typed_column_names(
+                column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
@@ -327,9 +327,9 @@ def column_condition_partial(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name = accessor_domain_kwargs["column"]
+                column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
-                column_name = get_typed_column_names(
+                column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
@@ -393,9 +393,9 @@ def column_condition_partial(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name = accessor_domain_kwargs["column"]
+                column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
-                column_name = get_typed_column_names(
+                column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
@@ -476,9 +476,9 @@ def column_condition_partial(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name = accessor_domain_kwargs["column"]
+                column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
-                column_name = get_typed_column_names(
+                column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
@@ -580,16 +580,19 @@ def column_pair_function_partial(
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_list = [column_A_name, column_B_name]
-                column_list = get_typed_column_names(
-                    column_names=column_list,
+                column_names: List[Union[str, quoted_name]] = [
+                    column_A_name,
+                    column_B_name,
+                ]
+                column_names = get_dbms_compatible_column_names(
+                    column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
                 )
                 # noinspection PyPep8Naming
-                column_A_name = column_list[0]
+                column_A_name = column_names[0]
                 # noinspection PyPep8Naming
-                column_B_name = column_list[1]
+                column_B_name = column_names[1]
 
                 values = metric_fn(
                     cls,
@@ -642,16 +645,19 @@ def column_pair_function_partial(
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_list = [column_A_name, column_B_name]
-                column_list = get_typed_column_names(
-                    column_names=column_list,
+                column_names: List[Union[str, quoted_name]] = [
+                    column_A_name,
+                    column_B_name,
+                ]
+                column_names = get_dbms_compatible_column_names(
+                    column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
                 )
                 # noinspection PyPep8Naming
-                column_A_name = column_list[0]
+                column_A_name = column_names[0]
                 # noinspection PyPep8Naming
-                column_B_name = column_list[1]
+                column_B_name = column_names[1]
 
                 column_pair_function = metric_fn(
                     cls,
@@ -708,16 +714,19 @@ def column_pair_function_partial(
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_list = [column_A_name, column_B_name]
-                column_list = get_typed_column_names(
-                    column_names=column_list,
+                column_names: List[Union[str, quoted_name]] = [
+                    column_A_name,
+                    column_B_name,
+                ]
+                column_names = get_dbms_compatible_column_names(
+                    column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
                 )
                 # noinspection PyPep8Naming
-                column_A_name = column_list[0]
+                column_A_name = column_names[0]
                 # noinspection PyPep8Naming
-                column_B_name = column_list[1]
+                column_B_name = column_names[1]
 
                 column_pair_function = metric_fn(
                     cls,
@@ -800,16 +809,19 @@ def column_pair_condition_partial(
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_list = [column_A_name, column_B_name]
-                column_list = get_typed_column_names(
-                    column_names=column_list,
+                column_names: List[Union[str, quoted_name]] = [
+                    column_A_name,
+                    column_B_name,
+                ]
+                column_names = get_dbms_compatible_column_names(
+                    column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
                 )
                 # noinspection PyPep8Naming
-                column_A_name = column_list[0]
+                column_A_name = column_names[0]
                 # noinspection PyPep8Naming
-                column_B_name = column_list[1]
+                column_B_name = column_names[1]
 
                 meets_expectation_series = metric_fn(
                     cls,
@@ -869,16 +881,19 @@ def column_pair_condition_partial(
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_list = [column_A_name, column_B_name]
-                column_list = get_typed_column_names(
-                    column_names=column_list,
+                column_names: List[Union[str, quoted_name]] = [
+                    column_A_name,
+                    column_B_name,
+                ]
+                column_names = get_dbms_compatible_column_names(
+                    column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
                 )
                 # noinspection PyPep8Naming
-                column_A_name = column_list[0]
+                column_A_name = column_names[0]
                 # noinspection PyPep8Naming
-                column_B_name = column_list[1]
+                column_B_name = column_names[1]
 
                 sqlalchemy_engine: Engine = execution_engine.engine
 
@@ -946,16 +961,19 @@ def column_pair_condition_partial(
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_list = [column_A_name, column_B_name]
-                column_list = get_typed_column_names(
-                    column_names=column_list,
+                column_names: List[Union[str, quoted_name]] = [
+                    column_A_name,
+                    column_B_name,
+                ]
+                column_names = get_dbms_compatible_column_names(
+                    column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
                 )
                 # noinspection PyPep8Naming
-                column_A_name = column_list[0]
+                column_A_name = column_names[0]
                 # noinspection PyPep8Naming
-                column_B_name = column_list[1]
+                column_B_name = column_names[1]
 
                 expected_condition = metric_fn(
                     cls,
@@ -1029,9 +1047,11 @@ def multicolumn_function_partial(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list = accessor_domain_kwargs["column_list"]
+                column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+                    "column_list"
+                ]
 
-                column_list = get_typed_column_names(
+                column_list = get_dbms_compatible_column_names(
                     column_names=column_list,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
@@ -1082,11 +1102,13 @@ def multicolumn_function_partial(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list = accessor_domain_kwargs["column_list"]
+                column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+                    "column_list"
+                ]
 
                 table_columns = metrics["table.columns"]
 
-                column_list = get_typed_column_names(
+                column_list = get_dbms_compatible_column_names(
                     column_names=column_list,
                     batch_columns_list=table_columns,
                     execution_engine=execution_engine,
@@ -1152,9 +1174,11 @@ def multicolumn_function_partial(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list = accessor_domain_kwargs["column_list"]
+                column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+                    "column_list"
+                ]
 
-                column_list = get_typed_column_names(
+                column_list = get_dbms_compatible_column_names(
                     column_names=column_list,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
@@ -1235,9 +1259,11 @@ def multicolumn_condition_partial(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list = accessor_domain_kwargs["column_list"]
+                column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+                    "column_list"
+                ]
 
-                column_list = get_typed_column_names(
+                column_list = get_dbms_compatible_column_names(
                     column_names=column_list,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
@@ -1295,9 +1321,11 @@ def multicolumn_condition_partial(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list = accessor_domain_kwargs["column_list"]
+                column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+                    "column_list"
+                ]
 
-                column_list = get_typed_column_names(
+                column_list = get_dbms_compatible_column_names(
                     column_names=column_list,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
@@ -1366,9 +1394,11 @@ def multicolumn_condition_partial(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list = accessor_domain_kwargs["column_list"]
+                column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+                    "column_list"
+                ]
 
-                column_list = get_typed_column_names(
+                column_list = get_dbms_compatible_column_names(
                     column_names=column_list,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
@@ -1429,9 +1459,9 @@ def _pandas_column_map_condition_values(
 """
         )
 
-    column_name = accessor_domain_kwargs["column"]
+    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
-    column_name = get_typed_column_names(
+    column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
         execution_engine=execution_engine,
@@ -1493,14 +1523,14 @@ def _pandas_column_pair_map_condition_values(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_list = [column_A_name, column_B_name]
-    column_list = get_typed_column_names(
-        column_names=column_list,
+    column_names: List[Union[str, quoted_name]] = [column_A_name, column_B_name]
+    column_names = get_dbms_compatible_column_names(
+        column_names=column_names,
         batch_columns_list=metrics["table.columns"],
         execution_engine=execution_engine,
     )
 
-    domain_values = df[column_list]
+    domain_values = df[column_names]
 
     domain_values = domain_values[boolean_mapped_unexpected_values == True]
 
@@ -1547,9 +1577,9 @@ def _pandas_column_pair_map_condition_filtered_row_count(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_list = [column_A_name, column_B_name]
+    column_names: List[Union[str, quoted_name]] = [column_A_name, column_B_name]
     verify_column_names_exist(
-        column_names=column_list, batch_columns_list=metrics["table.columns"]
+        column_names=column_names, batch_columns_list=metrics["table.columns"]
     )
 
     return df.shape[0]
@@ -1583,9 +1613,9 @@ def _pandas_multicolumn_map_condition_values(
 """
         )
 
-    column_list = accessor_domain_kwargs["column_list"]
+    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
 
-    column_list = get_typed_column_names(
+    column_list = get_dbms_compatible_column_names(
         column_names=column_list,
         batch_columns_list=metrics["table.columns"],
         execution_engine=execution_engine,
@@ -1627,7 +1657,7 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
 """
         )
 
-    column_list = accessor_domain_kwargs["column_list"]
+    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
     verify_column_names_exist(
         column_names=column_list, batch_columns_list=metrics["table.columns"]
     )
@@ -1670,9 +1700,9 @@ def _pandas_column_map_series_and_domain_values(
 """
         )
 
-    column_name = accessor_domain_kwargs["column"]
+    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
-    column_name = get_typed_column_names(
+    column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
         execution_engine=execution_engine,
@@ -1729,9 +1759,9 @@ def _pandas_map_condition_index(
     df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if "column" in accessor_domain_kwargs:
-        column_name = accessor_domain_kwargs["column"]
+        column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
-        column_name = get_typed_column_names(
+        column_name = get_dbms_compatible_column_names(
             column_names=column_name,
             batch_columns_list=metrics["table.columns"],
             execution_engine=execution_engine,
@@ -1749,7 +1779,9 @@ def _pandas_map_condition_index(
             df = df[df[column_name].notnull()]
 
     elif "column_list" in accessor_domain_kwargs:
-        column_list = accessor_domain_kwargs["column_list"]
+        column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+            "column_list"
+        ]
         verify_column_names_exist(
             column_names=column_list, batch_columns_list=metrics["table.columns"]
         )
@@ -1757,6 +1789,8 @@ def _pandas_map_condition_index(
     result_format = metric_value_kwargs["result_format"]
 
     df = df[boolean_mapped_unexpected_values]
+
+    column_name: Union[str, quoted_name]
 
     if "unexpected_index_column_names" in result_format:
         unexpected_index_list: Optional[List[Dict[str, Any]]] = []
@@ -1767,7 +1801,7 @@ def _pandas_map_condition_index(
         for index in unexpected_indices:
             primary_key_dict: Dict[str, Any] = {}
             for column_name in unexpected_index_column_names:
-                column_name = get_typed_column_names(
+                column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
@@ -1804,7 +1838,7 @@ def _pandas_column_map_condition_value_counts(
     ) = metrics.get("unexpected_condition")
     df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
-    column_name = accessor_domain_kwargs["column"]
+    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -1813,7 +1847,7 @@ def _pandas_column_map_condition_value_counts(
 """
         )
 
-    column_name = get_typed_column_names(
+    column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
         execution_engine=execution_engine,
@@ -1877,9 +1911,9 @@ def _pandas_map_condition_rows(
     df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if "column" in accessor_domain_kwargs:
-        column_name = accessor_domain_kwargs["column"]
+        column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
-        column_name = get_typed_column_names(
+        column_name = get_dbms_compatible_column_names(
             column_names=column_name,
             batch_columns_list=metrics["table.columns"],
             execution_engine=execution_engine,
@@ -1897,7 +1931,9 @@ def _pandas_map_condition_rows(
             df = df[df[column_name].notnull()]
 
     elif "column_list" in accessor_domain_kwargs:
-        column_list = accessor_domain_kwargs["column_list"]
+        column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+            "column_list"
+        ]
         verify_column_names_exist(
             column_names=column_list, batch_columns_list=metrics["table.columns"]
         )
@@ -2059,9 +2095,9 @@ def _sqlalchemy_column_map_condition_values(
 """
         )
 
-    column_name = accessor_domain_kwargs["column"]
+    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
-    column_name = get_typed_column_names(
+    column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
         execution_engine=execution_engine,
@@ -2118,16 +2154,16 @@ def _sqlalchemy_column_pair_map_condition_values(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_list = [column_A_name, column_B_name]
-    column_list = get_typed_column_names(
-        column_names=column_list,
+    column_names: List[Union[str, quoted_name]] = [column_A_name, column_B_name]
+    column_names = get_dbms_compatible_column_names(
+        column_names=column_names,
         batch_columns_list=metrics["table.columns"],
         execution_engine=execution_engine,
     )
     # noinspection PyPep8Naming
-    column_A_name = column_list[0]
+    column_A_name = column_names[0]
     # noinspection PyPep8Naming
-    column_B_name = column_list[1]
+    column_B_name = column_names[1]
 
     query = sa.select(
         [
@@ -2172,9 +2208,9 @@ def _sqlalchemy_column_pair_map_condition_filtered_row_count(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_list = [column_A_name, column_B_name]
+    column_names: List[Union[str, quoted_name]] = [column_A_name, column_B_name]
     verify_column_names_exist(
-        column_names=column_list, batch_columns_list=metrics["table.columns"]
+        column_names=column_names, batch_columns_list=metrics["table.columns"]
     )
 
     return execution_engine.engine.execute(
@@ -2210,9 +2246,9 @@ def _sqlalchemy_multicolumn_map_condition_values(
 """
         )
 
-    column_list = accessor_domain_kwargs["column_list"]
+    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
 
-    column_list = get_typed_column_names(
+    column_list = get_dbms_compatible_column_names(
         column_names=column_list,
         batch_columns_list=metrics["table.columns"],
         execution_engine=execution_engine,
@@ -2255,7 +2291,7 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
 """
         )
 
-    column_list = accessor_domain_kwargs["column_list"]
+    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
     verify_column_names_exist(
         column_names=column_list, batch_columns_list=metrics["table.columns"]
     )
@@ -2293,9 +2329,9 @@ def _sqlalchemy_column_map_condition_value_counts(
 """
         )
 
-    column_name = accessor_domain_kwargs["column"]
+    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
-    column_name = get_typed_column_names(
+    column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
         execution_engine=execution_engine,
@@ -2420,9 +2456,9 @@ def _spark_column_map_condition_values(
 """
         )
 
-    column_name = accessor_domain_kwargs["column"]
+    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
-    column_name = get_typed_column_names(
+    column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
         execution_engine=execution_engine,
@@ -2468,9 +2504,9 @@ def _spark_column_map_condition_value_counts(
 """
         )
 
-    column_name = accessor_domain_kwargs["column"]
+    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
-    column_name = get_typed_column_names(
+    column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
         execution_engine=execution_engine,
@@ -2546,16 +2582,16 @@ def _spark_column_pair_map_condition_values(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_list = [column_A_name, column_B_name]
-    column_list = get_typed_column_names(
-        column_names=column_list,
+    column_names: List[Union[str, quoted_name]] = [column_A_name, column_B_name]
+    column_names = get_dbms_compatible_column_names(
+        column_names=column_names,
         batch_columns_list=metrics["table.columns"],
         execution_engine=execution_engine,
     )
     # noinspection PyPep8Naming
-    column_A_name = column_list[0]
+    column_A_name = column_names[0]
     # noinspection PyPep8Naming
-    column_B_name = column_list[1]
+    column_B_name = column_names[1]
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
@@ -2607,9 +2643,9 @@ def _spark_column_pair_map_condition_filtered_row_count(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_list = [column_A_name, column_B_name]
+    column_names: List[Union[str, quoted_name]] = [column_A_name, column_B_name]
     verify_column_names_exist(
-        column_names=column_list, batch_columns_list=metrics["table.columns"]
+        column_names=column_names, batch_columns_list=metrics["table.columns"]
     )
 
     return df.count()
@@ -2643,9 +2679,9 @@ def _spark_multicolumn_map_condition_values(
 """
         )
 
-    column_list = accessor_domain_kwargs["column_list"]
+    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
 
-    column_list = get_typed_column_names(
+    column_list = get_dbms_compatible_column_names(
         column_names=column_list,
         batch_columns_list=metrics["table.columns"],
         execution_engine=execution_engine,
@@ -2701,7 +2737,7 @@ def _spark_multicolumn_map_condition_filtered_row_count(
 """
         )
 
-    column_list = accessor_domain_kwargs["column_list"]
+    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
     verify_column_names_exist(
         column_names=column_list, batch_columns_list=metrics["table.columns"]
     )

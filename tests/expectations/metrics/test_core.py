@@ -21,7 +21,9 @@ from great_expectations.expectations.metrics.import_manager import (
     pyspark_sql_Column,
     quoted_name,
 )
-from great_expectations.expectations.metrics.util import get_typed_column_names
+from great_expectations.expectations.metrics.util import (
+    get_dbms_compatible_column_names,
+)
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.self_check.util import (
     build_pandas_engine,
@@ -201,14 +203,14 @@ def test_column_quoted_name_type_sa(sa):
 
     column_name = "names"
 
-    str_column_name = get_typed_column_names(
+    str_column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=batch_column_list,
         execution_engine=PandasExecutionEngine(),
     )
     assert isinstance(str_column_name, str)
 
-    quoted_column_name = get_typed_column_names(
+    quoted_column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=quoted_batch_column_list,
         execution_engine=engine,
@@ -225,7 +227,7 @@ def test_column_quoted_name_type_sa(sa):
         with pytest.raises(
             ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError
         ) as eee:
-            _ = get_typed_column_names(
+            _ = get_dbms_compatible_column_names(
                 column_names=column_name,
                 batch_columns_list=batch_column_list,
                 execution_engine=engine,
@@ -237,7 +239,7 @@ def test_column_quoted_name_type_sa(sa):
         with pytest.raises(
             ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError
         ) as eee:
-            _ = get_typed_column_names(
+            _ = get_dbms_compatible_column_names(
                 column_names=column_name,
                 batch_columns_list=quoted_batch_column_list,
                 execution_engine=engine,

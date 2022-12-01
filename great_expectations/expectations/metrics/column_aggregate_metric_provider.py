@@ -1,6 +1,6 @@
 import logging
 from functools import wraps
-from typing import Any, Callable, Dict, Optional, Type
+from typing import Any, Callable, Dict, Optional, Type, Union
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
@@ -13,9 +13,9 @@ from great_expectations.execution_engine.sparkdf_execution_engine import (
 )
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
-    sa,
 )
 from great_expectations.expectations.metrics import DeprecatedMetaMetricProvider
+from great_expectations.expectations.metrics.import_manager import quoted_name, sa
 from great_expectations.expectations.metrics.metric_provider import (
     metric_partial,
     metric_value,
@@ -23,7 +23,9 @@ from great_expectations.expectations.metrics.metric_provider import (
 from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
-from great_expectations.expectations.metrics.util import get_typed_column_names
+from great_expectations.expectations.metrics.util import (
+    get_dbms_compatible_column_names,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -71,9 +73,9 @@ def column_aggregate_value(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name = accessor_domain_kwargs["column"]
+                column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
-                column_name = get_typed_column_names(
+                column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
@@ -145,9 +147,9 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                     compute_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name = accessor_domain_kwargs["column"]
+                column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
-                column_name = get_typed_column_names(
+                column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
@@ -209,9 +211,9 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                     domain_kwargs=compute_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name = accessor_domain_kwargs["column"]
+                column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
-                column_name = get_typed_column_names(
+                column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,

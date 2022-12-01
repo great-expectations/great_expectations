@@ -40,6 +40,7 @@ try:
         Label,
         TextClause,
         literal,
+        quoted_name,
     )
     from sqlalchemy.sql.operators import custom_op
 except ImportError:
@@ -56,6 +57,7 @@ except ImportError:
     TableClause = None
     TextClause = None
     literal = None
+    quoted_name = None
     custom_op = None
     OperationalError = None
 
@@ -611,12 +613,12 @@ def column_reflection_fallback(
     return col_info_dict_list
 
 
-def get_typed_column_names(
+def get_dbms_compatible_column_names(
     column_names: Union[List[str], str],
-    batch_columns_list: List[Any],
+    batch_columns_list: List[Union[str, quoted_name]],
     execution_engine: ExecutionEngine,
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
-) -> Union[List[Any], Any]:
+) -> Union[List[Union[str, quoted_name]], Union[str, quoted_name]]:
     """
     Case non-sensitivity is expressed in upper case by common DBMS backends and in lower case by SQLAlchemy, with any
     deviations enclosed with double quotes.
@@ -650,10 +652,12 @@ def get_typed_column_names(
         column_names_list = [column_names]
         is_list = False
 
-    typed_column_names_list: Union[List[Any], Any]
+    typed_column_names_list: Union[
+        List[Union[str, quoted_name]], Union[str, quoted_name]
+    ]
     if isinstance(execution_engine, SqlAlchemyExecutionEngine):
         column_name: str
-        batch_columns_dict: Dict[str, Any] = {
+        batch_columns_dict: Dict[str, Union[str, quoted_name]] = {
             str(column_name): column_name for column_name in batch_columns_list
         }
         typed_column_names_list = [
@@ -670,7 +674,7 @@ def get_typed_column_names(
 
 def verify_column_names_exist(
     column_names: Union[List[str], str],
-    batch_columns_list: List[Any],
+    batch_columns_list: List[Union[str, quoted_name]],
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
 ) -> None:
     """
