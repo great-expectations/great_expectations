@@ -38,7 +38,7 @@ stages:
               sourceFolder: 'static/gallery/'
               filesAcl: 'public-read'
 
-          - bash: mv expectation_library_v2--staging.json expectation_library_v2--tmp.json; mv package_manifests--staging.json package_manifests--tmp.json
+          - bash: pwd; ls -ltr; mv expectation_library_v2--staging.json expectation_library_v2--tmp.json; mv package_manifests--staging.json package_manifests--tmp.json
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Rename staging to prod (tmp for now)'
 
