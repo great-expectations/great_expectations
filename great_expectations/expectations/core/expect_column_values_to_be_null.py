@@ -22,6 +22,7 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+from great_expectations.validator.validator import ValidationDependencies
 
 
 class ExpectColumnValuesToBeNull(ColumnMapExpectation):
@@ -100,7 +101,6 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -161,7 +161,6 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -214,7 +213,6 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -236,14 +234,18 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
-    ):
-        dependencies = super().get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
+        **kwargs,
+    ) -> ValidationDependencies:
+        validation_dependencies: ValidationDependencies = (
+            super().get_validation_dependencies(
+                configuration, execution_engine, runtime_configuration
+            )
         )
-
         # We do not need this metric for a null metric
-        del dependencies["metrics"]["column_values.nonnull.unexpected_count"]
-        return dependencies
+        validation_dependencies.remove_metric_configuration(
+            metric_name="column_values.nonnull.unexpected_count"
+        )
+        return validation_dependencies
 
     def _validate(
         self,

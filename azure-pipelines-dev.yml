@@ -51,7 +51,7 @@ variables:
 stages:
   - stage: scope_check
     pool:
-      vmImage: 'ubuntu-20.04'
+      vmImage: 'ubuntu-latest'
     jobs:
       - job: changes
         steps:
@@ -140,7 +140,7 @@ stages:
   - stage: import_ge
     dependsOn: scope_check
     pool:
-      vmImage: 'ubuntu-18.04'
+      vmImage: 'ubuntu-20.04'
 
     jobs:
       - job: import_ge
@@ -165,7 +165,7 @@ stages:
   - stage: required
     dependsOn: [scope_check, lint, import_ge, custom_checks]
     pool:
-      vmImage: 'ubuntu-18.04'
+      vmImage: 'ubuntu-20.04'
 
     jobs:
       # Runs pytest without any additional flags
