@@ -643,7 +643,7 @@ def get_dbms_compatible_column_names(
         error_message_template=error_message_template,
     )
 
-    column_names_list: Union[List[str], str]
+    column_names_list: List[str]
     is_list: bool
     if isinstance(column_names, list):
         column_names_list = column_names
@@ -652,9 +652,7 @@ def get_dbms_compatible_column_names(
         column_names_list = [column_names]
         is_list = False
 
-    typed_column_names_list: Union[
-        List[Union[str, quoted_name]], Union[str, quoted_name]
-    ]
+    typed_column_names_list: List[Union[str, quoted_name]]
     if isinstance(execution_engine, SqlAlchemyExecutionEngine):
         column_name: str
         batch_columns_dict: Dict[str, Union[str, quoted_name]] = {
