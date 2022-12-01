@@ -5,7 +5,7 @@ import dataclasses
 import itertools
 from datetime import datetime
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Type, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union, cast
 
 import dateutil.tz
 import pydantic
