@@ -1,3 +1,25 @@
+"""This module provides logic for building Sphinx Docs via an Invoke command.
+
+It is currently specific to this build pattern but can be generalized if
+needed in the future.
+
+Typical usage example:
+
+    @invoke.task(
+        help={
+            "clean": "Clean out existing documentation first. Defaults to True.",
+        }
+    )
+    def my_task(
+        ctx,
+        clean=True,
+    ):
+
+        doc_builder = SphinxInvokeDocsBuilder(ctx=ctx)
+        doc_builder.exit_with_error_if_docs_dependencies_are_not_installed()
+        doc_builder.build_html_api_docs_in_temp_folder(clean=clean)
+        ...
+"""
 import importlib
 import pathlib
 import shutil
