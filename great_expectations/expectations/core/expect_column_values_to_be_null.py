@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -86,7 +86,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     args_keys = ("column",)
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -120,7 +120,6 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         renderer_configuration.add_param(
             name="condition_parser", schema_type=ParamSchemaType.STRING
         )
-
         params: RendererParams = renderer_configuration.params
 
         if params.mostly.value < 1.0:
@@ -142,7 +141,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
                 params.row_condition.value,
             )
             template_str = f"{conditional_template_str}, then {template_str}"
-            for conditional_param, condition in conditional_params:
+            for conditional_param, condition in conditional_params.items():
                 renderer_configuration.add_param(
                     name=conditional_param,
                     schema_type=ParamSchemaType.STRING,
@@ -161,7 +160,6 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = (
