@@ -683,7 +683,7 @@ def verify_column_names_exist(
         batch_columns_list: Properly typed column names (output of "table.columns" metric)
         error_message_template: String template to output error message if any column cannot be found in "Batch" object.
     """
-    column_names_list: Union[List[str], str]
+    column_names_list: List[str]
     if isinstance(column_names, list):
         column_names_list = column_names
     else:
