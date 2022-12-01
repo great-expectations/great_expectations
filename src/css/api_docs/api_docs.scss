@@ -5,7 +5,7 @@
 .sphinx-api-doc {
 
     @import "pygments.scss";
-    @import "basic.scss";
+    @import "basic-modified.scss";
     @import "pydata-sphinx-theme-modified.scss";
 
     // Mirror `code` selector for `cite` for inline code snippets in docstrings using backticks: ``
