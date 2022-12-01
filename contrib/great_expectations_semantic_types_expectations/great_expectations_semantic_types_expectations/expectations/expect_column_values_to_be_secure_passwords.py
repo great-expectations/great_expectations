@@ -199,9 +199,7 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.question")
-    def _question_renderer(
-        cls, configuration, result=None, language=None, runtime_configuration=None
-    ):
+    def _question_renderer(cls, configuration, result=None, runtime_configuration=None):
         column = configuration.kwargs.get("column")
         # password = configuration.kwargs.get("password")
         mostly = "{:.2%}".format(float(configuration.kwargs.get("mostly", 1)))
@@ -211,7 +209,7 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
     @classmethod
     @renderer(renderer_type="renderer.answer")
     def _answer_renderer(
-        cls, configuration=None, result=None, language=None, runtime_configuration=None
+        cls, configuration=None, result=None, runtime_configuration=None
     ):
         column = result.expectation_config.kwargs.get("column")
         # password = result.expectation_config.kwargs.get("password")
@@ -229,15 +227,11 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
     #     cls,
     #     configuration=None,
     #     result=None,
-    #     language=None,
     #     runtime_configuration=None,
     #     **kwargs,
     # ):
     #     runtime_configuration = runtime_configuration or {}
-    #     include_column_name = runtime_configuration.get("include_column_name", True)
-    #     include_column_name = (
-    #         include_column_name if include_column_name is not None else True
-    #     )
+    #     include_column_name = False if runtime_configuration.get("include_column_name") is False else True
     #     styling = runtime_configuration.get("styling")
     #     params = substitute_none_for_missing(
     #         configuration.kwargs,

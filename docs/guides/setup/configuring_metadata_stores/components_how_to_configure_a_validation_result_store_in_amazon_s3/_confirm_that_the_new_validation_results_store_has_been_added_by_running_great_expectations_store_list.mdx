@@ -22,3 +22,16 @@ This will list the currently configured Stores that Great Expectations has acces
 ```
 
 Notice the output contains two Validation Results Stores: the original ``validations_store`` on the local filesystem and the ``validations_S3_store`` we just configured.  This is ok, since Great Expectations will look for Validation Results on the S3 bucket as long as we set the ``validations_store_name`` variable to ``validations_S3_store``.
+
+Additional options are available for a more fine-grained customization of the TupleS3StoreBackend.
+
+```yaml title="File contents: great_expectations.yml"
+class_name: ValidationsStore
+store_backend:
+  class_name: TupleS3StoreBackend
+  bucket: '<your_s3_bucket_name>'
+  prefix: '<your_s3_bucket_folder_name>'
+  boto3_options:
+    endpoint_url: ${S3_ENDPOINT} # Uses the S3_ENDPOINT environment variable to determine which endpoint to use.
+    region_name: '<your_aws_region_name>'
+```
