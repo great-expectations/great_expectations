@@ -122,7 +122,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         )
         params: RendererParams = renderer_configuration.params
 
-        if params.mostly.value < 1.0:
+        if params.mostly.value and params.mostly.value < 1.0:
             params.mostly_pct.value = num_to_str(
                 params.mostly.value * 100, precision=15, no_scientific=True
             )
