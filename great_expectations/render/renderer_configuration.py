@@ -12,10 +12,8 @@ from great_expectations.core import (
 if TYPE_CHECKING:
     from pydantic.typing import AbstractSetIntStr, DictStrAny, MappingIntStrAny
 
-RendererParams = TypeVar("RendererParams")
 
-
-class RendererParamsBase(BaseModel):
+class RendererParams(BaseModel):
     class Config:
         validate_assignment = True
         arbitrary_types_allowed = True
@@ -53,7 +51,7 @@ class RendererConfiguration(BaseModel):
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
     styling: Union[dict, None] = Field(None, allow_mutation=False)
-    params: BaseModel = Field(default_factory=RendererParamsBase, allow_mutation=True)
+    params: BaseModel = Field(default_factory=RendererParams, allow_mutation=True)
 
     class Config:
         validate_assignment = True
