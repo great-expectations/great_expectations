@@ -7,6 +7,7 @@
 # -- Update syspath
 import os
 import sys
+from urllib.parse import urlparse
 
 from great_expectations.core._docs_decorators import WHITELISTED_TAG
 
@@ -61,6 +62,7 @@ def custom_process_docstring(app, what, name, obj, options, lines):
     """Custom processing for use during docstring processing."""
     _remove_whitelist_tag(app=app, what=what, name=name, obj=obj, options=options, lines=lines)
     _process_relevant_documentation_tag(app=app, what=what, name=name, obj=obj, options=options, lines=lines)
+    _convert_documentation_links(app=app, what=what, name=name, obj=obj, options=options, lines=lines)
 
 def _remove_whitelist_tag(app, what, name, obj, options, lines):
     """Remove the whitelisted tag from documentation before rendering.
@@ -81,6 +83,23 @@ def _process_relevant_documentation_tag(app, what, name, obj, options, lines):
         if DOCUMENTATION_TAG in line:
             trimmed_line = line.replace(DOCUMENTATION_TAG, "Relevant Documentation Links\n")
             lines[idx] = trimmed_line
+
+def _convert_documentation_links(app, what, name, obj, options, lines):
+    """Remove links and replace with formatted title.
+
+    Note: This method modifies lines in place per sphinx documentation.
+    """
+    pass
+    # for idx, line in enumerate(lines):
+    #     if "http" in line:
+    #         url = line
+    #         url_parts = urlparse(url)
+    #         url_path = url_parts.path.strip('/').split('/')
+    #         url_text = url_path[-1]
+    #         # TODO: AJB change underscores to spaces and convert to title case
+    #         processed_line = f'<a href="{url}">{url_text}</a>'
+    #         lines[idx] = processed_line
+
 
 
 def setup(app):
