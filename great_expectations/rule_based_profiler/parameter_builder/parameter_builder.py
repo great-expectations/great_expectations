@@ -171,17 +171,6 @@ class ParameterBuilder(ABC, Builder):
                 parameters=parameters,
                 recompute_existing_parameter_values=recompute_existing_parameter_values,
             )
-            print(
-                f"\n[ALEX_TEST] [PARAMETER_BUILDER.build_parameters()] PARAMETER_COMPUTATION_RESULT:\n{parameter_computation_result} ; TYPE: {str(type(parameter_computation_result))}"
-            )
-            # print(f'\n[ALEX_TEST] [PARAMETER_BUILDER.build_parameters()] PARAMETER_COMPUTATION_RESULT.DETAILS:\n{parameter_computation_result[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]} ; TYPE: {str(type(parameter_computation_result[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]))}')
-            # TODO: <Alex>ALEX</Alex>
-            # if "graph" in parameter_computation_result[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY] and not parameter_computation_result[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]["graph"]:
-            #     del parameter_computation_result[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]["graph"]
-            # TODO: <Alex>ALEX</Alex>
-            print(
-                f"\n[ALEX_TEST] [PARAMETER_BUILDER.build_parameters()] PARAMETER_COMPUTATION_RESULT_JSON_SERIALIZED:\n{convert_to_json_serializable(parameter_computation_result)} ; TYPE: {str(type(convert_to_json_serializable(parameter_computation_result)))}"
-            )
 
             parameter_values: Dict[str, Any] = {
                 self.raw_fully_qualified_parameter_name: parameter_computation_result,
@@ -340,7 +329,6 @@ class ParameterBuilder(ABC, Builder):
         limit: Optional[int] = None,
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
-        validation_graph_only: Union[str, bool] = False,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -356,7 +344,6 @@ class ParameterBuilder(ABC, Builder):
         :param limit: Optional limit on number of "Batch" objects requested (supports single-Batch scenarios).
         :param enforce_numeric_metric: Flag controlling whether or not metric output must be numerically-valued.
         :param replace_nan_with_zero: Directive controlling how NaN metric values, if encountered, should be handled.
-        :param validation_graph_only: Directive controlling whether or not to return only unresolved "ValidationGraph".
         :param domain: "Domain" object scoping "$variable"/"$parameter"-style references in configuration and runtime.
         :param variables: Part of the "rule state" available for "$variable"-style references.
         :param parameters: Part of the "rule state" available for "$parameter"-style references.
@@ -456,29 +443,7 @@ specified (empty "metric_name" value detected)."""
             for kwargs_pair_cursor in kwargs_combinations
         ]
 
-        # Step-4: Sort "MetricConfiguration" directives by "metric_value_kwargs_id" and "batch_id" (in that order).
-        # This precise sort order enables pairing every metric value with its respective "batch_id" (e.g., for display).
-
-        # TODO: <Alex>ALEX-MAYBE_DO_NOT_NEED_SORTING-AttributedResolvedMetrics-DOES_IT???</Alex>
-        # batch_id_idx: int
-        # batch_id_ordering: Dict[str, int] = {
-        #     batch_id: batch_id_idx for batch_id_idx, batch_id in enumerate(batch_ids)
-        # }
-        # TODO: <Alex>ALEX</Alex>
-
-        # TODO: <Alex>ALEX-MAYBE_DO_NOT_NEED_SORTING-AttributedResolvedMetrics-DOES_IT???</Alex>
-        # metrics_to_resolve = sorted(
-        #     metrics_to_resolve,
-        #     key=lambda metric_configuration_element: (
-        #         metric_configuration_element.metric_value_kwargs_id,
-        #         batch_id_ordering[
-        #             metric_configuration_element.metric_domain_kwargs["batch_id"]
-        #         ],
-        #     ),
-        # )
-        # TODO: <Alex>ALEX</Alex>
-
-        # Step-5: Resolve all metrics in one operation simultaneously.
+        # Step-4: Resolve all metrics in one operation simultaneously.
 
         # The Validator object used for metric calculation purposes.
         validator: Validator = self.get_validator(
@@ -493,229 +458,106 @@ specified (empty "metric_name" value detected)."""
                 runtime_configuration=None,
             )
         )
-        print(
-            f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] GRAPH:\n{graph} ; TYPE: {str(type(graph))}"
-        )
-        # TODO: <Alex>ALEX</Alex>
-        print(
-            f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] GRAPH.EDGES:\n{graph.edges} ; TYPE: {str(type(graph.edges))}"
-        )
-        print(
-            f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] GRAPH.EDGE_IDS:\n{graph.edge_ids} ; TYPE: {str(type(graph.edge_ids))}"
-        )
-        # TODO: <Alex>ALEX</Alex>
 
-        # TODO: <Alex>ALEX</Alex>
-        # resolved_metrics: Dict[
-        #     Tuple[str, str, str], MetricValue
-        # ] = validator.metrics_calculator.compute_metrics(
-        #     metric_configurations=metrics_to_resolve,
-        #     runtime_configuration=None,
-        # )
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # Obtain validation_graph_only from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        validation_graph_only = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=validation_graph_only,
-            expected_return_type=bool,
-            variables=variables,
-            parameters=parameters,
-        )
-        print(
-            f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] VALIDATION_GRAPH_ONLY:\n{validation_graph_only} ; TYPE: {str(type(validation_graph_only))}"
+        resolved_metrics: Dict[
+            Tuple[str, str, str], MetricValue
+        ] = validator.metrics_calculator.resolve_validation_graph_and_handle_aborted_metrics_info(
+            graph=graph,
+            runtime_configuration=None,
+            min_graph_edges_pbar_enable=0,
+            show_progress_bars=True,
         )
 
-        if validation_graph_only:
-            # Build and return result to receiver (contains "ValidationGraph" only).
-            return MetricComputationResult(
-                # TODO: <Alex>ALEX</Alex>
-                # graph=graph,
-                # TODO: <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX-CAN-attributed_resolved_metrics-BE_OMITTED?</Alex>
-                attributed_resolved_metrics=None,
-                # TODO: <Alex>ALEX</Alex>
-                details={
-                    "metric_configuration": {
-                        "metric_name": metric_name,
-                        "domain_kwargs": domain_kwargs,
-                        "metric_value_kwargs": metric_value_kwargs[0]
-                        if len(metric_value_kwargs) == 1
-                        else metric_value_kwargs,
-                    },
-                    "num_batches": len(batch_ids),
-                    # TODO: <Alex>ALEX</Alex>
-                    "graph": graph,
-                    # TODO: <Alex>ALEX</Alex>
-                },
+        # Step-5: Map resolved metrics to their attributes for identification and recovery by receiver.
+
+        attributed_resolved_metrics_map: Dict[str, AttributedResolvedMetrics] = {}
+
+        resolved_metric_value: MetricValue
+        attributed_resolved_metrics: AttributedResolvedMetrics
+        metric_configuration: MetricConfiguration
+        for metric_configuration in metrics_to_resolve:
+            attributed_resolved_metrics = attributed_resolved_metrics_map.get(
+                metric_configuration.metric_value_kwargs_id
             )
-        else:
-            # TODO: <Alex>ALEX</Alex>
-            resolved_metrics: Dict[
-                Tuple[str, str, str], MetricValue
-            ] = validator.metrics_calculator.resolve_validation_graph_and_handle_aborted_metrics_info(
-                graph=graph,
-                runtime_configuration=None,
-                min_graph_edges_pbar_enable=0,
-                show_progress_bars=True,
-            )
-            # TODO: <Alex>ALEX</Alex>
-
-            # Step-6: Sort resolved metrics according to same sort order as was applied to "MetricConfiguration" directives.
-
-            # TODO: <Alex>ALEX</Alex>
-            # TODO: <Alex>ALEX-MAYBE_DO_NOT_NEED_SORTING-AttributedResolvedMetrics-DOES_IT???</Alex>
-            # resolved_metrics_sorted: Dict[Tuple[str, str, str], MetricValue] = {}
-            # TODO: <Alex>ALEX</Alex>
-
-            metric_configuration: MetricConfiguration
-
-            resolved_metric_value: MetricValue
-
-            # TODO: <Alex>ALEX</Alex>
-            # TODO: <Alex>ALEX-COMBINE_THIS_LOGIC_WITH_BELOW_LOOP</Alex>
-            # for metric_configuration in metrics_to_resolve:
-            #     # TODO: <Alex>ALEX-COMBINE_THIS_LOGIC_WITH_BELOW_LOOP</Alex>
-            #     if metric_configuration.id not in resolved_metrics:
-            #         logger.warning(
-            #             f"{metric_configuration.id[0]} was not found in the resolved Metrics for ParameterBuilder."
-            #         )
-            #         continue
-            #
-            #     # TODO: <Alex>ALEX</Alex>
-            #     # TODO: <Alex>ALEX-MAYBE_DO_NOT_NEED_SORTING-AttributedResolvedMetrics-DOES_IT???</Alex>
-            #     # resolved_metrics_sorted[metric_configuration.id] = resolved_metrics[metric_configuration.id]
-            #     # TODO: <Alex>ALEX</Alex>
-            # TODO: <Alex>ALEX-COMBINE_THIS_LOGIC_WITH_BELOW_LOOP</Alex>
-            # TODO: <Alex>ALEX</Alex>
-
-            # Step-7: Map resolved metrics to their attributes for identification and recovery by receiver.
-
-            attributed_resolved_metrics_map: Dict[str, AttributedResolvedMetrics] = {}
-
-            attributed_resolved_metrics: AttributedResolvedMetrics
-
-            for metric_configuration in metrics_to_resolve:
-                attributed_resolved_metrics = attributed_resolved_metrics_map.get(
+            if attributed_resolved_metrics is None:
+                attributed_resolved_metrics = AttributedResolvedMetrics(
+                    batch_ids=batch_ids,
+                    metric_attributes=Attributes(
+                        metric_configuration.metric_value_kwargs
+                    ),
+                    metric_values_by_batch_id=None,
+                )
+                attributed_resolved_metrics_map[
                     metric_configuration.metric_value_kwargs_id
+                ] = attributed_resolved_metrics
+
+            if metric_configuration.id in resolved_metrics:
+                resolved_metric_value = resolved_metrics[metric_configuration.id]
+                attributed_resolved_metrics.add_resolved_metric(
+                    batch_id=metric_configuration.metric_domain_kwargs["batch_id"],
+                    value=resolved_metric_value,
                 )
-                if attributed_resolved_metrics is None:
-                    attributed_resolved_metrics = AttributedResolvedMetrics(
-                        batch_ids=batch_ids,
-                        metric_attributes=Attributes(
-                            metric_configuration.metric_value_kwargs
-                        ),
-                        metric_values_by_batch_id=None,
-                    )
-                    attributed_resolved_metrics_map[
-                        metric_configuration.metric_value_kwargs_id
-                    ] = attributed_resolved_metrics
-
-                # TODO: <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX-MAYBE_DO_NOT_NEED_SORTING-AttributedResolvedMetrics-DOES_IT???</Alex>
-                # if metric_configuration.id in resolved_metrics_sorted:
-                #     resolved_metric_value = resolved_metrics_sorted[metric_configuration.id]
-                #     attributed_resolved_metrics.add_resolved_metric(
-                #         batch_id=metric_configuration.metric_domain_kwargs["batch_id"],
-                #         value=resolved_metric_value,
-                #     )
-                # else:
-                #     continue
-                # TODO: <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX-MAYBE_DO_NOT_NEED_SORTING-AttributedResolvedMetrics-DOES_IT???</Alex>
-                if metric_configuration.id in resolved_metrics:
-                    resolved_metric_value = resolved_metrics[metric_configuration.id]
-                    attributed_resolved_metrics.add_resolved_metric(
-                        batch_id=metric_configuration.metric_domain_kwargs["batch_id"],
-                        value=resolved_metric_value,
-                    )
-                else:
-                    logger.warning(
-                        f"{metric_configuration.id[0]} was not found in the resolved Metrics for ParameterBuilder."
-                    )
-                    continue
-                # TODO: <Alex>ALEX</Alex>
-
-            # Step-8: Convert scalar metric values to vectors to enable uniformity of processing in subsequent operations.
-
-            metric_attributes_id: str
-            for (
-                metric_attributes_id,
-                attributed_resolved_metrics,
-            ) in attributed_resolved_metrics_map.items():
-                if (
-                    isinstance(
-                        attributed_resolved_metrics.conditioned_metric_values,
-                        np.ndarray,
-                    )
-                    and attributed_resolved_metrics.conditioned_metric_values.ndim == 1
-                ):
-                    attributed_resolved_metrics.metric_values_by_batch_id = {
-                        batch_id: [resolved_metric_value]
-                        for batch_id, resolved_metric_value in attributed_resolved_metrics.attributed_metric_values.items()
-                    }
-                    attributed_resolved_metrics_map[
-                        metric_attributes_id
-                    ] = attributed_resolved_metrics
-
-            # Step-9: Apply numeric/hygiene flags (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
-
-            for (
-                metric_attributes_id,
-                attributed_resolved_metrics,
-            ) in attributed_resolved_metrics_map.items():
-                self._sanitize_metric_computation(
-                    parameter_builder=self,
-                    metric_name=metric_name,
-                    attributed_resolved_metrics=attributed_resolved_metrics,
-                    enforce_numeric_metric=enforce_numeric_metric,
-                    replace_nan_with_zero=replace_nan_with_zero,
-                    domain=domain,
-                    variables=variables,
-                    parameters=parameters,
+            else:
+                logger.warning(
+                    f"{metric_configuration.id[0]} was not found in the resolved Metrics for ParameterBuilder."
                 )
+                continue
 
-            # Step-10: Build and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").
-            details: dict = {
-                "metric_configuration": {
-                    "metric_name": metric_name,
-                    "domain_kwargs": domain_kwargs,
-                    "metric_value_kwargs": metric_value_kwargs[0]
-                    if len(metric_value_kwargs) == 1
-                    else metric_value_kwargs,
-                },
-                "num_batches": len(batch_ids),
-                # TODO: <Alex>ALEX</Alex>
-                "graph": graph,
-                # TODO: <Alex>ALEX</Alex>
-            }
-            return MetricComputationResult(
-                # TODO: <Alex>ALEX</Alex>
-                # graph=graph,
-                # TODO: <Alex>ALEX</Alex>
-                attributed_resolved_metrics=list(
-                    attributed_resolved_metrics_map.values()
-                ),
-                # TODO: <Alex>ALEX</Alex>
-                # details={
-                #     "metric_configuration": {
-                #         "metric_name": metric_name,
-                #         "domain_kwargs": domain_kwargs,
-                #         "metric_value_kwargs": metric_value_kwargs[0]
-                #         if len(metric_value_kwargs) == 1
-                #         else metric_value_kwargs,
-                #     },
-                #     "num_batches": len(batch_ids),
-                #     # TODO: <Alex>ALEX</Alex>
-                #     "graph": graph,
-                #     # TODO: <Alex>ALEX</Alex>
-                # },
-                # TODO: <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX</Alex>
-                details=details,
-                # TODO: <Alex>ALEX</Alex>
+        # Step-6: Convert scalar metric values to vectors to enable uniformity of processing in subsequent operations.
+
+        metric_attributes_id: str
+        for (
+            metric_attributes_id,
+            attributed_resolved_metrics,
+        ) in attributed_resolved_metrics_map.items():
+            if (
+                isinstance(
+                    attributed_resolved_metrics.conditioned_metric_values,
+                    np.ndarray,
+                )
+                and attributed_resolved_metrics.conditioned_metric_values.ndim == 1
+            ):
+                attributed_resolved_metrics.metric_values_by_batch_id = {
+                    batch_id: [resolved_metric_value]
+                    for batch_id, resolved_metric_value in attributed_resolved_metrics.attributed_metric_values.items()
+                }
+                attributed_resolved_metrics_map[
+                    metric_attributes_id
+                ] = attributed_resolved_metrics
+
+        # Step-7: Apply numeric/hygiene flags (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
+
+        for (
+            metric_attributes_id,
+            attributed_resolved_metrics,
+        ) in attributed_resolved_metrics_map.items():
+            self._sanitize_metric_computation(
+                parameter_builder=self,
+                metric_name=metric_name,
+                attributed_resolved_metrics=attributed_resolved_metrics,
+                enforce_numeric_metric=enforce_numeric_metric,
+                replace_nan_with_zero=replace_nan_with_zero,
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
             )
+
+        # Step-8: Build and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").
+
+        details: dict = {
+            "metric_configuration": {
+                "metric_name": metric_name,
+                "domain_kwargs": domain_kwargs,
+                "metric_value_kwargs": metric_value_kwargs[0]
+                if len(metric_value_kwargs) == 1
+                else metric_value_kwargs,
+            },
+            "num_batches": len(batch_ids),
+        }
+        return MetricComputationResult(
+            attributed_resolved_metrics=list(attributed_resolved_metrics_map.values()),
+            details=details,
+        )
 
     @staticmethod
     def _sanitize_metric_computation(

@@ -1030,7 +1030,7 @@ class Validator:
                 processed_configurations=processed_configurations,
             )
         except Exception as err:
-            # If a general Exception occurs during the execution of "ValidationGraph.resolve_validation_graph()", then
+            # If a general Exception occurs during the execution of "ValidationGraph.resolve()", then
             # all expectations in the suite are impacted, because it is impossible to attribute the failure to a metric.
             if catch_exceptions:
                 exception_traceback: str = traceback.format_exc()
@@ -1179,7 +1179,7 @@ class Validator:
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ]
-        resolved_metrics, aborted_metrics_info = graph.resolve_validation_graph(
+        resolved_metrics, aborted_metrics_info = graph.resolve(
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=0,
             show_progress_bars=True,

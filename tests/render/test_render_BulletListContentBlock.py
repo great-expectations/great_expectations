@@ -81,7 +81,7 @@ def test_all_expectations_using_test_definitions():
 
     # Historically, collecting all the JSON tests was an issue - this step ensures we actually have test data.
     assert (
-        len(test_files) == 60
+        len(test_files) == 61
     ), "Something went wrong when collecting JSON Expectation test fixtures"
 
     # The following do not work with this parameterized test due to incomplete render methods.
