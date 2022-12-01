@@ -381,10 +381,7 @@ def docs(
     sphinx_api_docs_source_dir = "docs/sphinx_api_docs_source"
     os.chdir(sphinx_api_docs_source_dir)
 
-    if clean:
-        doc_builder.remove_existing_sphinx_api_docs()
-
-    doc_builder.build_html_api_docs_in_temp_folder()
+    doc_builder.build_html_api_docs_in_temp_folder(clean=clean)
 
     repo_root = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
 

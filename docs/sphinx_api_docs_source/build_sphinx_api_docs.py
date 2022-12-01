@@ -37,14 +37,9 @@ class SphinxInvokeDocsBuilder:
                 code=1,
             )
 
-    def remove_existing_sphinx_api_docs(self):
-        """Removes existing sphinx api docs."""
-        cmds = ["make clean"]
-        self.ctx.run(" ".join(cmds), echo=True, pty=True)
-
-    def build_html_api_docs_in_temp_folder(self):
+    def build_html_api_docs_in_temp_folder(self, clean: bool = True):
         """Builds html api documentation in temporary folder."""
-        cmds = ["sphinx-build -M html ./ ../../temp_docs_build_dir/sphinx_api_docs"]
+        cmds = ["sphinx-build -M html ./ ../../temp_docs_build_dir/sphinx_api_docs", "-E" if clean else ""]
         self.ctx.run(" ".join(cmds), echo=True, pty=True)
 
     def remove_existing_api_docs(self, repo_root: pathlib.Path):
