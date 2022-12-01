@@ -111,8 +111,15 @@ class ExpectTableRowCountToEqual(TableExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        renderer_configuration: RendererConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> Tuple[str, dict, Union[dict, None]]:
+        renderer_configuration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            runtime_configuration=runtime_configuration,
+        )
         renderer_configuration.add_param(
             name="value", schema_type=ParamSchemaType.NUMBER
         )
