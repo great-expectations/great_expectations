@@ -5,7 +5,8 @@
 #
 # The sole purpose of this pipeline is to copy staging JSON files to prod for the Expectation Gallery and trigger the prod algolia indices.
 
-trigger: none
+trigger:
+  - none
 
 stages:
   - stage: deploy_gallery_prod
