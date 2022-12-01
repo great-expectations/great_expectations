@@ -16,11 +16,19 @@ class ExpectationSuiteAnonymizer(BaseAnonymizer):
     def anonymize(
         self, obj: Optional["ExpectationSuite"] = None, **kwargs  # noqa: F821
     ) -> dict:
+        # Exit early if null
         expectation_suite = obj
+        if not expectation_suite:
+            return {}
+
+        # Exit early if no expectations to anonymize
+        expectations = expectation_suite.expectations
+        if not expectations:
+            return {}
+
         anonymized_info_dict = {}
         anonymized_expectation_counts = list()
 
-        expectations = expectation_suite.expectations
         expectation_types = [
             expectation.expectation_type for expectation in expectations
         ]

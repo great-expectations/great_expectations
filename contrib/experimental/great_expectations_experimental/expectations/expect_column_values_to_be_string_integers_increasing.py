@@ -22,9 +22,9 @@ from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_function_partial,
-    metric_partial,
 )
 from great_expectations.expectations.metrics.import_manager import F, Window, sparktypes
+from great_expectations.expectations.metrics.metric_provider import metric_partial
 from great_expectations.expectations.registry import get_metric_kwargs
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -242,12 +242,13 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
             runtime_configuration=runtime_configuration,
         )
 
-        dependencies["metrics"][
-            "column_values.string_integers.increasing.map"
-        ] = MetricConfiguration(
+        dependencies.set_metric_configuration(
             metric_name="column_values.string_integers.increasing.map",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            metric_configuration=MetricConfiguration(
+                metric_name="column_values.string_integers.increasing.map",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
         )
 
         return dependencies
