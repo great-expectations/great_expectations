@@ -67,13 +67,16 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         return kwargs
 
     def add_param(
-        self, name: str, schema_type: ParamSchemaType, value: Optional[Any] = None
+        self,
+        name: str,
+        schema_type: Union[ParamSchemaType, str],
+        value: Optional[Any] = None,
     ) -> None:
         """Adds a param that can be substituted into a template string during rendering.
 
         Attributes:
             name (str): A name for the attribute to be added to this RendererConfiguration instance.
-            schema_type (ParamSchemaType): The type of value being substituted. One of:
+            schema_type (ParamSchemaType or string): The type of value being substituted. One of:
                 - string
                 - number
                 - boolean
