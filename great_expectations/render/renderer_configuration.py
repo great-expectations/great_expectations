@@ -30,7 +30,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
     styling: Union[dict, None] = Field(None, allow_mutation=False)
-    params: RendererParams = Field(None, allow_mutation=True)  # type: ignore[assignment] # mypy bug see: https://github.com/python/mypy/issues/12385
+    params: Optional[RendererParams] = Field(None, allow_mutation=True)  # type: ignore[assignment] # mypy bug see: https://github.com/python/mypy/issues/12385
     template_str: Optional[str] = Field(None, allow_mutation=True)
 
     class Config:
