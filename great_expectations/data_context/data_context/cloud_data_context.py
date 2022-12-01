@@ -24,8 +24,8 @@ from great_expectations.data_context.cloud_constants import (
     GXCloudEnvironmentVariable,
     GXCloudRESTResource,
 )
-from great_expectations.data_context.data_context._serializable_data_context import (
-    _SerializableDataContext,
+from great_expectations.data_context.data_context.serializable_data_context import (
+    SerializableDataContext,
 )
 from great_expectations.data_context.data_context_variables import (
     CloudDataContextVariables,
@@ -53,7 +53,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class CloudDataContext(_SerializableDataContext):
+class CloudDataContext(SerializableDataContext):
     """
     Subclass of AbstractDataContext that contains functionality necessary to hydrate state from cloud
     """

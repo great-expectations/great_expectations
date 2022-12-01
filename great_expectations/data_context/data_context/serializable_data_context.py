@@ -33,7 +33,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 
-class _SerializableDataContext(AbstractDataContext):
+class SerializableDataContext(AbstractDataContext):
 
     UNCOMMITTED_DIRECTORIES = ["data_docs", "validations"]
     GE_UNCOMMITTED_DIR = "uncommitted"
@@ -63,7 +63,7 @@ class _SerializableDataContext(AbstractDataContext):
         project_root_dir: Optional[str] = None,
         usage_statistics_enabled: bool = True,
         runtime_environment: Optional[dict] = None,
-    ) -> _SerializableDataContext:
+    ) -> SerializableDataContext:
         """
         Build a new great_expectations directory and DataContext object in the provided project_root_dir.
 
@@ -415,21 +415,21 @@ class _SerializableDataContext(AbstractDataContext):
     @classmethod
     def _does_context_have_at_least_one_datasource(cls, ge_dir: str) -> bool:
         context = cls._attempt_context_instantiation(ge_dir)
-        if not isinstance(context, _SerializableDataContext):
+        if not isinstance(context, SerializableDataContext):
             return False
         return len(context.list_datasources()) >= 1
 
     @classmethod
     def _does_context_have_at_least_one_suite(cls, ge_dir: str) -> bool:
         context = cls._attempt_context_instantiation(ge_dir)
-        if not isinstance(context, _SerializableDataContext):
+        if not isinstance(context, SerializableDataContext):
             return False
         return bool(context.list_expectation_suites())
 
     @classmethod
     def _attempt_context_instantiation(
         cls, ge_dir: str
-    ) -> Optional[_SerializableDataContext]:
+    ) -> Optional[SerializableDataContext]:
         try:
             context = cls(ge_dir)
             return context
