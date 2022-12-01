@@ -298,7 +298,7 @@ class Expectation(metaclass=MetaExpectation):
         """
         Default rendering function that is utilized by GE Cloud Front-end if an implemented atomic renderer fails
         """
-        renderer_configuration: RendererConfiguration = RendererConfiguration(
+        renderer_configuration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
@@ -385,7 +385,7 @@ class Expectation(metaclass=MetaExpectation):
         """
         Rendering function that is utilized by GE Cloud Front-end
         """
-        renderer_configuration: RendererConfiguration = RendererConfiguration(
+        renderer_configuration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
@@ -395,7 +395,9 @@ class Expectation(metaclass=MetaExpectation):
             params_with_json_schema,
             styling,
         ) = cls._atomic_prescriptive_template(
-            renderer_configuration=renderer_configuration,
+            configuration=configuration,
+            result=result,
+            runtime_configuration=runtime_configuration,
         )
         value_obj = renderedAtomicValueSchema.load(
             {
@@ -419,7 +421,7 @@ class Expectation(metaclass=MetaExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[RenderedStringTemplateContent]:
-        renderer_configuration: RendererConfiguration = RendererConfiguration(
+        renderer_configuration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
@@ -806,7 +808,7 @@ class Expectation(metaclass=MetaExpectation):
         """
         Rendering function that is utilized by GE Cloud Front-end
         """
-        renderer_configuration: RendererConfiguration = RendererConfiguration(
+        renderer_configuration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
