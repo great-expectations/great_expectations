@@ -1,5 +1,7 @@
 /*
  * Styles to be applied only to sphinx generated API docs.
+ * These styles are only applied to elements with the sphinx-api-doc class.
+ * We apply that class to generated API docs during the build process.
  */
 
 .sphinx-api-doc {
