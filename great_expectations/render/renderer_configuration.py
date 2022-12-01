@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from enum import Enum
 from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
 
 from pydantic import BaseModel, Field, create_model
@@ -94,6 +95,52 @@ class RendererConfiguration(BaseModel):
             kwargs["styling"] = kwargs["runtime_configuration"].get("styling")
         return kwargs
 
+    def add_param(
+        self, name: str, schema_type: ParamSchemaType, value: Optional[Any] = None
+    ) -> None:
+        """RendererConfiguration add_param method.
+
+        This method will add a param that can be substituted into a template string during rendering.
+
+        Attributes:
+            name (str): A name for the attribute to be added to this RendererConfiguration instance.
+            schema_type (ParamSchemaType): The type of value being substituted. One of:
+                - string
+                - number
+                - boolean
+                - array
+            value (Optional[Any]): The value to be substituted into the template string. If no value is
+                provided, a value lookup will be attempted in RendererConfiguration.kwargs using the
+                provided name.
+
+        Returns:
+            None
+        """
+        renderer_param: Type[BaseModel] = create_model(
+            name,
+            renderer_schema=(Dict[str, ParamSchemaType], Field(..., alias="schema")),
+            value=(Union[Any, None], ...),
+            __base__=RendererConfiguration.RendererParam,
+        )
+        renderer_param_definition: Dict[str, Any] = {name: (renderer_param, ...)}
+
+        # As of Nov 30, 2022 there is a bug in autocompletion for pydantic dynamic models
+        # See: https://github.com/pydantic/pydantic/issues/3930
+        renderer_params: Type[BaseModel] = create_model(
+            "RendererParams",
+            **renderer_param_definition,
+            __base__=self.params.__class__,
+        )
+
+        if value is None:
+            value = self.kwargs.get(name)
+
+        renderer_params_definition: Dict[str, Any] = {
+            **self.params.dict(),
+            name: renderer_param(schema={"type": schema_type}, value=value),
+        }
+        self.params: BaseModel = renderer_params(**renderer_params_definition)
+
     class RendererParam(BaseModel):
         value: Optional[Any]
 
@@ -117,48 +164,11 @@ class RendererConfiguration(BaseModel):
             """
             return bool(self.value)
 
-    def add_param(
-        self, name: str, schema_type: str, value: Optional[Any] = None
-    ) -> None:
-        """RendererConfiguration add_param method.
 
-        This method will add a param that can be substituted into a template string during rendering.
+class ParamSchemaType(str, Enum):
+    """schema_type passed to RendererConfiguration.add_param()"""
 
-        Attributes:
-            name (str): A name for the attribute to be added to this RendererConfiguration instance.
-            schema_type (str): The type of value being substituted. One of:
-                - string
-                - number
-                - boolean
-                - array
-            value: Optional[Any]: The value to be substituted into the template string. If no value is
-                provided, a value lookup will be attempted in RendererConfiguration.kwargs using the
-                provided name.
-
-        Returns:
-            None
-        """
-        renderer_param: Type[BaseModel] = create_model(
-            name,
-            renderer_schema=(Dict[str, str], Field(..., alias="schema")),
-            value=(Union[Any, None], ...),
-            __base__=RendererConfiguration.RendererParam,
-        )
-        renderer_param_definition: Dict[str, Any] = {name: (renderer_param, ...)}
-
-        # As of Nov 30, 2022 there is a bug in autocompletion for pydantic dynamic models
-        # See: https://github.com/pydantic/pydantic/issues/3930
-        renderer_params: Type[BaseModel] = create_model(
-            "RendererParams",
-            **renderer_param_definition,
-            __base__=self.params.__class__,
-        )
-
-        if value is None:
-            value = self.kwargs.get(name)
-
-        renderer_params_definition: Dict[str, Any] = {
-            **self.params.dict(),
-            name: renderer_param(schema={"type": schema_type}, value=value),
-        }
-        self.params: BaseModel = renderer_params(**renderer_params_definition)
+    STRING = "string"
+    NUMBER = "number"
+    BOOLEAN = "boolean"
+    ARRAY = "array"

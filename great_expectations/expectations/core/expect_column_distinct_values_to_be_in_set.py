@@ -1,3 +1,4 @@
+from numbers import Number
 from typing import Dict, List, Optional, Tuple, Union
 
 import altair as alt
@@ -22,6 +23,7 @@ from great_expectations.render import (
 )
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
+    ParamSchemaType,
     RendererConfiguration,
     RendererParams,
 )
@@ -151,19 +153,19 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         )
         renderer_configuration.add_param(
             name="column",
-            schema_type="string",
+            schema_type=ParamSchemaType.STRING,
         )
         renderer_configuration.add_param(
             name="value_set",
-            schema_type="array",
+            schema_type=ParamSchemaType.ARRAY,
         )
         renderer_configuration.add_param(
             name="row_condition",
-            schema_type="string",
+            schema_type=ParamSchemaType.STRING,
         )
         renderer_configuration.add_param(
             name="condition_parser",
-            schema_type="string",
+            schema_type=ParamSchemaType.STRING,
         )
 
         params: RendererParams
@@ -177,8 +179,12 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
 
         else:
             for i, v in enumerate(params.value_set.value):
+                if isinstance(v, Number):
+                    schema_type = ParamSchemaType.NUMBER
+                else:
+                    schema_type = ParamSchemaType.STRING
                 renderer_configuration.add_param(
-                    name=f"v__{str(i)}", schema_type="string", value=v
+                    name=f"v__{str(i)}", schema_type=schema_type, value=v
                 )
 
             params = renderer_configuration.params

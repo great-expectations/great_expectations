@@ -256,9 +256,9 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                                 "schema": {"type": "string"},
                                 "value": None,
                             },
-                            "v__0": {"schema": {"type": "string"}, "value": 19},
-                            "v__1": {"schema": {"type": "string"}, "value": 22},
-                            "v__2": {"schema": {"type": "string"}, "value": 73},
+                            "v__0": {"schema": {"type": "number"}, "value": 19},
+                            "v__1": {"schema": {"type": "number"}, "value": 22},
+                            "v__2": {"schema": {"type": "number"}, "value": 73},
                             "value_set": {
                                 "schema": {"type": "array"},
                                 "value": [19, 22, 73],

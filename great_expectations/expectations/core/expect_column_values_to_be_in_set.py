@@ -1,3 +1,4 @@
+from numbers import Number
 from typing import List, Optional, Tuple, Union
 
 from great_expectations.core import (
@@ -17,6 +18,7 @@ from great_expectations.render import (
 )
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
+    ParamSchemaType,
     RendererConfiguration,
     RendererParams,
 )
@@ -204,31 +206,31 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         )
         renderer_configuration.add_param(
             name="column",
-            schema_type="string",
+            schema_type=ParamSchemaType.STRING,
         )
         renderer_configuration.add_param(
             name="value_set",
-            schema_type="array",
+            schema_type=ParamSchemaType.ARRAY,
         )
         renderer_configuration.add_param(
             name="mostly",
-            schema_type="number",
+            schema_type=ParamSchemaType.NUMBER,
         )
         renderer_configuration.add_param(
             name="mostly_pct",
-            schema_type="string",
+            schema_type=ParamSchemaType.STRING,
         )
         renderer_configuration.add_param(
             name="parse_strings_as_datetimes",
-            schema_type="boolean",
+            schema_type=ParamSchemaType.BOOLEAN,
         )
         renderer_configuration.add_param(
             name="row_condition",
-            schema_type="string",
+            schema_type=ParamSchemaType.STRING,
         )
         renderer_configuration.add_param(
             name="condition_parser",
-            schema_type="string",
+            schema_type=ParamSchemaType.STRING,
         )
 
         params: RendererParams
@@ -238,8 +240,12 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             values_string = "[ ]"
         else:
             for i, v in enumerate(params.value_set.value):
+                if isinstance(v, Number):
+                    schema_type = ParamSchemaType.NUMBER
+                else:
+                    schema_type = ParamSchemaType.STRING
                 renderer_configuration.add_param(
-                    name=f"v__{str(i)}", schema_type="string", value=v
+                    name=f"v__{str(i)}", schema_type=schema_type, value=v
                 )
 
             params = renderer_configuration.params
