@@ -45,7 +45,6 @@ class ExpectColumnBootstrappedKsTestPValueToBeGreaterThan(TableExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> None:
         pass
@@ -56,7 +55,6 @@ class ExpectColumnBootstrappedKsTestPValueToBeGreaterThan(TableExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> None:
         pass

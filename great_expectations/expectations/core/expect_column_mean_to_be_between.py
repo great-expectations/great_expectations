@@ -276,7 +276,6 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> Tuple[str, dict, Union[dict, None]]:
         renderer_configuration = RendererConfiguration(
@@ -363,7 +362,6 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[RenderedStringTemplateContent]:
         renderer_configuration = RendererConfiguration(
@@ -431,7 +429,6 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
     ):
         assert result, "Must pass in result."
