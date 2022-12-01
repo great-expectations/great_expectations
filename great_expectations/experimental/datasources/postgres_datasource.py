@@ -286,6 +286,16 @@ class TableAsset(DataAsset):
 
 
 class PostgresDatasource(Datasource):
+    """Postgres datasource
+
+    Args:
+        name: The name of this datasource
+        connection_str: The SQLAlchemy connection string used to connect to the database.
+            For example: "postgresql+psycopg2://postgres:@localhost/test_database"
+        assets: An optional dictionary whose keys are table asset names and whose values
+            are TableAsset objects.
+    """
+
     # class var definitions
     asset_types: ClassVar[List[Type[DataAsset]]] = [TableAsset]
 
