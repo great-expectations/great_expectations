@@ -7,10 +7,12 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchIdError
+from great_expectations.experimental.datasources.interfaces import (
+    BatchRequest as XBatchRequest,
+)
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.zep.interfaces import BatchRequest as ZepBatchRequest
 
 logger = logging.getLogger(__name__)
 
@@ -531,7 +533,7 @@ BatchDataType = Union[BatchData, pd.DataFrame, SparkDataFrame]
 class Batch(SerializableDictDot):
     def __init__(
         self,
-        data: BatchDataType,
+        data: Optional[BatchDataType] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         batch_definition: Optional[BatchDefinition] = None,
         batch_spec: Optional[BatchSpec] = None,
@@ -773,11 +775,11 @@ def get_batch_request_from_acceptable_arguments(  # noqa: C901 - complexity 21
 
     if batch_request:
         if not isinstance(
-            batch_request, (BatchRequest, RuntimeBatchRequest, ZepBatchRequest)
+            batch_request, (BatchRequest, RuntimeBatchRequest, XBatchRequest)
         ):
             raise TypeError(
                 "batch_request must be a BatchRequest, RuntimeBatchRequest, or a "
-                f"zep.interfaces.BatchRequest object, not {type(batch_request)}"
+                f"experimental.datasources.interfaces.BatchRequest object, not {type(batch_request)}"
             )
         datasource_name = batch_request.datasource_name
 

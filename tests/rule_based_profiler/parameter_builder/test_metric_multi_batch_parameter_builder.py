@@ -35,7 +35,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_default(
 
     # Omitting "single_batch_mode" argument in order to exercise default (False) behavior.
     metric_multi_batch_parameter_builder = MetricMultiBatchParameterBuilder(
-        name="row_count_range",
+        name="row_count",
         metric_name="table.row_count",
         metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
@@ -71,8 +71,8 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_default(
     )
     assert len(parameter_nodes) == 1
 
-    fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
-    expected_value_dict: Dict[str, Optional[str]] = {
+    fully_qualified_parameter_name: str = "$parameter.row_count"
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "attributed_value": None,
         "details": {
@@ -87,7 +87,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_default(
 
     parameter_node: ParameterNode = (
         get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+            fully_qualified_parameter_name=fully_qualified_parameter_name,
             domain=domain,
             parameters=parameters,
         )
@@ -96,7 +96,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_default(
     parameter_node["value"] = None
     parameter_node["attributed_value"] = None
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
 
 @pytest.mark.integration
@@ -115,7 +115,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_no(
     }
 
     metric_multi_batch_parameter_builder = MetricMultiBatchParameterBuilder(
-        name="row_count_range",
+        name="row_count",
         metric_name="table.row_count",
         metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
@@ -156,8 +156,8 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_no(
     )
     assert len(parameter_nodes) == 1
 
-    fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
-    expected_value_dict: Dict[str, Optional[str]] = {
+    fully_qualified_parameter_name: str = "$parameter.row_count"
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "attributed_value": None,
         "details": {
@@ -172,7 +172,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_no(
 
     parameter_node: ParameterNode = (
         get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+            fully_qualified_parameter_name=fully_qualified_parameter_name,
             domain=domain,
             parameters=parameters,
         )
@@ -181,7 +181,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_no(
     parameter_node["value"] = None
     parameter_node["attributed_value"] = None
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
 
 @pytest.mark.integration
@@ -200,7 +200,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_yes(
     }
 
     metric_multi_batch_parameter_builder = MetricMultiBatchParameterBuilder(
-        name="row_count_range",
+        name="row_count",
         metric_name="table.row_count",
         metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
@@ -241,8 +241,8 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_yes(
     )
     assert len(parameter_nodes) == 1
 
-    fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
-    expected_value_dict: Dict[str, Optional[str]] = {
+    fully_qualified_parameter_name: str = "$parameter.row_count"
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "attributed_value": None,
         "details": {
@@ -257,7 +257,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_yes(
 
     parameter_node: ParameterNode = (
         get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+            fully_qualified_parameter_name=fully_qualified_parameter_name,
             domain=domain,
             parameters=parameters,
         )
@@ -266,4 +266,4 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_yes(
     parameter_node["value"] = None
     parameter_node["attributed_value"] = None
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict

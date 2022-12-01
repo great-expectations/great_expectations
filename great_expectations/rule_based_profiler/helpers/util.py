@@ -156,10 +156,18 @@ def get_batch_ids(
 
     batch_ids: List[str] = [batch.id for batch in batch_list]
 
-    if limit is not None:
-        batch_ids = batch_ids[0:limit]
-
     num_batch_ids: int = len(batch_ids)
+
+    if limit is not None:
+        # No need to verify that type of "limit" is "integer", because static type checking already ascertains this.
+        if not (0 <= limit <= num_batch_ids):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""{__name__}.get_batch_ids() allows integer limit values between 0 and {num_batch_ids} \
+({limit} was requested).
+"""
+            )
+        batch_ids = batch_ids[-limit:]
+
     if num_batch_ids == 0:
         raise ge_exceptions.ProfilerExecutionError(
             message=f"""{__name__}.get_batch_ids() must return at least one batch_id ({num_batch_ids} were retrieved).

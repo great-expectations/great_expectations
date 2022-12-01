@@ -21,10 +21,10 @@ class TableColumnCount(TableMetricProvider):
     def _pandas(
         cls,
         execution_engine: "ExecutionEngine",
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         columns = metrics.get("table.columns")
         return len(columns)  # type: ignore[arg-type]
@@ -33,10 +33,10 @@ class TableColumnCount(TableMetricProvider):
     def _sqlalchemy(
         cls,
         execution_engine: "ExecutionEngine",
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         columns = metrics.get("table.columns")
         return len(columns)  # type: ignore[arg-type]
@@ -45,10 +45,10 @@ class TableColumnCount(TableMetricProvider):
     def _spark(
         cls,
         execution_engine: "ExecutionEngine",
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         columns = metrics.get("table.columns")
         return len(columns)  # type: ignore[arg-type]

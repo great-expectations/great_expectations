@@ -236,7 +236,6 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
-        language: str = None,
         runtime_configuration: dict = None,
         **kwargs,
     ):
@@ -245,9 +244,8 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
         ), "Must provide renderers either a configuration or result."
 
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         # get params dict with all expected kwargs

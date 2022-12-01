@@ -1,4 +1,3 @@
-import json
 import re
 from copy import deepcopy
 
@@ -8,9 +7,10 @@ from copy import deepcopy
 # https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
 from typing import Any, Dict, Optional, Tuple
 
-import numpy as np
-
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
@@ -25,20 +25,11 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    ExpectationConfiguration,
     TableExpectation,
     render_evaluation_parameter_string,
 )
-from great_expectations.expectations.metrics import (
-    ColumnMapMetricProvider,
-    column_condition_partial,
-)
 from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
-
-# from great_expectations.expectations.metrics.table_metric import TableMetricProvider
 from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
@@ -49,9 +40,8 @@ from great_expectations.expectations.registry import (
 )
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import num_to_str, substitute_none_for_missing
+from great_expectations.render.util import substitute_none_for_missing
 from great_expectations.validator.validation_graph import MetricConfiguration
-from great_expectations.validator.validator import Validator
 
 # DEBUG=True
 DEBUG = False
@@ -509,10 +499,9 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs
     ):
         runtime_configuration = runtime_configuration or {}

@@ -209,6 +209,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                 has_aggregate_fn = True
             except ge_exceptions.MetricProviderError:
                 has_aggregate_fn = False
+
             if has_aggregate_fn:
                 dependencies["metric_partial_fn"] = MetricConfiguration(
                     metric_name=metric_name + metric_suffix,
