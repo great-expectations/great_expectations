@@ -1,6 +1,6 @@
 ### Universal datasource configuration elements:
 
-CONNECTION_STRING = "sqlite:///data/yellow_tripdata_2020.db"
+CONNECTION_STRING = "sqlite:///data/yellow_tripdata_sample_2020_all_months_combined.db"
 
 
 def get_partial_config_universal_datasource_config_elements() -> dict:
@@ -285,12 +285,12 @@ def get_full_config_sql_configured_datasource() -> dict:
                 "class_name": "ConfiguredAssetSqlDataConnector",
                 "assets": {
                     "yellow_tripdata_sample_2020_full": {
-                        "table_name": "yellow_tripdata_sample_2020_01",
-                        "schema_name": "public",
+                        "table_name": "yellow_tripdata_sample_2020",
+                        "schema_name": "main",
                     },
                     "yellow_tripdata_sample_2020_by_year_and_month": {
-                        "table_name": "yellow_tripdata_sample_2020_01",
-                        "schema_name": "public",
+                        "table_name": "yellow_tripdata_sample_2020",
+                        "schema_name": "main",
                         "splitter_method": "split_on_year_and_month",
                         "splitter_kwargs": {
                             "column_name": "pickup_datetime",

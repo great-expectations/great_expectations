@@ -35,7 +35,7 @@ from tests.integration.docusaurus.connecting_to_your_data.datasource_configurati
     get_partial_config_universal_datasource_config_elements,
 )
 
-CONNECTION_STRING = "sqlite:///data/yellow_tripdata_2020.db"
+CONNECTION_STRING = "sqlite:///data/yellow_tripdata_sample_2020_all_months_combined.db"
 data_context: gx.DataContext = gx.get_context()
 
 
@@ -191,44 +191,68 @@ def section_8_configure_your_data_connectors_data_assets__inferred():
     )
 
 
-def section_9_test_your_configuration():
-    for datasource_config, connector_name, asset_count in (
+def section_9_test_your_configuration__inferred_and_configured():
+    for datasource_config, connector_name, asset_count, asset_name, batch_count in (
         (
             get_full_config_sql_inferred_datasource__single_and_multi_batch(),
             "inferred_data_connector_single_batch_asset",
-            12,
+            1,
+            "yellow_tripdata_sample_2020",
+            1,
         ),
         (
             get_full_config_sql_inferred_datasource__single_and_multi_batch(),
             "inferred_data_connector_multi_batch_asset_split_on_date_time",
+            1,
+            "yellow_tripdata_sample_2020",
             12,
         ),
         (
             get_full_config_sql_configured_datasource(),
+            "configured_sql_data_connector",
+            2,
             "yellow_tripdata_sample_2020_full",
-            12,
+            1,
         ),
         (
             get_full_config_sql_configured_datasource(),
+            "configured_sql_data_connector",
+            2,
             "yellow_tripdata_sample_2020_by_year_and_month",
             12,
-        ),
-        (
-            get_full_config_sql_runtime_datasource(),
-            "name_of_my_runtime_data_connector",
-            1,
         ),
     ):
 
         test_result = data_context.test_yaml_config(yaml.dump(datasource_config))
         datasource_check = test_result.self_check(max_examples=12)
-
-        # NOTE: The following code is only for testing and can be ignored by users.
-        # Assert that there are no data sets -- those get defined in a Batch Request.
         assert (
             datasource_check["data_connectors"][connector_name]["data_asset_count"]
             == asset_count
         ), f"{connector_name} {asset_count} != {datasource_check['data_connectors'][connector_name]['data_asset_count']}"
+        assert (
+            datasource_check["data_connectors"][connector_name]["data_assets"][
+                asset_name
+            ]["batch_definition_count"]
+            == batch_count
+        ), f"{connector_name} {batch_count} batches != {datasource_check['data_connectors'][connector_name]['data_assets'][asset_name]['batch_definition_count']}"
+
+
+def section_9_test_your_configuration__runtime():
+    # Testing the runtime data connector (there will be no data assets, those are passed in by the RuntimeBatchRequest.)
+    datasource_config = get_full_config_sql_runtime_datasource()
+    connector_name = "name_of_my_runtime_data_connector"
+    asset_count = 0
+
+    test_result = (
+        # <snippet name="test your sql datasource_config with test_yaml_config">
+        data_context.test_yaml_config(yaml.dump(datasource_config))
+        # </snippet>
+    )
+    datasource_check = test_result.self_check(max_examples=12)
+    assert (
+        datasource_check["data_connectors"][connector_name]["data_asset_count"]
+        == asset_count
+    ), f"{connector_name} {asset_count} != {datasource_check['data_connectors'][connector_name]['data_asset_count']}"
 
 
 # Test to verify that the universal config elements are consistent in each of the SQL config examples.
@@ -247,4 +271,5 @@ section_8_configure_your_data_connectors_data_assets__inferred()
 # Test to verify that the runtime config examples are consistent with each other.
 
 # Test to verify that the full configuration examples are functional.
-section_9_test_your_configuration()
+section_9_test_your_configuration__inferred_and_configured()
+section_9_test_your_configuration__runtime()
