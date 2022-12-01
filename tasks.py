@@ -12,11 +12,14 @@ import json
 import os
 import pathlib
 import shutil
+from typing import Union
 from urllib.parse import urlparse
 
 import invoke
 from bs4 import BeautifulSoup
 
+from docs.sphinx_api_docs_source.build_sphinx_api_docs import _exit_with_error_if_docs_dependencies_are_not_installed, \
+    _remove_existing_sphinx_api_docs, _build_html_api_docs_in_temp_folder
 from scripts import check_type_hint_coverage
 
 try:
@@ -315,13 +318,10 @@ def docker(
     """
     Build or run gx docker image.
     """
+
+    _exit_with_error_if_not_in_repo_root(task_name="docker")
+
     filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
-    curdir = os.path.realpath(os.getcwd())
-    if filedir != curdir:
-        raise invoke.Exit(
-            "The docker task must be invoked from the same directory as the task.py file at the top of the repo.",
-            code=1,
-        )
 
     cmds = ["docker"]
 
@@ -377,46 +377,29 @@ def docs(
     # TODO: AJB 20221116 Move the logic in this command to separate utility
     #  functions in another module, called here.
 
-    filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
-    curdir = os.path.realpath(os.getcwd())
-    if filedir != curdir:
-        raise invoke.Exit(
-            "The docs task must be invoked from the same directory as the task.py file at the top of the repo.",
-            code=1,
-        )
+    _exit_with_error_if_not_in_repo_root(task_name="docs")
+
+    _exit_with_error_if_docs_dependencies_are_not_installed()
 
     sphinx_api_docs_source_dir = "docs/sphinx_api_docs_source"
     os.chdir(sphinx_api_docs_source_dir)
 
-    try:
-        import sphinx
-        import myst_parser
-        import pydata_sphinx_theme
-    except ImportError:
-        raise invoke.Exit(
-            "Please make sure to install docs dependencies by running pip install -r docs/sphinx_api_docs_source/requirements-dev-api-docs.txt",
-            code=1,
-        )
-
-    # Remove existing sphinx api docs
     if clean:
-        cmds = ["make clean"]
-        ctx.run(" ".join(cmds), echo=True, pty=True)
+        _remove_existing_sphinx_api_docs(ctx=ctx)
 
-    # Build html api documentation in temporary folder
-    cmds = ["sphinx-build -M html ./ ../../temp_docs_build_dir/sphinx_api_docs"]
-    ctx.run(" ".join(cmds), echo=True, pty=True)
+    _build_html_api_docs_in_temp_folder(ctx=ctx)
 
     # Create api mdx files from content between <section> tags
     # First clean the docs/reference/api folder
-    api_path = curdir / pathlib.Path("docs/reference/api")
+    repo_root = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
+    api_path = repo_root / pathlib.Path("docs/reference/api")
     if api_path.is_dir():
         shutil.rmtree(api_path)
     pathlib.Path(api_path).mkdir(parents=True, exist_ok=True)
 
     # Process and create mdx files
     # First get file paths
-    temp_docs_build_dir = curdir / pathlib.Path("temp_docs_build_dir")
+    temp_docs_build_dir = repo_root / pathlib.Path("temp_docs_build_dir")
     sphinx_api_docs_build_dir = temp_docs_build_dir / "sphinx_api_docs"
 
     static_html_file_path = pathlib.Path(sphinx_api_docs_build_dir) / "html"
@@ -471,7 +454,7 @@ def docs(
 
             # Write out mdx files
             output_path = (
-                curdir
+                repo_root
                 / pathlib.Path("docs/reference/api")
                 / html_file.relative_to(static_html_file_path).with_suffix(".mdx")
             )
@@ -484,4 +467,15 @@ def docs(
         shutil.rmtree(temp_docs_build_dir)
 
     # Change back to the directory where the command was run
-    os.chdir(curdir)
+    os.chdir(repo_root)
+
+def _exit_with_error_if_not_in_repo_root(task_name: str):
+    """Exit if the command was not run from the repository root."""
+    filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
+    curdir = os.path.realpath(os.getcwd())
+    exit_message = f"The {task_name} task must be invoked from the same directory as the task.py file at the top of the repo."
+    if filedir != curdir:
+        raise invoke.Exit(
+            exit_message,
+            code=1,
+        )
