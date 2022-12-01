@@ -584,15 +584,12 @@ def column_pair_function_partial(
                     column_A_name,
                     column_B_name,
                 ]
-                column_names = get_dbms_compatible_column_names(
+                # noinspection PyPep8Naming
+                column_A_name, column_B_name = get_dbms_compatible_column_names(
                     column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
                 )
-                # noinspection PyPep8Naming
-                column_A_name = column_names[0]
-                # noinspection PyPep8Naming
-                column_B_name = column_names[1]
 
                 values = metric_fn(
                     cls,
@@ -649,15 +646,12 @@ def column_pair_function_partial(
                     column_A_name,
                     column_B_name,
                 ]
-                column_names = get_dbms_compatible_column_names(
+                # noinspection PyPep8Naming
+                column_A_name, column_B_name = get_dbms_compatible_column_names(
                     column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
                 )
-                # noinspection PyPep8Naming
-                column_A_name = column_names[0]
-                # noinspection PyPep8Naming
-                column_B_name = column_names[1]
 
                 column_pair_function = metric_fn(
                     cls,
@@ -718,15 +712,12 @@ def column_pair_function_partial(
                     column_A_name,
                     column_B_name,
                 ]
-                column_names = get_dbms_compatible_column_names(
+                # noinspection PyPep8Naming
+                column_A_name, column_B_name = get_dbms_compatible_column_names(
                     column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
                 )
-                # noinspection PyPep8Naming
-                column_A_name = column_names[0]
-                # noinspection PyPep8Naming
-                column_B_name = column_names[1]
 
                 column_pair_function = metric_fn(
                     cls,
@@ -813,15 +804,12 @@ def column_pair_condition_partial(
                     column_A_name,
                     column_B_name,
                 ]
-                column_names = get_dbms_compatible_column_names(
+                # noinspection PyPep8Naming
+                column_A_name, column_B_name = get_dbms_compatible_column_names(
                     column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
                 )
-                # noinspection PyPep8Naming
-                column_A_name = column_names[0]
-                # noinspection PyPep8Naming
-                column_B_name = column_names[1]
 
                 meets_expectation_series = metric_fn(
                     cls,
@@ -885,15 +873,12 @@ def column_pair_condition_partial(
                     column_A_name,
                     column_B_name,
                 ]
-                column_names = get_dbms_compatible_column_names(
+                # noinspection PyPep8Naming
+                column_A_name, column_B_name = get_dbms_compatible_column_names(
                     column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
                 )
-                # noinspection PyPep8Naming
-                column_A_name = column_names[0]
-                # noinspection PyPep8Naming
-                column_B_name = column_names[1]
 
                 sqlalchemy_engine: Engine = execution_engine.engine
 
@@ -965,15 +950,12 @@ def column_pair_condition_partial(
                     column_A_name,
                     column_B_name,
                 ]
-                column_names = get_dbms_compatible_column_names(
+                # noinspection PyPep8Naming
+                column_A_name, column_B_name = get_dbms_compatible_column_names(
                     column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
                 )
-                # noinspection PyPep8Naming
-                column_A_name = column_names[0]
-                # noinspection PyPep8Naming
-                column_B_name = column_names[1]
 
                 expected_condition = metric_fn(
                     cls,
@@ -1523,8 +1505,12 @@ def _pandas_column_pair_map_condition_values(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_names: List[Union[str, quoted_name]] = [column_A_name, column_B_name]
-    column_names = get_dbms_compatible_column_names(
+    column_names: List[Union[str, quoted_name]] = [
+        column_A_name,
+        column_B_name,
+    ]
+    # noinspection PyPep8Naming
+    column_A_name, column_B_name = get_dbms_compatible_column_names(
         column_names=column_names,
         batch_columns_list=metrics["table.columns"],
         execution_engine=execution_engine,
@@ -2154,16 +2140,16 @@ def _sqlalchemy_column_pair_map_condition_values(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_names: List[Union[str, quoted_name]] = [column_A_name, column_B_name]
-    column_names = get_dbms_compatible_column_names(
+    column_names: List[Union[str, quoted_name]] = [
+        column_A_name,
+        column_B_name,
+    ]
+    # noinspection PyPep8Naming
+    column_A_name, column_B_name = get_dbms_compatible_column_names(
         column_names=column_names,
         batch_columns_list=metrics["table.columns"],
         execution_engine=execution_engine,
     )
-    # noinspection PyPep8Naming
-    column_A_name = column_names[0]
-    # noinspection PyPep8Naming
-    column_B_name = column_names[1]
 
     query = sa.select(
         [
@@ -2582,16 +2568,16 @@ def _spark_column_pair_map_condition_values(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_names: List[Union[str, quoted_name]] = [column_A_name, column_B_name]
-    column_names = get_dbms_compatible_column_names(
+    column_names: List[Union[str, quoted_name]] = [
+        column_A_name,
+        column_B_name,
+    ]
+    # noinspection PyPep8Naming
+    column_A_name, column_B_name = get_dbms_compatible_column_names(
         column_names=column_names,
         batch_columns_list=metrics["table.columns"],
         execution_engine=execution_engine,
     )
-    # noinspection PyPep8Naming
-    column_A_name = column_names[0]
-    # noinspection PyPep8Naming
-    column_B_name = column_names[1]
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
