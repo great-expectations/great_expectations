@@ -24,17 +24,17 @@ stages:
               awsCredentials: 'aws-ci-great-expectations'
               bucketName: 'superconductive-public'
               targetFolder: '$(Build.SourcesDirectory)/assets/scripts'
-              globExpressions: 'expectation_library_v2--staging.json'
+              globExpressions: '*.json'
               sourceFolder: 'static/gallery/'
 
-          - task: S3Download@1
-            inputs:
-              regionName: 'us-east-2'
-              awsCredentials: 'aws-ci-great-expectations'
-              bucketName: 'superconductive-public'
-              targetFolder: '$(Build.SourcesDirectory)/assets/scripts'
-              globExpressions: 'package_manifests--staging.json'
-              sourceFolder: 'static/gallery/'
+#         - task: S3Download@1
+#           inputs:
+#             regionName: 'us-east-2'
+#             awsCredentials: 'aws-ci-great-expectations'
+#             bucketName: 'superconductive-public'
+#             targetFolder: '$(Build.SourcesDirectory)/assets/scripts'
+#             globExpressions: 'package_manifests--staging.json'
+#             sourceFolder: 'static/gallery/'
 
           - bash: pwd; ls -ltr; mv expectation_library_v2--staging.json expectation_library_v2--tmp.json; mv package_manifests--staging.json package_manifests--tmp.json
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
