@@ -63,8 +63,20 @@ export default function FooterLayout({style, links, logo, copyright}) {
           )}
           {links}
           </div>
-          <div className="footer__bottom text--center">
-            {copyright}
+          <div
+            style={{
+              display:"flex",
+              justifyContent:"space-between",
+              color:"#f8f8f8",
+              borderTop: "0.5px solid #f8f8f830",
+              paddingTop:"10px",
+              fontSize:"14px",
+            }}
+          >
+            <div>{copyright}</div>
+            <div>
+              <a href="https://greatexpectations.io/privacy-policy">Privacy Policy</a>
+            </div>
           </div>
       </div>
     </footer>
