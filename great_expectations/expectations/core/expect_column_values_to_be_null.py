@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -17,6 +17,11 @@ from great_expectations.render import (
     RenderedStringTemplateContent,
 )
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    ParamSchemaType,
+    RendererConfiguration,
+    RendererParams,
+)
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -102,58 +107,53 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
+    ) -> Tuple[str, dict, Optional[dict]]:
+        renderer_configuration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            runtime_configuration=runtime_configuration,
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            ["column", "mostly", "row_condition", "condition_parser"],
+        renderer_configuration.add_param(
+            name="column", schema_type=ParamSchemaType.STRING
         )
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
-            "mostly_pct": {
-                "schema": {"type": "string"},
-                "value": params.get("mostly_pct"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-        }
+        renderer_configuration.add_param(
+            name="mostly", schema_type=ParamSchemaType.NUMBER
+        )
+        renderer_configuration.add_param(
+            name="mostly_pct", schema_type=ParamSchemaType.STRING
+        )
+        renderer_configuration.add_param(
+            name="row_condition", schema_type=ParamSchemaType.STRING
+        )
+        renderer_configuration.add_param(
+            name="condition_parser", schema_type=ParamSchemaType.STRING
+        )
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:
+        params: RendererParams = renderer_configuration.params
+        params_with_json_schema: dict = params.dict()
+
+        if params.mostly and params.mostly.value < 1.0:
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
-            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str = "values must be null, at least $mostly_pct % of the time."
         else:
             template_str = "values must be null."
 
-        if include_column_name:
+        if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
-        if params["row_condition"] is not None:
+        if params.row_condition:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
+                params.row_condition.value, with_schema=True
             )
             template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
-        return (template_str, params_with_json_schema, styling)
+        return template_str, params_with_json_schema, renderer_configuration.styling
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
