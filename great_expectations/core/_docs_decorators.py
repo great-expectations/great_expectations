@@ -10,6 +10,6 @@ def public_api(func) -> Callable:
 
     existing_docstring = func.__doc__ if func.__doc__ else ""
 
-    func.__doc__ = " ".join([WHITELISTED_TAG + "\n\n", existing_docstring])
+    func.__doc__ = WHITELISTED_TAG + existing_docstring
 
     return func

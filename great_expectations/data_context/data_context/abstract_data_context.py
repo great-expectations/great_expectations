@@ -3349,8 +3349,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         ] = "instantiated_class",
         shorten_tracebacks: bool = False,
     ):
-        """
-        Convenience method for testing yaml configs
+        """Convenience method for testing yaml configs
 
         test_yaml_config is a convenience method for configuring the moving
         parts of a Great Expectations deployment. It allows you to quickly
@@ -3382,6 +3381,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             OR
             a json object containing metadata from the component's self_check method.
             The returned object is determined by return_mode.
+
         """
         yaml_config_validator = _YamlConfigValidator(
             data_context=self,
