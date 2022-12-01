@@ -8,9 +8,9 @@ from pprint import pformat as pf
 from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Type, Union, cast
 
 import dateutil.tz
-from pydantic import Field
+import pydantic
 from pydantic import dataclasses as pydantic_dc
-from typing_extensions import ClassVar, Literal
+from typing_extensions import ClassVar, Literal, TypeAlias
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.experimental.datasources.interfaces import (
@@ -47,11 +47,47 @@ class ColumnSplitter:
     # values are the default values if a batch request using the splitter leaves the parameter unspecified.
     # template_params: List[str]
     # Union of List/Iterable for serialization
-    param_defaults: Dict[str, Union[List, Iterable]] = Field(default_factory=dict)
+    param_defaults: Dict[str, Union[List, Iterable]] = pydantic.Field(
+        default_factory=dict
+    )
 
     @property
     def param_names(self) -> List[str]:
         return list(self.param_defaults.keys())
+
+
+@pydantic_dc.dataclass(frozen=True)
+class BatchSorter:
+    metadata_key: str
+    reverse: bool = False
+
+
+BatchSortersDefinition: TypeAlias = Union[List[BatchSorter], List[str]]
+
+
+def _batch_sorter_from_list(sorters: BatchSortersDefinition) -> List[BatchSorter]:
+    if len(sorters) == 0 or isinstance(sorters[0], BatchSorter):
+        # mypy gets confused here. Since BatchSortersDefinition has all elements of the
+        # same type in the list so if the first on is BatchSorter so are the others.
+        return cast(List[BatchSorter], sorters)
+    # Likewise, sorters must be List[str] here.
+    return [_batch_sorter_from_str(sorter) for sorter in cast(List[str], sorters)]
+
+
+def _batch_sorter_from_str(sort_key: str) -> BatchSorter:
+    """Convert a list of strings to BatchSorters
+
+    Args:
+        sort_key: A batch metadata key which will be used to sort batches on a data asset.
+                  This can be prefixed with a + or - to indicate increasing or decreasing
+                  sorting. If not specified, defaults to increasing order.
+    """
+    if sort_key[0] == "-":
+        return BatchSorter(metadata_key=sort_key[1:], reverse=True)
+    elif sort_key[0] == "+":
+        return BatchSorter(metadata_key=sort_key[1:], reverse=False)
+    else:
+        return BatchSorter(metadata_key=sort_key, reverse=False)
 
 
 class TableAsset(DataAsset):
@@ -60,6 +96,19 @@ class TableAsset(DataAsset):
     table_name: str
     column_splitter: Optional[ColumnSplitter] = None
     name: str
+    _order_by: List[BatchSorter] = pydantic.PrivateAttr()
+
+    def __init__(self, **kwargs):
+        # I `pop("order_by", None) or []` instead of `pop("order_by", [])` because if someone
+        # passes in `order_by=None`, I want this variable to be `[]` and not `None`.
+        # `pop("order_by", [])` will return None since the order_by key exists in this case.
+        order_by = kwargs.pop("order_by", None) or []
+        self._order_by = _batch_sorter_from_list(order_by)
+        super().__init__(**kwargs)
+
+    @property
+    def order_by(self) -> List[BatchSorter]:
+        return self._order_by
 
     def get_batch_request(
         self, options: Optional[BatchRequestOptions] = None
@@ -127,6 +176,10 @@ class TableAsset(DataAsset):
         if not self.column_splitter:
             return template
         return {p: None for p in self.column_splitter.param_names}
+
+    def add_sorters(self, sorters: BatchSortersDefinition) -> TableAsset:
+        self._order_by = _batch_sorter_from_list(sorters)
+        return self
 
     # This asset type will support a variety of splitters
     def add_year_and_month_splitter(
@@ -213,6 +266,24 @@ class TableAsset(DataAsset):
                 )
         return batch_requests
 
+    def sort_batches(self, batch_list: List[Batch]) -> None:
+        """Sorts batch_list in place.
+
+        Args:
+            batch_list: The list of batches to sort in place.
+        """
+        for sorter in reversed(self.order_by):
+            try:
+                batch_list.sort(
+                    key=lambda b: b.metadata[sorter.metadata_key],
+                    reverse=sorter.reverse,
+                )
+            except KeyError as e:
+                raise KeyError(
+                    f"Trying to sort {self.name} table asset batches on key {sorter.metadata_key} "
+                    "which isn't available on all batches."
+                ) from e
+
 
 class PostgresDatasource(Datasource):
     # class var definitions
@@ -230,17 +301,23 @@ class PostgresDatasource(Datasource):
 
         return SqlAlchemyExecutionEngine
 
-    def add_table_asset(self, name: str, table_name: str) -> TableAsset:
+    def add_table_asset(
+        self,
+        name: str,
+        table_name: str,
+        order_by: Optional[BatchSortersDefinition] = None,
+    ) -> TableAsset:
         """Adds a table asset to this datasource.
 
         Args:
             name: The name of this table asset.
             table_name: The table where the data resides.
+            order_by: A list of BatchSorters or BatchSorter strings.
 
         Returns:
             The TableAsset that is added to the datasource.
         """
-        asset = TableAsset(name=name, table_name=table_name)
+        asset = TableAsset(name=name, table_name=table_name, order_by=order_by)
         # TODO (kilo59): custom init for `DataAsset` to accept datasource in constructor?
         # Will most DataAssets require a `Datasource` attribute?
         asset._datasource = self
@@ -251,9 +328,6 @@ class PostgresDatasource(Datasource):
         """Returns the TableAsset referred to by name"""
         return super().get_asset(asset_name)  # type: ignore[return-value] # value is subclass
 
-    # When we have multiple types of DataAssets on a datasource, the batch_request argument will be a Union type.
-    # To differentiate we could use single dispatch or use an if/else (note pattern matching doesn't appear until
-    # python 3.10)
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> List[Batch]:
@@ -302,4 +376,5 @@ class PostgresDatasource(Datasource):
                     metadata=batch_metadata,
                 )
             )
+        data_asset.sort_batches(batch_list)
         return batch_list
