@@ -51,6 +51,8 @@ class MetaDatasource(pydantic.main.ModelMetaclass):
             LOGGER.info(f"5. Adding '{name}' {cls_name}")
             return cls(name=name, **kwargs)
 
+        _datasource_factory.__doc__ = cls.__doc__
+
         # TODO: generate schemas from `cls` if needed
 
         if cls.__module__ == "__main__":
