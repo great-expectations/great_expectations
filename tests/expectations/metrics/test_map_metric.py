@@ -1227,7 +1227,7 @@ def test_sqlite_single_unexpected_index_column_names_complete_result_format(
             "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "COMPLETE",
-                "unexpected_index_column_names": ["key_1"],
+                "unexpected_index_column_names": ["pk_1"],
             },
         },
     )
@@ -1276,11 +1276,11 @@ def test_sqlite_single_unexpected_index_column_names_complete_result_format(
             {"count": 1, "value": "lion"},
             {"count": 1, "value": "zebra"},
         ],
-        "partial_unexpected_index_list": [{"key_1": 3}, {"key_1": 4}, {"key_1": 5}],
+        "partial_unexpected_index_list": [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}],
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
-        "unexpected_index_list": [{"key_1": 3}, {"key_1": 4}, {"key_1": 5}],
-        "unexpected_index_query": "SELECT animals, key_1 \n"
+        "unexpected_index_list": [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}],
+        "unexpected_index_query": "SELECT animals, pk_1 \n"
         "FROM animal_names \n"
         "WHERE animals IS NOT NULL AND (animals NOT IN "
         "('cat', 'fish', 'dog'))",
@@ -1301,7 +1301,7 @@ def test_sqlite_single_unexpected_index_column_names_summary_result_format(
             "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "SUMMARY",
-                "unexpected_index_column_names": ["key_1"],  # Single column
+                "unexpected_index_column_names": ["pk_1"],  # Single column
             },
         },
     )
@@ -1350,7 +1350,7 @@ def test_sqlite_single_unexpected_index_column_names_summary_result_format(
             {"count": 1, "value": "lion"},
             {"count": 1, "value": "zebra"},
         ],
-        "partial_unexpected_index_list": [{"key_1": 3}, {"key_1": 4}, {"key_1": 5}],
+        "partial_unexpected_index_list": [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}],
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
         "unexpected_percent": 50.0,
@@ -1369,7 +1369,7 @@ def test_sqlite_multiple_unexpected_index_column_names_complete_result_format(
             "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "COMPLETE",
-                "unexpected_index_column_names": ["key_1", "key_2"],  # Multiple columns
+                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
             },
         },
     )
@@ -1419,18 +1419,18 @@ def test_sqlite_multiple_unexpected_index_column_names_complete_result_format(
             {"count": 1, "value": "zebra"},
         ],
         "partial_unexpected_index_list": [
-            {"key_1": 3, "key_2": "three"},
-            {"key_1": 4, "key_2": "four"},
-            {"key_1": 5, "key_2": "five"},
+            {"pk_1": 3, "pk_2": "three"},
+            {"pk_1": 4, "pk_2": "four"},
+            {"pk_1": 5, "pk_2": "five"},
         ],
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
         "unexpected_index_list": [
-            {"key_1": 3, "key_2": "three"},
-            {"key_1": 4, "key_2": "four"},
-            {"key_1": 5, "key_2": "five"},
+            {"pk_1": 3, "pk_2": "three"},
+            {"pk_1": 4, "pk_2": "four"},
+            {"pk_1": 5, "pk_2": "five"},
         ],
-        "unexpected_index_query": "SELECT animals, key_1, key_2 \n"
+        "unexpected_index_query": "SELECT animals, pk_1, pk_2 \n"
         "FROM animal_names \n"
         "WHERE animals IS NOT NULL AND (animals NOT IN "
         "('cat', 'fish', 'dog'))",
@@ -1451,7 +1451,7 @@ def test_sql_multiple_unexpected_index_column_names_complete_result_format_limit
             "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "COMPLETE",
-                "unexpected_index_column_names": ["key_1", "key_2"],  # Multiple columns
+                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
                 "partial_unexpected_count": 1,
             },
         },
@@ -1497,15 +1497,15 @@ def test_sql_multiple_unexpected_index_column_names_complete_result_format_limit
         "missing_count": 0,
         "missing_percent": 0.0,
         "partial_unexpected_counts": [{"count": 1, "value": "giraffe"}],
-        "partial_unexpected_index_list": [{"key_1": 3, "key_2": "three"}],
+        "partial_unexpected_index_list": [{"pk_1": 3, "pk_2": "three"}],
         "partial_unexpected_list": ["giraffe"],
         "unexpected_count": 3,
         "unexpected_index_list": [
-            {"key_1": 3, "key_2": "three"},
-            {"key_1": 4, "key_2": "four"},
-            {"key_1": 5, "key_2": "five"},
+            {"pk_1": 3, "pk_2": "three"},
+            {"pk_1": 4, "pk_2": "four"},
+            {"pk_1": 5, "pk_2": "five"},
         ],
-        "unexpected_index_query": "SELECT animals, key_1, key_2 \n"
+        "unexpected_index_query": "SELECT animals, pk_1, pk_2 \n"
         "FROM animal_names \n"
         "WHERE animals IS NOT NULL AND (animals NOT IN "
         "('cat', 'fish', 'dog'))",
@@ -1526,7 +1526,7 @@ def test_sql_multiple_unexpected_index_column_names_summary_result_format(
             "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "SUMMARY",  # SUMMARY will include partial_unexpected* values only
-                "unexpected_index_column_names": ["key_1", "key_2"],  # Multiple columns
+                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
             },
         },
     )
@@ -1576,9 +1576,9 @@ def test_sql_multiple_unexpected_index_column_names_summary_result_format(
             {"count": 1, "value": "zebra"},
         ],
         "partial_unexpected_index_list": [
-            {"key_1": 3, "key_2": "three"},
-            {"key_1": 4, "key_2": "four"},
-            {"key_1": 5, "key_2": "five"},
+            {"pk_1": 3, "pk_2": "three"},
+            {"pk_1": 4, "pk_2": "four"},
+            {"pk_1": 5, "pk_2": "five"},
         ],
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
@@ -1599,7 +1599,7 @@ def test_sql_multiple_unexpected_index_column_names_summary_result_format_limit_
             "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "SUMMARY",  # SUMMARY will include partial_unexpected* values only
-                "unexpected_index_column_names": ["key_1", "key_2"],  # Multiple columns
+                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
                 "partial_unexpected_count": 1,
             },
         },
@@ -1645,7 +1645,7 @@ def test_sql_multiple_unexpected_index_column_names_summary_result_format_limit_
         "missing_count": 0,
         "missing_percent": 0.0,
         "partial_unexpected_counts": [{"count": 1, "value": "giraffe"}],
-        "partial_unexpected_index_list": [{"key_1": 3, "key_2": "three"}],
+        "partial_unexpected_index_list": [{"pk_1": 3, "pk_2": "three"}],
         "partial_unexpected_list": ["giraffe"],
         "unexpected_count": 3,
         "unexpected_percent": 50.0,
@@ -1664,7 +1664,7 @@ def test_sql_multiple_unexpected_index_column_names_basic_result_format(
             "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "BASIC",  # SUMMARY will include partial_unexpected_list only, which means unexpected_index_column_names will have no effect
-                "unexpected_index_column_names": ["key_1", "key_2"],
+                "unexpected_index_column_names": ["pk_1", "pk_2"],
             },
         },
     )
@@ -1785,7 +1785,7 @@ def test_sql_multiple_unexpected_index_column_names_complete_result_format_non_e
             "result_format": {
                 "result_format": "COMPLETE",
                 "unexpected_index_column_names": [
-                    "key_1",
+                    "pk_1",
                     "i_dont_exist",
                 ],  # Only 1 column is valid
             },
