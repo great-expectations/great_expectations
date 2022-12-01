@@ -104,7 +104,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         renderer_params: Type[BaseModel] = create_model(
             "RendererParams",
             **renderer_param_definition,
-            __base__=base,  # type: ignore[assignment] # mypy bug see: https://github.com/python/mypy/issues/12385
+            __base__=base,  # type: ignore[arg-type] # mypy bug see: https://github.com/python/mypy/issues/12385
         )
 
         if value is None:
@@ -113,7 +113,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         renderer_params_definition: Dict[str, Any]
         if self.params is not None:
             renderer_params_definition = {
-                **self.params.dict(),  # type: ignore[assignment] # mypy bug see: https://github.com/python/mypy/issues/12385
+                **self.params.dict(),  # type: ignore[attr-defined] # mypy bug see: https://github.com/python/mypy/issues/12385
                 name: renderer_param(schema={"type": schema_type}, value=value),
             }
         else:

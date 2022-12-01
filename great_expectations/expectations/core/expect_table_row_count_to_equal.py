@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -12,6 +12,10 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    ParamSchemaType,
+    RendererConfiguration,
+)
 from great_expectations.render.util import substitute_none_for_missing
 
 
@@ -107,29 +111,18 @@ class ExpectTableRowCountToEqual(TableExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        renderer_configuration: RendererConfiguration,
+    ) -> Tuple[str, dict, Union[dict, None]]:
+        renderer_configuration.add_param(
+            name="value", schema_type=ParamSchemaType.NUMBER
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            ["value"],
-        )
-        params_with_json_schema = {
-            "value": {
-                "schema": {"type": "number"},
-                "value": params.get("value"),
-            },
-        }
         template_str = "Must have exactly $value rows."
 
-        return (template_str, params_with_json_schema, styling)
+        return (
+            template_str,
+            renderer_configuration.params.dict(),
+            renderer_configuration.styling,
+        )
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
@@ -139,7 +132,6 @@ class ExpectTableRowCountToEqual(TableExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = (
