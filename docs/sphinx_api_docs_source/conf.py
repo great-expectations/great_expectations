@@ -49,11 +49,11 @@ html_static_path = ['_static']
 # Skip autodoc unless part of the Public API
 DOCUMENTATION_TAG = "--Documentation--"
 def skip_if_not_whitelisted(app, what, name, obj, would_skip, options):
-    """Skip rendering documentation for docstrings that are not whitelisted.
+    """Skip rendering documentation for docstrings that are empty or not whitelisted.
 
     Whitelisted docstrings contain the WHITELISTED_TAG.
     """
-    if WHITELISTED_TAG in obj.__doc__:
+    if obj.__doc__ is not None and WHITELISTED_TAG in obj.__doc__:
         return False
     return True
 
