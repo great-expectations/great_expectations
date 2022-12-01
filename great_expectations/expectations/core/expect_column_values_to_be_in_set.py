@@ -195,15 +195,8 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
+        renderer_configuration: RendererConfiguration,
     ) -> Tuple[str, dict, Union[dict, None]]:
-        renderer_configuration = RendererConfiguration(
-            configuration=configuration,
-            result=result,
-            runtime_configuration=runtime_configuration,
-        )
         renderer_configuration.add_param(
             name="column",
             schema_type=ParamSchemaType.STRING,
