@@ -22,6 +22,9 @@ from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.data_context import DataContext
+from great_expectations.data_context.data_context.serializable_data_context import (
+    SerializableDataContext,
+)
 from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -219,7 +222,7 @@ Great Expectations will store these expectations in a new Expectation Suite '{:s
 def _raise_profiling_errors(profiling_results) -> None:
     if (
         profiling_results["error"]["code"]
-        == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
+        == SerializableDataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
     ):
         raise ge_exceptions.DataContextError(
             """Some of the data assets you specified were not found: {:s}
@@ -272,7 +275,7 @@ def tell_user_suite_exists(suite_name: str) -> None:
 
 
 def create_empty_suite(
-    context: DataContext, expectation_suite_name: str, batch_kwargs
+    context: SerializableDataContext, expectation_suite_name: str, batch_kwargs
 ) -> None:
     cli_message(
         """
@@ -304,7 +307,7 @@ def launch_jupyter_notebook(notebook_path: str) -> None:
 
 
 def load_batch(
-    context: DataContext,
+    context: SerializableDataContext,
     suite: Union[str, ExpectationSuite],
     batch_kwargs: Union[dict, BatchKwargs],
 ) -> Union[Batch, DataAsset]:
@@ -317,7 +320,7 @@ def load_batch(
 
 def load_expectation_suite(
     # TODO consolidate all the myriad CLI tests into this
-    context: DataContext,
+    context: SerializableDataContext,
     suite_name: str,
     usage_event: str,
 ) -> ExpectationSuite:
@@ -342,7 +345,7 @@ def load_expectation_suite(
 
 
 def exit_with_failure_message_and_stats(
-    context: DataContext, usage_event: str, message: str
+    context: SerializableDataContext, usage_event: str, message: str
 ) -> None:
     cli_message(message)
     send_usage_message(
@@ -355,7 +358,7 @@ def exit_with_failure_message_and_stats(
 
 
 def load_checkpoint(
-    context: DataContext,
+    context: SerializableDataContext,
     checkpoint_name: str,
     usage_event: str,
 ) -> Union[Checkpoint, LegacyCheckpoint]:
@@ -382,7 +385,7 @@ def load_checkpoint(
 
 
 def select_datasource(
-    context: DataContext, datasource_name: Optional[str] = None
+    context: SerializableDataContext, datasource_name: Optional[str] = None
 ) -> Datasource:
     """Select a datasource interactively."""
     # TODO consolidate all the myriad CLI tests into this
@@ -420,7 +423,7 @@ def select_datasource(
 
 def load_data_context_with_error_handling(
     directory: str, from_cli_upgrade_command: bool = False
-) -> DataContext:
+) -> SerializableDataContext:
     """Return a DataContext with good error handling and exit codes."""
     try:
         context = DataContext(context_root_dir=directory)
@@ -443,8 +446,8 @@ def load_data_context_with_error_handling(
                 context = DataContext(context_root_dir=directory)
         return context
     except ge_exceptions.UnsupportedConfigVersionError as err:
-        directory = directory or DataContext.find_context_root_dir()
-        ge_config_version = DataContext.get_ge_config_version(
+        directory = directory or SerializableDataContext.find_context_root_dir()
+        ge_config_version = SerializableDataContext.get_ge_config_version(
             context_root_dir=directory
         )
         upgrade_helper_class = (
@@ -550,7 +553,7 @@ def upgrade_project_up_to_one_version_increment(
         return False, False
     target_ge_config_version = int(ge_config_version) + 1
     # set version temporarily to CURRENT_GE_CONFIG_VERSION to get functional DataContext
-    DataContext.set_ge_config_version(
+    SerializableDataContext.set_ge_config_version(
         config_version=CURRENT_GE_CONFIG_VERSION,
         context_root_dir=context_root_dir,
     )
@@ -579,27 +582,27 @@ def upgrade_project_up_to_one_version_increment(
         cli_message(upgrade_report)
         if exception_occurred:
             # restore version number to current number
-            DataContext.set_ge_config_version(
+            SerializableDataContext.set_ge_config_version(
                 ge_config_version, context_root_dir, validate_config_version=False
             )
             # display report to user
             return False, True
         # set config version to target version
         if increment_version:
-            DataContext.set_ge_config_version(
+            SerializableDataContext.set_ge_config_version(
                 target_ge_config_version,
                 context_root_dir,
                 validate_config_version=False,
             )
             return True, False
         # restore version number to current number
-        DataContext.set_ge_config_version(
+        SerializableDataContext.set_ge_config_version(
             ge_config_version, context_root_dir, validate_config_version=False
         )
         return False, False
 
     # restore version number to current number
-    DataContext.set_ge_config_version(
+    SerializableDataContext.set_ge_config_version(
         ge_config_version, context_root_dir, validate_config_version=False
     )
     cli_message(continuation_message)

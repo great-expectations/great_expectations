@@ -12,6 +12,9 @@ from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
 from great_expectations.cli.util import verify_library_dependent_modules
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
+from great_expectations.data_context.data_context.serializable_data_context import (
+    SerializableDataContext,
+)
 from great_expectations.data_context.templates import YAMLToString
 from great_expectations.datasource.types import DatasourceTypes
 from great_expectations.render.renderer.datasource_new_notebook_renderer import (
@@ -77,7 +80,7 @@ def datasource(ctx: click.Context) -> None:
 )
 def datasource_new(ctx: click.Context, name: str, jupyter: bool) -> None:
     """Add a new Datasource to the data context."""
-    context: DataContext = ctx.obj.data_context
+    context: SerializableDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     try:
@@ -101,7 +104,7 @@ def datasource_new(ctx: click.Context, name: str, jupyter: bool) -> None:
 @click.pass_context
 def delete_datasource(ctx: click.Context, datasource: str) -> None:
     """Delete the datasource specified as an argument"""
-    context: DataContext = ctx.obj.data_context
+    context: SerializableDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     if not ctx.obj.assume_yes:
@@ -177,7 +180,7 @@ def _build_datasource_intro_string(datasources: List[dict]) -> str:
 
 
 def _datasource_new_flow(
-    context: DataContext,
+    context: SerializableDataContext,
     usage_event_end: str,
     datasource_name: Optional[str] = None,
     jupyter: bool = True,
@@ -254,7 +257,7 @@ class BaseDatasourceNewYamlHelper:
         """Used in the interactive CLI to help users install dependencies."""
         raise NotImplementedError
 
-    def create_notebook(self, context: DataContext) -> str:
+    def create_notebook(self, context: SerializableDataContext) -> str:
         """Create a datasource_new notebook and save it to disk."""
         renderer = self.get_notebook_renderer(context)
         notebook_path = os.path.join(
@@ -266,12 +269,14 @@ class BaseDatasourceNewYamlHelper:
         return notebook_path
 
     def get_notebook_renderer(
-        self, context: DataContext
+        self, context: SerializableDataContext
     ) -> DatasourceNewNotebookRenderer:
         """Get a renderer specifically constructed for the datasource type."""
         raise NotImplementedError
 
-    def send_backend_choice_usage_message(self, context: DataContext) -> None:
+    def send_backend_choice_usage_message(
+        self, context: SerializableDataContext
+    ) -> None:
         send_usage_message(
             data_context=context,
             event=UsageStatsEvents.CLI_NEW_DS_CHOICE,
@@ -308,7 +313,7 @@ class FilesYamlHelper(BaseDatasourceNewYamlHelper):
         self.context_root_dir: str = context_root_dir
 
     def get_notebook_renderer(
-        self, context: DataContext
+        self, context: SerializableDataContext
     ) -> DatasourceNewNotebookRenderer:
         return DatasourceNewNotebookRenderer(
             context,
@@ -482,7 +487,7 @@ data_connectors:
     database: {database}"""
 
     def get_notebook_renderer(
-        self, context: DataContext
+        self, context: SerializableDataContext
     ) -> DatasourceNewNotebookRenderer:
         return DatasourceNewNotebookRenderer(
             context,
@@ -858,7 +863,9 @@ def _verify_sqlalchemy_dependent_modules() -> bool:
 
 
 def sanitize_yaml_and_save_datasource(
-    context: DataContext, datasource_yaml: str, overwrite_existing: bool = False
+    context: SerializableDataContext,
+    datasource_yaml: str,
+    overwrite_existing: bool = False,
 ) -> None:
     """A convenience function used in notebooks to help users save secrets."""
     if not datasource_yaml:
@@ -898,7 +905,9 @@ CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES: list = [
 ]
 
 
-def check_if_datasource_name_exists(context: DataContext, datasource_name: str) -> bool:
+def check_if_datasource_name_exists(
+    context: SerializableDataContext, datasource_name: str
+) -> bool:
     """
     Check if a Datasource name already exists in the on-disk version of the given DataContext and if so raise an error
     Args:

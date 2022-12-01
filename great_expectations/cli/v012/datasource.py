@@ -8,13 +8,17 @@ import textwrap
 
 import click
 
+from great_expectations.data_context.data_context.serializable_data_context import (
+    SerializableDataContext,
+)
+
 try:
     from sqlalchemy_bigquery.parse_url import parse_url as parse_bigquery_url
 except (ImportError, ModuleNotFoundError):
     parse_bigquery_url = None
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations import DataContext, rtd_url_ge_version
+from great_expectations import rtd_url_ge_version
 from great_expectations.cli.v012 import toolkit
 from great_expectations.cli.v012.cli_messages import NO_DATASOURCES_FOUND
 from great_expectations.cli.v012.docs import build_docs
@@ -606,7 +610,7 @@ After you connect to the datasource, run great_expectations init to continue.
 
 """.format(
                         datasource_name,
-                        DataContext.GE_YML,
+                        SerializableDataContext.GE_YML,
                         context.get_config()["config_variables_file_path"],
                         rtd_url_ge_version,
                         selected_database.value.lower(),
@@ -1560,7 +1564,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
         while not do_exit:
             if (
                 profiling_results["error"]["code"]
-                == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
+                == SerializableDataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
             ):
                 cli_message(
                     msg_some_data_assets_not_found.format(
@@ -1569,7 +1573,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 )
             elif (
                 profiling_results["error"]["code"]
-                == DataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS
+                == SerializableDataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS
             ):
                 cli_message(
                     msg_too_many_data_assets.format(
@@ -1578,13 +1582,13 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 )
             elif (
                 profiling_results["error"]["code"]
-                == DataContext.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND
+                == SerializableDataContext.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND
             ):
                 cli_message(msg_error_multiple_generators_found.format(datasource_name))
                 sys.exit(1)
             elif (
                 profiling_results["error"]["code"]
-                == DataContext.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND
+                == SerializableDataContext.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND
             ):
                 cli_message(msg_error_no_generators_found.format(datasource_name))
                 sys.exit(1)

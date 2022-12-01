@@ -4,12 +4,14 @@ from typing import List
 
 import click
 
-from great_expectations import DataContext
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.cli import toolkit
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
+from great_expectations.data_context.data_context.serializable_data_context import (
+    SerializableDataContext,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidTopLevelConfigKeyError
 from great_expectations.render.renderer.checkpoint_new_notebook_renderer import (
@@ -103,7 +105,7 @@ def checkpoint_new(ctx: click.Context, name: str, jupyter: bool) -> None:
 
 def _checkpoint_new(ctx: click.Context, checkpoint_name: str, jupyter: bool) -> None:
 
-    context: DataContext = ctx.obj.data_context
+    context: SerializableDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     try:
@@ -147,7 +149,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
 
 
 def _verify_checkpoint_does_not_exist(
-    context: DataContext, checkpoint_name: str, usage_event: str
+    context: SerializableDataContext, checkpoint_name: str, usage_event: str
 ) -> None:
     try:
         if checkpoint_name in context.list_checkpoints():
@@ -162,7 +164,7 @@ def _verify_checkpoint_does_not_exist(
         )
 
 
-def _get_notebook_path(context: DataContext, notebook_name: str) -> str:
+def _get_notebook_path(context: SerializableDataContext, notebook_name: str) -> str:
     return os.path.abspath(
         os.path.join(
             context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name
@@ -174,7 +176,7 @@ def _get_notebook_path(context: DataContext, notebook_name: str) -> str:
 @click.pass_context
 def checkpoint_list(ctx: click.Context) -> None:
     """List configured checkpoints."""
-    context: DataContext = ctx.obj.data_context
+    context: SerializableDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     checkpoints: List[str] = context.list_checkpoints()
@@ -207,7 +209,7 @@ def checkpoint_list(ctx: click.Context) -> None:
 @click.pass_context
 def checkpoint_delete(ctx: click.Context, checkpoint: str) -> None:
     """Delete a Checkpoint."""
-    context: DataContext = ctx.obj.data_context
+    context: SerializableDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     try:
@@ -239,7 +241,7 @@ def checkpoint_delete(ctx: click.Context, checkpoint: str) -> None:
 @click.pass_context
 def checkpoint_run(ctx: click.Context, checkpoint: str) -> None:
     """Run a Checkpoint."""
-    context: DataContext = ctx.obj.data_context
+    context: SerializableDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     try:
@@ -317,7 +319,7 @@ def checkpoint_script(ctx: click.Context, checkpoint: str) -> None:
 
     This script is provided for those who wish to run Checkpoints via python.
     """
-    context: DataContext = ctx.obj.data_context
+    context: SerializableDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     toolkit.validate_checkpoint(

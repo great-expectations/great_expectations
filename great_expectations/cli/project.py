@@ -12,6 +12,9 @@ from great_expectations.cli.toolkit import load_data_context_with_error_handling
 from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
+from great_expectations.data_context.data_context.serializable_data_context import (
+    SerializableDataContext,
+)
 from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 
 
@@ -66,10 +69,12 @@ def project_upgrade(ctx: click.Context) -> None:
         sys.exit(1)
 
 
-def do_config_check(target_directory: str) -> Tuple[bool, str, Optional[DataContext]]:
+def do_config_check(
+    target_directory: str,
+) -> Tuple[bool, str, Optional[SerializableDataContext]]:
     is_config_ok: bool = True
     upgrade_message: str = ""
-    context: Optional[DataContext]
+    context: Optional[SerializableDataContext]
     try:
         context = DataContext(context_root_dir=target_directory)
         ge_config_version: int = context.get_config().config_version

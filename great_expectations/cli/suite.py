@@ -5,7 +5,6 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import click
 
-from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
 
@@ -22,6 +21,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     edit_expectation_suite_usage_statistics,
 )
 from great_expectations.core.usage_statistics.util import send_usage_message
+from great_expectations.data_context.data_context.serializable_data_context import (
+    SerializableDataContext,
+)
 from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
 from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
@@ -133,7 +135,7 @@ def suite_new(
     Create a new Expectation Suite.
     Edit in jupyter notebooks, or skip with the --no-jupyter flag.
     """
-    context: DataContext = ctx.obj.data_context
+    context: SerializableDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     # Only set to true if `--profile` or `--profile <PROFILER_NAME>`
@@ -174,7 +176,7 @@ def _determine_profile(profiler_name: Optional[str]) -> bool:
 
 
 def _process_suite_new_flags_and_prompt(
-    context: DataContext,
+    context: SerializableDataContext,
     usage_event_end: str,
     interactive_flag: bool,
     manual_flag: bool,
@@ -221,7 +223,7 @@ def _process_suite_new_flags_and_prompt(
 
 
 def _suite_new_workflow(
-    context: DataContext,
+    context: SerializableDataContext,
     expectation_suite_name: Optional[str],
     interactive_mode: CLISuiteInteractiveFlagCombinations,
     profile: bool,
@@ -411,7 +413,7 @@ def _suite_new_process_profile_and_batch_request_flags(
 
 def _exit_early_if_error(
     error_message: Optional[str],
-    context: DataContext,
+    context: SerializableDataContext,
     usage_event_end: str,
     interactive_mode: CLISuiteInteractiveFlagCombinations,
 ) -> None:
@@ -544,7 +546,7 @@ def suite_edit(
 
     Read more about specifying batches of data in the documentation: https://docs.greatexpectations.io/
     """
-    context: DataContext = ctx.obj.data_context
+    context: SerializableDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     interactive_mode: CLISuiteInteractiveFlagCombinations = (
@@ -580,7 +582,7 @@ def suite_edit(
 
 
 def _process_suite_edit_flags_and_prompt(
-    context: DataContext,
+    context: SerializableDataContext,
     usage_event_end: str,
     interactive_flag: bool,
     manual_flag: bool,
@@ -703,7 +705,7 @@ How would you like to edit your Expectation Suite?
 
 
 def _suite_edit_workflow(
-    context: DataContext,
+    context: SerializableDataContext,
     expectation_suite_name: str,
     profile: bool,
     profiler_name: Optional[str],
@@ -867,7 +869,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
 @click.pass_context
 def suite_demo(ctx: click.Context) -> None:
     """This command is not supported in the v3 (Batch Request) API."""
-    context: DataContext = ctx.obj.data_context
+    context: SerializableDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
     send_usage_message(
         data_context=context,
@@ -887,7 +889,7 @@ def suite_delete(ctx: click.Context, suite: str) -> None:
     """
     Delete an Expectation Suite from the Expectation Store.
     """
-    context: DataContext = ctx.obj.data_context
+    context: SerializableDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
     try:
         suite_names: List[str] = context.list_expectation_suite_names()
@@ -936,7 +938,7 @@ def suite_delete(ctx: click.Context, suite: str) -> None:
 @click.pass_context
 def suite_list(ctx: click.Context) -> None:
     """List existing Expectation Suites."""
-    context: DataContext = ctx.obj.data_context
+    context: SerializableDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
     try:
         suite_names: List[str] = context.list_expectation_suite_names()
@@ -975,7 +977,7 @@ def suite_list(ctx: click.Context) -> None:
     )
 
 
-def _get_notebook_path(context: DataContext, notebook_name: str) -> str:
+def _get_notebook_path(context: SerializableDataContext, notebook_name: str) -> str:
     return os.path.abspath(
         os.path.join(
             context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name

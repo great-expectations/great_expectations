@@ -1,13 +1,15 @@
 from typing import Dict, List, Optional
 
-from great_expectations import DataContext
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_logging import logger
 from great_expectations.cli.pretty_printing import cli_message
+from great_expectations.data_context.data_context.serializable_data_context import (
+    SerializableDataContext,
+)
 
 
 def build_docs(
-    context: DataContext,
+    context: SerializableDataContext,
     usage_stats_event: str,
     site_names: Optional[List[str]] = None,
     view: bool = True,
