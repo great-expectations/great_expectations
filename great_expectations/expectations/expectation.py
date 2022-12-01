@@ -349,7 +349,6 @@ class Expectation(metaclass=MetaExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> Tuple[str, dict, Optional[dict]]:
         """
@@ -404,7 +403,6 @@ class Expectation(metaclass=MetaExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ):
@@ -440,7 +438,6 @@ class Expectation(metaclass=MetaExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ):
@@ -553,7 +550,6 @@ class Expectation(metaclass=MetaExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ):
@@ -633,7 +629,6 @@ class Expectation(metaclass=MetaExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ):
@@ -739,7 +734,6 @@ class Expectation(metaclass=MetaExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ) -> Optional[RenderedTableContent]:
@@ -907,7 +901,6 @@ class Expectation(metaclass=MetaExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ) -> RenderedAtomicContent:
@@ -935,7 +928,6 @@ class Expectation(metaclass=MetaExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ) -> str:
