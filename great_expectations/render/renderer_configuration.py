@@ -69,9 +69,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     def add_param(
         self, name: str, schema_type: ParamSchemaType, value: Optional[Any] = None
     ) -> None:
-        """RendererConfiguration add_param method.
-
-        This method will add a param that can be substituted into a template string during rendering.
+        """Adds a param that can be substituted into a template string during rendering.
 
         Attributes:
             name (str): A name for the attribute to be added to this RendererConfiguration instance.
