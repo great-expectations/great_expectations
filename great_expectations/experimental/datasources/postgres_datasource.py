@@ -35,8 +35,8 @@ class BatchRequestError(Exception):
 
 # For our year splitter we default the range to the last 2 year.
 _CURRENT_YEAR = datetime.now(dateutil.tz.tzutc()).year
-_DEFAULT_YEAR_RANGE = range(_CURRENT_YEAR - 1, _CURRENT_YEAR + 1)
-_DEFAULT_MONTH_RANGE = range(1, 13)
+_DEFAULT_YEAR_RANGE = list(range(_CURRENT_YEAR - 1, _CURRENT_YEAR + 1))
+_DEFAULT_MONTH_RANGE = list(range(1, 13))
 
 
 @pydantic_dc.dataclass(frozen=True)

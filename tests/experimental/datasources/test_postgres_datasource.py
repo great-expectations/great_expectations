@@ -467,3 +467,48 @@ def test_sort_batch_list_by_unknown_key(create_source):
         )
         with pytest.raises(KeyError):
             source.get_batch_list_from_batch_request(batch_request)
+
+
+def test_data_source_json_has_properties(create_source):
+    with create_source(lambda _: None) as source:
+        assert (
+            type(TableAsset.order_by) == property,
+            "This test assumes TableAsset.order_by is a property. If it is not we "
+            "should update this test",
+        )
+        asset = source.add_table_asset(name="my_asset", table_name="my_table")
+        asset.add_year_and_month_splitter(column_name="my_col").add_sorters(
+            ["year", "month"]
+        )
+        source_json = source.json()
+        assert '"order_by": ' in source_json
+
+
+def test_data_source_str_has_properties(create_source):
+    with create_source(lambda _: None) as source:
+        assert (
+            type(TableAsset.order_by) == property,
+            "This test assumes TableAsset.order_by is a property. If it is not we "
+            "should update this test",
+        )
+        asset = source.add_table_asset(name="my_asset", table_name="my_table")
+        asset.add_year_and_month_splitter(column_name="my_col").add_sorters(
+            ["year", "month"]
+        )
+        source_str = source.__str__()
+        assert "order_by:" in source_str
+
+
+def test_datasource_dict_has_properties(create_source):
+    with create_source(lambda _: None) as source:
+        assert (
+            type(TableAsset.order_by) == property,
+            "This test assumes TableAsset.order_by is a property. If it is not we "
+            "should update this test",
+        )
+        asset = source.add_table_asset(name="my_asset", table_name="my_table")
+        asset.add_year_and_month_splitter(column_name="my_col").add_sorters(
+            ["year", "month"]
+        )
+        source_dict = source.dict()
+        assert type(source_dict["assets"]["my_asset"]["order_by"]) == list
