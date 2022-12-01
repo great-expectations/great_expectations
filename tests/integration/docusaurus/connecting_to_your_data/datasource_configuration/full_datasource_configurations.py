@@ -1,6 +1,6 @@
 ### Universal datasource configuration elements:
 
-CONNECTION_STRING = "sqlite:///data/yellow_tripdata.db"
+CONNECTION_STRING = "sqlite:///data/yellow_tripdata_2020.db"
 
 
 def get_partial_config_universal_datasource_config_elements() -> dict:
@@ -205,7 +205,32 @@ def get_full_config_spark_runtime_datasource() -> dict:
     return datasource_config
 
 
-def get_full_config_sql_inferred_datasource() -> dict:
+def get_full_config_sql_inferred_datasource__single_batch_only() -> dict:
+    """Creates a dictionary configuration for a SQL Datasource using a
+     configured data connector that can only return a single batch.
+
+    Returns:
+         a dictionary containing a full configuration for a SQL Datasource
+    """
+    datasource_config: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SqlAlchemyExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+            "connection_string": CONNECTION_STRING,
+        },
+        "data_connectors": {
+            "name_of_my_inferred_data_connector": {
+                "class_name": "InferredAssetSqlDataConnector",
+            },
+        },
+    }
+    return datasource_config
+
+
+def get_full_config_sql_inferred_datasource__single_and_multi_batch() -> dict:
     """Creates a dictionary configuration for a SQL Datasource using a
      configured data connector that can return multiple item batches and
      a configured data connector that can only return a single batch.
@@ -260,11 +285,11 @@ def get_full_config_sql_configured_datasource() -> dict:
                 "class_name": "ConfiguredAssetSqlDataConnector",
                 "assets": {
                     "yellow_tripdata_sample_2020_full": {
-                        "table_name": "yellow_tripdata_sample_2020",
+                        "table_name": "yellow_tripdata_sample_2020_01",
                         "schema_name": "public",
                     },
                     "yellow_tripdata_sample_2020_by_year_and_month": {
-                        "table_name": "yellow_tripdata_sample_2020",
+                        "table_name": "yellow_tripdata_sample_2020_01",
                         "schema_name": "public",
                         "splitter_method": "split_on_year_and_month",
                         "splitter_kwargs": {
