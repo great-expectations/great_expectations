@@ -900,16 +900,20 @@ def is_valid_continuous_partition_object(partition_object):
     )
 
 
-def sql_post_compile_to_string(
+def sql_statement_with_post_compile_to_string(
     engine: "sqlalchemy.engine.Engine", select_statement: "sqlalchemy.sql.Select"
 ) -> str:
     """
     Util method to compile SQL select statement with post-compile parameters into a string. Logic lifted directly
     from sqlalchemy documentation.
+
     https://docs.sqlalchemy.org/en/14/faq/sqlexpressions.html#rendering-postcompile-parameters-as-bound-parameters
-    Used by _sqlalchemy_map_condition_index() in map_metric_provider
+
+    Used by _sqlalchemy_map_condition_index() in map_metric_provider to build query that will allow you to
+    return unexpected_index_values.
+
     Args:
-        engine (sqlalchemy.engine.Engine): great_expectations/expectations/expectation.pyngine used to do the compilation
+        engine (sqlalchemy.engine.Engine): Sqlalchemy engine used to do the compilation.
         select_statement (sqlalchemy.sql.Select): Select statement to compile into string.
     Returns:
         String representation of select_statement
@@ -922,14 +926,15 @@ def sql_post_compile_to_string(
     return query_as_string
 
 
-def get_sqlalchemy_source_table_and_schema_selectable(
+def get_sqlalchemy_source_table_and_schema(
     engine: SqlAlchemyExecutionEngine,
 ) -> "Table":
     """
-    Util method to extract table when temp_table is being used.  This allows you to get the source_table_name
-    even if a temp_temp table is created.
-    This is used by `_sqlalchemy_map_condition_query()` which returns the query that allows you to get the
-    unexpected values and their indices
+    Util method to return table name that is associated with current batch.
+
+    This is used by `_sqlalchemy_map_condition_query()` which returns a query that allows users to return
+    unexpected_index_values.
+
     Args:
         engine (SqlAlchemyExecutionEngine): Engine that is currently being used to calculate the Metrics
     Returns:

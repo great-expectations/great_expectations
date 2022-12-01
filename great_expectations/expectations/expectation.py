@@ -2315,12 +2315,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
             self.metric_dependencies == tuple()
         ), "ColumnMapExpectation must be configured using map_metric, and cannot have metric_dependencies declared."
 
-        # convenient name for updates
-
-        metric_configurations: Dict[
-            str, MetricConfiguration
-        ] = validation_dependencies.metric_configurations
-
         metric_kwargs: dict
 
         metric_kwargs = get_metric_kwargs(
@@ -2582,7 +2576,6 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
-
         validation_dependencies: ValidationDependencies = (
             super().get_validation_dependencies(
                 configuration=configuration,
@@ -2596,12 +2589,6 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         assert (
             self.metric_dependencies == tuple()
         ), "ColumnPairMapExpectation must be configured using map_metric, and cannot have metric_dependencies declared."
-        # convenient name for updates
-
-        metric_configurations: Dict[
-            str, MetricConfiguration
-        ] = validation_dependencies.metric_configurations
-
         metric_kwargs: dict
 
         metric_kwargs = get_metric_kwargs(
@@ -2944,9 +2931,6 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         unexpected_index_list: Optional[List[int]] = metrics.get(
             f"{self.map_metric}.unexpected_index_list"
         )
-        unexpected_index_query: Optional[str] = metrics.get(
-            f"{self.map_metric}.unexpected_index_query"
-        )
         filtered_row_count: Optional[int] = metrics.get(
             f"{self.map_metric}.filtered_row_count"
         )
@@ -2977,7 +2961,6 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             unexpected_count=unexpected_count,
             unexpected_list=unexpected_values,
             unexpected_index_list=unexpected_index_list,
-            unexpected_index_query=unexpected_index_query,
         )
 
 

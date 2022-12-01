@@ -34,8 +34,8 @@ from great_expectations.expectations.metrics.util import (
     Insert,
     Label,
     Select,
-    get_sqlalchemy_source_table_and_schema_selectable,
-    sql_post_compile_to_string,
+    get_sqlalchemy_source_table_and_schema,
+    sql_statement_with_post_compile_to_string,
 )
 from great_expectations.expectations.registry import (
     get_metric_provider,
@@ -2345,34 +2345,23 @@ def _sqlalchemy_map_condition_query(
     **kwargs,
 ) -> Optional[str]:
     """
-    Returns indicies of the metric values which do not meet an expected Expectation condition for instances
+    Returns query that will return all rows which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation.
+
+    Requires `unexpected_index_column_names` to be part of `result_format` dict to specify primary_key columns
+    to return, along with column the Expectation is run on.
     """
     (
-        # boolean_mapped_unexpected_values,
         unexpected_condition,
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition")
 
-    """
-    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
-    with all of the available "domain_kwargs" keys.
-    """
-    """
-    The query we want to build :
-        - domain column + pk columns that are given
-    """
-    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    # boo this is not what we want
-    selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
-    result_format = metric_value_kwargs["result_format"]
-    # original
+    domain_kwargs: dict = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
+    result_format: dict = metric_value_kwargs["result_format"]
+
     column_selector: List[sa.Column] = [sa.column(domain_kwargs["column"])]
-    # can this also be a list more than one item?
     all_table_columns: List[str] = metrics.get("table.columns")
-    # maybe we will add this back later
-    # column_selector.append(sa.column(domain_kwargs["column"]))
     unexpected_index_column_names: List[str] = result_format.get(
         "unexpected_index_column_names"
     )
@@ -2383,18 +2372,25 @@ def _sqlalchemy_map_condition_query(
                 f"Please check your configuration and try again."
             )
         column_selector.append(sa.column(column_name))
-    # at this point we have the columns to select
-    query = sa.select(column_selector).where(unexpected_condition)
-    # TODO: not a temp table but the original one
-    # execution_engine.batch_manager.active_batch_data.source_schema_name
-    # execution_engine.batch_manager.active_batch_data.source_table_name
-    selectable = get_sqlalchemy_source_table_and_schema_selectable(execution_engine)
 
-    new_selectable = get_sqlalchemy_selectable(selectable)
-    new_query = query.select_from(new_selectable)
-    # query: this is going to be a sepraate metric
-    query_as_string: str = sql_post_compile_to_string(
-        engine=execution_engine.engine, select_statement=new_query
+    unexpected_condition_query_with_selected_columns: sa.select = sa.select(
+        column_selector
+    ).where(unexpected_condition)
+    source_table_and_schema: sa.Table = get_sqlalchemy_source_table_and_schema(
+        execution_engine
+    )
+
+    source_table_and_schema_as_selectable: Union[
+        sa.Table, sa.Select
+    ] = get_sqlalchemy_selectable(source_table_and_schema)
+    final_select_statement: sa.select = (
+        unexpected_condition_query_with_selected_columns.select_from(
+            source_table_and_schema_as_selectable
+        )
+    )
+
+    query_as_string: str = sql_statement_with_post_compile_to_string(
+        engine=execution_engine.engine, select_statement=final_select_statement
     )
     return query_as_string
 
