@@ -22,9 +22,9 @@ from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_function_partial,
-    metric_partial,
 )
 from great_expectations.expectations.metrics.import_manager import F, Window, sparktypes
+from great_expectations.expectations.metrics.metric_provider import metric_partial
 from great_expectations.expectations.registry import get_metric_kwargs
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
