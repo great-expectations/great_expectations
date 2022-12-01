@@ -2453,11 +2453,12 @@ def _sqlalchemy_map_condition_index(
 
     unexpected_index_list: Optional[List[Dict[str, Any]]] = []
 
-    # if the result_format is not COMPLETE (ie. SUMMARY), then we only process the first few query_results
-    if result_format["result_format"] != "COMPLETE":
-        query_result = query_result[: result_format["partial_unexpected_count"]]
+    # since SQL tables can be **very** large, truncate query_result values at 20, or at `partial_unexpected_count`
+    truncate: int = result_format.get(["partial_unexpected_count"], 20)
 
-    for row in query_result:
+    truncated_query_result = query_result[:truncate]
+
+    for row in truncated_query_result:
         primary_key_dict: Dict[str, Any] = {}
         for index in range(len(unexpected_index_column_names)):
             name: str = unexpected_index_column_names[index]
