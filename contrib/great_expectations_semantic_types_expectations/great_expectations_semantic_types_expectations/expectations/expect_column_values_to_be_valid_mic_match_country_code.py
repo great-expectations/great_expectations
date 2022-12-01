@@ -41,7 +41,7 @@ class ColumnValuesToBeValidMicMatchCountryCode(ColumnMapMetricProvider):
     condition_value_keys = ("country_code",)
 
     url = "https://www.iso20022.org/sites/default/files/ISO10383_MIC/ISO10383_MIC.csv"
-    df = pd.read_csv(url)
+    df = pd.read_csv(url, encoding="cp1250")
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
