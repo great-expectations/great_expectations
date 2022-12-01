@@ -189,39 +189,63 @@ def test_column_quoted_name_type_sa(sa):
 
     table_columns_metric: MetricConfiguration = MetricConfiguration(
         metric_name="table.columns",
-        metric_domain_kwargs=dict(),
+        metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
     table_columns_metric_id: Tuple[str, str, str] = table_columns_metric.id
+    batch_column_list = metrics[table_columns_metric_id]
+    quoted_batch_column_list = [
+        quoted_name(value=str(element), quote=True)
+        for element in metrics[table_columns_metric_id]
+    ]
 
     column_name = "names"
 
-    metrics[table_columns_metric_id] = [quoted_name(value=column_name, quote=True)]
-
-    quoted_column_name = get_typed_column_names(
-        column_names=column_name,
-        batch_columns_list=metrics[table_columns_metric_id],
-        execution_engine=engine,
-    )
-    assert isinstance(quoted_column_name, sa.sql.elements.quoted_name)
-
     str_column_name = get_typed_column_names(
         column_names=column_name,
-        batch_columns_list=metrics[table_columns_metric_id],
+        batch_columns_list=batch_column_list,
         execution_engine=PandasExecutionEngine(),
     )
     assert isinstance(str_column_name, str)
 
-    with pytest.raises(ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError) as eee:
-        _ = get_typed_column_names(
-            column_names="non_existent_column",
-            batch_columns_list=metrics[table_columns_metric_id],
-            execution_engine=engine,
-        )
-    assert (
-        str(eee.value)
-        == 'Error: The column "non_existent_column" in BatchData does not exist.'
+    quoted_column_name = get_typed_column_names(
+        column_names=column_name,
+        batch_columns_list=quoted_batch_column_list,
+        execution_engine=engine,
     )
+    assert isinstance(quoted_column_name, sa.sql.elements.quoted_name)
+    assert quoted_column_name.quote is True
+
+    for column_name in [
+        "non_existent_column",
+        "NAMES",
+        '"NAMES"',
+        '"Names"',
+    ]:
+        with pytest.raises(
+            ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError
+        ) as eee:
+            _ = get_typed_column_names(
+                column_names=column_name,
+                batch_columns_list=batch_column_list,
+                execution_engine=engine,
+            )
+        assert (
+            str(eee.value)
+            == f'Error: The column "{column_name}" in BatchData does not exist.'
+        )
+        with pytest.raises(
+            ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError
+        ) as eee:
+            _ = get_typed_column_names(
+                column_names=column_name,
+                batch_columns_list=quoted_batch_column_list,
+                execution_engine=engine,
+            )
+        assert (
+            str(eee.value)
+            == f'Error: The column "{column_name}" in BatchData does not exist.'
+        )
 
 
 def test_column_value_lengths_min_metric_sa(sa):
