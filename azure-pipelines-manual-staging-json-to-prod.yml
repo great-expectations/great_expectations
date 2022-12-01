@@ -26,7 +26,6 @@ stages:
               targetFolder: '$(Build.SourcesDirectory)/assets/scripts'
               globExpressions: 'expectation_library_v2--staging.json'
               sourceFolder: 'static/gallery/'
-              filesAcl: 'public-read'
 
           - task: S3Download@1
             inputs:
@@ -36,7 +35,6 @@ stages:
               targetFolder: '$(Build.SourcesDirectory)/assets/scripts'
               globExpressions: 'package_manifests--staging.json'
               sourceFolder: 'static/gallery/'
-              filesAcl: 'public-read'
 
           - bash: pwd; ls -ltr; mv expectation_library_v2--staging.json expectation_library_v2--tmp.json; mv package_manifests--staging.json package_manifests--tmp.json
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
