@@ -62,7 +62,7 @@ def custom_process_docstring(app, what, name, obj, options, lines):
     """Custom processing for use during docstring processing."""
     _remove_whitelist_tag(app=app, what=what, name=name, obj=obj, options=options, lines=lines)
     _process_relevant_documentation_tag(app=app, what=what, name=name, obj=obj, options=options, lines=lines)
-    _convert_documentation_links(app=app, what=what, name=name, obj=obj, options=options, lines=lines)
+    _remove_feature_maturity_info(app=app, what=what, name=name, obj=obj, options=options, lines=lines)
 
 def _remove_whitelist_tag(app, what, name, obj, options, lines):
     """Remove the whitelisted tag from documentation before rendering.
@@ -84,22 +84,24 @@ def _process_relevant_documentation_tag(app, what, name, obj, options, lines):
             trimmed_line = line.replace(DOCUMENTATION_TAG, "Relevant Documentation Links\n")
             lines[idx] = trimmed_line
 
-def _convert_documentation_links(app, what, name, obj, options, lines):
-    """Remove links and replace with formatted title.
+FEATURE_MATURITY_INFO_TAG = "--ge-feature-maturity-info--"
+
+def _remove_feature_maturity_info(app, what, name, obj, options, lines):
+    """Remove feature maturity info if there are starting and ending tags.
 
     Note: This method modifies lines in place per sphinx documentation.
     """
-    pass
-    # for idx, line in enumerate(lines):
-    #     if "http" in line:
-    #         url = line
-    #         url_parts = urlparse(url)
-    #         url_path = url_parts.path.strip('/').split('/')
-    #         url_text = url_path[-1]
-    #         # TODO: AJB change underscores to spaces and convert to title case
-    #         processed_line = f'<a href="{url}">{url_text}</a>'
-    #         lines[idx] = processed_line
+    feature_maturity_info_start = None
+    feature_maturity_info_end = None
+    for idx, line in enumerate(lines):
+        if FEATURE_MATURITY_INFO_TAG in line:
+            if feature_maturity_info_start is None:
+                feature_maturity_info_start = idx
+            else:
+                feature_maturity_info_end = idx
 
+    if feature_maturity_info_start and feature_maturity_info_end:
+        del lines[feature_maturity_info_start:feature_maturity_info_end + 1]
 
 
 def setup(app):
