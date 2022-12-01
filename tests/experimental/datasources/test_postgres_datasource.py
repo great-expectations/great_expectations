@@ -136,7 +136,7 @@ def test_construct_table_asset_directly_with_splitter(create_source):
         splitter = ColumnSplitter(
             method_name="splitter_method",
             column_name="col",
-            param_defaults={"a": [1, 2, 3], "b": range(1, 13)},
+            param_defaults={"a": [1, 2, 3], "b": list(range(1, 13))},
         )
         asset = TableAsset(
             name="my_asset",
@@ -406,25 +406,49 @@ def test_get_bad_batch_request(create_source):
         (["+year", "+month"], [_DEFAULT_YEAR_RANGE, _DEFAULT_MONTH_RANGE]),
         (["+year", "month"], [_DEFAULT_YEAR_RANGE, _DEFAULT_MONTH_RANGE]),
         (["year", "+month"], [_DEFAULT_YEAR_RANGE, _DEFAULT_MONTH_RANGE]),
-        (["+year", "-month"], [_DEFAULT_YEAR_RANGE, reversed(_DEFAULT_MONTH_RANGE)]),
-        (["year", "-month"], [_DEFAULT_YEAR_RANGE, reversed(_DEFAULT_MONTH_RANGE)]),
-        (["-year", "month"], [reversed(_DEFAULT_YEAR_RANGE), _DEFAULT_MONTH_RANGE]),
-        (["-year", "+month"], [reversed(_DEFAULT_YEAR_RANGE), _DEFAULT_MONTH_RANGE]),
+        (
+            ["+year", "-month"],
+            [_DEFAULT_YEAR_RANGE, list(reversed(_DEFAULT_MONTH_RANGE))],
+        ),
+        (
+            ["year", "-month"],
+            [_DEFAULT_YEAR_RANGE, list(reversed(_DEFAULT_MONTH_RANGE))],
+        ),
+        (
+            ["-year", "month"],
+            [list(reversed(_DEFAULT_YEAR_RANGE)), _DEFAULT_MONTH_RANGE],
+        ),
+        (
+            ["-year", "+month"],
+            [list(reversed(_DEFAULT_YEAR_RANGE)), _DEFAULT_MONTH_RANGE],
+        ),
         (
             ["-year", "-month"],
-            [reversed(_DEFAULT_YEAR_RANGE), reversed(_DEFAULT_MONTH_RANGE)],
+            [list(reversed(_DEFAULT_YEAR_RANGE)), list(reversed(_DEFAULT_MONTH_RANGE))],
         ),
         (["month", "year"], [_DEFAULT_MONTH_RANGE, _DEFAULT_YEAR_RANGE]),
         (["+month", "+year"], [_DEFAULT_MONTH_RANGE, _DEFAULT_YEAR_RANGE]),
         (["month", "+year"], [_DEFAULT_MONTH_RANGE, _DEFAULT_YEAR_RANGE]),
         (["+month", "year"], [_DEFAULT_MONTH_RANGE, _DEFAULT_YEAR_RANGE]),
-        (["-month", "+year"], [reversed(_DEFAULT_MONTH_RANGE), _DEFAULT_YEAR_RANGE]),
-        (["-month", "year"], [reversed(_DEFAULT_MONTH_RANGE), _DEFAULT_YEAR_RANGE]),
-        (["month", "-year"], [_DEFAULT_MONTH_RANGE, reversed(_DEFAULT_YEAR_RANGE)]),
-        (["+month", "-year"], [_DEFAULT_MONTH_RANGE, reversed(_DEFAULT_YEAR_RANGE)]),
+        (
+            ["-month", "+year"],
+            [list(reversed(_DEFAULT_MONTH_RANGE)), _DEFAULT_YEAR_RANGE],
+        ),
+        (
+            ["-month", "year"],
+            [list(reversed(_DEFAULT_MONTH_RANGE)), _DEFAULT_YEAR_RANGE],
+        ),
+        (
+            ["month", "-year"],
+            [_DEFAULT_MONTH_RANGE, list(reversed(_DEFAULT_YEAR_RANGE))],
+        ),
+        (
+            ["+month", "-year"],
+            [_DEFAULT_MONTH_RANGE, list(reversed(_DEFAULT_YEAR_RANGE))],
+        ),
         (
             ["-month", "-year"],
-            [reversed(_DEFAULT_MONTH_RANGE), reversed(_DEFAULT_YEAR_RANGE)],
+            [list(reversed(_DEFAULT_MONTH_RANGE)), list(reversed(_DEFAULT_YEAR_RANGE))],
         ),
     ],
 )
@@ -444,9 +468,7 @@ def test_sort_batch_list_by_metadata(sort_info, create_source):
         key0 = sort_keys[0].lstrip("+-")
         key1 = sort_keys[1].lstrip("+-")
         for value0 in sort_values[0]:
-            for value1 in copy(sort_values[1]):
-                # We copy(sort_values[1]) because otherwise we'd exhaust this
-                # inner iterator on the first pass of the outer loop.
+            for value1 in sort_values[1]:
                 expected_order.append({key0: value0, key1: value1})
         assert len(batches) == len(expected_order)
         for i, batch in enumerate(batches):
@@ -454,6 +476,7 @@ def test_sort_batch_list_by_metadata(sort_info, create_source):
             assert batch.metadata["month"] == expected_order[i]["month"]
 
 
+@pytest.mark.unit
 def test_sort_batch_list_by_unknown_key(create_source):
     with create_source(lambda _: None) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
@@ -469,6 +492,7 @@ def test_sort_batch_list_by_unknown_key(create_source):
             source.get_batch_list_from_batch_request(batch_request)
 
 
+@pytest.mark.unit
 def test_data_source_json_has_properties(create_source):
     with create_source(lambda _: None) as source:
         assert (
@@ -484,6 +508,7 @@ def test_data_source_json_has_properties(create_source):
         assert '"order_by": ' in source_json
 
 
+@pytest.mark.unit
 def test_data_source_str_has_properties(create_source):
     with create_source(lambda _: None) as source:
         assert (
@@ -499,6 +524,7 @@ def test_data_source_str_has_properties(create_source):
         assert "order_by:" in source_str
 
 
+@pytest.mark.unit
 def test_datasource_dict_has_properties(create_source):
     with create_source(lambda _: None) as source:
         assert (

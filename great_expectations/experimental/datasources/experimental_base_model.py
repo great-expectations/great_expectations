@@ -68,7 +68,7 @@ class ExperimentalBaseModel(pydantic.BaseModel):
     def __str__(self):
         return self.yaml()
 
-    ##### Workaround for https://github.com/pydantic/pydantic/issues/935 ####
+    # Workaround for https://github.com/pydantic/pydantic/issues/935
     #
     # Currently there is no way to output properties using pydantics builtin in json and dict
     # methods. Our current fix does let one use the exclude/include arguments on properties,
@@ -78,22 +78,24 @@ class ExperimentalBaseModel(pydantic.BaseModel):
     # https://github.com/pydantic/pydantic/issues/935#issuecomment-554378904
 
     @classmethod
-    def get_properties(cls) -> List[str]:
+    def _get_properties(cls) -> List[str]:
         return [
             prop for prop in cls.__dict__ if isinstance(cls.__dict__[prop], property)
         ]
 
     def json(self, **kwargs) -> str:
+        """The json representation of the Model."""
         self.__dict__.update(
-            {prop: getattr(self, prop) for prop in self.get_properties()}
+            {prop: getattr(self, prop) for prop in self._get_properties()}
         )
         attribs = super().json(**kwargs)
         return attribs
 
-    def dict(self, **kwargs) -> "DictStrAny":
+    def dict(self, **kwargs) -> DictStrAny:
+        """The dict representation of the Model."""
         self.__dict__.update(
-            {prop: getattr(self, prop) for prop in self.get_properties()}
+            {prop: getattr(self, prop) for prop in self._get_properties()}
         )
         return super().dict(**kwargs)
 
-    ##### End Workaround #####
+    # End Workaround
