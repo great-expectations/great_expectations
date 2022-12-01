@@ -17,6 +17,9 @@ class ExpectationSuiteAnonymizer(BaseAnonymizer):
         self, obj: Optional["ExpectationSuite"] = None, **kwargs  # noqa: F821
     ) -> dict:
         expectation_suite = obj
+        if not expectation_suite:
+            return {}
+
         anonymized_info_dict = {}
         anonymized_expectation_counts = list()
 
