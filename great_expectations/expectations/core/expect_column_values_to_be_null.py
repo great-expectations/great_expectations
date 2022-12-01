@@ -104,7 +104,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     @classmethod
     def atomic_prescriptive_template(
         cls, renderer_configuration: RendererConfiguration
-    ):
+    ) -> RendererConfiguration:
         renderer_configuration.add_param(
             name="column", schema_type=ParamSchemaType.STRING
         )
