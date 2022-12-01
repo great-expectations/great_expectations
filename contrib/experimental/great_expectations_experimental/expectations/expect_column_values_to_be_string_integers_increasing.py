@@ -242,12 +242,13 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
             runtime_configuration=runtime_configuration,
         )
 
-        dependencies["metrics"][
-            "column_values.string_integers.increasing.map"
-        ] = MetricConfiguration(
+        dependencies.set_metric_configuration(
             metric_name="column_values.string_integers.increasing.map",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            metric_configuration=MetricConfiguration(
+                metric_name="column_values.string_integers.increasing.map",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
         )
 
         return dependencies
