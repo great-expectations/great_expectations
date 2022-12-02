@@ -105,21 +105,16 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     def _prescriptive_template(
         cls, renderer_configuration: RendererConfiguration
     ) -> RendererConfiguration:
-        renderer_configuration.add_param(
-            name="column", schema_type=ParamSchemaType.STRING
+        add_param_args = (
+            ("column", ParamSchemaType.STRING),
+            ("mostly", ParamSchemaType.NUMBER),
+            ("mostly_pct", ParamSchemaType.STRING),
+            ("row_condition", ParamSchemaType.STRING),
+            ("condition_parser", ParamSchemaType.STRING),
         )
-        renderer_configuration.add_param(
-            name="mostly", schema_type=ParamSchemaType.NUMBER
-        )
-        renderer_configuration.add_param(
-            name="mostly_pct", schema_type=ParamSchemaType.STRING
-        )
-        renderer_configuration.add_param(
-            name="row_condition", schema_type=ParamSchemaType.STRING
-        )
-        renderer_configuration.add_param(
-            name="condition_parser", schema_type=ParamSchemaType.STRING
-        )
+        for name, schema_type in add_param_args:
+            renderer_configuration.add_param(name=name, schema_type=schema_type)
+
         params: RendererParams = renderer_configuration.params
 
         if params.mostly.value and params.mostly.value < 1.0:
@@ -134,19 +129,13 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             template_str = f"$column {template_str}"
 
         if params.row_condition.value:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params.row_condition.value,
+            renderer_configuration = cls._add_row_condition_condition_params(
+                renderer_configuration=renderer_configuration
             )
-            template_str = f"{conditional_template_str}, then {template_str}"
-            for conditional_param, condition in conditional_params.items():
-                renderer_configuration.add_param(
-                    name=conditional_param,
-                    schema_type=ParamSchemaType.STRING,
-                    value=condition,
-                )
+            conditions_str: str = cls._get_conditions_string_from_row_condition(
+                row_condition_param=params.row_condition
+            )
+            template_str = f"{conditions_str}, then {template_str}"
 
         renderer_configuration.template_str = template_str
 
@@ -161,13 +150,13 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        renderer_configuration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            runtime_configuration=runtime_configuration,
         )
-        styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            renderer_configuration.configuration.kwargs,
             ["column", "mostly", "row_condition", "condition_parser"],
         )
 
@@ -180,7 +169,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         else:
             template_str = "values must be null."
 
-        if include_column_name:
+        if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
@@ -198,7 +187,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
                     "string_template": {
                         "template": template_str,
                         "params": params,
-                        "styling": styling,
+                        "styling": renderer_configuration.styling,
                     },
                 }
             )
