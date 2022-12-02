@@ -2,6 +2,7 @@ from typing import Callable
 
 WHITELISTED_TAG = "--Public API--"
 
+
 def public_api(func) -> Callable:
     """Add the public API tag for processing by the auto documentation generator.
 
