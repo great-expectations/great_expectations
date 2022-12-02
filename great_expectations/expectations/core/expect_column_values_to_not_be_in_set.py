@@ -1,4 +1,3 @@
-from numbers import Number
 from typing import Dict, Optional
 
 import numpy as np
@@ -124,7 +123,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     )
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration)
         if configuration is None:
@@ -146,46 +145,30 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ):
-        renderer_configuration.add_param(
-            name="column", schema_type=ParamSchemaType.STRING
+        add_param_args = (
+            ("column", ParamSchemaType.STRING),
+            ("value_set", ParamSchemaType.ARRAY),
+            ("mostly", ParamSchemaType.NUMBER),
+            ("mostly_pct", ParamSchemaType.STRING),
+            ("parse_strings_as_datetimes", ParamSchemaType.BOOLEAN),
+            ("row_condition", ParamSchemaType.STRING),
+            ("condition_parser", ParamSchemaType.STRING),
         )
-        renderer_configuration.add_param(
-            name="value_set", schema_type=ParamSchemaType.ARRAY
-        )
-        renderer_configuration.add_param(
-            name="mostly", schema_type=ParamSchemaType.NUMBER
-        )
-        renderer_configuration.add_param(
-            name="mostly_pct", schema_type=ParamSchemaType.STRING
-        )
-        renderer_configuration.add_param(
-            name="parse_strings_as_datetimes", schema_type=ParamSchemaType.BOOLEAN
-        )
-        renderer_configuration.add_param(
-            name="row_condition", schema_type=ParamSchemaType.STRING
-        )
-        renderer_configuration.add_param(
-            name="condition_parser", schema_type=ParamSchemaType.STRING
-        )
+        for name, schema_type in add_param_args:
+            renderer_configuration.add_param(name=name, schema_type=schema_type)
+
         params: RendererParams = renderer_configuration.params
 
         if not params.value_set.value or len(params.value_set.value) == 0:
             values_string = "[ ]"
         else:
-            for i, v in enumerate(params.value_set.value):
-                if isinstance(v, Number):
-                    schema_type = ParamSchemaType.NUMBER
-                else:
-                    schema_type = ParamSchemaType.STRING
-                renderer_configuration.add_param(
-                    name=f"v__{str(i)}", schema_type=schema_type, value=v
-                )
-
-            values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params.value_set.value)]
+            renderer_configuration = cls._add_value_set_value_params(
+                renderer_configuration=renderer_configuration
             )
-
-        template_str = f"values must not belong to this set: {values_string}"
+            values_str: str = cls._get_values_string_from_value_set(
+                value_set_param=params.value_set
+            )
+            template_str = f"values must not belong to this set: {values_str}"
 
         if params.mostly.value and params.mostly.value < 1.0:
             params.mostly_pct.value = num_to_str(
@@ -202,17 +185,13 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             template_str = f"$column {template_str}"
 
         if params.row_condition.value:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params.row_condition.value)
-            template_str = f"{conditional_template_str}, then {template_str}"
-            for conditional_param, condition in conditional_params.items():
-                renderer_configuration.add_param(
-                    name=conditional_param,
-                    schema_type=ParamSchemaType.STRING,
-                    value=condition,
-                )
+            renderer_configuration = cls._add_row_condition_condition_params(
+                renderer_configuration=renderer_configuration
+            )
+            conditions_str: str = cls._get_conditions_string_from_row_condition(
+                row_condition_param=params.row_condition
+            )
+            template_str = f"{conditions_str}, then {template_str}"
 
         renderer_configuration.template_str = template_str
 
@@ -226,19 +205,14 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
     ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        renderer_configuration = RendererConfiguration(
+            configuraiton=configuration,
+            result=result,
+            runtime_configuration=runtime_configuration,
         )
-        styling = runtime_configuration.get("styling")
-        if configuration:
-            kwargs = configuration.kwargs
-        elif result and result.expectation_config:
-            kwargs = result.expectation_config.kwargs
         params = substitute_none_for_missing(
-            kwargs,
+            renderer_configuration.kwargs,
             [
                 "column",
                 "value_set",
@@ -273,7 +247,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
 
-        if include_column_name:
+        if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
@@ -291,7 +265,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
                     "string_template": {
                         "template": template_str,
                         "params": params,
-                        "styling": styling,
+                        "styling": renderer_configuration.styling,
                     },
                 }
             )
