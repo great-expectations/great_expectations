@@ -83,7 +83,6 @@ def test_value_counts_single_batch_parameter_builder_alice(
                 "metric_value_kwargs": {"sort": "value"},
             },
             "num_batches": 1,
-            "graph": None,
         },
     }
 

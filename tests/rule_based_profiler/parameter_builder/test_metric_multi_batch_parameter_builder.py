@@ -82,7 +82,6 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_default(
                 "metric_value_kwargs": None,
             },
             "num_batches": 3,
-            "graph": None,
         },
     }
 
@@ -96,7 +95,6 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_default(
 
     parameter_node["value"] = None
     parameter_node["attributed_value"] = None
-    parameter_node.details["graph"] = None
 
     assert parameter_node == expected_parameter_node_as_dict
 
@@ -169,7 +167,6 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_no(
                 "metric_value_kwargs": None,
             },
             "num_batches": 3,
-            "graph": None,
         },
     }
 
@@ -183,7 +180,6 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_no(
 
     parameter_node["value"] = None
     parameter_node["attributed_value"] = None
-    parameter_node.details["graph"] = None
 
     assert parameter_node == expected_parameter_node_as_dict
 
@@ -256,7 +252,6 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_yes(
                 "metric_value_kwargs": None,
             },
             "num_batches": 1,
-            "graph": None,
         },
     }
 
@@ -270,6 +265,5 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_yes(
 
     parameter_node["value"] = None
     parameter_node["attributed_value"] = None
-    parameter_node.details["graph"] = None
 
     assert parameter_node == expected_parameter_node_as_dict

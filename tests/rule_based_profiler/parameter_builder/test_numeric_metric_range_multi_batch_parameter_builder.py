@@ -89,7 +89,6 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
                 "metric_value_kwargs": None,
             },
             "num_batches": 3,
-            "graph": None,
         },
     }
 
@@ -220,7 +219,6 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
                 "metric_value_kwargs": None,
             },
             "num_batches": 3,
-            "graph": None,
         },
     }
 
@@ -418,7 +416,6 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
                 "metric_value_kwargs": None,
             },
             "num_batches": 3,
-            "graph": None,
         },
     }
 
@@ -555,7 +552,6 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
                 "metric_value_kwargs": None,
             },
             "num_batches": 3,
-            "graph": None,
         },
     }
 
@@ -990,7 +986,6 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
                 "metric_value_kwargs": None,
             },
             "num_batches": 3,
-            "graph": None,
         },
     }
 

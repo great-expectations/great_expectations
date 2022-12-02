@@ -9,7 +9,7 @@ from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchValidationGraphParameterBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_container import (  # TODO: <Alex>ALEX</Alex>; VARIABLES_KEY,; build_parameter_container_for_variables,
+from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     ParameterContainer,
     ParameterNode,

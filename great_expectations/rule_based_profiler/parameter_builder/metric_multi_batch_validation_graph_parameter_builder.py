@@ -9,10 +9,11 @@ from great_expectations.rule_based_profiler.metric_computation_result import (
     MetricComputationResult,
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
+from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+    MetricsComputationResultFormat,
+)
 from great_expectations.rule_based_profiler.parameter_container import (
-    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     ParameterContainer,
 )
 from great_expectations.types.attributes import Attributes
@@ -108,7 +109,7 @@ class MetricMultiBatchValidationGraphParameterBuilder(ParameterBuilder):
             limit=None,
             enforce_numeric_metric=False,
             replace_nan_with_zero=False,
-            validation_graph_only=True,
+            result_format=MetricsComputationResultFormat.VALIDATION_GRAPH,
             domain=domain,
             variables=variables,
             parameters=parameters,

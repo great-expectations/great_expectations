@@ -151,7 +151,6 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             limit=limit,
             enforce_numeric_metric=self.enforce_numeric_metric,
             replace_nan_with_zero=self.replace_nan_with_zero,
-            validation_graph_only=False,
             domain=domain,
             variables=variables,
             parameters=parameters,

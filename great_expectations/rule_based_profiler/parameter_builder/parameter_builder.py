@@ -6,6 +6,7 @@ import decimal
 import itertools
 import logging
 from abc import ABC, abstractmethod
+from enum import Enum
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
@@ -58,6 +59,11 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
+
+class MetricsComputationResultFormat(Enum):
+    VALIDATION_GRAPH = "validation_graph"
+    RESOLVED_METRICS = "resolved_metrics"
 
 
 class ParameterBuilder(ABC, Builder):
@@ -329,6 +335,9 @@ class ParameterBuilder(ABC, Builder):
         limit: Optional[int] = None,
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
+        result_format: Union[
+            str, MetricsComputationResultFormat
+        ] = MetricsComputationResultFormat.RESOLVED_METRICS,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -344,6 +353,7 @@ class ParameterBuilder(ABC, Builder):
         :param limit: Optional limit on number of "Batch" objects requested (supports single-Batch scenarios).
         :param enforce_numeric_metric: Flag controlling whether or not metric output must be numerically-valued.
         :param replace_nan_with_zero: Directive controlling how NaN metric values, if encountered, should be handled.
+        :param result_format: Directive controlling whether or not to return only unresolved "ValidationGraph".
         :param domain: "Domain" object scoping "$variable"/"$parameter"-style references in configuration and runtime.
         :param variables: Part of the "rule state" available for "$variable"-style references.
         :param parameters: Part of the "rule state" available for "$parameter"-style references.
@@ -458,6 +468,72 @@ specified (empty "metric_name" value detected)."""
                 runtime_configuration=None,
             )
         )
+        print(
+            f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] GRAPH:\n{graph} ; TYPE: {str(type(graph))}"
+        )
+        # TODO: <Alex>ALEX</Alex>
+        print(
+            f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] GRAPH.EDGES:\n{graph.edges} ; TYPE: {str(type(graph.edges))}"
+        )
+        print(
+            f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] GRAPH.EDGE_IDS:\n{graph.edge_ids} ; TYPE: {str(type(graph.edge_ids))}"
+        )
+        # TODO: <Alex>ALEX</Alex>
+
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # Obtain result_format from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        result_format = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=result_format,
+            expected_return_type=(str, MetricsComputationResultFormat),
+            variables=variables,
+            parameters=parameters,
+        )
+        # TODO: <Alex>ALEX</Alex>
+        if isinstance(result_format, str):
+            try:
+                result_format = MetricsComputationResultFormat(result_format.lower())
+            except (TypeError, KeyError) as e:
+                raise ValueError(
+                    f""" {e}: Cannot compute metrics (result_format "{str(result_format)}" of type \
+"{str(type(result_format))}" is not supported).
+"""
+                )
+        elif not isinstance(result_format, MetricsComputationResultFormat):
+            raise ValueError(
+                f"""Cannot compute metrics (result_format "{str(result_format)}" of type "{str(type(result_format))}" \
+is not supported).
+"""
+            )
+        # TODO: <Alex>ALEX</Alex>
+        print(
+            f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] VALIDATION_GRAPH_ONLY:\n{result_format} ; TYPE: {str(type(result_format))}"
+        )
+
+        details: dict = {
+            "metric_configuration": {
+                "metric_name": metric_name,
+                "domain_kwargs": domain_kwargs,
+                "metric_value_kwargs": metric_value_kwargs[0]
+                if len(metric_value_kwargs) == 1
+                else metric_value_kwargs,
+            },
+            "num_batches": len(batch_ids),
+        }
+
+        if result_format == MetricsComputationResultFormat.VALIDATION_GRAPH:
+            # Build and return result to receiver (contains "ValidationGraph" only).
+            # TODO: <Alex>ALEX</Alex>
+            details["graph"] = graph
+            # TODO: <Alex>ALEX</Alex>
+            return MetricComputationResult(
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX-CAN-attributed_resolved_metrics-BE_OMITTED?</Alex>
+                attributed_resolved_metrics=None,
+                # TODO: <Alex>ALEX</Alex>
+                details=details,
+            )
 
         resolved_metrics: Dict[
             Tuple[str, str, str], MetricValue
@@ -544,16 +620,6 @@ specified (empty "metric_name" value detected)."""
 
         # Step-8: Build and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").
 
-        details: dict = {
-            "metric_configuration": {
-                "metric_name": metric_name,
-                "domain_kwargs": domain_kwargs,
-                "metric_value_kwargs": metric_value_kwargs[0]
-                if len(metric_value_kwargs) == 1
-                else metric_value_kwargs,
-            },
-            "num_batches": len(batch_ids),
-        }
         return MetricComputationResult(
             attributed_resolved_metrics=list(attributed_resolved_metrics_map.values()),
             details=details,

@@ -111,7 +111,6 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
                 "metric_value_kwargs": None,
             },
             "num_batches": 1,
-            "graph": None,
         },
     }
 
@@ -192,7 +191,6 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
                 "metric_value_kwargs": None,
             },
             "num_batches": 1,
-            "graph": None,
         },
     }
 
@@ -269,7 +267,6 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
                 "metric_value_kwargs": None,
             },
             "num_batches": 3,
-            "graph": None,
         },
     }
 
@@ -348,7 +345,6 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
                 "metric_value_kwargs": None,
             },
             "num_batches": 3,
-            "graph": None,
         },
     }
 

@@ -88,7 +88,6 @@ def test_histogram_single_batch_parameter_builder_alice(
                 "metric_value_kwargs": {"bins": [397433.0, 4942918.5, 9488404.0]},
             },
             "num_batches": 1,
-            "graph": None,
         },
     }
 
@@ -221,7 +220,6 @@ def test_histogram_single_batch_parameter_builder_alice_nan_valued_bins(
                     "metric_value_kwargs": {"bins": [None]},
                 },
                 "num_batches": 1,
-                "graph": None,
             },
         }
 
@@ -382,7 +380,6 @@ def test_histogram_single_batch_parameter_builder_alice_reduced_bins_count(
                     },
                 },
                 "num_batches": 1,
-                "graph": None,
             },
         }
 
