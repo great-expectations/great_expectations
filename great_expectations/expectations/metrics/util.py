@@ -912,17 +912,26 @@ def sql_statement_with_post_compile_to_string(
     Used by _sqlalchemy_map_condition_index() in map_metric_provider to build query that will allow you to
     return unexpected_index_values.
 
+    https://docs.sqlalchemy.org/en/14/faq/sqlexpressions.html#rendering-postcompile-parameters-as-bound-parameters
+
     Args:
         engine (sqlalchemy.engine.Engine): Sqlalchemy engine used to do the compilation.
         select_statement (sqlalchemy.sql.Select): Select statement to compile into string.
     Returns:
         String representation of select_statement
+
+
+    engine, compile_kwargs={"render_postcompile": True}, dialect=engine.dialect # this is important
     """
     compiled = select_statement.compile(
-        engine, compile_kwargs={"render_postcompile": True}
+        engine, compile_kwargs={"render_postcompile": True}, dialect=engine.dialect
     )
-    params = (repr(compiled.params[name]) for name in compiled.positiontup)
-    query_as_string = re.sub(r"\?", lambda m: next(params), str(compiled))
+    if compiled.positiontup:
+        params = (repr(compiled.params[name]) for name in compiled.positiontup)
+        query_as_string = re.sub(r"\?", lambda m: next(params), str(compiled))
+    else:
+        params = (repr(compiled.params[name]) for name in list(compiled.params.keys()))
+        query_as_string = re.sub(r"%\(.*?\)s", lambda m: next(params), str(compiled))
     return query_as_string
 
 
