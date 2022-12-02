@@ -17,6 +17,7 @@ function ColumnLinkItem({item}) {
 function Column({column}) {
   return (
     <div 
+      className="footer__col"
       style={{
         boxSizing: "border-box",
         margin: "0",

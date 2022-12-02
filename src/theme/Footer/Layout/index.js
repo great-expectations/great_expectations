@@ -17,6 +17,7 @@ export default function FooterLayout({style, links, logo, copyright}) {
         }}
       >
         <div
+        className="footer__row"
           style={{
             WebkitFlexDirection: "row",
             msFlexDirection: "row",
