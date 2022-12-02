@@ -54,7 +54,7 @@ def test_sqlite(sa, test_backends, select_with_post_compile_statements):
             engine=engine, select_statement=select_with_post_compile_statements
         )
     else:
-        assert False
+        pytest.skip("skipping sqlite")
 
 
 def test_postgresql(sa, test_backends, select_with_post_compile_statements):
@@ -65,7 +65,7 @@ def test_postgresql(sa, test_backends, select_with_post_compile_statements):
             engine=engine, select_statement=select_with_post_compile_statements
         )
     else:
-        assert False
+        pytest.skip("skipping postgresql")
 
 
 def test_mysql(sa, test_backends, select_with_post_compile_statements):
@@ -76,7 +76,7 @@ def test_mysql(sa, test_backends, select_with_post_compile_statements):
             engine=engine, select_statement=select_with_post_compile_statements
         )
     else:
-        assert False
+        pytest.skip("skipping mysql")
 
 
 def test_mssql(sa, test_backends, select_with_post_compile_statements):
@@ -88,7 +88,7 @@ def test_mssql(sa, test_backends, select_with_post_compile_statements):
             engine=engine, select_statement=select_with_post_compile_statements
         )
     else:
-        assert False
+        pytest.skip("skipping mssql")
 
 
 def test_trino(sa, test_backends, select_with_post_compile_statements):
@@ -99,7 +99,7 @@ def test_trino(sa, test_backends, select_with_post_compile_statements):
             engine=engine, select_statement=select_with_post_compile_statements
         )
     else:
-        assert False
+        pytest.skip("skipping trino")
 
 
 def test_redshift(sa, test_backends, select_with_post_compile_statements):
@@ -144,4 +144,4 @@ def test_bigquery(sa, test_backends, select_with_post_compile_statements):
             engine=engine, select_statement=select_with_post_compile_statements
         )
     else:
-        assert False
+        pytest.skip("skipping bigquery")
