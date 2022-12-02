@@ -912,8 +912,6 @@ def sql_statement_with_post_compile_to_string(
     Used by _sqlalchemy_map_condition_index() in map_metric_provider to build query that will allow you to
     return unexpected_index_values.
 
-    https://docs.sqlalchemy.org/en/14/faq/sqlexpressions.html#rendering-postcompile-parameters-as-bound-parameters
-
     Args:
         engine (sqlalchemy.engine.Engine): Sqlalchemy engine used to do the compilation.
         select_statement (sqlalchemy.sql.Select): Select statement to compile into string.
