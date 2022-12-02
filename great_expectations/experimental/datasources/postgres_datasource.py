@@ -3,11 +3,9 @@ from __future__ import annotations
 import copy
 import dataclasses
 import itertools
-from datetime import datetime
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union, cast
 
-import dateutil.tz
 import pydantic
 from pydantic import dataclasses as pydantic_dc
 from typing_extensions import ClassVar, Literal, TypeAlias
@@ -33,23 +31,44 @@ class BatchRequestError(Exception):
     pass
 
 
-# For our year splitter we default the range to the last 2 year.
-_CURRENT_YEAR = datetime.now(dateutil.tz.tzutc()).year
-_DEFAULT_YEAR_RANGE = list(range(_CURRENT_YEAR - 1, _CURRENT_YEAR + 1))
-_DEFAULT_MONTH_RANGE = list(range(1, 13))
+@pydantic_dc.dataclass(frozen=True)
+class ColumnSplitter:
+    column_name: str
+    method_name: str
+    param_names: List[str]
+
+    def param_defaults(self, data_asset: DataAsset) -> Dict[str, List]:
+        raise NotImplementedError
 
 
 @pydantic_dc.dataclass(frozen=True)
-class ColumnSplitter:
-    method_name: str
-    column_name: str
-    # param_defaults is a Dict where the keys are the parameters of the splitter and the values are the default
-    # values are the default values if a batch request using the splitter leaves the parameter unspecified.
-    param_defaults: Dict[str, List] = pydantic.Field(default_factory=dict)
+class SqlYearMonthSplitter(ColumnSplitter):
+    method_name: str = "split_on_year_and_month"
+    param_names: List[str] = pydantic.Field(default_factory=lambda: ["year", "month"])
 
-    @property
-    def param_names(self) -> List[str]:
-        return list(self.param_defaults.keys())
+    def param_defaults(self, data_asset: DataAsset) -> Dict[str, List]:
+        # This column splitter is only relevant to SQL data assets so we do some assertions
+        # to validate this.
+        from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+
+        assert isinstance(data_asset, TableAsset), "data_asset must be a TableAsset"
+        assert isinstance(
+            data_asset.datasource.execution_engine, SqlAlchemyExecutionEngine
+        )
+        with data_asset.datasource.execution_engine.engine.connect() as conn:
+            # We opt to use a raw string instead of sqlalchemy.txt because we don't
+            # need any of the features for this query
+            # https://docs.sqlalchemy.org/en/14/core/sqlelement.html#sqlalchemy.sql.expression.text
+            col = self.column_name
+            q = f"select min({col}), max({col}) from {data_asset.table_name}"
+            min_dt, max_dt = list(conn.execute(q))[0]
+        year: List[int] = list(range(min_dt.year, max_dt.year + 1))
+        month: List[int]
+        if min_dt.year == max_dt.year:
+            month = list(range(min_dt.month, max_dt.month + 1))
+        else:
+            month = list(range(1, 13))
+        return {"year": year, "month": month}
 
 
 @pydantic_dc.dataclass(frozen=True)
@@ -181,26 +200,17 @@ class TableAsset(DataAsset):
     def add_year_and_month_splitter(
         self,
         column_name: str,
-        default_year_range: List[int] = _DEFAULT_YEAR_RANGE,
-        default_month_range: List[int] = _DEFAULT_MONTH_RANGE,
     ) -> TableAsset:
         """Associates a year month splitter with this DataAsset
 
         Args:
             column_name: A column name of the date column where year and month will be parsed out.
-            default_year_range: When this splitter is used, say in a BatchRequest, if no value for
-                year is specified, we query over all years in this range.
-                will query over all the years in this default range.
-            default_month_range: When this splitter is used, say in a BatchRequest, if no value for
-                month is specified, we query over all months in this range.
 
         Returns:
             This TableAsset so we can use this method fluently.
         """
-        self.column_splitter = ColumnSplitter(
-            method_name="split_on_year_and_month",
+        self.column_splitter = SqlYearMonthSplitter(
             column_name=column_name,
-            param_defaults={"year": default_year_range, "month": default_month_range},
         )
         return self
 
@@ -239,7 +249,7 @@ class TableAsset(DataAsset):
             default_option_values = []
             for option in unspecified_options:
                 default_option_values.append(
-                    self.column_splitter.param_defaults[option]
+                    self.column_splitter.param_defaults(self)[option]
                 )
             for option_values in itertools.product(*default_option_values):
                 # Add options from specified options
