@@ -87,7 +87,6 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     ParamSchemaType,
     RendererConfiguration,
-    RendererParams,
 )
 from great_expectations.render.util import num_to_str
 from great_expectations.self_check.util import (
@@ -367,12 +366,18 @@ class Expectation(metaclass=MetaExpectation):
         Template function that contains the logic that is shared by AtomicPrescriptiveRendererType.SUMMARY and
         LegacyRendererType.PRESCRIPTIVE.
         """
+        # deprecated-v0.15.37
+        warnings.warn(
+            "Expectation._atomic_prescriptive_template() is deprecated as of v0.15.37 and will be removed in v0.18. "
+            "Please use Expectation._prescriptive_template() instead.",
+            DeprecationWarning,
+        )
         renderer_configuration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
         )
-        renderer_configuration = cls.atomic_prescriptive_template(
+        renderer_configuration = cls._prescriptive_template(
             renderer_configuration=renderer_configuration,
         )
         return (
@@ -398,7 +403,7 @@ class Expectation(metaclass=MetaExpectation):
             result=result,
             runtime_configuration=runtime_configuration,
         )
-        renderer_configuration = cls.atomic_prescriptive_template(
+        renderer_configuration = cls._prescriptive_template(
             renderer_configuration=renderer_configuration
         )
         value_obj = renderedAtomicValueSchema.load(
@@ -3068,6 +3073,13 @@ def add_values_with_json_schema_from_list_in_params(
     Utility function used in _atomic_prescriptive_template() to take list values from a given params dict key,
     convert each value to a dict with JSON schema type info, then add it to params_with_json_schema (dict).
     """
+    # deprecated-v0.15.37
+    warnings.warn(
+        "The method add_values_with_json_schema_from_list_in_params is deprecated as of v0.15.37 and will be removed "
+        "in v0.18. Please utilize RendererConfiguration.add_param() and RendererConfiguration.dict() to produce a"
+        "json schema for renderer params.",
+        DeprecationWarning,
+    )
     target_list = params.get(param_key_with_list)
     if target_list is not None and len(target_list) > 0:
         for i, v in enumerate(target_list):
