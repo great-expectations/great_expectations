@@ -5,7 +5,7 @@ import dataclasses
 import itertools
 from datetime import datetime
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Type, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union, cast
 
 import dateutil.tz
 import pydantic
@@ -35,8 +35,8 @@ class BatchRequestError(Exception):
 
 # For our year splitter we default the range to the last 2 year.
 _CURRENT_YEAR = datetime.now(dateutil.tz.tzutc()).year
-_DEFAULT_YEAR_RANGE = range(_CURRENT_YEAR - 1, _CURRENT_YEAR + 1)
-_DEFAULT_MONTH_RANGE = range(1, 13)
+_DEFAULT_YEAR_RANGE = list(range(_CURRENT_YEAR - 1, _CURRENT_YEAR + 1))
+_DEFAULT_MONTH_RANGE = list(range(1, 13))
 
 
 @pydantic_dc.dataclass(frozen=True)
@@ -45,11 +45,7 @@ class ColumnSplitter:
     column_name: str
     # param_defaults is a Dict where the keys are the parameters of the splitter and the values are the default
     # values are the default values if a batch request using the splitter leaves the parameter unspecified.
-    # template_params: List[str]
-    # Union of List/Iterable for serialization
-    param_defaults: Dict[str, Union[List, Iterable]] = pydantic.Field(
-        default_factory=dict
-    )
+    param_defaults: Dict[str, List] = pydantic.Field(default_factory=dict)
 
     @property
     def param_names(self) -> List[str]:
@@ -185,8 +181,8 @@ class TableAsset(DataAsset):
     def add_year_and_month_splitter(
         self,
         column_name: str,
-        default_year_range: Iterable[int] = _DEFAULT_YEAR_RANGE,
-        default_month_range: Iterable[int] = _DEFAULT_MONTH_RANGE,
+        default_year_range: List[int] = _DEFAULT_YEAR_RANGE,
+        default_month_range: List[int] = _DEFAULT_MONTH_RANGE,
     ) -> TableAsset:
         """Associates a year month splitter with this DataAsset
 
