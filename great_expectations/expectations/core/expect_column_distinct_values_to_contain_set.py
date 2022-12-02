@@ -85,7 +85,8 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
         renderer_configuration: RendererConfiguration,
     ):
         renderer_configuration.add_param(
-            name="column", schema_type=ParamSchemaType.STRING
+            name="value_set",
+            schema_type=ParamSchemaType.ARRAY,
         )
         renderer_configuration.add_param(
             name="parse_strings_as_datetimes", schema_type=ParamSchemaType.BOOLEAN

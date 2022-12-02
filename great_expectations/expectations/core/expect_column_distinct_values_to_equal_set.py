@@ -1,4 +1,3 @@
-from numbers import Number
 from typing import Dict, Optional
 
 from great_expectations.core import (
@@ -85,37 +84,26 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ):
-        renderer_configuration.add_param(
-            name="column", schema_type=ParamSchemaType.STRING
+        add_param_args = (
+            ("column", ParamSchemaType.STRING),
+            ("parse_strings_as_datetimes", ParamSchemaType.BOOLEAN),
+            ("row_condition", ParamSchemaType.STRING),
+            ("condition_parser", ParamSchemaType.STRING),
+            ("value_set", ParamSchemaType.ARRAY),
         )
-        renderer_configuration.add_param(
-            name="parse_strings_as_datetimes", schema_type=ParamSchemaType.BOOLEAN
-        )
-        renderer_configuration.add_param(
-            name="row_condition", schema_type=ParamSchemaType.STRING
-        )
-        renderer_configuration.add_param(
-            name="condition_parser", schema_type=ParamSchemaType.STRING
-        )
+        for name, schema_type in add_param_args:
+            renderer_configuration.add_param(name=name, schema_type=schema_type)
+
         params: RendererParams = renderer_configuration.params
 
-        if not params.value_set.value or len(params.value_set.value) == 0:
-            values_string = "[ ]"
-        else:
-            for i, v in enumerate(params.value_set.value):
-                if isinstance(v, Number):
-                    schema_type = ParamSchemaType.NUMBER
-                else:
-                    schema_type = ParamSchemaType.STRING
-                renderer_configuration.add_param(
-                    name=f"v__{str(i)}", schema_type=schema_type, value=v
-                )
-
-            values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params.value_set.value)]
+        if params.value_set.value:
+            renderer_configuration = cls._add_value_set_value_params(
+                renderer_configuration=renderer_configuration
             )
-
-        template_str = f"distinct values must match this set: {values_string}."
+            values_str: str = cls._get_values_string_from_value_set(
+                value_set_param=params.value_set
+            )
+            template_str = f"distinct values must match this set: {values_str}."
 
         if params.parse_strings_as_datetimes.value:
             template_str += " Values should be parsed as datetimes."
@@ -124,19 +112,13 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
             template_str = f"$column {template_str}"
 
         if params.row_condition.value:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params.row_condition.value,
+            renderer_configuration = cls._add_row_condition_condition_params(
+                renderer_configuration=renderer_configuration
             )
-            template_str = f"{conditional_template_str}, then {template_str}"
-            for conditional_param, condition in conditional_params.items():
-                renderer_configuration.add_param(
-                    name=conditional_param,
-                    schema_type=ParamSchemaType.STRING,
-                    value=condition,
-                )
+            conditions_str: str = cls._get_conditions_string_from_row_condition(
+                row_condition_param=params.row_condition
+            )
+            template_str = f"{conditions_str}, then {template_str}"
 
         renderer_configuration.template_str = template_str
 

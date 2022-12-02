@@ -13,6 +13,7 @@ from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter, defaultdict
 from copy import deepcopy
 from inspect import isabstract
+from numbers import Number
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import pandas as pd
@@ -87,8 +88,13 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     ParamSchemaType,
     RendererConfiguration,
+    RendererParam,
+    RendererParams,
 )
-from great_expectations.render.util import num_to_str
+from great_expectations.render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+)
 from great_expectations.self_check.util import (
     evaluate_json_test_v3_api,
     generate_expectation_tests,
@@ -1467,6 +1473,61 @@ class Expectation(metaclass=MetaExpectation):
         else:
             print(f"The Expectation {name} is not able to be self-initialized.")
             return False
+
+    @staticmethod
+    def _add_value_set_value_params(
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        params: RendererParams = renderer_configuration.params
+        if params.value_set.value and len(params.value_set.value) > 0:
+            for i, v in enumerate(params.value_set.value):
+                if isinstance(v, Number):
+                    schema_type = ParamSchemaType.NUMBER
+                else:
+                    schema_type = ParamSchemaType.STRING
+                renderer_configuration.add_param(
+                    name=f"v__{str(i)}", schema_type=schema_type, value=v
+                )
+        return renderer_configuration
+
+    @staticmethod
+    def _get_values_string_from_value_set(value_set_param: RendererParam) -> str:
+        if value_set_param.value and len(value_set_param.value) > 0:
+            values_string = " ".join(
+                [f"$v__{str(i)}" for i, v in enumerate(value_set_param.value)]
+            )
+        else:
+            values_string = "[ ]"
+        return values_string
+
+    @staticmethod
+    def _add_row_condition_condition_params(
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        params: RendererParams = renderer_configuration.params
+        if params.row_condition.value:
+            (_, conditional_params,) = parse_row_condition_string_pandas_engine(
+                params.row_condition.value,
+            )
+            for conditional_param, condition in conditional_params.items():
+                renderer_configuration.add_param(
+                    name=conditional_param,
+                    schema_type=ParamSchemaType.STRING,
+                    value=condition,
+                )
+        return renderer_configuration
+
+    @staticmethod
+    def _get_conditions_string_from_row_condition(
+        row_condition_param: RendererParam,
+    ) -> str:
+        if row_condition_param.value:
+            (conditions_str, _,) = parse_row_condition_string_pandas_engine(
+                row_condition_param.value,
+            )
+        else:
+            conditions_str = ""
+        return conditions_str
 
     @staticmethod
     def _choose_example(

@@ -18,6 +18,33 @@ if TYPE_CHECKING:
 RendererParams = TypeVar("RendererParams")
 
 
+class ParamSchemaType(str, Enum):
+    """schema_type passed to RendererConfiguration.add_param()"""
+
+    STRING = "string"
+    NUMBER = "number"
+    BOOLEAN = "boolean"
+    ARRAY = "array"
+
+
+class RendererParam(BaseModel):
+    name: str
+    renderer_schema: ParamSchemaType
+    value: Optional[Any]
+
+    class Config:
+        validate_assignment = True
+        arbitrary_types_allowed = True
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, BaseModel):
+            return self.dict() == other.dict()
+        elif isinstance(other, dict):
+            return self.dict() == other
+        else:
+            return self.value == other
+
+
 class RendererConfiguration(GenericModel, Generic[RendererParams]):
     """Configuration object built for each renderer."""
 
@@ -93,7 +120,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             name,
             renderer_schema=(Dict[str, ParamSchemaType], Field(..., alias="schema")),
             value=(Union[Any, None], ...),
-            __base__=RendererConfiguration._RendererParamBase,
+            __base__=RendererParam,
         )
         renderer_param_definition: Dict[str, Any] = {name: (renderer_param, ...)}
 
@@ -156,27 +183,3 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 exclude_defaults=exclude_defaults,
                 exclude_none=exclude_none,
             )
-
-    class _RendererParamBase(BaseModel):
-        value: Optional[Any]
-
-        class Config:
-            validate_assignment = True
-            arbitrary_types_allowed = True
-
-        def __eq__(self, other: Any) -> bool:
-            if isinstance(other, BaseModel):
-                return self.dict() == other.dict()
-            elif isinstance(other, dict):
-                return self.dict() == other
-            else:
-                return self.value == other
-
-
-class ParamSchemaType(str, Enum):
-    """schema_type passed to RendererConfiguration.add_param()"""
-
-    STRING = "string"
-    NUMBER = "number"
-    BOOLEAN = "boolean"
-    ARRAY = "array"
