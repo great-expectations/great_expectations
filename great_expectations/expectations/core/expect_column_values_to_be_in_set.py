@@ -193,17 +193,10 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     }
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-    ) -> Tuple[str, dict, Union[dict, None]]:
-        renderer_configuration = RendererConfiguration(
-            configuration=configuration,
-            result=result,
-            runtime_configuration=runtime_configuration,
-        )
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
         renderer_configuration.add_param(
             name="column",
             schema_type=ParamSchemaType.STRING,
@@ -256,17 +249,15 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
         template_str = f"values must belong to this set: {values_string}"
 
-        params_with_json_schema: dict = params.dict()
-
         if params.mostly.value and params.mostly.value < 1.0:
-            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
+            params.mostly_pct.value = num_to_str(
                 params.mostly.value * 100, precision=15, no_scientific=True
             )
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
 
-        if params.parse_strings_as_datetimes:
+        if params.parse_strings_as_datetimes.value:
             template_str += " Values should be parsed as datetimes."
 
         if renderer_configuration.include_column_name:
@@ -276,13 +267,18 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             (
                 conditional_template_str,
                 conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params.row_condition.value, with_schema=True
-            )
+            ) = parse_row_condition_string_pandas_engine(params.row_condition.value)
             template_str = f"{conditional_template_str}, then {template_str}"
-            params_with_json_schema.update(conditional_params)
+            for conditional_param, condition in conditional_params.items():
+                renderer_configuration.add_param(
+                    name=conditional_param,
+                    schema_type=ParamSchemaType.STRING,
+                    value=condition,
+                )
 
-        return template_str, params_with_json_schema, renderer_configuration.styling
+        renderer_configuration.template_str = template_str
+
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)

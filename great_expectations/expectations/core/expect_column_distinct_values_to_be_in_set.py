@@ -1,5 +1,5 @@
 from numbers import Number
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional
 
 import altair as alt
 import pandas as pd
