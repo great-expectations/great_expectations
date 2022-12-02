@@ -159,9 +159,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
 
         params: RendererParams = renderer_configuration.params
 
-        if not params.value_set.value or len(params.value_set.value) == 0:
-            values_string = "[ ]"
-        else:
+        if params.value_set.value:
             renderer_configuration = cls._add_value_set_value_params(
                 renderer_configuration=renderer_configuration
             )
