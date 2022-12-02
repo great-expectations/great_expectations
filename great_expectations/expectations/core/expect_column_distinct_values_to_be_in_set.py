@@ -1,4 +1,3 @@
-from numbers import Number
 from typing import Dict, List, Optional
 
 import altair as alt
@@ -144,22 +143,14 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        renderer_configuration.add_param(
-            name="column",
-            schema_type=ParamSchemaType.STRING,
+        add_param_args = (
+            ("column", ParamSchemaType.STRING),
+            ("value_set", ParamSchemaType.ARRAY),
+            ("row_condition", ParamSchemaType.STRING),
+            ("condition_parser", ParamSchemaType.STRING),
         )
-        renderer_configuration.add_param(
-            name="value_set",
-            schema_type=ParamSchemaType.ARRAY,
-        )
-        renderer_configuration.add_param(
-            name="row_condition",
-            schema_type=ParamSchemaType.STRING,
-        )
-        renderer_configuration.add_param(
-            name="condition_parser",
-            schema_type=ParamSchemaType.STRING,
-        )
+        for name, schema_type in add_param_args:
+            renderer_configuration.add_param(name=name, schema_type=schema_type)
 
         params: RendererParams = renderer_configuration.params
 
@@ -170,40 +161,29 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                 template_str = "distinct values must belong to a set, but that set is not specified."
 
         else:
-            for i, v in enumerate(params.value_set.value):
-                if isinstance(v, Number):
-                    schema_type = ParamSchemaType.NUMBER
-                else:
-                    schema_type = ParamSchemaType.STRING
-                renderer_configuration.add_param(
-                    name=f"v__{str(i)}", schema_type=schema_type, value=v
-                )
-
-            values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params.value_set.value)]
+            renderer_configuration = cls._add_value_set_value_params(
+                renderer_configuration=renderer_configuration
             )
+            values_str: str = cls._get_values_string_from_value_set(
+                value_set_param=params.value_set
+            )
+            template_str = f"distinct values must contain this set: {values_str}."
 
             if renderer_configuration.include_column_name:
                 template_str = (
-                    f"$column distinct values must belong to this set: {values_string}."
+                    f"$column distinct values must belong to this set: {values_str}."
                 )
             else:
-                template_str = (
-                    f"distinct values must belong to this set: {values_string}."
-                )
+                template_str = f"distinct values must belong to this set: {values_str}."
 
         if params.row_condition.value:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params.row_condition.value)
-            template_str = f"{conditional_template_str}, then {template_str}"
-            for conditional_param, condition in conditional_params.items():
-                renderer_configuration.add_param(
-                    name=conditional_param,
-                    schema_type=ParamSchemaType.STRING,
-                    value=condition,
-                )
+            renderer_configuration = cls._add_row_condition_condition_params(
+                renderer_configuration=renderer_configuration
+            )
+            conditions_str: str = cls._get_conditions_string_from_row_condition(
+                row_condition_param=params.row_condition
+            )
+            template_str = f"{conditions_str}, then {template_str}"
 
         renderer_configuration.template_str = template_str
 
