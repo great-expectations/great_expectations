@@ -102,7 +102,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
-    def atomic_prescriptive_template(
+    def _prescriptive_template(
         cls, renderer_configuration: RendererConfiguration
     ) -> RendererConfiguration:
         renderer_configuration.add_param(

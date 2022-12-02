@@ -1052,7 +1052,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = (
@@ -1154,7 +1153,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
     ):
         """
         Rendering function that is utilized by GE Cloud Front-end
@@ -1168,7 +1166,9 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             distribution_table_rows,
             _,
         ) = cls._atomic_prescriptive_template(
-            configuration, result, runtime_configuration, **kwargs
+            configuration,
+            result,
+            runtime_configuration,
         )
 
         if chart is not None:

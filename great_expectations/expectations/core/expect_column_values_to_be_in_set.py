@@ -258,7 +258,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
         params_with_json_schema: dict = params.dict()
 
-        if params.mostly and params.mostly.value < 1.0:
+        if params.mostly.value and params.mostly.value < 1.0:
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params.mostly.value * 100, precision=15, no_scientific=True
             )
@@ -272,7 +272,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
-        if params.row_condition:
+        if params.row_condition.value:
             (
                 conditional_template_str,
                 conditional_params,

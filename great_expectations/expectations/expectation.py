@@ -338,7 +338,7 @@ class Expectation(metaclass=MetaExpectation):
         return rendered
 
     @classmethod
-    def atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
@@ -366,12 +366,13 @@ class Expectation(metaclass=MetaExpectation):
         Template function that contains the logic that is shared by AtomicPrescriptiveRendererType.SUMMARY and
         LegacyRendererType.PRESCRIPTIVE.
         """
+        # TODO: Add the following DeprecationWarning after all _atomic_prescriptive_template methods have been migrated
         # deprecated-v0.15.37
-        warnings.warn(
-            "Expectation._atomic_prescriptive_template() is deprecated as of v0.15.37 and will be removed in v0.18. "
-            "Please use Expectation._prescriptive_template() instead.",
-            DeprecationWarning,
-        )
+        # warnings.warn(
+        #     "Expectation._atomic_prescriptive_template() is deprecated as of v0.15.37 and will be removed in v0.18. "
+        #     "Please use Expectation._prescriptive_template() instead.",
+        #     DeprecationWarning,
+        # )
         renderer_configuration = RendererConfiguration(
             configuration=configuration,
             result=result,
@@ -3076,8 +3077,8 @@ def add_values_with_json_schema_from_list_in_params(
     # deprecated-v0.15.37
     warnings.warn(
         "The method add_values_with_json_schema_from_list_in_params is deprecated as of v0.15.37 and will be removed "
-        "in v0.18. Please utilize RendererConfiguration.add_param() and RendererConfiguration.dict() to produce a"
-        "json schema for renderer params.",
+        "in v0.18. Please utilize RendererConfiguration.add_param() and RendererConfiguration.params.dict() to produce "
+        "a json schema for renderer params.",
         DeprecationWarning,
     )
     target_list = params.get(param_key_with_list)
