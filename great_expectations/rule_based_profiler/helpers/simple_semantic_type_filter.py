@@ -55,9 +55,11 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
             return [
                 SemanticDomainTypes(semantic_type) for semantic_type in [semantic_types]
             ]
+
         if isinstance(semantic_types, SemanticDomainTypes):
             return [semantic_type for semantic_type in [semantic_types]]
-        elif isinstance(semantic_types, list):
+
+        if isinstance(semantic_types, list):
             if all(
                 [isinstance(semantic_type, str) for semantic_type in semantic_types]
             ):
@@ -68,19 +70,20 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
                     SemanticDomainTypes(semantic_type)
                     for semantic_type in semantic_types
                 ]
-            elif all(
+
+            if all(
                 [
                     isinstance(semantic_type, SemanticDomainTypes)
                     for semantic_type in semantic_types
                 ]
             ):
                 return [semantic_type for semantic_type in semantic_types]
-            else:
-                raise ValueError(
-                    "All elements in semantic_types list must be either of str or SemanticDomainTypes type."
-                )
-        else:
-            raise ValueError("Unrecognized semantic_types directive.")
+
+            raise ValueError(
+                "All elements in semantic_types list must be either of str or SemanticDomainTypes type."
+            )
+
+        raise ValueError("Unrecognized semantic_types directive.")
 
     def _build_table_column_name_to_inferred_semantic_domain_type_map(
         self,
