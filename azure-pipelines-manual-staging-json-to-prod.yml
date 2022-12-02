@@ -15,34 +15,27 @@ stages:
 
     jobs:
       - job: fetch_staging_and_upload
-        timeoutInMinutes: 300
+        timeoutInMinutes: 5
+        variables:
+          python.version: '3.8'
 
         steps:
-          - task: S3Download@1
+          - task: UsePythonVersion@0
             inputs:
-              regionName: 'us-east-2'
-              awsCredentials: 'aws-ci-great-expectations'
-              bucketName: 'superconductive-public'
-              # targetFolder: '$(Build.SourcesDirectory)/assets/scripts'
-              targetFolder: '$(System.DefaultWorkingDirectory)'
-              globExpressions: '*--staging.json'
-              sourceFolder: 'static/gallery/'
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
 
-          - bash: pwd; ls -ltr; mv expectation_library_v2--staging.json expectation_library_v2--tmp.json; mv package_manifests--staging.json package_manifests--tmp.json
-            # workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            workingDirectory: '$(System.DefaultWorkingDirectory)'
-            displayName: 'Rename staging to prod (tmp for now)'
+          - bash: python -m pip install --upgrade pip==21.3.1 awscli
+            displayName: 'Update pip and install awscli'
 
-          - task: S3Upload@1
-            inputs:
-              regionName: 'us-east-2'
-              awsCredentials: 'aws-ci-great-expectations'
-              bucketName: 'superconductive-public'
-              # sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
-              sourceFolder: '$(System.DefaultWorkingDirectory)'
-              globExpressions: '*.json'
-              targetFolder: 'static/gallery/'
-              filesAcl: 'public-read'
+          - bash: bash ./copy_s3_staging_to_prod.sh
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Copy staging JSON files in S3 to prod'
+            env:
+              # AWS credentials
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
 
           - task: NodeTool@0
             inputs:
