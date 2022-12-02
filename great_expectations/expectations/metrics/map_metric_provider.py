@@ -2448,7 +2448,7 @@ def _sqlalchemy_map_condition_index(
     final_query: sa.select = (
         unexpected_condition_query_with_selected_columns.select_from(
             domain_records_as_selectable
-        ).limit(result_format.get("partial_unexpected_count", 10))
+        ).limit(result_format["partial_unexpected_count"])
     )
     query_result: List[tuple] = execution_engine.engine.execute(final_query).fetchall()
 
