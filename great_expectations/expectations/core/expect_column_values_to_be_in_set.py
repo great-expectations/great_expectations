@@ -1,5 +1,4 @@
-from numbers import Number
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
