@@ -15,9 +15,6 @@ import shutil
 
 import invoke
 
-from docs.sphinx_api_docs_source.build_sphinx_api_docs import (
-    SphinxInvokeDocsBuilder,
-)
 from scripts import check_type_hint_coverage
 
 try:
@@ -357,48 +354,6 @@ def docker(
         )
 
     ctx.run(" ".join(cmds), echo=True, pty=True)
-
-
-@invoke.task(
-    help={
-        "clean": "Clean out existing documentation first. Defaults to True.",
-        "remove_html": "Remove temporary generated html. Defaults to True.",
-    }
-)
-def docs(
-    ctx,
-    clean=True,
-    remove_html=True,
-):
-    """Build documentation. Note: Currently only builds the sphinx based api docs, please build docusaurus docs separately."""
-
-    _exit_with_error_if_not_in_repo_root(task_name="docs")
-
-    doc_builder = SphinxInvokeDocsBuilder(ctx=ctx)
-
-    doc_builder.exit_with_error_if_docs_dependencies_are_not_installed()
-
-    sphinx_api_docs_source_dir = "docs/sphinx_api_docs_source"
-    os.chdir(sphinx_api_docs_source_dir)
-
-    doc_builder.build_html_api_docs_in_temp_folder(clean=clean)
-
-    repo_root = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
-
-    doc_builder.remove_existing_api_docs(repo_root=repo_root)
-
-    temp_docs_build_dir = repo_root / pathlib.Path("temp_docs_build_dir")
-
-    doc_builder.process_and_create_docusaurus_mdx_files(
-        repo_root=repo_root, temp_docs_build_dir=temp_docs_build_dir
-    )
-
-    # Remove temp build dir
-    if remove_html:
-        shutil.rmtree(temp_docs_build_dir)
-
-    # Change back to the directory where the command was run
-    os.chdir(repo_root)
 
 
 def _exit_with_error_if_not_in_repo_root(task_name: str):
