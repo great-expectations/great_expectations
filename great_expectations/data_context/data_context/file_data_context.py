@@ -31,8 +31,8 @@ class FileDataContext(SerializableDataContext):
 
     def __init__(
         self,
-        project_config: DataContextConfig,
         context_root_dir: str,
+        project_config: Optional[DataContextConfig] = None,
         runtime_environment: Optional[dict] = None,
     ) -> None:
         """FileDataContext constructor
@@ -44,6 +44,9 @@ class FileDataContext(SerializableDataContext):
             runtime_environment (Optional[dict]): a dictionary of config variables that override both those set in
                 config_variables.yml and the environment
         """
+        if not project_config:
+            project_config = self._load_project_config(context_root_dir)
+
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )

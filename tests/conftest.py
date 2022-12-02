@@ -31,6 +31,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import BaseDataContext, CloudDataContext
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.data_context.serializable_data_context import (
+    SerializableDataContext,
+)
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
@@ -769,7 +772,7 @@ def empty_data_context(
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path = str(project_path)
-    context = ge.data_context.DataContext.create(project_path)
+    context = SerializableDataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
@@ -1366,7 +1369,7 @@ def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS", raising=False)
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
-    context = ge.data_context.DataContext.create(project_path)
+    context = SerializableDataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
@@ -1635,7 +1638,7 @@ def site_builder_data_context_with_html_store_titanic_random(
         os.path.join(filesystem_csv_3, "f2.csv"),
         str(os.path.join(project_dir, "data", "random", "f2.csv")),
     )
-    ge.data_context.DataContext.create(project_dir)
+    SerializableDataContext.create(project_dir)
     shutil.copy(
         file_relative_path(
             __file__, "./test_fixtures/great_expectations_site_builder.yml"
@@ -1706,7 +1709,7 @@ def site_builder_data_context_v013_with_html_store_titanic_random(
         os.path.join(filesystem_csv_3, "f2.csv"),
         str(os.path.join(project_dir, "data", "random", "f2.csv")),
     )
-    ge.data_context.DataContext.create(project_dir)
+    SerializableDataContext.create(project_dir)
     shutil.copy(
         file_relative_path(
             __file__, "./test_fixtures/great_expectations_v013_site_builder.yml"

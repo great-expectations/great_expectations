@@ -7,6 +7,12 @@ import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.data_context import BaseDataContext, CloudDataContext
 from great_expectations.data_context.cloud_constants import GXCloudEnvironmentVariable
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
+from great_expectations.data_context.data_context.serializable_data_context import (
+    SerializableDataContext,
+)
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.exceptions import ConfigNotFoundError
 from tests.test_utils import working_directory
@@ -63,7 +69,7 @@ def test_base_context__with_overridden_yml(tmp_path: pathlib.Path, clear_env_var
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path_str = str(project_path)
-    gx.data_context.DataContext.create(project_path_str)
+    SerializableDataContext.create(project_path_str)
     context_path = project_path / "great_expectations"
     context = gx.get_context(context_root_dir=context_path)
     assert isinstance(context, DataContext)
@@ -96,7 +102,7 @@ def test_data_context(tmp_path: pathlib.Path, clear_env_vars):
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path_str = str(project_path)
-    gx.data_context.DataContext.create(project_path_str)
+    SerializableDataContext.create(project_path_str)
     with working_directory(project_path_str):
         assert isinstance(gx.get_context(), DataContext)
 
@@ -109,7 +115,7 @@ def test_data_context_root_dir_returns_data_context(
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path_str = str(project_path)
-    gx.data_context.DataContext.create(project_path_str)
+    FileDataContext.create(project_path_str)
     context_path = project_path / "great_expectations"
     assert isinstance(gx.get_context(context_root_dir=str(context_path)), DataContext)
 
@@ -158,7 +164,7 @@ def test_cloud_context_disabled(set_up_cloud_envs, tmp_path: pathlib.Path):
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path_str = str(project_path)
-    gx.data_context.DataContext.create(project_path_str)
+    SerializableDataContext.create(project_path_str)
     with working_directory(project_path_str):
         assert isinstance(gx.get_context(ge_cloud_mode=False), DataContext)
 

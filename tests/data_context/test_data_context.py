@@ -24,6 +24,9 @@ from great_expectations.data_context import (
     DataContext,
     ExplorerDataContext,
 )
+from great_expectations.data_context.data_context.serializable_data_context import (
+    SerializableDataContext,
+)
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
@@ -661,7 +664,7 @@ project_path/
 """
     )
 
-    context = DataContext.create(project_dir)
+    context = SerializableDataContext.create(project_dir)
     context.add_datasource(
         "titanic",
         module_name="great_expectations.datasource",
@@ -1032,13 +1035,13 @@ def test_data_context_create_does_not_raise_error_or_warning_if_ge_dir_exists(
     tmp_path_factory,
 ):
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    DataContext.create(project_path)
+    SerializableDataContext.create(project_path)
 
 
 @pytest.fixture()
 def empty_context(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    DataContext.create(project_path)
+    SerializableDataContext.create(project_path)
     ge_dir = os.path.join(project_path, "great_expectations")
     assert os.path.isdir(ge_dir)
     assert os.path.isfile(os.path.join(ge_dir, DataContext.GE_YML))
@@ -1187,13 +1190,13 @@ def test_data_context_create_raises_warning_and_leaves_existing_yml_untouched(
     tmp_path_factory,
 ):
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    DataContext.create(project_path)
+    SerializableDataContext.create(project_path)
     ge_yml = os.path.join(project_path, "great_expectations/great_expectations.yml")
     with open(ge_yml, "a") as ff:
         ff.write("# LOOK I WAS MODIFIED")
 
     with pytest.warns(UserWarning):
-        DataContext.create(project_path)
+        SerializableDataContext.create(project_path)
 
     with open(ge_yml) as ff:
         obs = ff.read()
@@ -1204,7 +1207,7 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(
     tmp_path_factory,
 ):
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    DataContext.create(project_path)
+    SerializableDataContext.create(project_path)
 
     # mangle the existing setup
     ge_dir = os.path.join(project_path, "great_expectations")
@@ -1215,7 +1218,7 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         # re-run create to simulate onboarding
-        DataContext.create(project_path)
+        SerializableDataContext.create(project_path)
     obs = gen_directory_tree_str(ge_dir)
 
     assert os.path.isdir(uncommitted_dir), "No uncommitted directory created"
@@ -1270,7 +1273,7 @@ great_expectations/
     project_path = str(tmp_path_factory.mktemp("stuff"))
     ge_dir = os.path.join(project_path, "great_expectations")
 
-    DataContext.create(project_path)
+    SerializableDataContext.create(project_path)
     fixture = gen_directory_tree_str(ge_dir)
 
     assert fixture == expected
@@ -1279,7 +1282,7 @@ great_expectations/
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         # re-run create to simulate onboarding
-        DataContext.create(project_path)
+        SerializableDataContext.create(project_path)
 
     obs = gen_directory_tree_str(ge_dir)
     assert obs == expected
@@ -1296,7 +1299,7 @@ uncommitted/
     project_path = str(tmp_path_factory.mktemp("stuff"))
     ge_dir = os.path.join(project_path, "great_expectations")
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
-    DataContext.create(project_path)
+    SerializableDataContext.create(project_path)
     fixture = gen_directory_tree_str(uncommitted_dir)
     assert fixture == expected
 
@@ -1313,7 +1316,7 @@ uncommitted/
 
 def test_data_context_create_builds_base_directories(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context = DataContext.create(project_path)
+    context = SerializableDataContext.create(project_path)
     assert isinstance(context, DataContext)
 
     for directory in [
@@ -1331,7 +1334,7 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
     tmp_path_factory,
 ):
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    DataContext.create(project_path)
+    SerializableDataContext.create(project_path)
     ge_dir = os.path.join(project_path, "great_expectations")
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
     config_vars_yml = os.path.join(uncommitted_dir, "config_variables.yml")
@@ -1342,7 +1345,7 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
 
     # re-run create to simulate onboarding
     with pytest.warns(UserWarning):
-        DataContext.create(project_path)
+        SerializableDataContext.create(project_path)
 
     with open(config_vars_yml) as ff:
         obs = ff.read()

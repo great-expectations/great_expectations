@@ -7,6 +7,9 @@ from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
 )
+from great_expectations.data_context.data_context.abstract_data_context import (
+    AbstractDataContext,
+)
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
@@ -42,7 +45,7 @@ def BaseDataContext(
         None
     """
     project_data_context_config: DataContextConfig = (
-        BaseDataContext.get_or_create_data_context_config(project_config)
+        AbstractDataContext.get_or_create_data_context_config(project_config)
     )
 
     if context_root_dir is not None:

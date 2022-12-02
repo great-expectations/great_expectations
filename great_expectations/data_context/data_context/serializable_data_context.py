@@ -7,11 +7,13 @@ import warnings
 from typing import Optional, Union
 
 from ruamel.yaml import YAML, YAMLError
+from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
+from great_expectations.data_context.data_context_variables import DataContextVariables
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
@@ -23,6 +25,7 @@ from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
     DataContextConfigDefaults,
+    GXCloudConfig,
 )
 from great_expectations.data_context.util import file_relative_path
 
@@ -56,6 +59,12 @@ class SerializableDataContext(AbstractDataContext):
     ) -> None:
         self._context_root_directory = context_root_dir
         super().__init__(runtime_environment=runtime_environment)
+
+    def _init_datasource_store(self) -> None:
+        pass
+
+    def _init_variables(self) -> DataContextVariables:
+        pass
 
     @classmethod
     def create(
@@ -439,3 +448,42 @@ class SerializableDataContext(AbstractDataContext):
         ) as e:
             logger.debug(e)
         return None
+
+    @classmethod
+    def _load_project_config(
+        cls,
+        context_root_directory: str,
+    ):
+        # if ge_cloud_mode:
+        #     ge_cloud_config = ge_cloud_config
+        #     assert ge_cloud_config is not None
+        #     config = CloudDataContext.retrieve_data_context_config_from_ge_cloud(
+        #         ge_cloud_config=ge_cloud_config
+        #     )
+        #     return config
+
+        path_to_yml = os.path.join(context_root_directory, cls.GE_YML)
+        try:
+            with open(path_to_yml) as data:
+                config_commented_map_from_yaml = yaml.load(data)
+
+        except DuplicateKeyError:
+            raise ge_exceptions.InvalidConfigurationYamlError(
+                "Error: duplicate key found in project YAML file."
+            )
+        except YAMLError as err:
+            raise ge_exceptions.InvalidConfigurationYamlError(
+                "Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{}".format(
+                    err
+                )
+            )
+        except OSError:
+            raise ge_exceptions.ConfigNotFoundError()
+
+        try:
+            return DataContextConfig.from_commented_map(
+                commented_map=config_commented_map_from_yaml
+            )
+        except ge_exceptions.InvalidDataContextConfigError:
+            # Just to be explicit about what we intended to catch
+            raise
