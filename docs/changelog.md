@@ -26,6 +26,11 @@ title: Changelog
 [BUGFIX] Patch key-generation issue with `DataContext.save_profiler()` (#6405)
 [DOCS] add configuration of anonymous_usage_statistics for documentation (#6293) (thanks @milithino)
 [DOCS] add boto3 explanations on document (#6407) (thanks @tiruka)
+[MAINTENANCE] [CONTRIB] Multicolumns sum equal to single column (#6446) (thanks @asafla)
+[MAINTENANCE] [CONTRIB] add expectation - check gaps in SCD tables (#6433) (thanks @itaise)
+[MAINTENANCE] [CONTRIB] Add no days missing expectation (#6432) (thanks @itaise)
+[MAINTENANCE] [CONTRIB] Feature/add two tables expectation (#6429) (thanks @itaise)
+[MAINTENANCE] [CONTRIB] Add number of unique values expectation (#6425) (thanks @itaise)
 [MAINTENANCE] Add sorters to zep postgres datasource. (#6456)
 [MAINTENANCE] Bump ubuntu version in CI (#6457)
 [MAINTENANCE] Remove anticipatory multi-language support from renderers (#6426)
@@ -45,11 +50,6 @@ title: Changelog
 [MAINTENANCE] ZEP add yaml methods to all experimental models (#6401)
 [MAINTENANCE] Remove call to verify_library_dependent_modules for pybigquery (#6394)
 [MAINTENANCE] Make "IDDict.to_id()" serialization more efficient. (#6389)
-[CONTRIB] Multicolumns sum equal to single column (#6446) (thanks @asafla)
-[CONTRIB] add expectation - check gaps in SCD tables (#6433) (thanks @itaise)
-[CONTRIB] Add no days missing expectation (#6432) (thanks @itaise)
-[CONTRIB] Feature/add two tables expectation (#6429) (thanks @itaise)
-[CONTRIB] Add number of unique values expectation (#6425) (thanks @itaise)
 
 ### 0.15.34
 * [BUGFIX] Ensure `packaging_and_installation` CI tests against latest tag (#6386)
