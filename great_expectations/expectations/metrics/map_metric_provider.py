@@ -34,9 +34,9 @@ from great_expectations.expectations.metrics.util import (
     Insert,
     Label,
     Select,
+    get_dbms_compatible_column_names,
     get_sqlalchemy_source_table_and_schema,
     sql_statement_with_post_compile_to_string,
-    get_dbms_compatible_column_names,
     verify_column_names_exist,
 )
 from great_expectations.expectations.registry import (
