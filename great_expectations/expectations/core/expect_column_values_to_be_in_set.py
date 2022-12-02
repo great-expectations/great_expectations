@@ -197,57 +197,28 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        renderer_configuration.add_param(
-            name="column",
-            schema_type=ParamSchemaType.STRING,
+        add_param_args = (
+            ("column", ParamSchemaType.STRING),
+            ("value_set", ParamSchemaType.ARRAY),
+            ("mostly", ParamSchemaType.NUMBER),
+            ("mostly_pct", ParamSchemaType.STRING),
+            ("parse_strings_as_datetimes", ParamSchemaType.BOOLEAN),
+            ("row_condition", ParamSchemaType.STRING),
+            ("condition_parser", ParamSchemaType.STRING),
         )
-        renderer_configuration.add_param(
-            name="value_set",
-            schema_type=ParamSchemaType.ARRAY,
-        )
-        renderer_configuration.add_param(
-            name="mostly",
-            schema_type=ParamSchemaType.NUMBER,
-        )
-        renderer_configuration.add_param(
-            name="mostly_pct",
-            schema_type=ParamSchemaType.STRING,
-        )
-        renderer_configuration.add_param(
-            name="parse_strings_as_datetimes",
-            schema_type=ParamSchemaType.BOOLEAN,
-        )
-        renderer_configuration.add_param(
-            name="row_condition",
-            schema_type=ParamSchemaType.STRING,
-        )
-        renderer_configuration.add_param(
-            name="condition_parser",
-            schema_type=ParamSchemaType.STRING,
-        )
+        for name, schema_type in add_param_args:
+            renderer_configuration.add_param(name=name, schema_type=schema_type)
 
-        params: RendererParams
-        params = renderer_configuration.params
+        params: RendererParams = renderer_configuration.params
 
-        if not params.value_set or len(params.value_set.value) == 0:
-            values_string = "[ ]"
-        else:
-            for i, v in enumerate(params.value_set.value):
-                if isinstance(v, Number):
-                    schema_type = ParamSchemaType.NUMBER
-                else:
-                    schema_type = ParamSchemaType.STRING
-                renderer_configuration.add_param(
-                    name=f"v__{str(i)}", schema_type=schema_type, value=v
-                )
-
-            params = renderer_configuration.params
-
-            values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params.value_set.value)]
+        if params.value_set.value:
+            renderer_configuration = cls._add_value_set_value_params(
+                renderer_configuration=renderer_configuration
             )
-
-        template_str = f"values must belong to this set: {values_string}"
+            values_str: str = cls._get_values_string_from_value_set(
+                value_set_param=params.value_set
+            )
+            template_str = f"values must belong to this set: {values_str}"
 
         if params.mostly.value and params.mostly.value < 1.0:
             params.mostly_pct.value = num_to_str(
@@ -264,17 +235,13 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             template_str = f"$column {template_str}"
 
         if params.row_condition.value:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params.row_condition.value)
-            template_str = f"{conditional_template_str}, then {template_str}"
-            for conditional_param, condition in conditional_params.items():
-                renderer_configuration.add_param(
-                    name=conditional_param,
-                    schema_type=ParamSchemaType.STRING,
-                    value=condition,
-                )
+            renderer_configuration = cls._add_row_condition_condition_params(
+                renderer_configuration=renderer_configuration
+            )
+            conditions_str: str = cls._get_conditions_string_from_row_condition(
+                row_condition_param=params.row_condition
+            )
+            template_str = f"{conditions_str}, then {template_str}"
 
         renderer_configuration.template_str = template_str
 
@@ -295,7 +262,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             runtime_configuration=runtime_configuration,
         )
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            renderer_configuration.kwargs,
             [
                 "column",
                 "value_set",
@@ -420,7 +387,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         return new_block
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration)
         # supports extensibility by allowing value_set to not be provided in config but captured via child-class default_kwarg_values, e.g. parameterized expectations

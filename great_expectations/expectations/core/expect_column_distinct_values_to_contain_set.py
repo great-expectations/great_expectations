@@ -139,7 +139,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
             runtime_configuration=runtime_configuration,
         )
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            renderer_configuration.configuration.kwargs,
             [
                 "column",
                 "value_set",
