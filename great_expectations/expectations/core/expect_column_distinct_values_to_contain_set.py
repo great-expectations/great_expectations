@@ -1,5 +1,5 @@
 import warnings
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import pandas as pd
 
@@ -131,7 +131,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-    ):
+    ) -> List[RenderedStringTemplateContent]:
         renderer_configuration = RendererConfiguration(
             configuraiton=configuration,
             result=result,
