@@ -103,14 +103,13 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
             values_string = "[ ]"
         else:
             for i, v in enumerate(params.value_set.value):
-                for i, v in enumerate(params.value_set.value):
-                    if isinstance(v, Number):
-                        schema_type = ParamSchemaType.NUMBER
-                    else:
-                        schema_type = ParamSchemaType.STRING
-                    renderer_configuration.add_param(
-                        name=f"v__{str(i)}", schema_type=schema_type, value=v
-                    )
+                if isinstance(v, Number):
+                    schema_type = ParamSchemaType.NUMBER
+                else:
+                    schema_type = ParamSchemaType.STRING
+                renderer_configuration.add_param(
+                    name=f"v__{str(i)}", schema_type=schema_type, value=v
+                )
 
             values_string = " ".join(
                 [f"$v__{str(i)}" for i, v in enumerate(params.value_set.value)]
