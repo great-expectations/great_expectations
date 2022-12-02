@@ -30,16 +30,23 @@ DEFAULT_MAX_DT = datetime(2022, 12, 31, 0, 0, 0)
 
 class _MockConnection:
     def execute(self, query):
-        # Right now we assume the query is:
-        # "select min(col), max(col) from table"
-        # where col is a datetime column since that's all that's necessary.
-        # We could build something more robust as needed.
+        """Execute a query over a sqlalchemy engine connection.
+
+        Currently this mock assumes the query is always of the form:
+        "select min(col), max(col) from table"
+        where col is a datetime column since that's all that's necessary.
+        This can be generalized if needed.
+
+        Args:
+            query: The SQL query to execute.
+        """
         return [(DEFAULT_MIN_DT, DEFAULT_MAX_DT)]
 
 
 class _MockSaEngine:
     @contextmanager
     def connect(self):
+        """A contextmanager that yields a _MockConnection"""
         yield _MockConnection()
 
 

@@ -47,6 +47,11 @@ class SqlYearMonthSplitter(ColumnSplitter):
     param_names: List[str] = pydantic.Field(default_factory=lambda: ["year", "month"])
 
     def param_defaults(self, data_asset: DataAsset) -> Dict[str, List]:
+        """Query the database to get the years and months to split over.
+
+        Args:
+            data_asset: A TableAsset over which we want to split the data.
+        """
         # This column splitter is only relevant to SQL data assets so we do some assertions
         # to validate this.
         from great_expectations.execution_engine import SqlAlchemyExecutionEngine
