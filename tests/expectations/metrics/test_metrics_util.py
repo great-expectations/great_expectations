@@ -10,7 +10,6 @@ from great_expectations.expectations.metrics.util import (
     sql_statement_with_post_compile_to_string,
 )
 
-# allows for declarative instantiation of base
 # https://docs.sqlalchemy.org/en/14/faq/sqlexpressions.html#rendering-bound-parameters-inline
 from tests.test_utils import (
     get_awsathena_connection_url,
@@ -19,6 +18,7 @@ from tests.test_utils import (
     get_snowflake_connection_url,
 )
 
+# allows for declarative instantiation of base
 Base = declarative_base()
 
 # https://docs.sqlalchemy.org/en/14/faq/sqlexpressions.html#rendering-postcompile-parameters-as-bound-parameters
