@@ -60,9 +60,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
             return [semantic_type for semantic_type in [semantic_types]]
 
         if isinstance(semantic_types, list):
-            if all(
-                [isinstance(semantic_type, str) for semantic_type in semantic_types]
-            ):
+            if all(isinstance(semantic_type, str) for semantic_type in semantic_types):
                 semantic_types = [
                     semantic_type.lower() for semantic_type in semantic_types
                 ]
@@ -72,10 +70,8 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
                 ]
 
             if all(
-                [
-                    isinstance(semantic_type, SemanticDomainTypes)
-                    for semantic_type in semantic_types
-                ]
+                isinstance(semantic_type, SemanticDomainTypes)
+                for semantic_type in semantic_types
             ):
                 return [semantic_type for semantic_type in semantic_types]
 
