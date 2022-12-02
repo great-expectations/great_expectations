@@ -348,16 +348,18 @@ class Expectation(metaclass=MetaExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        renderer_configuration.add_param(
-            name="expectation_type",
-            schema_type=ParamSchemaType.STRING,
-            value=renderer_configuration.expectation_type,
+        add_param_args = (
+            (
+                "expectation_type",
+                ParamSchemaType.STRING,
+                renderer_configuration.expectation_type,
+            ),
+            ("kwargs", ParamSchemaType.STRING, renderer_configuration.kwargs),
         )
-        renderer_configuration.add_param(
-            name="kwargs",
-            schema_type=ParamSchemaType.STRING,
-            value=renderer_configuration.kwargs,
-        )
+        for name, schema_type, value in add_param_args:
+            renderer_configuration.add_param(
+                name=name, schema_type=schema_type, value=value
+            )
         renderer_configuration.template_str = "$expectation_type(**$kwargs)"
         return renderer_configuration
 
@@ -372,7 +374,7 @@ class Expectation(metaclass=MetaExpectation):
         Template function that contains the logic that is shared by AtomicPrescriptiveRendererType.SUMMARY and
         LegacyRendererType.PRESCRIPTIVE.
         """
-        # TODO: Add the following DeprecationWarning after all _atomic_prescriptive_template methods have been migrated
+        # TODO: NF - Add the following DeprecationWarning after all _atomic_prescriptive_template methods are migrated
         # deprecated-v0.15.37
         # warnings.warn(
         #     "Expectation._atomic_prescriptive_template() is deprecated as of v0.15.37 and will be removed in v0.18. "
@@ -3135,13 +3137,14 @@ def add_values_with_json_schema_from_list_in_params(
     Utility function used in _atomic_prescriptive_template() to take list values from a given params dict key,
     convert each value to a dict with JSON schema type info, then add it to params_with_json_schema (dict).
     """
+    # TODO: NF - Add the following DeprecationWarning after all _atomic_prescriptive_template methods are migrated
     # deprecated-v0.15.37
-    warnings.warn(
-        "The method add_values_with_json_schema_from_list_in_params is deprecated as of v0.15.37 and will be removed "
-        "in v0.18. Please utilize RendererConfiguration.add_param() and RendererConfiguration.params.dict() to produce "
-        "a json schema for renderer params.",
-        DeprecationWarning,
-    )
+    # warnings.warn(
+    #     "The method add_values_with_json_schema_from_list_in_params is deprecated as of v0.15.37 and will be removed "
+    #     "in v0.18. Please utilize RendererConfiguration.add_param() and RendererConfiguration.params.dict() to produce "
+    #     "a json schema for renderer params.",
+    #     DeprecationWarning,
+    # )
     target_list = params.get(param_key_with_list)
     if target_list is not None and len(target_list) > 0:
         for i, v in enumerate(target_list):
