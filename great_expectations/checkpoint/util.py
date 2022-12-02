@@ -36,10 +36,12 @@ def send_slack_notification(
     query = query
     headers = None
 
+    if slack_channel:
+        query["channel"] = slack_channel
+
     if not slack_webhook:
         url = "https://slack.com/api/chat.postMessage"
         headers = {"Authorization": f"Bearer {slack_token}"}
-        query["channel"] = slack_channel
 
     try:
         response = session.post(url=url, headers=headers, json=query)
