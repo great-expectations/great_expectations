@@ -90,7 +90,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
     styling: Union[dict, None] = Field(None, allow_mutation=False)
-    params: RendererParams = Field(_RendererParamsBase, allow_mutation=True)
+    params: RendererParams = Field(
+        default_factory=_RendererParamsBase, allow_mutation=True
+    )
     template_str: str = Field("", allow_mutation=True)
 
     class Config:

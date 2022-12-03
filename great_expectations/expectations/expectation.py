@@ -1468,9 +1468,12 @@ class Expectation(metaclass=MetaExpectation):
     def _add_value_set_value_params(
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        params: RendererParams = renderer_configuration.params
-        assert hasattr(params, "value_set")
-        if params.value_set.value and len(params.value_set.value) > 0:
+        params = renderer_configuration.params
+        if (
+            hasattr(params, "value_set")
+            and params.value_set.value
+            and len(params.value_set.value) > 0
+        ):
             for i, v in enumerate(params.value_set.value):
                 if isinstance(v, Number):
                     schema_type = ParamSchemaType.NUMBER
@@ -1495,9 +1498,8 @@ class Expectation(metaclass=MetaExpectation):
     def _add_row_condition_condition_params(
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        params: RendererParams = renderer_configuration.params
-        assert hasattr(params, "row_condition")
-        if params.row_condition.value:
+        params = renderer_configuration.params
+        if hasattr(params, "row_condition") and params.row_condition.value:
             (_, conditional_params,) = parse_row_condition_string_pandas_engine(
                 params.row_condition.value,
             )
