@@ -318,8 +318,10 @@ class Expectation(metaclass=MetaExpectation):
             ),
             ("kwargs", ParamSchemaType.STRING, renderer_configuration.kwargs),
         )
-        for name, schema_type in add_param_args:
-            renderer_configuration.add_param(name=name, schema_type=schema_type)
+        for name, schema_type, value in add_param_args:
+            renderer_configuration.add_param(
+                name=name, schema_type=schema_type, value=value
+            )
 
         value_obj = renderedAtomicValueSchema.load(
             {
@@ -831,8 +833,10 @@ class Expectation(metaclass=MetaExpectation):
             ),
             ("kwargs", ParamSchemaType.STRING, renderer_configuration.kwargs),
         )
-        for name, schema_type in add_param_args:
-            renderer_configuration.add_param(name=name, schema_type=schema_type)
+        for name, schema_type, value in add_param_args:
+            renderer_configuration.add_param(
+                name=name, schema_type=schema_type, value=value
+            )
 
         value_obj = renderedAtomicValueSchema.load(
             {
