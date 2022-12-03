@@ -90,8 +90,8 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
     styling: Union[dict, None] = Field(None, allow_mutation=False)
-    params: RendererParams = Field(None, allow_mutation=True)
-    template_str: Optional[str] = Field(None, allow_mutation=True)
+    params: RendererParams = Field(_RendererParamsBase, allow_mutation=True)
+    template_str: str = Field("", allow_mutation=True)
 
     class Config:
         validate_assignment = True
@@ -159,15 +159,10 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
         # As of Nov 30, 2022 there is a bug in autocompletion for pydantic dynamic models
         # See: https://github.com/pydantic/pydantic/issues/3930
-        base: Type[RendererParams]
-        if self.params:
-            base = self.params.__class__
-        else:
-            base = _RendererParamsBase
         renderer_params: Type[BaseModel] = create_model(
             "RendererParams",
             **renderer_param_definition,
-            __base__=base,
+            __base__=self.params.__class__,
         )
 
         if value is None:
@@ -176,7 +171,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         renderer_params_definition: Dict[str, Any]
         if self.params is not None:
             renderer_params_definition = {
-                **self.params.dict(),  # type: ignore[attr-defined] # mypy bug see: https://github.com/python/mypy/issues/12385
+                **self.params.dict(),
                 name: renderer_param(schema={"type": schema_type}, value=value),
             }
         else:
