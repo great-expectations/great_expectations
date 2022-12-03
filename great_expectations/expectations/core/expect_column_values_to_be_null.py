@@ -117,8 +117,8 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         params: RendererParams = renderer_configuration.params
 
         if params.mostly.value and params.mostly.value < 1.0:
-            params.mostly_pct.value = num_to_str(
-                params.mostly.value * 100, precision=15, no_scientific=True
+            renderer_configuration = cls._add_mostly_pct_param(
+                renderer_configuration=renderer_configuration
             )
             template_str = "values must be null, at least $mostly_pct % of the time."
         else:
