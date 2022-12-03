@@ -1,5 +1,4 @@
 from contextlib import contextmanager
-from copy import copy
 from typing import Callable, ContextManager
 
 import pytest
@@ -351,7 +350,9 @@ def test_bad_batch_request_passed_into_get_batch_list_from_batch_request(
     "batch_request_options",
     [{}, {"year": 2021}, {"year": 2021, "month": 10}, {"year": None, "month": 10}],
 )
-def test_validate_good_batch_request(create_source, batch_request_options):
+def test_get_batch_list_from_batch_request_with_good_batch_request(
+    create_source, batch_request_options
+):
     with create_source(lambda _: None) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
@@ -361,7 +362,7 @@ def test_validate_good_batch_request(create_source, batch_request_options):
             options=batch_request_options,
         )
         # No exception should get thrown
-        asset.validate_batch_request(batch_request)
+        asset.get_batch_list_from_batch_request(batch_request)
 
 
 @pytest.mark.unit
@@ -374,7 +375,9 @@ def test_validate_good_batch_request(create_source, batch_request_options):
         ("bad", "bad", None),
     ],
 )
-def test_validate_malformed_batch_request(create_source, batch_request_args):
+def test_get_batch_list_from_batch_request_with_malformed_batch_request(
+    create_source, batch_request_args
+):
     with create_source(lambda _: None) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
@@ -385,7 +388,7 @@ def test_validate_malformed_batch_request(create_source, batch_request_args):
             options=op or {},
         )
         with pytest.raises(BatchRequestError):
-            asset.validate_batch_request(batch_request)
+            asset.get_batch_list_from_batch_request(batch_request)
 
 
 def test_get_bad_batch_request(create_source):

@@ -5,8 +5,8 @@
 #
 # The sole purpose of this pipeline is to copy staging JSON files to prod for the Expectation Gallery and trigger the prod algolia indices.
 
-trigger:
-  - none
+variables:
+  isManual: $[eq(variables['Build.Reason'], 'Manual')]
 
 stages:
   - stage: deploy_gallery_prod
@@ -15,6 +15,7 @@ stages:
 
     jobs:
       - job: copy_staging_to_prod
+        condition: eq(variables.isManual, true)
         timeoutInMinutes: 5
         variables:
           python.version: '3.8'
@@ -72,6 +73,7 @@ stages:
 
     jobs:
       - job: copy_old_prod_to_prod
+        condition: eq(variables.isManual, true)
         timeoutInMinutes: 5
         variables:
           python.version: '3.8'
