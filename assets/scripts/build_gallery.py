@@ -590,7 +590,7 @@ def _disable_progress_bars() -> Tuple[str, DataContext]:
     "--outfile-name",
     "-o",
     "outfile_name",
-    default="expectation_library_v2.json",
+    default="expectation_library_v2--staging.json",
     help="Name for the generated JSON file",
 )
 @click.option(
@@ -601,7 +601,7 @@ def _disable_progress_bars() -> Tuple[str, DataContext]:
 )
 @click.argument("args", nargs=-1)
 def main(**kwargs):
-    """Find all Expectations, run their diagnostics methods, and generate expectation_library_v2.json
+    """Find all Expectations, run their diagnostics methods, and generate expectation_library_v2--staging.json
 
     - args: snake_name of specific Expectations to include (useful for testing)
     """
