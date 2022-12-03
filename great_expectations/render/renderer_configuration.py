@@ -106,10 +106,14 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
     @staticmethod
     def _set_expectation_type_and_kwargs(kwargs: dict) -> dict:
-        if kwargs["configuration"]:
+        if "configuration" in kwargs and kwargs["configuration"]:
             kwargs["expectation_type"] = kwargs["configuration"].expectation_type
             kwargs["kwargs"] = kwargs["configuration"].kwargs
-        elif kwargs["result"] and kwargs["result"].expectation_config:
+        elif (
+            "result" in kwargs
+            and kwargs["result"]
+            and kwargs["result"].expectation_config
+        ):
             kwargs["expectation_type"] = kwargs[
                 "result"
             ].expectation_config.expectation_type
@@ -118,7 +122,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
     @staticmethod
     def _set_include_column_name_and_styling(kwargs: dict) -> dict:
-        if kwargs["runtime_configuration"]:
+        if "runtime_configuration" in kwargs and kwargs["runtime_configuration"]:
             kwargs["include_column_name"] = (
                 False
                 if kwargs["runtime_configuration"].get("include_column_name") is False
