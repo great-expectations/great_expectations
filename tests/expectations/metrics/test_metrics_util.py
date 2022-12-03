@@ -74,22 +74,38 @@ def _compare_select_statement_with_converted_string(engine) -> None:
         ("trino", get_default_trino_url()),
         ("redshift", get_redshift_connection_url()),
         ("snowflake", get_snowflake_connection_url()),
-        ("bigquery", get_bigquery_connection_url()),
     ],
 )
 def test_sql_statement_conversion_to_string_for_backends(
     backend_name: str, connection_string: str, test_backends: List[str]
 ):
-    if backend_name == "awsathena":
-        monkeypatch.setenv("ATHENA_STAGING_S3", "s3://test-staging/")
-        monkeypatch.setenv("ATHENA_DB_NAME", "test_db_name")
-        monkeypatch.setenv("ATHENA_TEN_TRIPS_DB_NAME", "test_ten_trips_db_name")
-
-    if backend_name == "bigquery":
-        monkeypatch.setenv("GE_TEST_GCP_PROJECT", "ge-oss")
 
     if backend_name in test_backends:
         engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
         _compare_select_statement_with_converted_string(engine=engine)
     else:
         pytest.skip(f"skipping sql statement conversion test for : {backend_name}")
+
+
+@pytest.mark.unit
+def test_sql_statement_converstion_to_string_awsathena(test_backends):
+    if "awsathena" in test_backends:
+        monkeypatch.setenv("ATHENA_STAGING_S3", "s3://test-staging/")
+        monkeypatch.setenv("ATHENA_DB_NAME", "test_db_name")
+        monkeypatch.setenv("ATHENA_TEN_TRIPS_DB_NAME", "test_ten_trips_db_name")
+        connection_string = get_awsathena_connection_url()
+        engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
+        _compare_select_statement_with_converted_string(engine=engine)
+    else:
+        pytest.skip(f"skipping sql statement conversion test for : awsathena")
+
+
+@pytest.mark.unit
+def test_sql_statement_converstion_to_string_bigquery(test_backends):
+    if "bigquery" in test_backends:
+        monkeypatch.setenv("GE_TEST_GCP_PROJECT", "ge-oss")
+        connection_string = get_bigquery_connection_url()
+        engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
+        _compare_select_statement_with_converted_string(engine=engine)
+    else:
+        pytest.skip(f"skipping sql statement conversion test for : bigquery")
