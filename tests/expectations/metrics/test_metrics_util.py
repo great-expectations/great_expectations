@@ -126,7 +126,7 @@ def test_snowflake(sa, test_backends, select_with_post_compile_statements):
 
 def test_awsathena(sa, test_backends, select_with_post_compile_statements):
     if "awsathena" in test_backends:
-        athena_db_name_env_var: str = ("ATHENA_DB_NAME",)
+        athena_db_name_env_var: str = "ATHENA_DB_NAME"
         connection_string: str = get_awsathena_connection_url(athena_db_name_env_var)
         engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
         _compare_select_statement_with_converted_string(
