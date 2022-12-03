@@ -109,7 +109,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class ValidationDependencies:
-    # Note: Dependent "metric_name" (key) is different concept than its dependency "MetricConfiguration" object (value).
+    # Note: Dependent "metric_name" (key) is different from "metric_name" in dependency "MetricConfiguration" (value).
     metric_configurations: Dict[str, MetricConfiguration] = field(default_factory=dict)
     result_format: Dict[str, Any] = field(default_factory=dict)
 
