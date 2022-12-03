@@ -80,8 +80,6 @@ def _compare_select_statement_with_converted_string(engine) -> None:
 def test_sql_statement_conversion_to_string_for_backends(
     backend_name: str, connection_string: str, test_backends: List[str]
 ):
-    athena_db_name_env_var: str = "ATHENA_DB_NAME"
-    connection_string: str = get_awsathena_connection_url(athena_db_name_env_var)
     if backend_name in test_backends:
         engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
         _compare_select_statement_with_converted_string(engine=engine)
