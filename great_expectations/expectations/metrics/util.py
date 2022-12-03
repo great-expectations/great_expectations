@@ -1014,21 +1014,25 @@ def sql_statement_with_post_compile_to_string(
         String representation of select_statement
 
     """
-
+    dialect_name: str = engine.dialect_name
     compiled = select_statement.compile(
         engine, compile_kwargs={"render_postcompile": True}, dialect=engine.dialect
     )
-    # if compiled.positiontup:
-    #    params = (repr(compiled.params[name]) for name in compiled.positiontup)
-    #    query_as_string = re.sub(r"\?", lambda m: next(params), str(compiled))
-    # else:
-    params = (repr(compiled.params[name]) for name in list(compiled.params.keys()))
-    query_as_string = re.sub(r"%\(.*?\)s", lambda m: next(params), str(compiled))
+    dialect_name: str = engine.dialect_name
 
-    if engine.dialect_name == "bigquery":
+    if dialect_name in ["sqlite", "trino", "mssql"]:
+        params = (repr(compiled.params[name]) for name in compiled.positiontup)
+        query_as_string = re.sub(r"\?", lambda m: next(params), str(compiled))
+
+    else:
+        params = (repr(compiled.params[name]) for name in list(compiled.params.keys()))
+        query_as_string = re.sub(r"%\(.*?\)s", lambda m: next(params), str(compiled))
+
         # bigquery inserts extra '`' character for compiled statement.
         # clean up string before returning
-        query_as_string = re.sub(r"`", "", query_as_string)
+        if dialect_name == "bigquery":
+            query_as_string = re.sub(r"`", "", query_as_string)
+
     return query_as_string
 
 

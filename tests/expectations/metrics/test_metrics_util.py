@@ -9,8 +9,6 @@ from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.expectations.metrics.util import (
     sql_statement_with_post_compile_to_string,
 )
-
-# https://docs.sqlalchemy.org/en/14/faq/sqlexpressions.html#rendering-bound-parameters-inline
 from tests.test_utils import (
     get_awsathena_connection_url,
     get_bigquery_connection_url,
@@ -18,10 +16,12 @@ from tests.test_utils import (
     get_snowflake_connection_url,
 )
 
-# allows for declarative instantiation of base
+# The following class allows for declarative instantiation of base class for SqlAlchemy. Adopted from
+# https://docs.sqlalchemy.org/en/14/faq/sqlexpressions.html#rendering-postcompile-parameters-as-bound-parameters
+
 Base = declarative_base()
 
-# https://docs.sqlalchemy.org/en/14/faq/sqlexpressions.html#rendering-postcompile-parameters-as-bound-parameters
+
 class A(Base):
     __tablename__ = "a"
     id = Column(Integer, primary_key=True)
