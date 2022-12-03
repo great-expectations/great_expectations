@@ -1,10 +1,20 @@
-import os
+from typing import List
 
 import pytest
-from sqlalchemy import Column, Integer, String, select
-from sqlalchemy.orm import declarative_base
 
-from great_expectations.data_context.util import file_relative_path
+try:
+    import sqlalchemy as sa
+    from sqlalchemy import Column, Integer, String, select
+    from sqlalchemy.orm import declarative_base
+except ImportError:
+    sa = None
+    Column = None
+    Integer = None
+    String = None
+    select = None
+    declarative_base = None
+
+
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.expectations.metrics.util import (
     sql_statement_with_post_compile_to_string,
@@ -12,6 +22,10 @@ from great_expectations.expectations.metrics.util import (
 from tests.test_utils import (
     get_awsathena_connection_url,
     get_bigquery_connection_url,
+    get_default_mssql_url,
+    get_default_mysql_url,
+    get_default_postgres_url,
+    get_default_trino_url,
     get_redshift_connection_url,
     get_snowflake_connection_url,
 )
@@ -28,15 +42,18 @@ class A(Base):
     data = Column(String)
 
 
-@pytest.fixture
-def select_with_post_compile_statements(sa):
-    id: str = "00000000"
-    stmt: select = select(A).where(A.data == id)
-    return stmt
+def select_with_post_compile_statements() -> "sqlalchemy.sql.Select":
+    test_id: str = "00000000"
+    return select(A).where(A.data == test_id)
 
 
-def _compare_select_statement_with_converted_string(engine, select_statement):
-
+def _compare_select_statement_with_converted_string(engine) -> None:
+    """
+    Helper method used to do the call to sql_statement_with_post_compile_to_string() and compare with expected val
+    Args:
+        engine (ExecutionEngine): SqlAlchemyExecutionEngine with connection to backend under test
+    """
+    select_statement: "sqlalchemy.sql.Select" = select_with_post_compile_statements()
     returned_string = sql_statement_with_post_compile_to_string(
         engine=engine, select_statement=select_statement
     )
@@ -45,103 +62,25 @@ def _compare_select_statement_with_converted_string(engine, select_statement):
     )
 
 
-def test_sqlite(sa, test_backends, select_with_post_compile_statements):
-    if "sqlite" in test_backends:
-        sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
-        connection_string = f"sqlite:///{sqlite_path}"
+@pytest.mark.parametrize(
+    "backend_name,connection_string",
+    [
+        ("sqlite", "sqlite:///../../test_sets/metrics_test.db"),
+        ("postgresql", get_default_postgres_url()),
+        ("mysql", get_default_mysql_url()),
+        ("mssql", get_default_mssql_url()),
+        ("trino", get_default_trino_url()),
+        ("redshift", get_redshift_connection_url()),
+        ("snowflake", get_snowflake_connection_url()),
+        ("awsathena", get_awsathena_connection_url()),
+        ("bigquery", get_bigquery_connection_url()),
+    ],
+)
+def test_sql_statement_conversion_to_string_for_backends(
+    backend_name: str, connection_string: str, test_backends: List[str]
+):
+    if backend_name in test_backends:
         engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-        _compare_select_statement_with_converted_string(
-            engine=engine, select_statement=select_with_post_compile_statements
-        )
+        _compare_select_statement_with_converted_string(engine=engine)
     else:
-        pytest.skip("skipping sqlite")
-
-
-def test_postgresql(sa, test_backends, select_with_post_compile_statements):
-    if "postgresql" in test_backends:
-        connection_string = "postgresql+psycopg2://postgres:@localhost/test_ci"
-        engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-        _compare_select_statement_with_converted_string(
-            engine=engine, select_statement=select_with_post_compile_statements
-        )
-    else:
-        pytest.skip("skipping postgresql")
-
-
-def test_mysql(sa, test_backends, select_with_post_compile_statements):
-    if "mysql" in test_backends:
-        connection_string = "mysql+pymysql://root@localhost/test_ci"
-        engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-        _compare_select_statement_with_converted_string(
-            engine=engine, select_statement=select_with_post_compile_statements
-        )
-    else:
-        pytest.skip("skipping mysql")
-
-
-def test_mssql(sa, test_backends, select_with_post_compile_statements):
-    if "mssql" in test_backends:
-        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-        connection_string = f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true"
-        engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-        _compare_select_statement_with_converted_string(
-            engine=engine, select_statement=select_with_post_compile_statements
-        )
-    else:
-        pytest.skip("skipping mssql")
-
-
-def test_trino(sa, test_backends, select_with_post_compile_statements):
-    if "trino" in test_backends:
-        connection_string = "trino://test@localhost:8088/memory/schema"
-        engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-        _compare_select_statement_with_converted_string(
-            engine=engine, select_statement=select_with_post_compile_statements
-        )
-    else:
-        pytest.skip("skipping trino")
-
-
-def test_redshift(sa, test_backends, select_with_post_compile_statements):
-    if "redshift" in test_backends:
-        connection_string = get_redshift_connection_url()
-        engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-        _compare_select_statement_with_converted_string(
-            engine=engine, select_statement=select_with_post_compile_statements
-        )
-    else:
-        pytest.skip("skipping redshift")
-
-
-def test_snowflake(sa, test_backends, select_with_post_compile_statements):
-    if "snowflake" in test_backends:
-        connection_string = get_snowflake_connection_url()
-        engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-        _compare_select_statement_with_converted_string(
-            engine=engine, select_statement=select_with_post_compile_statements
-        )
-    else:
-        pytest.skip("skipping snowflake")
-
-
-def test_awsathena(sa, test_backends, select_with_post_compile_statements):
-    if "awsathena" in test_backends:
-        athena_db_name_env_var: str = "ATHENA_DB_NAME"
-        connection_string: str = get_awsathena_connection_url(athena_db_name_env_var)
-        engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-        _compare_select_statement_with_converted_string(
-            engine=engine, select_statement=select_with_post_compile_statements
-        )
-    else:
-        pytest.skip("skipping awsathena")
-
-
-def test_bigquery(sa, test_backends, select_with_post_compile_statements):
-    if "bigquery" in test_backends:
-        connection_string = get_bigquery_connection_url()
-        engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-        _compare_select_statement_with_converted_string(
-            engine=engine, select_statement=select_with_post_compile_statements
-        )
-    else:
-        pytest.skip("skipping bigquery")
+        pytest.skip(f"skipping sql statement conversion test for : {backend_name}")
