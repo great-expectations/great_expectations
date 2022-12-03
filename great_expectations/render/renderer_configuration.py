@@ -15,9 +15,6 @@ if TYPE_CHECKING:
     from pydantic.typing import AbstractSetIntStr, DictStrAny, MappingIntStrAny
 
 
-RendererParams = TypeVar("RendererParams")
-
-
 class ParamSchemaType(str, Enum):
     """schema_type passed to RendererConfiguration.add_param()"""
 
@@ -43,6 +40,42 @@ class RendererParam(BaseModel):
             return self.dict() == other
         else:
             return self.value == other
+
+
+class _RendererParamsBase(BaseModel):
+    class Config:
+        validate_assignment = True
+        arbitrary_types_allowed = True
+
+    def dict(
+        self,
+        include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
+        exclude: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
+        by_alias: bool = True,
+        skip_defaults: Optional[bool] = None,
+        exclude_unset: bool = False,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+    ) -> DictStrAny:
+        """
+        Override BaseModel dict to make the default by_alias True instead of False.
+        We need by_alias to be set to True in RendererParams, because we have an existing
+        attribute named schema, and schema is already a Pydantic BaseModel attribute.
+        In practice this means the renderer implementer doesn't need to use
+        .dict(by_alias=True) everywhere.
+        """
+        return super().dict(
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            skip_defaults=skip_defaults,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+        )
+
+
+RendererParams = TypeVar("RendererParams", bound=_RendererParamsBase)
 
 
 class RendererConfiguration(GenericModel, Generic[RendererParams]):
@@ -126,11 +159,11 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
         # As of Nov 30, 2022 there is a bug in autocompletion for pydantic dynamic models
         # See: https://github.com/pydantic/pydantic/issues/3930
-        base: Type[RendererConfiguration._RendererParamsBase]
+        base: Type[RendererParams]
         if self.params:
             base = self.params.__class__
         else:
-            base = RendererConfiguration._RendererParamsBase
+            base = _RendererParamsBase
         renderer_params: Type[BaseModel] = create_model(
             "RendererParams",
             **renderer_param_definition,
@@ -152,35 +185,3 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             }
 
         self.params: BaseModel = renderer_params(**renderer_params_definition)  # type: ignore[assignment] # mypy bug see: https://github.com/python/mypy/issues/12385
-
-    class _RendererParamsBase(BaseModel):
-        class Config:
-            validate_assignment = True
-            arbitrary_types_allowed = True
-
-        def dict(
-            self,
-            include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
-            exclude: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
-            by_alias: bool = True,
-            skip_defaults: Optional[bool] = None,
-            exclude_unset: bool = False,
-            exclude_defaults: bool = False,
-            exclude_none: bool = False,
-        ) -> DictStrAny:
-            """
-            Override BaseModel dict to make the default by_alias True instead of False.
-            We need by_alias to be set to True in RendererParams, because we have an existing
-            attribute named schema, and schema is already a Pydantic BaseModel attribute.
-            In practice this means the renderer implementer doesn't need to use
-            .dict(by_alias=True) everywhere.
-            """
-            return super().dict(
-                include=include,
-                exclude=exclude,
-                by_alias=by_alias,
-                skip_defaults=skip_defaults,
-                exclude_unset=exclude_unset,
-                exclude_defaults=exclude_defaults,
-                exclude_none=exclude_none,
-            )
