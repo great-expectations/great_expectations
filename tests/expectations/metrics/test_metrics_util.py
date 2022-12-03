@@ -94,8 +94,11 @@ def test_sql_statement_conversion_to_string_for_backends(
 def test_sql_statement_conversion_to_string_for_backends_athena(
     test_backends: List[str],
 ):
+    monkeypatch.setenv("ATHENA_STAGING_S3", "s3://test-staging/")
     monkeypatch.setenv("ATHENA_DB_NAME", "test_db_name")
+    monkeypatch.setenv("ATHENA_TEN_TRIPS_DB_NAME", "test_ten_trips_db_name")
     backend_name: str = "awsathena"
+
     connection_string: str = get_awsathena_connection_url()
     if backend_name in test_backends:
         engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
