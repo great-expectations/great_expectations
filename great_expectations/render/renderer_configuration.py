@@ -84,15 +84,13 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     configuration: Union[ExpectationConfiguration, None] = Field(
         ..., allow_mutation=False
     )
-    result: Union[ExpectationValidationResult, None] = Field(..., allow_mutation=False)
-    runtime_configuration: Union[dict, None] = Field({}, allow_mutation=False)
+    result: Optional[ExpectationValidationResult] = Field(..., allow_mutation=False)
+    runtime_configuration: Optional[dict] = Field({}, allow_mutation=False)
     expectation_type: str = Field("", allow_mutation=False)
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
     styling: Union[dict, None] = Field(None, allow_mutation=False)
-    params: RendererParams = Field(
-        default_factory=_RendererParamsBase, allow_mutation=True
-    )
+    params: RendererParams = Field(..., allow_mutation=True)
     template_str: str = Field("", allow_mutation=True)
 
     class Config:
@@ -104,6 +102,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         kwargs = RendererConfiguration._set_include_column_name_and_styling(
             kwargs=kwargs
         )
+        kwargs["params"] = _RendererParamsBase()
         super().__init__(**kwargs)
 
     @staticmethod
@@ -170,15 +169,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         if value is None:
             value = self.kwargs.get(name)
 
-        renderer_params_definition: Dict[str, Any]
-        if self.params is not None:
-            renderer_params_definition = {
-                **self.params.dict(),
-                name: renderer_param(schema={"type": schema_type}, value=value),
-            }
-        else:
-            renderer_params_definition = {
-                name: renderer_param(schema={"type": schema_type}, value=value),
-            }
+        renderer_params_definition: Dict[str, Any] = {
+            **self.params.dict(),
+            name: renderer_param(schema={"type": schema_type}, value=value),
+        }
 
         self.params: BaseModel = renderer_params(**renderer_params_definition)  # type: ignore[assignment] # mypy bug see: https://github.com/python/mypy/issues/12385
