@@ -126,6 +126,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
         # As of Nov 30, 2022 there is a bug in autocompletion for pydantic dynamic models
         # See: https://github.com/pydantic/pydantic/issues/3930
+        base: Union[
+            Type[RendererParams], Type[RendererConfiguration._RendererParamsBase]
+        ]
         if self.params:
             base = self.params.__class__
         else:
@@ -133,7 +136,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         renderer_params: Type[BaseModel] = create_model(
             "RendererParams",
             **renderer_param_definition,
-            __base__=base,  # type: ignore[arg-type] # mypy bug see: https://github.com/python/mypy/issues/12385
+            __base__=base,
         )
 
         if value is None:
