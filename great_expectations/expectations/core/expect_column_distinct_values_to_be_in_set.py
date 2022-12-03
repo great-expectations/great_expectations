@@ -34,78 +34,75 @@ from great_expectations.render.util import (
 class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
     """Expect the set of distinct column values to be contained by a given set.
 
-            The success value for this expectation will match that of expect_column_values_to_be_in_set. However,
-            expect_column_distinct_values_to_be_in_set is a \
-            :func:`column_aggregate_expectation \
-            <great_expectations.execution_engine.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.
+    expect_column_distinct_values_to_be_in_set is a \
+    [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
-            For example:
-            ::
+    The success value for this expectation will match that of \
+    [expect_column_values_to_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_be_in_set).
 
-                # my_df.my_col = [1,2,2,3,3,3]
-                >>> my_df.expect_column_distinct_values_to_be_in_set(
-                    "my_col",
-                    [2, 3, 4]
-                )
-                {
-                  "success": false
-                  "result": {
-                    "observed_value": [1,2,3],
-                    "details": {
-                      "value_counts": [
+    For example:
+    ::
+
+        # my_df.my_col = [1,2,2,3,3,3]
+        >>> my_df.expect_column_distinct_values_to_be_in_set(
+                "my_col",
+                [2, 3, 4]
+            )
+        {
+            "success": false
+            "result": {
+                "observed_value": [1,2,3],
+                "details": {
+                    "value_counts": [
                         {
-                          "value": 1,
-                          "count": 1
+                            "value": 1,
+                            "count": 1
                         },
                         {
-                          "value": 2,
-                          "count": 1
+                            "value": 2,
+                            "count": 1
                         },
                         {
-                          "value": 3,
-                          "count": 1
+                            "value": 3,
+                            "count": 1
                         }
-                      ]
-                    }
-                  }
+                    ]
                 }
+            }
+        }
 
-            Args:
-                column (str): \
-                    The column name.
-                value_set (set-like): \
-                    A set of objects used for comparison.
+    Args:
+        column (str): \
+            The column name.
+        value_set (set-like): \
+            A set of objects used for comparison.
 
-            Keyword Args:
-                parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed \
-                as datetimes before making comparisons.
+    Keyword Args:
+        parse_strings_as_datetimes (boolean or None): If True values provided in value_set will be parsed \
+        as datetimes before making comparisons.
 
-            Other Parameters:
-                result_format (str or None): \
-                    Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`. \
-                    For more detail, see :ref:`result_format <result_format>`.
-                include_config (boolean): \
-                    If True, then include the expectation config as part of the result object. \
-                    For more detail, see :ref:`include_config`.
-                catch_exceptions (boolean or None): \
-                    If True, then catch exceptions and include them as part of the result object. \
-                    For more detail, see :ref:`catch_exceptions`.
-                meta (dict or None): \
-                    A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-                    modification. For more detail, see :ref:`meta`.
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
-            Returns:
-                An ExpectationSuiteValidationResult
+    Returns:
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-                Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-                :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
 
-            See Also:
-                :func:`expect_column_distinct_values_to_contain_set \
-                <great_expectations.execution_engine.execution_engine.ExecutionEngine
-                .expect_column_distinct_values_to_contain_set>`
-
-            """
+    See Also:
+        [expect_column_distinct_values_to_contain_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_contain_set)
+        [expect_column_distinct_values_to_equal_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_equal_set)
+    """
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
