@@ -74,7 +74,6 @@ def _compare_select_statement_with_converted_string(engine) -> None:
         ("trino", get_default_trino_url()),
         ("redshift", get_redshift_connection_url()),
         ("snowflake", get_snowflake_connection_url()),
-        ("awsathena", get_awsathena_connection_url()),
         ("bigquery", get_bigquery_connection_url()),
     ],
 )
