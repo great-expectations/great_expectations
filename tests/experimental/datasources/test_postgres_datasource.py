@@ -1,5 +1,4 @@
 from contextlib import contextmanager
-from copy import copy
 from typing import Callable, ContextManager
 
 import pytest
@@ -136,7 +135,7 @@ def test_construct_table_asset_directly_with_splitter(create_source):
         splitter = ColumnSplitter(
             method_name="splitter_method",
             column_name="col",
-            param_defaults={"a": [1, 2, 3], "b": range(1, 13)},
+            param_defaults={"a": [1, 2, 3], "b": list(range(1, 13))},
         )
         asset = TableAsset(
             name="my_asset",
@@ -351,7 +350,9 @@ def test_bad_batch_request_passed_into_get_batch_list_from_batch_request(
     "batch_request_options",
     [{}, {"year": 2021}, {"year": 2021, "month": 10}, {"year": None, "month": 10}],
 )
-def test_validate_good_batch_request(create_source, batch_request_options):
+def test_get_batch_list_from_batch_request_with_good_batch_request(
+    create_source, batch_request_options
+):
     with create_source(lambda _: None) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
@@ -361,7 +362,7 @@ def test_validate_good_batch_request(create_source, batch_request_options):
             options=batch_request_options,
         )
         # No exception should get thrown
-        asset.validate_batch_request(batch_request)
+        asset.get_batch_list_from_batch_request(batch_request)
 
 
 @pytest.mark.unit
@@ -374,7 +375,9 @@ def test_validate_good_batch_request(create_source, batch_request_options):
         ("bad", "bad", None),
     ],
 )
-def test_validate_malformed_batch_request(create_source, batch_request_args):
+def test_get_batch_list_from_batch_request_with_malformed_batch_request(
+    create_source, batch_request_args
+):
     with create_source(lambda _: None) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
@@ -385,7 +388,7 @@ def test_validate_malformed_batch_request(create_source, batch_request_args):
             options=op or {},
         )
         with pytest.raises(BatchRequestError):
-            asset.validate_batch_request(batch_request)
+            asset.get_batch_list_from_batch_request(batch_request)
 
 
 def test_get_bad_batch_request(create_source):
@@ -406,25 +409,49 @@ def test_get_bad_batch_request(create_source):
         (["+year", "+month"], [_DEFAULT_YEAR_RANGE, _DEFAULT_MONTH_RANGE]),
         (["+year", "month"], [_DEFAULT_YEAR_RANGE, _DEFAULT_MONTH_RANGE]),
         (["year", "+month"], [_DEFAULT_YEAR_RANGE, _DEFAULT_MONTH_RANGE]),
-        (["+year", "-month"], [_DEFAULT_YEAR_RANGE, reversed(_DEFAULT_MONTH_RANGE)]),
-        (["year", "-month"], [_DEFAULT_YEAR_RANGE, reversed(_DEFAULT_MONTH_RANGE)]),
-        (["-year", "month"], [reversed(_DEFAULT_YEAR_RANGE), _DEFAULT_MONTH_RANGE]),
-        (["-year", "+month"], [reversed(_DEFAULT_YEAR_RANGE), _DEFAULT_MONTH_RANGE]),
+        (
+            ["+year", "-month"],
+            [_DEFAULT_YEAR_RANGE, list(reversed(_DEFAULT_MONTH_RANGE))],
+        ),
+        (
+            ["year", "-month"],
+            [_DEFAULT_YEAR_RANGE, list(reversed(_DEFAULT_MONTH_RANGE))],
+        ),
+        (
+            ["-year", "month"],
+            [list(reversed(_DEFAULT_YEAR_RANGE)), _DEFAULT_MONTH_RANGE],
+        ),
+        (
+            ["-year", "+month"],
+            [list(reversed(_DEFAULT_YEAR_RANGE)), _DEFAULT_MONTH_RANGE],
+        ),
         (
             ["-year", "-month"],
-            [reversed(_DEFAULT_YEAR_RANGE), reversed(_DEFAULT_MONTH_RANGE)],
+            [list(reversed(_DEFAULT_YEAR_RANGE)), list(reversed(_DEFAULT_MONTH_RANGE))],
         ),
         (["month", "year"], [_DEFAULT_MONTH_RANGE, _DEFAULT_YEAR_RANGE]),
         (["+month", "+year"], [_DEFAULT_MONTH_RANGE, _DEFAULT_YEAR_RANGE]),
         (["month", "+year"], [_DEFAULT_MONTH_RANGE, _DEFAULT_YEAR_RANGE]),
         (["+month", "year"], [_DEFAULT_MONTH_RANGE, _DEFAULT_YEAR_RANGE]),
-        (["-month", "+year"], [reversed(_DEFAULT_MONTH_RANGE), _DEFAULT_YEAR_RANGE]),
-        (["-month", "year"], [reversed(_DEFAULT_MONTH_RANGE), _DEFAULT_YEAR_RANGE]),
-        (["month", "-year"], [_DEFAULT_MONTH_RANGE, reversed(_DEFAULT_YEAR_RANGE)]),
-        (["+month", "-year"], [_DEFAULT_MONTH_RANGE, reversed(_DEFAULT_YEAR_RANGE)]),
+        (
+            ["-month", "+year"],
+            [list(reversed(_DEFAULT_MONTH_RANGE)), _DEFAULT_YEAR_RANGE],
+        ),
+        (
+            ["-month", "year"],
+            [list(reversed(_DEFAULT_MONTH_RANGE)), _DEFAULT_YEAR_RANGE],
+        ),
+        (
+            ["month", "-year"],
+            [_DEFAULT_MONTH_RANGE, list(reversed(_DEFAULT_YEAR_RANGE))],
+        ),
+        (
+            ["+month", "-year"],
+            [_DEFAULT_MONTH_RANGE, list(reversed(_DEFAULT_YEAR_RANGE))],
+        ),
         (
             ["-month", "-year"],
-            [reversed(_DEFAULT_MONTH_RANGE), reversed(_DEFAULT_YEAR_RANGE)],
+            [list(reversed(_DEFAULT_MONTH_RANGE)), list(reversed(_DEFAULT_YEAR_RANGE))],
         ),
     ],
 )
@@ -444,9 +471,7 @@ def test_sort_batch_list_by_metadata(sort_info, create_source):
         key0 = sort_keys[0].lstrip("+-")
         key1 = sort_keys[1].lstrip("+-")
         for value0 in sort_values[0]:
-            for value1 in copy(sort_values[1]):
-                # We copy(sort_values[1]) because otherwise we'd exhaust this
-                # inner iterator on the first pass of the outer loop.
+            for value1 in sort_values[1]:
                 expected_order.append({key0: value0, key1: value1})
         assert len(batches) == len(expected_order)
         for i, batch in enumerate(batches):
@@ -454,6 +479,7 @@ def test_sort_batch_list_by_metadata(sort_info, create_source):
             assert batch.metadata["month"] == expected_order[i]["month"]
 
 
+@pytest.mark.unit
 def test_sort_batch_list_by_unknown_key(create_source):
     with create_source(lambda _: None) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
@@ -467,3 +493,51 @@ def test_sort_batch_list_by_unknown_key(create_source):
         )
         with pytest.raises(KeyError):
             source.get_batch_list_from_batch_request(batch_request)
+
+
+@pytest.mark.unit
+def test_data_source_json_has_properties(create_source):
+    with create_source(lambda _: None) as source:
+        assert (
+            type(TableAsset.order_by) == property,
+            "This test assumes TableAsset.order_by is a property. If it is not we "
+            "should update this test",
+        )
+        asset = source.add_table_asset(name="my_asset", table_name="my_table")
+        asset.add_year_and_month_splitter(column_name="my_col").add_sorters(
+            ["year", "month"]
+        )
+        source_json = source.json()
+        assert '"order_by": ' in source_json
+
+
+@pytest.mark.unit
+def test_data_source_str_has_properties(create_source):
+    with create_source(lambda _: None) as source:
+        assert (
+            type(TableAsset.order_by) == property,
+            "This test assumes TableAsset.order_by is a property. If it is not we "
+            "should update this test",
+        )
+        asset = source.add_table_asset(name="my_asset", table_name="my_table")
+        asset.add_year_and_month_splitter(column_name="my_col").add_sorters(
+            ["year", "month"]
+        )
+        source_str = source.__str__()
+        assert "order_by:" in source_str
+
+
+@pytest.mark.unit
+def test_datasource_dict_has_properties(create_source):
+    with create_source(lambda _: None) as source:
+        assert (
+            type(TableAsset.order_by) == property,
+            "This test assumes TableAsset.order_by is a property. If it is not we "
+            "should update this test",
+        )
+        asset = source.add_table_asset(name="my_asset", table_name="my_table")
+        asset.add_year_and_month_splitter(column_name="my_col").add_sorters(
+            ["year", "month"]
+        )
+        source_dict = source.dict()
+        assert type(source_dict["assets"]["my_asset"]["order_by"]) == list

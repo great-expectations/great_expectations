@@ -17,7 +17,13 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import pyspark_sql_Column
+from great_expectations.expectations.metrics.import_manager import (
+    pyspark_sql_Column,
+    quoted_name,
+)
+from great_expectations.expectations.metrics.util import (
+    get_dbms_compatible_column_names,
+)
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.self_check.util import (
     build_pandas_engine,
@@ -154,6 +160,94 @@ def test_column_value_lengths_min_metric_pd():
     )
     metrics.update(results)
     assert results == {desired_metric.id: 8}
+
+
+def test_column_quoted_name_type_sa(sa):
+    engine = build_sa_engine(
+        pd.DataFrame(
+            {
+                "names": [
+                    "Ada Lovelace",
+                    "Alan Kay",
+                    "Donald Knuth",
+                    "Edsger Dijkstra",
+                    "Guido van Rossum",
+                    "John McCarthy",
+                    "Marvin Minsky",
+                    "Ray Ozzie",
+                ]
+            }
+        ),
+        sa,
+    )
+
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+
+    table_columns_metric: MetricConfiguration
+    results: Dict[Tuple[str, str, str], MetricValue]
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    table_columns_metric: MetricConfiguration = MetricConfiguration(
+        metric_name="table.columns",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
+    table_columns_metric_id: Tuple[str, str, str] = table_columns_metric.id
+    batch_column_list = metrics[table_columns_metric_id]
+    quoted_batch_column_list = [
+        quoted_name(value=str(element), quote=True)
+        for element in metrics[table_columns_metric_id]
+    ]
+
+    column_name = "names"
+
+    str_column_name = get_dbms_compatible_column_names(
+        column_names=column_name,
+        batch_columns_list=batch_column_list,
+        execution_engine=PandasExecutionEngine(),
+    )
+    assert isinstance(str_column_name, str)
+
+    quoted_column_name = get_dbms_compatible_column_names(
+        column_names=column_name,
+        batch_columns_list=quoted_batch_column_list,
+        execution_engine=engine,
+    )
+    assert isinstance(quoted_column_name, sa.sql.elements.quoted_name)
+    assert quoted_column_name.quote is True
+
+    for column_name in [
+        "non_existent_column",
+        "NAMES",
+        '"NAMES"',
+        '"Names"',
+    ]:
+        with pytest.raises(
+            ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError
+        ) as eee:
+            _ = get_dbms_compatible_column_names(
+                column_names=column_name,
+                batch_columns_list=batch_column_list,
+                execution_engine=engine,
+            )
+        assert (
+            str(eee.value)
+            == f'Error: The column "{column_name}" in BatchData does not exist.'
+        )
+        with pytest.raises(
+            ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError
+        ) as eee:
+            _ = get_dbms_compatible_column_names(
+                column_names=column_name,
+                batch_columns_list=quoted_batch_column_list,
+                execution_engine=engine,
+            )
+        assert (
+            str(eee.value)
+            == f'Error: The column "{column_name}" in BatchData does not exist.'
+        )
 
 
 def test_column_value_lengths_min_metric_sa(sa):
@@ -1635,7 +1729,9 @@ def test_map_of_type_sa(sa):
     )
 
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    # noinspection PyTypeChecker
     assert results[desired_metric.id][0]["name"] == "a"
+    # noinspection PyTypeChecker
     assert isinstance(results[desired_metric.id][0]["type"], sa.FLOAT)
 
 

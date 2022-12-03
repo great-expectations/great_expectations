@@ -2,6 +2,55 @@
 title: Changelog
 ---
 
+### 0.15.36
+
+[BUGFIX] Contrib Expectation tracebacks (#6471)
+[BUGFIX] Add additional error checking to `ExpectationAnonymizer` (#6467)
+[MAINTENANCE] Add docstring for context.sources.add_postgres (#6459)
+[MAINTENANCE] fixing type hints in metrics utils module (#6469)
+[MAINTENANCE] Moving tutorials to great-expectations repo (#6464)
+
+### 0.15.35
+
+[FEATURE] add multiple input metric (#6373) (thanks @CarstenFrommhold)
+[FEATURE] add multiple column metric (#6372) (thanks @CarstenFrommhold)
+[FEATURE]: DataProfilerUnstructuredDataAssistant Integration (#6400) (thanks @micdavis)
+[FEATURE] add new metric - query template values (#5994) (thanks @itaise)
+[FEATURE] ZEP Config serialize as YAML (#6398)
+[BUGFIX] Patch issue with call to `ExpectationAnonymizer` to ensure `DataContext` init events are captured (#6458)
+[BUGFIX] Support Table and Column Names Case Non-Sensitivity Relationship Between Snowflake, Oracle, DB2, etc. DBMSs (Upper Case) and SQLAlchemy (Lower Case) Representations (#6450)
+[BUGFIX] Metrics return value no longer returns None for `unexpected_index_list` - Sql and Spark (#6392)
+[BUGFIX] Fix for `mssql` tests that depend on `datetime` to `string` conversion (#6449)
+[BUGFIX] issue-4295-fix-issue (#6164) (thanks @YevgeniyaLee)
+[BUGFIX] updated capitalone setup.py file (#6410) (thanks @micdavis)
+[BUGFIX] Patch key-generation issue with `DataContext.save_profiler()` (#6405)
+[DOCS] add configuration of anonymous_usage_statistics for documentation (#6293) (thanks @milithino)
+[DOCS] add boto3 explanations on document (#6407) (thanks @tiruka)
+[MAINTENANCE] [CONTRIB] Multicolumns sum equal to single column (#6446) (thanks @asafla)
+[MAINTENANCE] [CONTRIB] add expectation - check gaps in SCD tables (#6433) (thanks @itaise)
+[MAINTENANCE] [CONTRIB] Add no days missing expectation (#6432) (thanks @itaise)
+[MAINTENANCE] [CONTRIB] Feature/add two tables expectation (#6429) (thanks @itaise)
+[MAINTENANCE] [CONTRIB] Add number of unique values expectation (#6425) (thanks @itaise)
+[MAINTENANCE] Add sorters to zep postgres datasource. (#6456)
+[MAINTENANCE] Bump ubuntu version in CI (#6457)
+[MAINTENANCE] Remove anticipatory multi-language support from renderers (#6426)
+[MAINTENANCE] Remove yaml user_flow_scripts (#6454)
+[MAINTENANCE] Additional `sqlite` database fixture for `taxi_data` - All 2020 data in single table (#6455)
+[MAINTENANCE] Clean Up Variable Names In Test Modules, Type Hints, and Minor Refactoring For Better Code Elegance/Readability (#6444)
+[MAINTENANCE] Update and Simplify Pandas tests for MapMetrics (#6443)
+[MAINTENANCE] Add metadata to experimental datasource Batch class (#6442)
+[MAINTENANCE] Small refactor (#6422)
+[MAINTENANCE] Sorting batch IDs and typehints clean up (#6421)
+[MAINTENANCE] Clean Up Type Hints and Minor Refactoring For Better Code Elegance/Readability (#6418)
+[MAINTENANCE] Implement `RendererConfiguration` (#6412)
+[MAINTENANCE] Cleanup For Better Code Elegance/Readability (#6406)
+[MAINTENANCE] ZEP - `GxConfig` cleanup (#6404)
+[MAINTENANCE] Migrate remaining methods from `BaseDataContext` (#6403)
+[MAINTENANCE] Migrate additional CRUD methods from `BaseDataContext` to `AbstractDataContext` (#6395)
+[MAINTENANCE] ZEP add yaml methods to all experimental models (#6401)
+[MAINTENANCE] Remove call to verify_library_dependent_modules for pybigquery (#6394)
+[MAINTENANCE] Make "IDDict.to_id()" serialization more efficient. (#6389)
+
 ### 0.15.34
 * [BUGFIX] Ensure `packaging_and_installation` CI tests against latest tag (#6386)
 * [BUGFIX] Fixed missing comma in pydantic constraints (#6391) (thanks @awburgess)

@@ -1,12 +1,17 @@
 import logging
 import re
 import warnings
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 from dateutil.parser import parse
 from packaging import version
 
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 from great_expectations.execution_engine.util import check_sql_engine_dialect
 from great_expectations.util import get_sqlalchemy_inspector
@@ -35,6 +40,7 @@ try:
         Label,
         TextClause,
         literal,
+        quoted_name,
     )
     from sqlalchemy.sql.operators import custom_op
 except ImportError:
@@ -51,6 +57,7 @@ except ImportError:
     TableClause = None
     TextClause = None
     literal = None
+    quoted_name = None
     custom_op = None
     OperationalError = None
 
@@ -191,6 +198,7 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
 
     try:
         # Trino
+        # noinspection PyUnresolvedReferences
         if isinstance(dialect, trino.sqlalchemy.dialect.TrinoDialect):
             if positive:
                 return sa.func.regexp_like(column, literal(regex))
@@ -588,6 +596,7 @@ def column_reflection_fallback(
         if isinstance(selectable, TextClause):
             query: TextClause = selectable
         else:
+            # noinspection PyUnresolvedReferences
             if dialect.name.lower() == GESqlDialect.REDSHIFT:
                 # Redshift needs temp tables to be declared as text
                 query: Select = (
@@ -602,6 +611,93 @@ def column_reflection_fallback(
         col_names: List[str] = result_object._metadata.keys
         col_info_dict_list = [{"name": col_name} for col_name in col_names]
     return col_info_dict_list
+
+
+def get_dbms_compatible_column_names(
+    column_names: Union[List[str], str],
+    batch_columns_list: List[Union[str, quoted_name]],
+    execution_engine: ExecutionEngine,
+    error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
+) -> Union[List[Union[str, quoted_name]], Union[str, quoted_name]]:
+    """
+    Case non-sensitivity is expressed in upper case by common DBMS backends and in lower case by SQLAlchemy, with any
+    deviations enclosed with double quotes.
+
+    SQLAlchemy enables correct translation to/from DBMS backends through "sqlalchemy.sql.elements.quoted_name" class
+    where necessary by insuring that column names of correct type (i.e., "str" or "sqlalchemy.sql.elements.quoted_name")
+    are returned by "sqlalchemy.inspect(sqlalchemy.engine.Engine).get_columns(table_name, schema)" ("table.columns"
+    metric is based on this method).  Columns of precise type (string or "quoted_name" as appropriate) are returned.
+
+    Args:
+        column_names: Single string-valued column name or list of string-valued column names
+        batch_columns_list: Properly typed column names (output of "table.columns" metric)
+        execution_engine: "ExecutionEngine" (here, of interest is whether or not "SqlAlchemyExecutionEngine" is used)
+        error_message_template: String template to output error message if any column cannot be found in "Batch" object.
+
+    Returns:
+        Single property-typed column name object or list of property-typed column name objects (depending on input).
+    """
+    verify_column_names_exist(
+        column_names=column_names,
+        batch_columns_list=batch_columns_list,
+        error_message_template=error_message_template,
+    )
+
+    column_names_list: List[str]
+    is_list: bool
+    if isinstance(column_names, list):
+        column_names_list = column_names
+        is_list = True
+    else:
+        column_names_list = [column_names]
+        is_list = False
+
+    typed_column_names_list: List[Union[str, quoted_name]]
+    if isinstance(execution_engine, SqlAlchemyExecutionEngine):
+        column_name: str
+        batch_columns_dict: Dict[str, Union[str, quoted_name]] = {
+            str(column_name): column_name for column_name in batch_columns_list
+        }
+        typed_column_names_list = [
+            batch_columns_dict[column_name] for column_name in column_names_list
+        ]
+    else:
+        typed_column_names_list = column_names_list
+
+    if is_list:
+        return typed_column_names_list
+
+    return typed_column_names_list[0]
+
+
+def verify_column_names_exist(
+    column_names: Union[List[str], str],
+    batch_columns_list: List[Union[str, quoted_name]],
+    error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
+) -> None:
+    """
+    Insures that column name or column names (supplied as argument using "str" representation) exist in "Batch" object.
+
+    Args:
+        column_names: Single string-valued column name or list of string-valued column names
+        batch_columns_list: Properly typed column names (output of "table.columns" metric)
+        error_message_template: String template to output error message if any column cannot be found in "Batch" object.
+    """
+    column_names_list: List[str]
+    if isinstance(column_names, list):
+        column_names_list = column_names
+    else:
+        column_names_list = [column_names]
+
+    column_name: str
+
+    batch_columns_list = [str(column_name) for column_name in batch_columns_list]
+
+    for column_name in column_names_list:
+        if column_name not in batch_columns_list:
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                message=error_message_template.format(column_name=column_name)
+            )
 
 
 def parse_value_set(value_set):
