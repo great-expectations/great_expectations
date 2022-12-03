@@ -58,8 +58,6 @@ def test_metric_configuration_get_domain(
         domain_kwargs={
             "batch_id": "abc123",
         },
-        details=None,
-        rule_name=None,
     )
     assert column_histogram_metric_config.get_domain() == Domain(
         domain_type=MetricDomainTypes.COLUMN,
@@ -67,6 +65,4 @@ def test_metric_configuration_get_domain(
             "column": "my_column",
             "batch_id": "def456",
         },
-        details=None,
-        rule_name=None,
     )

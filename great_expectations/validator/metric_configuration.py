@@ -72,8 +72,6 @@ class MetricConfiguration:
         return Domain(
             domain_type=self.get_domain_type(),
             domain_kwargs=self._metric_domain_kwargs,
-            details=None,
-            rule_name=None,
         )
 
     def get_domain_type(self) -> MetricDomainTypes:
