@@ -108,7 +108,6 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         add_param_args = (
             ("column", ParamSchemaType.STRING),
             ("mostly", ParamSchemaType.NUMBER),
-            ("mostly_pct", ParamSchemaType.STRING),
             ("row_condition", ParamSchemaType.STRING),
             ("condition_parser", ParamSchemaType.STRING),
         )

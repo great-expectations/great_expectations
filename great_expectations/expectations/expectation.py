@@ -1536,6 +1536,24 @@ class Expectation(metaclass=MetaExpectation):
         return conditions_str
 
     @staticmethod
+    def _add_mostly_pct_param(
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        params = renderer_configuration.params
+        if hasattr(params, "mostly") and params.mostly.value:
+            mostly_pct_value: str = num_to_str(
+                renderer_configuration.params.mostly.value * 100,
+                precision=15,
+                no_scientific=True,
+            )
+            renderer_configuration.add_param(
+                name="mostly_pct",
+                schema_type=ParamSchemaType.STRING,
+                value=mostly_pct_value,
+            )
+        return renderer_configuration
+
+    @staticmethod
     def _choose_example(
         examples: List[ExpectationTestDataCases],
     ) -> Tuple[TestData, ExpectationTestCase]:

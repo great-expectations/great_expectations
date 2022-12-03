@@ -149,7 +149,6 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             ("column", ParamSchemaType.STRING),
             ("value_set", ParamSchemaType.ARRAY),
             ("mostly", ParamSchemaType.NUMBER),
-            ("mostly_pct", ParamSchemaType.STRING),
             ("parse_strings_as_datetimes", ParamSchemaType.BOOLEAN),
             ("row_condition", ParamSchemaType.STRING),
             ("condition_parser", ParamSchemaType.STRING),
@@ -169,8 +168,8 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             template_str = f"values must not belong to this set: {values_str}"
 
         if params.mostly.value and params.mostly.value < 1.0:
-            params.mostly_pct.value = num_to_str(
-                params.mostly.value * 100, precision=15, no_scientific=True
+            renderer_configuration = cls._add_mostly_pct_param(
+                renderer_configuration=renderer_configuration
             )
             template_str += ", at least $mostly_pct % of the time."
         else:
