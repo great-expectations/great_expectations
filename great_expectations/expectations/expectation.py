@@ -294,21 +294,13 @@ class Expectation(metaclass=MetaExpectation):
 
     @classmethod
     @renderer(renderer_type=AtomicPrescriptiveRendererType.FAILED)
-    def _atomic_prescriptive_failed(
+    def _prescriptive_failed(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
+        renderer_configuration: RendererConfiguration,
     ) -> RenderedAtomicContent:
         """
         Default rendering function that is utilized by GE Cloud Front-end if an implemented atomic renderer fails
         """
-        renderer_configuration = RendererConfiguration(
-            configuration=configuration,
-            result=result,
-            runtime_configuration=runtime_configuration,
-        )
-
         template_str = "Rendering failed for Expectation: "
 
         if renderer_configuration.expectation_type and renderer_configuration.kwargs:
@@ -318,16 +310,16 @@ class Expectation(metaclass=MetaExpectation):
         else:
             template_str = f"{template_str[:-2]}."
 
-        renderer_configuration.add_param(
-            name="expectation_type",
-            schema_type=ParamSchemaType.STRING,
-            value=renderer_configuration.expectation_type,
+        add_param_args = (
+            (
+                "expectation_type",
+                ParamSchemaType.STRING,
+                renderer_configuration.expectation_type,
+            ),
+            ("kwargs", ParamSchemaType.STRING, renderer_configuration.kwargs),
         )
-        renderer_configuration.add_param(
-            name="kwargs",
-            schema_type=ParamSchemaType.STRING,
-            value=renderer_configuration.kwargs,
-        )
+        for name, schema_type in add_param_args:
+            renderer_configuration.add_param(name=name, schema_type=schema_type)
 
         value_obj = renderedAtomicValueSchema.load(
             {
@@ -815,21 +807,13 @@ class Expectation(metaclass=MetaExpectation):
 
     @classmethod
     @renderer(renderer_type=AtomicDiagnosticRendererType.FAILED)
-    def _atomic_diagnostic_failed(
+    def _diagnostic_failed(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
+        renderer_configuration: RendererConfiguration,
     ) -> RenderedAtomicContent:
         """
         Rendering function that is utilized by GE Cloud Front-end
         """
-        renderer_configuration = RendererConfiguration(
-            configuration=configuration,
-            result=result,
-            runtime_configuration=runtime_configuration,
-        )
-
         template_str = "Rendering failed for Expectation: "
 
         if renderer_configuration.expectation_type and renderer_configuration.kwargs:
@@ -839,16 +823,16 @@ class Expectation(metaclass=MetaExpectation):
         else:
             template_str = f"{template_str[:-2]}."
 
-        renderer_configuration.add_param(
-            name="expectation_type",
-            schema_type=ParamSchemaType.STRING,
-            value=renderer_configuration.expectation_type,
+        add_param_args = (
+            (
+                "expectation_type",
+                ParamSchemaType.STRING,
+                renderer_configuration.expectation_type,
+            ),
+            ("kwargs", ParamSchemaType.STRING, renderer_configuration.kwargs),
         )
-        renderer_configuration.add_param(
-            name="kwargs",
-            schema_type=ParamSchemaType.STRING,
-            value=renderer_configuration.kwargs,
-        )
+        for name, schema_type in add_param_args:
+            renderer_configuration.add_param(name=name, schema_type=schema_type)
 
         value_obj = renderedAtomicValueSchema.load(
             {

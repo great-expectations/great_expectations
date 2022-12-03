@@ -57,7 +57,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
     styling: Union[dict, None] = Field(None, allow_mutation=False)
-    params: Optional[RendererParams] = Field(None, allow_mutation=True)  # type: ignore[assignment] # mypy bug see: https://github.com/python/mypy/issues/12385
+    params: Optional[RendererParams] = Field(None, allow_mutation=True)
     template_str: Optional[str] = Field(None, allow_mutation=True)
 
     class Config:
@@ -126,7 +126,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
         # As of Nov 30, 2022 there is a bug in autocompletion for pydantic dynamic models
         # See: https://github.com/pydantic/pydantic/issues/3930
-        if self.params is not None:
+        if self.params:
             base = self.params.__class__
         else:
             base = RendererConfiguration._RendererParamsBase
