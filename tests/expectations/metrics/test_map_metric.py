@@ -71,44 +71,6 @@ def spark_dataframe_for_unexpected_rows_with_index(
 
 
 @pytest.fixture
-def postgres_table_for_unexpected_rows_with_index(
-    test_backends,
-):
-    if "sqlite" in test_backends:
-        try:
-            import sqlalchemy as sa
-
-            sqlite_engine = sa.create_engine(
-                "postgresql+psycopg2://postgres:@localhost/test_ci"
-            )
-            df = pd.DataFrame(
-                {
-                    "pk_1": [0, 1, 2, 3, 4, 5],
-                    "pk_2": ["zero", "one", "two", "three", "four", "five"],
-                    "animals": [
-                        "cat",
-                        "fish",
-                        "dog",
-                        "giraffe",
-                        "lion",
-                        "zebra",
-                    ],
-                }
-            )
-            df.to_sql(
-                name="animal_names",
-                con=sqlite_engine,
-                index=False,
-                if_exists="replace",
-            )
-            return sqlite_engine
-        except ImportError:
-            sa = None
-    else:
-        pytest.skip("SqlAlchemy tests disabled; not testing views")
-
-
-@pytest.fixture
 def sqlite_table_for_unexpected_rows_with_index(
     test_backends,
 ) -> "sqlalchemy.engine.Engine":
@@ -1255,82 +1217,6 @@ def test_sqlite_single_column_complete_result_format(
     }
 
 
-def test_postgres_single_unexpected_index_column_names_complete_result_format(
-    sa, postgres_table_for_unexpected_rows_with_index
-):
-    expectationConfiguration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "COMPLETE",
-                "unexpected_index_column_names": ["pk_1"],
-            },
-        },
-    )
-
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
-    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
-    connection_string = f"sqlite:///{sqlite_path}"
-    connection_string = "postgresql+psycopg2://postgres:@localhost/test_ci"
-    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-    execution_engine = engine
-    my_data_connector: ConfiguredAssetSqlDataConnector = (
-        ConfiguredAssetSqlDataConnector(
-            name="my_sql_data_connector",
-            datasource_name="my_test_datasource",
-            execution_engine=execution_engine,
-            assets={
-                "my_asset": {
-                    "table_name": "animal_names",
-                },
-            },
-        )
-    )
-    batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="my_test_datasource",
-                data_connector_name="my_sql_data_connector",
-                data_asset_name="my_asset",
-            )
-        )
-    )
-    assert len(batch_definition_list) == 1
-    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
-        batch_definition=batch_definition_list[0]
-    )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=batch_spec
-    )
-    batch = Batch(data=batch_data)
-    validator = Validator(execution_engine, batches=[batch])
-    result = expectation.validate(validator)
-    assert convert_to_json_serializable(result.result) == {
-        "element_count": 6,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "partial_unexpected_counts": [
-            {"count": 1, "value": "giraffe"},
-            {"count": 1, "value": "lion"},
-            {"count": 1, "value": "zebra"},
-        ],
-        "partial_unexpected_index_list": [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}],
-        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_count": 3,
-        "unexpected_index_list": [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}],
-        "unexpected_index_query": "SELECT animals, pk_1 \n"
-        "FROM animal_names \n"
-        "WHERE animals IS NOT NULL AND (animals NOT IN "
-        "('cat', 'fish', 'dog'))",
-        "unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_percent": 50.0,
-        "unexpected_percent_nonmissing": 50.0,
-        "unexpected_percent_total": 50.0,
-    }
-
-
 def test_sqlite_single_unexpected_index_column_names_complete_result_format(
     sa, sqlite_table_for_unexpected_rows_with_index
 ):
@@ -1349,7 +1235,6 @@ def test_sqlite_single_unexpected_index_column_names_complete_result_format(
     expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
     sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
     connection_string = f"sqlite:///{sqlite_path}"
-    # connection_string = "postgresql+psycopg2://postgres:@localhost/test_ci"
     engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
     execution_engine = engine
     my_data_connector: ConfiguredAssetSqlDataConnector = (

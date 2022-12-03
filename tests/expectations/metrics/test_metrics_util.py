@@ -133,7 +133,7 @@ def test_awsathena(sa, test_backends, select_with_post_compile_statements):
             engine=engine, select_statement=select_with_post_compile_statements
         )
     else:
-        assert False
+        pytest.skip("skipping awsathena")
 
 
 def test_bigquery(sa, test_backends, select_with_post_compile_statements):
