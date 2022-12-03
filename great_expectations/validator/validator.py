@@ -977,7 +977,6 @@ class Validator:
         Args:
             configurations(List[ExpectationConfiguration]): A list of needed Expectation Configurations that will be
             used to supply domain and values for metrics.
-            metrics (dict): A list of currently registered metrics in the registry
             runtime_configuration (dict): A dictionary of runtime keyword arguments, controlling semantics, such as the
             result_format.
 
@@ -1151,6 +1150,9 @@ class Validator:
         expectation_validation_graphs: List[ExpectationValidationGraph],
     ) -> ValidationGraph:
         # Collect edges from all expectation-level sub-graphs and incorporate them under common suite-level graph.
+        if expectation_validation_graphs is None:
+            expectation_validation_graphs = []
+
         expectation_validation_graph: ExpectationValidationGraph
         edges: List[MetricEdge] = list(
             itertools.chain.from_iterable(
@@ -1190,6 +1192,9 @@ class Validator:
         )
 
         # Trace MetricResolutionError occurrences to expectations relying on corresponding malfunctioning metrics.
+        if expectation_validation_graphs is None:
+            expectation_validation_graphs = []
+
         rejected_configurations: List[ExpectationConfiguration] = []
         for expectation_validation_graph in expectation_validation_graphs:
             metric_exception_info: Set[
