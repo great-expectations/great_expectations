@@ -1,6 +1,7 @@
 from typing import List
 
 import pytest
+from _pytest import monkeypatch
 
 try:
     import sqlalchemy as sa
@@ -62,6 +63,7 @@ def _compare_select_statement_with_converted_string(engine) -> None:
     )
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "backend_name,connection_string",
     [
@@ -79,6 +81,22 @@ def _compare_select_statement_with_converted_string(engine) -> None:
 def test_sql_statement_conversion_to_string_for_backends(
     backend_name: str, connection_string: str, test_backends: List[str]
 ):
+    athena_db_name_env_var: str = "ATHENA_DB_NAME"
+    connection_string: str = get_awsathena_connection_url(athena_db_name_env_var)
+    if backend_name in test_backends:
+        engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
+        _compare_select_statement_with_converted_string(engine=engine)
+    else:
+        pytest.skip(f"skipping sql statement conversion test for : {backend_name}")
+
+
+@pytest.mark.unit
+def test_sql_statement_conversion_to_string_for_backends_athena(
+    test_backends: List[str],
+):
+    monkeypatch.setenv("ATHENA_DB_NAME", "test_db_name")
+    backend_name: str = "awsathena"
+    connection_string: str = get_awsathena_connection_url()
     if backend_name in test_backends:
         engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
         _compare_select_statement_with_converted_string(engine=engine)
