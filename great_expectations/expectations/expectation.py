@@ -295,11 +295,19 @@ class Expectation(metaclass=MetaExpectation):
     @renderer(renderer_type=AtomicPrescriptiveRendererType.FAILED)
     def _prescriptive_failed(
         cls,
-        renderer_configuration: RendererConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> RenderedAtomicContent:
         """
         Default rendering function that is utilized by GE Cloud Front-end if an implemented atomic renderer fails
         """
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            runtime_configuration=runtime_configuration,
+        )
+
         template_str = "Rendering failed for Expectation: "
 
         if renderer_configuration.expectation_type and renderer_configuration.kwargs:
@@ -400,18 +408,15 @@ class Expectation(metaclass=MetaExpectation):
         """
         Rendering function that is utilized by GE Cloud Front-end
         """
-        renderer_configuration: RendererConfiguration = RendererConfiguration(
+        (template_str, params_with_json_schema, _) = cls._atomic_prescriptive_template(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
         )
-        renderer_configuration = cls._prescriptive_template(
-            renderer_configuration=renderer_configuration
-        )
         value_obj = renderedAtomicValueSchema.load(
             {
-                "template": renderer_configuration.template_str,
-                "params": renderer_configuration.params.dict(),
+                "template": template_str,
+                "params": params_with_json_schema,
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
         )
@@ -810,11 +815,19 @@ class Expectation(metaclass=MetaExpectation):
     @renderer(renderer_type=AtomicDiagnosticRendererType.FAILED)
     def _diagnostic_failed(
         cls,
-        renderer_configuration: RendererConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> RenderedAtomicContent:
         """
         Rendering function that is utilized by GE Cloud Front-end
         """
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            runtime_configuration=runtime_configuration,
+        )
+
         template_str = "Rendering failed for Expectation: "
 
         if renderer_configuration.expectation_type and renderer_configuration.kwargs:

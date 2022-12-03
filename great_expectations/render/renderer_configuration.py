@@ -25,7 +25,6 @@ class ParamSchemaType(str, Enum):
 
 
 class RendererParam(BaseModel):
-    name: str
     renderer_schema: ParamSchemaType
     value: Optional[Any]
 
