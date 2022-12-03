@@ -89,7 +89,6 @@ from great_expectations.render.renderer_configuration import (
     ParamSchemaType,
     RendererConfiguration,
     RendererParam,
-    RendererParams,
 )
 from great_expectations.render.util import (
     num_to_str,
@@ -375,7 +374,7 @@ class Expectation(metaclass=MetaExpectation):
         #     "Please use Expectation._prescriptive_template() instead.",
         #     DeprecationWarning,
         # )
-        renderer_configuration = RendererConfiguration(
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
@@ -401,7 +400,7 @@ class Expectation(metaclass=MetaExpectation):
         """
         Rendering function that is utilized by GE Cloud Front-end
         """
-        renderer_configuration = RendererConfiguration(
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
@@ -431,7 +430,7 @@ class Expectation(metaclass=MetaExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[RenderedStringTemplateContent]:
-        renderer_configuration = RendererConfiguration(
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,

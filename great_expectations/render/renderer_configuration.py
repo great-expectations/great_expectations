@@ -97,7 +97,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         validate_assignment = True
         arbitrary_types_allowed = True
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         kwargs = RendererConfiguration._set_expectation_type_and_kwargs(kwargs=kwargs)
         kwargs = RendererConfiguration._set_include_column_name_and_styling(
             kwargs=kwargs
