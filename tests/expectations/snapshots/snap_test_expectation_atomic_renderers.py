@@ -812,7 +812,6 @@ snapshots[
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
             "mostly": {"schema": {"type": "number"}, "value": 1.0},
-            "mostly_pct": {"schema": {"type": "string"}, "value": None},
             "row_condition": {"schema": {"type": "string"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
