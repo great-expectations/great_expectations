@@ -7,6 +7,7 @@ from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
+    ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
@@ -34,16 +35,18 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_default(
     }
 
     # Omitting "single_batch_mode" argument in order to exercise default (False) behavior.
-    metric_multi_batch_parameter_builder = MetricMultiBatchParameterBuilder(
-        name="row_count",
-        metric_name="table.row_count",
-        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-        metric_value_kwargs=None,
-        enforce_numeric_metric=True,
-        replace_nan_with_zero=True,
-        reduce_scalar_metric=True,
-        evaluation_parameter_builder_configs=None,
-        data_context=data_context,
+    metric_multi_batch_parameter_builder: ParameterBuilder = (
+        MetricMultiBatchParameterBuilder(
+            name="row_count",
+            metric_name="table.row_count",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            enforce_numeric_metric=True,
+            replace_nan_with_zero=True,
+            reduce_scalar_metric=True,
+            evaluation_parameter_builder_configs=None,
+            data_context=data_context,
+        )
     )
 
     domain = Domain(
@@ -114,17 +117,19 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_no(
         "data_asset_name": "my_reports",
     }
 
-    metric_multi_batch_parameter_builder = MetricMultiBatchParameterBuilder(
-        name="row_count",
-        metric_name="table.row_count",
-        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-        metric_value_kwargs=None,
-        single_batch_mode=f"{VARIABLES_KEY}single_batch_mode",
-        enforce_numeric_metric=True,
-        replace_nan_with_zero=True,
-        reduce_scalar_metric=True,
-        evaluation_parameter_builder_configs=None,
-        data_context=data_context,
+    metric_multi_batch_parameter_builder: ParameterBuilder = (
+        MetricMultiBatchParameterBuilder(
+            name="row_count",
+            metric_name="table.row_count",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            single_batch_mode=f"{VARIABLES_KEY}single_batch_mode",
+            enforce_numeric_metric=True,
+            replace_nan_with_zero=True,
+            reduce_scalar_metric=True,
+            evaluation_parameter_builder_configs=None,
+            data_context=data_context,
+        )
     )
 
     domain = Domain(
@@ -199,17 +204,19 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_yes(
         "data_asset_name": "my_reports",
     }
 
-    metric_multi_batch_parameter_builder = MetricMultiBatchParameterBuilder(
-        name="row_count",
-        metric_name="table.row_count",
-        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-        metric_value_kwargs=None,
-        single_batch_mode=f"{VARIABLES_KEY}single_batch_mode",
-        enforce_numeric_metric=True,
-        replace_nan_with_zero=True,
-        reduce_scalar_metric=True,
-        evaluation_parameter_builder_configs=None,
-        data_context=data_context,
+    metric_multi_batch_parameter_builder: ParameterBuilder = (
+        MetricMultiBatchParameterBuilder(
+            name="row_count",
+            metric_name="table.row_count",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            single_batch_mode=f"{VARIABLES_KEY}single_batch_mode",
+            enforce_numeric_metric=True,
+            replace_nan_with_zero=True,
+            reduce_scalar_metric=True,
+            evaluation_parameter_builder_configs=None,
+            data_context=data_context,
+        )
     )
 
     domain = Domain(

@@ -8,6 +8,7 @@ from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchValidationGraphParameterBuilder,
+    ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
@@ -42,7 +43,7 @@ def test_metric_multi_batch_validation_graph_parameter_builder_bobby(
     batch_ids: List[str] = [batch.id for batch in batch_list]
 
     # Omitting "single_batch_mode" argument in order to exercise default (False) behavior.
-    metric_multi_batch_validation_graph_parameter_builder = (
+    metric_multi_batch_validation_graph_parameter_builder: ParameterBuilder = (
         MetricMultiBatchValidationGraphParameterBuilder(
             name="row_count_graph",
             metric_name="table.row_count",

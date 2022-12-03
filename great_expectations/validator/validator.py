@@ -63,6 +63,20 @@ from great_expectations.expectations.registry import (
 from great_expectations.experimental.datasources.interfaces import Batch as XBatch
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+
+# TODO: <Alex>ALEX</Alex>
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.rule_based_profiler.data_assistant import DataAssistant
+# TODO: <Alex>ALEX</Alex>
+from great_expectations.rule_based_profiler.data_assistant.metric_multi_batch_data_assistant import (
+    MetricMultiBatchDataAssistant,
+)
+from great_expectations.rule_based_profiler.data_assistant_result import (
+    DataAssistantResult,
+)
+
+# TODO: <Alex>ALEX</Alex>
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
@@ -71,9 +85,16 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
     ReconciliationDirectives,
     ReconciliationStrategy,
 )
+from great_expectations.rule_based_profiler.helpers.util import sanitize_parameter_name
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
-from great_expectations.rule_based_profiler.parameter_container import (
+from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+    MetricsComputationResultFormat,
+)
+from great_expectations.rule_based_profiler.parameter_container import (  # TODO: <Alex>ALEX</Alex>; ParameterNode,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    RAW_PARAMETER_KEY,
     ParameterContainer,
+    ParameterNode,
 )
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import (
@@ -977,7 +998,6 @@ class Validator:
         Args:
             configurations(List[ExpectationConfiguration]): A list of needed Expectation Configurations that will be
             used to supply domain and values for metrics.
-            metrics (dict): A list of currently registered metrics in the registry
             runtime_configuration (dict): A dictionary of runtime keyword arguments, controlling semantics, such as the
             result_format.
 
@@ -1052,6 +1072,9 @@ class Validator:
                     metrics=resolved_metrics,
                     execution_engine=self._execution_engine,
                     runtime_configuration=runtime_configuration,
+                    # TODO: <Alex>ALEX</Alex>
+                    validator=self,
+                    # TODO: <Alex>ALEX</Alex>
                 )
                 evrs.append(result)
             except Exception as err:
@@ -1118,11 +1141,63 @@ class Validator:
                 for (
                     metric_configuration
                 ) in validation_dependencies.get_metric_configurations():
+                    # TODO: <Alex>ALEX</Alex>
                     graph = ValidationGraph(execution_engine=self._execution_engine)
                     graph.build_metric_dependency_graph(
                         metric_configuration=metric_configuration,
                         runtime_configuration=runtime_configuration,
                     )
+                    # TODO: <Alex>ALEX</Alex>
+                    print(
+                        f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] SINGLE_BATCH_VALIDATION_GRAPH:\n{graph} ; TYPE: {str(type(graph))}"
+                    )
+                    # TODO: <Alex>ALEX</Alex>
+                    # TODO: <Alex>ALEX</Alex>
+                    metrics_by_domain: Optional[
+                        Dict[Domain, Dict[str, ParameterNode]]
+                    ] = self.compute_multi_batch_metric_for_domain(
+                        metric_configuration=metric_configuration,
+                        result_format=MetricsComputationResultFormat.VALIDATION_GRAPH,
+                    )
+                    # TODO: <Alex>ALEX</Alex>
+                    print(
+                        f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] METRICS_BY_DOMAIN:\n{metrics_by_domain} ; TYPE: {str(type(metrics_by_domain))}"
+                    )
+                    # TODO: <Alex>ALEX</Alex>
+                    # TODO: <Alex>ALEX</Alex>
+                    a = len(metrics_by_domain.keys())
+                    b = len(metrics_by_domain.values())
+                    print(
+                        f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] METRICS_BY_DOMAIN.NUM_KEYS:\n{a} ; TYPE: {str(type(a))}"
+                    )
+                    print(
+                        f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] METRICS_BY_DOMAIN.NUM_VALUES:\n{b} ; TYPE: {str(type(b))}"
+                    )
+                    b = list(metrics_by_domain.values())[0]
+                    print(
+                        f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] METRICS_BY_DOMAIN.VALUE:\n{b} ; TYPE: {str(type(b))}"
+                    )
+                    name: str = sanitize_parameter_name(
+                        name=metric_configuration.metric_name
+                    )
+                    # TODO: <Alex>ALEX</Alex>
+                    # TODO: <Alex>ALEX</Alex>
+                    fully_qualified_parameter_name: str = f"{RAW_PARAMETER_KEY}{name}"
+                    print(
+                        f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] METRICS_BY_DOMAIN.FULLY_QUALIFIED_PARAMETER_NAME:\n{fully_qualified_parameter_name} ; TYPE: {str(type(fully_qualified_parameter_name))}"
+                    )
+                    c = b[fully_qualified_parameter_name]
+                    print(
+                        f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] METRICS_BY_DOMAIN.RAW-VALUE:\n{c} ; TYPE: {str(type(c))}"
+                    )
+                    g: ValidationGraph = b[fully_qualified_parameter_name][
+                        FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                    ]["graph"]
+                    print(
+                        f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] METRICS_BY_DOMAIN.VALIDATION_GRAPH:\n{g} ; TYPE: {str(type(g))}"
+                    )
+                    graph = g
+                    # TODO: <Alex>ALEX</Alex>
                     expectation_validation_graph.update(graph=graph)
 
                 expectation_validation_graphs.append(expectation_validation_graph)
@@ -1258,6 +1333,40 @@ class Validator:
             evrs.append(result)
 
         return evrs
+
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    def compute_multi_batch_metric_for_domain(
+        self,
+        metric_configuration: MetricConfiguration,
+        result_format: MetricsComputationResultFormat,
+    ) -> Dict[Domain, Dict[str, ParameterNode]]:
+        """
+        This method builds and parametrizes statistics style "DataAssistant" dynamically, then runs it to produce either
+        "ValidationGraph" or resolved multi-Batch metrics (corressponding to "result_format" directive).
+
+        Args:
+            metric_configuration: MetricConfiguration object, containing prototype metric name, domain, and value arguments.
+            param result_format: Directive controlling whether or not to return only unresolved "ValidationGraph".
+
+        Returns:
+            Dictionaries of values for fully-qualified parameter names by Domain for metrics, from "RuleBasedpRofiler"
+        """
+        data_assistant_name: str = MetricMultiBatchDataAssistant.data_assistant_type
+        data_assistant: "DataAssistant" = MetricMultiBatchDataAssistant(  # noqa: F821
+            name=data_assistant_name,
+            validator=self,
+            metric_configuration=metric_configuration,
+            result_format=result_format,
+        )
+        data_assistant_result: DataAssistantResult = data_assistant.run()
+        metrics_by_domain: Optional[
+            Dict[Domain, Dict[str, ParameterNode]]
+        ] = data_assistant_result.metrics_by_domain
+        return metrics_by_domain
+
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
 
     def append_expectation(self, expectation_config: ExpectationConfiguration) -> None:
         """This method is a thin wrapper for ExpectationSuite.append_expectation"""

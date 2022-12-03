@@ -1406,6 +1406,9 @@ class ExpectationConfiguration(SerializableDictDot):
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
+        # TODO: <Alex>ALEX</Alex>
+        validator: Optional[Validator] = None,
+        # TODO: <Alex>ALEX</Alex>
         **kwargs: dict,
     ):
         expectation_impl: Expectation = self._get_expectation_impl()
@@ -1414,6 +1417,9 @@ class ExpectationConfiguration(SerializableDictDot):
             metrics=metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,
+            # TODO: <Alex>ALEX</Alex>
+            validator=validator,
+            # TODO: <Alex>ALEX</Alex>
         )
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>

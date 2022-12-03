@@ -22,7 +22,10 @@ from great_expectations.rule_based_profiler.helpers.util import (
 )
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.util import deep_filter_properties_iterable
-from great_expectations.validator.validator import Validator
+
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.validator.validator import Validator
+# TODO: <Alex>ALEX</Alex>
 
 from great_expectations.rule_based_profiler.helpers.runtime_environment import (  # isort:skip
     RuntimeEnvironmentVariablesDirectives,
@@ -231,7 +234,7 @@ class DataAssistantRunner:
                 validator=None,
             )
         else:
-            validator: Validator = get_validator_with_expectation_suite(
+            validator: "Validator" = get_validator_with_expectation_suite(  # noqa: F821
                 data_context=self._data_context,
                 batch_list=None,
                 batch_request=batch_request,

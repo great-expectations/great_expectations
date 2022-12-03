@@ -508,7 +508,7 @@ is not supported).
             )
         # TODO: <Alex>ALEX</Alex>
         print(
-            f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] VALIDATION_GRAPH_ONLY:\n{result_format} ; TYPE: {str(type(result_format))}"
+            f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] MULTI_BATCH_COMPUTATION_RESULT_FORMAT:\n{result_format} ; TYPE: {str(type(result_format))}"
         )
 
         details: dict = {
@@ -521,6 +521,14 @@ is not supported).
             },
             "num_batches": len(batch_ids),
         }
+
+        if result_format not in [
+            MetricsComputationResultFormat.VALIDATION_GRAPH,
+            MetricsComputationResultFormat.RESOLVED_METRICS,
+        ]:
+            raise ValueError(
+                f"""Metric computation result format "{result_format}" is not recognized."""
+            )
 
         if result_format == MetricsComputationResultFormat.VALIDATION_GRAPH:
             # Build and return result to receiver (contains "ValidationGraph" only).
