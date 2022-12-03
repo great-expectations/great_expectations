@@ -1,13 +1,10 @@
 import json
 from typing import Optional, Tuple
 
+from great_expectations.core.domain import Domain
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
-
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.rule_based_profiler.domain import Domain
-# TODO: <Alex>ALEX</Alex>
 
 
 class MetricConfiguration:
@@ -70,16 +67,14 @@ class MetricConfiguration:
     def metric_dependencies(self, metric_dependencies) -> None:
         self._metric_dependencies = metric_dependencies
 
-    # TODO: <Alex>ALEX</Alex>
-    # def get_domain(self) -> Domain:
-    #     """Return "Domain" object, constructed from this "MetricConfiguration" object."""
-    #     return Domain(
-    #         domain_type=self.get_domain_type(),
-    #         domain_kwargs=self._metric_domain_kwargs,
-    #         details=None,
-    #         rule_name=None,
-    #     )
-    # TODO: <Alex>ALEX</Alex>
+    def get_domain(self) -> Domain:
+        """Return "Domain" object, constructed from this "MetricConfiguration" object."""
+        return Domain(
+            domain_type=self.get_domain_type(),
+            domain_kwargs=self._metric_domain_kwargs,
+            details=None,
+            rule_name=None,
+        )
 
     def get_domain_type(self) -> MetricDomainTypes:
         """Return "domain_type" of this "MetricConfiguration" object."""
