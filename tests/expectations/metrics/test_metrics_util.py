@@ -3,6 +3,8 @@ from typing import List
 import pytest
 from _pytest import monkeypatch
 
+from great_expectations.data_context.util import file_relative_path
+
 try:
     import sqlalchemy as sa
     from sqlalchemy import Column, Integer, String, select
@@ -67,7 +69,10 @@ def _compare_select_statement_with_converted_string(engine) -> None:
 @pytest.mark.parametrize(
     "backend_name,connection_string",
     [
-        ("sqlite", "sqlite:///../../test_sets/metrics_test.db"),
+        (
+            "sqlite",
+            f"sqlite:///{file_relative_path(__file__, '../../test_sets/metrics_test.db')}",
+        ),
         ("postgresql", get_default_postgres_url()),
         ("mysql", get_default_mysql_url()),
         ("mssql", get_default_mssql_url()),
