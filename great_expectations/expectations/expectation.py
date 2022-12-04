@@ -1512,7 +1512,7 @@ class Expectation(metaclass=MetaExpectation):
     ) -> RendererConfiguration:
         params = renderer_configuration.params
         if hasattr(params, "row_condition") and params.row_condition.value:
-            (_, conditional_params,) = parse_row_condition_string_pandas_engine(
+            (_, conditional_params) = parse_row_condition_string_pandas_engine(
                 params.row_condition.value,
             )
             for conditional_param, condition in conditional_params.items():

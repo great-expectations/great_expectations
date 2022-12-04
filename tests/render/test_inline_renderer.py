@@ -247,7 +247,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                                 "value": None,
                             },
                             "mostly": {"schema": {"type": "number"}, "value": None},
-                            "mostly_pct": {"schema": {"type": "string"}, "value": None},
                             "parse_strings_as_datetimes": {
                                 "schema": {"type": "boolean"},
                                 "value": None,
