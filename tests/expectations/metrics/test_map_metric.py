@@ -410,29 +410,13 @@ def test_pandas_unexpected_rows_basic_result_format(
             },
         },
     )
-
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch_definition = BatchDefinition(
-        datasource_name="pandas_datasource",
-        data_connector_name="runtime_data_connector",
-        data_asset_name="my_asset",
-        batch_identifiers=IDDict({}),
-        batch_spec_passthrough=None,
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
-    batch = Batch(
-        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        batch_definition=batch_definition,
-    )
-    engine = PandasExecutionEngine()
-    validator = Validator(
-        execution_engine=engine,
-        data_context=in_memory_runtime_context,
-        batches=[
-            batch,
-        ],
-    )
-    result = expectation.validate(validator)
-
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -466,29 +450,13 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_explicitly
             },
         },
     )
-
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch_definition = BatchDefinition(
-        datasource_name="pandas_datasource",
-        data_connector_name="runtime_data_connector",
-        data_asset_name="my_asset",
-        batch_identifiers=IDDict({}),
-        batch_spec_passthrough=None,
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
-    batch = Batch(
-        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        batch_definition=batch_definition,
-    )
-    engine = PandasExecutionEngine()
-    validator = Validator(
-        execution_engine=engine,
-        data_context=in_memory_runtime_context,
-        batches=[
-            batch,
-        ],
-    )
-    result = expectation.validate(validator)
-
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -523,29 +491,13 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_including_
             },
         },
     )
-
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch_definition = BatchDefinition(
-        datasource_name="pandas_datasource",
-        data_connector_name="runtime_data_connector",
-        data_asset_name="my_asset",
-        batch_identifiers=IDDict({}),
-        batch_spec_passthrough=None,
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
-    batch = Batch(
-        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        batch_definition=batch_definition,
-    )
-    engine = PandasExecutionEngine()
-    validator = Validator(
-        execution_engine=engine,
-        data_context=in_memory_runtime_context,
-        batches=[
-            batch,
-        ],
-    )
-    result = expectation.validate(validator)
-
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -584,28 +536,13 @@ def test_pandas_unexpected_rows_complete_result_format(
             },
         },
     )
-
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch_definition = BatchDefinition(
-        datasource_name="pandas_datasource",
-        data_connector_name="runtime_data_connector",
-        data_asset_name="my_asset",
-        batch_identifiers=IDDict({}),
-        batch_spec_passthrough=None,
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
-    batch = Batch(
-        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        batch_definition=batch_definition,
-    )
-    engine = PandasExecutionEngine()
-    validator = Validator(
-        execution_engine=engine,
-        data_context=in_memory_runtime_context,
-        batches=[
-            batch,
-        ],
-    )
-    result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -645,28 +582,13 @@ def test_pandas_default_complete_result_format(
             },
         },
     )
-
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch_definition = BatchDefinition(
-        datasource_name="pandas_datasource",
-        data_connector_name="runtime_data_connector",
-        data_asset_name="my_asset",
-        batch_identifiers=IDDict({}),
-        batch_spec_passthrough=None,
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
-    batch = Batch(
-        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        batch_definition=batch_definition,
-    )
-    engine = PandasExecutionEngine()
-    validator = Validator(
-        execution_engine=engine,
-        data_context=in_memory_runtime_context,
-        batches=[
-            batch,
-        ],
-    )
-    result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -702,28 +624,13 @@ def test_pandas_single_unexpected_index_column_names_complete_result_format(
             },
         },
     )
-
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch_definition = BatchDefinition(
-        datasource_name="pandas_datasource",
-        data_connector_name="runtime_data_connector",
-        data_asset_name="my_asset",
-        batch_identifiers=IDDict({}),
-        batch_spec_passthrough=None,
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
-    batch = Batch(
-        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        batch_definition=batch_definition,
-    )
-    engine = PandasExecutionEngine()
-    validator = Validator(
-        execution_engine=engine,
-        data_context=in_memory_runtime_context,
-        batches=[
-            batch,
-        ],
-    )
-    result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -767,28 +674,13 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format(
             },
         },
     )
-
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch_definition = BatchDefinition(
-        datasource_name="pandas_datasource",
-        data_connector_name="runtime_data_connector",
-        data_asset_name="my_asset",
-        batch_identifiers=IDDict({}),
-        batch_spec_passthrough=None,
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
-    batch = Batch(
-        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        batch_definition=batch_definition,
-    )
-    engine = PandasExecutionEngine()
-    validator = Validator(
-        execution_engine=engine,
-        data_context=in_memory_runtime_context,
-        batches=[
-            batch,
-        ],
-    )
-    result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -833,28 +725,13 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format_li
             },
         },
     )
-
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch_definition = BatchDefinition(
-        datasource_name="pandas_datasource",
-        data_connector_name="runtime_data_connector",
-        data_asset_name="my_asset",
-        batch_identifiers=IDDict({}),
-        batch_spec_passthrough=None,
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
-    batch = Batch(
-        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        batch_definition=batch_definition,
-    )
-    engine = PandasExecutionEngine()
-    validator = Validator(
-        execution_engine=engine,
-        data_context=in_memory_runtime_context,
-        batches=[
-            batch,
-        ],
-    )
-    result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -890,28 +767,13 @@ def test_pandas_multiple_unexpected_index_column_names_summary_result_format(
             },
         },
     )
-
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch_definition = BatchDefinition(
-        datasource_name="pandas_datasource",
-        data_connector_name="runtime_data_connector",
-        data_asset_name="my_asset",
-        batch_identifiers=IDDict({}),
-        batch_spec_passthrough=None,
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
-    batch = Batch(
-        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        batch_definition=batch_definition,
-    )
-    engine = PandasExecutionEngine()
-    validator = Validator(
-        execution_engine=engine,
-        data_context=in_memory_runtime_context,
-        batches=[
-            batch,
-        ],
-    )
-    result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -950,28 +812,13 @@ def test_pandas_multiple_unexpected_index_column_names_summary_result_format_lim
             },
         },
     )
-
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch_definition = BatchDefinition(
-        datasource_name="pandas_datasource",
-        data_connector_name="runtime_data_connector",
-        data_asset_name="my_asset",
-        batch_identifiers=IDDict({}),
-        batch_spec_passthrough=None,
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
-    batch = Batch(
-        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        batch_definition=batch_definition,
-    )
-    engine = PandasExecutionEngine()
-    validator = Validator(
-        execution_engine=engine,
-        data_context=in_memory_runtime_context,
-        batches=[
-            batch,
-        ],
-    )
-    result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -1003,28 +850,13 @@ def test_pandas_multiple_unexpected_index_column_names_basic_result_format(
             },
         },
     )
-
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch_definition = BatchDefinition(
-        datasource_name="pandas_datasource",
-        data_connector_name="runtime_data_connector",
-        data_asset_name="my_asset",
-        batch_identifiers=IDDict({}),
-        batch_spec_passthrough=None,
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
-    batch = Batch(
-        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        batch_definition=batch_definition,
-    )
-    engine = PandasExecutionEngine()
-    validator = Validator(
-        execution_engine=engine,
-        data_context=in_memory_runtime_context,
-        batches=[
-            batch,
-        ],
-    )
-    result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -1052,28 +884,13 @@ def test_pandas_single_unexpected_index_column_names_complete_result_format_non_
             },
         },
     )
-
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch_definition = BatchDefinition(
-        datasource_name="pandas_datasource",
-        data_connector_name="runtime_data_connector",
-        data_asset_name="my_asset",
-        batch_identifiers=IDDict({}),
-        batch_spec_passthrough=None,
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
-    batch = Batch(
-        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        batch_definition=batch_definition,
-    )
-    engine = PandasExecutionEngine()
-    validator = Validator(
-        execution_engine=engine,
-        data_context=in_memory_runtime_context,
-        batches=[
-            batch,
-        ],
-    )
-    result = expectation.validate(validator)
     assert result.success is False
     assert result.exception_info
     assert (
@@ -1130,7 +947,6 @@ def test_pandas_default_to_not_include_unexpected_rows(
             },
         },
     )
-
     result: ExpectationValidationResult = (
         _expecation_configuration_to_validation_result_pandas(
             expectation_configuration=expectation_configuration,
@@ -1157,7 +973,6 @@ def test_pandas_specify_not_include_unexpected_rows(
             },
         },
     )
-
     result: ExpectationValidationResult = (
         _expecation_configuration_to_validation_result_pandas(
             expectation_configuration=expectation_configuration,
@@ -1388,43 +1203,6 @@ def test_sqlite_single_column_summary_result_format(
     }
 
 
-def test_sqlite_single_column_complete_result_format(
-    sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
-):
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "COMPLETE",
-            },
-        },
-    )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_sql(
-            expectation_configuration=expectation_configuration,
-            context=in_memory_runtime_context,
-        )
-    )
-    assert convert_to_json_serializable(result.result) == {
-        "element_count": 6,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "partial_unexpected_counts": [
-            {"count": 1, "value": "giraffe"},
-            {"count": 1, "value": "lion"},
-            {"count": 1, "value": "zebra"},
-        ],
-        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_count": 3,
-        "unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_percent": 50.0,
-        "unexpected_percent_nonmissing": 50.0,
-        "unexpected_percent_total": 50.0,
-    }
-
-
 def test_sqlite_single_unexpected_index_column_names_complete_result_format(
     sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):
@@ -1439,7 +1217,6 @@ def test_sqlite_single_unexpected_index_column_names_complete_result_format(
             },
         },
     )
-
     result: ExpectationValidationResult = (
         _expecation_configuration_to_validation_result_sql(
             expectation_configuration=expectation_configuration,
@@ -1484,7 +1261,6 @@ def test_sqlite_single_unexpected_index_column_names_summary_result_format(
             },
         },
     )
-
     result: ExpectationValidationResult = (
         _expecation_configuration_to_validation_result_sql(
             expectation_configuration=expectation_configuration,
@@ -1523,7 +1299,6 @@ def test_sqlite_multiple_unexpected_index_column_names_complete_result_format(
             },
         },
     )
-
     result: ExpectationValidationResult = (
         _expecation_configuration_to_validation_result_sql(
             expectation_configuration=expectation_configuration,
@@ -1577,7 +1352,6 @@ def test_sql_multiple_unexpected_index_column_names_complete_result_format_limit
             },
         },
     )
-
     result: ExpectationValidationResult = (
         _expecation_configuration_to_validation_result_sql(
             expectation_configuration=expectation_configuration,
@@ -1620,7 +1394,6 @@ def test_sql_multiple_unexpected_index_column_names_summary_result_format(
             },
         },
     )
-
     result: ExpectationValidationResult = (
         _expecation_configuration_to_validation_result_sql(
             expectation_configuration=expectation_configuration,
@@ -1665,7 +1438,6 @@ def test_sql_multiple_unexpected_index_column_names_summary_result_format_limit_
             },
         },
     )
-
     result: ExpectationValidationResult = (
         _expecation_configuration_to_validation_result_sql(
             expectation_configuration=expectation_configuration,
@@ -1700,7 +1472,6 @@ def test_sql_multiple_unexpected_index_column_names_basic_result_format(
             },
         },
     )
-
     result: ExpectationValidationResult = (
         _expecation_configuration_to_validation_result_sql(
             expectation_configuration=expectation_configuration,
@@ -1733,14 +1504,12 @@ def test_sql_single_unexpected_index_column_names_complete_result_format_non_exi
             },
         },
     )
-
     result: ExpectationValidationResult = (
         _expecation_configuration_to_validation_result_sql(
             expectation_configuration=expectation_configuration,
             context=in_memory_runtime_context,
         )
     )
-
     assert result.success is False
     assert result.exception_info
     assert (
@@ -1766,14 +1535,12 @@ def test_sql_multiple_unexpected_index_column_names_complete_result_format_non_e
             },
         },
     )
-
     result: ExpectationValidationResult = (
         _expecation_configuration_to_validation_result_sql(
             expectation_configuration=expectation_configuration,
             context=in_memory_runtime_context,
         )
     )
-
     assert result.success is False
     assert result.exception_info
     assert (
