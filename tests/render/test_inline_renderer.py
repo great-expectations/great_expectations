@@ -314,22 +314,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                                         "schema": {"type": "string"},
                                         "value": "user_id",
                                     },
-                                    "condition_parser": {
-                                        "schema": {"type": "string"},
-                                        "value": None,
-                                    },
-                                    "mostly": {
-                                        "schema": {"type": "number"},
-                                        "value": None,
-                                    },
-                                    "row_condition": {
-                                        "schema": {"type": "string"},
-                                        "value": None,
-                                    },
-                                    "threshold": {
-                                        "schema": {"type": "number"},
-                                        "value": None,
-                                    },
                                 },
                                 "template": "$column Kullback-Leibler (KL) "
                                 "divergence with respect to the "

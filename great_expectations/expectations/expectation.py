@@ -87,8 +87,8 @@ from great_expectations.render import (
 )
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
-    ParamSchemaType,
     RendererConfiguration,
+    RendererSchemaType,
 )
 from great_expectations.render.util import num_to_str
 from great_expectations.self_check.util import (
@@ -345,10 +345,10 @@ class Expectation(metaclass=MetaExpectation):
         add_param_args = (
             (
                 "expectation_type",
-                ParamSchemaType.STRING,
+                RendererSchemaType.STRING,
                 renderer_configuration.expectation_type,
             ),
-            ("kwargs", ParamSchemaType.STRING, renderer_configuration.kwargs),
+            ("kwargs", RendererSchemaType.STRING, renderer_configuration.kwargs),
         )
         for name, schema_type, value in add_param_args:
             renderer_configuration.add_param(
@@ -386,10 +386,10 @@ class Expectation(metaclass=MetaExpectation):
         add_param_args = (
             (
                 "expectation_type",
-                ParamSchemaType.STRING,
+                RendererSchemaType.STRING,
                 renderer_configuration.expectation_type,
             ),
-            ("kwargs", ParamSchemaType.STRING, renderer_configuration.kwargs),
+            ("kwargs", RendererSchemaType.STRING, renderer_configuration.kwargs),
         )
         for name, schema_type, value in add_param_args:
             renderer_configuration.add_param(
@@ -868,10 +868,10 @@ class Expectation(metaclass=MetaExpectation):
         add_param_args = (
             (
                 "expectation_type",
-                ParamSchemaType.STRING,
+                RendererSchemaType.STRING,
                 renderer_configuration.expectation_type,
             ),
-            ("kwargs", ParamSchemaType.STRING, renderer_configuration.kwargs),
+            ("kwargs", RendererSchemaType.STRING, renderer_configuration.kwargs),
         )
         for name, schema_type, value in add_param_args:
             renderer_configuration.add_param(
@@ -1510,9 +1510,9 @@ class Expectation(metaclass=MetaExpectation):
         if len(value_set) > 0:
             for idx, value in enumerate(value_set):
                 if isinstance(value, Number):
-                    schema_type = ParamSchemaType.NUMBER
+                    schema_type = RendererSchemaType.NUMBER
                 else:
-                    schema_type = ParamSchemaType.STRING
+                    schema_type = RendererSchemaType.STRING
                 renderer_configuration.add_param(
                     name=f"v__{str(idx)}", schema_type=schema_type, value=value
                 )
@@ -1581,7 +1581,7 @@ class Expectation(metaclass=MetaExpectation):
             name = f"row_condition__{str(idx)}"
             value = condition.replace(" NOT ", " not ")
             renderer_configuration.add_param(
-                name=name, schema_type=ParamSchemaType.STRING, value=value
+                name=name, schema_type=RendererSchemaType.STRING, value=value
             )
 
         return renderer_configuration
@@ -1616,7 +1616,7 @@ class Expectation(metaclass=MetaExpectation):
         )
         renderer_configuration.add_param(
             name="mostly_pct",
-            schema_type=ParamSchemaType.STRING,
+            schema_type=RendererSchemaType.STRING,
             value=mostly_pct_value,
         )
         return renderer_configuration
