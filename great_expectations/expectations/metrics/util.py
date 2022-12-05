@@ -29,8 +29,9 @@ except ImportError:
 
 try:
     import sqlalchemy as sa
+    from sqlalchemy import Table
     from sqlalchemy.dialects import registry
-    from sqlalchemy.engine import Engine, reflection
+    from sqlalchemy.engine import Connection, Engine, reflection
     from sqlalchemy.engine.interfaces import Dialect
     from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Insert, Select, TableClause
@@ -47,6 +48,7 @@ except ImportError:
     sa = None
     registry = None
     Engine = None
+    Connection = None
     reflection = None
     Dialect = None
     Insert = None
@@ -992,3 +994,65 @@ def is_valid_continuous_partition_object(partition_object):
         and np.all(np.diff(partition_object["bins"]) > 0)
         and np.allclose(np.sum(comb_weights), 1.0)
     )
+
+
+def sql_statement_with_post_compile_to_string(
+    engine: SqlAlchemyExecutionEngine, select_statement: "sqlalchemy.sql.Select"
+) -> str:
+    """
+    Util method to compile SQL select statement with post-compile parameters into a string. Logic lifted directly
+    from sqlalchemy documentation.
+
+    https://docs.sqlalchemy.org/en/14/faq/sqlexpressions.html#rendering-postcompile-parameters-as-bound-parameters
+
+    Used by _sqlalchemy_map_condition_index() in map_metric_provider to build query that will allow you to
+    return unexpected_index_values.
+
+    Args:
+        engine (sqlalchemy.engine.Engine): Sqlalchemy engine used to do the compilation.
+        select_statement (sqlalchemy.sql.Select): Select statement to compile into string.
+    Returns:
+        String representation of select_statement
+
+    """
+    sqlalchemy_connection: "sa.engine.base.Connection" = engine.engine
+    compiled = select_statement.compile(
+        sqlalchemy_connection,
+        compile_kwargs={"render_postcompile": True},
+        dialect=engine.dialect,
+    )
+    dialect_name: str = engine.dialect_name
+
+    if dialect_name in ["sqlite", "trino", "mssql"]:
+        params = (repr(compiled.params[name]) for name in compiled.positiontup)
+        query_as_string = re.sub(r"\?", lambda m: next(params), str(compiled))
+
+    else:
+        params = (repr(compiled.params[name]) for name in list(compiled.params.keys()))
+        query_as_string = re.sub(r"%\(.*?\)s", lambda m: next(params), str(compiled))
+
+    return query_as_string
+
+
+def get_sqlalchemy_source_table_and_schema(
+    engine: SqlAlchemyExecutionEngine,
+) -> "Table":
+    """
+    Util method to return table name that is associated with current batch.
+
+    This is used by `_sqlalchemy_map_condition_query()` which returns a query that allows users to return
+    unexpected_index_values.
+
+    Args:
+        engine (SqlAlchemyExecutionEngine): Engine that is currently being used to calculate the Metrics
+    Returns:
+        SqlAlchemy Table that is the source table and schema.
+    """
+    schema_name = engine.batch_manager.active_batch_data.source_schema_name
+    table_name = engine.batch_manager.active_batch_data.source_table_name
+    selectable = sa.Table(
+        table_name,
+        sa.MetaData(),
+        schema=schema_name,
+    )
+    return selectable
