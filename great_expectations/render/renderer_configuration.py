@@ -37,14 +37,16 @@ class _RendererParamsBase(BaseModel):
         skip_defaults: Optional[bool] = None,
         exclude_unset: bool = False,
         exclude_defaults: bool = False,
-        exclude_none: bool = False,
+        exclude_none: bool = True,
     ) -> DictStrAny:
         """
-        Override BaseModel dict to make the default by_alias True instead of False.
-        We need by_alias to be set to True in RendererParams, because we have an existing
-        attribute named schema, and schema is already a Pydantic BaseModel attribute.
-        In practice this means the renderer implementer doesn't need to use
-        .dict(by_alias=True) everywhere.
+        Override BaseModel dict to make the defaults:
+            - by_alias=True instead of False. We need by_alias to be set to True in RendererParams, because we have
+              an existing attribute named schema, and schema is already a Pydantic BaseModel attribute.
+            - exclude_none=True to ensure that None values aren't included in the json dict.
+
+        In practice this means the renderer implementer doesn't need to use .dict(by_alias=True, exclude_none=True)
+        everywhere.
         """
         return super().dict(
             include=include,
@@ -115,8 +117,8 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         return kwargs
 
     class _RendererParamBase(BaseModel):
-        renderer_schema: ParamSchemaType
-        value: Optional[Any]
+        renderer_schema: Optional[ParamSchemaType] = Field(..., allow_mutation=False)
+        value: Optional[Any] = Field(..., allow_mutation=False)
 
         class Config:
             validate_assignment = True
@@ -154,11 +156,16 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         """
         renderer_param: Type[BaseModel] = create_model(
             name,
-            renderer_schema=(Dict[str, ParamSchemaType], Field(..., alias="schema")),
+            renderer_schema=(
+                Dict[str, Optional[ParamSchemaType]],
+                Field(..., alias="schema"),
+            ),
             value=(Union[Any, None], ...),
             __base__=RendererConfiguration._RendererParamBase,
         )
-        renderer_param_definition: Dict[str, Any] = {name: (renderer_param, ...)}
+        renderer_param_definition: Dict[str, Any] = {
+            name: (Optional[renderer_param], ...)
+        }
 
         # As of Nov 30, 2022 there is a bug in autocompletion for pydantic dynamic models
         # See: https://github.com/pydantic/pydantic/issues/3930
@@ -171,9 +178,16 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         if value is None:
             value = self.kwargs.get(name)
 
-        renderer_params_definition: Dict[str, Any] = {
-            **self.params.dict(),
-            name: renderer_param(schema={"type": schema_type}, value=value),
-        }
+        renderer_params_definition: Dict[str, Any]
+        if value is None:
+            renderer_params_definition = {
+                **self.params.dict(exclude_none=False),
+                name: None,
+            }
+        else:
+            renderer_params_definition = {
+                **self.params.dict(exclude_none=False),
+                name: renderer_param(schema={"type": schema_type}, value=value),
+            }
 
         self.params: BaseModel = renderer_params(**renderer_params_definition)  # type: ignore[assignment] # mypy bug see: https://github.com/python/mypy/issues/12385

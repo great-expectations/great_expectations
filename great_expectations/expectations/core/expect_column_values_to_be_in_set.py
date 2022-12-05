@@ -204,7 +204,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         params: RendererParams = renderer_configuration.params
         template_str = ""
 
-        if params.value_set.value:
+        if params.value_set:
             renderer_configuration = cls._add_value_set_params(
                 renderer_configuration=renderer_configuration
             )
@@ -213,7 +213,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             )
             template_str += f"values must belong to this set: {value_set_str}"
 
-            if params.mostly.value and params.mostly.value < 1.0:
+            if params.mostly and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -221,13 +221,13 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             else:
                 template_str += "."
 
-            if params.parse_strings_as_datetimes.value:
+            if params.parse_strings_as_datetimes:
                 template_str += " Values should be parsed as datetimes."
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
-        if params.row_condition.value:
+        if params.row_condition:
             renderer_configuration = cls._add_row_condition_params(
                 renderer_configuration=renderer_configuration
             )
