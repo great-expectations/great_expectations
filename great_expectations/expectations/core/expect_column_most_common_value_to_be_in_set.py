@@ -8,7 +8,6 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnExpectation,
     InvalidExpectationConfigurationError,
-    add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -121,7 +120,7 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnExpectation):
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
-    ):
+    ) -> RendererConfiguration:
         add_param_args = (
             ("column", RendererSchemaType.STRING),
             ("value_set", RendererSchemaType.ARRAY),
