@@ -5,7 +5,7 @@ from great_expectations.core._docs_decorators import (
 
 
 @public_api
-def func_full_docstring_public_api(some_arg, other_arg):
+def _func_full_docstring_public_api(some_arg, other_arg):
     """My docstring.
 
     Longer description.
@@ -18,7 +18,7 @@ def func_full_docstring_public_api(some_arg, other_arg):
 
 
 @deprecated(version="1.2.3", message="This is deprecated!!")
-def func_full_docstring_deprecated(some_arg, other_arg):
+def _func_full_docstring_deprecated(some_arg, other_arg):
     """My docstring.
 
     Longer description.
@@ -30,17 +30,17 @@ def func_full_docstring_deprecated(some_arg, other_arg):
     pass
 
 
-def func_only_summary():
+def _func_only_summary():
     """My docstring."""
     pass
 
 
-def func_no_docstring():
+def _func_no_docstring():
     pass
 
 
 def test_public_api_decorator():
-    assert func_full_docstring_public_api.__doc__ == (
+    assert _func_full_docstring_public_api.__doc__ == (
         "--Public API--My docstring.\n"
         "\n"
         "    Longer description.\n"
@@ -50,12 +50,12 @@ def test_public_api_decorator():
         "        other_arg: describe other_arg\n"
         "    "
     )
-    assert func_full_docstring_public_api.__name__ == "func_full_docstring_public_api"
+    assert _func_full_docstring_public_api.__name__ == "_func_full_docstring_public_api"
 
 
 def test_deprecated_decorator():
 
-    assert func_full_docstring_deprecated.__doc__ == (
+    assert _func_full_docstring_deprecated.__doc__ == (
         "My docstring.\n"
         "\n"
         ".. deprecated:: 1.2.3\n"
