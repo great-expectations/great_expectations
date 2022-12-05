@@ -1594,6 +1594,7 @@ class Expectation(metaclass=MetaExpectation):
                 row_condition_str = row_condition_str.replace(
                     condition, f"$row_condition__{str(idx)}"
                 )
+            row_condition_str = row_condition_str.lower()
         else:
             raise AttributeError(
                 f"RendererConfiguration does not have a {param_name} param. "
