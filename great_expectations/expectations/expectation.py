@@ -1502,7 +1502,7 @@ class Expectation(metaclass=MetaExpectation):
         if hasattr(params, "value_set"):
             if params.value_set.value and len(params.value_set.value) > 0:
                 value_set_str = " ".join(
-                    [f"$v__{str(idx)}" for idx in range(params.value_set.value)]
+                    [f"$v__{str(idx)}" for idx in range(len(params.value_set.value))]
                 )
             else:
                 value_set_str = "[ ]"
