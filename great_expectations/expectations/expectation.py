@@ -89,10 +89,7 @@ from great_expectations.render.renderer_configuration import (
     ParamSchemaType,
     RendererConfiguration,
 )
-from great_expectations.render.util import (
-    num_to_str,
-    parse_row_condition_string_pandas_engine,
-)
+from great_expectations.render.util import num_to_str
 from great_expectations.self_check.util import (
     evaluate_json_test_v3_api,
     generate_expectation_tests,
