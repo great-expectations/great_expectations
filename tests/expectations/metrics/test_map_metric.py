@@ -96,12 +96,18 @@ def sqlite_table_for_unexpected_rows_with_index(
                     ],
                 }
             )
-            df.to_sql(
-                name="animal_names",
-                con=sqlite_engine,
-                index=False,
-                if_exists="replace",
-            )
+            # use try-except block to ensure we don't keep modifying the database
+            # adapted from https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_sql.html
+            try:
+                df.to_sql(
+                    name="animal_names",
+                    con=sqlite_engine,
+                    index=False,
+                    if_exists="fail",
+                )
+            except ValueError:
+                pass
+
             return sqlite_engine
         except ImportError:
             sa = None
