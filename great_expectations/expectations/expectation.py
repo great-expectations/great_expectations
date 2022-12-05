@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import functools
 import glob
 import json
 import logging
@@ -169,6 +170,29 @@ def render_evaluation_parameter_string(render_func) -> Callable:
         return rendered_string_template
 
     return inner_func
+
+
+def param_method(param_name: str) -> Callable:
+    def _param_method(param_func: Callable) -> Callable:
+        @functools.wraps(param_func)
+        def wrapper(
+            renderer_configuration: RendererConfiguration,
+        ) -> RendererConfiguration:
+            params = renderer_configuration.params
+            if hasattr(params, param_name):
+                renderer_configuration = param_func(
+                    renderer_configuration=renderer_configuration
+                )
+            else:
+                raise AttributeError(
+                    f"RendererConfiguration does not have a {param_name} param. "
+                    f'Use RendererConfiguration.add_param() with name="{param_name}" to add it.'
+                )
+            return renderer_configuration
+
+        return wrapper
+
+    return _param_method
 
 
 # noinspection PyMethodParameters
@@ -1473,44 +1497,32 @@ class Expectation(metaclass=MetaExpectation):
             return False
 
     @staticmethod
+    @param_method(param_name="value_set")
     def _add_value_set_params(
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         params = renderer_configuration.params
-        param_name = "value_set"
-        if hasattr(params, "value_set"):
-            if params.value_set.value and len(params.value_set.value) > 0:
-                for idx, value in enumerate(params.value_set.value):
-                    if isinstance(value, Number):
-                        schema_type = ParamSchemaType.NUMBER
-                    else:
-                        schema_type = ParamSchemaType.STRING
-                    renderer_configuration.add_param(
-                        name=f"v__{str(idx)}", schema_type=schema_type, value=value
-                    )
-        else:
-            raise AttributeError(
-                f"RendererConfiguration does not have a {param_name} param. "
-                f'Use RendererConfiguration.add_param() with name="{param_name}" to add it.'
-            )
+        if params.value_set.value and len(params.value_set.value) > 0:
+            for idx, value in enumerate(params.value_set.value):
+                if isinstance(value, Number):
+                    schema_type = ParamSchemaType.NUMBER
+                else:
+                    schema_type = ParamSchemaType.STRING
+                renderer_configuration.add_param(
+                    name=f"v__{str(idx)}", schema_type=schema_type, value=value
+                )
         return renderer_configuration
 
     @staticmethod
+    @param_method(param_name="value_set")
     def _get_value_set_string(renderer_configuration: RendererConfiguration) -> str:
         params = renderer_configuration.params
-        param_name = "value_set"
-        if hasattr(params, "value_set"):
-            if params.value_set.value and len(params.value_set.value) > 0:
-                value_set_str = " ".join(
-                    [f"$v__{str(idx)}" for idx in range(len(params.value_set.value))]
-                )
-            else:
-                value_set_str = "[ ]"
-        else:
-            raise AttributeError(
-                f"RendererConfiguration does not have a {param_name} param. "
-                f'Use RendererConfiguration.add_param() with name="{param_name}" to add it.'
+        if params.value_set.value and len(params.value_set.value) > 0:
+            value_set_str = " ".join(
+                [f"$v__{str(idx)}" for idx in range(len(params.value_set.value))]
             )
+        else:
+            value_set_str = "[ ]"
         return value_set_str
 
     @staticmethod
@@ -1548,40 +1560,12 @@ class Expectation(metaclass=MetaExpectation):
         return row_condition_str
 
     @staticmethod
+    @param_method(param_name="row_condition")
     def _add_row_condition_params(
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         params = renderer_configuration.params
-        param_name = "row_condition"
-        if hasattr(params, "row_condition"):
-            if params.row_condition.value:
-                row_condition_str: str = Expectation._parse_row_condition_str(
-                    row_condition_str=params.row_condition.value
-                )
-                row_conditions_list: List[
-                    str
-                ] = Expectation._get_row_conditions_list_from_row_condition_str(
-                    row_condition_str=row_condition_str
-                )
-                for idx, condition in enumerate(row_conditions_list):
-                    name = f"row_condition__{str(idx)}"
-                    value = condition.replace(" NOT ", " not ")
-                    renderer_configuration.add_param(
-                        name=name, schema_type=ParamSchemaType.STRING, value=value
-                    )
-        else:
-            raise AttributeError(
-                f"RendererConfiguration does not have a {param_name} param. "
-                f'Use RendererConfiguration.add_param() with name="{param_name}" to add it.'
-            )
-
-        return renderer_configuration
-
-    @staticmethod
-    def _get_row_condition_string(renderer_configuration: RendererConfiguration) -> str:
-        params = renderer_configuration.params
-        param_name = "row_condition"
-        if hasattr(params, param_name):
+        if params.row_condition.value:
             row_condition_str: str = Expectation._parse_row_condition_str(
                 row_condition_str=params.row_condition.value
             )
@@ -1591,39 +1575,49 @@ class Expectation(metaclass=MetaExpectation):
                 row_condition_str=row_condition_str
             )
             for idx, condition in enumerate(row_conditions_list):
-                row_condition_str = row_condition_str.replace(
-                    condition, f"$row_condition__{str(idx)}"
+                name = f"row_condition__{str(idx)}"
+                value = condition.replace(" NOT ", " not ")
+                renderer_configuration.add_param(
+                    name=name, schema_type=ParamSchemaType.STRING, value=value
                 )
-            row_condition_str = row_condition_str.lower()
-        else:
-            raise AttributeError(
-                f"RendererConfiguration does not have a {param_name} param. "
-                f'Use RendererConfiguration.add_param() with name="{param_name}" to add it.'
+
+        return renderer_configuration
+
+    @staticmethod
+    @param_method(param_name="row_condition")
+    def _get_row_condition_string(renderer_configuration: RendererConfiguration) -> str:
+        params = renderer_configuration.params
+        row_condition_str: str = Expectation._parse_row_condition_str(
+            row_condition_str=params.row_condition.value
+        )
+        row_conditions_list: List[
+            str
+        ] = Expectation._get_row_conditions_list_from_row_condition_str(
+            row_condition_str=row_condition_str
+        )
+        for idx, condition in enumerate(row_conditions_list):
+            row_condition_str = row_condition_str.replace(
+                condition, f"$row_condition__{str(idx)}"
             )
+        row_condition_str = row_condition_str.lower()
         return f"if {row_condition_str}"
 
     @staticmethod
+    @param_method(param_name="mostly")
     def _add_mostly_pct_param(
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         params = renderer_configuration.params
-        param_name = "mostly"
-        if hasattr(params, param_name):
-            if params.mostly.value:
-                mostly_pct_value: str = num_to_str(
-                    renderer_configuration.params.mostly.value * 100,
-                    precision=15,
-                    no_scientific=True,
-                )
-                renderer_configuration.add_param(
-                    name="mostly_pct",
-                    schema_type=ParamSchemaType.STRING,
-                    value=mostly_pct_value,
-                )
-        else:
-            raise AttributeError(
-                f"RendererConfiguration does not have a {param_name} param. "
-                f'Use RendererConfiguration.add_param() with name="{param_name}" to add it.'
+        if params.mostly.value:
+            mostly_pct_value: str = num_to_str(
+                renderer_configuration.params.mostly.value * 100,
+                precision=15,
+                no_scientific=True,
+            )
+            renderer_configuration.add_param(
+                name="mostly_pct",
+                schema_type=ParamSchemaType.STRING,
+                value=mostly_pct_value,
             )
         return renderer_configuration
 
