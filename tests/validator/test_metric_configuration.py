@@ -1,5 +1,7 @@
 import pytest
 
+from great_expectations.core import Domain
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
@@ -35,3 +37,32 @@ def test_metric_configuration_to_json_dict(
         "metric_value_kwargs": {"n_rows": 5},
         "metric_value_kwargs_id": "n_rows=5",
     }
+
+
+@pytest.mark.unit
+def test_metric_configuration_get_domain_type(
+    table_head_metric_config: MetricConfiguration,
+    column_histogram_metric_config: MetricConfiguration,
+) -> None:
+    assert table_head_metric_config.get_domain_type() == MetricDomainTypes.TABLE
+    assert column_histogram_metric_config.get_domain_type() == MetricDomainTypes.COLUMN
+
+
+@pytest.mark.unit
+def test_metric_configuration_get_domain(
+    table_head_metric_config: MetricConfiguration,
+    column_histogram_metric_config: MetricConfiguration,
+) -> None:
+    assert table_head_metric_config.get_domain() == Domain(
+        domain_type=MetricDomainTypes.TABLE,
+        domain_kwargs={
+            "batch_id": "abc123",
+        },
+    )
+    assert column_histogram_metric_config.get_domain() == Domain(
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs={
+            "column": "my_column",
+            "batch_id": "def456",
+        },
+    )
