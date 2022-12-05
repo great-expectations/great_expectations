@@ -3,7 +3,7 @@ from typing import Dict, Optional
 
 import numpy as np
 
-from great_expectations.rule_based_profiler.domain import Domain
+from great_expectations.core.domain import Domain
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
     NumericRangeEstimationResult,
 )
