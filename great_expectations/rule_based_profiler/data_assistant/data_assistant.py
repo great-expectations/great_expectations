@@ -7,25 +7,26 @@ from inspect import isabstract
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequestBase
+from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.id_dict import deep_convert_properties_iterable_to_id_dict
-from great_expectations.core.metric_domain_types import MetricDomainTypes
+
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.core.metric_domain_types import MetricDomainTypes
+# TODO: <Alex>ALEX</Alex>
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
-from great_expectations.rule_based_profiler.altair import AltairDataTypes
+
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.rule_based_profiler.altair import AltairDataTypes
+# TODO: <Alex>ALEX</Alex>
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
-from great_expectations.rule_based_profiler.domain import Domain, SemanticDomainTypes
-from great_expectations.rule_based_profiler.domain_builder import (
-    ColumnDomainBuilder,
-    ColumnPairDomainBuilder,
-    DomainBuilder,
+from great_expectations.rule_based_profiler.domain_builder import (  # TODO: <Alex>ALEX</Alex>; ColumnDomainBuilder,; ColumnPairDomainBuilder,; DomainBuilder,; MultiColumnDomainBuilder,; TableDomainBuilder,
     MapMetricColumnDomainBuilder,
-    MultiColumnDomainBuilder,
-    TableDomainBuilder,
 )
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     DefaultExpectationConfigurationBuilder,
@@ -68,7 +69,10 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
     RuleBasedProfiler,
 )
 from great_expectations.util import camel_to_snake, measure_execution_time
-from great_expectations.validator.metric_configuration import MetricConfiguration
+
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.validator.metric_configuration import MetricConfiguration
+# TODO: <Alex>ALEX</Alex>
 
 # TODO: <Alex>ALEX</Alex>
 # TODO: <Alex>ALEX</Alex>
@@ -342,7 +346,12 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 single_batch_mode=False,
                 enforce_numeric_metric=False,
                 replace_nan_with_zero=False,
+                # TODO: <Alex>ALEX</Alex>
                 reduce_scalar_metric=True,
+                # TODO:True <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                # reduce_scalar_metric=False,
+                # TODO: <Alex>ALEX</Alex>
                 evaluation_parameter_builder_configs=None,
                 data_context=None,
             )
@@ -723,8 +732,20 @@ class DataAssistant(metaclass=MetaDataAssistant):
         This method uses loaded "Batch" objects to return the mapping between unique "batch_id" and "batch_identifiers".
         """
         batches: Dict[str, Batch] = self._batches
+        # print(f'\n[ALEX_TEST] [DATA_ASSISTANT._BATCH_ID_TO_BATCH_IDENTIFIER_DISPLAY_NAME_MAP()] BATCHES:\n{batches} ; TYPE: {str(type(batches))}')
         if batches is None:
             batches = {}
+        # TODO: <Alex>ALEX</Alex>
+        batch_id: str
+        batch: Batch
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # for batch_id, batch in batches.items():
+        #     print(f'\n[ALEX_TEST] [DATA_ASSISTANT._BATCH_ID_TO_BATCH_IDENTIFIER_DISPLAY_NAME_MAP()] BATCH_ID:\n{batch_id} ; TYPE: {str(type(batch_id))}')
+        #     # print(f'\n[ALEX_TEST] [DATA_ASSISTANT._BATCH_ID_TO_BATCH_IDENTIFIER_DISPLAY_NAME_MAP()] BATCH:\n{batch} ; TYPE: {str(type(batch))}')
+        #     print(f'\n[ALEX_TEST] [DATA_ASSISTANT._BATCH_ID_TO_BATCH_IDENTIFIER_DISPLAY_NAME_MAP()] BATCH ; TYPE: {str(type(batch))}')
+        #     print(f'\n[ALEX_TEST] [DATA_ASSISTANT._BATCH_ID_TO_BATCH_IDENTIFIER_DISPLAY_NAME_MAP()] BATCH.BATCH_DEFINITION:\n{batch.batch_definition} ; TYPE: {str(type(batch.batch_definition))}')
+        # TODO: <Alex>ALEX</Alex>
 
         return {
             batch_id: set(

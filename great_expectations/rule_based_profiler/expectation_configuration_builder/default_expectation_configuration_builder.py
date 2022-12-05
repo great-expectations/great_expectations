@@ -18,9 +18,9 @@ from pyparsing import (
 )
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.domain import Domain
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
@@ -39,7 +39,16 @@ if TYPE_CHECKING:
 
 text = Suppress("'") + Word(alphas, alphanums) + Suppress("'")
 integer = Word(nums).setParseAction(lambda t: int(t[0]))
-var = Combine(Word("$" + alphas, alphanums + "_.") + ppOptional("[" + integer + "]"))
+# TODO: <Alex>ALEX</Alex>
+# var = Combine(Word("$" + alphas, alphanums + "_.") + ppOptional("[" + integer + "]"))
+# TODO: <Alex>ALEX</Alex>
+# TODO: <Alex>ALEX</Alex>
+var = Combine(
+    Word("$" + alphas, alphanums + "_.")
+    + ppOptional("[" + integer + "]")
+    + ppOptional("[" + integer + "]")
+)
+# TODO: <Alex>ALEX</Alex>
 comparison_operator = oneOf(">= <= != > < ==")
 binary_operator = oneOf("& |")
 operand = text | integer | var
@@ -335,11 +344,14 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             variables=variables,
             parameters=parameters,
         )
+        # print(f'\n[ALEX_TEST] [DefaultExpectationConfigurationBuilder._evaluate_condition()] SUBSTITUTED_TERM_LIST:\n{substituted_term_list} ; TYPE: {str(type(substituted_term_list))}')
 
         binary_list: ParseResults = self._build_binary_list(
             substituted_term_list=substituted_term_list
         )
+        # print(f'\n[ALEX_TEST] [DefaultExpectationConfigurationBuilder._evaluate_condition()] BINARY_LIST:\n{binary_list} ; TYPE: {str(type(binary_list))}')
         boolean_result: bool = self._build_boolean_result(binary_list=binary_list)
+        # print(f'\n[ALEX_TEST] [DefaultExpectationConfigurationBuilder._evaluate_condition()] BOOLEAN_RESULT:\n{boolean_result} ; TYPE: {str(type(boolean_result))}')
 
         return boolean_result
 
@@ -352,6 +364,8 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         """Returns either and ExpectationConfiguration object or None depending on evaluation of condition"""
         parameter_name: str
         fully_qualified_parameter_name: str
+        # print(f'\n[ALEX_TEST] [DefaultExpectationConfigurationBuilder._build_expectation_configuration()] SELF._KWARGS:\n{self._kwargs} ; TYPE: {str(type(self._kwargs))}')
+        # print(f'\n[ALEX_TEST] [DefaultExpectationConfigurationBuilder._build_expectation_configuration()] SELF.KWARGS:\n{self.kwargs} ; TYPE: {str(type(self.kwargs))}')
         expectation_kwargs: Dict[str, Any] = {
             parameter_name: get_parameter_value_and_validate_return_type(
                 domain=domain,
@@ -371,7 +385,9 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         )
 
         if self._condition:
+            # print(f'\n[ALEX_TEST] [DefaultExpectationConfigurationBuilder._build_expectation_configuration()] SELF._CONDITION:\n{self._condition} ; TYPE: {str(type(self._condition))}')
             parsed_condition: ParseResults = self._parse_condition()
+            # print(f'\n[ALEX_TEST] [DefaultExpectationConfigurationBuilder._build_expectation_configuration()] PARSED_CONDITION:\n{parsed_condition} ; TYPE: {str(type(parsed_condition))}')
             condition: bool = self._evaluate_condition(
                 parsed_condition=parsed_condition,
                 domain=domain,

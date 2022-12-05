@@ -3,11 +3,11 @@ from typing import Any, Dict, List, Optional
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.domain import Domain
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     DefaultExpectationConfigurationBuilder,
 )
@@ -198,6 +198,8 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
         domain=domain,
         parameters=parameters,
     )
+    # print(f'\n[ALEX_TEST] [WOUTPUT] PARAMETER_VALUE:\n{parameter_value} ; TYPE: {str(type(parameter_value))}')
+    # print(f'\n[ALEX_TEST] [WOUTPUT] PARAMETER_VALUE.VALUE:\n{parameter_value.value} ; TYPE: {str(type(parameter_value.value))}')
 
     condition: Optional[str] = None
     max_user_id: int = 999999999999
@@ -205,7 +207,7 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
-        min_value=parameter_value.value[0],
+        min_value=parameter_value.value[0][0],
         max_value=max_user_id,
     )
 
@@ -244,7 +246,9 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
         domain.id: parameter_container,
     }
 
-    fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
+    fully_qualified_parameter_name_for_value: str = (
+        "$parameter.my_min_user_id.value[0][0]"
+    )
 
     condition: Optional[str] = None
     max_user_id: int = 999999999999
@@ -327,14 +331,22 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
         domain=domain,
         parameters=parameters,
     )
+    # print(f'\n[ALEX_TEST] [WOUTPUT] PARAMETER_VALUE:\n{parameter_value} ; TYPE: {str(type(parameter_value))}')
+    # print(f'\n[ALEX_TEST] [WOUTPUT] PARAMETER_VALUE.VALUE:\n{parameter_value.value} ; TYPE: {str(type(parameter_value.value))}')
+    # print(f'\n[ALEX_TEST] [WOUTPUT] PARAMETER_VALUE.VALUE[0]:\n{parameter_value.value[0]} ; TYPE: {str(type(parameter_value.value[0]))}')
+    # print(f'\n[ALEX_TEST] [WOUTPUT] PARAMETER_VALUE.VALUE[0][0]:\n{parameter_value.value[0][0]} ; TYPE: {str(type(parameter_value.value[0][0]))}')
 
-    condition: str = "$parameter.my_min_user_id.value[0]>0"
+    # TODO: <Alex>ALEX</Alex>
+    condition: str = "$parameter.my_min_user_id.value[0][0]>0"
+    # TODO: <Alex>ALEX</Alex>
     max_user_id: int = 999999999999
 
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
-        min_value=parameter_value.value[0],
+        # TODO: <Alex>ALEX</Alex>
+        min_value=parameter_value.value[0][0],
+        # TODO: <Alex>ALEX</Alex>
         max_value=max_user_id,
     )
 
@@ -394,14 +406,22 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
         domain=domain,
         parameters=parameters,
     )
+    # print(f'\n[ALEX_TEST] [WOUTPUT] PARAMETER_VALUE:\n{parameter_value} ; TYPE: {str(type(parameter_value))}')
+    # print(f'\n[ALEX_TEST] [WOUTPUT] PARAMETER_VALUE.VALUE:\n{parameter_value.value} ; TYPE: {str(type(parameter_value.value))}')
+    # print(f'\n[ALEX_TEST] [WOUTPUT] PARAMETER_VALUE.VALUE[0]:\n{parameter_value.value[0]} ; TYPE: {str(type(parameter_value.value[0]))}')
+    # print(f'\n[ALEX_TEST] [WOUTPUT] PARAMETER_VALUE.VALUE[0][0]:\n{parameter_value.value[0][0]} ; TYPE: {str(type(parameter_value.value[0][0]))}')
 
-    condition: str = "$parameter.my_min_user_id.value[0]<0"
+    # TODO: <Alex>ALEX</Alex>
+    condition: str = "$parameter.my_min_user_id.value[0][0]<0"
+    # TODO: <Alex>ALEX</Alex>
     max_user_id: int = 999999999999
 
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
-        min_value=parameter_value.value[0],
+        # TODO: <Alex>ALEX</Alex>
+        min_value=parameter_value.value[0][0],
+        # TODO: <Alex>ALEX</Alex>
         max_value=max_user_id,
     )
 
@@ -471,7 +491,7 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
-        min_value=parameter_value.value[0],
+        min_value=parameter_value.value[0][0],
         max_value=max_value,
     )
 
@@ -542,7 +562,7 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
-        min_value=parameter_value.value[0],
+        min_value=parameter_value.value[0][0],
         max_value=max_value,
     )
 
@@ -600,14 +620,18 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
         batch_request=batch_request,
     )
 
-    fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
+    fully_qualified_parameter_name_for_value: str = (
+        "$parameter.my_min_user_id.value[0][0]"
+    )
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,
     )
 
-    condition: str = "$variables.max_user_id>0 & $parameter.my_min_user_id.value[0]>0"
+    condition: str = (
+        "$variables.max_user_id>0 & $parameter.my_min_user_id.value[0][0]>0"
+    )
     max_value: str = "$variables.max_user_id"
 
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
@@ -671,14 +695,18 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
         batch_request=batch_request,
     )
 
-    fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
+    fully_qualified_parameter_name_for_value: str = (
+        "$parameter.my_min_user_id.value[0][0]"
+    )
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,
     )
 
-    condition: str = "$variables.max_user_id<0 & $parameter.my_min_user_id.value[0]<0"
+    condition: str = (
+        "$variables.max_user_id<0 & $parameter.my_min_user_id.value[0][0]<0"
+    )
     max_value: str = "$variables.max_user_id"
 
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
@@ -742,14 +770,18 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
         batch_request=batch_request,
     )
 
-    fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
+    fully_qualified_parameter_name_for_value: str = (
+        "$parameter.my_min_user_id.value[0][0]"
+    )
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,
     )
 
-    condition: str = "$variables.max_user_id>0 | $parameter.my_min_user_id.value[0]<0"
+    condition: str = (
+        "$variables.max_user_id>0 | $parameter.my_min_user_id.value[0][0]<0"
+    )
     max_value: str = "$variables.max_user_id"
 
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
@@ -813,14 +845,18 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
         batch_request=batch_request,
     )
 
-    fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
+    fully_qualified_parameter_name_for_value: str = (
+        "$parameter.my_min_user_id.value[0][0]"
+    )
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,
     )
 
-    condition: str = "$variables.max_user_id<0 | $parameter.my_min_user_id.value[0]<0"
+    condition: str = (
+        "$variables.max_user_id<0 | $parameter.my_min_user_id.value[0][0]<0"
+    )
     max_value: str = "$variables.max_user_id"
 
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
@@ -884,14 +920,16 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
         batch_request=batch_request,
     )
 
-    fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
+    fully_qualified_parameter_name_for_value: str = (
+        "$parameter.my_min_user_id.value[0][0]"
+    )
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,
     )
 
-    condition: str = "$variables.max_user_id>0 & $variables.answer==42 | $parameter.my_min_user_id.value[0]<0"
+    condition: str = "$variables.max_user_id>0 & $variables.answer==42 | $parameter.my_min_user_id.value[0][0]<0"
     max_value: str = "$variables.max_user_id"
 
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
@@ -955,14 +993,16 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
         batch_request=batch_request,
     )
 
-    fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
+    fully_qualified_parameter_name_for_value: str = (
+        "$parameter.my_min_user_id.value[0][0]"
+    )
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,
     )
 
-    condition: str = "$variables.max_user_id<0 | $variables.answer!=42 | $parameter.my_min_user_id.value[0]<0"
+    condition: str = "$variables.max_user_id<0 | $variables.answer!=42 | $parameter.my_min_user_id.value[0][0]<0"
     max_value: str = "$variables.max_user_id"
 
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
@@ -1026,14 +1066,16 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
         batch_request=batch_request,
     )
 
-    fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
+    fully_qualified_parameter_name_for_value: str = (
+        "$parameter.my_min_user_id.value[0][0]"
+    )
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,
     )
 
-    condition: str = "($variables.max_user_id>0 & $variables.answer==42) | $parameter.my_min_user_id.value[0]<0"
+    condition: str = "($variables.max_user_id>0 & $variables.answer==42) | $parameter.my_min_user_id.value[0][0]<0"
     max_value: str = "$variables.max_user_id"
 
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
@@ -1097,14 +1139,16 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
         batch_request=batch_request,
     )
 
-    fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
+    fully_qualified_parameter_name_for_value: str = (
+        "$parameter.my_min_user_id.value[0][0]"
+    )
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,
     )
 
-    condition: str = "($variables.max_user_id<0 | $variables.answer!=42) | $parameter.my_min_user_id.value[0]<0"
+    condition: str = "($variables.max_user_id<0 | $variables.answer!=42) | $parameter.my_min_user_id.value[0][0]<0"
     max_value: str = "$variables.max_user_id"
 
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(

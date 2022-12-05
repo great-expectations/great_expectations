@@ -5,11 +5,13 @@ import pytest
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
+    IDDict,
 )
-from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -273,6 +275,7 @@ def test_is_sqlalchemy_metric_selectable():
 
 
 def test_pandas_unexpected_rows_basic_result_format(
+    in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index,
 ):
     expectation_configuration = ExpectationConfiguration(
@@ -289,10 +292,21 @@ def test_pandas_unexpected_rows_basic_result_format(
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
+    batch_definition = BatchDefinition(
+        datasource_name="pandas_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    batch = Batch(
+        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        batch_definition=batch_definition,
+    )
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
+        data_context=in_memory_runtime_context,
         batches=[
             batch,
         ],
@@ -317,6 +331,7 @@ def test_pandas_unexpected_rows_basic_result_format(
 
 
 def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_explicitly_false(
+    in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index,
 ):
     expectation_configuration = ExpectationConfiguration(
@@ -333,10 +348,21 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_explicitly
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
+    batch_definition = BatchDefinition(
+        datasource_name="pandas_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    batch = Batch(
+        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        batch_definition=batch_definition,
+    )
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
+        data_context=in_memory_runtime_context,
         batches=[
             batch,
         ],
@@ -362,6 +388,7 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_explicitly
 
 
 def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_including_unexpected_rows(
+    in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index,
 ):
     expectation_configuration = ExpectationConfiguration(
@@ -378,10 +405,21 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_including_
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
+    batch_definition = BatchDefinition(
+        datasource_name="pandas_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    batch = Batch(
+        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        batch_definition=batch_definition,
+    )
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
+        data_context=in_memory_runtime_context,
         batches=[
             batch,
         ],
@@ -412,6 +450,7 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_including_
 
 
 def test_pandas_unexpected_rows_complete_result_format(
+    in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index,
 ):
     expectation_configuration = ExpectationConfiguration(
@@ -427,10 +466,21 @@ def test_pandas_unexpected_rows_complete_result_format(
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
+    batch_definition = BatchDefinition(
+        datasource_name="pandas_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    batch = Batch(
+        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        batch_definition=batch_definition,
+    )
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
+        data_context=in_memory_runtime_context,
         batches=[
             batch,
         ],
@@ -462,6 +512,7 @@ def test_pandas_unexpected_rows_complete_result_format(
 
 
 def test_pandas_default_complete_result_format(
+    in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
@@ -476,10 +527,21 @@ def test_pandas_default_complete_result_format(
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch: Batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
+    batch_definition = BatchDefinition(
+        datasource_name="pandas_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    batch = Batch(
+        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        batch_definition=batch_definition,
+    )
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
+        data_context=in_memory_runtime_context,
         batches=[
             batch,
         ],
@@ -506,6 +568,7 @@ def test_pandas_default_complete_result_format(
 
 
 def test_pandas_single_unexpected_index_column_names_complete_result_format(
+    in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
@@ -521,10 +584,21 @@ def test_pandas_single_unexpected_index_column_names_complete_result_format(
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch: Batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
+    batch_definition = BatchDefinition(
+        datasource_name="pandas_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    batch = Batch(
+        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        batch_definition=batch_definition,
+    )
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
+        data_context=in_memory_runtime_context,
         batches=[
             batch,
         ],
@@ -559,6 +633,7 @@ def test_pandas_single_unexpected_index_column_names_complete_result_format(
 
 
 def test_pandas_multiple_unexpected_index_column_names_complete_result_format(
+    in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
@@ -574,10 +649,21 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format(
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch: Batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
+    batch_definition = BatchDefinition(
+        datasource_name="pandas_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    batch = Batch(
+        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        batch_definition=batch_definition,
+    )
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
+        data_context=in_memory_runtime_context,
         batches=[
             batch,
         ],
@@ -612,6 +698,7 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format(
 
 
 def test_pandas_multiple_unexpected_index_column_names_complete_result_format_limit_1(
+    in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
@@ -628,10 +715,21 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format_li
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch: Batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
+    batch_definition = BatchDefinition(
+        datasource_name="pandas_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    batch = Batch(
+        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        batch_definition=batch_definition,
+    )
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
+        data_context=in_memory_runtime_context,
         batches=[
             batch,
         ],
@@ -658,6 +756,7 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format_li
 
 
 def test_pandas_multiple_unexpected_index_column_names_summary_result_format(
+    in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
@@ -673,10 +772,21 @@ def test_pandas_multiple_unexpected_index_column_names_summary_result_format(
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch: Batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
+    batch_definition = BatchDefinition(
+        datasource_name="pandas_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    batch = Batch(
+        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        batch_definition=batch_definition,
+    )
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
+        data_context=in_memory_runtime_context,
         batches=[
             batch,
         ],
@@ -705,6 +815,7 @@ def test_pandas_multiple_unexpected_index_column_names_summary_result_format(
 
 
 def test_pandas_multiple_unexpected_index_column_names_summary_result_format_limit_1(
+    in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
@@ -721,10 +832,21 @@ def test_pandas_multiple_unexpected_index_column_names_summary_result_format_lim
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch: Batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
+    batch_definition = BatchDefinition(
+        datasource_name="pandas_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    batch = Batch(
+        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        batch_definition=batch_definition,
+    )
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
+        data_context=in_memory_runtime_context,
         batches=[
             batch,
         ],
@@ -747,6 +869,7 @@ def test_pandas_multiple_unexpected_index_column_names_summary_result_format_lim
 
 
 def test_pandas_multiple_unexpected_index_column_names_basic_result_format(
+    in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
@@ -762,10 +885,21 @@ def test_pandas_multiple_unexpected_index_column_names_basic_result_format(
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch: Batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
+    batch_definition = BatchDefinition(
+        datasource_name="pandas_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    batch = Batch(
+        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        batch_definition=batch_definition,
+    )
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
+        data_context=in_memory_runtime_context,
         batches=[
             batch,
         ],
@@ -784,6 +918,7 @@ def test_pandas_multiple_unexpected_index_column_names_basic_result_format(
 
 
 def test_pandas_single_unexpected_index_column_names_complete_result_format_non_existing_column(
+    in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
@@ -799,10 +934,21 @@ def test_pandas_single_unexpected_index_column_names_complete_result_format_non_
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch: Batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
+    batch_definition = BatchDefinition(
+        datasource_name="pandas_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    batch = Batch(
+        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        batch_definition=batch_definition,
+    )
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
+        data_context=in_memory_runtime_context,
         batches=[
             batch,
         ],
@@ -817,6 +963,7 @@ def test_pandas_single_unexpected_index_column_names_complete_result_format_non_
 
 
 def test_pandas_multiple_unexpected_index_column_names_complete_result_format_non_existing_column(
+    in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
@@ -834,10 +981,21 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format_no
         },
     )
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch: Batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
+    batch_definition = BatchDefinition(
+        datasource_name="pandas_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    batch = Batch(
+        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        batch_definition=batch_definition,
+    )
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
+        data_context=in_memory_runtime_context,
         batches=[
             batch,
         ],
@@ -852,6 +1010,7 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format_no
 
 
 def test_pandas_default_to_not_include_unexpected_rows(
+    in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index,
     expected_evr_without_unexpected_rows,
 ):
@@ -867,19 +1026,34 @@ def test_pandas_default_to_not_include_unexpected_rows(
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
+    batch_definition = BatchDefinition(
+        datasource_name="pandas_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    batch = Batch(
+        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        batch_definition=batch_definition,
+    )
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
+        data_context=in_memory_runtime_context,
         batches=[
             batch,
         ],
     )
     result = expectation.validate(validator)
+    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_pandas_default_to_not_include_unexpected_rows()] RESULT:\n{result} ; TYPE: {str(type(result))}')
+    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_pandas_default_to_not_include_unexpected_rows()] RESULT.RESULT:\n{result.result} ; TYPE: {str(type(result.result))}')
+    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_pandas_default_to_not_include_unexpected_rows()] EXPECTED_EVR_WITHOUT_UNEXPECTED_ROWS.RESULT:\n{expected_evr_without_unexpected_rows.result} ; TYPE: {str(type(expected_evr_without_unexpected_rows.result))}')
     assert result.result == expected_evr_without_unexpected_rows.result
 
 
 def test_pandas_specify_not_include_unexpected_rows(
+    in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index,
     expected_evr_without_unexpected_rows,
 ):
@@ -896,10 +1070,21 @@ def test_pandas_specify_not_include_unexpected_rows(
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
+    batch_definition = BatchDefinition(
+        datasource_name="pandas_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    batch = Batch(
+        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        batch_definition=batch_definition,
+    )
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
+        data_context=in_memory_runtime_context,
         batches=[
             batch,
         ],
@@ -909,6 +1094,7 @@ def test_pandas_specify_not_include_unexpected_rows(
 
 
 def test_include_unexpected_rows_without_explicit_result_format_raises_error(
+    in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index,
 ):
     expectation_configuration = ExpectationConfiguration(
@@ -923,10 +1109,21 @@ def test_include_unexpected_rows_without_explicit_result_format_raises_error(
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
+    batch_definition = BatchDefinition(
+        datasource_name="pandas_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    batch = Batch(
+        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        batch_definition=batch_definition,
+    )
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
+        data_context=in_memory_runtime_context,
         batches=[
             batch,
         ],
@@ -937,6 +1134,7 @@ def test_include_unexpected_rows_without_explicit_result_format_raises_error(
 
 # Spark
 def test_spark_single_column_complete_result_format(
+    in_memory_runtime_context,
     spark_dataframe_for_unexpected_rows_with_index,
 ):
     expectation_configuration = ExpectationConfiguration(
@@ -950,10 +1148,21 @@ def test_spark_single_column_complete_result_format(
         },
     )
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch: Batch = Batch(data=spark_dataframe_for_unexpected_rows_with_index)
+    batch_definition = BatchDefinition(
+        datasource_name="spark_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    batch = Batch(
+        data=spark_dataframe_for_unexpected_rows_with_index,
+        batch_definition=batch_definition,
+    )
     engine = SparkDFExecutionEngine()
     validator = Validator(
         execution_engine=engine,
+        data_context=in_memory_runtime_context,
         batches=[
             batch,
         ],
@@ -978,6 +1187,7 @@ def test_spark_single_column_complete_result_format(
 
 
 def test_spark_single_column_summary_result_format(
+    in_memory_runtime_context,
     spark_dataframe_for_unexpected_rows_with_index,
 ):
     expectation_configuration = ExpectationConfiguration(
@@ -991,10 +1201,21 @@ def test_spark_single_column_summary_result_format(
         },
     )
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch: Batch = Batch(data=spark_dataframe_for_unexpected_rows_with_index)
+    batch_definition = BatchDefinition(
+        datasource_name="spark_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    batch = Batch(
+        data=spark_dataframe_for_unexpected_rows_with_index,
+        batch_definition=batch_definition,
+    )
     engine = SparkDFExecutionEngine()
     validator = Validator(
         execution_engine=engine,
+        data_context=in_memory_runtime_context,
         batches=[
             batch,
         ],
@@ -1018,7 +1239,9 @@ def test_spark_single_column_summary_result_format(
 
 
 def test_sqlite_single_column_complete_result_format(
-    sa, sqlite_table_for_unexpected_rows_with_index
+    sa,
+    in_memory_runtime_context,
+    sqlite_table_for_unexpected_rows_with_index,
 ):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -1033,7 +1256,10 @@ def test_sqlite_single_column_complete_result_format(
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
     sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
     connection_string = f"sqlite:///{sqlite_path}"
-    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
+    engine = SqlAlchemyExecutionEngine(
+        connection_string=connection_string,
+        create_temp_table=False,
+    )
     execution_engine = engine
     my_data_connector: ConfiguredAssetSqlDataConnector = (
         ConfiguredAssetSqlDataConnector(
@@ -1047,6 +1273,28 @@ def test_sqlite_single_column_complete_result_format(
             },
         )
     )
+
+    # TODO: <Alex>ALEX</Alex>
+    context = in_memory_runtime_context
+    context.datasources["my_test_datasource"] = Datasource(
+        name="my_test_datasource",
+        execution_engine=execution_engine.config,
+        data_connectors={
+            "my_sql_data_connector": {
+                "class_name": "ConfiguredAssetSqlDataConnector",
+                "assets": {
+                    "my_asset": {
+                        "table_name": "animals_table",
+                    },
+                },
+            },
+        },
+    )
+    # TODO: <Alex>ALEX</Alex>
+    # a = context.datasources["my_test_datasource"].get_available_data_asset_names()
+    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] AVAILABLE_ASSET_NAMES:\n{a} ; TYPE: {str(type(a))}')
+    # TODO: <Alex>ALEX</Alex>
+
     batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
@@ -1057,14 +1305,28 @@ def test_sqlite_single_column_complete_result_format(
         )
     )
     assert len(batch_definition_list) == 1
+    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] BATCH_DEFINITION:\n{batch_definition_list[0]} ; TYPE: {str(type(batch_definition_list[0]))}')
     batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
         batch_definition=batch_definition_list[0]
     )
+    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] BATCH_SPEC:\n{batch_spec} ; TYPE: {str(type(batch_spec))}')
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=batch_spec
     )
-    batch = Batch(data=batch_data)
-    validator = Validator(execution_engine, batches=[batch])
+    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] BATCH_DATA:\n{batch_data} ; TYPE: {str(type(batch_data))}')
+    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] BATCH_DATA.SELECTABLE:\n{batch_data.selectable} ; TYPE: {str(type(batch_data.selectable))}')
+    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] BATCH_DATA.DIALECT:\n{batch_data.dialect} ; TYPE: {str(type(batch_data.dialect))}')
+    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] BATCH_DATA.SQL_ENGINE_DIALECT:\n{batch_data.sql_engine_dialect} ; TYPE: {str(type(batch_data.sql_engine_dialect))}')
+    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] BATCH_DATA.SOURCE_SCHEMA_NAME:\n{batch_data.source_schema_name} ; TYPE: {str(type(batch_data.source_schema_name))}')
+    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] BATCH_DATA.SOURCE_TABLE_NAME:\n{batch_data.source_table_name} ; TYPE: {str(type(batch_data.source_table_name))}')
+    batch = Batch(data=batch_data, batch_definition=batch_definition_list[0])
+    validator = Validator(
+        execution_engine=engine,
+        data_context=context,
+        batches=[
+            batch,
+        ],
+    )
     result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
@@ -1085,7 +1347,7 @@ def test_sqlite_single_column_complete_result_format(
 
 
 def test_sqlite_single_column_summary_result_format(
-    sa, sqlite_table_for_unexpected_rows_with_index
+    sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -1100,7 +1362,10 @@ def test_sqlite_single_column_summary_result_format(
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
     sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
     connection_string = f"sqlite:///{sqlite_path}"
-    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
+    engine = SqlAlchemyExecutionEngine(
+        connection_string=connection_string,
+        create_temp_table=False,
+    )
     execution_engine = engine
     my_data_connector: ConfiguredAssetSqlDataConnector = (
         ConfiguredAssetSqlDataConnector(
@@ -1114,6 +1379,25 @@ def test_sqlite_single_column_summary_result_format(
             },
         )
     )
+
+    # TODO: <Alex>ALEX</Alex>
+    context = in_memory_runtime_context
+    context.datasources["my_test_datasource"] = Datasource(
+        name="my_test_datasource",
+        execution_engine=execution_engine.config,
+        data_connectors={
+            "my_sql_data_connector": {
+                "class_name": "ConfiguredAssetSqlDataConnector",
+                "assets": {
+                    "my_asset": {
+                        "table_name": "animals_table",
+                    },
+                },
+            },
+        },
+    )
+    # TODO: <Alex>ALEX</Alex>
+
     batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
@@ -1130,8 +1414,14 @@ def test_sqlite_single_column_summary_result_format(
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=batch_spec
     )
-    batch = Batch(data=batch_data)
-    validator = Validator(execution_engine, batches=[batch])
+    batch = Batch(data=batch_data, batch_definition=batch_definition_list[0])
+    validator = Validator(
+        execution_engine=engine,
+        data_context=context,
+        batches=[
+            batch,
+        ],
+    )
     result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,

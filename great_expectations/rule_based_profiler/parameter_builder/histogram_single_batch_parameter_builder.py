@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Set
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.domain import Domain
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
     get_parameter_value_and_validate_return_type,
@@ -144,6 +144,10 @@ elements.
 """
             )
 
+        # TODO: <Alex>ALEX</Alex>
+        bins = bins[0]
+        # print(f'\n[ALEX_TEST] [WOUTPUT] BINS-0:\n{bins} ; TYPE: {str(type(bins))}')
+        # TODO: <Alex>ALEX</Alex>
         if not np.issubdtype(bins.dtype, np.number):
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"""Partitioning values for {self.__class__.__name__} by \
@@ -206,11 +210,13 @@ elements.
         )
 
         weights: np.ndarray = np.asarray(
-            parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
+            parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY][0]  # <ALEX>
         ) / (
             column_values_nonnull_count_parameter_node[
                 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-            ]
+            ][
+                0
+            ]  # <ALEX>
             + NP_EPSILON
         )
         tail_weights: float = (1.0 - sum(weights)) / 2.0

@@ -3,12 +3,12 @@ from typing import Any, Dict, List, Optional
 from contrib.experimental.great_expectations_experimental.rule_based_profiler.data_assistant_result import (
     StatisticsDataAssistantResult,
 )
+from great_expectations.core.domain import SemanticDomainTypes
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
-from great_expectations.rule_based_profiler.domain import SemanticDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import (
     ColumnDomainBuilder,
     DomainBuilder,

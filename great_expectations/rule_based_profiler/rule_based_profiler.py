@@ -14,6 +14,7 @@ from great_expectations.core.batch import (
     batch_request_contains_batch_data,
 )
 from great_expectations.core.config_peer import ConfigPeer
+from great_expectations.core.domain import Domain
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
@@ -43,7 +44,6 @@ from great_expectations.rule_based_profiler.config.base import (
     expectationConfigurationBuilderConfigSchema,
     parameterBuilderConfigSchema,
 )
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
 )
@@ -270,7 +270,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
             "RuleBasedProfilerResult" dataclass object, containing essential outputs of profiling.
         """
         # Check to see if the user has disabled progress bars
-        disable = False
+        # TODO: <Alex>ALEX</Alex>
+        # disable = False
+        # TODO: <Alex>ALEX</Alex>
         if self._data_context:
             progress_bars = self._data_context.progress_bars
             # If progress_bars are not present, assume we want them enabled
@@ -281,6 +283,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 if "rule_based_profiler" in progress_bars:
                     disable = not progress_bars["rule_based_profiler"]
 
+        # TODO: <Alex>ALEX</Alex>
+        disable = True
+        # TODO: <Alex>ALEX</Alex>
         effective_variables: Optional[
             ParameterContainer
         ] = self.reconcile_profiler_variables(

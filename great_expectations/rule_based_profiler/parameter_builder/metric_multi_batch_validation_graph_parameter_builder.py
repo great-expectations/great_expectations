@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
+from great_expectations.core.domain import Domain
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.metric_computation_result import (
     MetricComputationDetails,
     MetricComputationResult,
@@ -114,19 +114,13 @@ class MetricMultiBatchValidationGraphParameterBuilder(ParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        print(
-            f"\n[ALEX_TEST] [MetricMultiBatchValidationGraphParameterBuilder._build_parameters()] METRIC_COMPUTATION_RESULT:\n{metric_computation_result} ; TYPE: {str(type(metric_computation_result))}"
-        )
+        # print(f"\n[ALEX_TEST] [MetricMultiBatchValidationGraphParameterBuilder._build_parameters()] METRIC_COMPUTATION_RESULT:\n{metric_computation_result} ; TYPE: {str(type(metric_computation_result))}")
         details: MetricComputationDetails = metric_computation_result.details
         # TODO: <Alex>ALEX</Alex>
-        graph: ValidationGraph = details["graph"]
-        print(
-            f"\n[ALEX_TEST] [MetricMultiBatchValidationGraphParameterBuilder._build_parameters()] METRIC_COMPUTATION_RESULT.GRAPH:\n{graph} ; TYPE: {str(type(graph))}"
-        )
+        # graph: ValidationGraph = details["graph"]
+        # print(f"\n[ALEX_TEST] [MetricMultiBatchValidationGraphParameterBuilder._build_parameters()] METRIC_COMPUTATION_RESULT.GRAPH:\n{graph} ; TYPE: {str(type(graph))}")
         # TODO: <Alex>ALEX</Alex>
-        print(
-            f"\n[ALEX_TEST] [MetricMultiBatchValidationGraphParameterBuilder._build_parameters()] METRIC_COMPUTATION_RESULT.DETAILS:\n{details} ; TYPE: {str(type(details))}"
-        )
+        # print(f"\n[ALEX_TEST] [MetricMultiBatchValidationGraphParameterBuilder._build_parameters()] METRIC_COMPUTATION_RESULT.DETAILS:\n{details} ; TYPE: {str(type(details))}")
         # print(f'\n[ALEX_TEST] [MetricMultiBatchValidationGraphParameterBuilder._build_parameters()] METRIC_COMPUTATION_RESULT.ATTRIBUTED_RESOLVED_METRICS:\n{metric_computation_result.attributed_resolved_metrics} ; TYPE: {str(type(metric_computation_result.attributed_resolved_metrics))} ; LEN: {len(metric_computation_result.attributed_resolved_metrics)}')
         return Attributes(
             {

@@ -20,6 +20,11 @@ from ruamel.yaml import YAML
 import great_expectations as ge
 from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.domain import (
+    INFERRED_SEMANTIC_TYPE_KEY,
+    Domain,
+    SemanticDomainTypes,
+)
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -61,11 +66,6 @@ from great_expectations.datasource.new_datasource import BaseDatasource, Datasou
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
-)
-from great_expectations.rule_based_profiler.domain import (
-    INFERRED_SEMANTIC_TYPE_KEY,
-    Domain,
-    SemanticDomainTypes,
 )
 from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
     NumericMetricRangeMultiBatchParameterBuilder,
@@ -2232,10 +2232,12 @@ introspection:
 
 @pytest.fixture
 def basic_datasource(tmp_path_factory):
-    base_directory: str = str(
-        tmp_path_factory.mktemp("basic_datasource_runtime_data_connector")
-    )
-
+    # TODO: <Alex>ALEX</Alex>
+    # base_directory: str = str(
+    #     tmp_path_factory.mktemp("basic_datasource_runtime_data_connector")
+    # )
+    #
+    # TODO: <Alex>ALEX</Alex>
     basic_datasource: Datasource = instantiate_class_from_config(
         config=yaml.load(
             """
@@ -7066,6 +7068,8 @@ def build_in_memory_runtime_context():
                     }
                 },
             },
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
         },
         expectations_store_name="expectations_store",
         validations_store_name="validations_store",

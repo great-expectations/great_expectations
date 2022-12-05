@@ -10,8 +10,8 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Unio
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.domain import Domain
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.estimators.bootstrap_numeric_range_estimator import (
     BootstrapNumericRangeEstimator,
 )
@@ -135,6 +135,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         ] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
+        # print(f'\n[ALEX_TEST] [NumericMetricRangeMultiBatchParameterBuilder.__INIT__()] **************************************NAME:\n{name} ; TYPE: {str(type(name))}')
         """
         Args:
             name: the name of this parameter -- this is user-specified parameter name (from configuration); it is not
@@ -303,6 +304,7 @@ detected.
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         recompute_existing_parameter_values: bool = False,
     ) -> Attributes:
+        # print(f'\n[ALEX_TEST] [NumericMetricRangeMultiBatchParameterBuilder._build_parameters()] **************************************DOMAIN:\n{domain} ; TYPE: {str(type(domain))}')
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
 
@@ -359,6 +361,7 @@ detected.
         metric_values: MetricValues = parameter_node[
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
         ]
+        # print(f'\n[ALEX_TEST] [WOUTPUT] **************************************WOUTPUT:\n{metric_values} ; TYPE: {str(type(metric_values))}')
 
         round_decimals: int
         if integer_semantic_domain_type(domain=domain):
@@ -391,6 +394,7 @@ detected.
         )
 
         value_range: np.ndarray = numeric_range_estimation_result.value_range
+        # print(f'\n[ALEX_TEST] [WOUTPUT] **************************************VALUE_RANGE:\n{value_range} ; TYPE: {str(type(value_range))}')
         details: Dict[str, Any] = copy.deepcopy(
             parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]
         )

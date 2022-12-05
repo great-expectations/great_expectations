@@ -22,11 +22,11 @@ from great_expectations.core.batch import (
     RuntimeBatchRequest,
     materialize_batch_request,
 )
-from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain import (
+from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     SemanticDomainTypes,
 )
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
     NUM_HISTOGRAM_BINS,
     NumericRangeEstimationResult,
@@ -158,15 +158,9 @@ def get_batch_ids(
 
     num_batch_ids: int = len(batch_ids)
 
-    print(
-        f"\n[ALEX_TEST] [RULE_BASED_PROFILER.HELPERS.UTIL.GET_BATCH_IDS()] BATCH_IDS:\n{batch_ids} ; TYPE: {str(type(batch_ids))}"
-    )
-    print(
-        f"\n[ALEX_TEST] [RULE_BASED_PROFILER.HELPERS.UTIL.GET_BATCH_IDS()] NUM_BATCH_IDS:\n{num_batch_ids} ; TYPE: {str(type(num_batch_ids))}"
-    )
-    print(
-        f"\n[ALEX_TEST] [RULE_BASED_PROFILER.HELPERS.UTIL.GET_BATCH_IDS()] LIMIT:\n{limit} ; TYPE: {str(type(limit))}"
-    )
+    # print(f"\n[ALEX_TEST] [RULE_BASED_PROFILER.HELPERS.UTIL.GET_BATCH_IDS()] BATCH_IDS:\n{batch_ids} ; TYPE: {str(type(batch_ids))}")
+    # print(f"\n[ALEX_TEST] [RULE_BASED_PROFILER.HELPERS.UTIL.GET_BATCH_IDS()] NUM_BATCH_IDS:\n{num_batch_ids} ; TYPE: {str(type(num_batch_ids))}")
+    # print(f"\n[ALEX_TEST] [RULE_BASED_PROFILER.HELPERS.UTIL.GET_BATCH_IDS()] LIMIT:\n{limit} ; TYPE: {str(type(limit))}")
     if limit is not None:
         # No need to verify that type of "limit" is "integer", because static type checking already ascertains this.
         if not (0 <= limit <= num_batch_ids):

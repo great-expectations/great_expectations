@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Set
 
 import numpy as np
 
+from great_expectations.core.domain import Domain
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
     get_parameter_value_and_validate_return_type,
@@ -145,17 +145,35 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
             parameters=parameters,
         )
 
+        # print(f'\n[ALEX_TEST] [ValueCountsSingleBatchParameterBuilder._build_parameters()] COLUMN_VALUE_COUNTS_PARAMETER_NODE:\n{column_value_counts_parameter_node} ; TYPE: {str(type(column_value_counts_parameter_node))}')
+        # print(f'\n[ALEX_TEST] [ValueCountsSingleBatchParameterBuilder._build_parameters()] COLUMN_VALUE_COUNTS_PARAMETER_NODE.VALUE:\n{column_value_counts_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]} ; TYPE: {str(type(column_value_counts_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]))}')
+        # print(f'\n[ALEX_TEST] [ValueCountsSingleBatchParameterBuilder._build_parameters()] COLUMN_VALUE_COUNTS_PARAMETER_NODE.VALUE[0]:\n{column_value_counts_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY][0]} ; TYPE: {str(type(column_value_counts_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY][0]))}')
+        # TODO: <Alex>ALEX</Alex>
+        # values: list = list(
+        #     column_value_counts_parameter_node[
+        #         FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
+        #     ].index
+        # )
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
         values: list = list(
             column_value_counts_parameter_node[
                 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-            ].index
+            ][0].index
         )
+        # TODO: <Alex>ALEX</Alex>
         weights: np.ndarray = np.asarray(
-            column_value_counts_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
+            column_value_counts_parameter_node[
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
+            ][
+                0
+            ]  # <ALEX>
         ) / (
             column_values_nonnull_count_parameter_node[
                 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-            ]
+            ][
+                0
+            ]  # <ALEX>
             + NP_EPSILON
         )
 

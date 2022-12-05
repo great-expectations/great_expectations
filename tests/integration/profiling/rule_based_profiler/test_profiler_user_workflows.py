@@ -16,6 +16,9 @@ from ruamel.yaml.comments import CommentedMap
 # To support python 3.7 we must import Protocol from typing_extensions instead of typing
 from typing_extensions import Protocol
 
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.core.usage_statistics.events import UsageStatsEvents
+# TODO: <Alex>ALEX</Alex>
 from great_expectations import DataContext
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -23,6 +26,11 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.domain import (
+    INFERRED_SEMANTIC_TYPE_KEY,
+    Domain,
+    SemanticDomainTypes,
+)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.datasource import DataConnector, Datasource
@@ -35,11 +43,6 @@ from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfig,
     ruleBasedProfilerConfigSchema,
-)
-from great_expectations.rule_based_profiler.domain import (
-    INFERRED_SEMANTIC_TYPE_KEY,
-    Domain,
-    SemanticDomainTypes,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator_with_expectation_suite,
@@ -272,6 +275,18 @@ def test_alice_profiler_user_workflow_single_batch(
                 "estimation_histogram", None
             )
 
+    # print(f'\n[ALEX_TEST] [WOUTPUT] RESULT.EXPECTATION_CONFIGURATIONS:\n{result.expectation_configurations} ; TYPE: {str(type(result.expectation_configurations))}')
+    # print(f'\n[ALEX_TEST] [WOUTPUT] NUM_RESULT.EXPECTATION_CONFIGURATIONS:\n{len(result.expectation_configurations)} ; TYPE: {str(type(len(result.expectation_configurations)))}')
+    # print(f'\n[ALEX_TEST] [WOUTPUT] ALICE_COLUMNAR_TABLE_SINGLE_BATCH.EXPECTED_EXPECTATION_CONFIGURATIONS:\n{alice_columnar_table_single_batch["expected_expectation_suite"].expectations} ; TYPE: {str(type(alice_columnar_table_single_batch["expected_expectation_suite"].expectations))}')
+    # print(f'\n[ALEX_TEST] [WOUTPUT] NUM_ALICE_COLUMNAR_TABLE_SINGLE_BATCH.EXPECTED_EXPECTATION_CONFIGURATIONS:\n{len(alice_columnar_table_single_batch["expected_expectation_suite"].expectations)} ; TYPE: {str(type(len(alice_columnar_table_single_batch["expected_expectation_suite"].expectations)))}')
+    # # TODO: <Alex>ALEX</Alex>
+    # for i, a in enumerate(result.expectation_configurations):
+    #     b = alice_columnar_table_single_batch["expected_expectation_suite"].expectations[i]
+    #     if a!=b:
+    #         print(f'\n[ALEX_TEST] [WOUTPUT] NUM_ALICE_COLUMNAR_TABLE_SINGLE_BATCH.PROBLEM_AT[{i}]-RESULT:\n{a} ; TYPE: {str(type(a))}')
+    #         print(f'\n[ALEX_TEST] [WOUTPUT] NUM_ALICE_COLUMNAR_TABLE_SINGLE_BATCH.PROBLEM_AT[{i}]-EXPECT:\n{b} ; TYPE: {str(type(b))}')
+    #     # assert a == b, f"PROBLEM AT: {i}"
+    # # TODO: <Alex>ALEX</Alex>
     assert (
         result.expectation_configurations
         == alice_columnar_table_single_batch["expected_expectation_suite"].expectations
@@ -323,12 +338,12 @@ def test_alice_profiler_user_workflow_single_batch(
                             {
                                 "parent_class": "DefaultExpectationConfigurationBuilder",
                                 "anonymized_expectation_type": "49e0013b377d4c7d9604d73fd672aa63",
-                                "anonymized_condition": "5191ecaeb23644e402e68b1c641b1342",
+                                "anonymized_condition": "ef23fb6147ec6f8281534a051338c85a",
                             },
                             {
                                 "parent_class": "DefaultExpectationConfigurationBuilder",
                                 "anonymized_expectation_type": "5a4993ff394c8cf957dbe7964798f5a5",
-                                "anonymized_condition": "a7f49ffeced7b75c9e0d958e9d010ddd",
+                                "anonymized_condition": "8f7c53c7a7e8d7dd24a94f9723fea360",
                             },
                         ],
                     },
@@ -404,10 +419,16 @@ def test_alice_profiler_user_workflow_single_batch(
                 "rule_count": 3,
                 "variable_count": 5,
             },
+            # TODO: <Alex>ALEX</Alex>
             "event": "profiler.run",
+            # TODO: <Alex"profiler.run">ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # "event": UsageStatsEvents.RULE_BASED_PROFILER_RUN,
+            # TODO: <Alex>ALEX</Alex>
             "success": True,
         }
     )
+    # print(f'\n[ALEX_TEST] [WOUTPUT] MOCK_EMIT.CALL_ARGS_LIST[-1]:\n{mock_emit.call_args_list[-1]} ; TYPE: {str(type(mock_emit.call_args_list[-1]))}')
     assert mock_emit.call_args_list[-1] == expected_profiler_run_event
 
     # Confirm that logs do not contain any exceptions or invalid messages
@@ -1090,7 +1111,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
                             "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                             "expectation_type": "expect_column_values_to_be_between",
                             "column": "$domain.domain_kwargs.column",
-                            "min_value": "$parameter.my_min_estimator.value[0]",
+                            "min_value": "$parameter.my_min_estimator.value[0][0]",
                             "mostly": "$variables.mostly",
                             "strict_min": "$variables.strict_min",
                             "meta": {
@@ -1224,7 +1245,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
                             "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                             "expectation_type": "expect_column_values_to_be_between",
                             "column": "$domain.domain_kwargs.column",
-                            "min_value": "$parameter.my_min_estimator.value[0]",
+                            "min_value": "$parameter.my_min_estimator.value[0][0]",
                             "mostly": "$variables.mostly",
                             "strict_min": "$variables.strict_min",
                             "meta": {
@@ -1343,7 +1364,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
                             "class_name": "DefaultExpectationConfigurationBuilder",
                             "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                             "column": "$domain.domain_kwargs.column",
-                            "min_value": "$parameter.my_min_estimator.value[0]",
+                            "min_value": "$parameter.my_min_estimator.value[0][0]",
                             "mostly": "$variables.mostly",
                             "strict_min": "$variables.strict_min",
                             "meta": {
@@ -1485,7 +1506,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
                             "class_name": "DefaultExpectationConfigurationBuilder",
                             "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                             "column": "$domain.domain_kwargs.column",
-                            "min_value": "$parameter.my_min_estimator.value[0]",
+                            "min_value": "$parameter.my_min_estimator.value[0][0]",
                             "mostly": "$variables.mostly",
                             "strict_min": "$variables.strict_min",
                             "meta": {

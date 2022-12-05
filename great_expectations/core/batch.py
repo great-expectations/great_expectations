@@ -547,12 +547,18 @@ class Batch(SerializableDictDot):
         self._data = data
         if batch_request is None:
             batch_request = {}
+
         self._batch_request = batch_request
+
+        # TODO: <Alex>ALEX</Alex>
         if batch_definition is None:
             batch_definition = IDDict()
+        # TODO: <Alex>ALEX</Alex>
         self._batch_definition = batch_definition
+
         if batch_spec is None:
             batch_spec = BatchSpec()
+
         self._batch_spec = batch_spec
 
         if batch_markers is None:
@@ -563,7 +569,10 @@ class Batch(SerializableDictDot):
                     ).strftime("%Y%m%dT%H%M%S.%fZ")
                 }
             )
+
+        # TODO: <Alex>ALEX</Alex>
         self._batch_markers = batch_markers
+        # TODO: <Alex>ALEX</Alex>
 
         # The remaining parameters are for backward compatibility.
         self._data_context = data_context
@@ -645,11 +654,25 @@ class Batch(SerializableDictDot):
     @property
     def id(self):
         batch_definition = self._batch_definition
-        return (
-            batch_definition.id
-            if isinstance(batch_definition, BatchDefinition)
-            else batch_definition.to_id()
-        )
+        # TODO: <Alex>ALEX</Alex>
+        if isinstance(batch_definition, BatchDefinition):
+            return batch_definition.id
+
+        if isinstance(batch_definition, IDDict):
+            return batch_definition.to_id()
+
+        if isinstance(batch_definition, dict):
+            return IDDict(batch_definition).to_id()
+
+        return IDDict({}).to_id()
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # return (
+        #     batch_definition.id
+        #     if isinstance(batch_definition, BatchDefinition)
+        #     else batch_definition.to_id()
+        # )
+        # TODO: <Alex>ALEX</Alex>
 
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)

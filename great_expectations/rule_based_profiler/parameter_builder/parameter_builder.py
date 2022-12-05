@@ -14,6 +14,7 @@ import pandas as pd
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequestBase
+from great_expectations.core.domain import Domain
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
@@ -21,7 +22,6 @@ from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
 )
 from great_expectations.rule_based_profiler.builder import Builder
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     build_metric_domain_kwargs,
 )
@@ -468,16 +468,11 @@ specified (empty "metric_name" value detected)."""
                 runtime_configuration=None,
             )
         )
-        print(
-            f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] GRAPH:\n{graph} ; TYPE: {str(type(graph))}"
-        )
         # TODO: <Alex>ALEX</Alex>
-        print(
-            f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] GRAPH.EDGES:\n{graph.edges} ; TYPE: {str(type(graph.edges))}"
-        )
-        print(
-            f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] GRAPH.EDGE_IDS:\n{graph.edge_ids} ; TYPE: {str(type(graph.edge_ids))}"
-        )
+        # print(f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] GRAPH:\n{graph} ; TYPE: {str(type(graph))}")
+        # TODO: <Alex>ALEX</Alex>
+        # print(f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] GRAPH.EDGES:\n{graph.edges} ; TYPE: {str(type(graph.edges))}")
+        # print(f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] GRAPH.EDGE_IDS:\n{graph.edge_ids} ; TYPE: {str(type(graph.edge_ids))}")
         # TODO: <Alex>ALEX</Alex>
 
         # TODO: <Alex>ALEX</Alex>
@@ -507,9 +502,7 @@ is not supported).
 """
             )
         # TODO: <Alex>ALEX</Alex>
-        print(
-            f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] MULTI_BATCH_COMPUTATION_RESULT_FORMAT:\n{result_format} ; TYPE: {str(type(result_format))}"
-        )
+        # print(f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] MULTI_BATCH_COMPUTATION_RESULT_FORMAT:\n{result_format} ; TYPE: {str(type(result_format))}")
 
         details: dict = {
             "metric_configuration": {
@@ -587,19 +580,51 @@ is not supported).
                 )
                 continue
 
+        # TODO: <Alex>ALEX</Alex>
         # Step-6: Convert scalar metric values to vectors to enable uniformity of processing in subsequent operations.
+        # TODO: <Alex>ALEX</Alex>
 
         metric_attributes_id: str
+        # TODO: <Alex>ALEX</Alex>
+        # for (
+        #     metric_attributes_id,
+        #     attributed_resolved_metrics,
+        # ) in attributed_resolved_metrics_map.items():
+        #     if (
+        #         isinstance(
+        #             attributed_resolved_metrics.conditioned_metric_values,
+        #             np.ndarray,
+        #         )
+        #         and attributed_resolved_metrics.conditioned_metric_values.ndim == 1
+        #     ):
+        #         attributed_resolved_metrics.metric_values_by_batch_id = {
+        #             batch_id: [resolved_metric_value]
+        #             for batch_id, resolved_metric_value in attributed_resolved_metrics.attributed_metric_values.items()
+        #         }
+        #         attributed_resolved_metrics_map[
+        #             metric_attributes_id
+        #         ] = attributed_resolved_metrics
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
         for (
             metric_attributes_id,
             attributed_resolved_metrics,
         ) in attributed_resolved_metrics_map.items():
             if (
-                isinstance(
-                    attributed_resolved_metrics.conditioned_metric_values,
-                    np.ndarray,
-                )
-                and attributed_resolved_metrics.conditioned_metric_values.ndim == 1
+                # TODO: <Alex>ALEX</Alex>
+                # True
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                attributed_resolved_metrics.conditioned_metric_values
+                is not None
+                # TODO: <Alex>ALEX</Alex>
+                # isinstance(
+                #     attributed_resolved_metrics.conditioned_metric_values,
+                #     np.ndarray,
+                # )
+                # TODO: <Alex>ALEX</Alex>
+                # and attributed_resolved_metrics.conditioned_metric_values.ndim == 1
+                # TODO: <Alex>ALEX</Alex>
             ):
                 attributed_resolved_metrics.metric_values_by_batch_id = {
                     batch_id: [resolved_metric_value]
@@ -608,6 +633,7 @@ is not supported).
                 attributed_resolved_metrics_map[
                     metric_attributes_id
                 ] = attributed_resolved_metrics
+        # TODO: <Alex>ALEX</Alex>
 
         # Step-7: Apply numeric/hygiene flags (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
 

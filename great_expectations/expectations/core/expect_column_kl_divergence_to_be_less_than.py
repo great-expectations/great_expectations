@@ -461,6 +461,8 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             )
             # Sort not available before pandas 0.23.0
             # test_df = pd.concat([expected_weights, observed_weights], axis=1, sort=True)
+            # print(f'\n[ALEX_TEST] [ExpectColumnKlDivergenceToBeLessThan._VALIDATE()] EXPECTED_WEIGHTS:\n{expected_weights} ; TYPE: {str(type(expected_weights))}')
+            # print(f'\n[ALEX_TEST] [ExpectColumnKlDivergenceToBeLessThan._VALIDATE()] OBSERVED_WEIGHTS:\n{observed_weights} ; TYPE: {str(type(observed_weights))}')
             test_df = pd.concat([expected_weights, observed_weights], axis=1)
 
             na_counts = test_df.isnull().sum()
