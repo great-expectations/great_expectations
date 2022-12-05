@@ -41,8 +41,8 @@ class _RendererParamsBase(BaseModel):
     ) -> DictStrAny:
         """
         Override BaseModel dict to make the defaults:
-            - by_alias=True instead of False. We need by_alias to be set to True in RendererParams, because we have
-              an existing attribute named schema, and schema is already a Pydantic BaseModel attribute.
+            - by_alias=True because we have an existing attribute named schema, and schema is already a Pydantic
+              BaseModel attribute.
             - exclude_none=True to ensure that None values aren't included in the json dict.
 
         In practice this means the renderer implementer doesn't need to use .dict(by_alias=True, exclude_none=True)
@@ -130,7 +130,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             elif isinstance(other, dict):
                 return self.dict() == other
             else:
-                return self.value == other
+                return self == other
 
     def add_param(
         self,

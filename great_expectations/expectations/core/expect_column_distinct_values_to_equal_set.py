@@ -16,7 +16,6 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     ParamSchemaType,
     RendererConfiguration,
-    RendererParams,
 )
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
@@ -130,10 +129,10 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
         for name, schema_type in add_param_args:
             renderer_configuration.add_param(name=name, schema_type=schema_type)
 
-        params: RendererParams = renderer_configuration.params
+        params = renderer_configuration.params
         template_str = ""
 
-        if params.value_set.value:
+        if params.value_set:
             renderer_configuration = cls._add_value_set_params(
                 renderer_configuration=renderer_configuration
             )
@@ -142,13 +141,13 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
             )
             template_str += f"distinct values must match this set: {value_set_str}."
 
-            if params.parse_strings_as_datetimes.value:
+            if params.parse_strings_as_datetimes:
                 template_str += " Values should be parsed as datetimes."
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
-        if params.row_condition.value:
+        if params.row_condition:
             renderer_configuration = cls._add_row_condition_params(
                 renderer_configuration=renderer_configuration
             )

@@ -150,8 +150,6 @@ snapshots[
         "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
-            "row_condition": {"schema": {"type": "string"}, "value": None},
             "v__0": {"schema": {"type": "number"}, "value": 1},
             "v__1": {"schema": {"type": "number"}, "value": 2},
             "v__2": {"schema": {"type": "number"}, "value": 3},
@@ -171,12 +169,10 @@ snapshots[
         "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "parse_strings_as_datetimes": {
                 "schema": {"type": "boolean"},
                 "value": True,
             },
-            "row_condition": {"schema": {"type": "string"}, "value": None},
             "v__0": {"schema": {"type": "string"}, "value": "a"},
             "v__1": {"schema": {"type": "string"}, "value": "b"},
             "v__2": {"schema": {"type": "string"}, "value": "c"},
@@ -196,12 +192,10 @@ snapshots[
         "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "parse_strings_as_datetimes": {
                 "schema": {"type": "boolean"},
                 "value": True,
             },
-            "row_condition": {"schema": {"type": "string"}, "value": None},
             "v__0": {"schema": {"type": "string"}, "value": "a"},
             "v__1": {"schema": {"type": "string"}, "value": "b"},
             "v__2": {"schema": {"type": "string"}, "value": "c"},
@@ -696,14 +690,12 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_in_set 1"
         "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
             "parse_strings_as_datetimes": {
                 "schema": {"type": "boolean"},
                 "value": True,
             },
-            "row_condition": {"schema": {"type": "string"}, "value": None},
             "v__0": {"schema": {"type": "number"}, "value": 1},
             "v__1": {"schema": {"type": "number"}, "value": 2},
             "v__2": {"schema": {"type": "number"}, "value": 3},
@@ -791,10 +783,8 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_null 1"] 
         "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
-            "row_condition": {"schema": {"type": "string"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "$column values must be null, at least $mostly_pct % of the time.",
@@ -810,9 +800,7 @@ snapshots[
         "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "mostly": {"schema": {"type": "number"}, "value": 1.0},
-            "row_condition": {"schema": {"type": "string"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "$column values must be null.",
@@ -947,14 +935,8 @@ snapshots[
         "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
-            "parse_strings_as_datetimes": {
-                "schema": {"type": "boolean"},
-                "value": None,
-            },
-            "row_condition": {"schema": {"type": "string"}, "value": None},
             "v__0": {"schema": {"type": "number"}, "value": 1},
             "v__1": {"schema": {"type": "number"}, "value": 2},
             "v__2": {"schema": {"type": "number"}, "value": 3},

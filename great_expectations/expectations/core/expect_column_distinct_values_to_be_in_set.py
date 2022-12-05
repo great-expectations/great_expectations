@@ -24,7 +24,6 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     ParamSchemaType,
     RendererConfiguration,
-    RendererParams,
 )
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
@@ -149,9 +148,9 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         for name, schema_type in add_param_args:
             renderer_configuration.add_param(name=name, schema_type=schema_type)
 
-        params: RendererParams = renderer_configuration.params
+        params = renderer_configuration.params
 
-        if not params.value_set.value or len(params.value_set.value) == 0:
+        if not params.value_set or len(params.value_set.value) == 0:
             if renderer_configuration.include_column_name:
                 template_str = "$column distinct values must belong to this set: [ ]"
             else:
@@ -173,7 +172,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                     f"distinct values must belong to this set: {value_set_str}."
                 )
 
-        if params.row_condition.value:
+        if params.row_condition:
             renderer_configuration = cls._add_row_condition_params(
                 renderer_configuration=renderer_configuration
             )

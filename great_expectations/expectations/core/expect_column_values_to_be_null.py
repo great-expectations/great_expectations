@@ -20,7 +20,6 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     ParamSchemaType,
     RendererConfiguration,
-    RendererParams,
 )
 from great_expectations.render.util import (
     num_to_str,
@@ -108,9 +107,9 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         for name, schema_type in add_param_args:
             renderer_configuration.add_param(name=name, schema_type=schema_type)
 
-        params: RendererParams = renderer_configuration.params
+        params = renderer_configuration.params
 
-        if params.mostly.value and params.mostly.value < 1.0:
+        if params.mostly and params.mostly.value < 1.0:
             renderer_configuration = cls._add_mostly_pct_param(
                 renderer_configuration=renderer_configuration
             )
@@ -121,7 +120,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
-        if params.row_condition.value:
+        if params.row_condition:
             renderer_configuration = cls._add_row_condition_params(
                 renderer_configuration=renderer_configuration
             )

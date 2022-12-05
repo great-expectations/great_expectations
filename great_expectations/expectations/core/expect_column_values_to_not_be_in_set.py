@@ -151,10 +151,10 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         for name, schema_type in add_param_args:
             renderer_configuration.add_param(name=name, schema_type=schema_type)
 
-        params: RendererParams = renderer_configuration.params
+        params = renderer_configuration.params
         template_str = ""
 
-        if params.value_set.value:
+        if params.value_set:
             renderer_configuration = cls._add_value_set_params(
                 renderer_configuration=renderer_configuration
             )
@@ -163,7 +163,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             )
             template_str += f"values must not belong to this set: {value_set_str}"
 
-            if params.mostly.value and params.mostly.value < 1.0:
+            if params.mostly and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -171,13 +171,13 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             else:
                 template_str += "."
 
-            if params.parse_strings_as_datetimes.value:
+            if params.parse_strings_as_datetimes:
                 template_str += " Values should be parsed as datetimes."
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
-        if params.row_condition.value:
+        if params.row_condition:
             renderer_configuration = cls._add_row_condition_params(
                 renderer_configuration=renderer_configuration
             )
