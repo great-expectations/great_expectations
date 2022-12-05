@@ -158,10 +158,10 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             renderer_configuration = cls._add_value_set_params(
                 renderer_configuration=renderer_configuration
             )
-            values_str: str = cls._get_value_set_string(
+            value_set_str: str = cls._get_value_set_string(
                 renderer_configuration=renderer_configuration
             )
-            template_str += f"values must not belong to this set: {values_str}"
+            template_str += f"values must not belong to this set: {value_set_str}"
 
             if params.mostly.value and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
