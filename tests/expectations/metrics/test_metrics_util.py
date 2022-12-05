@@ -107,10 +107,23 @@ def test_sql_statement_conversion_to_string_awsathena(test_backends):
 
 @pytest.mark.unit
 def test_sql_statement_conversion_to_string_bigquery(test_backends):
+    """
+    Bigquery backend returns a slightly different query
+    """
     if "bigquery" in test_backends:
         monkeypatch.setenv("GE_TEST_GCP_PROJECT", "ge-oss")
         connection_string = get_bigquery_connection_url()
         engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-        _compare_select_statement_with_converted_string(engine=engine)
+        select_statement: "sqlalchemy.sql.Select" = (
+            select_with_post_compile_statements()
+        )
+        returned_string = sql_statement_with_post_compile_to_string(
+            engine=engine, select_statement=select_statement
+        )
+        assert returned_string == (
+            "SELECT `a`.`id`, `a`.`data` \n"
+            "FROM `a` \n"
+            "WHERE `a`.`data` = '00000000'"
+        )
     else:
         pytest.skip(f"skipping sql statement conversion test for : bigquery")

@@ -1031,11 +1031,6 @@ def sql_statement_with_post_compile_to_string(
         params = (repr(compiled.params[name]) for name in list(compiled.params.keys()))
         query_as_string = re.sub(r"%\(.*?\)s", lambda m: next(params), str(compiled))
 
-        # bigquery inserts extra '`' character for compiled statement.
-        # clean up string before returning
-        if dialect_name == "bigquery":
-            query_as_string = re.sub(r"`", "", query_as_string)
-
     return query_as_string
 
 
