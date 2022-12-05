@@ -113,7 +113,7 @@ You can see all the Expectations available in the [gallery](https://greatexpecta
 :::
 
 ```python
-df = ge.from_pandas(df)
+df = gx.from_pandas(df)
 
 # ~30% chance of passing
 df.expect_column_values_to_be_unique("products") # ~30% chance of passing

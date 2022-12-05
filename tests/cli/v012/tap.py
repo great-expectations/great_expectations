@@ -19,7 +19,7 @@ import sys
 import great_expectations as gx
 
 # tap configuration
-context = ge.DataContext(
+context = gx.DataContext(
     "/private/var/folders/_t/psczkmjd69vf9jz0bblzlzww0000gn/T/pytest-of-taylor/pytest-1812/empty_data_context0/great_expectations"
 )
 suite = context.get_expectation_suite("sweet_suite")

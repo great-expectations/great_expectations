@@ -223,7 +223,7 @@ for how to profile a single batch of data and build documentation from the valid
   profiling_html_filepath = '/path/into/which/to/save/results.html'
 
   # obtain the DataContext object
-  context = ge.data_context.DataContext()
+  context = gx.data_context.DataContext()
 
   # load a batch to profile
   context.create_expectation_suite('default')

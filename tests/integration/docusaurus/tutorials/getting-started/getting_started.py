@@ -14,7 +14,7 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (  #
     GETTING_STARTED_CHECKPOINT_NAME,
 )
 
-context = ge.get_context()
+context = gx.get_context()
 # NOTE: The following assertion is only for testing and can be ignored by users.
 assert context
 

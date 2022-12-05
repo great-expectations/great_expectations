@@ -100,7 +100,7 @@ Python in a Jupyter notebook:
     from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
     # obtain the DataContext object
-    context = ge.data_context.DataContext()
+    context = gx.data_context.DataContext()
 
     # load a batch from the data asset
     batch = context.get_batch('ratings')
@@ -139,5 +139,3 @@ Data Samples
 
 Since profiling and expectations are so tightly linked, getting samples of *expected* data requires a slightly
 different approach than the normal path for profiling. Stay tuned for more in this area!
-
-

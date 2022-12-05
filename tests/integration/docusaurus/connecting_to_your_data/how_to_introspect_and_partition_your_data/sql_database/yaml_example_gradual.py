@@ -6,7 +6,7 @@ import great_expectations as gx
 # </snippet>
 
 # <snippet>
-context = ge.get_context()
+context = gx.get_context()
 # </snippet>
 
 # <snippet>

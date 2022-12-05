@@ -174,13 +174,13 @@ providing the bucket/prefix combination:
         store_backend:
           class_name: TupleS3StoreBackend
           base_directory: expectations/
-          bucket: ge.my_org.com
+          bucket: gx.my_org.com
           prefix:
       validations_store:
         class_name: ValidationsStore
         store_backend:
           class_name: TupleS3StoreBackend
-          bucket: ge.my_org.com
+          bucket: gx.my_org.com
           prefix: common_validations
       evaluation_parameter_store:
         class_name: EvaluationParameterStore

@@ -83,21 +83,21 @@ As a Great Expectations user, once you have created a Data Context, you will alm
 
 ```python title="Python code"
 import great_expectations as gx
-context = ge.get_context()
+context = gx.get_context()
 ```
 
 Alternatively, you might call:
 
 ```python title="Python code"
 import great_expectations as gx
-context = ge.get_context(filepath=”something”)
+context = gx.get_context(filepath=”something”)
 ```
 
 If you’re using Great Expectations Cloud, you’d call:
 
 ```python title="Python code"
 import great_expectations as gx
-context = ge.get_context(API_KEY=”something”)
+context = gx.get_context(API_KEY=”something”)
 ```
 
 That’s it! You now have access to all the goodness of a DataContext.

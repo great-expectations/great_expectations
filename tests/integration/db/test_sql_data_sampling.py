@@ -109,7 +109,7 @@ if __name__ == "test_script_module":
 
         # 1. Setup
 
-        context: DataContext = ge.get_context()
+        context: DataContext = gx.get_context()
 
         datasource_name: str = "test_datasource"
         data_connector_name: str = "test_data_connector"

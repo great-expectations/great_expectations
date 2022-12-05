@@ -2886,7 +2886,7 @@ varundunga!)
 0.10.5
 -----------------
 
-* improvements to ge.read_json tests
+* improvements to gx.read_json tests
 * tidy up the changelog
 
   - Fix bullet list spacing issues
@@ -3620,11 +3620,11 @@ to top-level names.
 
 * New expectation available for parameterized distributions--\
   expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than (what a name! :) -- (thanks @ccnobbli)
-* ge.from_pandas() utility (thanks @schrockn)
+* gx.from_pandas() utility (thanks @schrockn)
 * Pandas operations on a PandasDataset now return another PandasDataset (thanks @dlwhite5)
 * expect_column_to_exist now takes a column_index parameter to specify column order (thanks @louispotok)
 * Top-level validate option (ge.validate())
-* ge.read_json() helper (thanks @rjurney)
+* gx.read_json() helper (thanks @rjurney)
 * Behind-the-scenes improvements to testing framework to ensure parity across data contexts.
 * Documentation improvements, bug-fixes, and internal api improvements
 

@@ -21,7 +21,7 @@ bigquery_dataset = "demo"
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
 # <snippet>
-context = ge.get_context()
+context = gx.get_context()
 # </snippet>
 
 # <snippet>
@@ -77,7 +77,7 @@ print(validator.head())
 # </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 
 # Test for BatchRequest naming a table.
 batch_request = BatchRequest(
@@ -94,7 +94,7 @@ validator = context.get_validator(
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_bigquery_datasource"]
 assert "demo.taxi_data" in set(
     context.get_available_data_asset_names()["my_bigquery_datasource"][

@@ -23,7 +23,7 @@ yaml = yaml.YAML(typ="safe")
 
 # Initialize your data context.
 # <snippet>
-context = ge.get_context()
+context = gx.get_context()
 # </snippet>
 
 # Add datasource for all tests

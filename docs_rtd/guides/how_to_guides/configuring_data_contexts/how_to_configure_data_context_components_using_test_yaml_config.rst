@@ -21,7 +21,7 @@ Steps
     .. code-block:: python
 
         import great_expectations as gx
-        context = ge.get_context()
+        context = gx.get_context()
 
 #. **Create or copy a yaml config**
 
@@ -161,7 +161,7 @@ Steps
 
     .. code-block:: python
 
-        context = ge.get_context()
+        context = gx.get_context()
 
         validator = context.get_validator(
             datasource_name="my_datasource",

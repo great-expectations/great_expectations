@@ -94,7 +94,7 @@ If the current version of the ``GreatExpectationsOperator`` does not support you
     def validate_data(ds, **kwargs):
 
         # Retrieve your data context
-        context = ge.data_context.DataContext(<insert path to your great_expectations.yml>)
+        context = gx.data_context.DataContext(<insert path to your great_expectations.yml>)
 
         # Create your batch_kwargs
         batch_kwargs_file = {

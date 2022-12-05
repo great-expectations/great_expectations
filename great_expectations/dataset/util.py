@@ -545,7 +545,7 @@ def validate_distribution_parameters(distribution, params):
 
     else:
         raise ValueError(
-            "params must be a dict or list, or use ge.dataset.util.infer_distribution_parameters(data, distribution)"
+            "params must be a dict or list, or use gx.dataset.util.infer_distribution_parameters(data, distribution)"
         )
 
     return

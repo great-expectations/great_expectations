@@ -102,14 +102,14 @@ Steps
 
     .. code-block:: python
 
-        my_df = ge.read_csv("./data/Titanic.csv", dataset_class=MyCustomPandasDataset)
+        my_df = gx.read_csv("./data/Titanic.csv", dataset_class=MyCustomPandasDataset)
 
     You can also coerce an existing pandas DataFrame to your class using ``from_pandas``:
 
     .. code-block:: python
 
         my_pd_df = pd.read_csv("./data/Titanic.csv")
-        my_df = ge.from_pandas(my_pd_df, dataset_class=MyCustomPandasDataset)
+        my_df = gx.from_pandas(my_pd_df, dataset_class=MyCustomPandasDataset)
 
     As a third option:
 
@@ -223,7 +223,7 @@ Steps
 
     .. code-block:: python
 
-        context = ge.DataContext()
+        context = gx.DataContext()
         context.create_expectation_suite("my_new_suite")
         my_batch = context.get_batch({
             "path": "my_data/Titanic.csv",
@@ -320,13 +320,13 @@ Here's a single code block containing all the notebook code in this article:
 
 
     #Instantiate the class in several different ways
-    my_df = ge.read_csv("my_data/Titanic.csv", dataset_class=MyCustomPandasDataset)
+    my_df = gx.read_csv("my_data/Titanic.csv", dataset_class=MyCustomPandasDataset)
 
     my_other_df = pd.read_csv("my_data/Titanic.csv")
-    ge.from_pandas(my_other_df, dataset_class=MyCustomPandasDataset)
+    gx.from_pandas(my_other_df, dataset_class=MyCustomPandasDataset)
 
-    my_other_df = ge.read_csv("my_data/Titanic.csv")
-    ge.from_pandas(my_other_df, dataset_class=MyCustomPandasDataset)
+    my_other_df = gx.read_csv("my_data/Titanic.csv")
+    gx.from_pandas(my_other_df, dataset_class=MyCustomPandasDataset)
 
     # Run Expectations in assertions so that they can be used as tests for this guide
     assert my_df.expect_column_values_to_be_in_set("Sex", value_set=["Male", "Female"]).success == False

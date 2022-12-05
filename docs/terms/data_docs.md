@@ -79,7 +79,7 @@ great_expectations docs build
 Alternatively, you can use your Data Context to build your Data Docs in python with the command:
 ```python title="Python code"
 import great_expectations as gx
-context = ge.get_context()
+context = gx.get_context()
 context.build_data_docs()
 ```
 

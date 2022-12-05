@@ -242,7 +242,7 @@ def test_pandas_happy_path_statistics_data_assistant(empty_data_context) -> None
     3. Running StatisticsDataAssistant and making sure that StatisticsDataAssistantResult contains relevant fields
     4. Configuring BatchRequest to load 2020 January data
     """
-    data_context: ge.DataContext = empty_data_context
+    data_context: gx.DataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__,
         os.path.join(
@@ -322,7 +322,7 @@ def test_sql_happy_path_statistics_data_assistant(
     else:
         load_data_into_postgres_database(sa)
 
-    data_context: ge.DataContext = empty_data_context
+    data_context: gx.DataContext = empty_data_context
 
     datasource_config = {
         "name": "taxi_multi_batch_sql_datasource",
@@ -389,7 +389,7 @@ def test_spark_happy_path_statistics_data_assistant(
     from pyspark.sql.types import StructType
 
     schema: StructType = spark_df_taxi_data_schema
-    data_context: ge.DataContext = empty_data_context
+    data_context: gx.DataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__,
         os.path.join(

@@ -154,7 +154,7 @@ class ExpectationSuite(SerializableDictDot):
             "profiler_config": profiler_config,
             "comment": comment,
         }
-        ge.util.filter_properties_dict(
+        gx.util.filter_properties_dict(
             properties=citation, clean_falsy=True, inplace=True
         )
         self.meta["citations"].append(citation)

@@ -183,7 +183,7 @@ def titanic_validator(titanic_data_context_modular_api):
     What does this test do and why?
     Ensures that all available expectation types work as expected
     """
-    df = ge.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
+    df = gx.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
 
     return get_pandas_runtime_validator(titanic_data_context_modular_api, df)
 
@@ -195,7 +195,7 @@ def taxi_validator_pandas(titanic_data_context_modular_api):
     Ensures that all available expectation types work as expected
     """
 
-    df = ge.read_csv(
+    df = gx.read_csv(
         file_relative_path(
             __file__,
             "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
@@ -212,7 +212,7 @@ def taxi_validator_spark(spark_session, titanic_data_context_modular_api):
     What does this test do and why?
     Ensures that all available expectation types work as expected
     """
-    df = ge.read_csv(
+    df = gx.read_csv(
         file_relative_path(
             __file__,
             "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
@@ -228,7 +228,7 @@ def taxi_validator_sqlalchemy(sa, titanic_data_context_modular_api):
     What does this test do and why?
     Ensures that all available expectation types work as expected
     """
-    df = ge.read_csv(
+    df = gx.read_csv(
         file_relative_path(
             __file__,
             "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",

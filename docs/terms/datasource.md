@@ -62,7 +62,7 @@ You will typically only access your Datasource directly through Python code, whi
 ```python title="Python console:"
 import great_expectations as gx
 
-context = ge.get_context()
+context = gx.get_context()
 datasource = context.get_datasource("my_datasource_name")
 ```
 

@@ -148,7 +148,7 @@ import great_expectations as gx
 
 datasource_yaml = ""  # Replace this with the yaml string you want to check for errors.
 
-context = ge.get_context()
+context = gx.get_context()
 context.test_yaml_config(datasource_yaml)
 ```
 
@@ -162,7 +162,7 @@ from ruamel import yaml
 
 datasource_config = {}  # Replace this with the Python dictionary you want to check for errors.
 
-context = ge.get_context()
+context = gx.get_context()
 context.test_yaml_config(yaml.dump(datasource_config))
 ```
 

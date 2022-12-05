@@ -11,14 +11,14 @@ from great_expectations.self_check.util import get_dataset
 
 
 def test_no_autoinspection():
-    df = ge.dataset.PandasDataset({"a": [1, 2, 3]}, profiler=None)
+    df = gx.dataset.PandasDataset({"a": [1, 2, 3]}, profiler=None)
     suite = df.get_expectation_suite()
 
     assert len(suite.expectations) == 0
 
 
 def test_default_no_autoinspection():
-    df = ge.dataset.PandasDataset({"a": [1, 2, 3]})
+    df = gx.dataset.PandasDataset({"a": [1, 2, 3]})
     suite = df.get_expectation_suite()
 
     assert len(suite.expectations) == 0
@@ -59,4 +59,4 @@ def test_autoinspect_columns_exist(test_backend):
 
 def test_autoinspect_warning():
     with pytest.raises(NotImplementedError):
-        ge.dataset.Dataset(profiler=ge.profile.ColumnsExistProfiler)
+        gx.dataset.Dataset(profiler=ge.profile.ColumnsExistProfiler)

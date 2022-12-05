@@ -11,12 +11,12 @@ from great_expectations.validator.validator import Validator
 
 # </snippet>
 # <snippet>
-context: DataContext = ge.get_context()
+context: DataContext = gx.get_context()
 # </snippet>
 yaml = yaml.YAML(typ="safe")
 
 spark_session: pyspark.sql.session.SparkSession = (
-    ge.core.util.get_or_create_spark_application()
+    gx.core.util.get_or_create_spark_application()
 )
 
 # create and load Expectation Suite

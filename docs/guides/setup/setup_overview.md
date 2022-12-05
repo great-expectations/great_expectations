@@ -94,7 +94,7 @@ That's all there is to the Setup step.  Once you have your Data Context initiali
 
 ```markdown title="Python code:"
 import great_expectations as gx
-context = ge.get_context()
+context = gx.get_context()
 ```
 
 From here you will move on to the next step of working with Great Expectations: Connecting to Data.

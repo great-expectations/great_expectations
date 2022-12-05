@@ -102,7 +102,7 @@ If you do not use the :ref:`CLI <command_line>`, create a new notebook in the``g
     # Data Context is a GE object that represents your project.
     # Your project's great_expectations.yml contains all the config
     # options for the project's GE Data Context.
-    context = ge.data_context.DataContext()
+    context = gx.data_context.DataContext()
 
     # Create a new empty Expectation Suite
     # and give it a name

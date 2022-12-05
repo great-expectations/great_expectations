@@ -5,7 +5,7 @@ from ruamel import yaml
 import great_expectations as gx
 from great_expectations.data_context.util import file_relative_path
 
-context = ge.get_context()
+context = gx.get_context()
 
 yaml = yaml.YAML(typ="safe")
 

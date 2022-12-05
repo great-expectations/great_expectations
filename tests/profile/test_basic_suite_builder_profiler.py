@@ -536,7 +536,7 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
     and comparing the EVRs to ones retrieved from a
     previously stored file.
     """
-    df = ge.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
+    df = gx.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
     suite, evrs = df.profile(BasicSuiteBuilderProfiler, profiler_configuration="demo")
 
     # Check to make sure BasicSuiteBuilderProfiler is adding meta.columns with a single "description" field for each column
@@ -1427,7 +1427,7 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_with_builder_configuratio
     We are running the profiler on the Titanic dataset and comparing the EVRs
     to ones retrieved from a previously stored file.
     """
-    batch = ge.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
+    batch = gx.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
     suite, evrs = BasicSuiteBuilderProfiler().profile(
         batch,
         profiler_configuration={

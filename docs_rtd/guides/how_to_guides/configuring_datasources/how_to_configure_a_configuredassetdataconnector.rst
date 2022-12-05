@@ -27,7 +27,7 @@ All of the examples below assume you’re testing configuration using something 
 .. code-block:: python
 
     import great_expectations as gx
-    context = ge.get_context()
+    context = gx.get_context()
     config = f"""
       class_name: Datasource
       execution_engine:

@@ -7,7 +7,7 @@ from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
 
-context = ge.get_context()
+context = gx.get_context()
 # </snippet>
 
 # This utility is not for general use. It is only to support testing.

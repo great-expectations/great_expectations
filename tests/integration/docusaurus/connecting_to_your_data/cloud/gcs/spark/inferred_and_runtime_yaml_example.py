@@ -88,7 +88,7 @@ print(validator.head())
 # </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 
 
 # Here is a BatchRequest naming a data_asset
@@ -118,7 +118,7 @@ print(validator.head())
 # </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_gcs_datasource"]
 assert set(
     context.get_available_data_asset_names()["my_gcs_datasource"][

@@ -70,7 +70,7 @@ try:
             os.environ[key] = value
 
     # get context and set config variables in config_variables.yml
-    context = ge.get_context()
+    context = gx.get_context()
     context_config_variables_relative_file_path = os.path.join(
         context.GE_UNCOMMITTED_DIR, "config_variables.yml"
     )

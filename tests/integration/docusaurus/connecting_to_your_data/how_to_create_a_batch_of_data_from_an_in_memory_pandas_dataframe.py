@@ -11,7 +11,7 @@ from great_expectations.validator.validator import Validator
 # </snippet>
 
 # <snippet>
-context: DataContext = ge.get_context()
+context: DataContext = gx.get_context()
 # </snippet>
 
 # create and load Expectation Suite

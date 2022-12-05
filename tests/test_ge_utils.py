@@ -41,7 +41,7 @@ def file_data_asset(tmp_path):
     with open(path, "w+") as file:
         file.write(json.dumps([0, 1, 2, 3, 4]))
 
-    return ge.data_asset.FileDataAsset(file_path=path)
+    return gx.data_asset.FileDataAsset(file_path=path)
 
 
 @pytest.fixture
@@ -80,7 +80,7 @@ def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
             Warning,
             match="No great_expectations version found in configuration object.",
         ):
-            ge.validate(
+            gx.validate(
                 file_data_asset,
                 empty_expectation_suite,
                 data_asset_class=ge.data_asset.FileDataAsset,
@@ -89,11 +89,11 @@ def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
 
 @pytest.mark.unit
 def test_validate_dataset(dataset, basic_expectation_suite):
-    res = ge.validate(dataset, basic_expectation_suite)
+    res = gx.validate(dataset, basic_expectation_suite)
     # assert res.success is True  # will not be true for mysql, where "infinities" column is missing
     assert res["statistics"]["evaluated_expectations"] == 4
-    if isinstance(dataset, ge.dataset.PandasDataset):
-        res = ge.validate(
+    if isinstance(dataset, gx.dataset.PandasDataset):
+        res = gx.validate(
             dataset,
             expectation_suite=basic_expectation_suite,
             data_asset_class=ge.dataset.PandasDataset,
@@ -104,17 +104,17 @@ def test_validate_dataset(dataset, basic_expectation_suite):
             ValueError,
             match=r"The validate util method only supports validation for subtypes of the provided data_asset_type",
         ):
-            ge.validate(
+            gx.validate(
                 dataset,
                 basic_expectation_suite,
                 data_asset_class=ge.dataset.SqlAlchemyDataset,
             )
 
     elif (
-        isinstance(dataset, ge.dataset.SqlAlchemyDataset)
+        isinstance(dataset, gx.dataset.SqlAlchemyDataset)
         and dataset.sql_engine_dialect.name.lower() != "mysql"
     ):
-        res = ge.validate(
+        res = gx.validate(
             dataset,
             expectation_suite=basic_expectation_suite,
             data_asset_class=ge.dataset.SqlAlchemyDataset,
@@ -125,18 +125,18 @@ def test_validate_dataset(dataset, basic_expectation_suite):
             ValueError,
             match=r"The validate util method only supports validation for subtypes of the provided data_asset_type",
         ):
-            ge.validate(
+            gx.validate(
                 dataset,
                 expectation_suite=basic_expectation_suite,
                 data_asset_class=ge.dataset.PandasDataset,
             )
 
     elif (
-        isinstance(dataset, ge.dataset.SqlAlchemyDataset)
+        isinstance(dataset, gx.dataset.SqlAlchemyDataset)
         and dataset.sql_engine_dialect.name.lower() == "mysql"
     ):
         # mysql cannot use the infinities column
-        res = ge.validate(
+        res = gx.validate(
             dataset,
             expectation_suite=basic_expectation_suite,
             data_asset_class=ge.dataset.SqlAlchemyDataset,
@@ -147,14 +147,14 @@ def test_validate_dataset(dataset, basic_expectation_suite):
             ValueError,
             match=r"The validate util method only supports validation for subtypes of the provided data_asset_type",
         ):
-            ge.validate(
+            gx.validate(
                 dataset,
                 expectation_suite=basic_expectation_suite,
                 data_asset_class=ge.dataset.PandasDataset,
             )
 
-    elif isinstance(dataset, ge.dataset.SparkDFDataset):
-        res = ge.validate(
+    elif isinstance(dataset, gx.dataset.SparkDFDataset):
+        res = gx.validate(
             dataset, basic_expectation_suite, data_asset_class=ge.dataset.SparkDFDataset
         )
         assert res.success is True
@@ -163,7 +163,7 @@ def test_validate_dataset(dataset, basic_expectation_suite):
             ValueError,
             match=r"The validate util method only supports validation for subtypes of the provided data_asset_type",
         ):
-            ge.validate(
+            gx.validate(
                 dataset,
                 expectation_suite=basic_expectation_suite,
                 data_asset_class=ge.dataset.PandasDataset,
@@ -180,7 +180,7 @@ def test_validate_using_data_context(
         is False
     )
 
-    res = ge.validate(
+    res = gx.validate(
         dataset,
         expectation_suite_name="my_dag_node.default",
         data_context=data_context_parameterized_expectation_suite,
@@ -203,7 +203,7 @@ def test_validate_using_data_context_path(
     dataset, data_context_parameterized_expectation_suite
 ):
     data_context_path = data_context_parameterized_expectation_suite.root_directory
-    res = ge.validate(
+    res = gx.validate(
         dataset,
         expectation_suite_name="my_dag_node.default",
         data_context=data_context_path,
@@ -223,7 +223,7 @@ def test_validate_invalid_parameters(
         ValueError,
         match="Either an expectation suite or a DataContext is required for validation.",
     ):
-        ge.validate(dataset)
+        gx.validate(dataset)
 
 
 @pytest.mark.unit
@@ -237,7 +237,7 @@ def test_gen_directory_tree_str(tmpdir):
 
     os.mkdir(os.path.join(project_dir, "AAA"))
 
-    res = ge.util.gen_directory_tree_str(project_dir)
+    res = gx.util.gen_directory_tree_str(project_dir)
     print(res)
 
     # Note: files and directories are sorteds alphabetically, so that this method can be used for testing.

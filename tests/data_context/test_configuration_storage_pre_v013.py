@@ -58,7 +58,7 @@ def data_context_parameterized_expectation_suite_no_checkpoint_store_with_usage_
         os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
         str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
     )
-    return ge.data_context.DataContext(context_path)
+    return gx.data_context.DataContext(context_path)
 
 
 def test_preserve_comments_in_yml_after_adding_datasource(

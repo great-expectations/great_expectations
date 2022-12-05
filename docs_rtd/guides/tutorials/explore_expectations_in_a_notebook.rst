@@ -35,13 +35,13 @@ All of these steps take place within your notebook:
 
     .. code-block:: python
 
-        my_df = ge.read_csv("my_data_directory/titanic.csv")
+        my_df = gx.read_csv("my_data_directory/titanic.csv")
 
     This method behaves exactly the same as ``pandas.read_csv``, so you can add parameters to parse your file:
 
     .. code-block:: python
 
-        my_df = ge.read_csv(
+        my_df = gx.read_csv(
             "my_data_directory/my_messy_data.csv",
             sep="\t",
             skiprows=3
@@ -57,7 +57,7 @@ All of these steps take place within your notebook:
 
     .. code-block:: python
 
-        my_df = ge.from_pandas(
+        my_df = gx.from_pandas(
             my_pandas_dataframe
         )
 

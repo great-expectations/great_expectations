@@ -35,7 +35,7 @@ def test_pandas_happy_path_onboarding_data_assistant(empty_data_context) -> None
     This test tests the code in `DataAssistants_Instantiation_And_Running-OnboardingAssistant-Pandas.ipynb`
 
     """
-    data_context: ge.DataContext = empty_data_context
+    data_context: gx.DataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__, os.path.join("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
     )
@@ -143,7 +143,7 @@ def test_spark_happy_path_onboarding_data_assistant(
     from pyspark.sql.types import StructType
 
     schema: StructType = spark_df_taxi_data_schema
-    data_context: ge.DataContext = empty_data_context
+    data_context: gx.DataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__, os.path.join("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
     )
@@ -252,7 +252,7 @@ def test_sql_happy_path_onboarding_data_assistant(
     else:
         load_data_into_postgres_database(sa)
 
-    data_context: ge.DataContext = empty_data_context
+    data_context: gx.DataContext = empty_data_context
 
     datasource_config = {
         "name": "taxi_multi_batch_sql_datasource",

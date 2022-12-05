@@ -26,7 +26,7 @@ An example report looks like the following:
     >> import json
     >> import great_expectations as gx
     >> my_expectation_suite = json.load(file("my_titanic_expectations.json"))
-    >> my_df = ge.read_csv(
+    >> my_df = gx.read_csv(
         "./tests/examples/titanic.csv",
         expectation_suite=my_expectation_suite
     )

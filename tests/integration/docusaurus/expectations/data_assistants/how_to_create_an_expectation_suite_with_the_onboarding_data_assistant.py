@@ -19,7 +19,7 @@ from great_expectations.core.yaml_handler import YAMLHandler
 
 yaml = YAMLHandler()
 
-context: ge.DataContext = ge.get_context()
+context: gx.DataContext = gx.get_context()
 
 # Configure your datasource (if you aren't using one that already exists)
 

@@ -50,7 +50,7 @@ import great_expectations as gx
 from pprint import pprint
 
 yaml = YAML()
-context = ge.get_context()
+context = gx.get_context()
 """,
             lint=True,
         )

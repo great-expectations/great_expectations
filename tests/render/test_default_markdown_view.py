@@ -114,7 +114,7 @@ def test_render_section_page():
         }
     )
 
-    rendered_doc = ge.render.view.view.DefaultMarkdownPageView().render(
+    rendered_doc = gx.render.view.view.DefaultMarkdownPageView().render(
         RenderedDocumentContent(sections=[section])
     )
 
