@@ -1037,7 +1037,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
-    ):
+    ) -> RendererConfiguration:
         add_param_args = (
             ("column", RendererSchemaType.STRING),
             ("mostly", RendererSchemaType.NUMBER),
