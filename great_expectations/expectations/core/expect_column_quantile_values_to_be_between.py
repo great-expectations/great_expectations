@@ -313,9 +313,9 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         ).get("value_ranges", [])
 
         header_row = [
-            {"schema": {"type": "string"}, "value": "Quantile"},
-            {"schema": {"type": "string"}, "value": "Min Value"},
-            {"schema": {"type": "string"}, "value": "Max Value"},
+            {"schema": {"type": RendererSchemaType.STRING}, "value": "Quantile"},
+            {"schema": {"type": RendererSchemaType.STRING}, "value": "Min Value"},
+            {"schema": {"type": RendererSchemaType.STRING}, "value": "Max Value"},
         ]
 
         renderer_configuration.header_row = header_row
@@ -331,9 +331,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                         "schema": {"type": RendererSchemaType.STRING},
                     },
                     {
-                        "value": value_range[0]
-                        if value_range[0] is not None
-                        else "Any",
+                        "value": value_range[0] if value_range[0] else "Any",
                         "schema": {
                             "type": RendererSchemaType.NUMBER
                             if value_range[0]
@@ -344,7 +342,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                         "value": value_range[1] if value_range[1] else "Any",
                         "schema": {
                             "type": RendererSchemaType.NUMBER
-                            if value_range[1] is not None
+                            if value_range[1]
                             else RendererSchemaType.STRING
                         },
                     },
