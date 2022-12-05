@@ -24,23 +24,6 @@ class ParamSchemaType(str, Enum):
     ARRAY = "array"
 
 
-class RendererParam(BaseModel):
-    renderer_schema: ParamSchemaType
-    value: Optional[Any]
-
-    class Config:
-        validate_assignment = True
-        arbitrary_types_allowed = True
-
-    def __eq__(self, other: Any) -> bool:
-        if isinstance(other, BaseModel):
-            return self.dict() == other.dict()
-        elif isinstance(other, dict):
-            return self.dict() == other
-        else:
-            return self.value == other
-
-
 class _RendererParamsBase(BaseModel):
     class Config:
         validate_assignment = True
@@ -131,6 +114,22 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             kwargs["styling"] = kwargs["runtime_configuration"].get("styling")
         return kwargs
 
+    class _RendererParamBase(BaseModel):
+        renderer_schema: ParamSchemaType
+        value: Optional[Any]
+
+        class Config:
+            validate_assignment = True
+            arbitrary_types_allowed = True
+
+        def __eq__(self, other: Any) -> bool:
+            if isinstance(other, BaseModel):
+                return self.dict() == other.dict()
+            elif isinstance(other, dict):
+                return self.dict() == other
+            else:
+                return self.value == other
+
     def add_param(
         self,
         name: str,
@@ -157,7 +156,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             name,
             renderer_schema=(Dict[str, ParamSchemaType], Field(..., alias="schema")),
             value=(Union[Any, None], ...),
-            __base__=RendererParam,
+            __base__=RendererConfiguration._RendererParamBase,
         )
         renderer_param_definition: Dict[str, Any] = {name: (renderer_param, ...)}
 
