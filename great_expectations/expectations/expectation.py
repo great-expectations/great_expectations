@@ -369,6 +369,15 @@ class Expectation(metaclass=MetaExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
+        if renderer_configuration.expectation_type and renderer_configuration.kwargs:
+            template_str = "$expectation_type(**$kwargs)."
+        elif renderer_configuration.expectation_type:
+            template_str = "$expectation_type."
+        else:
+            raise ValueError(
+                "RendererConfiguration does not contain an expectation_type."
+            )
+
         add_param_args = (
             (
                 "expectation_type",
@@ -381,7 +390,8 @@ class Expectation(metaclass=MetaExpectation):
             renderer_configuration.add_param(
                 name=name, schema_type=schema_type, value=value
             )
-        renderer_configuration.template_str = "$expectation_type(**$kwargs)"
+
+        renderer_configuration.template_str = template_str
         return renderer_configuration
 
     @classmethod
