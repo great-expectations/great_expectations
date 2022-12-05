@@ -119,7 +119,7 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
-    ):
+    ) -> RendererConfiguration:
         add_param_args = (
             ("column", ParamSchemaType.STRING),
             ("value_set", ParamSchemaType.ARRAY),
@@ -131,30 +131,31 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
             renderer_configuration.add_param(name=name, schema_type=schema_type)
 
         params: RendererParams = renderer_configuration.params
+        template_str = ""
 
         if params.value_set.value:
-            renderer_configuration = cls._add_value_set_value_params(
+            renderer_configuration = cls._add_value_set_params(
                 renderer_configuration=renderer_configuration
             )
-            values_str: str = cls._get_values_string_from_value_set(
-                value_set_param=params.value_set
+            value_set_str: str = cls._get_value_set_string(
+                renderer_configuration=renderer_configuration
             )
-            template_str = f"distinct values must match this set: {values_str}."
+            template_str += f"distinct values must match this set: {value_set_str}."
 
-        if params.parse_strings_as_datetimes.value:
-            template_str += " Values should be parsed as datetimes."
+            if params.parse_strings_as_datetimes.value:
+                template_str += " Values should be parsed as datetimes."
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
         if params.row_condition.value:
-            renderer_configuration = cls._add_row_condition_condition_params(
+            renderer_configuration = cls._add_row_condition_params(
                 renderer_configuration=renderer_configuration
             )
-            conditions_str: str = cls._get_conditions_string_from_row_condition(
-                row_condition_param=params.row_condition
+            row_condition_str: str = cls._get_row_condition_string(
+                renderer_configuration=renderer_configuration
             )
-            template_str = f"{conditions_str}, then {template_str}"
+            template_str = f"{row_condition_str}, then {template_str}"
 
         renderer_configuration.template_str = template_str
 
