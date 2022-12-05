@@ -411,13 +411,6 @@ class Expectation(metaclass=MetaExpectation):
         Template function that contains the logic that is shared by AtomicPrescriptiveRendererType.SUMMARY and
         LegacyRendererType.PRESCRIPTIVE.
         """
-        # TODO: NF - Add the following DeprecationWarning after all _atomic_prescriptive_template methods are migrated
-        # deprecated-v0.XX.XX
-        # warnings.warn(
-        #     "Expectation._atomic_prescriptive_template() is deprecated as of v0.XX.XX and will be removed in v0.XX. "
-        #     "Please use Expectation._prescriptive_template() instead.",
-        #     DeprecationWarning,
-        # )
         renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
@@ -3243,14 +3236,6 @@ def add_values_with_json_schema_from_list_in_params(
     Utility function used in _atomic_prescriptive_template() to take list values from a given params dict key,
     convert each value to a dict with JSON schema type info, then add it to params_with_json_schema (dict).
     """
-    # TODO: NF - Add the following DeprecationWarning after all _atomic_prescriptive_template methods are migrated
-    # deprecated-v0.XX.XX
-    # warnings.warn(
-    #     "The method add_values_with_json_schema_from_list_in_params is deprecated as of v0.XX.XX and will be removed "
-    #     "in v0.XX. Please utilize RendererConfiguration.add_param() and RendererConfiguration.params.dict() to produce "
-    #     "a json schema for renderer params.",
-    #     DeprecationWarning,
-    # )
     target_list = params.get(param_key_with_list)
     if target_list is not None and len(target_list) > 0:
         for i, v in enumerate(target_list):
