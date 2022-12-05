@@ -3,14 +3,15 @@ from typing import Any, Dict, List, Optional
 from contrib.experimental.great_expectations_experimental.rule_based_profiler.data_assistant_result import (
     StatisticsDataAssistantResult,
 )
+from great_expectations.core.domain import SemanticDomainTypes
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
-from great_expectations.rule_based_profiler.domain import SemanticDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import (
     ColumnDomainBuilder,
+    DomainBuilder,
     TableDomainBuilder,
 )
 from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
@@ -100,11 +101,11 @@ class StatisticsDataAssistant(DataAssistant):
     @staticmethod
     def _build_table_rule() -> Rule:
         """
-        This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for table "Domain" type.
+        This method builds "Rule" object focused on emitting "ParameterBuilder" objects for table "Domain" type metrics.
         """
         # Step-1: Instantiate "TableDomainBuilder" object.
 
-        table_domain_builder = TableDomainBuilder(
+        table_domain_builder: DomainBuilder = TableDomainBuilder(
             data_context=None,
         )
 
@@ -185,7 +186,7 @@ class StatisticsDataAssistant(DataAssistant):
 
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting all columns.
 
-        every_column_domain_builder = ColumnDomainBuilder(
+        every_column_domain_builder: DomainBuilder = ColumnDomainBuilder(
             include_column_names=None,
             exclude_column_names=None,
             include_column_name_suffixes=None,
@@ -282,12 +283,12 @@ class StatisticsDataAssistant(DataAssistant):
     @staticmethod
     def _build_numeric_columns_rule() -> Rule:
         """
-        This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for numeric columns.
+        This method builds "Rule" object focused on emitting "ParameterBuilder" objects for numeric columns "Domain" type metrics.
         """
 
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting numeric columns (but not "ID-type" columns).
 
-        numeric_column_type_domain_builder = ColumnDomainBuilder(
+        numeric_column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(
             include_column_names=None,
             exclude_column_names=None,
             include_column_name_suffixes=None,
@@ -447,12 +448,12 @@ class StatisticsDataAssistant(DataAssistant):
     @staticmethod
     def _build_datetime_columns_rule() -> Rule:
         """
-        This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for datetime columns.
+        This method builds "Rule" object focused on emitting "ParameterBuilder" objects for datetime columns "Domain" type metrics.
         """
 
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting proper datetime columns (not "datetime-looking" text).
 
-        datetime_column_type_domain_builder = ColumnDomainBuilder(
+        datetime_column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(
             include_column_names=None,
             exclude_column_names=None,
             include_column_name_suffixes=None,
@@ -542,7 +543,7 @@ class StatisticsDataAssistant(DataAssistant):
 
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting proper text columns.
 
-        text_column_type_domain_builder = ColumnDomainBuilder(
+        text_column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(
             include_column_names=None,
             exclude_column_names=None,
             include_column_name_suffixes=None,
@@ -632,12 +633,12 @@ class StatisticsDataAssistant(DataAssistant):
     @staticmethod
     def _build_categorical_columns_rule() -> Rule:
         """
-        This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for categorical columns.
+        This method builds "Rule" object focused on emitting "ParameterBuilder" objects for categorical columns "Domain" type metrics.
         """
 
         # Step-1: Instantiate "CategoricalColumnDomainBuilder" for selecting columns containing "FEW" discrete values.
 
-        categorical_column_type_domain_builder = ColumnDomainBuilder(
+        categorical_column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(
             include_column_names=None,
             exclude_column_names=None,
             include_column_name_suffixes=None,

@@ -10,8 +10,8 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Unio
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.domain import Domain
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.estimators.bootstrap_numeric_range_estimator import (
     BootstrapNumericRangeEstimator,
 )
