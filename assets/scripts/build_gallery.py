@@ -29,6 +29,7 @@ logger.setLevel(logging.DEBUG)
 
 expectation_tracebacks = StringIO()
 expectation_checklists = StringIO()
+expectation_docstrings = StringIO()
 
 
 def execute_shell_command(command: str) -> int:
@@ -356,8 +357,18 @@ def build_gallery(
             )
             expectation_checklists.write(f"{checklist_string}\n")
             if diagnostics["description"]["docstring"]:
+                expectation_docstrings.write(
+                    "\n\n" + "=" * 80 + f"\n\n{expectation} ({group})\n"
+                )
+                expectation_docstrings.write(
+                    f"{diagnostics['description']['docstring']}\n"
+                )
                 diagnostics["description"]["docstring"] = format_docstring_to_markdown(
                     diagnostics["description"]["docstring"]
+                )
+                expectation_docstrings.write("\n" + "." * 80 + "\n\n")
+                expectation_docstrings.write(
+                    f"{diagnostics['description']['docstring']}\n"
                 )
         except Exception:
             logger.error(f"Failed to run diagnostics for: {expectation}")
@@ -590,7 +601,7 @@ def _disable_progress_bars() -> Tuple[str, DataContext]:
     "--outfile-name",
     "-o",
     "outfile_name",
-    default="expectation_library_v2.json",
+    default="expectation_library_v2--staging.json",
     help="Name for the generated JSON file",
 )
 @click.option(
@@ -601,7 +612,7 @@ def _disable_progress_bars() -> Tuple[str, DataContext]:
 )
 @click.argument("args", nargs=-1)
 def main(**kwargs):
-    """Find all Expectations, run their diagnostics methods, and generate expectation_library_v2.json
+    """Find all Expectations, run their diagnostics methods, and generate expectation_library_v2--staging.json
 
     - args: snake_name of specific Expectations to include (useful for testing)
     """
@@ -622,12 +633,16 @@ def main(**kwargs):
     )
     tracebacks = expectation_tracebacks.getvalue()
     checklists = expectation_checklists.getvalue()
+    docstrings = expectation_docstrings.getvalue()
     if tracebacks != "":
         with open("./gallery-tracebacks.txt", "w") as outfile:
             outfile.write(tracebacks)
     if checklists != "":
         with open("./checklists.txt", "w") as outfile:
             outfile.write(checklists)
+    if docstrings != "":
+        with open("./docstrings.txt", "w") as outfile:
+            outfile.write(docstrings)
     with open(f"./{kwargs['outfile_name']}", "w") as outfile:
         json.dump(gallery_info, outfile, indent=4)
 
