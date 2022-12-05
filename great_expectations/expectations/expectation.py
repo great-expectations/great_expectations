@@ -1511,7 +1511,7 @@ class Expectation(metaclass=MetaExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         params = renderer_configuration.params
-        if params.value_set.value and len(params.value_set.value) > 0:
+        if len(params.value_set.value) > 0:
             for idx, value in enumerate(params.value_set.value):
                 if isinstance(value, Number):
                     schema_type = ParamSchemaType.NUMBER
@@ -1526,7 +1526,7 @@ class Expectation(metaclass=MetaExpectation):
     @param_method(param_name="value_set")
     def _get_value_set_string(renderer_configuration: RendererConfiguration) -> str:
         params = renderer_configuration.params
-        if params.value_set.value and len(params.value_set.value) > 0:
+        if len(params.value_set.value) > 0:
             value_set_str = " ".join(
                 [f"$v__{str(idx)}" for idx in range(len(params.value_set.value))]
             )
@@ -1561,7 +1561,7 @@ class Expectation(metaclass=MetaExpectation):
         row_condition_str = " ".join(row_condition_str.split())
 
         # replace tuples of values by lists of values
-        tuples_list = re.findall(r"\([^\(\)]*,[^\(\)]*\)", row_condition_str)
+        tuples_list = re.findall(r"\([^()]*,[^()]*\)", row_condition_str)
         for value_tuple in tuples_list:
             value_list = value_tuple.replace("(", "[").replace(")", "]")
             row_condition_str = row_condition_str.replace(value_tuple, value_list)
@@ -1574,21 +1574,20 @@ class Expectation(metaclass=MetaExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         params = renderer_configuration.params
-        if params.row_condition.value:
-            row_condition_str: str = Expectation._parse_row_condition_str(
-                row_condition_str=params.row_condition.value
+        row_condition_str: str = Expectation._parse_row_condition_str(
+            row_condition_str=params.row_condition.value
+        )
+        row_conditions_list: List[
+            str
+        ] = Expectation._get_row_conditions_list_from_row_condition_str(
+            row_condition_str=row_condition_str
+        )
+        for idx, condition in enumerate(row_conditions_list):
+            name = f"row_condition__{str(idx)}"
+            value = condition.replace(" NOT ", " not ")
+            renderer_configuration.add_param(
+                name=name, schema_type=ParamSchemaType.STRING, value=value
             )
-            row_conditions_list: List[
-                str
-            ] = Expectation._get_row_conditions_list_from_row_condition_str(
-                row_condition_str=row_condition_str
-            )
-            for idx, condition in enumerate(row_conditions_list):
-                name = f"row_condition__{str(idx)}"
-                value = condition.replace(" NOT ", " not ")
-                renderer_configuration.add_param(
-                    name=name, schema_type=ParamSchemaType.STRING, value=value
-                )
 
         return renderer_configuration
 
@@ -1617,17 +1616,16 @@ class Expectation(metaclass=MetaExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         params = renderer_configuration.params
-        if params.mostly.value:
-            mostly_pct_value: str = num_to_str(
-                renderer_configuration.params.mostly.value * 100,
-                precision=15,
-                no_scientific=True,
-            )
-            renderer_configuration.add_param(
-                name="mostly_pct",
-                schema_type=ParamSchemaType.STRING,
-                value=mostly_pct_value,
-            )
+        mostly_pct_value: str = num_to_str(
+            renderer_configuration.params.mostly.value * 100,
+            precision=15,
+            no_scientific=True,
+        )
+        renderer_configuration.add_param(
+            name="mostly_pct",
+            schema_type=ParamSchemaType.STRING,
+            value=mostly_pct_value,
+        )
         return renderer_configuration
 
     @staticmethod
