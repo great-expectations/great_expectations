@@ -129,7 +129,7 @@ class Child(Parent):
     Child class docstring
     """
 
-    @ge.data_asset.util.DocInherit
+    @gx.data_asset.util.DocInherit
     @Parent.expectation
     def override_me(self):
         """Child method docstring
