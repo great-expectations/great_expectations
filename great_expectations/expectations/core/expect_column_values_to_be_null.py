@@ -122,13 +122,13 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             template_str = f"$column {template_str}"
 
         if params.row_condition.value:
-            renderer_configuration = cls._add_row_condition_condition_params(
+            renderer_configuration = cls._add_row_condition_params(
                 renderer_configuration=renderer_configuration
             )
-            conditions_str: str = cls._get_conditions_string_from_row_condition(
-                row_condition_param=params.row_condition
+            row_condition_str: str = cls._get_row_condition_string(
+                renderer_configuration=renderer_configuration
             )
-            template_str = f"{conditions_str}, then {template_str}"
+            template_str = f"{row_condition_str}, then {template_str}"
 
         renderer_configuration.template_str = template_str
 
