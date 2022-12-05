@@ -34,7 +34,42 @@ class ParamSchemaType(str, Enum):
     ARRAY = "array"
 
 
-RendererParams = TypeVar("RendererParams")
+class _RendererParamsBase(BaseModel):
+    class Config:
+        validate_assignment = True
+        arbitrary_types_allowed = True
+
+    def dict(
+        self,
+        include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
+        exclude: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
+        by_alias: bool = True,
+        skip_defaults: Optional[bool] = None,
+        exclude_unset: bool = False,
+        exclude_defaults: bool = False,
+        exclude_none: bool = True,
+    ) -> DictStrAny:
+        """
+        Override BaseModel dict to make the defaults:
+            - by_alias=True because we have an existing attribute named schema, and schema is already a Pydantic
+              BaseModel attribute.
+            - exclude_none=True to ensure that None values aren't included in the json dict.
+
+        In practice this means the renderer implementer doesn't need to use .dict(by_alias=True, exclude_none=True)
+        everywhere.
+        """
+        return super().dict(
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            skip_defaults=skip_defaults,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+        )
+
+
+RendererParams = TypeVar("RendererParams", bound=_RendererParamsBase)
 
 
 class RendererConfiguration(GenericModel, Generic[RendererParams]):
@@ -61,7 +96,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         kwargs = RendererConfiguration._set_include_column_name_and_styling(
             kwargs=kwargs
         )
-        kwargs["params"] = RendererConfiguration._RendererParamsBase()
+        kwargs["params"] = _RendererParamsBase()
         super().__init__(**kwargs)
 
     @staticmethod
@@ -106,40 +141,6 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 return self.dict() == other
             else:
                 return self == other
-
-    class _RendererParamsBase(BaseModel):
-        class Config:
-            validate_assignment = True
-            arbitrary_types_allowed = True
-
-        def dict(
-            self,
-            include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
-            exclude: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
-            by_alias: bool = True,
-            skip_defaults: Optional[bool] = None,
-            exclude_unset: bool = False,
-            exclude_defaults: bool = False,
-            exclude_none: bool = True,
-        ) -> DictStrAny:
-            """
-            Override BaseModel dict to make the defaults:
-                - by_alias=True because we have an existing attribute named schema, and schema is already a Pydantic
-                  BaseModel attribute.
-                - exclude_none=True to ensure that None values aren't included in the json dict.
-
-            In practice this means the renderer implementer doesn't need to use .dict(by_alias=True, exclude_none=True)
-            everywhere.
-            """
-            return super().dict(
-                include=include,
-                exclude=exclude,
-                by_alias=by_alias,
-                skip_defaults=skip_defaults,
-                exclude_unset=exclude_unset,
-                exclude_defaults=exclude_defaults,
-                exclude_none=exclude_none,
-            )
 
     def add_param(
         self,
@@ -199,6 +200,6 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 name: renderer_param(schema={"type": schema_type}, value=value),
             }
 
-        params: BaseModel = renderer_params(**renderer_params_definition)
-
-        self.params = cast(RendererParams, params)
+        self.params = cast(
+            RendererParams, renderer_params(**renderer_params_definition)
+        )
