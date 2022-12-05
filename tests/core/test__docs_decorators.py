@@ -17,16 +17,18 @@ def _func_full_docstring_public_api(some_arg, other_arg):
     pass
 
 
+@public_api
 def _func_only_summary_public_api():
     """My docstring."""
     pass
 
 
+@public_api
 def _func_no_docstring_public_api():
     pass
 
 
-def test_public_api_decorator():
+def test_public_api_decorator_full_docstring():
     assert _func_full_docstring_public_api.__doc__ == (
         "--Public API--My docstring.\n"
         "\n"
@@ -38,6 +40,16 @@ def test_public_api_decorator():
         "    "
     )
     assert _func_full_docstring_public_api.__name__ == "_func_full_docstring_public_api"
+
+
+def test_public_api_decorator_only_summary():
+    assert _func_only_summary_public_api.__doc__ == ("--Public API--My docstring.")
+    assert _func_only_summary_public_api.__name__ == "_func_only_summary_public_api"
+
+
+def test_public_api_decorator_no_docstring():
+    assert _func_no_docstring_public_api.__doc__ == ("--Public API--")
+    assert _func_no_docstring_public_api.__name__ == "_func_no_docstring_public_api"
 
 
 @deprecated(version="1.2.3", message="This is deprecated!!")
