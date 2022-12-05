@@ -375,9 +375,9 @@ class Expectation(metaclass=MetaExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         if renderer_configuration.expectation_type and renderer_configuration.kwargs:
-            template_str = "$expectation_type(**$kwargs)."
+            template_str = "$expectation_type(**$kwargs)"
         elif renderer_configuration.expectation_type:
-            template_str = "$expectation_type."
+            template_str = "$expectation_type"
         else:
             raise ValueError(
                 "RendererConfiguration does not contain an expectation_type."
