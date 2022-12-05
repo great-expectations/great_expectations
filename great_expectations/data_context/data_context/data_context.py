@@ -73,7 +73,7 @@ class DataContext(BaseDataContext):
 
     You can create or load a DataContext from disk via the following:
     ```
-    import great_expectations as ge
+    import great_expectations as gx
     ge.get_context()
     ```
 

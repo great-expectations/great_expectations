@@ -2,7 +2,7 @@
 import pandas as pd
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import RuntimeBatchRequest

@@ -2,7 +2,7 @@ import os
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
 db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")

@@ -39,7 +39,7 @@ Steps
 
             .. code-block:: python
 
-                import great_expectations as ge
+                import great_expectations as gx
 
                 context = ge.data_context.DataContext()
                 suite = context.create_expectation_suite(

@@ -17,7 +17,7 @@ import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite

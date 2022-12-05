@@ -105,7 +105,7 @@ action_list:
 To test your `StoreMetricsAction`, run your Checkpoint from your code or the <TechnicalTag tag="cli" text="CLI" />:
 
 ```python
-import great_expectations as ge
+import great_expectations as gx
 context = ge.get_context()
 checkpoint_name = "your checkpoint name here"
 context.run_checkpoint(checkpoint_name=checkpoint_name)

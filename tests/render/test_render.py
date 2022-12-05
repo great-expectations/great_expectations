@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path

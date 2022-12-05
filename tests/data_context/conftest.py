@@ -9,7 +9,7 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store.gx_cloud_store_backend import (

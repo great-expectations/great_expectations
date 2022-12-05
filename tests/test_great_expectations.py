@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 from freezegun import freeze_time
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core import (
     ExpectationConfiguration,

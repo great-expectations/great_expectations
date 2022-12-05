@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset.util import build_categorical_partition_object
 

@@ -3,7 +3,7 @@ import subprocess
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 
 context = ge.get_context()
 

@@ -35,7 +35,7 @@ This lets us import the required libraries right away.
 ```python
 import pandas as pd
 import numpy as np
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,

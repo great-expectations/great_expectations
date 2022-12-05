@@ -1,6 +1,6 @@
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
 CONNECTION_STRING = "mysql+pymysql://root@localhost/test_ci"

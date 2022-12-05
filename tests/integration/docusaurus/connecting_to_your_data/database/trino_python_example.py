@@ -1,6 +1,6 @@
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from tests.test_utils import load_data_into_test_database
 

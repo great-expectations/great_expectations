@@ -3,7 +3,7 @@ from unittest import mock
 import pandas as pd
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import PandasDataset
 from great_expectations.profile.base import (

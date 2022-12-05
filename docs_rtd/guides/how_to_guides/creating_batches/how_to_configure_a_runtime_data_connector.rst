@@ -22,7 +22,7 @@ The following example uses ``test_yaml_config`` and ``sanitize_yaml_and_save_dat
 
 .. code-block:: python
 
-  import great_expectations as ge
+  import great_expectations as gx
   from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource
 
   context = ge.get_context()

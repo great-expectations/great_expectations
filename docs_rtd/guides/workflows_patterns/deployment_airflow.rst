@@ -87,7 +87,7 @@ If the current version of the ``GreatExpectationsOperator`` does not support you
 
     from airflow import AirflowException
     from airflow.operators.python_operator import PythonOperator
-    import great_expectations as ge
+    import great_expectations as gx
 
     ...
 

@@ -82,21 +82,21 @@ Because your Data Context contains the entirety of your Great Expectations proje
 As a Great Expectations user, once you have created a Data Context, you will almost always start future work either by using <TechnicalTag relative="../" tag="cli" text="CLI" /> commands from your Data Context's root folder, or by instantiating a `DataContext` in Python:
 
 ```python title="Python code"
-import great_expectations as ge
+import great_expectations as gx
 context = ge.get_context()
 ```
 
 Alternatively, you might call:
 
 ```python title="Python code"
-import great_expectations as ge
+import great_expectations as gx
 context = ge.get_context(filepath=”something”)
 ```
 
 If you’re using Great Expectations Cloud, you’d call:
 
 ```python title="Python code"
-import great_expectations as ge
+import great_expectations as gx
 context = ge.get_context(API_KEY=”something”)
 ```
 

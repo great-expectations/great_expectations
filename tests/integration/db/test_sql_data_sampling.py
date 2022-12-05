@@ -3,7 +3,7 @@ from typing import List
 import pandas as pd
 import sqlalchemy as sa
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec

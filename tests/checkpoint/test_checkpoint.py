@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 from ruamel.yaml.comments import CommentedMap
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult

@@ -3,7 +3,7 @@ from ruamel import yaml
 
 # Required imports for this script's purpose:
 # <snippet>
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.checkpoint import Checkpoint
 
 # </snippet>

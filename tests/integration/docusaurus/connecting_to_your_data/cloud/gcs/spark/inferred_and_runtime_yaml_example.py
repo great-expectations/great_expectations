@@ -3,7 +3,7 @@ from typing import List
 from ruamel import yaml
 
 # <snippet>
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (

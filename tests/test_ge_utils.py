@@ -8,7 +8,7 @@ from typing import Any
 import numpy as np
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.util import nested_update
 from great_expectations.util import (
     convert_json_string_to_be_python_compliant,

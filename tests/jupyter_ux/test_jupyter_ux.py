@@ -2,7 +2,7 @@ import logging
 
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux as jux
 
 

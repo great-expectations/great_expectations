@@ -2,7 +2,7 @@ import os
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 
 CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
 

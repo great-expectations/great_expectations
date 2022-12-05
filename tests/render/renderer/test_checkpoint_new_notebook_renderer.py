@@ -4,7 +4,7 @@ import shutil
 import nbformat
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.util import file_relative_path
@@ -172,7 +172,7 @@ def checkpoint_new_notebook_assets():
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": "from ruamel.yaml import YAML\nimport great_expectations as ge\nfrom pprint import pprint\n\nyaml = YAML()\ncontext = ge.get_context()",
+            "source": "from ruamel.yaml import YAML\nimport great_expectations as gx\nfrom pprint import pprint\n\nyaml = YAML()\ncontext = ge.get_context()",
             "outputs": [],
         },
     ]

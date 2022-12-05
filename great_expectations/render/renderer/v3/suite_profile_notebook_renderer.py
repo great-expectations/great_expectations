@@ -128,7 +128,7 @@ import datetime
 
 import pandas as pd
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
@@ -193,7 +193,7 @@ import datetime
 
 import pandas as pd
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint
@@ -234,7 +234,7 @@ import datetime
 
 import pandas as pd
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint

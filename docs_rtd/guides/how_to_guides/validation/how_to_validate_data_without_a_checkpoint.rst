@@ -21,7 +21,7 @@ This guide demonstrates how to load an Expectation Suite and validate data witho
 
         .. code-block:: python
 
-            import great_expectations as ge
+            import great_expectations as gx
             context = ge.data_context.DataContext()
 
             datasource_name = "my_datasource"

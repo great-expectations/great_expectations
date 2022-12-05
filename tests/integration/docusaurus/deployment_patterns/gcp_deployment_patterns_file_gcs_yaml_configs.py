@@ -1,7 +1,7 @@
 import os
 
 # <snippet>
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
 
 # </snippet>

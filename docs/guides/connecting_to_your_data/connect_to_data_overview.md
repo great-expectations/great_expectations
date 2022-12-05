@@ -144,7 +144,7 @@ You can call `test_yaml_config()` from your Data Context, like so:
 <TabItem value="yaml">
 
 ```python
-import great_expectations as ge
+import great_expectations as gx
 
 datasource_yaml = ""  # Replace this with the yaml string you want to check for errors.
 
@@ -157,7 +157,7 @@ context.test_yaml_config(datasource_yaml)
 <TabItem value="python">
 
 ```python
-import great_expectations as ge
+import great_expectations as gx
 from ruamel import yaml
 
 datasource_config = {}  # Replace this with the Python dictionary you want to check for errors.

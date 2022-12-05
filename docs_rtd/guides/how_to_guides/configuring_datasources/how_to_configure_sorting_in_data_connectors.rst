@@ -53,7 +53,7 @@ However, it can also be assigned to an a relative path like ``../`` as can be se
 
   .. code-block:: python
 
-    import great_expectations as ge
+    import great_expectations as gx
     from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource
     from great_expectations.core.batch import BatchRequest
 
@@ -216,7 +216,7 @@ GE will begin looking for the files in the parent directory.
 
   .. code-block:: python
 
-    import great_expectations as ge
+    import great_expectations as gx
     from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource
     from great_expectations.core.batch import BatchRequest
 
@@ -378,7 +378,7 @@ GE will begin looking for the files in the parent directory.
 
   .. code-block:: python
 
-    import great_expectations as ge
+    import great_expectations as gx
     from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource
     from great_expectations.core.batch import BatchRequest
 
@@ -543,7 +543,7 @@ GE will begin looking for the files in the parent directory.
 
   .. code-block:: python
 
-    import great_expectations as ge
+    import great_expectations as gx
     from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource
     from great_expectations.core.batch import BatchRequest
 
@@ -715,7 +715,7 @@ GE will begin looking for the files in the parent directory.
 
   .. code-block:: python
 
-    import great_expectations as ge
+    import great_expectations as gx
     from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource
     from great_expectations.core.batch import BatchRequest
 
@@ -889,7 +889,7 @@ GE will begin looking for the files in the parent directory.
 
   .. code-block:: python
 
-    import great_expectations as ge
+    import great_expectations as gx
     from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource
     from great_expectations.core.batch import BatchRequest
 

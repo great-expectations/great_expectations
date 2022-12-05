@@ -160,7 +160,7 @@ This guide shows how to get a :ref:`batch <reference__core_concepts__batches>` o
 
           .. code-block:: python
 
-              import great_expectations as ge
+              import great_expectations as gx
               from great_expectations import DataContext
               from great_expectations.core import ExpectationSuite
               from great_expectations.core.batch import RuntimeBatchRequest

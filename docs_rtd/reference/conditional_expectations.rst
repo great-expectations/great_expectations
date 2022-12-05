@@ -18,7 +18,7 @@ One can test, for example, whether abbreviated state names are correct condition
 
 .. code-block:: bash
 
-    >>> import great_expectations as ge
+    >>> import great_expectations as gx
     >>> my_df = ge.read_csv("data/npidata_cut_65k.csv")
     >>> my_df.expect_column_values_to_be_in_set(
             column='Provider Business Mailing Address State Name',

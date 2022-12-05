@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 from freezegun import freeze_time
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import BaseDataContext
 from great_expectations.self_check.util import modify_locale

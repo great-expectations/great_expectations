@@ -98,7 +98,7 @@ If you do not use the :ref:`CLI <command_line>`, create a new notebook in the``g
 .. code-block:: python
 
     from datetime import datetime
-    import great_expectations as ge
+    import great_expectations as gx
     import great_expectations.jupyter_ux
     from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 

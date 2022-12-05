@@ -82,7 +82,7 @@ Here is an example with an in memory `DataContext`:
 import os
 from pathlib import Path
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
     DataContextConfig,

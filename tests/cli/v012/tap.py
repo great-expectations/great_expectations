@@ -16,7 +16,7 @@ Usage:
 """
 import sys
 
-import great_expectations as ge
+import great_expectations as gx
 
 # tap configuration
 context = ge.DataContext(

@@ -5,7 +5,7 @@ from unittest import mock
 import pandas as pd
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_configuration import ExpectationConfiguration

@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional, cast
 import numpy as np
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 
 # noinspection PyUnresolvedReferences
 from contrib.experimental.great_expectations_experimental.rule_based_profiler.data_assistant import (

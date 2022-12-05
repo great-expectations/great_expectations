@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
 from great_expectations.core.expectation_suite import ExpectationSuite

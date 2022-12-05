@@ -5,7 +5,7 @@ from collections import OrderedDict
 import pytest
 from ruamel.yaml import YAML
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.config_provider import _ConfigurationSubstitutor
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import (

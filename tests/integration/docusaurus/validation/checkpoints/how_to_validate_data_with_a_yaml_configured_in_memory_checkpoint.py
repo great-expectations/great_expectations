@@ -4,7 +4,7 @@
 from ruamel import yaml
 
 # </snippet>
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.checkpoint import Checkpoint
 
 # Imports used for testing purposes (and can be left out of typical scripts):

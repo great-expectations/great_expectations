@@ -59,7 +59,7 @@ Steps
 
     .. code-block:: python
 
-        import great_expectations as ge
+        import great_expectations as gx
         context = ge.DataContext()
 
 

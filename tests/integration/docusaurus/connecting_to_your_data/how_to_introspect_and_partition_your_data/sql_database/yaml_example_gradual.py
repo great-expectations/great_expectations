@@ -1,7 +1,7 @@
 from ruamel import yaml
 
 # <snippet>
-import great_expectations as ge
+import great_expectations as gx
 
 # </snippet>
 

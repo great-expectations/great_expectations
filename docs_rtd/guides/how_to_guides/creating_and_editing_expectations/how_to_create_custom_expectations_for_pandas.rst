@@ -19,7 +19,7 @@ Steps
 
     .. code-block:: python
 
-        import great_expectations as ge
+        import great_expectations as gx
         from great_expectations.dataset import (
             PandasDataset,
             MetaPandasDataset,
@@ -67,7 +67,7 @@ Steps
     .. code-block:: python
 
         @MetaPandasDataset.column_map_expectation
-        def expect_column_value_word_counts_to_be_between(self, column, min_value=None, max_value=None):        
+        def expect_column_value_word_counts_to_be_between(self, column, min_value=None, max_value=None):
             def count_words(string):
                 word_list = re.findall("(\S+)", string)
                 return len(word_list)
@@ -119,7 +119,7 @@ Steps
         my_df = MyCustomPandasDataset(my_pd_df)
 
     Note: We're using the ``read_csv`` method to fetch data, instead of the more typical ``DataContext.get_batch``. This is for convenience: it allows us to handle the full development loop for a custom Expectation within a notebook with a minimum of configuration.
-    
+
     In a moment, we'll demonstrate how to configure a Datasource to use ``MyCustomPandasDataset`` when calling ``get_batch``.
 
 5. **Test your Expectations**
@@ -185,7 +185,7 @@ Steps
     The simplest way to do this is to create a new, single-file python module within your ``great_expectations/plugins/`` directory. Name it something like ``custom_pandas_dataset.py``. Copy the full contents of your ``MyCustomPandasDataset`` class into this file. Make sure to include any required imports, too.
 
     When you instantiate a Data Context, Great Expectations automatically adds ``plugins/`` to the python namespace, so your class can be imported as ``custom_pandas_dataset.MyCustomPandasDataset``.
-    
+
 #. **Configure your Datasource(s)**
 
     Now, open your ``great_expectations.yml`` file. Assuming that you've previously :ref:`configured a pandas Datasource <how_to_guides__configuring_datasources__how_to_configure_a_pandas_filesystem_datasource>`, you should see a configuration block similar to this, under the ``datasources`` key:
@@ -280,7 +280,7 @@ Here's a single code block containing all the notebook code in this article:
     import re
     import pytz
 
-    import great_expectations as ge
+    import great_expectations as gx
     from great_expectations.dataset import (
         PandasDataset,
         MetaPandasDataset,
@@ -318,7 +318,7 @@ Here's a single code block containing all the notebook code in this article:
         def expect_column_values_to_be_valid_timezones(self, column, timezone_values=pytz.all_timezones):
             return column.map(lambda x: x in timezone_values)
 
-    
+
     #Instantiate the class in several different ways
     my_df = ge.read_csv("my_data/Titanic.csv", dataset_class=MyCustomPandasDataset)
 

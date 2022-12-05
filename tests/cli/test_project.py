@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 from click.testing import CliRunner
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.cli import cli
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.util import file_relative_path

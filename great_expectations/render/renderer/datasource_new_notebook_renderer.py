@@ -64,7 +64,7 @@ Give your datasource a unique name:"""
 Use this notebook to configure a new {self.datasource_type.value} Datasource and add it to your project."""
         )
         self.add_code_cell(
-            """import great_expectations as ge
+            """import great_expectations as gx
 from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource, check_if_datasource_name_exists
 context = ge.get_context()""",
         )

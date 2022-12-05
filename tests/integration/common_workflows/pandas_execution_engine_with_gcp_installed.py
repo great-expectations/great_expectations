@@ -2,7 +2,7 @@ import os
 from contextlib import contextmanager
 from typing import Dict
 
-import great_expectations as ge
+import great_expectations as gx
 
 
 @contextmanager

@@ -100,7 +100,7 @@ evaluation_parameters:
 If you would rather pass the value of the Environment Variable `upstream_row_count` in as a dictionary when the Checkpoint is run, you can do so like this:
 
 ```python title="Python code"
-import great_expectations as ge
+import great_expectations as gx
 
 test_row_count = 10000
 

@@ -2,7 +2,7 @@ import os
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.datasource.new_datasource import Datasource
 
 config_variables_yaml = """

@@ -22,7 +22,7 @@ Steps
     Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
 
     ```python
-    import great_expectations as ge
+    import great_expectations as gx
     context = ge.get_context()
     ```
 

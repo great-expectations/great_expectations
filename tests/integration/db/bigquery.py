@@ -4,7 +4,7 @@ import os
 import pytest
 from google.cloud import bigquery
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler

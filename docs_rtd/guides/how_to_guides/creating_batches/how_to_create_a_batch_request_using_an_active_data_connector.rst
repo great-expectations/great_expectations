@@ -36,7 +36,7 @@ If you have the following ``reports`` directory in your filesystem, and you want
 
   .. code-block:: python
 
-    import great_expectations as ge
+    import great_expectations as gx
     from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource
     from great_expectations.core.batch import BatchRequest
 

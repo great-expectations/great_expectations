@@ -2,7 +2,7 @@ from typing import List
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import Batch, BatchRequest
 
 context = ge.get_context()

@@ -8,7 +8,7 @@ The block below is not rendered in the final documentation, but *does* affect th
 
 .. invisible-code-block: python
 
-    import great_expectations as ge
+    import great_expectations as gx
     import pandas as pd
     npi = ge.dataset.PandasDataset({"provider_id": [1,2,3]})
     from great_expectations.core import ExpectationValidationResult, ExpectationConfiguration
@@ -108,4 +108,3 @@ This section would often fail, but will be skipped because of the Sphinx comment
         }
       }
     }
-

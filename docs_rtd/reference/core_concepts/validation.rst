@@ -24,7 +24,7 @@ An example report looks like the following:
 .. code-block:: bash
 
     >> import json
-    >> import great_expectations as ge
+    >> import great_expectations as gx
     >> my_expectation_suite = json.load(file("my_titanic_expectations.json"))
     >> my_df = ge.read_csv(
         "./tests/examples/titanic.csv",

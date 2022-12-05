@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 from freezegun import freeze_time
 
-import great_expectations as ge
+import great_expectations as gx
 
 # noinspection PyUnresolvedReferences
 from contrib.experimental.great_expectations_experimental.rule_based_profiler.data_assistant import (

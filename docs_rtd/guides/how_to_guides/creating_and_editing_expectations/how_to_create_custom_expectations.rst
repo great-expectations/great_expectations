@@ -334,7 +334,7 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
 
         .. code-block:: bash
 
-            >> import great_expectations as ge
+            >> import great_expectations as gx
             >> from custom_dataset import CustomPandasDataset
 
             >> my_df = ge.read_csv("my_data_file.csv", dataset_class=CustomPandasDataset)
@@ -414,7 +414,7 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
 
         .. code-block:: bash
 
-            >> import great_expectations as ge
+            >> import great_expectations as gx
             >> context = ge.DataContext()
             >> my_df = context.get_batch(
                 "my_datasource/default/my_file",

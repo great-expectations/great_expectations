@@ -28,7 +28,7 @@ This guide will help you load a Spark DataFrame as a Batch for use in creating E
 
             .. code-block:: python
 
-                import great_expectations as ge
+                import great_expectations as gx
                 context = ge.get_context()
 
             Create an in-code Data Context using these instructions: :ref:`How to instantiate a Data Context without a yml file <how_to_guides__configuring_data_contexts__how_to_instantiate_a_data_context_without_a_yml_file>`
@@ -110,7 +110,7 @@ This guide will help you load a Spark DataFrame as a Batch for use in creating E
 
             import pyspark
 
-            import great_expectations as ge
+            import great_expectations as gx
             from great_expectations import DataContext
             from great_expectations.core import ExpectationSuite
             from great_expectations.core.batch import RuntimeBatchRequest

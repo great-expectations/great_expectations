@@ -1,7 +1,7 @@
 import os
 import tempfile
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
     DataContextConfig,

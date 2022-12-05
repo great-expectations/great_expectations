@@ -4,7 +4,7 @@ Tests for autoinspection framework.
 
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.core.expectation_configuration
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.self_check.util import get_dataset

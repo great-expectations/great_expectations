@@ -79,7 +79,7 @@ The full example script is here:
 
 ```python
 import json
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.profile.json_schema_profiler import JsonSchemaProfiler
 
 jsonschema_file = "YOUR_JSON_SCHEMA_FILE.json"
