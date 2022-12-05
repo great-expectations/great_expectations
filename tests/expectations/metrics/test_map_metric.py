@@ -148,6 +148,80 @@ def expected_evr_without_unexpected_rows():
     )
 
 
+def _expecation_configuration_to_validation_result_pandas(
+    expectation_configuration: ExpectationConfiguration, dataframe: pd.DataFrame
+) -> ExpectationValidationResult:
+    """
+    Helper method used by pandas tests in this suite. Takes in a ExpectationConfiguration and returns an EVR
+    after building an ExecutionEngine, DataConnector and Validator.
+
+    Args:
+        expectation_configuration (ExpectationConfiguration): configuration that is being tested
+
+    """
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
+    batch: Batch = Batch(data=dataframe)
+    engine = PandasExecutionEngine()
+    validator = Validator(
+        execution_engine=engine,
+        batches=[
+            batch,
+        ],
+    )
+    result = expectation.validate(validator)
+    return result
+
+
+def _expecation_configuration_to_validation_result_sql(
+    expectation_configuration: ExpectationConfiguration,
+) -> ExpectationValidationResult:
+    """
+    Helper method used by sql tests in this suite. Takes in a ExpectationConfiguration and returns an EVR
+    after building an ExecutionEngine, DataConnector and Validator.
+
+    Args:
+        expectation_configuration (ExpectationConfiguration): configuration that is being tested
+
+    """
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
+    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
+    connection_string = f"sqlite:///{sqlite_path}"
+    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
+    execution_engine = engine
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=execution_engine,
+            assets={
+                "my_asset": {
+                    "table_name": "animal_names",
+                },
+            },
+        )
+    )
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="my_asset",
+            )
+        )
+    )
+    assert len(batch_definition_list) == 1
+    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
+        batch_definition=batch_definition_list[0]
+    )
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=batch_spec
+    )
+    batch = Batch(data=batch_data)
+    validator = Validator(execution_engine, batches=[batch])
+    result = expectation.validate(validator)
+    return result
+
+
 def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
     mp = ColumnMax()
     metric = MetricConfiguration(
@@ -833,16 +907,12 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format_no
             },
         },
     )
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch: Batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
-    engine = PandasExecutionEngine()
-    validator = Validator(
-        execution_engine=engine,
-        batches=[
-            batch,
-        ],
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        )
     )
-    result = expectation.validate(validator)
     assert result.success is False
     assert result.exception_info
     assert (
@@ -866,16 +936,12 @@ def test_pandas_default_to_not_include_unexpected_rows(
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
-    engine = PandasExecutionEngine()
-    validator = Validator(
-        execution_engine=engine,
-        batches=[
-            batch,
-        ],
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        )
     )
-    result = expectation.validate(validator)
     assert result.result == expected_evr_without_unexpected_rows.result
 
 
@@ -895,16 +961,12 @@ def test_pandas_specify_not_include_unexpected_rows(
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch = Batch(data=pandas_animals_dataframe_for_unexpected_rows_and_index)
-    engine = PandasExecutionEngine()
-    validator = Validator(
-        execution_engine=engine,
-        batches=[
-            batch,
-        ],
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        )
     )
-    result = expectation.validate(validator)
     assert result.result == expected_evr_without_unexpected_rows.result
 
 
@@ -1030,42 +1092,11 @@ def test_sqlite_single_column_complete_result_format(
             },
         },
     )
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
-    connection_string = f"sqlite:///{sqlite_path}"
-    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-    execution_engine = engine
-    my_data_connector: ConfiguredAssetSqlDataConnector = (
-        ConfiguredAssetSqlDataConnector(
-            name="my_sql_data_connector",
-            datasource_name="my_test_datasource",
-            execution_engine=execution_engine,
-            assets={
-                "my_asset": {
-                    "table_name": "animals_table",
-                },
-            },
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration
         )
     )
-    batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="my_test_datasource",
-                data_connector_name="my_sql_data_connector",
-                data_asset_name="my_asset",
-            )
-        )
-    )
-    assert len(batch_definition_list) == 1
-    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
-        batch_definition=batch_definition_list[0]
-    )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=batch_spec
-    )
-    batch = Batch(data=batch_data)
-    validator = Validator(execution_engine, batches=[batch])
-    result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -1097,42 +1128,9 @@ def test_sqlite_single_column_summary_result_format(
             },
         },
     )
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
-    connection_string = f"sqlite:///{sqlite_path}"
-    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-    execution_engine = engine
-    my_data_connector: ConfiguredAssetSqlDataConnector = (
-        ConfiguredAssetSqlDataConnector(
-            name="my_sql_data_connector",
-            datasource_name="my_test_datasource",
-            execution_engine=execution_engine,
-            assets={
-                "my_asset": {
-                    "table_name": "animals_table",
-                },
-            },
-        )
+    result = _expecation_configuration_to_validation_result_sql(
+        expectation_configuration=expectation_configuration
     )
-    batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="my_test_datasource",
-                data_connector_name="my_sql_data_connector",
-                data_asset_name="my_asset",
-            )
-        )
-    )
-    assert len(batch_definition_list) == 1
-    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
-        batch_definition=batch_definition_list[0]
-    )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=batch_spec
-    )
-    batch = Batch(data=batch_data)
-    validator = Validator(execution_engine, batches=[batch])
-    result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -1153,7 +1151,7 @@ def test_sqlite_single_column_summary_result_format(
 def test_sqlite_single_column_complete_result_format(
     sa, sqlite_table_for_unexpected_rows_with_index
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
@@ -1163,42 +1161,12 @@ def test_sqlite_single_column_complete_result_format(
             },
         },
     )
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration
+        )
+    )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
-    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
-    connection_string = f"sqlite:///{sqlite_path}"
-    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-    execution_engine = engine
-    my_data_connector: ConfiguredAssetSqlDataConnector = (
-        ConfiguredAssetSqlDataConnector(
-            name="my_sql_data_connector",
-            datasource_name="my_test_datasource",
-            execution_engine=execution_engine,
-            assets={
-                "my_asset": {
-                    "table_name": "animal_names",
-                },
-            },
-        )
-    )
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="my_test_datasource",
-            data_connector_name="my_sql_data_connector",
-            # data_asset_name="main.my_asset"
-            data_asset_name="my_asset",
-        )
-    )
-    assert len(batch_definition_list) == 1
-    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
-        batch_definition=batch_definition_list[0]
-    )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=batch_spec
-    )
-    batch = Batch(data=batch_data)
-    validator = Validator(execution_engine, batches=[batch])
-    result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -1220,7 +1188,7 @@ def test_sqlite_single_column_complete_result_format(
 def test_sqlite_single_unexpected_index_column_names_complete_result_format(
     sa, sqlite_table_for_unexpected_rows_with_index
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
@@ -1232,42 +1200,12 @@ def test_sqlite_single_unexpected_index_column_names_complete_result_format(
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
-    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
-    connection_string = f"sqlite:///{sqlite_path}"
-    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-    execution_engine = engine
-    my_data_connector: ConfiguredAssetSqlDataConnector = (
-        ConfiguredAssetSqlDataConnector(
-            name="my_sql_data_connector",
-            datasource_name="my_test_datasource",
-            execution_engine=execution_engine,
-            assets={
-                "my_asset": {
-                    "table_name": "animal_names",
-                },
-            },
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration
         )
     )
-    batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="my_test_datasource",
-                data_connector_name="my_sql_data_connector",
-                data_asset_name="my_asset",
-            )
-        )
-    )
-    assert len(batch_definition_list) == 1
-    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
-        batch_definition=batch_definition_list[0]
-    )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=batch_spec
-    )
-    batch = Batch(data=batch_data)
-    validator = Validator(execution_engine, batches=[batch])
-    result = expectation.validate(validator)
+
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -1295,7 +1233,7 @@ def test_sqlite_single_unexpected_index_column_names_complete_result_format(
 def test_sqlite_single_unexpected_index_column_names_summary_result_format(
     sa, sqlite_table_for_unexpected_rows_with_index
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
@@ -1307,42 +1245,12 @@ def test_sqlite_single_unexpected_index_column_names_summary_result_format(
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
-    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
-    connection_string = f"sqlite:///{sqlite_path}"
-    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-    execution_engine = engine
-    my_data_connector: ConfiguredAssetSqlDataConnector = (
-        ConfiguredAssetSqlDataConnector(
-            name="my_sql_data_connector",
-            datasource_name="my_test_datasource",
-            execution_engine=execution_engine,
-            assets={
-                "my_asset": {
-                    "table_name": "animal_names",
-                },
-            },
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration
         )
     )
-    batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="my_test_datasource",
-                data_connector_name="my_sql_data_connector",
-                data_asset_name="my_asset",
-            )
-        )
-    )
-    assert len(batch_definition_list) == 1
-    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
-        batch_definition=batch_definition_list[0]
-    )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=batch_spec
-    )
-    batch = Batch(data=batch_data)
-    validator = Validator(execution_engine, batches=[batch])
-    result = expectation.validate(validator)
+
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -1364,7 +1272,7 @@ def test_sqlite_single_unexpected_index_column_names_summary_result_format(
 def test_sqlite_multiple_unexpected_index_column_names_complete_result_format(
     sa, sqlite_table_for_unexpected_rows_with_index
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
@@ -1376,42 +1284,12 @@ def test_sqlite_multiple_unexpected_index_column_names_complete_result_format(
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
-    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
-    connection_string = f"sqlite:///{sqlite_path}"
-    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-    execution_engine = engine
-    my_data_connector: ConfiguredAssetSqlDataConnector = (
-        ConfiguredAssetSqlDataConnector(
-            name="my_sql_data_connector",
-            datasource_name="my_test_datasource",
-            execution_engine=execution_engine,
-            assets={
-                "my_asset": {
-                    "table_name": "animal_names",
-                },
-            },
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration
         )
     )
-    batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="my_test_datasource",
-                data_connector_name="my_sql_data_connector",
-                data_asset_name="my_asset",
-            )
-        )
-    )
-    assert len(batch_definition_list) == 1
-    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
-        batch_definition=batch_definition_list[0]
-    )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=batch_spec
-    )
-    batch = Batch(data=batch_data)
-    validator = Validator(execution_engine, batches=[batch])
-    result = expectation.validate(validator)
+
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -1447,7 +1325,7 @@ def test_sqlite_multiple_unexpected_index_column_names_complete_result_format(
 def test_sql_multiple_unexpected_index_column_names_complete_result_format_limit_1(
     sa, sqlite_table_for_unexpected_rows_with_index
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
@@ -1460,42 +1338,12 @@ def test_sql_multiple_unexpected_index_column_names_complete_result_format_limit
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
-    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
-    connection_string = f"sqlite:///{sqlite_path}"
-    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-    execution_engine = engine
-    my_data_connector: ConfiguredAssetSqlDataConnector = (
-        ConfiguredAssetSqlDataConnector(
-            name="my_sql_data_connector",
-            datasource_name="my_test_datasource",
-            execution_engine=execution_engine,
-            assets={
-                "my_asset": {
-                    "table_name": "animal_names",
-                },
-            },
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration
         )
     )
-    batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="my_test_datasource",
-                data_connector_name="my_sql_data_connector",
-                data_asset_name="my_asset",
-            )
-        )
-    )
-    assert len(batch_definition_list) == 1
-    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
-        batch_definition=batch_definition_list[0]
-    )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=batch_spec
-    )
-    batch = Batch(data=batch_data)
-    validator = Validator(execution_engine, batches=[batch])
-    result = expectation.validate(validator)
+
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -1521,7 +1369,7 @@ def test_sql_multiple_unexpected_index_column_names_complete_result_format_limit
 def test_sql_multiple_unexpected_index_column_names_summary_result_format(
     sa, sqlite_table_for_unexpected_rows_with_index
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
@@ -1533,42 +1381,11 @@ def test_sql_multiple_unexpected_index_column_names_summary_result_format(
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
-    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
-    connection_string = f"sqlite:///{sqlite_path}"
-    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-    execution_engine = engine
-    my_data_connector: ConfiguredAssetSqlDataConnector = (
-        ConfiguredAssetSqlDataConnector(
-            name="my_sql_data_connector",
-            datasource_name="my_test_datasource",
-            execution_engine=execution_engine,
-            assets={
-                "my_asset": {
-                    "table_name": "animal_names",
-                },
-            },
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration
         )
     )
-    batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="my_test_datasource",
-                data_connector_name="my_sql_data_connector",
-                data_asset_name="my_asset",
-            )
-        )
-    )
-    assert len(batch_definition_list) == 1
-    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
-        batch_definition=batch_definition_list[0]
-    )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=batch_spec
-    )
-    batch = Batch(data=batch_data)
-    validator = Validator(execution_engine, batches=[batch])
-    result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -1595,7 +1412,7 @@ def test_sql_multiple_unexpected_index_column_names_summary_result_format_limit_
     sa, sqlite_table_for_unexpected_rows_with_index
 ):
 
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
@@ -1608,42 +1425,11 @@ def test_sql_multiple_unexpected_index_column_names_summary_result_format_limit_
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
-    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
-    connection_string = f"sqlite:///{sqlite_path}"
-    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-    execution_engine = engine
-    my_data_connector: ConfiguredAssetSqlDataConnector = (
-        ConfiguredAssetSqlDataConnector(
-            name="my_sql_data_connector",
-            datasource_name="my_test_datasource",
-            execution_engine=execution_engine,
-            assets={
-                "my_asset": {
-                    "table_name": "animal_names",
-                },
-            },
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration
         )
     )
-    batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="my_test_datasource",
-                data_connector_name="my_sql_data_connector",
-                data_asset_name="my_asset",
-            )
-        )
-    )
-    assert len(batch_definition_list) == 1
-    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
-        batch_definition=batch_definition_list[0]
-    )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=batch_spec
-    )
-    batch = Batch(data=batch_data)
-    validator = Validator(execution_engine, batches=[batch])
-    result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -1661,7 +1447,7 @@ def test_sql_multiple_unexpected_index_column_names_summary_result_format_limit_
 def test_sql_multiple_unexpected_index_column_names_basic_result_format(
     sa, sqlite_table_for_unexpected_rows_with_index
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
@@ -1673,42 +1459,11 @@ def test_sql_multiple_unexpected_index_column_names_basic_result_format(
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
-    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
-    connection_string = f"sqlite:///{sqlite_path}"
-    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-    execution_engine = engine
-    my_data_connector: ConfiguredAssetSqlDataConnector = (
-        ConfiguredAssetSqlDataConnector(
-            name="my_sql_data_connector",
-            datasource_name="my_test_datasource",
-            execution_engine=execution_engine,
-            assets={
-                "my_asset": {
-                    "table_name": "animal_names",
-                },
-            },
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration
         )
     )
-    batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="my_test_datasource",
-                data_connector_name="my_sql_data_connector",
-                data_asset_name="my_asset",
-            )
-        )
-    )
-    assert len(batch_definition_list) == 1
-    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
-        batch_definition=batch_definition_list[0]
-    )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=batch_spec
-    )
-    batch = Batch(data=batch_data)
-    validator = Validator(execution_engine, batches=[batch])
-    result = expectation.validate(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -1724,7 +1479,7 @@ def test_sql_multiple_unexpected_index_column_names_basic_result_format(
 def test_sql_single_unexpected_index_column_names_complete_result_format_non_existing_column(
     sa, sqlite_table_for_unexpected_rows_with_index
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
@@ -1736,42 +1491,11 @@ def test_sql_single_unexpected_index_column_names_complete_result_format_non_exi
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
-    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
-    connection_string = f"sqlite:///{sqlite_path}"
-    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-    execution_engine = engine
-    my_data_connector: ConfiguredAssetSqlDataConnector = (
-        ConfiguredAssetSqlDataConnector(
-            name="my_sql_data_connector",
-            datasource_name="my_test_datasource",
-            execution_engine=execution_engine,
-            assets={
-                "my_asset": {
-                    "table_name": "animal_names",
-                },
-            },
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration
         )
     )
-    batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="my_test_datasource",
-                data_connector_name="my_sql_data_connector",
-                data_asset_name="my_asset",
-            )
-        )
-    )
-    assert len(batch_definition_list) == 1
-    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
-        batch_definition=batch_definition_list[0]
-    )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=batch_spec
-    )
-    batch = Batch(data=batch_data)
-    validator = Validator(execution_engine, batches=[batch])
-    result = expectation.validate(validator)
     assert result.success is False
     assert result.exception_info
     assert (
@@ -1783,7 +1507,7 @@ def test_sql_single_unexpected_index_column_names_complete_result_format_non_exi
 def test_sql_multiple_unexpected_index_column_names_complete_result_format_non_existing_column(
     sa, sqlite_table_for_unexpected_rows_with_index
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
@@ -1797,42 +1521,12 @@ def test_sql_multiple_unexpected_index_column_names_complete_result_format_non_e
             },
         },
     )
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
-    sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
-    connection_string = f"sqlite:///{sqlite_path}"
-    engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-    execution_engine = engine
-    my_data_connector: ConfiguredAssetSqlDataConnector = (
-        ConfiguredAssetSqlDataConnector(
-            name="my_sql_data_connector",
-            datasource_name="my_test_datasource",
-            execution_engine=execution_engine,
-            assets={
-                "my_asset": {
-                    "table_name": "animal_names",
-                },
-            },
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration
         )
     )
-    batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="my_test_datasource",
-                data_connector_name="my_sql_data_connector",
-                data_asset_name="my_asset",
-            )
-        )
-    )
-    assert len(batch_definition_list) == 1
-    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
-        batch_definition=batch_definition_list[0]
-    )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=batch_spec
-    )
-    batch = Batch(data=batch_data)
-    validator = Validator(execution_engine, batches=[batch])
-    result = expectation.validate(validator)
+
     assert result.success is False
     assert result.exception_info
     assert (

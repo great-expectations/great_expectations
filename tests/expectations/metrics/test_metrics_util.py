@@ -93,7 +93,7 @@ def test_sql_statement_conversion_to_string_for_backends(
 
 
 @pytest.mark.unit
-def test_sql_statement_converstion_to_string_awsathena(test_backends):
+def test_sql_statement_conversion_to_string_awsathena(test_backends):
     if "awsathena" in test_backends:
         monkeypatch.setenv("ATHENA_STAGING_S3", "s3://test-staging/")
         monkeypatch.setenv("ATHENA_DB_NAME", "test_db_name")
@@ -106,7 +106,7 @@ def test_sql_statement_converstion_to_string_awsathena(test_backends):
 
 
 @pytest.mark.unit
-def test_sql_statement_converstion_to_string_bigquery(test_backends):
+def test_sql_statement_conversion_to_string_bigquery(test_backends):
     if "bigquery" in test_backends:
         monkeypatch.setenv("GE_TEST_GCP_PROJECT", "ge-oss")
         connection_string = get_bigquery_connection_url()
