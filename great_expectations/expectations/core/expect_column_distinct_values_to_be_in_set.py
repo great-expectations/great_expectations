@@ -156,31 +156,31 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                 template_str = "$column distinct values must belong to this set: [ ]"
             else:
                 template_str = "distinct values must belong to a set, but that set is not specified."
-
         else:
-            renderer_configuration = cls._add_value_set_value_params(
+            renderer_configuration = cls._add_value_set_params(
                 renderer_configuration=renderer_configuration
             )
-            values_str: str = cls._get_values_string_from_value_set(
-                value_set_param=params.value_set
+            value_set_str: str = cls._get_value_set_string(
+                renderer_configuration=renderer_configuration
             )
-            template_str = f"distinct values must contain this set: {values_str}."
 
             if renderer_configuration.include_column_name:
                 template_str = (
-                    f"$column distinct values must belong to this set: {values_str}."
+                    f"$column distinct values must belong to this set: {value_set_str}."
                 )
             else:
-                template_str = f"distinct values must belong to this set: {values_str}."
+                template_str = (
+                    f"distinct values must belong to this set: {value_set_str}."
+                )
 
         if params.row_condition.value:
-            renderer_configuration = cls._add_row_condition_condition_params(
+            renderer_configuration = cls._add_row_condition_params(
                 renderer_configuration=renderer_configuration
             )
-            conditions_str: str = cls._get_conditions_string_from_row_condition(
-                row_condition_param=params.row_condition
+            row_condition_str: str = cls._get_row_condition_string(
+                renderer_configuration=renderer_configuration
             )
-            template_str = f"{conditions_str}, then {template_str}"
+            template_str = f"{row_condition_str}, then {template_str}"
 
         renderer_configuration.template_str = template_str
 
