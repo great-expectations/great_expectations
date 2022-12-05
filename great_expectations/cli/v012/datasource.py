@@ -8,6 +8,10 @@ import textwrap
 
 import click
 
+from great_expectations.data_context.data_context.serializable_data_context import (
+    SerializableDataContext,
+)
+
 try:
     from sqlalchemy_bigquery.parse_url import parse_url as parse_bigquery_url
 except (ImportError, ModuleNotFoundError):
@@ -606,7 +610,7 @@ After you connect to the datasource, run great_expectations init to continue.
 
 """.format(
                         datasource_name,
-                        DataContext.GE_YML,
+                        SerializableDataContext.GE_YML,
                         context.get_config()["config_variables_file_path"],
                         rtd_url_ge_version,
                         selected_database.value.lower(),

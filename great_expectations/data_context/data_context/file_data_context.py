@@ -1,8 +1,8 @@
 import logging
 from typing import Optional
 
-from great_expectations.data_context.data_context.abstract_data_context import (
-    AbstractDataContext,
+from great_expectations.data_context.data_context.serializable_data_context import (
+    SerializableDataContext,
 )
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
@@ -19,7 +19,7 @@ from great_expectations.datasource.datasource_serializer import (
 logger = logging.getLogger(__name__)
 
 
-class FileDataContext(AbstractDataContext):
+class FileDataContext(SerializableDataContext):
     """
     Extends AbstractDataContext, contains only functionality necessary to hydrate state from disk.
 
@@ -27,12 +27,10 @@ class FileDataContext(AbstractDataContext):
     class will exist only for backwards-compatibility reasons.
     """
 
-    GE_YML = "great_expectations.yml"
-
     def __init__(
         self,
-        project_config: DataContextConfig,
         context_root_dir: str,
+        project_config: Optional[DataContextConfig] = None,
         runtime_environment: Optional[dict] = None,
     ) -> None:
         """FileDataContext constructor
@@ -45,10 +43,19 @@ class FileDataContext(AbstractDataContext):
                 config_variables.yml and the environment
         """
         self._context_root_directory = context_root_dir
+        if not project_config:
+            project_config = self._load_project_config(
+                context_root_directory=context_root_dir,
+                ge_cloud_mode=False,
+                ge_cloud_config=None,
+            )
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
-        super().__init__(runtime_environment=runtime_environment)
+        super().__init__(
+            context_root_dir=self._context_root_directory,
+            runtime_environment=runtime_environment,
+        )
 
     def _init_datasource_store(self) -> None:
         from great_expectations.data_context.store.datasource_store import (

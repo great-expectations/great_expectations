@@ -21,6 +21,12 @@ from great_expectations.cli.cli_messages import (
 from great_expectations.cli.pretty_printing import cli_message
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
+from great_expectations.data_context.data_context.serializable_data_context import (
+    SerializableDataContext,
+)
 from great_expectations.exceptions import (
     DataContextError,
     DatasourceInitializationError,
@@ -61,9 +67,7 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
     cli_message(GREETING)
 
     if DataContext.does_config_exist_on_disk(ge_dir):
-        message = (
-            f"""Warning. An existing `{DataContext.GE_YML}` was found here: {ge_dir}."""
-        )
+        message = f"""Warning. An existing `{SerializableDataContext.GE_YML}` was found here: {ge_dir}."""
         warnings.warn(message)
         try:
             project_file_structure_exists = (
@@ -86,7 +90,9 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
             sys.exit(1)
 
         try:
-            DataContext.create(target_directory, usage_statistics_enabled=usage_stats)
+            FileDataContext.create(
+                target_directory, usage_statistics_enabled=usage_stats
+            )
             cli_message(ONBOARDING_COMPLETE)
 
         except DataContextError as e:
@@ -100,7 +106,7 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
                 exit(0)
 
         try:
-            context = DataContext.create(
+            context = FileDataContext.create(
                 target_directory, usage_statistics_enabled=usage_stats
             )
             send_usage_message(

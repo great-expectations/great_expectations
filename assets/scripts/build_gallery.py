@@ -16,6 +16,9 @@ import click
 import pkg_resources
 
 from great_expectations.data_context.data_context import DataContext
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 
 logger = logging.getLogger(__name__)
 chandler = logging.StreamHandler(stream=sys.stdout)
@@ -554,7 +557,7 @@ def _disable_progress_bars() -> Tuple[str, DataContext]:
     """Return context_dir and context that was created"""
     context_dir = os.path.join(os.path.sep, "tmp", f"gx-context-{os.getpid()}")
     os.makedirs(context_dir)
-    context = DataContext.create(context_dir, usage_statistics_enabled=False)
+    context = FileDataContext.create(context_dir, usage_statistics_enabled=False)
     context.variables.progress_bars = {
         "globally": False,
         "metric_calculations": False,

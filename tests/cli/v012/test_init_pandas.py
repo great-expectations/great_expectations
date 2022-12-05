@@ -8,6 +8,9 @@ from freezegun import freeze_time
 
 from great_expectations import DataContext
 from great_expectations.cli.v012 import cli
+from great_expectations.data_context.data_context.serializable_data_context import (
+    SerializableDataContext,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.v012.test_cli import yaml
@@ -236,7 +239,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     )
     assert "Great Expectations is now set up." in stdout
 
-    config = _load_config_file(os.path.join(ge_dir, DataContext.GE_YML))
+    config = _load_config_file(os.path.join(ge_dir, SerializableDataContext.GE_YML))
     assert "data__dir" in config["datasources"].keys()
 
     context = DataContext(ge_dir)

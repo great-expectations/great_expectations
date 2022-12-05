@@ -316,7 +316,9 @@ def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
 )
 @pytest.mark.e2e
 @pytest.mark.cloud
-@mock.patch("great_expectations.data_context.DataContext._save_project_config")
+@mock.patch(
+    "great_expectations.data_context.data_context.data_context.SerializableDataContext._save_project_config"
+)
 def test_cloud_backed_data_context_add_checkpoint_e2e(
     mock_save_project_config: mock.MagicMock,
     checkpoint_config: dict,

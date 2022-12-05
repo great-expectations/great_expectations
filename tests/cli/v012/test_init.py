@@ -7,6 +7,9 @@ from click.testing import CliRunner
 
 from great_expectations import DataContext
 from great_expectations.cli.v012 import cli
+from great_expectations.data_context.data_context.serializable_data_context import (
+    SerializableDataContext,
+)
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
@@ -197,9 +200,9 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
 
         assert result.exit_code == 1
 
-        ge_dir = os.path.join(root_dir, DataContext.GE_DIR)
+        ge_dir = os.path.join(root_dir, SerializableDataContext.GE_DIR)
         assert os.path.isdir(ge_dir)
-        config_path = os.path.join(ge_dir, DataContext.GE_YML)
+        config_path = os.path.join(ge_dir, SerializableDataContext.GE_YML)
         assert os.path.isfile(config_path)
 
         config = yaml.load(open(config_path))

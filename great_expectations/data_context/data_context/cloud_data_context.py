@@ -4,10 +4,7 @@ import logging
 import os
 from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Union, cast
 
-import requests
-
 import great_expectations.exceptions as ge_exceptions
-from great_expectations import __version__
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.config_provider import (
     _CloudConfigurationProvider,
@@ -24,8 +21,8 @@ from great_expectations.data_context.cloud_constants import (
     GXCloudEnvironmentVariable,
     GXCloudRESTResource,
 )
-from great_expectations.data_context.data_context.abstract_data_context import (
-    AbstractDataContext,
+from great_expectations.data_context.data_context.serializable_data_context import (
+    SerializableDataContext,
 )
 from great_expectations.data_context.data_context_variables import (
     CloudDataContextVariables,
@@ -53,7 +50,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class CloudDataContext(AbstractDataContext):
+class CloudDataContext(SerializableDataContext):
     """
     Subclass of AbstractDataContext that contains functionality necessary to hydrate state from cloud
     """
@@ -101,6 +98,7 @@ class CloudDataContext(AbstractDataContext):
             config=project_data_context_config
         )
         super().__init__(
+            context_root_dir=self._context_root_directory,
             runtime_environment=runtime_environment,
         )
 
@@ -162,39 +160,6 @@ class CloudDataContext(AbstractDataContext):
                 f'{context_root_dir}".'
             )
         return os.path.abspath(os.path.expanduser(context_root_dir))
-
-    @classmethod
-    def retrieve_data_context_config_from_ge_cloud(
-        cls, ge_cloud_config: GXCloudConfig
-    ) -> DataContextConfig:
-        """
-        Utilizes the GeCloudConfig instantiated in the constructor to create a request to the Cloud API.
-        Given proper authorization, the request retrieves a data context config that is pre-populated with
-        GE objects specific to the user's Cloud environment (datasources, data connectors, etc).
-
-        Please note that substitution for ${VAR} variables is performed in GE Cloud before being sent
-        over the wire.
-
-        :return: the configuration object retrieved from the Cloud API
-        """
-        base_url = ge_cloud_config.base_url
-        organization_id = ge_cloud_config.organization_id
-        ge_cloud_url = (
-            f"{base_url}/organizations/{organization_id}/data-context-configuration"
-        )
-        headers = {
-            "Content-Type": "application/vnd.api+json",
-            "Authorization": f"Bearer {ge_cloud_config.access_token}",
-            "Gx-Version": __version__,
-        }
-
-        response = requests.get(ge_cloud_url, headers=headers)
-        if response.status_code != 200:
-            raise ge_exceptions.GXCloudError(
-                f"Bad request made to GE Cloud; {response.text}"
-            )
-        config = response.json()
-        return DataContextConfig(**config)
 
     @classmethod
     def get_ge_cloud_config(
