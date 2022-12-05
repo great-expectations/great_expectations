@@ -11,6 +11,9 @@ from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.data_context import DataContext
+from great_expectations.data_context.data_context.serializable_data_context import (
+    SerializableDataContext,
+)
 from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
@@ -516,7 +519,7 @@ def test_add_checkpoint(
 ) -> None:
     store, mock_backend = checkpoint_store_with_mock_backend
 
-    context = mock.MagicMock(spec=DataContext)
+    context = mock.MagicMock(spec=SerializableDataContext)
     context._usage_statistics_handler = mock.MagicMock()
     checkpoint = Checkpoint(name="my_checkpoint", data_context=context)
 

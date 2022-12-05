@@ -3,10 +3,6 @@ from __future__ import annotations
 import os
 from typing import Optional
 
-from ruamel.yaml import YAML, YAMLError
-from ruamel.yaml.constructor import DuplicateKeyError
-
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -19,11 +15,7 @@ from great_expectations.data_context.data_context.cloud_data_context import (
 from great_expectations.data_context.data_context.serializable_data_context import (
     SerializableDataContext,
 )
-from great_expectations.data_context.types.base import DataContextConfig, GXCloudConfig
-
-yaml = YAML()
-yaml.indent(mapping=2, sequence=4, offset=2)
-yaml.default_flow_style = False
+from great_expectations.data_context.types.base import GXCloudConfig
 
 
 def DataContext(
@@ -47,7 +39,7 @@ def DataContext(
     )
 
     project_config = SerializableDataContext._load_project_config(
-        context_root_directory=context_root_dir,
+        context_root_directory=context_root_directory,
         ge_cloud_mode=ge_cloud_mode,
         ge_cloud_config=ge_cloud_config,
     )

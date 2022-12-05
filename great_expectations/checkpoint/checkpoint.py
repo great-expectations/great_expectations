@@ -69,7 +69,7 @@ class BaseCheckpoint(ConfigPeer):
     def __init__(
         self,
         checkpoint_config: CheckpointConfig,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
     ) -> None:
         from great_expectations.data_context.data_context.abstract_data_context import (
             AbstractDataContext,
