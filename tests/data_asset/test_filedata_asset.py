@@ -16,8 +16,8 @@ def test_autoinspect_filedata_asset():
     file_path = file_relative_path(__file__, "../test_sets/toy_data_complete.csv")
     my_file_data = gx.data_asset.FileDataAsset(file_path)
 
-    with pytest.raises(ge.exceptions.GreatExpectationsError) as exc:
-        my_file_data.profile(ge.profile.ColumnsExistProfiler)
+    with pytest.raises(gx.exceptions.GreatExpectationsError) as exc:
+        my_file_data.profile(gx.profile.ColumnsExistProfiler)
     assert "Invalid data_asset for profiler; aborting" in exc.value.message
 
     # with warnings.catch_warnings(record=True):

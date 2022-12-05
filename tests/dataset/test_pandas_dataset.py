@@ -689,7 +689,7 @@ def test_ge_pandas_automatic_failure_removal():
     )
 
     # Put some simple expectations on the data frame
-    df.profile(ge.profile.ColumnsExistProfiler)
+    df.profile(gx.profile.ColumnsExistProfiler)
     df.expect_column_values_to_be_in_set("A", [1, 2, 3, 4])
     df.expect_column_values_to_be_in_set("B", [5, 6, 7, 8])
     df.expect_column_values_to_be_in_set("C", ["w", "x", "y", "z"])

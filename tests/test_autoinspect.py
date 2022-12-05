@@ -31,7 +31,7 @@ def test_autoinspect_existing_dataset(test_backend):
     assert len(suite.expectations) == 0
 
     # Run autoinspect
-    df.profile(ge.profile.ColumnsExistProfiler)
+    df.profile(gx.profile.ColumnsExistProfiler)
     suite = df.get_expectation_suite()
 
     # Ensure that autoinspect worked
