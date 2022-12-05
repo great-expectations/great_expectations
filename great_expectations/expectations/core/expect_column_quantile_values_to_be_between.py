@@ -48,100 +48,79 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     # noinspection PyUnresolvedReferences
     """Expect the specific provided column quantiles to be between a minimum value and a maximum value.
 
-           ``quantile_ranges`` must be a dictionary with two keys:
+    expect_column_quantile_values_to_be_between is a \
+    [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
-               * ``quantiles``: (list of float) increasing ordered list of desired quantile values
+    For example:
+    ::
 
-               * ``value_ranges``: (list of lists): Each element in this list consists of a list with two values, a lower \
-                 and upper bound (inclusive) for the corresponding quantile. These values must be [min, max] ordered.
+        # my_df.my_col = [1,2,2,3,3,3,4]
+        >>> my_df.expect_column_quantile_values_to_be_between(
+            "my_col",
+            {
+                "quantiles": [0., 0.333, 0.6667, 1.],
+                "value_ranges": [[0,1], [2,3], [3,4], [4,5]]
+            }
+        )
+        {
+          "success": True,
+            "result": {
+              "observed_value": {
+                "quantiles: [0., 0.333, 0.6667, 1.],
+                "values": [1, 2, 3, 4],
+              }
+              "element_count": 7,
+              "missing_count": 0,
+              "missing_percent": 0.0,
+              "details": {
+                "success_details": [true, true, true, true]
+              }
+            }
+          }
+        }
 
+    expect_column_quantile_values_to_be_between can be computationally intensive for large datasets.
 
-           For each provided range:
+    Args:
+        column (str): \
+            The column name.
+        quantile_ranges (dictionary with keys 'quantiles' and 'value_ranges'): \
+            Key 'quantiles' is an increasingly ordered list of desired quantile values (floats). \
+            Key 'value_ranges' is a list of 2-value lists that specify a lower and upper bound (inclusive) \
+            for the corresponding quantile (with [min, max] ordering). The length of the 'quantiles' list \
+            and the 'value_ranges' list must be equal.
+        allow_relative_error (boolean or string): \
+            Whether to allow relative error in quantile communications on backends that support or require it.
 
-               * min_value and max_value are both inclusive.
-               * If min_value is None, then max_value is treated as an upper bound only
-               * If max_value is None, then min_value is treated as a lower bound only
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
-           The length of the quantiles list and quantile_values list must be equal.
+    Returns:
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-           For example:
-           ::
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
 
-               # my_df.my_col = [1,2,2,3,3,3,4]
-               >>> my_df.expect_column_quantile_values_to_be_between(
-                   "my_col",
-                   {
-                       "quantiles": [0., 0.333, 0.6667, 1.],
-                       "value_ranges": [[0,1], [2,3], [3,4], [4,5]]
-                   }
-               )
-               {
-                 "success": True,
-                   "result": {
-                     "observed_value": {
-                       "quantiles: [0., 0.333, 0.6667, 1.],
-                       "values": [1, 2, 3, 4],
-                     }
-                     "element_count": 7,
-                     "missing_count": 0,
-                     "missing_percent": 0.0,
-                     "details": {
-                       "success_details": [true, true, true, true]
-                     }
-                   }
-                 }
-               }
+    Notes:
+        * min_value and max_value are both inclusive.
+        * If min_value is None, then max_value is treated as an upper bound only
+        * If max_value is None, then min_value is treated as a lower bound only
+        * details.success_details field in the result object is customized for this expectation
 
-           `expect_column_quantile_values_to_be_between` can be computationally intensive for large datasets.
-
-           expect_column_quantile_values_to_be_between is a \
-           :func:`column_aggregate_expectation
-           <great_expectations.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.
-
-           Args:
-               column (str): \
-                   The column name.
-               quantile_ranges (dictionary): \
-                   Quantiles and associated value ranges for the column. See above for details.
-               allow_relative_error (boolean or string): \
-                   Whether to allow relative error in quantile communications on backends that support or require it.
-
-           Other Parameters:
-               result_format (str or None): \
-                   Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                   For more detail, see :ref:`result_format <result_format>`.
-               include_config (boolean): \
-                   If True, then include the expectation config as part of the result object. \
-                   For more detail, see :ref:`include_config`.
-               catch_exceptions (boolean or None): \
-                   If True, then catch exceptions and include them as part of the result object. \
-                   For more detail, see :ref:`catch_exceptions`.
-               meta (dict or None): \
-                   A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-                   modification. For more detail, see :ref:`meta`.
-
-           Returns:
-               An ExpectationSuiteValidationResult
-
-               Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-               :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-           Notes:
-               These fields in the result object are customized for this expectation:
-               ::
-               details.success_details
-
-           See Also:
-               :func:`expect_column_min_to_be_between \
-               <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_min_to_be_between>`
-
-               :func:`expect_column_max_to_be_between \
-               <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_max_to_be_between>`
-
-               :func:`expect_column_median_to_be_between \
-               <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_median_to_be_between>`
-
-           """
+    See Also:
+        [expect_column_min_to_be_between](https://greatexpectations.io/expectations/expect_column_min_to_be_between)
+        [expect_column_max_to_be_between](https://greatexpectations.io/expectations/expect_column_max_to_be_between)
+        [expect_column_median_to_be_between](https://greatexpectations.io/expectations/expect_column_median_to_be_between)
+    """
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

@@ -30,6 +30,7 @@ from IPython.display import HTML, display
 from great_expectations import __version__ as ge_version
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
@@ -56,7 +57,6 @@ from great_expectations.rule_based_profiler.data_assistant_result.plot_result im
     PlotMode,
     PlotResult,
 )
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_or_create_expectation_suite,
     sanitize_parameter_name,

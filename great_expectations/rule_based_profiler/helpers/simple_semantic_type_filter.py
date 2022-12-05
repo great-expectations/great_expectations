@@ -3,11 +3,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
-from great_expectations.rule_based_profiler.domain import (
+from great_expectations.core.domain import (
     InferredSemanticDomainType,
     SemanticDomainTypes,
 )
+from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.rule_based_profiler.semantic_type_filter import (
     SemanticTypeFilter,
 )
