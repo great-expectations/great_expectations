@@ -894,6 +894,40 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
         engine.dispose()
 
 
+def get_default_postgres_url() -> str:
+    """Get connection string to postgres container
+    Returns:
+        String of default connection to Docker container
+    """
+    return "postgresql+psycopg2://postgres:@localhost/test_ci"
+
+
+def get_default_mysql_url() -> str:
+    """Get connection string to mysql container
+    Returns:
+        String of default connection to Docker container
+    """
+    return "mysql+pymysql://root@localhost/test_ci"
+
+
+def get_default_trino_url() -> str:
+    """Get connection string to trino container
+    Returns:
+        String of default connection to Docker container
+    """
+    return "trino://test@localhost:8088/memory/schema"
+
+
+def get_default_mssql_url() -> str:
+    """Get connection string to mssql container
+    Returns:
+        String of default connection to Docker container
+    """
+    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+    connection_string = f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true"
+    return connection_string
+
+
 def get_awsathena_db_name(db_name_env_var: str = "ATHENA_DB_NAME") -> str:
     """Get awsathena database name from environment variables.
 
