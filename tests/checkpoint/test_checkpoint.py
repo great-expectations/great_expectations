@@ -63,6 +63,16 @@ def test_checkpoint_with_config_version_has_action_list(empty_data_context):
     assert obs == [{"foo": "bar"}]
 
 
+def test_checkpoint_parameters_respected(data_context_with_one_expectation):
+    checkpoint: Checkpoint = Checkpoint(
+        "foo",
+        data_context_with_one_expectation,
+        config_version=1,
+        action_list=[{"foo": "bar"}],
+    )
+    pass
+
+
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
