@@ -31,7 +31,7 @@ try:
     import sqlalchemy as sa
     from sqlalchemy import Table
     from sqlalchemy.dialects import registry
-    from sqlalchemy.engine import Engine, reflection
+    from sqlalchemy.engine import Connection, Engine, reflection
     from sqlalchemy.engine.interfaces import Dialect
     from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Insert, Select, TableClause
@@ -48,6 +48,7 @@ except ImportError:
     sa = None
     registry = None
     Engine = None
+    Connection = None
     reflection = None
     Dialect = None
     Insert = None
@@ -996,7 +997,7 @@ def is_valid_continuous_partition_object(partition_object):
 
 
 def sql_statement_with_post_compile_to_string(
-    engine: "sqlalchemy.engine.Engine", select_statement: "sqlalchemy.sql.Select"
+    engine: SqlAlchemyExecutionEngine, select_statement: "sqlalchemy.sql.Select"
 ) -> str:
     """
     Util method to compile SQL select statement with post-compile parameters into a string. Logic lifted directly
@@ -1014,9 +1015,11 @@ def sql_statement_with_post_compile_to_string(
         String representation of select_statement
 
     """
-    dialect_name: str = engine.dialect_name
+    sqlalchemy_connection: "sa.engine.base.Connection" = engine.engine
     compiled = select_statement.compile(
-        engine, compile_kwargs={"render_postcompile": True}, dialect=engine.dialect
+        sqlalchemy_connection,
+        compile_kwargs={"render_postcompile": True},
+        dialect=engine.dialect,
     )
     dialect_name: str = engine.dialect_name
 
