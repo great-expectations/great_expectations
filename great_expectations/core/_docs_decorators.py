@@ -42,21 +42,33 @@ def _decorate_with_deprecation(
     version: str,
     message: str,
 ) -> F:
-    existing_docstring = func.__doc__ if func.__doc__ else ""
-    short_description, docstring = existing_docstring.split("\n", 1)
-
     deprecation_rst = (
         f".. deprecated:: {version}"
         "\n"
         f"    {message}"
     )
+    existing_docstring = func.__doc__ if func.__doc__ else ""
+    split_docstring = existing_docstring.split("\n", 1)
 
-    func.__doc__ = (
-        f"{short_description.strip()}\n"
-        "\n"
-        f"{deprecation_rst}\n"
-        "\n"
-        f"{dedent(docstring)}"
-    )
+    if len(split_docstring) == 2:
+        short_description, docstring = split_docstring
+        func.__doc__ = (
+            f"{short_description.strip()}\n"
+            "\n"
+            f"{deprecation_rst}\n"
+            "\n"
+            f"{dedent(docstring)}"
+        )
+    elif len(split_docstring) == 1:
+        short_description = split_docstring[0]
+        func.__doc__ = (
+            f"{short_description.strip()}\n"
+            "\n"
+            f"{deprecation_rst}\n"
+        )
+    elif len(split_docstring) == 0:
+        func.__doc__ = (
+            f"{deprecation_rst}\n"
+        )
 
     return func

@@ -16,6 +16,15 @@ def _func_full_docstring_public_api(some_arg, other_arg):
     """
     pass
 
+def _func_only_summary_public_api():
+    """My docstring."""
+    pass
+
+
+def _func_no_docstring_public_api():
+    pass
+
+
 
 @deprecated(version="1.2.3", message="This is deprecated!!")
 def _func_full_docstring_deprecated(some_arg, other_arg):
@@ -30,12 +39,14 @@ def _func_full_docstring_deprecated(some_arg, other_arg):
     pass
 
 
-def _func_only_summary():
+@deprecated(version="1.2.3", message="This is deprecated!!")
+def _func_only_summary_deprecated(some_arg, other_arg):
     """My docstring."""
     pass
 
 
-def _func_no_docstring():
+@deprecated(version="1.2.3", message="This is deprecated!!")
+def _func_no_docstring_deprecated(some_arg, other_arg):
     pass
 
 
@@ -53,7 +64,7 @@ def test_public_api_decorator():
     assert _func_full_docstring_public_api.__name__ == "_func_full_docstring_public_api"
 
 
-def test_deprecated_decorator():
+def test_deprecated_decorator_full_docstring():
 
     assert _func_full_docstring_deprecated.__doc__ == (
         "My docstring.\n"
@@ -67,4 +78,23 @@ def test_deprecated_decorator():
         "Args:\n"
         "    some_arg: describe some_arg\n"
         "    other_arg: describe other_arg\n"
+    )
+
+
+def test_deprecated_decorator_only_summary():
+
+    assert _func_only_summary_deprecated.__doc__ == (
+        "My docstring.\n"
+        "\n"
+        ".. deprecated:: 1.2.3\n"
+        "    This is deprecated!!\n"
+    )
+
+def test_deprecated_decorator_no_docstring():
+
+    assert _func_no_docstring_deprecated.__doc__ == (
+        "\n"
+        "\n"
+        ".. deprecated:: 1.2.3\n"
+        "    This is deprecated!!\n"
     )
