@@ -1,4 +1,5 @@
 import json
+import warnings
 from collections import OrderedDict
 
 import pytest
@@ -19,6 +20,7 @@ from great_expectations.render.renderer import (
 from great_expectations.render.renderer.content_block import (
     ValidationResultsTableContentBlockRenderer,
 )
+from great_expectations.render.types import CollapseContent, RenderedContent
 from great_expectations.render.view import DefaultJinjaPageView
 from great_expectations.self_check.util import (
     expectationSuiteSchema,
@@ -477,3 +479,20 @@ def test_render_string_template():
     )
 
     assert res == expected
+
+
+def test_render_types_module_deprecation_warning():
+    with warnings.catch_warnings(record=True) as w:
+        CollapseContent(collapse=True)
+        RenderedContent()
+    assert len(w) == 2
+    assert str(w[0].message) == (
+        "Importing the class CollapseContent from great_expectations.render.types is "
+        "deprecated as of v0.15.32 in v0.18. Please import class CollapseContent from "
+        "great_expectations.render."
+    )
+    assert str(w[1].message) == (
+        "Importing the class RenderedContent from great_expectations.render.types is "
+        "deprecated as of v0.15.32 in v0.18. Please import class RenderedContent from "
+        "great_expectations.render."
+    )

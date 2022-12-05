@@ -3,7 +3,7 @@ from typing import Dict, List
 import pytest
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.rule_based_profiler.domain import Domain
+from great_expectations.core.domain import Domain
 from great_expectations.rule_based_profiler.parameter_container import ParameterNode
 from great_expectations.rule_based_profiler.rule import RuleOutput
 

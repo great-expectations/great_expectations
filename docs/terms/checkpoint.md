@@ -86,7 +86,7 @@ At runtime, a Checkpoint configuration has three required and three optional key
    Each validation dictionary has three required and three optional keys:
     * #### Required keys
         1. `batch_request`: a dictionary describing the batch of data to validate (learn more about specifying Batches
-           here: [Dividing data assets into Batches](../reference/dividing_data_assets_into_batches.md))
+           here: [Batches](../terms/batch.md))
         1. `expectation_suite_name`: the name of the Expectation Suite to validate the batch of data against
         1. `action_list`: a list of actions to perform after each batch is validated
 

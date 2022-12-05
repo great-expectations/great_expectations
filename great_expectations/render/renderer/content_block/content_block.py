@@ -2,22 +2,22 @@ import logging
 import traceback
 from typing import Any, Callable, Optional, Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.core.expectation_validation_result import (
+from great_expectations.core import (
+    ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.expectations.registry import (
     _registered_renderers,
     get_renderer_impl,
 )
-from great_expectations.render import LegacyRendererType
-from great_expectations.render.renderer.renderer import Renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
     CollapseContent,
+    LegacyRendererType,
     RenderedMarkdownContent,
     RenderedStringTemplateContent,
     TextContent,
 )
+from great_expectations.render.renderer.renderer import Renderer
 
 logger = logging.getLogger(__name__)
 
@@ -416,10 +416,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
     @classmethod
     def _missing_content_block_fn(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         return []

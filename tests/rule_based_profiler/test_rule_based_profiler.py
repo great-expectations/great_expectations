@@ -10,7 +10,7 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
 )
 from great_expectations.exceptions.exceptions import InvalidConfigError
 from great_expectations.rule_based_profiler import (
@@ -1187,7 +1187,7 @@ def test_add_profiler(
 def test_add_profiler_ge_cloud_mode(
     mock_data_context: mock.MagicMock,
     ge_cloud_profiler_id: str,
-    ge_cloud_profiler_key: GeCloudIdentifier,
+    ge_cloud_profiler_key: GXCloudIdentifier,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
     mock_data_context.ge_cloud_mode.return_value = True

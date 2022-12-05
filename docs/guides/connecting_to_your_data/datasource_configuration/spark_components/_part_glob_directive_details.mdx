@@ -4,23 +4,5 @@ import PartGlobDirectiveDetails from '../components/_part_glob_directive_details
 
 In this guide's examples, all of our data is assumed to be in the `base_directory` folder.  Therefore, you will not need to add an entry for `glob_directive` to your configuration.  However, if you were to include the example `glob_directive` from above, your full configuration would currently look like:
 
-```python
-datasource_config: dict = {
-    "name": "my_datasource_name",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "class_name": "SparkDFExecutionEngine",
-        "module_name": "great_expectations.execution_engine",
-    },
-    "data_connectors": {
-        "name_of_my_inferred_data_connector": {
-            "class_name": "InferredAssetFilesystemDataConnector",
-            "base_directory": "./data",
-            "glob_directive": "*/*",
-            "default_regex": {},
-            "batch_spec_passthrough": {},
-        }
-    }
-}
+```python name="spark inferred datasource_config post glob_directive definition"
 ```

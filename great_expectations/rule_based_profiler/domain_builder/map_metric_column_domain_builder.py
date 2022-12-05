@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Union
 
-from great_expectations.rule_based_profiler.domain import Domain, SemanticDomainTypes
+from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
@@ -13,6 +13,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
 from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
@@ -268,7 +269,6 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
                         "batch_id": batch_id,
                     },
                     metric_value_kwargs=None,
-                    metric_dependencies=None,
                 )
                 for batch_id in batch_ids
             ]
@@ -300,10 +300,10 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             List of column names satisfying tolerance limits.
         """
         column_name: str
-        resolved_metrics: Dict[Tuple[str, str, str], Any]
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
 
         resolved_metrics_by_column_name: Dict[
-            str, Dict[Tuple[str, str, str], Any]
+            str, Dict[Tuple[str, str, str], MetricValue]
         ] = get_resolved_metrics_by_key(
             validator=validator,
             metric_configurations_by_key=metric_configurations_by_column_name,

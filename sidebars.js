@@ -187,9 +187,9 @@ module.exports = {
           type: 'category',
           label: 'Profilers and Data Assistants',
           items: [
+            'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant',
             'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers',
-            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file',
-            'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant'
+            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file'
           ]
         },
         {
@@ -221,10 +221,8 @@ module.exports = {
               label: 'Adding Features to Custom Expectations',
               items: [
                 'guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs',
-                // 'guides/expectations/features_custom_expectations/how_to_add_data_visualization_renderers_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_example_cases_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_input_validation_for_an_expectation',
-                // 'guides/expectations/features_custom_expectations/how_to_add_statement_renderers_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation'
               ]

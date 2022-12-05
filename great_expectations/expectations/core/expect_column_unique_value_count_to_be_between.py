@@ -1,14 +1,20 @@
 from typing import Dict, List, Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnExpectation,
     render_evaluation_parameter_string,
 )
-from great_expectations.render import LegacyDescriptiveRendererType, LegacyRendererType
+from great_expectations.render import (
+    LegacyDescriptiveRendererType,
+    LegacyRendererType,
+    RenderedStringTemplateContent,
+)
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     handle_strict_min_max,
     num_to_str,
@@ -32,56 +38,45 @@ from great_expectations.rule_based_profiler.parameter_container import (
 class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
     """Expect the number of unique values to be between a minimum value and a maximum value.
 
-            expect_column_unique_value_count_to_be_between is a \
-            :func:`column_aggregate_expectation
-            <great_expectations.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.
+    expect_column_unique_value_count_to_be_between is a \
+    [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
-            Args:
-                column (str): \
-                    The column name.
-                min_value (int or None): \
-                    The minimum number of unique values allowed.
-                max_value (int or None): \
-                    The maximum number of unique values allowed.
+    Args:
+        column (str): \
+            The column name.
+        min_value (int or None): \
+            The minimum number of unique values allowed.
+        max_value (int or None): \
+            The maximum number of unique values allowed.
 
-            Other Parameters:
-                result_format (str or None): \
-                    Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                    For more detail, see :ref:`result_format <result_format>`.
-                include_config (boolean): \
-                    If True, then include the expectation config as part of the result object. \
-                    For more detail, see :ref:`include_config`.
-                catch_exceptions (boolean or None): \
-                    If True, then catch exceptions and include them as part of the result object. \
-                    For more detail, see :ref:`catch_exceptions`.
-                meta (dict or None): \
-                    A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-                    modification. For more detail, see :ref:`meta`.
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
-            Returns:
-                An ExpectationSuiteValidationResult
+    Returns:
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-                Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-                :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
 
-            Notes:
-                These fields in the result object are customized for this expectation:
-                ::
+    Notes:
+        * min_value and max_value are both inclusive.
+        * If min_value is None, then max_value is treated as an upper bound
+        * If max_value is None, then min_value is treated as a lower bound
+        * observed_value field in the result object is customized for this expectation to be an int \
+          representing the number of unique values the column
 
-                    {
-                        "observed_value": (int) The number of unique values in the column
-                    }
-
-                * min_value and max_value are both inclusive.
-                * If min_value is None, then max_value is treated as an upper bound
-                * If max_value is None, then min_value is treated as a lower bound
-
-            See Also:
-                :func:`expect_column_proportion_of_unique_values_to_be_between \
-                <great_expectations.execution_engine.execution_engine.ExecutionEngine
-                .expect_column_proportion_of_unique_values_to_be_between>`
-
-            """
+    See Also:
+        [expect_column_proportion_of_unique_values_to_be_between](https://greatexpectations.io/expectations/expect_column_proportion_of_unique_values_to_be_between)
+    """
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -209,16 +204,14 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -311,16 +304,14 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -391,10 +382,9 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
     )
     def _descriptive_column_properties_table_distinct_count_row_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         assert result, "Must pass in result."
@@ -419,8 +409,8 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         return self._validate_metric_value_between(
             metric_name="column.distinct_values.count",

@@ -4,17 +4,15 @@ from typing import Dict
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_suite import ExpectationSuiteSchema
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
-)
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
 )
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
 )
 from great_expectations.data_context.util import load_class
 from great_expectations.util import (
@@ -182,7 +180,7 @@ class ExpectationsStore(Store):
 
     def serialize(self, value):
         if self.ge_cloud_mode:
-            # GeCloudStoreBackend expects a json str
+            # GXCloudStoreBackend expects a json str
             return self._expectationSuiteSchema.dump(value)
         return self._expectationSuiteSchema.dumps(value, indent=2, sort_keys=True)
 
@@ -217,8 +215,8 @@ class ExpectationsStore(Store):
             [random.choice(list("0123456789ABCDEF")) for i in range(20)]
         )
         if self.ge_cloud_mode:
-            test_key: GeCloudIdentifier = self.key_class(
-                resource_type=GeCloudRESTResource.CHECKPOINT,
+            test_key: GXCloudIdentifier = self.key_class(
+                resource_type=GXCloudRESTResource.CHECKPOINT,
                 ge_cloud_id=str(uuid.uuid4()),
             )
         else:

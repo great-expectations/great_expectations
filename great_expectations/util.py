@@ -36,6 +36,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Mapping,
     Optional,
     Set,
     Tuple,
@@ -51,11 +52,10 @@ from packaging import version
 from pkg_resources import Distribution
 
 from great_expectations.exceptions import (
-    GeCloudConfigurationError,
+    GXCloudConfigurationError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
-from great_expectations.expectations.registry import _registered_expectations
 
 if TYPE_CHECKING:
     # needed until numpy min version 1.20
@@ -76,7 +76,7 @@ except ImportError:
 try:
     import black
 except ImportError:
-    black = None
+    black = None  # type: ignore[assignment]
 
 try:
     # This library moved in python 3.8
@@ -267,8 +267,8 @@ def get_project_distribution() -> Optional[Distribution]:
         except ValueError:
             pass
         else:
-            if relative_path in distr.files:  # type: ignore[operator]
-                return distr  # type: ignore[return-value]
+            if relative_path in distr.files:
+                return distr
     return None
 
 
@@ -362,16 +362,18 @@ def verify_dynamic_loading_support(
     :param module_name: a possibly-relative name of a module
     :param package_name: the name of a package, to which the given module belongs
     """
+    # noinspection PyUnresolvedReferences
+    module_spec: Optional[importlib.machinery.ModuleSpec]
     try:
         # noinspection PyUnresolvedReferences
-        module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(  # type: ignore[attr-defined]
-            module_name, package=package_name
-        )
+        module_spec = importlib.util.find_spec(module_name, package=package_name)
     except ModuleNotFoundError:
-        module_spec = None  # type: ignore[assignment]
+        module_spec = None
+
     if not module_spec:
         if not package_name:
             package_name = ""
+
         message: str = f"""No module named "{package_name + module_name}" could be found in the repository. Please \
 make sure that the file, corresponding to this package and module, exists and that dynamic loading of code modules, \
 templates, and assets is supported in your execution environment.  This error is unrecoverable.
@@ -1668,7 +1670,7 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
 
 
 def get_context(
-    project_config: Optional[Union["DataContextConfig", dict]] = None,
+    project_config: Optional[Union["DataContextConfig", Mapping]] = None,
     context_root_dir: Optional[str] = None,
     runtime_environment: Optional[dict] = None,
     ge_cloud_base_url: Optional[str] = None,
@@ -1753,7 +1755,7 @@ def get_context(
         )
 
     if ge_cloud_mode and not config_available:
-        raise GeCloudConfigurationError(
+        raise GXCloudConfigurationError(
             "GE Cloud Mode enabled, but missing env vars: GE_CLOUD_ORGANIZATION_ID, GE_CLOUD_ACCESS_TOKEN"
         )
 
@@ -1786,6 +1788,8 @@ def is_list_of_strings(_list) -> TypeGuard[List[str]]:
 
 def generate_library_json_from_registered_expectations():
     """Generate the JSON object used to populate the public gallery"""
+    from great_expectations.expectations.registry import _registered_expectations
+
     library_json = {}
 
     for expectation_name, expectation in _registered_expectations.items():
