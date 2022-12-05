@@ -156,7 +156,7 @@ def parse_row_condition_string_pandas_engine(
     condition_string = " ".join(condition_string.split())
 
     # replace tuples of values by lists of values
-    tuples_list = re.findall(r"\([^()]*,[^()]*\)", condition_string)
+    tuples_list = re.findall(r"\([^\(\)]*,[^\(\)]*\)", condition_string)
     for value_tuple in tuples_list:
         value_list = value_tuple.replace("(", "[").replace(")", "]")
         condition_string = condition_string.replace(value_tuple, value_list)
