@@ -10,14 +10,21 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchRequestOptions,
 )
 from great_expectations.experimental.datasources.postgres_datasource import (
-    _DEFAULT_MONTH_RANGE,
-    _DEFAULT_YEAR_RANGE,
     BatchRequestError,
-    ColumnSplitter,
     PostgresDatasource,
+    SqlYearMonthSplitter,
     TableAsset,
 )
-from tests.experimental.datasources.conftest import sqlachemy_execution_engine_mock_cls
+from tests.experimental.datasources.conftest import (
+    DEFAULT_MAX_DT,
+    DEFAULT_MIN_DT,
+    sqlachemy_execution_engine_mock_cls,
+)
+
+# We set a default time range that we use for testing. We grab the years from the
+# mocks we use in tests. For months, we use every month.
+_DEFAULT_TEST_YEARS = list(range(DEFAULT_MIN_DT.year, DEFAULT_MAX_DT.year + 1))
+_DEFAULT_TEST_MONTHS = list(range(1, 13))
 
 
 @contextmanager
@@ -132,15 +139,10 @@ def test_construct_table_asset_directly_with_no_splitter(create_source):
 @pytest.mark.unit
 def test_construct_table_asset_directly_with_splitter(create_source):
     with create_source(lambda _: None) as source:
-        splitter = ColumnSplitter(
-            method_name="splitter_method",
-            column_name="col",
-            param_defaults={"a": [1, 2, 3], "b": list(range(1, 13))},
-        )
         asset = TableAsset(
             name="my_asset",
             table_name="my_table",
-            column_splitter=splitter,
+            column_splitter=SqlYearMonthSplitter(column_name="col"),
         )
         # TODO: asset custom init
         asset._datasource = source
@@ -149,9 +151,9 @@ def test_construct_table_asset_directly_with_splitter(create_source):
             "my_asset",
             "my_table",
             source,
-            {"a": None, "b": None},
+            {"year": None, "month": None},
         )
-        batch_request_options = {"a": 1, "b": 2}
+        batch_request_options = {"year": 2022, "month": 10}
         assert_batch_request(
             asset.get_batch_request(batch_request_options),
             "my_datasource",
@@ -177,12 +179,10 @@ def test_datasource_gets_batch_list_no_splitter(create_source):
 
 def assert_batch_specs_correct_with_year_month_splitter_defaults(batch_specs):
     # We should have 1 batch_spec per (year, month) pair
-    expected_batch_spec_num = len(list(_DEFAULT_YEAR_RANGE)) * len(
-        list(_DEFAULT_MONTH_RANGE)
-    )
+    expected_batch_spec_num = len(_DEFAULT_TEST_YEARS) * len(_DEFAULT_TEST_MONTHS)
     assert len(batch_specs) == expected_batch_spec_num
-    for year in _DEFAULT_YEAR_RANGE:
-        for month in _DEFAULT_MONTH_RANGE:
+    for year in _DEFAULT_TEST_YEARS:
+        for month in _DEFAULT_TEST_MONTHS:
             spec = {
                 "type": "table",
                 "data_asset_name": "my_asset",
@@ -196,13 +196,11 @@ def assert_batch_specs_correct_with_year_month_splitter_defaults(batch_specs):
 
 def assert_batches_correct_with_year_month_splitter_defaults(batches):
     # We should have 1 batch_spec per (year, month) pair
-    expected_batch_spec_num = len(list(_DEFAULT_YEAR_RANGE)) * len(
-        list(_DEFAULT_MONTH_RANGE)
-    )
+    expected_batch_spec_num = len(_DEFAULT_TEST_YEARS) * len(_DEFAULT_TEST_MONTHS)
     assert len(batches) == expected_batch_spec_num
     metadatas = [batch.metadata for batch in batches]
-    for year in _DEFAULT_YEAR_RANGE:
-        for month in _DEFAULT_MONTH_RANGE:
+    for year in _DEFAULT_TEST_YEARS:
+        for month in _DEFAULT_TEST_MONTHS:
             assert {"year": year, "month": month} in metadatas
 
 
@@ -262,8 +260,8 @@ def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_requ
         batches = source.get_batch_list_from_batch_request(
             asset.get_batch_request({"year": 2022})
         )
-        assert len(batch_specs) == len(_DEFAULT_MONTH_RANGE)
-        for month in _DEFAULT_MONTH_RANGE:
+        assert len(batch_specs) == len(_DEFAULT_TEST_MONTHS)
+        for month in _DEFAULT_TEST_MONTHS:
             spec = {
                 "type": "table",
                 "data_asset_name": "my_asset",
@@ -274,9 +272,9 @@ def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_requ
             }
             assert spec in batch_specs
 
-        assert len(batches) == len(_DEFAULT_MONTH_RANGE)
+        assert len(batches) == len(_DEFAULT_TEST_MONTHS)
         metadatas = [batch.metadata for batch in batches]
-        for month in _DEFAULT_MONTH_RANGE:
+        for month in _DEFAULT_TEST_MONTHS:
             expected_metadata = {"month": month, "year": 2022}
             expected_metadata in metadatas
 
@@ -405,53 +403,53 @@ def test_get_bad_batch_request(create_source):
     # Sort info is a list where the first element is the sort keys with an optional prefix and
     # the second element is a range of the values they can take.
     [
-        (["year", "month"], [_DEFAULT_YEAR_RANGE, _DEFAULT_MONTH_RANGE]),
-        (["+year", "+month"], [_DEFAULT_YEAR_RANGE, _DEFAULT_MONTH_RANGE]),
-        (["+year", "month"], [_DEFAULT_YEAR_RANGE, _DEFAULT_MONTH_RANGE]),
-        (["year", "+month"], [_DEFAULT_YEAR_RANGE, _DEFAULT_MONTH_RANGE]),
+        (["year", "month"], [_DEFAULT_TEST_YEARS, _DEFAULT_TEST_MONTHS]),
+        (["+year", "+month"], [_DEFAULT_TEST_YEARS, _DEFAULT_TEST_MONTHS]),
+        (["+year", "month"], [_DEFAULT_TEST_YEARS, _DEFAULT_TEST_MONTHS]),
+        (["year", "+month"], [_DEFAULT_TEST_YEARS, _DEFAULT_TEST_MONTHS]),
         (
             ["+year", "-month"],
-            [_DEFAULT_YEAR_RANGE, list(reversed(_DEFAULT_MONTH_RANGE))],
+            [_DEFAULT_TEST_YEARS, list(reversed(_DEFAULT_TEST_MONTHS))],
         ),
         (
             ["year", "-month"],
-            [_DEFAULT_YEAR_RANGE, list(reversed(_DEFAULT_MONTH_RANGE))],
+            [_DEFAULT_TEST_YEARS, list(reversed(_DEFAULT_TEST_MONTHS))],
         ),
         (
             ["-year", "month"],
-            [list(reversed(_DEFAULT_YEAR_RANGE)), _DEFAULT_MONTH_RANGE],
+            [list(reversed(_DEFAULT_TEST_YEARS)), _DEFAULT_TEST_MONTHS],
         ),
         (
             ["-year", "+month"],
-            [list(reversed(_DEFAULT_YEAR_RANGE)), _DEFAULT_MONTH_RANGE],
+            [list(reversed(_DEFAULT_TEST_YEARS)), _DEFAULT_TEST_MONTHS],
         ),
         (
             ["-year", "-month"],
-            [list(reversed(_DEFAULT_YEAR_RANGE)), list(reversed(_DEFAULT_MONTH_RANGE))],
+            [list(reversed(_DEFAULT_TEST_YEARS)), list(reversed(_DEFAULT_TEST_MONTHS))],
         ),
-        (["month", "year"], [_DEFAULT_MONTH_RANGE, _DEFAULT_YEAR_RANGE]),
-        (["+month", "+year"], [_DEFAULT_MONTH_RANGE, _DEFAULT_YEAR_RANGE]),
-        (["month", "+year"], [_DEFAULT_MONTH_RANGE, _DEFAULT_YEAR_RANGE]),
-        (["+month", "year"], [_DEFAULT_MONTH_RANGE, _DEFAULT_YEAR_RANGE]),
+        (["month", "year"], [_DEFAULT_TEST_MONTHS, _DEFAULT_TEST_YEARS]),
+        (["+month", "+year"], [_DEFAULT_TEST_MONTHS, _DEFAULT_TEST_YEARS]),
+        (["month", "+year"], [_DEFAULT_TEST_MONTHS, _DEFAULT_TEST_YEARS]),
+        (["+month", "year"], [_DEFAULT_TEST_MONTHS, _DEFAULT_TEST_YEARS]),
         (
             ["-month", "+year"],
-            [list(reversed(_DEFAULT_MONTH_RANGE)), _DEFAULT_YEAR_RANGE],
+            [list(reversed(_DEFAULT_TEST_MONTHS)), _DEFAULT_TEST_YEARS],
         ),
         (
             ["-month", "year"],
-            [list(reversed(_DEFAULT_MONTH_RANGE)), _DEFAULT_YEAR_RANGE],
+            [list(reversed(_DEFAULT_TEST_MONTHS)), _DEFAULT_TEST_YEARS],
         ),
         (
             ["month", "-year"],
-            [_DEFAULT_MONTH_RANGE, list(reversed(_DEFAULT_YEAR_RANGE))],
+            [_DEFAULT_TEST_MONTHS, list(reversed(_DEFAULT_TEST_YEARS))],
         ),
         (
             ["+month", "-year"],
-            [_DEFAULT_MONTH_RANGE, list(reversed(_DEFAULT_YEAR_RANGE))],
+            [_DEFAULT_TEST_MONTHS, list(reversed(_DEFAULT_TEST_YEARS))],
         ),
         (
             ["-month", "-year"],
-            [list(reversed(_DEFAULT_MONTH_RANGE)), list(reversed(_DEFAULT_YEAR_RANGE))],
+            [list(reversed(_DEFAULT_TEST_MONTHS)), list(reversed(_DEFAULT_TEST_YEARS))],
         ),
     ],
 )
