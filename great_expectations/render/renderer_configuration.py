@@ -76,9 +76,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     """Configuration object built for each renderer."""
 
     configuration: Union[ExpectationConfiguration, None] = Field(
-        ..., allow_mutation=False
+        None, allow_mutation=False
     )
-    result: Optional[ExpectationValidationResult] = Field(..., allow_mutation=False)
+    result: Optional[ExpectationValidationResult] = Field(None, allow_mutation=False)
     runtime_configuration: Optional[dict] = Field({}, allow_mutation=False)
     expectation_type: str = Field("", allow_mutation=False)
     kwargs: dict = Field({}, allow_mutation=False)
