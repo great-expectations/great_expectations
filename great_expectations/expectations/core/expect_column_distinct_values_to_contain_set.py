@@ -170,7 +170,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
         runtime_configuration: Optional[dict] = None,
     ) -> List[RenderedStringTemplateContent]:
         renderer_configuration = RendererConfiguration(
-            configuraiton=configuration,
+            configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
         )
