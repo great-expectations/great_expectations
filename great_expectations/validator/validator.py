@@ -109,6 +109,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class ValidationDependencies:
+    # Note: Dependent "metric_name" (key) is different from "metric_name" in dependency "MetricConfiguration" (value).
     metric_configurations: Dict[str, MetricConfiguration] = field(default_factory=dict)
     result_format: Dict[str, Any] = field(default_factory=dict)
 
@@ -977,7 +978,6 @@ class Validator:
         Args:
             configurations(List[ExpectationConfiguration]): A list of needed Expectation Configurations that will be
             used to supply domain and values for metrics.
-            metrics (dict): A list of currently registered metrics in the registry
             runtime_configuration (dict): A dictionary of runtime keyword arguments, controlling semantics, such as the
             result_format.
 
@@ -992,18 +992,18 @@ class Validator:
         else:
             catch_exceptions = False
 
-        expectation_validation_graphs: List[ExpectationValidationGraph] = []
+        expectation_validation_graphs: List[ExpectationValidationGraph]
 
         evrs: List[ExpectationValidationResult]
 
         processed_configurations: List[ExpectationConfiguration] = []
 
         (
+            expectation_validation_graphs,
             evrs,
             processed_configurations,
         ) = self._generate_metric_dependency_subgraphs_for_each_expectation_configuration(
             expectation_configurations=configurations,
-            expectation_validation_graphs=expectation_validation_graphs,
             processed_configurations=processed_configurations,
             catch_exceptions=catch_exceptions,
             runtime_configuration=runtime_configuration,
@@ -1071,13 +1071,17 @@ class Validator:
     def _generate_metric_dependency_subgraphs_for_each_expectation_configuration(
         self,
         expectation_configurations: List[ExpectationConfiguration],
-        expectation_validation_graphs: List[ExpectationValidationGraph],
         processed_configurations: List[ExpectationConfiguration],
         catch_exceptions: bool,
         runtime_configuration: Optional[dict] = None,
-    ) -> Tuple[List[ExpectationValidationResult], List[ExpectationConfiguration]]:
+    ) -> Tuple[
+        List[ExpectationValidationGraph],
+        List[ExpectationValidationResult],
+        List[ExpectationConfiguration],
+    ]:
         # While evaluating expectation configurations, create sub-graph for every metric dependency and incorporate
         # these sub-graphs under corresponding expectation-level sub-graph (state of ExpectationValidationGraph object).
+        expectation_validation_graphs: List[ExpectationValidationGraph] = []
         evrs: List[ExpectationValidationResult] = []
         configuration: ExpectationConfiguration
         evaluated_config: ExpectationConfiguration
@@ -1140,7 +1144,7 @@ class Validator:
                 else:
                     raise err
 
-        return evrs, processed_configurations
+        return expectation_validation_graphs, evrs, processed_configurations
 
     def _generate_suite_level_graph_from_expectation_level_sub_graphs(
         self,

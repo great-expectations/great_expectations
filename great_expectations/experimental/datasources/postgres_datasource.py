@@ -3,11 +3,9 @@ from __future__ import annotations
 import copy
 import dataclasses
 import itertools
-from datetime import datetime
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union, cast
 
-import dateutil.tz
 import pydantic
 from pydantic import dataclasses as pydantic_dc
 from typing_extensions import ClassVar, Literal, TypeAlias
@@ -33,23 +31,49 @@ class BatchRequestError(Exception):
     pass
 
 
-# For our year splitter we default the range to the last 2 year.
-_CURRENT_YEAR = datetime.now(dateutil.tz.tzutc()).year
-_DEFAULT_YEAR_RANGE = list(range(_CURRENT_YEAR - 1, _CURRENT_YEAR + 1))
-_DEFAULT_MONTH_RANGE = list(range(1, 13))
+@pydantic_dc.dataclass(frozen=True)
+class ColumnSplitter:
+    column_name: str
+    method_name: str
+    param_names: List[str]
+
+    def param_defaults(self, data_asset: DataAsset) -> Dict[str, List]:
+        raise NotImplementedError
 
 
 @pydantic_dc.dataclass(frozen=True)
-class ColumnSplitter:
-    method_name: str
-    column_name: str
-    # param_defaults is a Dict where the keys are the parameters of the splitter and the values are the default
-    # values are the default values if a batch request using the splitter leaves the parameter unspecified.
-    param_defaults: Dict[str, List] = pydantic.Field(default_factory=dict)
+class SqlYearMonthSplitter(ColumnSplitter):
+    method_name: str = "split_on_year_and_month"
+    param_names: List[str] = pydantic.Field(default_factory=lambda: ["year", "month"])
 
-    @property
-    def param_names(self) -> List[str]:
-        return list(self.param_defaults.keys())
+    def param_defaults(self, data_asset: DataAsset) -> Dict[str, List]:
+        """Query the database to get the years and months to split over.
+
+        Args:
+            data_asset: A TableAsset over which we want to split the data.
+        """
+        # This column splitter is only relevant to SQL data assets so we do some assertions
+        # to validate this.
+        from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+
+        assert isinstance(data_asset, TableAsset), "data_asset must be a TableAsset"
+        assert isinstance(
+            data_asset.datasource.execution_engine, SqlAlchemyExecutionEngine
+        )
+        with data_asset.datasource.execution_engine.engine.connect() as conn:
+            # We opt to use a raw string instead of sqlalchemy.txt because we don't
+            # need any of the features for this query
+            # https://docs.sqlalchemy.org/en/14/core/sqlelement.html#sqlalchemy.sql.expression.text
+            col = self.column_name
+            q = f"select min({col}), max({col}) from {data_asset.table_name}"
+            min_dt, max_dt = list(conn.execute(q))[0]
+        year: List[int] = list(range(min_dt.year, max_dt.year + 1))
+        month: List[int]
+        if min_dt.year == max_dt.year:
+            month = list(range(min_dt.month, max_dt.month + 1))
+        else:
+            month = list(range(1, 13))
+        return {"year": year, "month": month}
 
 
 @pydantic_dc.dataclass(frozen=True)
@@ -137,7 +161,7 @@ class TableAsset(DataAsset):
             set(self.batch_request_options_template().keys())
         )
 
-    def validate_batch_request(self, batch_request: BatchRequest) -> None:
+    def _validate_batch_request(self, batch_request: BatchRequest) -> None:
         """Validates the batch_request has the correct form.
 
         Args:
@@ -181,35 +205,22 @@ class TableAsset(DataAsset):
     def add_year_and_month_splitter(
         self,
         column_name: str,
-        default_year_range: List[int] = _DEFAULT_YEAR_RANGE,
-        default_month_range: List[int] = _DEFAULT_MONTH_RANGE,
     ) -> TableAsset:
         """Associates a year month splitter with this DataAsset
 
         Args:
             column_name: A column name of the date column where year and month will be parsed out.
-            default_year_range: When this splitter is used, say in a BatchRequest, if no value for
-                year is specified, we query over all years in this range.
-                will query over all the years in this default range.
-            default_month_range: When this splitter is used, say in a BatchRequest, if no value for
-                month is specified, we query over all months in this range.
 
         Returns:
             This TableAsset so we can use this method fluently.
         """
-        self.column_splitter = ColumnSplitter(
-            method_name="split_on_year_and_month",
+        self.column_splitter = SqlYearMonthSplitter(
             column_name=column_name,
-            param_defaults={"year": default_year_range, "month": default_month_range},
         )
         return self
 
-    def fully_specified_batch_requests(self, batch_request) -> List[BatchRequest]:
-        """Populates a batch requests unspecified params producing a list of batch requests
-
-        This method does NOT validate the batch_request. If necessary call
-        TableAsset.validate_batch_request before calling this method.
-        """
+    def _fully_specified_batch_requests(self, batch_request) -> List[BatchRequest]:
+        """Populates a batch requests unspecified params producing a list of batch requests."""
         if self.column_splitter is None:
             # Currently batch_request.options is complete determined by the presence of a
             # column splitter. If column_splitter is None, then there are no specifiable options
@@ -243,7 +254,7 @@ class TableAsset(DataAsset):
             default_option_values = []
             for option in unspecified_options:
                 default_option_values.append(
-                    self.column_splitter.param_defaults[option]
+                    self.column_splitter.param_defaults(self)[option]
                 )
             for option_values in itertools.product(*default_option_values):
                 # Add options from specified options
@@ -262,7 +273,7 @@ class TableAsset(DataAsset):
                 )
         return batch_requests
 
-    def sort_batches(self, batch_list: List[Batch]) -> None:
+    def _sort_batches(self, batch_list: List[Batch]) -> None:
         """Sorts batch_list in place.
 
         Args:
@@ -279,6 +290,56 @@ class TableAsset(DataAsset):
                     f"Trying to sort {self.name} table asset batches on key {sorter.metadata_key} "
                     "which isn't available on all batches."
                 ) from e
+
+    def get_batch_list_from_batch_request(
+        self, batch_request: BatchRequest
+    ) -> List[Batch]:
+        """A list of batches that match the BatchRequest.
+
+        Args:
+            batch_request: A batch request for this asset. Usually obtained by calling
+                get_batch_request on the asset.
+
+        Returns:
+            A list of batches that match the options specified in the batch request.
+        """
+        # We translate the batch_request into a BatchSpec to hook into GX core.
+        self._validate_batch_request(batch_request)
+
+        batch_list: List[Batch] = []
+        column_splitter = self.column_splitter
+        for request in self._fully_specified_batch_requests(batch_request):
+            batch_metadata = copy.deepcopy(request.options)
+            batch_spec_kwargs = {
+                "type": "table",
+                "data_asset_name": self.name,
+                "table_name": self.table_name,
+                "batch_identifiers": {},
+            }
+            if column_splitter:
+                batch_spec_kwargs["splitter_method"] = column_splitter.method_name
+                batch_spec_kwargs["splitter_kwargs"] = {
+                    "column_name": column_splitter.column_name
+                }
+                # mypy infers that batch_spec_kwargs["batch_identifiers"] is a collection, but
+                # it is hardcoded to a dict above, so we cast it here.
+                cast(Dict, batch_spec_kwargs["batch_identifiers"]).update(
+                    {column_splitter.column_name: request.options}
+                )
+            data, _ = self.datasource.execution_engine.get_batch_data_and_markers(
+                batch_spec=SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
+            )
+            batch_list.append(
+                Batch(
+                    datasource=self.datasource,
+                    data_asset=self,
+                    batch_request=request,
+                    data=data,
+                    metadata=batch_metadata,
+                )
+            )
+        self._sort_batches(batch_list)
+        return batch_list
 
 
 class PostgresDatasource(Datasource):
@@ -348,39 +409,4 @@ class PostgresDatasource(Datasource):
         """
         # We translate the batch_request into a BatchSpec to hook into GX core.
         data_asset = self.get_asset(batch_request.data_asset_name)
-        data_asset.validate_batch_request(batch_request)
-
-        batch_list: List[Batch] = []
-        column_splitter = data_asset.column_splitter
-        for request in data_asset.fully_specified_batch_requests(batch_request):
-            batch_metadata = copy.deepcopy(request.options)
-            batch_spec_kwargs = {
-                "type": "table",
-                "data_asset_name": data_asset.name,
-                "table_name": data_asset.table_name,
-                "batch_identifiers": {},
-            }
-            if column_splitter:
-                batch_spec_kwargs["splitter_method"] = column_splitter.method_name
-                batch_spec_kwargs["splitter_kwargs"] = {
-                    "column_name": column_splitter.column_name
-                }
-                # mypy infers that batch_spec_kwargs["batch_identifiers"] is a collection, but
-                # it is hardcoded to a dict above, so we cast it here.
-                cast(Dict, batch_spec_kwargs["batch_identifiers"]).update(
-                    {column_splitter.column_name: request.options}
-                )
-            data, _ = self.execution_engine.get_batch_data_and_markers(
-                batch_spec=SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
-            )
-            batch_list.append(
-                Batch(
-                    datasource=self,
-                    data_asset=data_asset,
-                    batch_request=request,
-                    data=data,
-                    metadata=batch_metadata,
-                )
-            )
-        data_asset.sort_batches(batch_list)
-        return batch_list
+        return data_asset.get_batch_list_from_batch_request(batch_request)

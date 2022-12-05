@@ -963,15 +963,12 @@ class Expectation(metaclass=MetaExpectation):
             )
         )
         runtime_configuration["result_format"] = validation_dependencies.result_format
-        requested_metrics: Dict[
-            str, MetricConfiguration
-        ] = validation_dependencies.metric_configurations
 
         metric_name: str
         metric_configuration: MetricConfiguration
         provided_metrics: Dict[str, MetricValue] = {
             metric_name: metrics[metric_configuration.id]
-            for metric_name, metric_configuration in requested_metrics.items()
+            for metric_name, metric_configuration in validation_dependencies.metric_configurations.items()
         }
 
         expectation_validation_result: Union[
