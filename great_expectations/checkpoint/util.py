@@ -35,7 +35,7 @@ def send_slack_notification(
     url = slack_webhook
     query = query
     headers = None
-    
+
     # Slack doc about overwritting the channel when using the legacy Incoming Webhooks
     # https://api.slack.com/legacy/custom-integrations/messaging/webhooks
     # ** Since it is legacy, it could be deprecated or removed in the future **
