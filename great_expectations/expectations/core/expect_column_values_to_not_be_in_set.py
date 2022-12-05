@@ -139,7 +139,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
-    ):
+    ) -> RendererConfiguration:
         add_param_args = (
             ("column", ParamSchemaType.STRING),
             ("value_set", ParamSchemaType.ARRAY),
