@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 import numpy as np
 
@@ -24,6 +24,10 @@ from great_expectations.render import (
     renderedAtomicValueSchema,
 )
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererSchemaType,
+)
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
@@ -42,6 +46,9 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.util import isclose
 from great_expectations.validator.validator import ValidationDependencies
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import RendererParams
 
 
 class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
@@ -234,8 +241,9 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     )
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        """Ensures quantile_ranges has been provided with value_ranges."""
         super().validate_configuration(configuration)
         try:
             assert (
@@ -266,91 +274,70 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             )
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
+        renderer_configuration: RendererConfiguration,
     ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        add_param_args = (
+            ("column", RendererSchemaType.STRING),
+            ("mostly", RendererSchemaType.NUMBER),
+            ("row_condition", RendererSchemaType.STRING),
+            ("condition_parser", RendererSchemaType.STRING),
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration["kwargs"],
-            ["column", "quantile_ranges", "row_condition", "condition_parser"],
-        )
+        for name, schema_type in add_param_args:
+            renderer_configuration.add_param(name=name, schema_type=schema_type)
 
-        header_params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-        }
+        params: RendererParams = renderer_configuration.params
 
-        header_template_str = "quantiles must be within the following value ranges."
+        template_str = "quantiles must be within the following value ranges."
 
-        if include_column_name:
-            header_template_str = f"$column {header_template_str}"
+        if renderer_configuration.include_column_name:
+            template_str = f"$column {template_str}"
 
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
+        if params.row_condition:
+            renderer_configuration = cls._add_row_condition_params(
+                renderer_configuration=renderer_configuration
             )
-            header_template_str = (
-                conditional_template_str
-                + ", then "
-                + header_template_str[0].lower()
-                + header_template_str[1:]
+            row_condition_str: str = cls._get_row_condition_string(
+                renderer_configuration=renderer_configuration
             )
-            header_params_with_json_schema.update(conditional_params)
+            template_str = f"{row_condition_str}, then {template_str}"
 
-        quantile_ranges = (
-            params.get("quantile_ranges") if params.get("quantile_ranges") else {}
-        )
-        quantiles = (
-            quantile_ranges.get("quantiles") if quantile_ranges.get("quantiles") else []
-        )
-        value_ranges = (
-            quantile_ranges.get("value_ranges")
-            if quantile_ranges.get("value_ranges")
-            else []
-        )
+        renderer_configuration.template_str = template_str
 
-        table_header_row = [
+        quantiles: list = renderer_configuration.kwargs.get("quantile_ranges", {}).get(
+            "quantiles", []
+        )
+        value_ranges: list = renderer_configuration.kwargs.get(
+            "quantile_ranges", {}
+        ).get("value_ranges", [])
+
+        header_row = [
             {"schema": {"type": "string"}, "value": "Quantile"},
             {"schema": {"type": "string"}, "value": "Min Value"},
             {"schema": {"type": "string"}, "value": "Max Value"},
         ]
-        table_rows = []
 
+        renderer_configuration.header_row = header_row
+
+        table = []
         quantile_strings = {0.25: "Q1", 0.75: "Q3", 0.50: "Median"}
-
         for quantile, value_range in zip(quantiles, value_ranges):
             quantile_string = quantile_strings.get(quantile, f"{quantile:3.2f}")
-            table_rows.append(
+            table.append(
                 [
                     {
                         "value": quantile_string,
-                        "schema": {"type": "string"},
+                        "schema": {"type": RendererSchemaType.STRING},
                     },
                     {
                         "value": value_range[0]
                         if value_range[0] is not None
                         else "Any",
                         "schema": {
-                            "type": "number" if value_range[0] is not None else "string"
+                            "type": RendererSchemaType.NUMBER
+                            if value_range[0] is not None
+                            else RendererSchemaType.STRING
                         },
                     },
                     {
@@ -358,19 +345,15 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                         if value_range[1] is not None
                         else "Any",
                         "schema": {
-                            "type": "number" if value_range[1] is not None else "string"
+                            "type": RendererSchemaType.NUMBER
+                            if value_range[1] is not None
+                            else RendererSchemaType.STRING
                         },
                     },
                 ]
             )
 
-        return (
-            header_template_str,
-            header_params_with_json_schema,
-            styling,
-            table_header_row,
-            table_rows,
-        )
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=AtomicPrescriptiveRendererType.SUMMARY)
@@ -380,40 +363,37 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
+    ) -> RenderedAtomicContent:
         """
         Rendering function that is utilized by GE Cloud Front-end
         """
-        (
-            header_template_str,
-            header_params_with_json_schema,
-            _,
-            table_header_row,
-            table_rows,
-        ) = cls._atomic_prescriptive_template(
-            configuration, result, runtime_configuration, **kwargs
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            runtime_configuration=runtime_configuration,
+        )
+        renderer_configuration = cls._prescriptive_template(
+            renderer_configuration=renderer_configuration
         )
         value_obj = renderedAtomicValueSchema.load(
             {
                 "header": {
                     "schema": {"type": "StringValueType"},
                     "value": {
-                        "template": header_template_str,
-                        "params": header_params_with_json_schema,
+                        "template": renderer_configuration.template_str,
+                        "params": renderer_configuration.params.dict(),
                     },
                 },
-                "header_row": table_header_row,
-                "table": table_rows,
+                "header_row": renderer_configuration.header_row,
+                "table": renderer_configuration.table,
                 "schema": {"type": "TableType"},
             }
         )
-        rendered = RenderedAtomicContent(
+        return RenderedAtomicContent(
             name=AtomicPrescriptiveRendererType.SUMMARY,
             value=value_obj,
             value_type="TableType",
         )
-        return rendered
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
