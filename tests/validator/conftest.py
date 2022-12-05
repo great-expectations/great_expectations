@@ -21,6 +21,7 @@ def column_histogram_metric_config() -> MetricConfiguration:
     return MetricConfiguration(
         metric_name="column.histogram",
         metric_domain_kwargs={
+            "column": "my_column",
             "batch_id": "def456",
         },
         metric_value_kwargs={
