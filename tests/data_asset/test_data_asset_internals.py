@@ -684,7 +684,7 @@ def test_discard_failing_expectations():
             "C": ["a", "b", "c", "d"],
             "D": ["e", "f", "g", "h"],
         },
-        profiler=ge.profile.ColumnsExistProfiler,
+        profiler=gx.profile.ColumnsExistProfiler,
     )
 
     # Put some simple expectations on the data frame

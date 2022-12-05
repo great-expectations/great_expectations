@@ -83,7 +83,7 @@ def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
             gx.validate(
                 file_data_asset,
                 empty_expectation_suite,
-                data_asset_class=ge.data_asset.FileDataAsset,
+                data_asset_class=gx.data_asset.FileDataAsset,
             )
 
 
@@ -96,7 +96,7 @@ def test_validate_dataset(dataset, basic_expectation_suite):
         res = gx.validate(
             dataset,
             expectation_suite=basic_expectation_suite,
-            data_asset_class=ge.dataset.PandasDataset,
+            data_asset_class=gx.dataset.PandasDataset,
         )
         assert res.success is True
         assert res["statistics"]["evaluated_expectations"] == 4
@@ -107,7 +107,7 @@ def test_validate_dataset(dataset, basic_expectation_suite):
             gx.validate(
                 dataset,
                 basic_expectation_suite,
-                data_asset_class=ge.dataset.SqlAlchemyDataset,
+                data_asset_class=gx.dataset.SqlAlchemyDataset,
             )
 
     elif (
@@ -117,7 +117,7 @@ def test_validate_dataset(dataset, basic_expectation_suite):
         res = gx.validate(
             dataset,
             expectation_suite=basic_expectation_suite,
-            data_asset_class=ge.dataset.SqlAlchemyDataset,
+            data_asset_class=gx.dataset.SqlAlchemyDataset,
         )
         assert res.success is True
         assert res["statistics"]["evaluated_expectations"] == 4
@@ -128,7 +128,7 @@ def test_validate_dataset(dataset, basic_expectation_suite):
             gx.validate(
                 dataset,
                 expectation_suite=basic_expectation_suite,
-                data_asset_class=ge.dataset.PandasDataset,
+                data_asset_class=gx.dataset.PandasDataset,
             )
 
     elif (
@@ -139,7 +139,7 @@ def test_validate_dataset(dataset, basic_expectation_suite):
         res = gx.validate(
             dataset,
             expectation_suite=basic_expectation_suite,
-            data_asset_class=ge.dataset.SqlAlchemyDataset,
+            data_asset_class=gx.dataset.SqlAlchemyDataset,
         )
         assert res.success is False
         assert res["statistics"]["evaluated_expectations"] == 4
@@ -150,12 +150,12 @@ def test_validate_dataset(dataset, basic_expectation_suite):
             gx.validate(
                 dataset,
                 expectation_suite=basic_expectation_suite,
-                data_asset_class=ge.dataset.PandasDataset,
+                data_asset_class=gx.dataset.PandasDataset,
             )
 
     elif isinstance(dataset, gx.dataset.SparkDFDataset):
         res = gx.validate(
-            dataset, basic_expectation_suite, data_asset_class=ge.dataset.SparkDFDataset
+            dataset, basic_expectation_suite, data_asset_class=gx.dataset.SparkDFDataset
         )
         assert res.success is True
         assert res["statistics"]["evaluated_expectations"] == 4
@@ -166,7 +166,7 @@ def test_validate_dataset(dataset, basic_expectation_suite):
             gx.validate(
                 dataset,
                 expectation_suite=basic_expectation_suite,
-                data_asset_class=ge.dataset.PandasDataset,
+                data_asset_class=gx.dataset.PandasDataset,
             )
 
 

@@ -45,7 +45,7 @@ def test_autoinspect_existing_dataset(test_backend):
 
 def test_autoinspect_columns_exist(test_backend):
     df = get_dataset(
-        test_backend, {"a": [1, 2, 3]}, profiler=ge.profile.ColumnsExistProfiler
+        test_backend, {"a": [1, 2, 3]}, profiler=gx.profile.ColumnsExistProfiler
     )
     suite = df.get_expectation_suite()
 
@@ -59,4 +59,4 @@ def test_autoinspect_columns_exist(test_backend):
 
 def test_autoinspect_warning():
     with pytest.raises(NotImplementedError):
-        gx.dataset.Dataset(profiler=ge.profile.ColumnsExistProfiler)
+        gx.dataset.Dataset(profiler=gx.profile.ColumnsExistProfiler)
