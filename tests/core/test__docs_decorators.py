@@ -1,9 +1,11 @@
 from great_expectations.core._docs_decorators import (
     deprecated,
-    public_api, version_added,
+    public_api,
+    version_added,
 )
 
 # @public_api
+
 
 @public_api
 def _func_full_docstring_public_api(some_arg, other_arg):
@@ -44,16 +46,17 @@ def test_public_api_decorator_full_docstring():
 
 
 def test_public_api_decorator_only_summary():
-    assert _func_only_summary_public_api.__doc__ == ("--Public API--My docstring.")
+    assert _func_only_summary_public_api.__doc__ == "--Public API--My docstring."
     assert _func_only_summary_public_api.__name__ == "_func_only_summary_public_api"
 
 
 def test_public_api_decorator_no_docstring():
-    assert _func_no_docstring_public_api.__doc__ == ("--Public API--")
+    assert _func_no_docstring_public_api.__doc__ == "--Public API--"
     assert _func_no_docstring_public_api.__name__ == "_func_no_docstring_public_api"
 
 
 # @deprecated
+
 
 @deprecated(version="1.2.3", message="This is deprecated!!")
 def _func_full_docstring_deprecated(some_arg, other_arg):
@@ -139,7 +142,9 @@ def test_deprecated_decorator_no_docstring():
         "\n" "\n" ".. deprecated:: 1.2.3\n" "    This is deprecated!!\n"
     )
 
+
 # @version_added
+
 
 @version_added(version="1.2.3", message="Added in version 1.2.3")
 def _func_full_docstring_version_added(some_arg, other_arg):
@@ -215,7 +220,10 @@ def test_version_added_decorator_full_docstring_no_message():
 def test_version_added_decorator_only_summary():
 
     assert _func_only_summary_version_added.__doc__ == (
-        "My docstring.\n" "\n" ".. versionadded:: 1.2.3\n" "    Added in version 1.2.3\n"
+        "My docstring.\n"
+        "\n"
+        ".. versionadded:: 1.2.3\n"
+        "    Added in version 1.2.3\n"
     )
 
 
@@ -227,6 +235,7 @@ def test_version_added_decorator_no_docstring():
 
 
 # All Decorators
+
 
 @public_api
 @version_added(version="1.2.3", message="Added in version 1.2.3")
