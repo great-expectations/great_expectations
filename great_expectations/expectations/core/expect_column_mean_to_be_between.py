@@ -274,7 +274,6 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
             ("column", RendererSchemaType.STRING),
             ("min_value", RendererSchemaType.NUMBER),
             ("min_value", RendererSchemaType.NUMBER),
-            ("parse_strings_as_datetimes", RendererSchemaType.BOOLEAN),
             ("row_condition", RendererSchemaType.STRING),
             ("condition_parser", RendererSchemaType.STRING),
             ("strict_min", RendererSchemaType.BOOLEAN),
