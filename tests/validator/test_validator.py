@@ -663,7 +663,8 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
 
 
 @pytest.mark.integration
-def test_graph_validate(basic_datasource):
+def test_graph_validate(in_memory_runtime_context, basic_datasource):
+    in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
 
     batch = basic_datasource.get_single_batch_from_batch_request(
@@ -694,7 +695,9 @@ def test_graph_validate(basic_datasource):
         },
     )
     result = Validator(
-        execution_engine=PandasExecutionEngine(), batches=[batch]
+        execution_engine=basic_datasource.execution_engine,
+        data_context=in_memory_runtime_context,
+        batches=[batch],
     ).graph_validate(configurations=[expectation_configuration])
     assert result == [
         ExpectationValidationResult(
@@ -717,7 +720,10 @@ def test_graph_validate(basic_datasource):
 
 # Tests that runtime configuration actually works during graph validation
 @pytest.mark.integration
-def test_graph_validate_with_runtime_config(basic_datasource):
+def test_graph_validate_with_runtime_config(
+    in_memory_runtime_context, basic_datasource
+):
+    in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
     df = pd.DataFrame(
         {"a": [1, 5, 22, 3, 5, 10, 2, 3], "b": [97, 332, 3, 4, 5, 6, 7, None]}
     )
@@ -747,7 +753,9 @@ def test_graph_validate_with_runtime_config(basic_datasource):
     try:
         # noinspection PyTypeChecker
         result = Validator(
-            execution_engine=PandasExecutionEngine(), batches=(batch,)
+            execution_engine=basic_datasource.execution_engine,
+            data_context=in_memory_runtime_context,
+            batches=[batch],
         ).graph_validate(
             configurations=[expectation_configuration],
             runtime_configuration={"result_format": "COMPLETE"},
@@ -836,7 +844,10 @@ def test_graph_validate_with_exception(basic_datasource):
 
 
 @pytest.mark.integration
-def test_graph_validate_with_bad_config_catch_exceptions_false(basic_datasource):
+def test_graph_validate_with_bad_config_catch_exceptions_false(
+    in_memory_runtime_context, basic_datasource
+):
+    in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
 
     batch = basic_datasource.get_single_batch_from_batch_request(
@@ -861,10 +872,16 @@ def test_graph_validate_with_bad_config_catch_exceptions_false(basic_datasource)
         expectation_type="expect_column_max_to_be_between",
         kwargs={"column": "not_in_table", "min_value": 1, "max_value": 29},
     )
-    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
+    with pytest.raises(
+        tuple(
+            [ge_exceptions.MetricResolutionError, ge_exceptions.ProfilerExecutionError]
+        )
+    ) as eee:
         # noinspection PyUnusedLocal
         result = Validator(
-            execution_engine=PandasExecutionEngine(), batches=[batch]
+            execution_engine=basic_datasource.execution_engine,
+            data_context=in_memory_runtime_context,
+            batches=[batch],
         ).graph_validate(
             configurations=[expectation_configuration],
             runtime_configuration={
