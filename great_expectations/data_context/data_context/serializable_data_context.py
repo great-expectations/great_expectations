@@ -57,6 +57,12 @@ class SerializableDataContext(AbstractDataContext):
         self.context_root_dir = context_root_dir
         super().__init__(runtime_environment=runtime_environment)
 
+    def _init_datasource_store(self):
+        pass
+
+    def _init_variables(self):
+        pass
+
     def _save_project_config(self) -> None:
         """
         See parent 'AbstractDataContext._save_project_config()` for more information.
