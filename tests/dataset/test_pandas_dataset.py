@@ -422,7 +422,7 @@ def test_from_pandas():
     assert list(ge_df["z"]) == list(pd_df["z"])
 
     # make an empty subclass to test dataset_class argument
-    class CustomPandasDataset(ge.dataset.PandasDataset):
+    class CustomPandasDataset(gx.dataset.PandasDataset):
         pass
 
     ge_df_custom = gx.from_pandas(pd_df, dataset_class=CustomPandasDataset)
@@ -812,12 +812,12 @@ def test_ge_pandas_automatic_failure_removal():
 def test_subclass_pandas_subset_retains_subclass():
     """A subclass of PandasDataset should still be that subclass after a Pandas subsetting operation"""
 
-    class CustomPandasDataset(ge.dataset.PandasDataset):
-        @ge.dataset.MetaPandasDataset.column_map_expectation
+    class CustomPandasDataset(gx.dataset.PandasDataset):
+        @gx.dataset.MetaPandasDataset.column_map_expectation
         def expect_column_values_to_be_odd(self, column):
             return column.map(lambda x: x % 2)
 
-        @ge.dataset.MetaPandasDataset.column_map_expectation
+        @gx.dataset.MetaPandasDataset.column_map_expectation
         def expectation_that_crashes_on_sixes(self, column):
             return column.map(lambda x: (x - 6) / 0 != "duck")
 

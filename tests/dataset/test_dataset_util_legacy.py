@@ -230,7 +230,7 @@ class TestUtilMethods(unittest.TestCase):
         self.assertFalse(
             gx.dataset.util.is_valid_partition_object({"weights": [0.5, 0.5]})
         )
-        self.assertFalse(ge.dataset.util.is_valid_partition_object({"bins": [0, 1, 2]}))
+        self.assertFalse(gx.dataset.util.is_valid_partition_object({"bins": [0, 1, 2]}))
 
     def test_validate_distribution_parameters(self):
         D = gx.read_csv(
