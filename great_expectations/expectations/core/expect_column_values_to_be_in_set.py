@@ -384,6 +384,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        """Validates that a value_set has been provided."""
         super().validate_configuration(configuration)
         # supports extensibility by allowing value_set to not be provided in config but captured via child-class default_kwarg_values, e.g. parameterized expectations
         value_set = configuration.kwargs.get(

@@ -122,6 +122,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        """Validates that a value_set has been provided."""
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
