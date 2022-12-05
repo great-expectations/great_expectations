@@ -32,8 +32,8 @@ Additional info: https://github.com/great-expectations/great_expectations/issues
 https://www.python.org/dev/peps/pep-0273/
 """
 
-print(f"Great Expectations location: {ge.__file__}")
-print(f"Great Expectations version: {ge.__version__}")
+print(f"Great Expectations location: {gx.__file__}")
+print(f"Great Expectations version: {gx.__version__}")
 
 data_context_config = DataContextConfig(
     datasources={"example_datasource": DatasourceConfig(class_name="PandasDatasource")},
