@@ -336,14 +336,12 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                         else "Any",
                         "schema": {
                             "type": RendererSchemaType.NUMBER
-                            if value_range[0] is not None
+                            if value_range[0]
                             else RendererSchemaType.STRING
                         },
                     },
                     {
-                        "value": value_range[1]
-                        if value_range[1] is not None
-                        else "Any",
+                        "value": value_range[1] if value_range[1] else "Any",
                         "schema": {
                             "type": RendererSchemaType.NUMBER
                             if value_range[1] is not None
