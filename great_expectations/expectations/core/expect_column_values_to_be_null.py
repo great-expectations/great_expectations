@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -27,6 +27,9 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 from great_expectations.validator.validator import ValidationDependencies
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import RendererParams
 
 
 class ExpectColumnValuesToBeNull(ColumnMapExpectation):
@@ -107,7 +110,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         for name, schema_type in add_param_args:
             renderer_configuration.add_param(name=name, schema_type=schema_type)
 
-        params = renderer_configuration.params
+        params: RendererParams = renderer_configuration.params
 
         if params.mostly and params.mostly.value < 1.0:
             renderer_configuration = cls._add_mostly_pct_param(

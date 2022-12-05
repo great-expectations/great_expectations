@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -45,6 +45,9 @@ except ImportError:
 from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import RendererParams
 
 
 class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
@@ -200,7 +203,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         for name, schema_type in add_param_args:
             renderer_configuration.add_param(name=name, schema_type=schema_type)
 
-        params = renderer_configuration.params
+        params: RendererParams = renderer_configuration.params
         template_str = ""
 
         if params.value_set:

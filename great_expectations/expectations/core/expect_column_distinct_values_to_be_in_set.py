@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 import altair as alt
 import pandas as pd
@@ -29,6 +29,9 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import RendererParams
 
 
 class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
@@ -148,7 +151,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         for name, schema_type in add_param_args:
             renderer_configuration.add_param(name=name, schema_type=schema_type)
 
-        params = renderer_configuration.params
+        params: RendererParams = renderer_configuration.params
 
         if not params.value_set or len(params.value_set.value) == 0:
             if renderer_configuration.include_column_name:
