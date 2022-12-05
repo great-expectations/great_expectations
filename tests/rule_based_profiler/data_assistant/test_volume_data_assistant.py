@@ -1532,7 +1532,7 @@ def quentin_implicit_invocation_result_frozen_time(
     return cast(VolumeDataAssistantResult, data_assistant_result)
 
 
-def assert_quentin_expected_metrics_by_domain_serialized(
+def _assert_quentin_expected_metrics_by_domain_serialized(
     actual_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]],
     expected_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]],
 ):
@@ -1749,7 +1749,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_insta
         name=data_assistant_name
     )
 
-    assert_quentin_expected_metrics_by_domain_serialized(
+    _assert_quentin_expected_metrics_by_domain_serialized(
         actual_metrics_by_domain=data_assistant_result.metrics_by_domain,
         expected_metrics_by_domain=quentin_expected_metrics_by_domain,
     )
@@ -1821,7 +1821,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
         name=registered_data_assistant_name
     )
 
-    assert_quentin_expected_metrics_by_domain_serialized(
+    _assert_quentin_expected_metrics_by_domain_serialized(
         actual_metrics_by_domain=data_assistant_result.metrics_by_domain,
         expected_metrics_by_domain=quentin_expected_metrics_by_domain,
     )
@@ -1947,7 +1947,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
         name=registered_data_assistant_name
     )
 
-    assert_quentin_expected_metrics_by_domain_serialized(
+    _assert_quentin_expected_metrics_by_domain_serialized(
         actual_metrics_by_domain=data_assistant_result.metrics_by_domain,
         expected_metrics_by_domain=quentin_expected_metrics_by_domain,
     )

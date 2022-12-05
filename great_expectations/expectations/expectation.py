@@ -62,7 +62,11 @@ from great_expectations.exceptions import (
     InvalidExpectationConfigurationError,
     InvalidExpectationKwargsError,
 )
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    PandasExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.expectations.registry import (
     _registered_metrics,
     _registered_renderers,
@@ -2384,7 +2388,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
         assert (
             self.metric_dependencies == tuple()
         ), "ColumnMapExpectation must be configured using map_metric, and cannot have metric_dependencies declared."
-        # convenient name for updates
 
         metric_kwargs: dict
 
@@ -2502,7 +2505,34 @@ class ColumnMapExpectation(TableExpectation, ABC):
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
             )
-
+        if isinstance(execution_engine, SqlAlchemyExecutionEngine):
+            if "unexpected_index_column_names" in validation_dependencies.result_format:
+                metric_kwargs = get_metric_kwargs(
+                    f"{self.map_metric}.unexpected_index_list",
+                    configuration=configuration,
+                    runtime_configuration=runtime_configuration,
+                )
+                validation_dependencies.set_metric_configuration(
+                    metric_name=f"{self.map_metric}.unexpected_index_list",
+                    metric_configuration=MetricConfiguration(
+                        metric_name=f"{self.map_metric}.unexpected_index_list",
+                        metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                        metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                    ),
+                )
+                metric_kwargs = get_metric_kwargs(
+                    f"{self.map_metric}.unexpected_index_query",
+                    configuration=configuration,
+                    runtime_configuration=runtime_configuration,
+                )
+                validation_dependencies.set_metric_configuration(
+                    metric_name=f"{self.map_metric}.unexpected_index_query",
+                    metric_configuration=MetricConfiguration(
+                        metric_name=f"{self.map_metric}.unexpected_index_query",
+                        metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                        metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                    ),
+                )
         return validation_dependencies
 
     def _validate(
@@ -2539,6 +2569,9 @@ class ColumnMapExpectation(TableExpectation, ABC):
         unexpected_index_list: Optional[List[int]] = metrics.get(
             f"{self.map_metric}.unexpected_index_list"
         )
+        unexpected_index_query: Optional[str] = metrics.get(
+            f"{self.map_metric}.unexpected_index_query"
+        )
         unexpected_rows = None
         if include_unexpected_rows:
             unexpected_rows = metrics.get(f"{self.map_metric}.unexpected_rows")
@@ -2569,6 +2602,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
             unexpected_list=unexpected_values,
             unexpected_index_list=unexpected_index_list,
             unexpected_rows=unexpected_rows,
+            unexpected_index_query=unexpected_index_query,
         )
 
 
@@ -2633,8 +2667,6 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         assert (
             self.metric_dependencies == tuple()
         ), "ColumnPairMapExpectation must be configured using map_metric, and cannot have metric_dependencies declared."
-        # convenient name for updates
-
         metric_kwargs: dict
 
         metric_kwargs = get_metric_kwargs(
@@ -3026,6 +3058,7 @@ def _format_map_output(
     unexpected_count: Optional[int] = None,
     unexpected_list: Optional[List[Any]] = None,
     unexpected_index_list: Optional[List[int]] = None,
+    unexpected_index_query: Optional[str] = None,
     unexpected_rows=None,
 ) -> Dict:
     """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
@@ -3150,7 +3183,8 @@ def _format_map_output(
         return_obj["result"].update({"unexpected_list": unexpected_list})
     if unexpected_index_list is not None:
         return_obj["result"].update({"unexpected_index_list": unexpected_index_list})
-
+    if unexpected_index_query is not None:
+        return_obj["result"].update({"unexpected_index_query": unexpected_index_query})
     if result_format["result_format"] == "COMPLETE":
         return return_obj
 

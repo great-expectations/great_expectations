@@ -16,10 +16,6 @@ datasources:
               method_name: foobar_it
               column_name: my_column
               name: my_splitter
-              param_defaults:
-                alpha:
-                  - fizz
-                  - bizz
-                bravo:
-                  - foo
-                  - bar
+              param_names:
+                - alpha
+                - bravo
