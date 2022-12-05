@@ -2232,12 +2232,6 @@ introspection:
 
 @pytest.fixture
 def basic_datasource(tmp_path_factory):
-    # TODO: <Alex>ALEX</Alex>
-    # base_directory: str = str(
-    #     tmp_path_factory.mktemp("basic_datasource_runtime_data_connector")
-    # )
-    #
-    # TODO: <Alex>ALEX</Alex>
     basic_datasource: Datasource = instantiate_class_from_config(
         config=yaml.load(
             """

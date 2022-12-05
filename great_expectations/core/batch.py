@@ -550,10 +550,9 @@ class Batch(SerializableDictDot):
 
         self._batch_request = batch_request
 
-        # TODO: <Alex>ALEX</Alex>
         if batch_definition is None:
             batch_definition = IDDict()
-        # TODO: <Alex>ALEX</Alex>
+
         self._batch_definition = batch_definition
 
         if batch_spec is None:
@@ -570,7 +569,6 @@ class Batch(SerializableDictDot):
                 }
             )
 
-        # TODO: <Alex>ALEX</Alex>
         self._batch_markers = batch_markers
         # TODO: <Alex>ALEX</Alex>
 
@@ -654,7 +652,6 @@ class Batch(SerializableDictDot):
     @property
     def id(self):
         batch_definition = self._batch_definition
-        # TODO: <Alex>ALEX</Alex>
         if isinstance(batch_definition, BatchDefinition):
             return batch_definition.id
 
@@ -665,14 +662,6 @@ class Batch(SerializableDictDot):
             return IDDict(batch_definition).to_id()
 
         return IDDict({}).to_id()
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # return (
-        #     batch_definition.id
-        #     if isinstance(batch_definition, BatchDefinition)
-        #     else batch_definition.to_id()
-        # )
-        # TODO: <Alex>ALEX</Alex>
 
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
