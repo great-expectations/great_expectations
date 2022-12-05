@@ -184,8 +184,7 @@ def param_method(param_name: str) -> Callable:
         def wrapper(
             renderer_configuration: RendererConfiguration,
         ) -> RendererConfiguration:
-            params = renderer_configuration.params
-            if hasattr(params, param_name):
+            if hasattr(renderer_configuration.params, param_name):
                 renderer_configuration = param_func(
                     renderer_configuration=renderer_configuration
                 )
@@ -1510,9 +1509,9 @@ class Expectation(metaclass=MetaExpectation):
     def _add_value_set_params(
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        params = renderer_configuration.params
-        if len(params.value_set.value) > 0:
-            for idx, value in enumerate(params.value_set.value):
+        value_set: List[Optional[Any]] = renderer_configuration.params.value_set.value
+        if len(value_set) > 0:
+            for idx, value in enumerate(value_set):
                 if isinstance(value, Number):
                     schema_type = ParamSchemaType.NUMBER
                 else:
@@ -1525,10 +1524,10 @@ class Expectation(metaclass=MetaExpectation):
     @staticmethod
     @param_method(param_name="value_set")
     def _get_value_set_string(renderer_configuration: RendererConfiguration) -> str:
-        params = renderer_configuration.params
-        if len(params.value_set.value) > 0:
+        value_set: List[Optional[Any]] = renderer_configuration.params.value_set.value
+        if len(value_set) > 0:
             value_set_str = " ".join(
-                [f"$v__{str(idx)}" for idx in range(len(params.value_set.value))]
+                [f"$v__{str(idx)}" for idx in range(len(value_set))]
             )
         else:
             value_set_str = "[ ]"
@@ -1573,9 +1572,8 @@ class Expectation(metaclass=MetaExpectation):
     def _add_row_condition_params(
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        params = renderer_configuration.params
         row_condition_str: str = Expectation._parse_row_condition_str(
-            row_condition_str=params.row_condition.value
+            row_condition_str=renderer_configuration.params.row_condition.value
         )
         row_conditions_list: List[
             str
@@ -1594,9 +1592,8 @@ class Expectation(metaclass=MetaExpectation):
     @staticmethod
     @param_method(param_name="row_condition")
     def _get_row_condition_string(renderer_configuration: RendererConfiguration) -> str:
-        params = renderer_configuration.params
         row_condition_str: str = Expectation._parse_row_condition_str(
-            row_condition_str=params.row_condition.value
+            row_condition_str=renderer_configuration.params.row_condition.value
         )
         row_conditions_list: List[
             str
@@ -1615,7 +1612,6 @@ class Expectation(metaclass=MetaExpectation):
     def _add_mostly_pct_param(
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        params = renderer_configuration.params
         mostly_pct_value: str = num_to_str(
             renderer_configuration.params.mostly.value * 100,
             precision=15,
