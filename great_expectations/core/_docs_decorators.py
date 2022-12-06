@@ -4,7 +4,7 @@ from typing import Any, Callable, TypeVar
 try:
     import docstring_parser
 except ImportError:
-    docstring_parser = None  # type: ignore[assignment]
+    docstring_parser = None
 
 WHITELISTED_TAG = "--Public API--"
 
