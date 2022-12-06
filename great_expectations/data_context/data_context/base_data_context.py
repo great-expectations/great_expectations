@@ -193,8 +193,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         if ge_cloud_mode or ge_cloud_config:
             # deprecated-v0.15.37
             warnings.warn(
-                f"The ge_cloud_mode/ge_cloud_config arguments are deprecated as of v0.15.37 and will be removed in a future release."
-                f" Please use the renamed cloud_mode/cloud_config moving forward.",
+                "The ge_cloud_mode/ge_cloud_config arguments are deprecated as of v0.15.37 and will be removed in a future release."
+                " Please use the renamed cloud_mode/cloud_config moving forward.",
                 DeprecationWarning,
             )
             cloud_mode = ge_cloud_mode

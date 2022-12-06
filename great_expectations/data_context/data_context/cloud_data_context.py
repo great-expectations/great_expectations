@@ -90,8 +90,8 @@ class CloudDataContext(AbstractDataContext):
         ):
             # deprecated-v0.15.37
             warnings.warn(
-                f"The ge_cloud_base_url/ge_cloud_access_token/ge_cloud_organization_id arguments are deprecated as of v0.15.37 and will be removed in a future release."
-                f" Please use the renamed cloud_base_url/cloud_access_token/cloud_organization_id moving forward.",
+                "The ge_cloud_base_url/ge_cloud_access_token/ge_cloud_organization_id arguments are deprecated as of v0.15.37 and will be removed in a future release."
+                " Please use the renamed cloud_base_url/cloud_access_token/cloud_organization_id moving forward.",
                 DeprecationWarning,
             )
             cloud_base_url = ge_cloud_base_url
