@@ -83,7 +83,11 @@ class CloudDataContext(AbstractDataContext):
         """
         self._cloud_mode = True  # property needed for backward compatibility
 
-        if ge_cloud_base_url or ge_cloud_access_token or ge_cloud_organization_id:
+        if (
+            ge_cloud_base_url is not None
+            or ge_cloud_access_token is not None
+            or ge_cloud_organization_id is not None
+        ):
             # deprecated-v0.15.37
             warnings.warn(
                 f"The ge_cloud_base_url/ge_cloud_access_token/ge_cloud_organization_id arguments are deprecated as of v0.15.37 and will be removed in a future release."

@@ -1742,10 +1742,10 @@ def get_context(
     )
 
     if (
-        ge_cloud_base_url
-        or ge_cloud_access_token
-        or ge_cloud_organization_id
-        or ge_cloud_mode
+        ge_cloud_base_url is not None
+        or ge_cloud_access_token is not None
+        or ge_cloud_organization_id is not None
+        or ge_cloud_mode is not None
     ):
         # deprecated-v0.15.37
         warnings.warn(
