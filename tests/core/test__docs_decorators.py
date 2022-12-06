@@ -300,10 +300,14 @@ def test_deprecated_decorator_full_docstring_deprecated_argument():
         "Longer description.\n"
         "\n"
         "Args:\n"
-        "    some_arg: describe some_arg\n"
+        "    some_arg:\n"
+        "        describe some_arg\n"
+        "        \n"
         "        .. deprecated:: 1.2.3\n"
         "            some msg\n"
-        "    other_arg: describe other_arg"
+        "        \n"
+        "    other_arg:\n"
+        "        describe other_arg"
     )
 
 
@@ -327,10 +331,14 @@ def test_deprecated_decorator_full_docstring_deprecated_argument_no_description(
         "Longer description.\n"
         "\n"
         "Args:\n"
-        "    some_arg: \n"
+        "    some_arg:\n"
+        "        \n"
+        "        \n"
         "        .. deprecated:: 1.2.3\n"
         "            some msg\n"
-        "    other_arg: describe other_arg"
+        "        \n"
+        "    other_arg:\n"
+        "        describe other_arg"
     )
 
 
@@ -380,10 +388,49 @@ def test_new_argument_decorator_full_docstring_new_argument():
         "Longer description.\n"
         "\n"
         "Args:\n"
-        "    some_arg: describe some_arg\n"
+        "    some_arg:\n"
+        "        describe some_arg\n"
+        "        \n"
         "        .. versionadded:: 1.2.3\n"
         "            some msg\n"
-        "    other_arg: describe other_arg"
+        "        \n"
+        "    other_arg:\n"
+        "        describe other_arg"
+    )
+
+
+@new_argument(argument_name="some_arg", version="1.2.3", message="some msg")
+@new_argument(argument_name="other_arg", version="1.2.3", message="some other msg")
+def _func_full_docstring_two_new_arguments(some_arg, other_arg):
+    """My docstring.
+
+    Longer description.
+
+    Args:
+        some_arg: describe some_arg
+        other_arg: describe other_arg
+    """
+    pass
+
+
+def test_new_argument_decorator_full_docstring_two_new_arguments():
+    assert _func_full_docstring_two_new_arguments.__doc__ == (
+        "My docstring.\n"
+        "\n"
+        "Longer description.\n"
+        "\n"
+        "Args:\n"
+        "    some_arg:\n"
+        "        describe some_arg\n"
+        "        \n"
+        "        .. versionadded:: 1.2.3\n"
+        "            some msg\n"
+        "        \n"
+        "    other_arg:\n"
+        "        describe other_arg\n"
+        "        \n"
+        "        .. versionadded:: 1.2.3\n"
+        "            some other msg"
     )
 
 
@@ -407,10 +454,14 @@ def test_new_argument_full_docstring_new_argument_no_description():
         "Longer description.\n"
         "\n"
         "Args:\n"
-        "    some_arg: \n"
+        "    some_arg:\n"
+        "        \n"
+        "        \n"
         "        .. versionadded:: 1.2.3\n"
         "            some msg\n"
-        "    other_arg: describe other_arg"
+        "        \n"
+        "    other_arg:\n"
+        "        describe other_arg"
     )
 
 
@@ -473,10 +524,15 @@ def test_all_decorators_full_docstring():
         "Longer description.\n"
         "\n"
         "Args:\n"
-        "    some_arg: describe some_arg\n"
+        "    some_arg:\n"
+        "        describe some_arg\n"
+        "\n"
         "        .. versionadded:: 1.2.3\n"
         "            some msg\n"
-        "    other_arg: describe other_arg\n"
+        "\n"
+        "    other_arg:\n"
+        "        describe other_arg\n"
+        "\n"
         "        .. deprecated:: 1.2.3\n"
-        "        some msg"
+        "            some msg"
     )
