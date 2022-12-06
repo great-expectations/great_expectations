@@ -1,3 +1,5 @@
+from unittest.mock import Mock
+
 import pytest
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
@@ -149,3 +151,30 @@ def test_instantiation_with_unknown_dialect(sqlite_view_engine):
     )
 
     assert batch_data.dialect == GXSqlDialect.OTHER
+
+
+@pytest.mark.unit
+def test_instantiation_with_temp_table_schema():
+    engine = Mock(spec=["dialect", "execute"])
+    execution_engine = Mock(spec=SqlAlchemyExecutionEngine, engine=engine)
+
+    # not supported
+    engine.dialect.name = "sqlite"
+    SqlAlchemyBatchData(
+        execution_engine=execution_engine,
+        query="test_query",
+        create_temp_table=True,
+        temp_table_schema_name="test_schema",
+    )
+    assert "test_schema" not in engine.execute.call_args[0][0]
+
+    # supported
+    for dialect in ["bigquery", "snowflake", "vertica"]:
+        engine.dialect.name = dialect
+        SqlAlchemyBatchData(
+            execution_engine=execution_engine,
+            query="test_query",
+            create_temp_table=True,
+            temp_table_schema_name="test_schema",
+        )
+        assert "test_schema" in engine.execute.call_args[0][0]
