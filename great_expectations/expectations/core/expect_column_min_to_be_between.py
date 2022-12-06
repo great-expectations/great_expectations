@@ -229,7 +229,7 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
         add_param_args = (
             ("column", RendererSchemaType.STRING),
             ("min_value", RendererSchemaType.NUMBER),
-            ("min_value", RendererSchemaType.NUMBER),
+            ("max_value", RendererSchemaType.NUMBER),
             ("parse_strings_as_datetimes", RendererSchemaType.BOOLEAN),
             ("row_condition", RendererSchemaType.STRING),
             ("condition_parser", RendererSchemaType.STRING),

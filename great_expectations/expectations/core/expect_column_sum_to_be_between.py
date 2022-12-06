@@ -212,7 +212,7 @@ class ExpectColumnSumToBeBetween(ColumnExpectation):
         add_param_args = (
             ("column", RendererSchemaType.STRING),
             ("min_value", RendererSchemaType.NUMBER),
-            ("min_value", RendererSchemaType.NUMBER),
+            ("max_value", RendererSchemaType.NUMBER),
             ("row_condition", RendererSchemaType.STRING),
             ("condition_parser", RendererSchemaType.STRING),
             ("strict_min", RendererSchemaType.BOOLEAN),
