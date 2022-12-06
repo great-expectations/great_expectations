@@ -155,14 +155,14 @@ Now you are ready to manually migrate Datasources and Checkpoints to be compatib
 
 ### Manually migrate Datasources from V2 to V3
 
-The first manual step needed is to convert the V2-style Datasource to a V3-style one. The following documentation 
-contains examples for data read-in using `pandas`, `spark`, and a database, using `postgresql` as an example. 
+The first manual step needed is to convert the V2-style Datasource to a V3-style one. The following documentation
+contains examples for data read-in using `pandas`, `spark`, and a database, using `postgresql` as an example.
 
 :::tip
 
-The configurations for `pandas`, `spark` and `postgresql` shown in this guide are available as part of the `great-expectations` repository. 
+The configurations for `pandas`, `spark` and `postgresql` shown in this guide are available as part of the `great-expectations` repository.
 Please feel free to use the complete-and-working configurations found [here](https://github.com/great-expectations/great_expectations/tree/develop/tests/test_fixtures/configuration_for_testing_v2_v3_migration)
-to help with your migration. 
+to help with your migration.
 
 :::
 
@@ -195,7 +195,7 @@ The V3-style Datasource has:
 #### V3-Style Datasource
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v3/great_expectations/great_expectations.yml#L16-L31
 ```
- 
+
 <details>
   <summary> More details on <code>base_directory</code></summary>
     The <code>base_directory</code> is set to <code>../../../data/</code> according to the example Pandas configuration which can be found <a href="https://github.com/great-expectations/great_expectations/tree/develop/tests/test_fixtures/configuration_for_testing_v2_v3_migration"> in the great_expectations repository</a>.
@@ -270,9 +270,9 @@ One exception to the datatype-agnostic Datasource in the V3 API is the <code>Sim
 
 </details>
 
-Migrating Datasource configurations that contain connections to databases involve additional parameters like credentials that are specific to each configuration. The how-to-guides for Great Expectations contain numerous examples of V3 configurations that can be used for these various situations. 
+Migrating Datasource configurations that contain connections to databases involve additional parameters like credentials that are specific to each configuration. The how-to-guides for Great Expectations contain numerous examples of V3 configurations that can be used for these various situations.
 
-Please check out the following docs for examples of V3-style Datasource configurations that will suit your needs: 
+Please check out the following docs for examples of V3-style Datasource configurations that will suit your needs:
 
 - [How to connect to a Athena database](../connecting_to_your_data/database/athena.md)
 - [How to connect to a BigQuery database](../connecting_to_your_data/database/bigquery.md)
@@ -288,11 +288,11 @@ Please check out the following docs for examples of V3-style Datasource configur
 
 :::tip
 
-Before doing the migration, we recommend that you create a backup of your V2 Checkpoints. Checkpoints are typically stored as `.yml` configuration files in the `checkpoints/` directory of your `great_expectations/` folder.  We recommend that you make a backup copy of these files or the directory.  
+Before doing the migration, we recommend that you create a backup of your V2 Checkpoints. Checkpoints are typically stored as `.yml` configuration files in the `checkpoints/` directory of your `great_expectations/` folder.  We recommend that you make a backup copy of these files or the directory.
 
 :::
 
-In Great Expectations version 0.13.7, we introduced an improved Checkpoints feature, which allowed Checkpoints to utilize features the V3 API. As a result, Checkpoints are now able to [filter and sort batches from configured datasources](../connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md), [introspect and partition tables as batches](../connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md), with multi-batch Expectations soon to come.  As part of these design improvements, Validation Operators (originally located in the `great_expectations.yml` file) were combined into Checkpoint configurations. 
+In Great Expectations version 0.13.7, we introduced an improved Checkpoints feature, which allowed Checkpoints to utilize features the V3 API. As a result, Checkpoints are now able to [filter and sort batches from configured datasources](../connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md), [introspect and partition tables as batches](../connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md), with multi-batch Expectations soon to come.  As part of these design improvements, Validation Operators (originally located in the `great_expectations.yml` file) were combined into Checkpoint configurations.
 
 This means that, although Validation Operators were run directly from the DataContext in V2, they are now run by Checkpoints in V3 as part of `action_list` items. This change offers a convenient abstraction for running Validations and ensures that all actions associated with running validations are included in one place, rather than split up between the `great_expectations.yml` file and Checkpoint configuration.
 
@@ -322,10 +322,10 @@ The example V3-style Checkpoint contains:
   - A `action_list`, which contain a list of actions associated with the Validation Results (e.g., saving them for a later review, sending notifications in case of failures, etc.). These were known as Validation Operators in V2-style Checkpoints.
 
 :::note Migrating ExpectationSuites
-  
-  `ExpectationSuites` that were created in the V2-API will work in the V3-API **without** needing to be modified. However, `ExpectationSuites` also contain `metadata` describing the `batch` that was used to create the original `ExpectationSuite` object (under the `citations` field). For a suite that was created in V2, this metadata will contain `batch_kwargs`, and V3 suites will contain a `batch_request`. 
-  
-  If you choose to do so, the `citation` metadata can be migrated using the same pattern for migrating `batch_kwargs` to `batch_request` described below. 
+
+  `ExpectationSuites` that were created in the V2-API will work in the V3-API **without** needing to be modified. However, `ExpectationSuites` also contain `metadata` describing the `batch` that was used to create the original `ExpectationSuite` object (under the `citations` field). For a suite that was created in V2, this metadata will contain `batch_kwargs`, and V3 suites will contain a `batch_request`.
+
+  If you choose to do so, the `citation` metadata can be migrated using the same pattern for migrating `batch_kwargs` to `batch_request` described below.
 
 :::
 
@@ -402,10 +402,10 @@ The example V3-style Checkpoint contains:
   - A `action_list`, which contain a list of actions associated with the Validation Results (e.g., saving them for a later review, sending notifications in case of failures, etc.). These were known as Validation Operators in V2-style Checkpoints.
 
 :::note Migrating ExpectationSuites
-  
-  `ExpectationSuites` that were created in the V2-API will work in the V3-API **without** needing to be modified. However, `ExpectationSuites` also contain `metadata` describing the `batch` that was used to create the original `ExpectationSuite` object (under the `citations` field). For a suite that was created in V2, this metadata will contain `batch_kwargs`, and V3 suites will contain a `batch_request`. 
-  
-  If you choose to do so, the `citation` metadata can be migrated using the same pattern for migrating `batch_kwargs` to `batch_request` described below. 
+
+  `ExpectationSuites` that were created in the V2-API will work in the V3-API **without** needing to be modified. However, `ExpectationSuites` also contain `metadata` describing the `batch` that was used to create the original `ExpectationSuite` object (under the `citations` field). For a suite that was created in V2, this metadata will contain `batch_kwargs`, and V3 suites will contain a `batch_request`.
+
+  If you choose to do so, the `citation` metadata can be migrated using the same pattern for migrating `batch_kwargs` to `batch_request` described below.
 
 :::
 
@@ -481,10 +481,10 @@ The example V3-style Checkpoint contains:
   - A `action_list`, which contain a list of actions associated with the Validation Results (e.g., saving them for a later review, sending notifications in case of failures, etc.). These were known as Validation Operators in V2-style Checkpoints.
 
 :::note Migrating ExpectationSuites
-  
-  `ExpectationSuites` that were created in the V2-API will work in the V3-API **without** needing to be modified. However, `ExpectationSuites` also contain `metadata` describing the `batch` that was used to create the original `ExpectationSuite` object (under the `citations` field). For a suite that was created in V2, this metadata will contain `batch_kwargs`, and V3 suites will contain a `batch_request`. 
-  
-  If you choose to do so, the `citation` metadata can be migrated using the same pattern for migrating `batch_kwargs` to `batch_request` described below. 
+
+  `ExpectationSuites` that were created in the V2-API will work in the V3-API **without** needing to be modified. However, `ExpectationSuites` also contain `metadata` describing the `batch` that was used to create the original `ExpectationSuite` object (under the `citations` field). For a suite that was created in V2, this metadata will contain `batch_kwargs`, and V3 suites will contain a `batch_request`.
+
+  If you choose to do so, the `citation` metadata can be migrated using the same pattern for migrating `batch_kwargs` to `batch_request` described below.
 
 :::
 
@@ -582,7 +582,7 @@ Using the new API:
            }
       ),
       match_type="success"
-    )    
+    )
 ```
 
 
@@ -931,7 +931,7 @@ if __name__ == "__main__":
 - This project has now been migrated to 0.9.0. Please see the list of changes below for more detailed information.
 
 
-#### CONFIGURATION CHANGXS
+#### CONFIGURATION CHANGES
 
 - FixedLengthTupleXXXX stores are renamed to TupleXXXX stores; they no
   longer allow or require (or allow) a key_length to be specified, but they
@@ -957,7 +957,7 @@ if __name__ == "__main__":
   will need to update their code. For example, a pandas datasource would use
   `reader_method: read_csv` instead of `reader_method: csv`
 
-#### CODE CHANGXS
+#### CODE CHANGES
 
 - DataAssetName and name normalization have been completely eliminated, which
   causes several related changes to code using the DataContext.

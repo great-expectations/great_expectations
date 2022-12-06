@@ -336,7 +336,7 @@ def pytest_collection_modifyitems(config, items):
 @pytest.fixture(autouse=True)
 def no_usage_stats(monkeypatch):
     # Do not generate usage stats from test runs
-    monkeypatch.setenv("GX_USAGX_STATS", "False")
+    monkeypatch.setenv("GE_USAGE_STATS", "False")
 
 
 @pytest.fixture(scope="module")
@@ -782,8 +782,8 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     tmp_path_factory,
     monkeypatch,
 ):
-    # Re-enable GX_USAGX_STATS
-    monkeypatch.delenv("GX_USAGX_STATS")
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")
@@ -1001,8 +1001,8 @@ def deterministic_asset_dataconnector_context(
     tmp_path_factory,
     monkeypatch,
 ):
-    # Re-enable GX_USAGX_STATS
-    monkeypatch.delenv("GX_USAGX_STATS")
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
@@ -1363,8 +1363,8 @@ def empty_context_with_checkpoint(empty_data_context):
 
 @pytest.fixture
 def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
-    # Re-enable GX_USAGX_STATS
-    monkeypatch.delenv("GX_USAGX_STATS", raising=False)
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
     context = gx.data_context.DataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
@@ -1438,8 +1438,8 @@ def titanic_data_context_no_data_docs(tmp_path_factory):
 
 @pytest.fixture
 def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
-    # Re-enable GX_USAGX_STATS
-    monkeypatch.delenv("GX_USAGX_STATS")
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
@@ -1461,8 +1461,8 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
 
 @pytest.fixture
 def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkeypatch):
-    # Re-enable GX_USAGX_STATS
-    monkeypatch.delenv("GX_USAGX_STATS")
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
@@ -1484,8 +1484,8 @@ def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkey
 
 @pytest.fixture
 def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkeypatch):
-    # Re-enable GX_USAGX_STATS
-    monkeypatch.delenv("GX_USAGX_STATS")
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
@@ -6416,8 +6416,8 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
     tmp_path_factory,
     monkeypatch,
 ) -> DataContext:
-    # Re-enable GX_USAGX_STATS
-    monkeypatch.delenv("GX_USAGX_STATS")
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
@@ -6660,8 +6660,8 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
     This fixture generates three years' worth (36 months; i.e., 36 batches) of taxi trip data with the number of rows
     of a batch sampled from a normal distribution with the mean of 5,000 rows and the standard deviation of 1,000 rows.
     """
-    # Re-enable GX_USAGX_STATS
-    monkeypatch.delenv("GX_USAGX_STATS", raising=False)
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
@@ -6841,8 +6841,8 @@ def quentin_columnar_table_multi_batch_data_context(
     This fixture generates three years' worth (36 months; i.e., 36 batches) of taxi trip data with the number of rows
     of each batch being equal to the original number per log file (10,000 rows).
     """
-    # Re-enable GX_USAGX_STATS
-    monkeypatch.delenv("GX_USAGX_STATS")
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))

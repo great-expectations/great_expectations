@@ -303,7 +303,7 @@ The format for an unstructured profile is below:
 * DATE
 * TIME
 * DATETIME
-* INTEGXR
+* INTEGER
 * FLOAT
 * QUANTITY
 * ORDINAL

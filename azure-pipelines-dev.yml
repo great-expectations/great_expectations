@@ -45,7 +45,7 @@ resources:
       - 8088:8080
 
 variables:
-  GX_USAGX_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+  GX_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 
 
 stages:
@@ -214,7 +214,7 @@ stages:
 
             displayName: 'Unit Tests'
             env:
-              GX_USAGX_STATISTICS_URL: ${{ variables.GX_USAGX_STATISTICS_URL }}
+              GX_USAGE_STATISTICS_URL: ${{ variables.GX_USAGE_STATISTICS_URL }}
 
           - script: |
               # Run pytest
@@ -232,7 +232,7 @@ stages:
 
             displayName: 'pytest'
             env:
-              GX_USAGX_STATISTICS_URL: ${{ variables.GX_USAGX_STATISTICS_URL }}
+              GX_USAGE_STATISTICS_URL: ${{ variables.GX_USAGE_STATISTICS_URL }}
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
@@ -302,7 +302,7 @@ stages:
 
             displayName: 'pytest'
             env:
-              GX_USAGX_STATISTICS_URL: ${{ variables.GX_USAGX_STATISTICS_URL }}
+              GX_USAGE_STATISTICS_URL: ${{ variables.GX_USAGE_STATISTICS_URL }}
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
@@ -349,7 +349,7 @@ stages:
 
             displayName: 'pytest'
             env:
-              GX_USAGX_STATISTICS_URL: ${{ variables.GX_USAGX_STATISTICS_URL }}
+              GX_USAGE_STATISTICS_URL: ${{ variables.GX_USAGE_STATISTICS_URL }}
 
   - stage: db_integration
     pool:
@@ -413,7 +413,7 @@ stages:
 
             displayName: 'pytest'
             env:
-              GX_USAGX_STATISTICS_URL: ${{ variables.GX_USAGX_STATISTICS_URL }}
+              GX_USAGE_STATISTICS_URL: ${{ variables.GX_USAGE_STATISTICS_URL }}
 
       - job: mssql
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
@@ -460,7 +460,7 @@ stages:
 
             displayName: 'pytest'
             env:
-              GX_USAGX_STATISTICS_URL: ${{ variables.GX_USAGX_STATISTICS_URL }}
+              GX_USAGE_STATISTICS_URL: ${{ variables.GX_USAGE_STATISTICS_URL }}
 
       - job: trino
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
@@ -513,7 +513,7 @@ stages:
 
             displayName: 'pytest'
             env:
-              GX_USAGX_STATISTICS_URL: ${{ variables.GX_USAGX_STATISTICS_URL }}
+              GX_USAGE_STATISTICS_URL: ${{ variables.GX_USAGE_STATISTICS_URL }}
 
   - stage: cli_integration
     dependsOn: [scope_check, lint, import_ge, custom_checks]
@@ -555,4 +555,4 @@ stages:
 
             displayName: 'pytest'
             env:
-              GX_USAGX_STATISTICS_URL: ${{ variables.GX_USAGX_STATISTICS_URL }}
+              GX_USAGE_STATISTICS_URL: ${{ variables.GX_USAGE_STATISTICS_URL }}

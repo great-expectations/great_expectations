@@ -12,7 +12,7 @@ While we hope you'll leave them on, you can easily disable usage statistics for 
       enabled: false
 ```
 
-You can also disable usage statistics system-wide by setting the `GX_USAGX_STATS` environment variable to `FALSE` or adding the following code block to a file called `great_expectations.conf` located in `/etc/` or `~/.great_expectations`:
+You can also disable usage statistics system-wide by setting the `GE_USAGE_STATS` environment variable to `FALSE` or adding the following code block to a file called `great_expectations.conf` located in `/etc/` or `~/.great_expectations`:
 
 ```ini
     [anonymous_usage_statistics]

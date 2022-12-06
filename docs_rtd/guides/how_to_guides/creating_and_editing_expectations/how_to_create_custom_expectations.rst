@@ -200,7 +200,7 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
                 ):
                     """Execute the two sample KS test on two columns of data that are expected to be **histograms** with
                     aligned values/points on the CDF. ."""
-                    LARGX_N = 10000  # 'auto' will attempt to be exact if n1,n2 <= LARGX_N
+                    LARGE_N = 10000  # 'auto' will attempt to be exact if n1,n2 <= LARGE_N
 
                     # We will assume that these are already HISTOGRAMS created as a check_dataset
                     # either of binned values or of (ordered) value counts
@@ -231,7 +231,7 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
                     prob = -np.inf
                     original_mode = mode
                     if mode == 'auto':
-                        if max(n1, n2) <= LARGX_N:
+                        if max(n1, n2) <= LARGE_N:
                             mode = 'exact'
                         else:
                             mode = 'asymp'

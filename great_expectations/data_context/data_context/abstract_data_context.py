@@ -2727,9 +2727,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def _is_usage_stats_enabled() -> bool:
         """
         Checks the following locations to see if usage_statistics is disabled in any of the following locations:
-            - GX_USAGX_STATS, which is an environment_variable
+            - GE_USAGE_STATS, which is an environment_variable
             - GLOBAL_CONFIG_PATHS
-        If GX_USAGX_STATS exists AND its value is one of the FALSEY_STRINGS, usage_statistics is disabled (return False)
+        If GE_USAGE_STATS exists AND its value is one of the FALSEY_STRINGS, usage_statistics is disabled (return False)
         Also checks GLOBAL_CONFIG_PATHS to see if config file contains override for anonymous_usage_statistics
         Returns True otherwise
 
@@ -2737,13 +2737,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             bool that tells you whether usage_statistics is on or off
         """
         usage_statistics_enabled: bool = True
-        if os.environ.get("GX_USAGX_STATS", False):
-            ge_usage_stats = os.environ.get("GX_USAGX_STATS")
+        if os.environ.get("GE_USAGE_STATS", False):
+            ge_usage_stats = os.environ.get("GE_USAGE_STATS")
             if ge_usage_stats in AbstractDataContext.FALSEY_STRINGS:
                 usage_statistics_enabled = False
             else:
                 logger.warning(
-                    "GX_USAGX_STATS environment variable must be one of: {}".format(
+                    "GE_USAGE_STATS environment variable must be one of: {}".format(
                         AbstractDataContext.FALSEY_STRINGS
                     )
                 )

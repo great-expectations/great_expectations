@@ -438,7 +438,7 @@ How to use the project ``check-config`` command
             * This project has now been migrated to 0.9.0. Please see the list of changes below for more detailed information.
 
 
-            CONFIGURATION CHANGXS:
+            CONFIGURATION CHANGES:
 
             - FixedLengthTupleXXXX stores are renamed to TupleXXXX stores; they no
               longer allow or require (or allow) a key_length to be specified, but they
@@ -464,7 +464,7 @@ How to use the project ``check-config`` command
               will need to update their code. For example, a pandas datasource would use
               `reader_method: read_csv`` instead of `reader_method: csv`
 
-            CODE CHANGXS:
+            CODE CHANGES:
 
             - DataAssetName and name normalization have been completely eliminated, which
               causes several related changes to code using the DataContext.
@@ -969,7 +969,7 @@ How to use the project ``check-config`` command
             * This project has now been migrated to 0.9.0. Please see the list of changes below for more detailed information.
 
 
-            CONFIGURATION CHANGXS:
+            CONFIGURATION CHANGES:
 
             - FixedLengthTupleXXXX stores are renamed to TupleXXXX stores; they no
               longer allow or require (or allow) a key_length to be specified, but they
@@ -995,7 +995,7 @@ How to use the project ``check-config`` command
               will need to update their code. For example, a pandas datasource would use
               `reader_method: read_csv`` instead of `reader_method: csv`
 
-            CODE CHANGXS:
+            CODE CHANGES:
 
             - DataAssetName and name normalization have been completely eliminated, which
               causes several related changes to code using the DataContext.
