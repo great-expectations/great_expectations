@@ -34,6 +34,7 @@ from typing_extensions import Literal
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,
@@ -1287,6 +1288,7 @@ class AbstractDataContext(ABC):
     ) -> CheckpointResult:
         """
         Validate against a pre-defined Checkpoint. (Experimental)
+
         Args:
             checkpoint_name: The name of a Checkpoint defined via the CLI or by manually creating a yml file
             template_name: The name of a Checkpoint template to retrieve from the CheckpointStore
@@ -3334,6 +3336,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             return save_changes
         return True
 
+    @public_api
     def test_yaml_config(  # noqa: C901 - complexity 17
         self,
         yaml_config: str,
@@ -3356,13 +3359,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         For many deployments of Great Expectations, these components (plus
         Expectations) are the only ones you'll need.
 
-        test_yaml_config is mainly intended for use within notebooks and tests.
-
-        --Public API--
+        `test_yaml_config` is mainly intended for use within notebooks and tests.
 
         --Documentation--
-            https://docs.greatexpectations.io/docs/terms/data_context
-            https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config
+            - https://docs.greatexpectations.io/docs/terms/data_context
+            - https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config
 
         Args:
             yaml_config: A string containing the yaml config to be tested
@@ -3370,7 +3371,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             pretty_print: Determines whether to print human-readable output
             return_mode: Determines what type of object test_yaml_config will return.
                 Valid modes are "instantiated_class" and "report_object"
-            shorten_tracebacks:If true, catch any errors during instantiation and print only the
+            shorten_tracebacks: If true, catch any errors during instantiation and print only the
                 last element of the traceback stack. This can be helpful for
                 rapid iteration on configs in a notebook, because it can remove
                 the need to scroll up and down a lot.
@@ -3380,6 +3381,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             OR
             a json object containing metadata from the component's self_check method.
             The returned object is determined by return_mode.
+
         """
         yaml_config_validator = _YamlConfigValidator(
             data_context=self,
