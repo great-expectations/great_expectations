@@ -205,7 +205,7 @@ class GXDependencies:
         "uszipcode",
         "yahoo_fin",
         "zipcodes",
-        # requirements-dev-api-docs.txt
+        # requirements-dev-api-docs-test.txt
         "docstring-parser",
     ]
 
