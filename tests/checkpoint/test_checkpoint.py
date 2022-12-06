@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 from ruamel.yaml.comments import CommentedMap
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -970,11 +970,11 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
 
     mock_create_quarantine_data = mock.MagicMock()
     mock_create_quarantine_data.run.return_value = True
-    ge.validation_operators.CreateQuarantineData = mock_create_quarantine_data
+    gx.validation_operators.CreateQuarantineData = mock_create_quarantine_data
 
     mock_create_passed_data = mock.MagicMock()
     mock_create_passed_data.run.return_value = True
-    ge.validation_operators.CreatePassedData = mock_create_passed_data
+    gx.validation_operators.CreatePassedData = mock_create_passed_data
 
     expected_checkpoint_config: dict = {
         "name": "airflow_users_node_3",

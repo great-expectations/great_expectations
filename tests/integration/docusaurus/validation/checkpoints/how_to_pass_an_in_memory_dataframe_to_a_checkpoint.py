@@ -2,13 +2,13 @@
 import pandas as pd
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import RuntimeBatchRequest
 
 # </snippet>
 
 # <snippet>
-context = ge.get_context()
+context = gx.get_context()
 # </snippet>
 
 # YAML <snippet>

@@ -4,7 +4,7 @@ import shutil
 import pandas as pd
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations import __version__ as ge_version
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -54,7 +54,7 @@ def data_context_simple_expectation_suite_with_custom_pandas_dataset(tmp_path_fa
         os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
         str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
     )
-    return ge.data_context.DataContext(context_path)
+    return gx.data_context.DataContext(context_path)
 
 
 def test_data_asset_expectation_suite(empty_data_context_stats_enabled):

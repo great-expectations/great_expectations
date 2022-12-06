@@ -22,8 +22,8 @@ Steps
     Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
 
     ```python
-    import great_expectations as ge
-    context = ge.get_context()
+    import great_expectations as gx
+    context = gx.get_context()
     ```
 
 2. **Create or copy a yaml config**
@@ -163,7 +163,7 @@ Steps
     In a fresh notebook, test your edited config file by re-instantiating your DataContext:
 
     ```python
-    context = ge.get_context()
+    context = gx.get_context()
 
     validator = context.get_validator(
         datasource_name="my_datasource",
