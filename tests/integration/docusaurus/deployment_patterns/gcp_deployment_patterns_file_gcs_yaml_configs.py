@@ -1,7 +1,7 @@
 import os
 
 # <snippet>
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
 
 # </snippet>
@@ -10,7 +10,7 @@ from great_expectations.core.yaml_handler import YAMLHandler
 yaml = YAMLHandler()
 
 # <snippet>
-context = ge.get_context()
+context = gx.get_context()
 # </snippet>
 
 
@@ -277,7 +277,7 @@ validator = context.get_validator(
 
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_gcs_datasource"]
 assert set(
     context.get_available_data_asset_names()["my_gcs_datasource"][

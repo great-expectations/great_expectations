@@ -2,7 +2,7 @@ import os
 from contextlib import contextmanager
 from typing import Dict
 
-import great_expectations as ge
+import great_expectations as gx
 
 
 @contextmanager
@@ -32,7 +32,7 @@ def temp_gc_creds() -> None:
 
 
 with temp_gc_creds():
-    context = ge.get_context()
+    context = gx.get_context()
 
     example_yaml = """
 name: my_datasource

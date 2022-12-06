@@ -49,7 +49,7 @@ To do this, we first need to instantiate our Data Context.
 For example, a pattern for importing a Custom Expectation `ExpectColumnValuesToBeAlphabetical` could look like:
 
 ```python
-context = ge.get_context()
+context = gx.get_context()
 from expectations.expect_column_values_to_be_alphabetical import ExpectColumnValuesToBeAlphabetical
 ```
 

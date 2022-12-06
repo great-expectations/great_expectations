@@ -2,7 +2,7 @@ import os
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -15,7 +15,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 
 yaml = yaml.YAML(typ="safe")
 
-context = ge.get_context()
+context = gx.get_context()
 
 # Add datasource for all tests
 datasource_yaml = """
