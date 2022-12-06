@@ -246,17 +246,14 @@ def _add_text_below_string_docstring_argument(
             f"Please specify an existing argument, you specified {argument_name}."
         )
 
-    for idx, param in enumerate(parsed_docstring.params):
+    for param in parsed_docstring.params:
         if param.arg_name == argument_name:
-            # description can be None
-            if parsed_docstring.params[idx] is None:
-                parsed_docstring.params[idx].description = text
+            if param.description is None:
+                param.description = text
             else:
-                # To handle mypy issue with description type
-                assert isinstance(param.description, str)
                 param.description += "\n\n" + text + "\n\n"
 
-    # RenderingStyle.Expanded used to make sure any line breaks before and
+    # RenderingStyle.EXPANDED used to make sure any line breaks before and
     # after the added text are included.
     return docstring_parser.compose(
         docstring=parsed_docstring,
