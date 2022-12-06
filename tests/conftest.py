@@ -789,6 +789,30 @@ def data_context_with_one_expectation(
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
     assert context.list_datasources() == []
+    sqlite_path = file_relative_path(__file__, "test_sets/metrics_test.db")
+    datasource_config: str = f"""
+        class_name: Datasource
+        execution_engine:
+            module_name: great_expectations.execution_engine
+            class_name: SqlAlchemyExecutionEngine
+            connection_string: sqlite:///{sqlite_path}
+
+        data_connectors:
+            my_sql_data_connector:
+                module_name: great_expectations.datasource.data_connector
+                class_name: ConfiguredAssetSqlDataConnector
+                assets:
+                    my_asset:
+                        table_name: animal_names
+                        class_name: Asset
+    """
+
+    # noinspection PyUnusedLocal
+    datasource: Datasource = context.test_yaml_config(
+        name="my_datasource", yaml_config=datasource_config, pretty_print=False
+    )
+    # noinspection PyProtectedMember
+    context._save_project_config()
     return context
 
 

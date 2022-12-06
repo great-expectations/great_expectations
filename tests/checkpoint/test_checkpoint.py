@@ -13,7 +13,10 @@ import great_expectations as ge
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.core import ExpectationSuiteValidationResult
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationSuiteValidationResult,
+)
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_validation_result import (
@@ -61,16 +64,6 @@ def test_checkpoint_with_config_version_has_action_list(empty_data_context):
     obs = checkpoint.action_list
     assert isinstance(obs, list)
     assert obs == [{"foo": "bar"}]
-
-
-def test_checkpoint_parameters_respected(data_context_with_one_expectation):
-    checkpoint: Checkpoint = Checkpoint(
-        "foo",
-        data_context_with_one_expectation,
-        config_version=1,
-        action_list=[{"foo": "bar"}],
-    )
-    pass
 
 
 @mock.patch(
