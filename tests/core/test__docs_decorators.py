@@ -121,6 +121,7 @@ class TestDeprecatedMethod:
             "    some_arg: describe some_arg\n"
             "    other_arg: describe other_arg\n"
         )
+        assert _func_full_docstring_deprecated.__name__ == "_func_full_docstring_deprecated"
 
     @pytest.mark.unit
     def test_deprecated_decorator_full_docstring_no_message(self):
@@ -256,7 +257,7 @@ class TestNewMethod:
 @public_api
 @new_method(version="1.2.3", message="Added in version 1.2.3")
 @deprecated_method(version="1.2.3", message="This is deprecated!!")
-def _func_full_docstring_all_methoddecorators(some_arg, other_arg):
+def _func_full_docstring_all_method_decorators(some_arg, other_arg):
     """My docstring.
 
     Longer description.
@@ -271,7 +272,7 @@ def _func_full_docstring_all_methoddecorators(some_arg, other_arg):
 @pytest.mark.unit
 def test_all_method_decorators_full_docstring():
 
-    assert _func_full_docstring_all_methoddecorators.__doc__ == (
+    assert _func_full_docstring_all_method_decorators.__doc__ == (
         "--Public API--My docstring.\n"
         "\n"
         ".. versionadded:: 1.2.3\n"
@@ -288,6 +289,10 @@ def test_all_method_decorators_full_docstring():
         "    some_arg: describe some_arg\n"
         "    other_arg: describe other_arg\n"
     )
+
+@pytest.mark.unit
+def test_method_decorators_do_not_change_function_name():
+    assert _func_full_docstring_all_method_decorators.__name__ == "_func_full_docstring_all_method_decorators"
 
 
 # @deprecated_argument
@@ -337,6 +342,7 @@ class TestDeprecatedArgument:
             "    other_arg:\n"
             "        describe other_arg"
         )
+        assert _func_full_docstring_deprecated_argument.__name__ == "_func_full_docstring_deprecated_argument"
 
     @pytest.mark.unit
     def test_deprecated_decorator_full_docstring_deprecated_argument_no_description(
@@ -560,3 +566,7 @@ def test_all_decorators_full_docstring():
         "        .. deprecated:: 1.2.3\n"
         "            some msg"
     )
+
+@pytest.mark.unit
+def test_all_decorators_do_not_change_function_name():
+    assert _func_full_docstring_all_decorators.__name__ == "_func_full_docstring_all_decorators"
