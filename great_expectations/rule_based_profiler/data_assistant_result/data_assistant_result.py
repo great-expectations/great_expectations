@@ -2709,8 +2709,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
             point_color_condition = alt.condition(
                 predicate=predicates[idx],
-                if_false=alt.value(SecondaryColors.LEAF_GREEN),
-                if_true=alt.value(SecondaryColors.POMEGRANATE_PINK),
+                if_false=alt.value(SecondaryColors.POMEGRANATE_PINK),
+                if_true=alt.value(SecondaryColors.LEAF_GREEN),
             )
 
             anomaly_coded_points = points.encode(
