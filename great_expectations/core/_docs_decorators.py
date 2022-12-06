@@ -5,6 +5,8 @@ import docstring_parser
 
 WHITELISTED_TAG = "--Public API--"
 
+F = TypeVar("F", bound=Callable[..., Any])
+
 
 def public_api(func) -> Callable:
     """Add the public API tag for processing by the auto documentation generator.
@@ -23,9 +25,6 @@ def public_api(func) -> Callable:
     func.__doc__ = WHITELISTED_TAG + existing_docstring
 
     return func
-
-
-F = TypeVar("F", bound=Callable[..., Any])
 
 
 def deprecated_method(
