@@ -1753,7 +1753,7 @@ def site_builder_data_context_v013_with_html_store_titanic_random(
 @pytest.fixture
 def v20_project_directory(tmp_path_factory):
     """
-    GE config_version: 2 project for testing upgrade helper
+    GX config_version: 2 project for testing upgrade helper
     """
     project_path = str(tmp_path_factory.mktemp("v20_project"))
     context_root_dir = os.path.join(project_path, "great_expectations")

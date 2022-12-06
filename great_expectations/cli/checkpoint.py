@@ -165,7 +165,7 @@ def _verify_checkpoint_does_not_exist(
 def _get_notebook_path(context: DataContext, notebook_name: str) -> str:
     return os.path.abspath(
         os.path.join(
-            context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name
+            context.root_directory, context.GX_EDIT_NOTEBOOK_DIR, notebook_name
         )
     )
 
@@ -326,7 +326,7 @@ def checkpoint_script(ctx: click.Context, checkpoint: str) -> None:
 
     script_name: str = f"run_{checkpoint}.py"
     script_path: str = os.path.join(
-        context.root_directory, context.GE_UNCOMMITTED_DIR, script_name
+        context.root_directory, context.GX_UNCOMMITTED_DIR, script_name
     )
 
     if os.path.isfile(script_path):

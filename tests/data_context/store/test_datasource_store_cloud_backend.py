@@ -227,7 +227,7 @@ def test_datasource_http_error_handling(
         resource_type=GXCloudRESTResource.DATASOURCE, ge_cloud_id=id
     )
     with pytest.raises(
-        StoreBackendError, match=r"Unable to \w+ object in GE Cloud Store Backend: .*"
+        StoreBackendError, match=r"Unable to \w+ object in GX Cloud Store Backend: .*"
     ) as exc_info:
 
         backend_method = getattr(datasource_store_ge_cloud_backend, method)

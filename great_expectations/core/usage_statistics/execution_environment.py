@@ -5,7 +5,7 @@ to help enable the core team to safely upgrade package dependencies to gain
 access to features of new package versions.
 
     Typical usage example:
-        ge_execution_environment = GEExecutionEnvironment()
+        ge_execution_environment = GXExecutionEnvironment()
         dependencies: List[PackageInfo] = ge_execution_environment.dependencies
 
 """
@@ -18,7 +18,7 @@ from typing import Iterable, List, Optional
 from marshmallow import Schema, fields
 from packaging import version
 
-from great_expectations.core.usage_statistics.package_dependencies import GEDependencies
+from great_expectations.core.usage_statistics.package_dependencies import GXDependencies
 
 if sys.version_info < (3, 8):
     # Note: importlib_metadata is included in the python standard library as importlib
@@ -49,8 +49,8 @@ class PackageInfoSchema(Schema):
     version = fields.Str(required=False, allow_none=True)
 
 
-class GEExecutionEnvironment:
-    """The list of GE dependencies with version and install information.
+class GXExecutionEnvironment:
+    """The list of GX dependencies with version and install information.
 
     This does not return any dependencies that are not specified directly in
     either requirements.txt or any requirements-dev*.txt files.
@@ -59,7 +59,7 @@ class GEExecutionEnvironment:
     """
 
     def __init__(self) -> None:
-        self._ge_dependencies = GEDependencies()
+        self._ge_dependencies = GXDependencies()
         self._all_installed_packages: List[str] = []
         self._get_all_installed_packages()
 
@@ -69,7 +69,7 @@ class GEExecutionEnvironment:
 
     @property
     def dependencies(self) -> List[PackageInfo]:
-        """The list of GE dependencies with version and install information.
+        """The list of GX dependencies with version and install information.
 
         This does not return any dependencies that are not specified directly in
         either requirements.txt or any requirements-dev*.txt files.
