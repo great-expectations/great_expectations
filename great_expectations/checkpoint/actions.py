@@ -47,6 +47,10 @@ class ValidationAction:
 
     def __init__(self, data_context) -> None:
         self.data_context = data_context
+        self._cloud_mode = (
+            hasattr(self.data_context, "ge_cloud_mode")
+            and self.data_context.ge_cloud_mode
+        )
 
     def run(
         self,
@@ -824,11 +828,11 @@ class StoreValidationResultAction(ValidationAction):
             )
 
         checkpoint_ge_cloud_id = None
-        if self.data_context.ge_cloud_mode and checkpoint_identifier:
+        if self._cloud_mode and checkpoint_identifier:
             checkpoint_ge_cloud_id = checkpoint_identifier.ge_cloud_id
 
         expectation_suite_ge_cloud_id = None
-        if self.data_context.ge_cloud_mode and expectation_suite_identifier:
+        if self._cloud_mode and expectation_suite_identifier:
             expectation_suite_ge_cloud_id = str(
                 expectation_suite_identifier.ge_cloud_id
             )
@@ -839,7 +843,7 @@ class StoreValidationResultAction(ValidationAction):
             checkpoint_id=checkpoint_ge_cloud_id,
             expectation_suite_id=expectation_suite_ge_cloud_id,
         )
-        if self.data_context.ge_cloud_mode:
+        if self._cloud_mode:
             return_val: GXCloudResourceRef
             new_ge_cloud_id = return_val.ge_cloud_id
             validation_result_suite_identifier.ge_cloud_id = new_ge_cloud_id
@@ -1084,7 +1088,7 @@ class UpdateDataDocsAction(ValidationAction):
         # <snippet>
         data_docs_validation_results = {}
         # </snippet>
-        if self.data_context.ge_cloud_mode:
+        if self._cloud_mode:
             return data_docs_validation_results
 
         # get the URL for the validation result
@@ -1132,7 +1136,7 @@ class CloudNotificationAction(ValidationAction):
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action. "
             )
 
-        if not self.data_context.ge_cloud_mode:
+        if not self._cloud_mode:
             return Exception(
                 "CloudNotificationActions can only be used in GE Cloud Mode."
             )
