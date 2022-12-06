@@ -2517,15 +2517,21 @@ def ge_cloud_config_e2e() -> GXCloudConfig:
     """
     Uses live credentials stored in the Great Expectations Cloud backend.
     """
-    base_url = os.environ["GE_CLOUD_BASE_URL"]
-    organization_id = os.environ["GE_CLOUD_ORGANIZATION_ID"]
-    access_token = os.environ["GE_CLOUD_ACCESS_TOKEN"]
-    ge_cloud_config = GXCloudConfig(
+    env_vars = os.environ
+
+    base_url = env_vars.get("GX_CLOUD_BASE_URL", env_vars.get("GE_CLOUD_BASE_URL"))
+    organization_id = env_vars.get(
+        "GX_CLOUD_ORGANIZATION_ID", env_vars.get("GE_CLOUD_ORGANIZATION_ID")
+    )
+    access_token = env_vars.get(
+        "GX_CLOUD_ACCESS_TOKEN", env_vars.get("GE_CLOUD_ACCESS_TOKEN")
+    )
+    cloud_config = GXCloudConfig(
         base_url=base_url,
         organization_id=organization_id,
         access_token=access_token,
     )
-    return ge_cloud_config
+    return cloud_config
 
 
 @pytest.fixture
@@ -2567,19 +2573,19 @@ def empty_data_context_in_cloud_mode(
     def mocked_config(*args, **kwargs) -> DataContextConfig:
         return empty_ge_cloud_data_context_config
 
-    def mocked_get_ge_cloud_config(*args, **kwargs) -> GXCloudConfig:
+    def mocked_get_cloud_config(*args, **kwargs) -> GXCloudConfig:
         return ge_cloud_config
 
     with mock.patch(
         "great_expectations.data_context.DataContext._save_project_config"
     ), mock.patch(
-        "great_expectations.data_context.data_context.CloudDataContext.retrieve_data_context_config_from_ge_cloud",
+        "great_expectations.data_context.data_context.CloudDataContext.retrieve_data_context_config_from_cloud",
         autospec=True,
         side_effect=mocked_config,
     ), mock.patch(
-        "great_expectations.data_context.data_context.CloudDataContext.get_ge_cloud_config",
+        "great_expectations.data_context.data_context.CloudDataContext.get_cloud_config",
         autospec=True,
-        side_effect=mocked_get_ge_cloud_config,
+        side_effect=mocked_get_cloud_config,
     ):
         context = DataContext(
             ge_cloud_mode=True,
@@ -2630,8 +2636,8 @@ def empty_base_data_context_in_cloud_mode_custom_base_url(
     context = gx.data_context.BaseDataContext(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path,
-        ge_cloud_mode=True,
-        ge_cloud_config=custom_ge_cloud_config,
+        cloud_mode=True,
+        cloud_config=custom_ge_cloud_config,
     )
     assert context.list_datasources() == []
     assert context.ge_cloud_config.base_url != ge_cloud_config.base_url

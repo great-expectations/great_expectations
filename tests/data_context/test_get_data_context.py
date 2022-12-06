@@ -11,12 +11,12 @@ from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.exceptions import ConfigNotFoundError
 from tests.test_utils import working_directory
 
-GE_CLOUD_PARAMS_ALL = {
+GX_CLOUD_PARAMS_ALL = {
     "ge_cloud_base_url": "http://hello.com",
     "ge_cloud_organization_id": "bd20fead-2c31-4392-bcd1-f1e87ad5a79c",
     "ge_cloud_access_token": "i_am_a_token",
 }
-GE_CLOUD_PARAMS_REQUIRED = {
+GX_CLOUD_PARAMS_REQUIRED = {
     "ge_cloud_organization_id": "bd20fead-2c31-4392-bcd1-f1e87ad5a79c",
     "ge_cloud_access_token": "i_am_a_token",
 }
@@ -24,11 +24,11 @@ GE_CLOUD_PARAMS_REQUIRED = {
 
 @pytest.fixture()
 def set_up_cloud_envs(monkeypatch):
-    monkeypatch.setenv("GE_CLOUD_BASE_URL", "http://hello.com")
+    monkeypatch.setenv("GX_CLOUD_BASE_URL", "http://hello.com")
     monkeypatch.setenv(
-        "GE_CLOUD_ORGANIZATION_ID", "bd20fead-2c31-4392-bcd1-f1e87ad5a79c"
+        "GX_CLOUD_ORGANIZATION_ID", "bd20fead-2c31-4392-bcd1-f1e87ad5a79c"
     )
-    monkeypatch.setenv("GE_CLOUD_ACCESS_TOKEN", "i_am_a_token")
+    monkeypatch.setenv("GX_CLOUD_ACCESS_TOKEN", "i_am_a_token")
 
 
 @pytest.fixture
@@ -144,7 +144,7 @@ def test_cloud_context_env(
 ):
     with mock.patch.object(
         CloudDataContext,
-        "retrieve_data_context_config_from_ge_cloud",
+        "retrieve_data_context_config_from_cloud",
         return_value=empty_ge_cloud_data_context_config,
     ):
         assert isinstance(
@@ -171,12 +171,12 @@ def test_cloud_missing_env_throws_exception(
         gx.get_context(ge_cloud_mode=True),
 
 
-@pytest.mark.parametrize("params", [GE_CLOUD_PARAMS_REQUIRED, GE_CLOUD_PARAMS_ALL])
+@pytest.mark.parametrize("params", [GX_CLOUD_PARAMS_REQUIRED, GX_CLOUD_PARAMS_ALL])
 @pytest.mark.cloud
 def test_cloud_context_params(monkeypatch, empty_ge_cloud_data_context_config, params):
     with mock.patch.object(
         CloudDataContext,
-        "retrieve_data_context_config_from_ge_cloud",
+        "retrieve_data_context_config_from_cloud",
         return_value=empty_ge_cloud_data_context_config,
     ):
         assert isinstance(
@@ -191,7 +191,7 @@ def test_cloud_context_with_in_memory_config_overrides(
 ):
     with mock.patch.object(
         CloudDataContext,
-        "retrieve_data_context_config_from_ge_cloud",
+        "retrieve_data_context_config_from_cloud",
         return_value=empty_ge_cloud_data_context_config,
     ):
         context = gx.get_context(

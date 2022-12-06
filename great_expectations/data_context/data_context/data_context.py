@@ -226,18 +226,32 @@ class DataContext(BaseDataContext):
         self,
         context_root_dir: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
+        cloud_mode: bool = False,
+        cloud_base_url: Optional[str] = None,
+        cloud_access_token: Optional[str] = None,
+        cloud_organization_id: Optional[str] = None,
+        # Deprecated as of 0.15.37
         ge_cloud_mode: bool = False,
         ge_cloud_base_url: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
+        if not cloud_mode:
+            cloud_mode = ge_cloud_mode
+        if not cloud_base_url:
+            cloud_base_url = ge_cloud_base_url
+        if not cloud_access_token:
+            cloud_access_token = ge_cloud_access_token
+        if not cloud_organization_id:
+            cloud_organization_id = ge_cloud_organization_id
+
         self._sources: _SourceFactories = _SourceFactories(self)
-        self._ge_cloud_mode = ge_cloud_mode
-        self._ge_cloud_config = self._init_ge_cloud_config(
-            ge_cloud_mode=ge_cloud_mode,
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_access_token=ge_cloud_access_token,
-            ge_cloud_organization_id=ge_cloud_organization_id,
+        self._cloud_mode = ge_cloud_mode
+        self._cloud_config = self._init_cloud_config(
+            cloud_mode=cloud_mode,
+            cloud_base_url=cloud_base_url,
+            cloud_access_token=cloud_access_token,
+            cloud_organization_id=cloud_organization_id,
         )
 
         self._context_root_directory = self._init_context_root_directory(
@@ -250,8 +264,8 @@ class DataContext(BaseDataContext):
             project_config=project_config,
             context_root_dir=self._context_root_directory,
             runtime_environment=runtime_environment,
-            ge_cloud_mode=self._ge_cloud_mode,
-            ge_cloud_config=self._ge_cloud_config,
+            ge_cloud_mode=self._cloud_mode,
+            ge_cloud_config=self._cloud_config,
         )
 
         # Save project config if data_context_id auto-generated
@@ -287,22 +301,22 @@ class DataContext(BaseDataContext):
     def sources(self) -> _SourceFactories:
         return self._sources
 
-    def _init_ge_cloud_config(
+    def _init_cloud_config(
         self,
-        ge_cloud_mode: bool,
-        ge_cloud_base_url: Optional[str],
-        ge_cloud_access_token: Optional[str],
-        ge_cloud_organization_id: Optional[str],
+        cloud_mode: bool,
+        cloud_base_url: Optional[str],
+        cloud_access_token: Optional[str],
+        cloud_organization_id: Optional[str],
     ) -> Optional[GXCloudConfig]:
-        if not ge_cloud_mode:
+        if not cloud_mode:
             return None
 
-        ge_cloud_config = CloudDataContext.get_ge_cloud_config(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_access_token=ge_cloud_access_token,
-            ge_cloud_organization_id=ge_cloud_organization_id,
+        cloud_config = CloudDataContext.get_cloud_config(
+            cloud_base_url=cloud_base_url,
+            cloud_access_token=cloud_access_token,
+            cloud_organization_id=cloud_organization_id,
         )
-        return ge_cloud_config
+        return cloud_config
 
     def _init_context_root_directory(self, context_root_dir: Optional[str]) -> str:
         if self.ge_cloud_mode and context_root_dir is None:
@@ -386,15 +400,15 @@ class DataContext(BaseDataContext):
         for how these are substituted.
 
         For Data Contexts in GX Cloud mode, a user-specific template is retrieved from the Cloud API
-        - see CloudDataContext.retrieve_data_context_config_from_ge_cloud for more details.
+        - see CloudDataContext.retrieve_data_context_config_from_cloud for more details.
 
         :return: the configuration object read from the file or template
         """
         if self.ge_cloud_mode:
-            ge_cloud_config = self.ge_cloud_config
-            assert ge_cloud_config is not None
-            config = CloudDataContext.retrieve_data_context_config_from_ge_cloud(
-                ge_cloud_config=ge_cloud_config
+            cloud_config = self.ge_cloud_config
+            assert cloud_config is not None
+            config = CloudDataContext.retrieve_data_context_config_from_cloud(
+                cloud_config=cloud_config
             )
             return config
 

@@ -1673,6 +1673,11 @@ def get_context(
     project_config: Optional[Union["DataContextConfig", Mapping]] = None,
     context_root_dir: Optional[str] = None,
     runtime_environment: Optional[dict] = None,
+    cloud_base_url: Optional[str] = None,
+    cloud_access_token: Optional[str] = None,
+    cloud_organization_id: Optional[str] = None,
+    cloud_mode: Optional[bool] = None,
+    # Deprecated as of 0.15.37
     ge_cloud_base_url: Optional[str] = None,
     ge_cloud_access_token: Optional[str] = None,
     ge_cloud_organization_id: Optional[str] = None,
@@ -1735,12 +1740,19 @@ def get_context(
         DataContext,
     )
 
+    if not cloud_base_url:
+        cloud_base_url = ge_cloud_base_url
+    if not cloud_access_token:
+        cloud_access_token = ge_cloud_access_token
+    if not cloud_organization_id:
+        cloud_organization_id = ge_cloud_organization_id
+
     # First, check for ge_cloud conditions
 
-    config_available = CloudDataContext.is_ge_cloud_config_available(
-        ge_cloud_base_url=ge_cloud_base_url,
-        ge_cloud_access_token=ge_cloud_access_token,
-        ge_cloud_organization_id=ge_cloud_organization_id,
+    config_available = CloudDataContext.is_cloud_config_available(
+        cloud_base_url=cloud_base_url,
+        cloud_access_token=cloud_access_token,
+        cloud_organization_id=cloud_organization_id,
     )
 
     # If config available and not explicitly disabled
@@ -1749,14 +1761,14 @@ def get_context(
             project_config=project_config,
             runtime_environment=runtime_environment,
             context_root_dir=context_root_dir,
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_access_token=ge_cloud_access_token,
-            ge_cloud_organization_id=ge_cloud_organization_id,
+            cloud_base_url=cloud_base_url,
+            cloud_access_token=cloud_access_token,
+            cloud_organization_id=cloud_organization_id,
         )
 
     if ge_cloud_mode and not config_available:
         raise GXCloudConfigurationError(
-            "GX Cloud Mode enabled, but missing env vars: GE_CLOUD_ORGANIZATION_ID, GE_CLOUD_ACCESS_TOKEN"
+            "GX Cloud Mode enabled, but missing env vars: GX_CLOUD_ORGANIZATION_ID, GX_CLOUD_ACCESS_TOKEN"
         )
 
     # Second, check for which type of local
