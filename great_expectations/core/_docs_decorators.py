@@ -1,7 +1,7 @@
 from textwrap import dedent
 from typing import Callable, TypeVar, Any, List
 
-from docstring_parser import compose
+from docstring_parser import compose, parse
 
 WHITELISTED_TAG = "--Public API--"
 
@@ -91,9 +91,30 @@ def _decorate_argument_with_deprecation(
 ) -> F:
     deprecation_rst = f".. deprecated:: {version}" "\n" f"    {message}"
     existing_docstring = func.__doc__ if func.__doc__ else ""
-    from docstring_parser import parse
 
-    parsed_docstring = parse(existing_docstring)
+    func.__doc__ = add_text_below_docstring_argument(
+        docstring=existing_docstring, argument_name=argument_name, text=deprecation_rst
+    )
+
+    return func
+
+
+def add_text_below_docstring_argument(
+    docstring: str, argument_name: str, text: str
+) -> str:
+    """Add text below an argument in a docstring.
+
+    Note: Can be used for rst directives.
+
+    Args:
+        docstring: Docstring to modify.
+        argument_name: Argument to place text below.
+        text: Text to place below argument. Can be an rst directive.
+
+    Returns:
+        Modified docstring.
+    """
+    parsed_docstring = parse(docstring)
 
     if not argument_name in (param.arg_name for param in parsed_docstring.params):
         raise ValueError(
@@ -104,13 +125,11 @@ def _decorate_argument_with_deprecation(
         if param.arg_name == argument_name:
             # description can be None
             if not parsed_docstring.params[idx]:
-                parsed_docstring.params[idx].description = deprecation_rst
+                parsed_docstring.params[idx].description = text
             else:
-                parsed_docstring.params[idx].description += "\n" + deprecation_rst  # type: ignore[operator]
+                parsed_docstring.params[idx].description += "\n" + text  # type: ignore[operator]
 
-    func.__doc__ = compose(parsed_docstring)
-
-    return func
+    return compose(parsed_docstring)
 
 
 def version_added(
