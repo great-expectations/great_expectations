@@ -236,6 +236,7 @@ class DataContext(BaseDataContext):
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
+        # If any deprecated args deviate from their defaults, we should flag the issue
         if (
             ge_cloud_mode is not False
             or ge_cloud_base_url is not None

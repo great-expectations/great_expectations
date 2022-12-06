@@ -190,7 +190,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             None
         """
-        if ge_cloud_mode or ge_cloud_config:
+        # If any deprecated args deviate from their defaults, we should flag the issue
+        if ge_cloud_mode is not False or ge_cloud_config is not None:
             # deprecated-v0.15.37
             warnings.warn(
                 "The ge_cloud_mode/ge_cloud_config arguments are deprecated as of v0.15.37 and will be removed in a future release."
