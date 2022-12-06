@@ -37,7 +37,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
-    USAGE_STATISTICS_QA_URL,
+    USAGX_STATISTICS_QA_URL,
 )
 
 yaml = YAMLHandler()
@@ -71,7 +71,7 @@ def data_context_config_dict() -> dict:
         "anonymous_usage_statistics": AnonymizedUsageStatisticsConfig(
             enabled=True,
             data_context_id="6a52bdfa-e182-455b-a825-e69f076e67d6",
-            usage_statistics_url=USAGE_STATISTICS_QA_URL,
+            usage_statistics_url=USAGX_STATISTICS_QA_URL,
         ),
         "notebooks": None,
         "concurrency": None,
@@ -276,7 +276,7 @@ def include_rendered_content() -> IncludeRenderedContentConfig:
             id="data_docs_sites getter",
         ),
         pytest.param(
-            DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
+            DataContextVariableSchema.ANONYMOUS_USAGX_STATISTICS,
             id="anonymous_usage_statistics getter",
         ),
         pytest.param(
@@ -392,7 +392,7 @@ def test_data_context_variables_get_with_substitutions(
         ),
         pytest.param(
             anonymous_usage_statistics,
-            DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
+            DataContextVariableSchema.ANONYMOUS_USAGX_STATISTICS,
             id="anonymous_usage_statistics setter",
         ),
         pytest.param(
@@ -446,7 +446,7 @@ def test_data_context_variables_save_config(
     ephemeral_data_context_variables: EphemeralDataContextVariables,
     file_data_context_variables: FileDataContextVariables,
     cloud_data_context_variables: CloudDataContextVariables,
-    # The below GE Cloud variables were used to instantiate the above CloudDataContextVariables
+    # The below GX Cloud variables were used to instantiate the above CloudDataContextVariables
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
     ge_cloud_access_token: str,
@@ -568,7 +568,7 @@ def test_file_data_context_variables_e2e(
 
     # Review great_expectations.yml where values were written and confirm changes
     config_filepath = pathlib.Path(file_data_context.root_directory).joinpath(
-        file_data_context.GE_YML
+        file_data_context.GX_YML
     )
 
     with open(config_filepath) as f:
@@ -622,7 +622,7 @@ def test_cloud_enabled_data_context_variables_e2e(
     Expectations Cloud interacts with variables.
       1. User updates certain values and sets them as attributes.
       2. User persists changes utilizing the save_config call defined by the Variables API.
-      3. Upon reading the result config from a GET request, we can confirm that changes were appropriately persisted.
+      3. Upon reading the result config from a GXT request, we can confirm that changes were appropriately persisted.
 
     It is also important to note that in the case of $VARS syntax, we NEVER want to persist the underlying
     value in order to preserve sensitive information.

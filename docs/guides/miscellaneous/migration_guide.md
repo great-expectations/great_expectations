@@ -21,7 +21,7 @@ The Batch Request (V3) API was introduced as part of the 0.13 major release of G
 
 ## Migrating to the Batch Request (V3) API
 
-As of version 0.14.0, the V3 API is the preferred method of interacting with GE. We highly recommend that you migrate to working with the V3 API as soon as possible. Please make sure you're using the latest version of GE before beginning your migration!
+As of version 0.14.0, the V3 API is the preferred method of interacting with GX. We highly recommend that you migrate to working with the V3 API as soon as possible. Please make sure you're using the latest version of GX before beginning your migration!
 
 The migration involves two parts: first, using an automated CLI tool to upgrade the config file and Data Stores, and second, manually upgrading Datasources and Checkpoints. To begin the migration from the V2 to the V3 API, please do the following:
 
@@ -807,7 +807,7 @@ Follow these steps to upgrade your existing Great Expectations project:
 
 - The command will display this message when done: `Your config file appears valid!`.
 
-- Rename your Expectation Suites to make them compatible with the new naming. Save this Python code snippet in a file called `update_project.py`, then run it using the command: `python update_project.py PATH_TO_GE_CONFIG_DIRECTORY`:
+- Rename your Expectation Suites to make them compatible with the new naming. Save this Python code snippet in a file called `update_project.py`, then run it using the command: `python update_project.py PATH_TO_GX_CONFIG_DIRECTORY`:
 
 ```python
     # !/usr/bin/env python3
@@ -931,7 +931,7 @@ if __name__ == "__main__":
 - This project has now been migrated to 0.9.0. Please see the list of changes below for more detailed information.
 
 
-#### CONFIGURATION CHANGES
+#### CONFIGURATION CHANGXS
 
 - FixedLengthTupleXXXX stores are renamed to TupleXXXX stores; they no
   longer allow or require (or allow) a key_length to be specified, but they
@@ -957,7 +957,7 @@ if __name__ == "__main__":
   will need to update their code. For example, a pandas datasource would use
   `reader_method: read_csv` instead of `reader_method: csv`
 
-#### CODE CHANGES
+#### CODE CHANGXS
 
 - DataAssetName and name normalization have been completely eliminated, which
   causes several related changes to code using the DataContext.
@@ -1028,7 +1028,7 @@ If you run into any issues, please ask for help on [Slack](https://greatexpectat
 
 ### Upgrading to 0.7.x
 
-In version 0.7, GE introduced several new features, and significantly changed the way DataContext objects work:
+In version 0.7, GX introduced several new features, and significantly changed the way DataContext objects work:
 
  - A <TechnicalTag tag="data_context" text="Data Context"/> object manages access to expectation suites and other configuration in addition to data assets.
    - It provides a flexible but opinionated structure for creating and storing configuration and expectations in version control.

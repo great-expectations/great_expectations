@@ -42,7 +42,7 @@ class DataContextVariableSchema(str, enum.Enum):
     DATA_DOCS_SITES = "data_docs_sites"
     NOTEBOOKS = "notebooks"
     CONFIG_VARIABLES_FILE_PATH = "config_variables_file_path"
-    ANONYMOUS_USAGE_STATISTICS = "anonymous_usage_statistics"
+    ANONYMOUS_USAGX_STATISTICS = "anonymous_usage_statistics"
     CONCURRENCY = "concurrency"
     PROGRESS_BARS = "progress_bars"
     INCLUDE_RENDERED_CONTENT = "include_rendered_content"
@@ -67,7 +67,7 @@ class DataContextVariables(ABC):
 
     Args:
         config:          A reference to the DataContextConfig to perform CRUD on.
-        config_provider: Responsible for determining config values and substituting them in GET calls.
+        config_provider: Responsible for determining config values and substituting them in GXT calls.
         _store:          An instance of a DataContextStore with the appropriate backend to persist config changes.
     """
 
@@ -227,14 +227,14 @@ class DataContextVariables(ABC):
     def anonymous_usage_statistics(
         self,
     ) -> Optional[AnonymizedUsageStatisticsConfig]:
-        return self._get(DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS)
+        return self._get(DataContextVariableSchema.ANONYMOUS_USAGX_STATISTICS)
 
     @anonymous_usage_statistics.setter
     def anonymous_usage_statistics(
         self, anonymous_usage_statistics: AnonymizedUsageStatisticsConfig
     ) -> None:
         self._set(
-            DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
+            DataContextVariableSchema.ANONYMOUS_USAGX_STATISTICS,
             anonymous_usage_statistics,
         )
 
@@ -389,7 +389,7 @@ class CloudDataContextVariables(DataContextVariables):
 
     def get_key(self) -> GXCloudIdentifier:
         """
-        Generates a GE Cloud-specific key for use with Stores. See parent "DataContextVariables.get_key" for more details.
+        Generates a GX Cloud-specific key for use with Stores. See parent "DataContextVariables.get_key" for more details.
         """
         from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 

@@ -127,7 +127,7 @@ stages:
               EPOCH=`date +%s`
               SUFFIX="develop_${EPOCH}_${RANDOM}"
               echo "Generated image suffix: ${SUFFIX}"
-              echo "##vso[task.setvariable variable=IMAGE_SUFFIX;isOutput=true]${SUFFIX}"
+              echo "##vso[task.setvariable variable=IMAGX_SUFFIX;isOutput=true]${SUFFIX}"
             name: suffix
 
       - job: build_push
@@ -142,16 +142,16 @@ stages:
             Python39:
               python.version: '3.9'
         variables:
-          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
-          GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+          IMAGX_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGX_SUFFIX'] ]
+          GX_USAGX_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
         steps:
           - bash: |
-              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              DOCKER_TAG="$(python.version)_$(IMAGX_SUFFIX)"
               # We repull the develop branch. We could build the local branch that is already present but we should
               # prune it's depth since we don't need the git history.
               CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${DOCKER_TAG} "
               CMD+="--target test --build-arg PYTHON_VERSION=$(python.version) "
-              CMD+="--build-arg GE_USAGE_STATISTICS_URL=\"$(GE_USAGE_STATISTICS_URL)\" "
+              CMD+="--build-arg GX_USAGX_STATISTICS_URL=\"$(GX_USAGX_STATISTICS_URL)\" "
               CMD+="--build-arg SOURCE=github --build-arg BRANCH=develop ."
               echo ${CMD}
               eval ${CMD}
@@ -159,7 +159,7 @@ stages:
 
           - bash: |
               docker login -u ${DOCKER_USER} -p ${DOCKER_TOKEN}
-              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              DOCKER_TAG="$(python.version)_$(IMAGX_SUFFIX)"
               PUSH="docker push greatexpectations/test:${DOCKER_TAG}"
               echo ${PUSH}
               eval ${PUSH}
@@ -185,10 +185,10 @@ stages:
         services:
           postgres: postgres
         variables:
-          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+          IMAGX_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGX_SUFFIX'] ]
         steps:
           - bash: |
-              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              DOCKER_TAG="$(python.version)_$(IMAGX_SUFFIX)"
               mkdir coverage
               PYTEST="docker run -e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) "
               PYTEST+="-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) -e AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION) "
@@ -237,10 +237,10 @@ stages:
             Python39:
               python.version: '3.9'
         variables:
-          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+          IMAGX_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGX_SUFFIX'] ]
         steps:
           - bash: |
-              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              DOCKER_TAG="$(python.version)_$(IMAGX_SUFFIX)"
               PYTEST="docker run greatexpectations/test:${DOCKER_TAG} "
               # These tests currently do no succeed in random order.
               PYTEST+="pytest tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py"
@@ -261,10 +261,10 @@ stages:
             Python39:
               python.version: '3.9'
         variables:
-          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+          IMAGX_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGX_SUFFIX'] ]
         steps:
           - bash: |
-              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              DOCKER_TAG="$(python.version)_$(IMAGX_SUFFIX)"
               PYTEST="docker run greatexpectations/test:${DOCKER_TAG} "
               # We do NOT randomize the spark tests.
               # Spark only allows 1 context per JVM process, so we share it between tests.
@@ -289,7 +289,7 @@ stages:
         services:
           mysql: mysql
         variables:
-          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+          IMAGX_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGX_SUFFIX'] ]
         steps:
           - bash: |
               printf "Waiting for MySQL database to accept connections: "
@@ -302,7 +302,7 @@ stages:
           - bash: |
               mkdir script
               echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > script/mysql_setup.sql
-              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              DOCKER_TAG="$(python.version)_$(IMAGX_SUFFIX)"
               PYTEST="docker run -e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) "
               PYTEST+="-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) -e AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION) "
               PYTEST+="--network=host --mount type=bind,source=${PWD}/script,target=/script "
@@ -333,14 +333,14 @@ stages:
         services:
           trino: trino
         variables:
-          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+          IMAGX_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGX_SUFFIX'] ]
         steps:
           - bash: |
               printf 'Waiting for Trino database to accept connections'
               sleep 30
             displayName: 'Wait for Trino'
           - bash: |
-              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              DOCKER_TAG="$(python.version)_$(IMAGX_SUFFIX)"
               PYTEST="docker run -e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) "
               PYTEST+="-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) -e AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION) "
               PYTEST+="--network=host greatexpectations/test:${DOCKER_TAG} "
@@ -367,10 +367,10 @@ stages:
         services:
           postgres: postgres
         variables:
-          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+          IMAGX_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGX_SUFFIX'] ]
         steps:
           - bash: |
-              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              DOCKER_TAG="$(python.version)_$(IMAGX_SUFFIX)"
               PYTEST="docker run --network=host greatexpectations/test:${DOCKER_TAG} "
               PYTEST+="pytest --postgresql --spark --aws-integration tests/cli"
               echo ${PYTEST}
@@ -395,10 +395,10 @@ stages:
               min_numpy: '1.19.3'
               min_pandas: '1.1.3'
         variables:
-          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+          IMAGX_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGX_SUFFIX'] ]
         steps:
           - bash: |
-              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              DOCKER_TAG="$(python.version)_$(IMAGX_SUFFIX)"
               PYTEST="docker run -e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) "
               PYTEST+="-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) -e AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION) "
               PYTEST+="--network=host greatexpectations/test:${DOCKER_TAG} bash -c \""
@@ -426,10 +426,10 @@ stages:
             Python39:
               python.version: '3.9'
         variables:
-          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+          IMAGX_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGX_SUFFIX'] ]
         steps:
           - bash: |
-              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              DOCKER_TAG="$(python.version)_$(IMAGX_SUFFIX)"
               PYTEST="docker run --network=host greatexpectations/test:${DOCKER_TAG} "
               PYTEST+="pytest --no-sqlalchemy --aws-integration --random-order tests/integration/usage_statistics"
               echo ${PYTEST}
@@ -466,10 +466,10 @@ stages:
 
          - script: |
              pip install  .
-           displayName: 'Install GE and required dependencies (i.e. not sqlalchemy)'
+           displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
 
          - script: |
-             python -c "import great_expectations as gx; print('Successfully imported GE Version:', gx.__version__)"
+             python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
            displayName: 'Import Great Expectations'
 
   - stage: db_integration

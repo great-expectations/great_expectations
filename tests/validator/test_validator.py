@@ -42,8 +42,8 @@ def yellow_trip_pandas_data_context(
     where the "year" in batch_filter_parameters is set to "2019", or to individual months if the "month" in
     batch_filter_parameters is set to "01", "02", or "03"
     """
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    # Re-enable GX_USAGX_STATS
+    monkeypatch.delenv("GX_USAGX_STATS")
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")
@@ -330,8 +330,8 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     """
     This checks that Validator in ge_cloud_mode properly updates underlying Expectation Suite on save.
     The multi_batch_taxi_validator_ge_cloud_mode fixture has a suite with a single expectation.
-    :param mock_context_get_suite: Under normal circumstances, this would be ExpectationSuite object returned from GE Cloud
-    :param mock_context_save_suite: Under normal circumstances, this would trigger post or patch to GE Cloud
+    :param mock_context_get_suite: Under normal circumstances, this would be ExpectationSuite object returned from GX Cloud
+    :param mock_context_save_suite: Under normal circumstances, this would trigger post or patch to GX Cloud
     """
     context: DataContext = empty_data_context_stats_enabled
     mock_suite = ExpectationSuite(

@@ -103,7 +103,7 @@ class MetricPartialFunctionTypes(Enum):
 
 
 class DataConnectorStorageDataReferenceResolver:
-    DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP: Dict[str, str] = {
+    DATA_CONNECTOR_NAME_TO_STORAGX_NAME_MAP: Dict[str, str] = {
         "InferredAssetS3DataConnector": "S3",
         "ConfiguredAssetS3DataConnector": "S3",
         "InferredAssetGCSDataConnector": "GCS",
@@ -113,7 +113,7 @@ class DataConnectorStorageDataReferenceResolver:
         "InferredAssetDBFSDataConnector": "DBFS",
         "ConfiguredAssetDBFSDataConnector": "DBFS",
     }
-    STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS: Dict[
+    STORAGX_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS: Dict[
         Tuple[str, str], Callable
     ] = {
         (
@@ -143,13 +143,13 @@ class DataConnectorStorageDataReferenceResolver:
         (
             "ABS",
             "PandasExecutionEngine",
-        ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format(
+        ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGX_HTTPS_URL_TEMPLATE.format(
             **template_arguments
         ),
         (
             "ABS",
             "SparkDFExecutionEngine",
-        ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format(
+        ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGX_WASBS_URL_TEMPLATE.format(
             **template_arguments
         ),
         (
@@ -173,10 +173,10 @@ class DataConnectorStorageDataReferenceResolver:
         template_arguments: dict,
     ):
         """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
-        storage_name: str = DataConnectorStorageDataReferenceResolver.DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP[
+        storage_name: str = DataConnectorStorageDataReferenceResolver.DATA_CONNECTOR_NAME_TO_STORAGX_NAME_MAP[
             data_connector_name
         ]
-        return DataConnectorStorageDataReferenceResolver.STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS[
+        return DataConnectorStorageDataReferenceResolver.STORAGX_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS[
             (storage_name, execution_engine_name)
         ](
             template_arguments
@@ -509,7 +509,7 @@ class ExecutionEngine(ABC):
 
         row_condition = RowCondition(
             condition=f'col("{column}").notnull()',
-            condition_type=RowConditionParserType.GE,
+            condition_type=RowConditionParserType.GX,
         )
         new_domain_kwargs.setdefault("filter_conditions", []).append(row_condition)
         return new_domain_kwargs

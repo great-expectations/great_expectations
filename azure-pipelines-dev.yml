@@ -45,7 +45,7 @@ resources:
       - 8088:8080
 
 variables:
-  GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+  GX_USAGX_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 
 
 stages:
@@ -72,7 +72,7 @@ stages:
                 tests/integration/fixtures/**
                 tests/test_sets/**
 
-                [GEChanged]
+                [GXChanged]
                 great_expectations/**/*.py
                 pyproject.toml
                 setup.cfg
@@ -89,7 +89,7 @@ stages:
 
     jobs:
       - job: lint
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
         steps:
           - task: UsePythonVersion@0
             inputs:
@@ -156,10 +156,10 @@ stages:
 
          - script: |
              pip install  .
-           displayName: 'Install GE and required dependencies (i.e. not sqlalchemy)'
+           displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
 
          - script: |
-             python -c "import great_expectations as gx; print('Successfully imported GE Version:', gx.__version__)"
+             python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
            displayName: 'Import Great Expectations'
 
   - stage: required
@@ -170,7 +170,7 @@ stages:
     jobs:
       # Runs pytest without any additional flags
       - job: minimal
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
         strategy:
           # This matrix is intended to split up our sizeable test suite into two distinct components.
           # By splitting up slow tests from the remainder of the suite, we can parallelize test runs
@@ -214,7 +214,7 @@ stages:
 
             displayName: 'Unit Tests'
             env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+              GX_USAGX_STATISTICS_URL: ${{ variables.GX_USAGX_STATISTICS_URL }}
 
           - script: |
               # Run pytest
@@ -232,7 +232,7 @@ stages:
 
             displayName: 'pytest'
             env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+              GX_USAGX_STATISTICS_URL: ${{ variables.GX_USAGX_STATISTICS_URL }}
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
@@ -248,7 +248,7 @@ stages:
 
       # Runs pytest with Spark and Postgres enabled
       - job: comprehensive
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
         strategy:
           # This matrix is intended to split up our sizeable test suite into two distinct components.
           # By splitting up slow tests from the remainder of the suite, we can parallelize test runs
@@ -302,7 +302,7 @@ stages:
 
             displayName: 'pytest'
             env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+              GX_USAGX_STATISTICS_URL: ${{ variables.GX_USAGX_STATISTICS_URL }}
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
@@ -323,7 +323,7 @@ stages:
 
     jobs:
       - job: test_usage_stats_messages
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
         variables:
           python.version: '3.8'
 
@@ -349,7 +349,7 @@ stages:
 
             displayName: 'pytest'
             env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+              GX_USAGX_STATISTICS_URL: ${{ variables.GX_USAGX_STATISTICS_URL }}
 
   - stage: db_integration
     pool:
@@ -359,7 +359,7 @@ stages:
 
     jobs:
       - job: mysql
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
 
         services:
           mysql: mysql
@@ -413,10 +413,10 @@ stages:
 
             displayName: 'pytest'
             env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+              GX_USAGX_STATISTICS_URL: ${{ variables.GX_USAGX_STATISTICS_URL }}
 
       - job: mssql
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
 
         services:
           mssql: mssql
@@ -460,10 +460,10 @@ stages:
 
             displayName: 'pytest'
             env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+              GX_USAGX_STATISTICS_URL: ${{ variables.GX_USAGX_STATISTICS_URL }}
 
       - job: trino
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
 
         services:
           trino: trino
@@ -513,7 +513,7 @@ stages:
 
             displayName: 'pytest'
             env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+              GX_USAGX_STATISTICS_URL: ${{ variables.GX_USAGX_STATISTICS_URL }}
 
   - stage: cli_integration
     dependsOn: [scope_check, lint, import_ge, custom_checks]
@@ -522,7 +522,7 @@ stages:
 
     jobs:
       - job: test_cli
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
 
         services:
           postgres: postgres
@@ -555,4 +555,4 @@ stages:
 
             displayName: 'pytest'
             env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+              GX_USAGX_STATISTICS_URL: ${{ variables.GX_USAGX_STATISTICS_URL }}

@@ -35,7 +35,7 @@ def test_connectable_postgresql_db(sa, test_backends, test_df):
         drivername="postgresql",
         username="postgres",
         password="",
-        host=os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
+        host=os.getenv("GX_TEST_LOCAL_DB_HOSTNAME", "localhost"),
         port="5432",
         database="test_ci",
     )
@@ -679,7 +679,7 @@ def test_golden_path_sql_datasource_configuration(
 
         context = gx.get_context()
 
-        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+        db_hostname = os.getenv("GX_TEST_LOCAL_DB_HOSTNAME", "localhost")
         yaml_config = f"""
     class_name: SimpleSqlalchemyDatasource
     credentials:
@@ -1196,7 +1196,7 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
     """
     Tests output of test_yaml_config() for a Datacontext configured with a Datasource with
     RuntimeDataConnector. Even though the test directory contains multiple files that can be read-in
-    by GE, the RuntimeDataConnector will output 0 data_assets, and return a "note" to the user.
+    by GX, the RuntimeDataConnector will output 0 data_assets, and return a "note" to the user.
 
     This is because the RuntimeDataConnector is not aware of data_assets until they are passed in
     through the RuntimeBatchRequest.
@@ -1421,7 +1421,7 @@ def test_rule_based_profiler_integration(
     module_name: great_expectations.rule_based_profiler
     config_version: 1.0
     variables:
-      integer_type: INTEGER
+      integer_type: INTEGXR
       timestamp_type: TIMESTAMP
       max_user_id: 999999999999
       min_timestamp: 2004-10-19 10:23:54

@@ -18,7 +18,7 @@ class DataContextStore(ConfigurationStore):
     _configuration_class = DataContextConfig
 
     ge_cloud_exclude_field_names: Set[DataContextVariableSchema] = {
-        DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
+        DataContextVariableSchema.ANONYMOUS_USAGX_STATISTICS,
         DataContextVariableSchema.CHECKPOINT_STORE_NAME,
         DataContextVariableSchema.DATASOURCES,
         DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,
@@ -32,7 +32,7 @@ class DataContextStore(ConfigurationStore):
         """
         Please see `ConfigurationStore.serialize` for more information.
 
-        Note that GE Cloud utilizes a subset of the config; as such, an explicit
+        Note that GX Cloud utilizes a subset of the config; as such, an explicit
         step to remove unnecessary keys is a required part of the serialization process.
 
         Args:

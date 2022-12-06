@@ -18,11 +18,11 @@ from great_expectations.data_context.data_context.cloud_data_context import (
 )
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
-    PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
-    PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
+    PROJECT_TEMPLATE_USAGX_STATISTICS_DISABLED,
+    PROJECT_TEMPLATE_USAGX_STATISTICS_ENABLED,
 )
 from great_expectations.data_context.types.base import (
-    CURRENT_GE_CONFIG_VERSION,
+    CURRENT_GX_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
@@ -49,7 +49,7 @@ class DataContext(BaseDataContext):
 
     The DataContext is configured via a yml file stored in a directory called great_expectations; this configuration
     file as well as managed Expectation Suites should be stored in version control. There are other ways to create a
-    Data Context that may be better suited for your particular deployment e.g. ephemerally or backed by GE Cloud
+    Data Context that may be better suited for your particular deployment e.g. ephemerally or backed by GX Cloud
     (coming soon). Please refer to our documentation for more details.
 
     You can Validate data or generate Expectations using Execution Engines including:
@@ -117,18 +117,18 @@ class DataContext(BaseDataContext):
                 "to initialize a new DataContext"
             )
 
-        ge_dir = os.path.join(project_root_dir, cls.GE_DIR)  # type: ignore[arg-type]
+        ge_dir = os.path.join(project_root_dir, cls.GX_DIR)  # type: ignore[arg-type]
         os.makedirs(ge_dir, exist_ok=True)
         cls.scaffold_directories(ge_dir)
 
-        if os.path.isfile(os.path.join(ge_dir, cls.GE_YML)):
-            message = f"""Warning. An existing `{cls.GE_YML}` was found here: {ge_dir}.
+        if os.path.isfile(os.path.join(ge_dir, cls.GX_YML)):
+            message = f"""Warning. An existing `{cls.GX_YML}` was found here: {ge_dir}.
     - No action was taken."""
             warnings.warn(message)
         else:
             cls.write_project_template_to_disk(ge_dir, usage_statistics_enabled)
 
-        uncommitted_dir = os.path.join(ge_dir, cls.GE_UNCOMMITTED_DIR)
+        uncommitted_dir = os.path.join(ge_dir, cls.GX_UNCOMMITTED_DIR)
         if os.path.isfile(os.path.join(uncommitted_dir, "config_variables.yml")):
             message = """Warning. An existing `config_variables.yml` was found here: {}.
     - No action was taken.""".format(
@@ -143,7 +143,7 @@ class DataContext(BaseDataContext):
     @classmethod
     def all_uncommitted_directories_exist(cls, ge_dir: str) -> bool:
         """Check if all uncommitted directories exist."""
-        uncommitted_dir = os.path.join(ge_dir, cls.GE_UNCOMMITTED_DIR)
+        uncommitted_dir = os.path.join(ge_dir, cls.GX_UNCOMMITTED_DIR)
         for directory in cls.UNCOMMITTED_DIRECTORIES:
             if not os.path.isdir(os.path.join(uncommitted_dir, directory)):
                 return False
@@ -153,7 +153,7 @@ class DataContext(BaseDataContext):
     @classmethod
     def config_variables_yml_exist(cls, ge_dir: str) -> bool:
         """Check if all config_variables.yml exists."""
-        path_to_yml = os.path.join(ge_dir, cls.GE_YML)
+        path_to_yml = os.path.join(ge_dir, cls.GX_YML)
 
         # TODO this is so brittle and gross
         with open(path_to_yml) as f:
@@ -173,16 +173,16 @@ class DataContext(BaseDataContext):
     def write_project_template_to_disk(
         cls, ge_dir: str, usage_statistics_enabled: bool = True
     ) -> None:
-        file_path = os.path.join(ge_dir, cls.GE_YML)
+        file_path = os.path.join(ge_dir, cls.GX_YML)
         with open(file_path, "w") as template:
             if usage_statistics_enabled:
-                template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED)
+                template.write(PROJECT_TEMPLATE_USAGX_STATISTICS_ENABLED)
             else:
-                template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED)
+                template.write(PROJECT_TEMPLATE_USAGX_STATISTICS_DISABLED)
 
     @classmethod
     def scaffold_directories(cls, base_dir: str) -> None:
-        """Safely create GE directories for a new project."""
+        """Safely create GX directories for a new project."""
         os.makedirs(base_dir, exist_ok=True)
         with open(os.path.join(base_dir, ".gitignore"), "w") as f:
             f.write("uncommitted/")
@@ -210,7 +210,7 @@ class DataContext(BaseDataContext):
             else:
                 os.makedirs(os.path.join(base_dir, directory), exist_ok=True)
 
-        uncommitted_dir = os.path.join(base_dir, cls.GE_UNCOMMITTED_DIR)
+        uncommitted_dir = os.path.join(base_dir, cls.GX_UNCOMMITTED_DIR)
 
         for new_directory in cls.UNCOMMITTED_DIRECTORIES:
             new_directory_path = os.path.join(uncommitted_dir, new_directory)
@@ -272,7 +272,7 @@ class DataContext(BaseDataContext):
         """
         logger.debug("Starting DataContext._save_project_config")
 
-        config_filepath = os.path.join(self.root_directory, self.GE_YML)  # type: ignore[arg-type]
+        config_filepath = os.path.join(self.root_directory, self.GX_YML)  # type: ignore[arg-type]
 
         try:
             with open(config_filepath, "w") as outfile:
@@ -391,7 +391,7 @@ class DataContext(BaseDataContext):
         The file may contain ${SOME_VARIABLE} variables - see self.project_config_with_variables_substituted
         for how these are substituted.
 
-        For Data Contexts in GE Cloud mode, a user-specific template is retrieved from the Cloud API
+        For Data Contexts in GX Cloud mode, a user-specific template is retrieved from the Cloud API
         - see CloudDataContext.retrieve_data_context_config_from_ge_cloud for more details.
 
         :return: the configuration object read from the file or template
@@ -404,7 +404,7 @@ class DataContext(BaseDataContext):
             )
             return config
 
-        path_to_yml = os.path.join(self._context_root_directory, self.GE_YML)
+        path_to_yml = os.path.join(self._context_root_directory, self.GX_YML)
         try:
             with open(path_to_yml) as data:
                 config_commented_map_from_yaml = yaml.load(data)
@@ -474,7 +474,7 @@ class DataContext(BaseDataContext):
     def find_context_root_dir(cls) -> str:
         result = None
         yml_path = None
-        ge_home_environment = os.getenv("GE_HOME")
+        ge_home_environment = os.getenv("GX_HOME")
         if ge_home_environment:
             ge_home_environment = os.path.expanduser(ge_home_environment)
             if os.path.isdir(ge_home_environment) and os.path.isfile(
@@ -525,10 +525,10 @@ class DataContext(BaseDataContext):
                         config_version, MINIMUM_SUPPORTED_CONFIG_VERSION
                     ),
                 )
-            elif config_version > CURRENT_GE_CONFIG_VERSION:
+            elif config_version > CURRENT_GX_CONFIG_VERSION:
                 raise ge_exceptions.UnsupportedConfigVersionError(
                     "Invalid config version ({}).\n    The maximum valid version is {}.".format(
-                        config_version, CURRENT_GE_CONFIG_VERSION
+                        config_version, CURRENT_GX_CONFIG_VERSION
                     ),
                 )
 
@@ -559,10 +559,10 @@ class DataContext(BaseDataContext):
                 f"Searching for config file {search_start_dir} ({i} layer deep)"
             )
 
-            potential_ge_dir = os.path.join(search_start_dir, cls.GE_DIR)
+            potential_ge_dir = os.path.join(search_start_dir, cls.GX_DIR)
 
             if os.path.isdir(potential_ge_dir):
-                potential_yml = os.path.join(potential_ge_dir, cls.GE_YML)
+                potential_yml = os.path.join(potential_ge_dir, cls.GX_YML)
                 if os.path.isfile(potential_yml):
                     yml_path = potential_yml
                     logger.debug(f"Found config file at {str(yml_path)}")
@@ -575,7 +575,7 @@ class DataContext(BaseDataContext):
     @classmethod
     def does_config_exist_on_disk(cls, context_root_dir: str) -> bool:
         """Return True if the great_expectations.yml exists on disk."""
-        return os.path.isfile(os.path.join(context_root_dir, cls.GE_YML))
+        return os.path.isfile(os.path.join(context_root_dir, cls.GX_YML))
 
     @classmethod
     def is_project_initialized(cls, ge_dir: str) -> bool:

@@ -162,7 +162,7 @@ def render_evaluation_parameter_string(render_func) -> Callable:
                             rendered_string_template.append(rendered_content)
             else:
                 raise GreatExpectationsError(
-                    f"""GE was not able to render the value of evaluation parameters.
+                    f"""GX was not able to render the value of evaluation parameters.
                         Expectation {render_func} had evaluation parameters set, but they were not passed in."""
                 )
         return rendered_string_template
@@ -295,7 +295,7 @@ class Expectation(metaclass=MetaExpectation):
         **kwargs: dict,
     ) -> RenderedAtomicContent:
         """
-        Default rendering function that is utilized by GE Cloud Front-end if an implemented atomic renderer fails
+        Default rendering function that is utilized by GX Cloud Front-end if an implemented atomic renderer fails
         """
         template_str = "Rendering failed for Expectation: "
 
@@ -407,7 +407,7 @@ class Expectation(metaclass=MetaExpectation):
         **kwargs: dict,
     ):
         """
-        Rendering function that is utilized by GE Cloud Front-end
+        Rendering function that is utilized by GX Cloud Front-end
         """
         (
             template_str,
@@ -844,7 +844,7 @@ class Expectation(metaclass=MetaExpectation):
         **kwargs: dict,
     ) -> RenderedAtomicContent:
         """
-        Rendering function that is utilized by GE Cloud Front-end
+        Rendering function that is utilized by GX Cloud Front-end
         """
 
         expectation_type: str
@@ -905,7 +905,7 @@ class Expectation(metaclass=MetaExpectation):
         **kwargs: dict,
     ) -> RenderedAtomicContent:
         """
-        Rendering function that is utilized by GE Cloud Front-end
+        Rendering function that is utilized by GX Cloud Front-end
         """
         observed_value: str = cls._get_observed_value_from_evr(result=result)
         value_obj = renderedAtomicValueSchema.load(

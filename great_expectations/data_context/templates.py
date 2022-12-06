@@ -54,7 +54,7 @@ CONFIG_VARIABLES_INTRO = """
 # secrets out of source control & 2) environment-based configuration changes
 # such as staging vs prod.
 #
-# When GE encounters substitution syntax (like `my_key: ${my_value}` or
+# When GX encounters substitution syntax (like `my_key: ${my_value}` or
 # `my_key: $my_value`) in the great_expectations.yml file, it will attempt
 # to replace the value of `my_key` with the value from an environment
 # variable `my_value` or a corresponding key read from this config file,
@@ -151,23 +151,23 @@ data_docs_sites:
 """
 )
 
-ANONYMIZED_USAGE_STATISTICS_ENABLED = """
+ANONYMIZED_USAGX_STATISTICS_ENABLED = """
 anonymous_usage_statistics:
   enabled: True
 """
 
-ANONYMIZED_USAGE_STATISTICS_DISABLED = """
+ANONYMIZED_USAGX_STATISTICS_DISABLED = """
 anonymous_usage_statistics:
   enabled: False
 """
 
-PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED = (
+PROJECT_TEMPLATE_USAGX_STATISTICS_ENABLED = (
     PROJECT_HELP_COMMENT
     + PROJECT_OPTIONAL_CONFIG_COMMENT
-    + ANONYMIZED_USAGE_STATISTICS_ENABLED
+    + ANONYMIZED_USAGX_STATISTICS_ENABLED
 )
-PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED = (
+PROJECT_TEMPLATE_USAGX_STATISTICS_DISABLED = (
     PROJECT_HELP_COMMENT
     + PROJECT_OPTIONAL_CONFIG_COMMENT
-    + ANONYMIZED_USAGE_STATISTICS_DISABLED
+    + ANONYMIZED_USAGX_STATISTICS_DISABLED
 )

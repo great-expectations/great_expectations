@@ -187,7 +187,7 @@ Changelog
 * [MAINTENANCE] Update `scope_check` in Azure CI to trigger on changed `.py` source code files (#6185)
 * [MAINTENANCE] Move test_yaml_config to a separate class (#5487)
 * [MAINTENANCE] Changed profiler to Data Assistant in CLI, docs, and tests (#6189)
-* [MAINTENANCE] Update default GE_USAGE_STATISTICS_URL in test docker image. (#6192)
+* [MAINTENANCE] Update default GX_USAGX_STATISTICS_URL in test docker image. (#6192)
 * [MAINTENANCE] Re-add a renamed test definition file (#6182)
 * [MAINTENANCE] Refactor method `parse_evaluation_parameter` (#6191)
 * [MAINTENANCE] Migrate methods from `BaseDataContext` to `AbstractDataContext` (#6188)
@@ -227,8 +227,8 @@ Changelog
 * [DOCS] Clean up snippets and line number validation in docs (#6142)
 * [MAINTENANCE] Add Enums for renderer types (#6112)
 * [MAINTENANCE] Minor cleanup in preparation for Validator refactoring into separate concerns (#6155)
-* [MAINTENANCE] add the internal `GE_DATA_CONTEXT_ID` env var to the docker file (#6122)
-* [MAINTENANCE] Rollback setting GE_DATA_CONTEXT_ID in docker image. (#6163)
+* [MAINTENANCE] add the internal `GX_DATA_CONTEXT_ID` env var to the docker file (#6122)
+* [MAINTENANCE] Rollback setting GX_DATA_CONTEXT_ID in docker image. (#6163)
 * [MAINTENANCE] disable ge_cloud_mode when specified, detect misconfiguration (#6162)
 * [MAINTENANCE] Re-add missing Expectations to gallery and include package names (#6171)
 * [MAINTENANCE] Use `from __future__ import annotations` to clean up type hints (#6127)
@@ -242,7 +242,7 @@ Changelog
 * [FEATURE] Contribute StatisticsDataAssistant and GrowthNumericDataAssistant (both experimental)  (#6115)
 * [BUGFIX] add OBJECT_TYPE_NAMES to the JsonSchemaProfiler - issue #6109 (#6110) (thanks @OphelieC)
 * [BUGFIX] Fix example `Set-Based Column Map Expectation` template import (#6134)
-* [BUGFIX] Regression due to `GESqlDialect` `Enum` for Hive (#6149)
+* [BUGFIX] Regression due to `GXSqlDialect` `Enum` for Hive (#6149)
 * [DOCS] Support for named snippets in documentation (#6087)
 * [MAINTENANCE] Clean up `test_migrate=True` Cloud migrator output (#6119)
 * [MAINTENANCE] Creation of Hackathon Packages (#4587)
@@ -347,7 +347,7 @@ Changelog
 * [MAINTENANCE] Refactor `DataContext.__init__` to move Cloud-specific logic to `CloudDataContext` (#5981)
 * [MAINTENANCE] Set up cloud integration tests with Azure Pipelines (#5995)
 * [MAINTENANCE] Example of `splitter_method` at `Asset` and `DataConnector` level (#6000)
-* [MAINTENANCE] Replace `splitter_method` strings with `SplitterMethod` Enum and leverage `GESqlDialect` Enum where applicable (#5980)
+* [MAINTENANCE] Replace `splitter_method` strings with `SplitterMethod` Enum and leverage `GXSqlDialect` Enum where applicable (#5980)
 * [MAINTENANCE] Ensure that `DataContext.add_datasource` works with nested `DataConnector` ids (#5992)
 * [MAINTENANCE] Remove cloud integration tests from azure-pipelines.yml (#5997)
 * [MAINTENANCE] Unit tests for `GeCloudStoreBackend` (#5999)
@@ -715,7 +715,7 @@ Changelog
 * [MAINTENANCE] Remove pyspark<3.0.0 constraint for python 3.7 (#5496)
 * [MAINTENANCE] Ensure that `parter-integration` pipeline only runs on cronjob (#5500)
 * [MAINTENANCE] Adding fixtures Query Expectations tests  (#5486)
-* [MAINTENANCE] Misc updates to `GeCloudStoreBackend` to better integrate with GE Cloud (#5497)
+* [MAINTENANCE] Misc updates to `GeCloudStoreBackend` to better integrate with GX Cloud (#5497)
 * [MAINTENANCE] Update automated release schedule (#5488)
 * [MAINTENANCE] Update core-team in `teams.yml` (#5489)
 * [MAINTENANCE] Update how_to_create_a_new_expectation_suite_using_rule_based_profile… (#5495)
@@ -1073,8 +1073,8 @@ Changelog
 * [MAINTENANCE] Add dgtest-overrides section to dependency_graph Azure pipeline
 * [MAINTENANCE] Datasource and DataContext-level tests for RuntimeDataConnector changes (#4866)
 * [MAINTENANCE] Temporarily disable bigquery tests. (#4888)
-* [MAINTENANCE] Import GE after running `ge init` in packaging CI pipeline (#4885)
-* [MAINTENANCE] Add CI stage importing GE with only required dependencies installed (#4884)
+* [MAINTENANCE] Import GX after running `ge init` in packaging CI pipeline (#4885)
+* [MAINTENANCE] Add CI stage importing GX with only required dependencies installed (#4884)
 * [MAINTENANCE] `DataAssistantResult.plot()` conditional formatting and tooltips (#4881)
 * [MAINTENANCE] split data context files (#4879)
 * [MAINTENANCE] Add Tanner to CODEOWNERS for schemas.py (#4875)
@@ -1090,7 +1090,7 @@ Changelog
 * [FEATURE] `RuntimeDataConnector` able to specify `Assets` (#4861)
 * [BUGFIX] Linting error from hackathon automerge (#4829)
 * [BUGFIX] Cleanup contrib (#4838)
-* [BUGFIX] Add `notebook` to `GE_REQUIRED_DEPENDENCIES` (#4842)
+* [BUGFIX] Add `notebook` to `GX_REQUIRED_DEPENDENCIES` (#4842)
 * [BUGFIX] ParameterContainer return value formatting bug fix (#4840)
 * [BUGFIX] Ensure that Parameter Validation/Configuration Dependency Configurations are included in Serialization (#4843)
 * [BUGFIX] Correctly handle SQLA unexpected count metric for empty tables (#4618) (thanks @douglascook)
@@ -1463,7 +1463,7 @@ Changelog
 * [BUGFIX] Custom notebook templates (#2619) (thanks @luke321321)
 * [BUGFIX] Include public fields in property_names (#4159)
 * [DOCS] Reenable docs-under-test for RuleBasedProfiler (#4149)
-* [DOCS] Provided details for using GE_HOME in commandline. (#4164)
+* [DOCS] Provided details for using GX_HOME in commandline. (#4164)
 * [MAINTENANCE] Return Rule-Based Profiler base.py to its dedicated config subdirectory (#4125)
 * [MAINTENANCE] enable filter properties dict to handle both inclusion and exclusion lists  (#4127)
 * [MAINTENANCE] Remove unused Great Expectations imports (#4135)
@@ -1479,7 +1479,7 @@ Changelog
 * [MAINTENANCE] Minor Validator code clean up -- for better code clarity (#4147)
 * [MAINTENANCE] Refactoring of `test_script_runner.py`. Integration and Docs tests (#4145)
 * [MAINTENANCE] Remove `compatability` stage from `dependency-graph` pipeline (#4161)
-* [MAINTENANCE] CLOUD-618: GE Cloud "account" to "organization" rename (#4146)
+* [MAINTENANCE] CLOUD-618: GX Cloud "account" to "organization" rename (#4146)
 
 0.14.5
 -----------------
@@ -1614,7 +1614,7 @@ Changelog
 * [DOCS] Update how to configure a validation result store in GCS (#3887)
 * [DOCS] Update how to host and share data docs on GCS (#3889)
 * [DOCS] Organize metadata store sidebar category by type of store (#3890)
-* [MAINTENANCE] `add_expectation()` in `ExpectationSuite` supports usage statistics for GE.  (#3824)
+* [MAINTENANCE] `add_expectation()` in `ExpectationSuite` supports usage statistics for GX.  (#3824)
 * [MAINTENANCE] Clean up Metrics type usage, SQLAlchemyExecutionEngine and SQLAlchemyBatchData implementation, and SQLAlchemy API usage (#3884)
 
 0.13.47
@@ -1622,7 +1622,7 @@ Changelog
 * [FEATURE] Add support for named groups in data asset regex (#3855)
 * [BUGFIX] Fix issue where dependency graph tester picks up non *.py files and add test file (#3830)
 * [BUGFIX] Ensure proper exit code for dependency graph script (#3839)
-* [BUGFIX] Allows GE to work when installed in a zip file (PEP 273). Fixes issue #3772 (#3798) (thanks @joseignaciorc)
+* [BUGFIX] Allows GX to work when installed in a zip file (PEP 273). Fixes issue #3772 (#3798) (thanks @joseignaciorc)
 * [BUGFIX] Update conditional for TextClause isinstance check in SQLAlchemyExecutionEngine (#3844)
 * [BUGFIX] Fix usage stats events (#3857)
 * [BUGFIX] Make ExpectationContext optional and remove when null to ensure backwards compatability (#3859)
@@ -1692,7 +1692,7 @@ Changelog
 -----------------
 * [FEATURE] Add new result_format to include unexpected_row_list (#3346)
 * [FEATURE] Implement "deep_filter_properties_dict()" method (#3703)
-* [FEATURE] Create Constants for GETTING_STARTED Entities (e.g., datasource_name, expectation_suite_name, etc.) (#3712)
+* [FEATURE] Create Constants for GXTTING_STARTED Entities (e.g., datasource_name, expectation_suite_name, etc.) (#3712)
 * [FEATURE] Add usage statistics event for DataContext.get_batch_list() method (#3708)
 * [FEATURE] Add data_context.run_checkpoint event to usage statistics (#3721)
 * [FEATURE] Add event_duration to usage statistics events (#3729)
@@ -1860,7 +1860,7 @@ Changelog
 * [BUGFIX] Handle RuntimeBatchRequest passed to Checkpoint programatically (without yml) (#3448)
 * [DOCS] Fix typo in command to create new checkpoint (#3434) (Thanks @joeltone)
 * [DOCS] How to validate data by running a Checkpoint (#3436)
-* [ENHANCEMENT] cloud-199 - Update Expectation and ExpectationSuite classes for GE Cloud (#3453)
+* [ENHANCEMENT] cloud-199 - Update Expectation and ExpectationSuite classes for GX Cloud (#3453)
 * [MAINTENANCE] Does not test numpy.float128 when it doesn't exist (#3460)
 * [MAINTENANCE] Remove Unnecessary SQL OR Condition (#3469)
 * [MAINTENANCE] Remove validation playground notebooks (#3467)
@@ -1910,9 +1910,9 @@ Changelog
 * [FEATURE] Implement InferredAssetAzureDataConnector with Support for Pandas and Spark Execution Engines (#3372)
 * [FEATURE] Spark connecting to Google Cloud Storage (#3365)
 * [FEATURE] SparkDFExecutionEngine can load data accessed by ConfiguredAssetAzureDataConnector (integration tests are included). (#3345)
-* [FEATURE] [MER-293] GE Cloud Mode for DataContext (#3262) (Thanks @roblim)
+* [FEATURE] [MER-293] GX Cloud Mode for DataContext (#3262) (Thanks @roblim)
 * [BUGFIX] Allow for RuntimeDataConnector to accept custom query while suppressing temp table creation (#3335) (Thanks @NathanFarmer)
-* [BUGFIX] Fix issue where multiple validators reused the same execution engine, causing a conflict in active batch (GE-3168) (#3222) (Thanks @jcampbell)
+* [BUGFIX] Fix issue where multiple validators reused the same execution engine, causing a conflict in active batch (GX-3168) (#3222) (Thanks @jcampbell)
 * [BUGFIX] Run batch_request dictionary through util function convert_to_json_serializable (#3349) (Thanks @NathanFarmer)
 * [BUGFIX] added casting of numeric value to fix redshift issue #3293 (#3338) (Thanks @sariabod)
 * [DOCS] Docusaurus - How to connect to an MSSQL database (#3353) (Thanks @NathanFarmer)
@@ -1946,7 +1946,7 @@ Changelog
 * [FEATURE] Enable `GCS DataConnector` integration with `PandasExecutionEngine` (#3264)
 * [FEATURE] Enable column_pair expectations and tests for Spark (#3294)
 * [FEATURE] Implement `InferredAssetGCSDataConnector` (#3284)
-* [FEATURE]/CHANGE run time format (#3272) (Thanks @serialbandicoot)
+* [FEATURE]/CHANGX run time format (#3272) (Thanks @serialbandicoot)
 * [DOCS] Fix misc errors in "How to create renderers for Custom Expectations" (#3315)
 * [DOCS] GDOC-217 remove stub links (#3314)
 * [DOCS] Remove misc TODOs to tidy up docs (#3313)
@@ -2163,7 +2163,7 @@ Changelog
 * [DOCS] Update rule-based profiler docs (#2987)
 * [DOCS] add image zoom plugin (#2979)
 * [MAINTENANCE] fix lint issues for docusaurus (#3004)
-* [Maintenance] update header to match GE.io (#2811)
+* [Maintenance] update header to match GX.io (#2811)
 * [MAINTENANCE] Instrument test_yaml_config() (#2981)
 * [MAINTENANCE] Remove "mostly" from "bobster" test config (#2996)
 * [MAINTENANCE] Update v-0.12 CLI test to reflect Pandas upgrade to version 1.3.0 (#2995)
@@ -2350,12 +2350,12 @@ Changelog
 0.13.11
 -----------------
 * [FEATURE] Add "table.head" metric
-* [FEATURE] Add support for BatchData as a core GE concept for all Execution Engines. #2395
+* [FEATURE] Add support for BatchData as a core GX concept for all Execution Engines. #2395
  * NOTE: As part of our improvements to the underlying Batch API, we have refactored BatchSpec to be part of the "core" package in Great Expectations, consistent with its role coordinating communication about Batches between the Datasource and Execution Engine abstractions.
 * [ENHANCEMENT] Explicit support for schema_name in the SqlAlchemyBatchData #2465. Issue #2340
 * [ENHANCEMENT] Data docs can now be built skipping the index page using the python API #2224
 * [ENHANCEMENT] Evaluation parameter runtime values rendering in data docs if arithmetic is present #2447. Issue #2215
-* [ENHANCEMENT] When connecting to new Datasource, CLI prompt is consistent with rest of GE #2434
+* [ENHANCEMENT] When connecting to new Datasource, CLI prompt is consistent with rest of GX #2434
 * [ENHANCEMENT] Adds basic test for bad s3 paths generated from regex #2427 (Thanks @lukedyer-peak!)
 * [ENHANCEMENT] Updated UserConfigurableProfiler date parsing error handling #2459
 * [ENHANCEMENT] Clarification of self_check error messages #2304
@@ -2554,7 +2554,7 @@ varundunga!)
 * [FEATURE] Add OpsgenieAlertAction #2012 (thanks @miike!)
 * [FEATURE] Add S3SubdirReaderBatchKwargsGenerator #2001 (thanks @noklam)
 * [ENHANCEMENT] Snowflake uses temp tables by default while still allowing transient tables
-* [ENHANCEMENT] Enabled use of lowercase table and column names in GE with the `use_quoted_name` key in batch_kwargs #2023
+* [ENHANCEMENT] Enabled use of lowercase table and column names in GX with the `use_quoted_name` key in batch_kwargs #2023
 * [BUGFIX] Basic suite builder profiler (suite scaffold) now skips excluded expectations #2037
 * [BUGFIX] Off-by-one error in linking to static images #2036 (thanks @NimaVaziri!)
 * [BUGFIX] Improve handling of pandas NA type issue #2029 PR #2039 (thanks @isichei!)
@@ -2655,7 +2655,7 @@ varundunga!)
 0.12.0
 -----------------
 * [BREAKING] This release includes a breaking change that *only* affects users who directly call `add_expectation`, `remove_expectation`, or `find_expectations`. (Most users do not use these APIs but add Expectations by stating them directly on Datasets). Those methods have been updated to take an ExpectationConfiguration object and `match_type` object. The change provides more flexibility in determining which expectations should be modified and allows us provide substantially improved support for two major features that we have frequently heard requested: conditional Expectations and more flexible multi-column custom expectations. See :ref:`expectation_suite_operations` and :ref:`migrating_versions` for more information.
-* [FEATURE] Add support for conditional expectations using pandas execution engine (#1217 HUGE thanks @arsenii!)
+* [FEATURE] Add support for conditional expectations using pandas execution engine (#1217 HUGX thanks @arsenii!)
 * [FEATURE] ValidationActions can now consume and return "payload", which can be used to share information across ValidationActions
 * [FEATURE] Add support for nested columns in the PySpark expectations (thanks @bramelfrink)!
 * [FEATURE] add support for `expect_column_values_to_be_increasing` to `Spark` (thanks @mikaylaedwards)!
@@ -2666,7 +2666,7 @@ varundunga!)
 * [ENHANCEMENT] Include datetime and bool column types in descriptive documentation results
 * [ENHANCEMENT] Improve data docs page breadcrumbs to have clearer run information
 * [ENHANCEMENT] Data Docs Validation Results only shows unexpected value counts if all unexpected values are available
-* [ENHANCEMENT] Convert GE version key from great_expectations.__version__ to great_expectations_version (thanks, @cwerner!) (#1606)
+* [ENHANCEMENT] Convert GX version key from great_expectations.__version__ to great_expectations_version (thanks, @cwerner!) (#1606)
 * [ENHANCEMENT] Add support in JSON Schema profiler for combining schema with anyOf key and creating nullability expectations
 * [BUGFIX] Add guard for checking Redshift Dialect in match_like_pattern expectation
 * [BUGFIX] Fix content_block build failure for dictionary content - (thanks @jliew!) #1722
@@ -2720,7 +2720,7 @@ varundunga!)
 
 0.11.6
 -----------------
-* [FEATURE] Auto-install Python DB packages.  If the required packages for a DB library are not installed, GE will offer the user to install them, without exiting CLI
+* [FEATURE] Auto-install Python DB packages.  If the required packages for a DB library are not installed, GX will offer the user to install them, without exiting CLI
 * [FEATURE] Add new expectation expect_table_row_count_to_equal_other_table for SqlAlchemyDataset
 * [FEATURE] A profiler that builds suites from JSONSchema files
 * [ENHANCEMENT] Add ``.feather`` file support to PandasDatasource
@@ -2730,7 +2730,7 @@ varundunga!)
 * [ENHANCEMENT] Implement "column_quantiles" for MySQL (via a compound SQLAlchemy query, since MySQL does not support "percentile_disc")
 * [BUGFIX] "data_asset.validate" events with "data_asset_name" key in the batch kwargs were failing schema validation
 * [BUGFIX] database_store_backend does not support storing Expectations in DB
-* [BUGFIX] instantiation of ExpectationSuite always adds GE version metadata to prevent datadocs from crashing
+* [BUGFIX] instantiation of ExpectationSuite always adds GX version metadata to prevent datadocs from crashing
 * [BUGFIX] Fix all tests having to do with missing data source libraries
 * [DOCS] will/docs/how_to/Store Expectations on Google Cloud Store
 
@@ -2769,7 +2769,7 @@ varundunga!)
 * [BUGFIX] Fix object name construction when calling SqlAlchemyDataset.head (thanks @mascah!)
 * [BUGFIX] Fixed bug where evaluation parameters used in arithmetic expressions would not be identified as upstream dependencies.
 * [BUGFIX] Fix issue where DatabaseStoreBackend threw IntegrityError when storing same metric twice
-* [FEATURE] Added new cli upgrade helper to help facilitate upgrading projects to be compatible with GE 0.11.
+* [FEATURE] Added new cli upgrade helper to help facilitate upgrading projects to be compatible with GX 0.11.
   See :ref:`upgrading_to_0.11` for more info.
 * [BUGFIX] Fixed bug preventing GCS Data Docs sites to cleaned
 * [BUGFIX] Correct doc link in checkpoint yml
@@ -2829,13 +2829,13 @@ varundunga!)
 
 0.10.10
 -----------------
-* Removed out-of-date Airflow integration examples. This repo provides a comprehensive example of Airflow integration: `#GE Airflow Example <https://github.com/superconductive/ge_tutorials>`_
+* Removed out-of-date Airflow integration examples. This repo provides a comprehensive example of Airflow integration: `#GX Airflow Example <https://github.com/superconductive/ge_tutorials>`_
 * Bugfix suite scaffold notebook now has correct suite name in first markdown cell.
 * Bugfix: fixed an example in the custom expectations documentation article - "result" key was missing in the returned dictionary
 * Data Docs Bugfix: template string substitution is now done using .safe_substitute(), to handle cases where string templates
   or substitution params have extraneous $ signs. Also added logic to handle templates where intended output has groupings of 2 or more $ signs
 * Docs fix: fix in yml for example action_list_operator for metrics
-* GE is now auto-linted using Black
+* GX is now auto-linted using Black
 
 -----------------
 
@@ -2858,7 +2858,7 @@ varundunga!)
 
 0.10.8
 -----------------
-* added support for overriding the default jupyter command via a GE_JUPYTER_CMD environment variable (#1347) @nehiljain
+* added support for overriding the default jupyter command via a GX_JUPYTER_CMD environment variable (#1347) @nehiljain
 * Bugfix for checkpoint missing template (#1379)
 
 0.10.7
@@ -3011,7 +3011,7 @@ varundunga!)
 * Use filename for default expectation suite name in CLI `init`
 * Tables created by SqlAlchemyDataset use a shorter name with 8 hex characters of randomness instead of a full uuid
 * Better error message when config substitution variable is missing
-* removed an unused directory in the GE folder
+* removed an unused directory in the GX folder
 * removed obsolete config error handling
 * Docs typo fixes
 * Jupyter notebook improvements
@@ -3146,12 +3146,12 @@ us on Slack for questions you don't see addressed!
 
 0.8.5
 -----------------
-* BREAKING CHANGE: move all reader options from the top-level batch_kwargs object to a sub-dictionary called
+* BREAKING CHANGX: move all reader options from the top-level batch_kwargs object to a sub-dictionary called
   "reader_options" for SparkDFDatasource and PandasDatasource. This means it is no longer possible to specify
   supplemental reader-specific options at the top-level of `get_batch`,  `yield_batch_kwargs` or `build_batch_kwargs`
   calls, and instead, you must explicitly specify that they are reader_options, e.g. by a call such as:
   `context.yield_batch_kwargs(data_asset_name, reader_options={'encoding': 'utf-8'})`.
-* BREAKING CHANGE: move all query_params from the top-level batch_kwargs object to a sub-dictionary called
+* BREAKING CHANGX: move all query_params from the top-level batch_kwargs object to a sub-dictionary called
   "query_params" for SqlAlchemyDatasource. This means it is no longer possible to specify supplemental query_params at
   the top-level of `get_batch`,  `yield_batch_kwargs` or `build_batch_kwargs`
   calls, and instead, you must explicitly specify that they are query_params, e.g. by a call such as:
@@ -3236,20 +3236,20 @@ several breaking changes to configs and APIs.
 
 Highlights include:
 
-1. Validation Operators and Actions. Validation operators make it easy to integrate GE into a variety of pipeline runners. They
+1. Validation Operators and Actions. Validation operators make it easy to integrate GX into a variety of pipeline runners. They
    offer one-line integration that emphasizes configurability. See the :ref:`validation_operators_and_actions`
    feature guide for more information.
 
    - The DataContext `get_batch` method no longer treats `expectation_suite_name` or `batch_kwargs` as optional; they
      must be explicitly specified.
-   - The top-level GE validate method allows more options for specifying the specific data_asset class to use.
+   - The top-level GX validate method allows more options for specifying the specific data_asset class to use.
 
 2. First-class support for plugins in a DataContext, with several features that make it easier to configure and
    maintain DataContexts across common deployment patterns.
 
    - **Environments**: A DataContext can now manage :ref:`environment_and_secrets` more easily thanks to more dynamic and
      flexible variable substitution.
-   - **Stores**: A new internal abstraction for DataContexts, :ref:`Stores <reference__core_concepts__data_context__stores>`, make extending GE easier by
+   - **Stores**: A new internal abstraction for DataContexts, :ref:`Stores <reference__core_concepts__data_context__stores>`, make extending GX easier by
      consolidating logic for reading and writing resources from a database, local, or cloud storage.
    - **Types**: Utilities configured in a DataContext are now referenced using `class_name` and `module_name` throughout
      the DataContext configuration, making it easier to extend or supplement pre-built resources. For now, the "type"
@@ -3257,13 +3257,13 @@ Highlights include:
 
 3. Partitioners: Batch Kwargs are clarified and enhanced to help easily reference well-known chunks of data using a
    partition_id. Batch ID and Batch Fingerprint help round out support for enhanced metadata around data
-   assets that GE validates. See :ref:`Batch Identifiers <reference__core_concepts__batch_parameters>` for more information. The `GlobReaderBatchKwargsGenerator`,
+   assets that GX validates. See :ref:`Batch Identifiers <reference__core_concepts__batch_parameters>` for more information. The `GlobReaderBatchKwargsGenerator`,
    `QueryBatchKwargsGenerator`, `S3GlobReaderBatchKwargsGenerator`, `SubdirReaderBatchKwargsGenerator`, and `TableBatchKwargsGenerator` all support partition_id for
    easily accessing data assets.
 
 4. Other Improvements:
 
-   - We're beginning a long process of some under-the-covers refactors designed to make GE more maintainable as we
+   - We're beginning a long process of some under-the-covers refactors designed to make GX more maintainable as we
      begin adding additional features.
    - Restructured documentation: our docs have a new structure and have been reorganized to provide space for more
      easily adding and accessing reference material. Stay tuned for additional detail.
@@ -3295,7 +3295,7 @@ v0.7.9
 * Enhance the Site Index page in documentation so that validation results are sorted and display the newest items first
   when using the default run-id scheme
 * Add a new utility method, `build_continuous_partition_object` which will build partition objects using the dataset
-  API and so supports any GE backend.
+  API and so supports any GX backend.
 * Fix an issue where columns with spaces in their names caused failures in some SqlAlchemyDataset and SparkDFDataset
   expectations
 * Fix an issue where generated queries including null checks failed on MSSQL (#695)
@@ -3324,7 +3324,7 @@ v0.7.8
 -----------------
 * Standardize the way that plugin module loading works. DataContext will begin to use the new-style class and plugin
   identification moving forward; yml configs should specify class_name and module_name (with module_name optional for
-  GE types). For now, it is possible to use the "type" parameter in configuration (as before).
+  GX types). For now, it is possible to use the "type" parameter in configuration (as before).
 * Add support for custom data_asset_type to all datasources
 * Add support for strict_min and strict_max to inequality-based expectations to allow strict inequality checks
   (thanks @RoyalTS!)
@@ -3354,7 +3354,7 @@ v0.7.8
 * New Validation Renderer! Supports turning validation results into HTML and displays differences between the expected
   and the observed attributes of a dataset.
 * Data Documentation sites are now fully configurable; a data context can be configured to generate multiple
-  sites built with different GE objects to support a variety of data documentation use cases. See data documentation
+  sites built with different GX objects to support a variety of data documentation use cases. See data documentation
   guide for more detail.
 * CLI now has a new top-level command, `build-documentation` that can support rendering documentation for specified
   sites and even named data assets in a specific site.
@@ -3423,11 +3423,11 @@ v0.7.8
 0.7.0
 ------------
 
-Version 0.7 of Great Expectations is HUGE. It introduces several major new features
+Version 0.7 of Great Expectations is HUGX. It introduces several major new features
 and a large number of improvements, including breaking API changes.
 
 The core vocabulary of expectations remains consistent. Upgrading to
-the new version of GE will primarily require changes to code that
+the new version of GX will primarily require changes to code that
 uses data contexts; existing expectation suites will require only changes
 to top-level names.
 
@@ -3435,7 +3435,7 @@ to top-level names.
    more support for building and maintaining expectation suites and \
    interacting with existing pipeline systems, including providing a namespace for objects.\
    They can handle integrating, registering, and storing validation results, and
-   provide a namespace for data assets, making **batches** first-class citizens in GE.
+   provide a namespace for data assets, making **batches** first-class citizens in GX.
    Read more: :ref:`data_context` or :py:mod:`great_expectations.data_context`
 
  * Major refactor of autoinspect. Autoinspect is now built around a module
@@ -3503,14 +3503,14 @@ to top-level names.
 
 0.6.0
 ------------
-* Add support for SparkDFDataset and caching (HUGE work from @cselig)
+* Add support for SparkDFDataset and caching (HUGX work from @cselig)
 * Migrate distributional expectations to new testing framework
 * Add support for two new expectations: expect_column_distinct_values_to_contain_set
   and expect_column_distinct_values_to_equal_set (thanks @RoyalTS)
-* FUTURE BREAKING CHANGE: The new cache mechanism for Datasets, \
-  when enabled, causes GE to assume that dataset does not change between evaluation of individual expectations. \
+* FUTURE BREAKING CHANGX: The new cache mechanism for Datasets, \
+  when enabled, causes GX to assume that dataset does not change between evaluation of individual expectations. \
   We anticipate this will become the future default behavior.
-* BREAKING CHANGE: Drop official support pandas < 0.22
+* BREAKING CHANGX: Drop official support pandas < 0.22
 
 0.5.1
 ---------------

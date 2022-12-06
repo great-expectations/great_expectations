@@ -200,7 +200,7 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
                 ):
                     """Execute the two sample KS test on two columns of data that are expected to be **histograms** with
                     aligned values/points on the CDF. ."""
-                    LARGE_N = 10000  # 'auto' will attempt to be exact if n1,n2 <= LARGE_N
+                    LARGX_N = 10000  # 'auto' will attempt to be exact if n1,n2 <= LARGX_N
 
                     # We will assume that these are already HISTOGRAMS created as a check_dataset
                     # either of binned values or of (ordered) value counts
@@ -231,7 +231,7 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
                     prob = -np.inf
                     original_mode = mode
                     if mode == 'auto':
-                        if max(n1, n2) <= LARGE_N:
+                        if max(n1, n2) <= LARGX_N:
                             mode = 'exact'
                         else:
                             mode = 'asymp'
@@ -454,7 +454,7 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
 
            Once you’ve decided on an Expectation to implement, think of the different aggregations, mappings, or metadata you’ll need to validate your data within the Expectation - each of these will be a separate metric that must be implemented prior to validating your Expectation.
 
-           Fortunately, many Metrics have already been implemented for pre-existing Expectations, so it is possible you will find that the Metric you’d like to implement already exists within the GE framework and can be readily deployed.
+           Fortunately, many Metrics have already been implemented for pre-existing Expectations, so it is possible you will find that the Metric you’d like to implement already exists within the GX framework and can be readily deployed.
 
 
         #. **Implement your Metric**

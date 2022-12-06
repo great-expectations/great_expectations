@@ -383,7 +383,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         **kwargs,
     ):
         """
-        Rendering function that is utilized by GE Cloud Front-end
+        Rendering function that is utilized by GX Cloud Front-end
         """
         (
             header_template_str,

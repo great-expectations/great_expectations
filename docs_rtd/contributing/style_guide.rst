@@ -9,7 +9,7 @@ Style Guide
 General conventions
 -------------------
 
-* **The project name "Great Expectations" is always spaced and capitalized.** Good: "Great Expectations". Bad: "great_expectations", "great expectations", "GE."
+* **The project name "Great Expectations" is always spaced and capitalized.** Good: "Great Expectations". Bad: "great_expectations", "great expectations", "GX."
 * **We refer to ourselves in the first person plural.** Good: "we", "our". Bad: "I". This helps us avoid awkward passive sentences. Occasionally, we refer to ourselves as "the Great Expectations team" (or community) for clarity.
 * **We refer to developers and users as "you".** Good: "you can," "you might want to."
 * **We reserve the word "should" for strong directives, not just helpful guidance.**
@@ -116,8 +116,8 @@ Within the table of contents, each section has specific role to play. Broadly sp
     * Abbreviated link to a class: ``:py:class:`~great_expectations.data_context.data_context.BaseDataContext``` :py:class:`~great_expectations.data_context.data_context.BaseDataContext`
     * Link to a method in a class: ``:py:meth:`great_expectations.data_context.data_context.BaseDataContext.validate_config``` :py:meth:`great_expectations.data_context.data_context.BaseDataContext.validate_config`
     * Abbreviated link to a method in a class: ``:py:meth:`~great_expectations.data_context.data_context.BaseDataContext.validate_config``` :py:meth:`~great_expectations.data_context.data_context.BaseDataContext.validate_config`
-    * Link to an attribute in a class: ``:py:attr:`great_expectations.data_context.data_context.BaseDataContext.GE_DIR``` :py:attr:`great_expectations.data_context.data_context.BaseDataContext.GE_DIR`
-    * Abbreviated link to an attribute in a class: ``:py:attr:`~great_expectations.data_context.data_context.BaseDataContext.GE_DIR``` :py:attr:`~great_expectations.data_context.data_context.BaseDataContext.GE_DIR`
+    * Link to an attribute in a class: ``:py:attr:`great_expectations.data_context.data_context.BaseDataContext.GX_DIR``` :py:attr:`great_expectations.data_context.data_context.BaseDataContext.GX_DIR`
+    * Abbreviated link to an attribute in a class: ``:py:attr:`~great_expectations.data_context.data_context.BaseDataContext.GX_DIR``` :py:attr:`~great_expectations.data_context.data_context.BaseDataContext.GX_DIR`
     * Link to a function in a module: ``:py:attr:`great_expectations.jupyter_ux.display_column_evrs_as_section``` :py:attr:`great_expectations.jupyter_ux.display_column_evrs_as_section`
     * Abbreviated to a function in a module: ``:py:attr:`~great_expectations.jupyter_ux.display_column_evrs_as_section``` :py:attr:`~great_expectations.jupyter_ux.display_column_evrs_as_section`
 

@@ -55,7 +55,7 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
     """
     # PostgreSQL (if installed in test environment)
     # default
-    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+    db_hostname = os.getenv("GX_TEST_LOCAL_DB_HOSTNAME", "localhost")
     try:
         assert (
             PasswordMasker.mask_db_url(
@@ -168,7 +168,7 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
     )
 
     # Oracle (if installed in test environment)
-    url_host = os.getenv("GE_TEST_LOCALHOST_URL", "127.0.0.1")
+    url_host = os.getenv("GX_TEST_LOCALHOST_URL", "127.0.0.1")
     try:
         assert (
             PasswordMasker.mask_db_url(f"oracle://scott:tiger@{url_host}:1521/sidname")
@@ -335,7 +335,7 @@ def test_sanitize_config_masks_cloud_store_backend_access_tokens(
                 ]["ge_cloud_credentials"]["access_token"]
                 == ge_cloud_access_token
             )
-            # expect that the GE Cloud token has been obscured
+            # expect that the GX Cloud token has been obscured
             assert (
                 store_config["store_backend"]["ge_cloud_credentials"]["access_token"]
                 != ge_cloud_access_token

@@ -35,7 +35,7 @@ class DataConnector:
     A Batch is the primary unit of validation in the Great Expectations DataContext.
     Batches include metadata that identifies how they were constructed--the same “batch_spec”
     assembled by the data connector, While not every Datasource will enable re-fetching a
-    specific batch of data, GE can store snapshots of batches or store metadata from an
+    specific batch of data, GX can store snapshots of batches or store metadata from an
     external data version control system.
     """
 

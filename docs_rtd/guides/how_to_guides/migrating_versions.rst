@@ -322,7 +322,7 @@ How to use the project ``check-config`` command
 
             * The command will display this message when done: ``Your config file appears valid!``.
 
-            * Rename your Expectation Suites to make them compatible with the new naming. Save this Python code snippet in a file called ``update_project.py``, then run it using the command: ``python update_project.py PATH_TO_GE_CONFIG_DIRECTORY``:
+            * Rename your Expectation Suites to make them compatible with the new naming. Save this Python code snippet in a file called ``update_project.py``, then run it using the command: ``python update_project.py PATH_TO_GX_CONFIG_DIRECTORY``:
 
             .. code-block:: python
 
@@ -438,7 +438,7 @@ How to use the project ``check-config`` command
             * This project has now been migrated to 0.9.0. Please see the list of changes below for more detailed information.
 
 
-            CONFIGURATION CHANGES:
+            CONFIGURATION CHANGXS:
 
             - FixedLengthTupleXXXX stores are renamed to TupleXXXX stores; they no
               longer allow or require (or allow) a key_length to be specified, but they
@@ -464,7 +464,7 @@ How to use the project ``check-config`` command
               will need to update their code. For example, a pandas datasource would use
               `reader_method: read_csv`` instead of `reader_method: csv`
 
-            CODE CHANGES:
+            CODE CHANGXS:
 
             - DataAssetName and name normalization have been completely eliminated, which
               causes several related changes to code using the DataContext.
@@ -540,7 +540,7 @@ How to use the project ``check-config`` command
             How to upgrade to 0.7.x
             ***********************
 
-            In version 0.7, GE introduced several new features, and significantly changed the way DataContext objects work:
+            In version 0.7, GX introduced several new features, and significantly changed the way DataContext objects work:
 
              - A :ref:`data_context` object manages access to expectation suites and other configuration in addition to data assets.
                It provides a flexible but opinionated structure for creating and storing configuration and expectations in version
@@ -853,7 +853,7 @@ How to use the project ``check-config`` command
 
             * The command will display this message when done: ``Your config file appears valid!``.
 
-            * Rename your Expectation Suites to make them compatible with the new naming. Save this Python code snippet in a file called ``update_project.py``, then run it using the command: ``python update_project.py PATH_TO_GE_CONFIG_DIRECTORY``:
+            * Rename your Expectation Suites to make them compatible with the new naming. Save this Python code snippet in a file called ``update_project.py``, then run it using the command: ``python update_project.py PATH_TO_GX_CONFIG_DIRECTORY``:
 
             .. code-block:: python
 
@@ -969,7 +969,7 @@ How to use the project ``check-config`` command
             * This project has now been migrated to 0.9.0. Please see the list of changes below for more detailed information.
 
 
-            CONFIGURATION CHANGES:
+            CONFIGURATION CHANGXS:
 
             - FixedLengthTupleXXXX stores are renamed to TupleXXXX stores; they no
               longer allow or require (or allow) a key_length to be specified, but they
@@ -995,7 +995,7 @@ How to use the project ``check-config`` command
               will need to update their code. For example, a pandas datasource would use
               `reader_method: read_csv`` instead of `reader_method: csv`
 
-            CODE CHANGES:
+            CODE CHANGXS:
 
             - DataAssetName and name normalization have been completely eliminated, which
               causes several related changes to code using the DataContext.
@@ -1071,7 +1071,7 @@ How to use the project ``check-config`` command
             How to upgrade to 0.7.x
             ***********************
 
-            In version 0.7, GE introduced several new features, and significantly changed the way DataContext objects work:
+            In version 0.7, GX introduced several new features, and significantly changed the way DataContext objects work:
 
              - A :ref:`data_context` object manages access to expectation suites and other configuration in addition to data assets.
                It provides a flexible but opinionated structure for creating and storing configuration and expectations in version

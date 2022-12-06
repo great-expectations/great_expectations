@@ -43,7 +43,7 @@ from great_expectations.exceptions import (
     BatchKwargsError,
     DatasourceInitializationError,
 )
-from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.validator.validator import BridgeValidator
 
 logger = logging.getLogger(__name__)
@@ -64,7 +64,7 @@ class DatasourceTypes(enum.Enum):
     # TODO DBT = "dbt"
 
 
-MANUAL_GENERATOR_CLASSES = ManualBatchKwargsGenerator
+MANUAL_GXNERATOR_CLASSES = ManualBatchKwargsGenerator
 
 
 class SupportedDatabases(enum.Enum):
@@ -498,7 +498,7 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
     # with the datasource's name as the variable name.
     # The value of the datasource's "credentials" key in the config file (great_expectations.yml) will
     # be ${datasource name}.
-    # GE will replace the ${datasource name} with the value from the credentials file in runtime.
+    # GX will replace the ${datasource name} with the value from the credentials file in runtime.
 
     while True:
         cli_message(msg_db_config.format(datasource_name))
@@ -606,7 +606,7 @@ After you connect to the datasource, run great_expectations init to continue.
 
 """.format(
                         datasource_name,
-                        DataContext.GE_YML,
+                        DataContext.GX_YML,
                         context.get_config()["config_variables_file_path"],
                         rtd_url_ge_version,
                         selected_database.value.lower(),
@@ -1368,7 +1368,7 @@ Would you like to continue?"""
     temp_table_kwargs = {}
     datasource = context.get_datasource(datasource_name)
 
-    if datasource.engine.dialect.name.lower() == GESqlDialect.BIGQUERY:
+    if datasource.engine.dialect.name.lower() == GXSqlDialect.BIGQUERY:
         # bigquery table needs to contain the project id if it differs from the credentials project
         if len(data_asset_name.split(".")) < 3:
             project_id, _, _, _, _, _ = parse_bigquery_url(datasource.engine.url)
@@ -1578,13 +1578,13 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 )
             elif (
                 profiling_results["error"]["code"]
-                == DataContext.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND
+                == DataContext.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GXNERATORS_FOUND
             ):
                 cli_message(msg_error_multiple_generators_found.format(datasource_name))
                 sys.exit(1)
             elif (
                 profiling_results["error"]["code"]
-                == DataContext.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND
+                == DataContext.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GXNERATORS_FOUND
             ):
                 cli_message(msg_error_no_generators_found.format(datasource_name))
                 sys.exit(1)

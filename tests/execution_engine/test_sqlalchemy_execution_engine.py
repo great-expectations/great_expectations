@@ -15,7 +15,7 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -90,7 +90,7 @@ def test_instantiation_via_url_and_retrieve_data_with_other_dialect(sa):
     assert my_execution_engine.credentials is None
     assert my_execution_engine.url[-36:] == "test_cases_for_sql_data_connector.db"
 
-    # 2. Change dialect to one not listed in GESqlDialect
+    # 2. Change dialect to one not listed in GXSqlDialect
     my_execution_engine.engine.dialect.name = "other_dialect"
 
     # 3. Get data
@@ -105,7 +105,7 @@ def test_instantiation_via_url_and_retrieve_data_with_other_dialect(sa):
 
     # 4. Assert dialect and data are as expected
 
-    assert batch_data.dialect == GESqlDialect.OTHER
+    assert batch_data.dialect == GXSqlDialect.OTHER
 
     my_execution_engine.load_batch_data("__", batch_data)
     validator = Validator(my_execution_engine)
@@ -121,7 +121,7 @@ def test_instantiation_via_credentials(sa, test_backends, test_df):
             "drivername": "postgresql",
             "username": "postgres",
             "password": "",
-            "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
+            "host": os.getenv("GX_TEST_LOCAL_DB_HOSTNAME", "localhost"),
             "port": "5432",
             "database": "test_ci",
         }
@@ -130,7 +130,7 @@ def test_instantiation_via_credentials(sa, test_backends, test_df):
     assert my_execution_engine.credentials == {
         "username": "postgres",
         "password": "",
-        "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
+        "host": os.getenv("GX_TEST_LOCAL_DB_HOSTNAME", "localhost"),
         "port": "5432",
         "database": "test_ci",
     }
@@ -319,7 +319,7 @@ def test_get_domain_records_with_column_domain_and_filter_conditions(sa):
             "filter_conditions": [
                 RowCondition(
                     condition=f'col("b").notnull()',
-                    condition_type=RowConditionParserType.GE,
+                    condition_type=RowConditionParserType.GX,
                 )
             ],
         }
@@ -352,7 +352,7 @@ def test_get_domain_records_with_different_column_domain_and_filter_conditions(s
             "filter_conditions": [
                 RowCondition(
                     condition=f'col("b").notnull()',
-                    condition_type=RowConditionParserType.GE,
+                    condition_type=RowConditionParserType.GX,
                 )
             ],
         }
@@ -388,11 +388,11 @@ def test_get_domain_records_with_column_domain_and_filter_conditions_raises_erro
                 "filter_conditions": [
                     RowCondition(
                         condition=f'col("b").notnull()',
-                        condition_type=RowConditionParserType.GE,
+                        condition_type=RowConditionParserType.GX,
                     ),
                     RowCondition(
                         condition=f'col("c").notnull()',
-                        condition_type=RowConditionParserType.GE,
+                        condition_type=RowConditionParserType.GX,
                     ),
                 ],
             }

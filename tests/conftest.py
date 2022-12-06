@@ -336,7 +336,7 @@ def pytest_collection_modifyitems(config, items):
 @pytest.fixture(autouse=True)
 def no_usage_stats(monkeypatch):
     # Do not generate usage stats from test runs
-    monkeypatch.setenv("GE_USAGE_STATS", "False")
+    monkeypatch.setenv("GX_USAGX_STATS", "False")
 
 
 @pytest.fixture(scope="module")
@@ -732,7 +732,7 @@ def postgresql_engine(test_backend):
         try:
             import sqlalchemy as sa
 
-            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+            db_hostname = os.getenv("GX_TEST_LOCAL_DB_HOSTNAME", "localhost")
             engine = sa.create_engine(
                 f"postgresql://postgres@{db_hostname}/test_ci"
             ).connect()
@@ -750,7 +750,7 @@ def mysql_engine(test_backend):
         try:
             import sqlalchemy as sa
 
-            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+            db_hostname = os.getenv("GX_TEST_LOCAL_DB_HOSTNAME", "localhost")
             engine = sa.create_engine(
                 f"mysql+pymysql://root@{db_hostname}/test_ci"
             ).connect()
@@ -782,8 +782,8 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     tmp_path_factory,
     monkeypatch,
 ):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    # Re-enable GX_USAGX_STATS
+    monkeypatch.delenv("GX_USAGX_STATS")
 
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")
@@ -1001,8 +1001,8 @@ def deterministic_asset_dataconnector_context(
     tmp_path_factory,
     monkeypatch,
 ):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    # Re-enable GX_USAGX_STATS
+    monkeypatch.delenv("GX_USAGX_STATS")
 
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
@@ -1095,7 +1095,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
             },
         ],
         evaluation_parameters={
-            "environment": "$GE_ENVIRONMENT",
+            "environment": "$GX_ENVIRONMENT",
             "tolerance": 1.0e-2,
             "aux_param_0": "$MY_PARAM",
             "aux_param_1": "1 + $MY_PARAM",
@@ -1206,7 +1206,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
             },
         ],
         evaluation_parameters={
-            "environment": "$GE_ENVIRONMENT",
+            "environment": "$GX_ENVIRONMENT",
             "tolerance": 1.0e-2,
             "aux_param_0": "$MY_PARAM",
             "aux_param_1": "1 + $MY_PARAM",
@@ -1256,7 +1256,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
             },
         ],
         evaluation_parameters={
-            "environment": "$GE_ENVIRONMENT",
+            "environment": "$GX_ENVIRONMENT",
             "tolerance": 1.0e-2,
             "aux_param_0": "$MY_PARAM",
             "aux_param_1": "1 + $MY_PARAM",
@@ -1363,8 +1363,8 @@ def empty_context_with_checkpoint(empty_data_context):
 
 @pytest.fixture
 def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
+    # Re-enable GX_USAGX_STATS
+    monkeypatch.delenv("GX_USAGX_STATS", raising=False)
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
     context = gx.data_context.DataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
@@ -1438,8 +1438,8 @@ def titanic_data_context_no_data_docs(tmp_path_factory):
 
 @pytest.fixture
 def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    # Re-enable GX_USAGX_STATS
+    monkeypatch.delenv("GX_USAGX_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
@@ -1461,8 +1461,8 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
 
 @pytest.fixture
 def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkeypatch):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    # Re-enable GX_USAGX_STATS
+    monkeypatch.delenv("GX_USAGX_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
@@ -1484,8 +1484,8 @@ def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkey
 
 @pytest.fixture
 def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkeypatch):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    # Re-enable GX_USAGX_STATS
+    monkeypatch.delenv("GX_USAGX_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
@@ -1753,7 +1753,7 @@ def site_builder_data_context_v013_with_html_store_titanic_random(
 @pytest.fixture
 def v20_project_directory(tmp_path_factory):
     """
-    GE config_version: 2 project for testing upgrade helper
+    GX config_version: 2 project for testing upgrade helper
     """
     project_path = str(tmp_path_factory.mktemp("v20_project"))
     context_root_dir = os.path.join(project_path, "great_expectations")
@@ -2517,9 +2517,9 @@ def ge_cloud_config_e2e() -> GXCloudConfig:
     """
     Uses live credentials stored in the Great Expectations Cloud backend.
     """
-    base_url = os.environ["GE_CLOUD_BASE_URL"]
-    organization_id = os.environ["GE_CLOUD_ORGANIZATION_ID"]
-    access_token = os.environ["GE_CLOUD_ACCESS_TOKEN"]
+    base_url = os.environ["GX_CLOUD_BASE_URL"]
+    organization_id = os.environ["GX_CLOUD_ORGANIZATION_ID"]
+    access_token = os.environ["GX_CLOUD_ACCESS_TOKEN"]
     ge_cloud_config = GXCloudConfig(
         base_url=base_url,
         organization_id=organization_id,
@@ -2826,7 +2826,7 @@ def alice_columnar_table_single_batch(empty_data_context):
             expectation_type="expect_column_values_to_be_of_type",
             kwargs={
                 "column": "user_id",
-                "type_": "INTEGER",
+                "type_": "INTEGXR",
             },
             meta={},
         ),
@@ -3065,7 +3065,7 @@ def alice_columnar_table_single_batch(empty_data_context):
         "name": "alice user workflow",
         "config_version": 1.0,
         "variables": {
-            "integer_type": "INTEGER",
+            "integer_type": "INTEGXR",
             "timestamp_type": "TIMESTAMP",
             "very_small_user_id": 1000,
             "very_large_user_id": 999999999999,
@@ -6416,8 +6416,8 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
     tmp_path_factory,
     monkeypatch,
 ) -> DataContext:
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    # Re-enable GX_USAGX_STATS
+    monkeypatch.delenv("GX_USAGX_STATS")
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
@@ -6660,8 +6660,8 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
     This fixture generates three years' worth (36 months; i.e., 36 batches) of taxi trip data with the number of rows
     of a batch sampled from a normal distribution with the mean of 5,000 rows and the standard deviation of 1,000 rows.
     """
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
+    # Re-enable GX_USAGX_STATS
+    monkeypatch.delenv("GX_USAGX_STATS", raising=False)
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
@@ -6841,8 +6841,8 @@ def quentin_columnar_table_multi_batch_data_context(
     This fixture generates three years' worth (36 months; i.e., 36 batches) of taxi trip data with the number of rows
     of each batch being equal to the original number per log file (10,000 rows).
     """
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    # Re-enable GX_USAGX_STATS
+    monkeypatch.delenv("GX_USAGX_STATS")
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
