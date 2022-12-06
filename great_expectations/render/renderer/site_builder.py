@@ -304,7 +304,7 @@ class SiteBuilder:
         for site_section_builder in self.site_section_builders.values():
             site_section_builder.build(resource_identifiers=resource_identifiers)
 
-        # GE Cloud supports JSON Site Data Docs
+        # GX Cloud supports JSON Site Data Docs
         # Skip static assets, indexing
         if self.ge_cloud_mode:
             return
