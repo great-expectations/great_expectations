@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -11,6 +11,10 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererSchemaType,
+)
 from great_expectations.render.util import (
     handle_strict_min_max,
     parse_row_condition_string_pandas_engine,
@@ -28,6 +32,9 @@ from great_expectations.rule_based_profiler.parameter_container import (
     PARAMETER_KEY,
     VARIABLES_KEY,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import RendererParams
 
 
 class ExpectColumnStdevToBeBetween(ColumnExpectation):
@@ -187,7 +194,7 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
     )
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -203,61 +210,26 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
+        renderer_configuration: RendererConfiguration,
     ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        add_param_args = (
+            ("column", RendererSchemaType.STRING),
+            ("min_value", RendererSchemaType.NUMBER),
+            ("min_value", RendererSchemaType.NUMBER),
+            ("parse_strings_as_datetimes", RendererSchemaType.BOOLEAN),
+            ("row_condition", RendererSchemaType.STRING),
+            ("condition_parser", RendererSchemaType.STRING),
+            ("strict_min", RendererSchemaType.BOOLEAN),
+            ("strict_max", RendererSchemaType.BOOLEAN),
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            [
-                "column",
-                "min_value",
-                "max_value",
-                "row_condition",
-                "condition_parser",
-                "strict_min",
-                "strict_max",
-            ],
-        )
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "min_value": {
-                "schema": {"type": "number"},
-                "value": params.get("min_value"),
-            },
-            "max_value": {
-                "schema": {"type": "number"},
-                "value": params.get("max_value"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-            "strict_min": {
-                "schema": {"type": "boolean"},
-                "value": params.get("strict_min"),
-            },
-            "strict_max": {
-                "schema": {"type": "boolean"},
-                "value": params.get("strict_max"),
-            },
-        }
+        for name, schema_type in add_param_args:
+            renderer_configuration.add_param(name=name, schema_type=schema_type)
 
-        template_str: str = ""
+        params: RendererParams = renderer_configuration.params
 
-        if (params["min_value"] is None) and (params["max_value"] is None):
+        if not params.min_value and not params.max_value:
             template_str = "standard deviation may have any numerical value."
         else:
             at_least_str, at_most_str = handle_strict_min_max(params)
@@ -266,23 +238,22 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
                 template_str = f"standard deviation must be {at_least_str} $min_value and {at_most_str} $max_value."
             elif params["min_value"] is None:
                 template_str = f"standard deviation must be {at_most_str} $max_value."
-            elif params["max_value"] is None:
+            else:
                 template_str = f"standard deviation must be {at_least_str} $min_value."
 
-        if include_column_name:
+        if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
+        if params.row_condition:
+            renderer_configuration = cls._add_row_condition_params(
+                renderer_configuration=renderer_configuration
             )
-            template_str = f"{conditional_template_str}, then {template_str}"
-            params_with_json_schema.update(conditional_params)
+            row_condition_str: str = cls._get_row_condition_string(
+                renderer_configuration=renderer_configuration
+            )
+            template_str = f"{row_condition_str}, then {template_str}"
 
-        return template_str, params_with_json_schema, styling
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
