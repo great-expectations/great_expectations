@@ -1967,7 +1967,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         expectation_type: Optional[str] = None,
     ) -> alt.Chart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            TintsAndShades.MIDNIGHT_BLUE_30
+            TintsAndShades.ROYAL_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2095,7 +2095,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         expectation_type: Optional[str] = None,
     ) -> alt.LayerChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            TintsAndShades.MIDNIGHT_BLUE_30
+            TintsAndShades.ROYAL_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2198,7 +2198,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             )
             bar_color_condition: alt.condition = alt.condition(
                 predicate=predicate,
-                if_false=alt.value(SecondaryColors.LEAF_GREEN),
+                if_false=alt.value(SecondaryColors.ROYAL_BLUE),
                 if_true=alt.value(SecondaryColors.POMEGRANATE_PINK),
             )
 
@@ -2224,7 +2224,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         expectation_type: Optional[str] = None,
     ) -> alt.Chart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            TintsAndShades.MIDNIGHT_BLUE_30
+            TintsAndShades.ROYAL_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2589,7 +2589,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         predicates: List[Union[bool, int]],
     ) -> alt.LayerChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            TintsAndShades.MIDNIGHT_BLUE_30
+            TintsAndShades.ROYAL_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2740,7 +2740,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         predicates: List[Union[bool, int]],
     ) -> alt.VConcatChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            TintsAndShades.MIDNIGHT_BLUE_30
+            TintsAndShades.ROYAL_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2852,7 +2852,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             bar_color_condition: alt.condition = alt.condition(
                 predicate=predicates[idx],
                 if_false=alt.value(SecondaryColors.POMEGRANATE_PINK),
-                if_true=alt.value(SecondaryColors.LEAF_GREEN),
+                if_true=alt.value(SecondaryColors.ROYAL_BLUE),
             )
 
             bars.layer[idx] = bar_layer.encode(
@@ -2878,7 +2878,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         predicates: List[Union[bool, int]],
     ) -> alt.LayerChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            TintsAndShades.MIDNIGHT_BLUE_30
+            TintsAndShades.ROYAL_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 

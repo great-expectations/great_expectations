@@ -72,10 +72,10 @@ ordinal_color_scheme = ColorPalettes.ORDINAL_5.value
 
 # Area
 fill_opacity = 0.5
-fill_color = TintsAndShades.MIDNIGHT_BLUE_20
+fill_color = TintsAndShades.ROYAL_BLUE_20
 
 # Line Chart
-line_color = SecondaryColors.MIDNIGHT_BLUE
+line_color = SecondaryColors.ROYAL_BLUE
 line_stroke_width = 2.5
 line_opacity = 0.9
 
@@ -86,7 +86,7 @@ point_filled = True
 point_opacity = 1.0
 
 # Bar Chart
-bar_color = SecondaryColors.MIDNIGHT_BLUE
+bar_color = SecondaryColors.ROYAL_BLUE
 bar_opacity = 0.7
 bar_stroke_color = SecondaryColors.MIDNIGHT_BLUE
 bar_stroke_width = 1
