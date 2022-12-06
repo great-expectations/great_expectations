@@ -1,7 +1,10 @@
 from textwrap import dedent
 from typing import Any, Callable, TypeVar
 
-import docstring_parser
+try:
+    import docstring_parser
+except ImportError:
+    docstring_parser = None
 
 WHITELISTED_TAG = "--Public API--"
 
@@ -216,6 +219,8 @@ def _add_text_below_string_docstring_argument(
 ) -> str:
     """Add text below an argument in a docstring.
 
+    If docstring_parser is not installed, this returns the unmodified docstring.
+
     Note: Can be used for rst directives.
 
     Args:
@@ -226,24 +231,27 @@ def _add_text_below_string_docstring_argument(
     Returns:
         Modified docstring.
     """
-    parsed_docstring = docstring_parser.parse(docstring)
+    if docstring_parser:
+        parsed_docstring = docstring_parser.parse(docstring)
 
-    if argument_name not in (param.arg_name for param in parsed_docstring.params):
-        raise ValueError(
-            f"Please specify an existing argument, you specified {argument_name}."
+        if argument_name not in (param.arg_name for param in parsed_docstring.params):
+            raise ValueError(
+                f"Please specify an existing argument, you specified {argument_name}."
+            )
+
+        for idx, param in enumerate(parsed_docstring.params):
+            if param.arg_name == argument_name:
+                # description can be None
+                if not parsed_docstring.params[idx]:
+                    parsed_docstring.params[idx].description = text
+                else:
+                    parsed_docstring.params[idx].description += "\n\n" + text + "\n\n"
+
+        # RenderingStyle.Expanded used to make sure any line breaks before and
+        # after the added text are included.
+        return docstring_parser.compose(
+            docstring=parsed_docstring,
+            rendering_style=docstring_parser.RenderingStyle.EXPANDED,
         )
-
-    for idx, param in enumerate(parsed_docstring.params):
-        if param.arg_name == argument_name:
-            # description can be None
-            if not parsed_docstring.params[idx]:
-                parsed_docstring.params[idx].description = text
-            else:
-                parsed_docstring.params[idx].description += "\n\n" + text + "\n\n"
-
-    # RenderingStyle.Expanded used to make sure any line breaks before and
-    # after the added text are included.
-    return docstring_parser.compose(
-        docstring=parsed_docstring,
-        rendering_style=docstring_parser.RenderingStyle.EXPANDED,
-    )
+    else:
+        return docstring
