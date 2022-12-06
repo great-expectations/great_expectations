@@ -29,8 +29,8 @@ All of the examples below assume you’re testing configurations using something
 
 .. code-block:: python
 
-    import great_expectations as ge
-    context = ge.DataContext()
+    import great_expectations as gx
+    context = gx.DataContext()
 
     context.test_yaml_config("""
     my_data_source:

@@ -87,14 +87,14 @@ If the current version of the ``GreatExpectationsOperator`` does not support you
 
     from airflow import AirflowException
     from airflow.operators.python_operator import PythonOperator
-    import great_expectations as ge
+    import great_expectations as gx
 
     ...
 
     def validate_data(ds, **kwargs):
 
         # Retrieve your data context
-        context = ge.data_context.DataContext(<insert path to your great_expectations.yml>)
+        context = gx.data_context.DataContext(<insert path to your great_expectations.yml>)
 
         # Create your batch_kwargs
         batch_kwargs_file = {

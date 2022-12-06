@@ -1,7 +1,7 @@
 import os
 
 # <snippet>
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import RuntimeBatchRequest
 
 # </snippet>
@@ -10,7 +10,7 @@ from great_expectations.core.yaml_handler import YAMLHandler
 yaml = YAMLHandler()
 
 # <snippet>
-context = ge.get_context()
+context = gx.get_context()
 # </snippet>
 
 # NOTE: The following code is only for testing and depends on an environment

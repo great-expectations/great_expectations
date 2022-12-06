@@ -36,11 +36,11 @@ If you have the following ``reports`` directory in your filesystem, and you want
 
   .. code-block:: python
 
-    import great_expectations as ge
+    import great_expectations as gx
     from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource
     from great_expectations.core.batch import BatchRequest
 
-    context = ge.get_context()
+    context = gx.get_context()
 
 
 2. **Configure a Datasource**
@@ -105,7 +105,7 @@ If you have the following ``reports`` directory in your filesystem, and you want
 
     # save the configuration and re-instantiate the data context with our newly configured datasource
     sanitize_yaml_and_save_datasource(context, config, overwrite_existing=False)
-    context = ge.get_context()
+    context = gx.get_context()
 
 5. **Obtain an ExpectationSuite**
 

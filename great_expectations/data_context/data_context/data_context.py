@@ -10,6 +10,7 @@ from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
@@ -71,35 +72,28 @@ class DataContext(BaseDataContext):
     store Expectations, Profilers, Checkpoints, Metrics, Validation Results and Data Docs and how those Stores are
     configured. Take a look at our documentation for more configuration options.
 
-    You can create or load a DataContext from disk via the following:
-    ```
-    import great_expectations as ge
-    ge.get_context()
-    ```
-
     --Public API--
 
     --Documentation--
-        https://docs.greatexpectations.io/docs/terms/data_context
+        - https://docs.greatexpectations.io/docs/terms/data_context
+
     """
 
     @classmethod
+    @public_api
     def create(
         cls,
         project_root_dir: Optional[str] = None,
         usage_statistics_enabled: bool = True,
         runtime_environment: Optional[dict] = None,
     ) -> DataContext:
-        """
-        Build a new great_expectations directory and DataContext object in the provided project_root_dir.
+        """Build a new great_expectations directory and DataContext object in the provided project_root_dir.
 
         `create` will create a new "great_expectations" directory in the provided folder, provided one does not
         already exist. Then, it will initialize a new DataContext in that folder and write the resulting config.
 
-        --Public API--
-
         --Documentation--
-            https://docs.greatexpectations.io/docs/terms/data_context
+            - https://docs.greatexpectations.io/docs/terms/data_context
 
         Args:
             project_root_dir: path to the root directory in which to create a new great_expectations directory

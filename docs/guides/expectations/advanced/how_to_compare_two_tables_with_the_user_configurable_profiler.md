@@ -45,7 +45,7 @@ To begin, we'll need to set up our imports and instantiate our <TechnicalTag tag
 :::note
 Depending on your use-case, workflow, and directory structures, you may need to update you context root directory as follows:
 ```python
-context = ge.data_context.DataContext( 
+context = gx.data_context.DataContext( 
     context_root_dir='/my/context/root/directory/great_expectations'
 )
 ```
@@ -132,7 +132,7 @@ To begin, we'll need to set up our imports and instantiate our <TechnicalTag tag
 :::note
 Depending on your use-case, workflow, and directory structures, you may need to update you context root directory as follows:
 ```python
-context = ge.data_context.DataContext( 
+context = gx.data_context.DataContext( 
     context_root_dir='/my/context/root/directory/great_expectations'
 )
 ```
