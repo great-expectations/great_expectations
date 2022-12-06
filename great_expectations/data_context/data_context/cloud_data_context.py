@@ -79,7 +79,7 @@ class CloudDataContext(AbstractDataContext):
             project_config (DataContextConfig): config for CloudDataContext
             runtime_environment (dict):  a dictionary of config variables that override both those set in
                 config_variables.yml and the environment
-            gx_cloud_config (GXCloudConfig): GXCloudConfig corresponding to current CloudDataContext
+            cloud_config (GXCloudConfig): GXCloudConfig corresponding to current CloudDataContext
         """
         self._cloud_mode = True  # property needed for backward compatibility
 
@@ -311,6 +311,12 @@ class CloudDataContext(AbstractDataContext):
         conf_file_section: str,
         conf_file_option: str,
     ) -> Optional[str]:
+        """
+        Utility to gradually deprecate environment variables prefixed with `GE`.
+
+        This method is aimed to initially attempt retrieval with the `GX` prefix
+        and only attempt to grab the deprecated value if unsuccessful.
+        """
         val = cls._get_global_config_value(
             environment_variable=primary_environment_variable,
             conf_file_section=conf_file_section,
