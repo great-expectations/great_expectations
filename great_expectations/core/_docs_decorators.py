@@ -1,7 +1,7 @@
 from textwrap import dedent
 from typing import Callable, TypeVar, Any, List
 
-from docstring_parser import compose, parse
+import docstring_parser
 
 WHITELISTED_TAG = "--Public API--"
 
@@ -154,7 +154,7 @@ def _add_text_below_docstring_argument(
     Returns:
         Modified docstring.
     """
-    parsed_docstring = parse(docstring)
+    parsed_docstring = docstring_parser.parse(docstring)
 
     if not argument_name in (param.arg_name for param in parsed_docstring.params):
         raise ValueError(
@@ -169,7 +169,12 @@ def _add_text_below_docstring_argument(
             else:
                 parsed_docstring.params[idx].description += "\n\n" + text + "\n\n"  # type: ignore[operator]
 
-    return compose(parsed_docstring)
+    # RenderingStyle.Expanded used to make sure any line breaks before and
+    # after the added text are included.
+    return docstring_parser.compose(
+        docstring=parsed_docstring,
+        rendering_style=docstring_parser.RenderingStyle.EXPANDED,
+    )
 
 
 def new_method(
@@ -210,9 +215,7 @@ def _decorate_with_new_method(
     return func
 
 
-def _add_text_to_method_docstring(
-    split_docstring: List[str], text: str
-) -> str:
+def _add_text_to_method_docstring(split_docstring: List[str], text: str) -> str:
     """Insert rst directive into docstring.
 
     Args:
@@ -224,9 +227,10 @@ def _add_text_to_method_docstring(
                 "    Added in version 1.2.3\n"
             )
     """
+    docstring = ""
     if len(split_docstring) == 2:
         short_description, docstring = split_docstring
-        return (
+        docstring = (
             f"{short_description.strip()}\n"
             "\n"
             f"{text}\n"
@@ -235,6 +239,8 @@ def _add_text_to_method_docstring(
         )
     elif len(split_docstring) == 1:
         short_description = split_docstring[0]
-        return f"{short_description.strip()}\n" "\n" f"{text}\n"
+        docstring = f"{short_description.strip()}\n" "\n" f"{text}\n"
     elif len(split_docstring) == 0:
-        return f"{text}\n"
+        docstring = f"{text}\n"
+
+    return docstring
