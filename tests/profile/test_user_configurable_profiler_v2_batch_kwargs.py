@@ -3,7 +3,7 @@ from unittest import mock
 import pandas as pd
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import PandasDataset
 from great_expectations.profile.base import (
@@ -50,7 +50,7 @@ def nulls_dataset():
 
 @pytest.fixture()
 def titanic_dataset():
-    df = ge.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
+    df = gx.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
     batch_df = PandasDataset(df)
 
     return batch_df
@@ -511,13 +511,13 @@ def test_profiler_all_expectation_types(
     Ensures that all available expectation types work as expected
     """
     context = titanic_data_context
-    df = ge.read_csv(
+    df = gx.read_csv(
         file_relative_path(
             __file__,
             "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
         )
     )
-    batch_df = ge.dataset.PandasDataset(df)
+    batch_df = gx.dataset.PandasDataset(df)
 
     ignored_columns = [
         "pickup_location_id",

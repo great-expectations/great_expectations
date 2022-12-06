@@ -2,7 +2,7 @@ import os
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
 from great_expectations.exceptions import DataContextError
 from tests.test_utils import check_athena_table_count, clean_athena_db
@@ -21,7 +21,7 @@ if not ATHENA_STAGING_S3:
 connection_string = f"awsathena+rest://@athena.us-east-1.amazonaws.com/{ATHENA_DB_NAME}?s3_staging_dir={ATHENA_STAGING_S3}"
 
 # create datasource and add to DataContext
-context = ge.data_context.DataContext()
+context = gx.data_context.DataContext()
 datasource_yaml = f"""
 name: my_awsathena_datasource
 class_name: Datasource

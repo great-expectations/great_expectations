@@ -5,7 +5,7 @@ from collections import OrderedDict
 import pytest
 from ruamel.yaml import YAML
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.config_provider import _ConfigurationSubstitutor
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.data_context.file_data_context import (
@@ -94,10 +94,10 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     expected_config_commented_map.pop("anonymous_usage_statistics")
 
     # instantiate data_context twice to go through cycle of loading config from file then saving
-    context = ge.data_context.DataContext(context_path)
+    context = gx.data_context.DataContext(context_path)
     context._save_project_config()
     context_config_commented_map = dataContextConfigSchema.dump(
-        ge.data_context.DataContext(context_path)._project_config
+        gx.data_context.DataContext(context_path)._project_config
     )
     context_config_commented_map.pop("anonymous_usage_statistics")
 
@@ -123,7 +123,7 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
         config_variables_fixture_filename="config_variables.yml",
     )
 
-    data_context = ge.data_context.DataContext(
+    data_context = gx.data_context.DataContext(
         context_path, runtime_environment=runtime_environment
     )
     config = data_context.get_config_with_variables_substituted()
