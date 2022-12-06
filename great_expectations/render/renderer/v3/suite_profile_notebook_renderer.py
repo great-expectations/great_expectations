@@ -128,7 +128,7 @@ import datetime
 
 import pandas as pd
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
@@ -137,7 +137,7 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.exceptions import DataContextError
 
-context = ge.data_context.DataContext()
+context = gx.data_context.DataContext()
 
 batch_request = {self._batch_request}
 
@@ -193,13 +193,13 @@ import datetime
 
 import pandas as pd
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.exceptions import DataContextError
 
-context = ge.data_context.DataContext()
+context = gx.data_context.DataContext()
 
 batch_request = {self._batch_request}
 
@@ -234,13 +234,13 @@ import datetime
 
 import pandas as pd
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.exceptions import DataContextError
 
-context = ge.data_context.DataContext()
+context = gx.data_context.DataContext()
 
 batch_request = {self._batch_request}
 
