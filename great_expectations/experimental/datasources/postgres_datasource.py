@@ -326,8 +326,24 @@ class TableAsset(DataAsset):
                 cast(Dict, batch_spec_kwargs["batch_identifiers"]).update(
                     {column_splitter.column_name: request.options}
                 )
-            data, _ = self.datasource.execution_engine.get_batch_data_and_markers(
-                batch_spec=SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
+            batch_spec = SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
+            data, markers = self.datasource.execution_engine.get_batch_data_and_markers(
+                batch_spec=batch_spec
+            )
+
+            # batch_definition (along iwht batch_spec and markers) is only here to satisfy a
+            # legacy constraint when computing usage statistics in a validator. We hope to remove
+            # it in the future.
+            # imports are done inline to prevent a circular dependency with core/batch.py
+            from great_expectations.core import IDDict
+            from great_expectations.core.batch import BatchDefinition
+
+            batch_definition = BatchDefinition(
+                datasource_name=self.datasource.name,
+                data_connector_name="experimental",
+                data_asset_name=self.name,
+                batch_identifiers=IDDict(batch_spec["batch_identifiers"]),
+                batch_spec_passthrough=None,
             )
             batch_list.append(
                 Batch(
@@ -336,6 +352,9 @@ class TableAsset(DataAsset):
                     batch_request=request,
                     data=data,
                     metadata=batch_metadata,
+                    legacy_batch_markers=markers,
+                    legacy_batch_spec=batch_spec,
+                    legacy_batch_definition=batch_definition,
                 )
             )
         self._sort_batches(batch_list)
