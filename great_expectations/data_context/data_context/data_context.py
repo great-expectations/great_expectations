@@ -18,8 +18,8 @@ from great_expectations.data_context.data_context.cloud_data_context import (
 )
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
-    PROJECT_TEMPLATE_USAGX_STATISTICS_DISABLED,
-    PROJECT_TEMPLATE_USAGX_STATISTICS_ENABLED,
+    PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
+    PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
 from great_expectations.data_context.types.base import (
     CURRENT_GX_CONFIG_VERSION,
@@ -176,9 +176,9 @@ class DataContext(BaseDataContext):
         file_path = os.path.join(ge_dir, cls.GX_YML)
         with open(file_path, "w") as template:
             if usage_statistics_enabled:
-                template.write(PROJECT_TEMPLATE_USAGX_STATISTICS_ENABLED)
+                template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED)
             else:
-                template.write(PROJECT_TEMPLATE_USAGX_STATISTICS_DISABLED)
+                template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED)
 
     @classmethod
     def scaffold_directories(cls, base_dir: str) -> None:

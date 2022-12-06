@@ -180,8 +180,8 @@ class AbstractDataContext(ABC):
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
     PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
-    PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GXNERATORS_FOUND = 4
-    PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GXNERATORS_FOUND = 5
+    PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND = 4
+    PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND = 5
 
     def __init__(self, runtime_environment: Optional[dict] = None) -> None:
         """
@@ -1563,7 +1563,7 @@ class AbstractDataContext(ABC):
         return validator
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_GXT_BATCH_LIST,
+        event_name=UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST,
         args_payload_fn=get_batch_list_usage_statistics,
     )
     def get_batch_list(
@@ -2773,20 +2773,20 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             Optional string that represents data_context_id
         """
         return self._get_global_config_value(
-            environment_variable="GX_DATA_CONTEXT_ID",
+            environment_variable="GE_DATA_CONTEXT_ID",
             conf_file_section="anonymous_usage_statistics",
             conf_file_option="data_context_id",
         )
 
     def _get_usage_stats_url_override(self) -> Optional[str]:
         """
-        Return GX_USAGX_STATISTICS_URL from environment variable if it exists
+        Return GX_USAGE_STATISTICS_URL from environment variable if it exists
 
         Returns:
-            Optional string that represents GX_USAGX_STATISTICS_URL
+            Optional string that represents GX_USAGE_STATISTICS_URL
         """
         return self._get_global_config_value(
-            environment_variable="GX_USAGX_STATISTICS_URL",
+            environment_variable="GX_USAGE_STATISTICS_URL",
             conf_file_section="anonymous_usage_statistics",
             conf_file_option="usage_statistics_url",
         )
@@ -3463,7 +3463,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                     profiling_results = {
                         "success": False,
                         "error": {
-                            "code": self.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GXNERATORS_FOUND
+                            "code": self.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND
                         },
                     }
                     return profiling_results
@@ -3478,7 +3478,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 profiling_results = {
                     "success": False,
                     "error": {
-                        "code": self.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GXNERATORS_FOUND
+                        "code": self.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND
                     },
                 }
                 return profiling_results

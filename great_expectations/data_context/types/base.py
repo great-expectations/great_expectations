@@ -54,7 +54,7 @@ CURRENT_GX_CONFIG_VERSION = 3
 FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE = 3
 CURRENT_CHECKPOINT_CONFIG_VERSION = 1
 MINIMUM_SUPPORTED_CONFIG_VERSION = 2
-DEFAULT_USAGX_STATISTICS_URL = (
+DEFAULT_USAGE_STATISTICS_URL = (
     "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 )
 
@@ -1256,7 +1256,7 @@ class AnonymizedUsageStatisticsConfig(DictDot):
         self._data_context_id = data_context_id
 
         if usage_statistics_url is None:
-            usage_statistics_url = DEFAULT_USAGX_STATISTICS_URL
+            usage_statistics_url = DEFAULT_USAGE_STATISTICS_URL
             self._explicit_url = False
         else:
             self._explicit_url = True

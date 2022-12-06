@@ -2,7 +2,7 @@ import logging
 from typing import Optional
 
 from great_expectations.core.batch import BatchData
-from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 from great_expectations.util import generate_temporary_table_name
 
 try:
@@ -112,9 +112,9 @@ class SqlAlchemyBatchData(BatchData):
         dialect_name: str = engine.dialect.name.lower()
 
         try:
-            dialect = GXSqlDialect(dialect_name)
+            dialect = GESqlDialect(dialect_name)
         except ValueError:
-            dialect = GXSqlDialect.OTHER
+            dialect = GESqlDialect.OTHER
 
         self._dialect = dialect
 
@@ -122,7 +122,7 @@ class SqlAlchemyBatchData(BatchData):
             # Suggestion: pull this block out as its own _function
             if use_quoted_name:
                 table_name = quoted_name(table_name, quote=True)
-            if dialect == GXSqlDialect.BIGQUERY:
+            if dialect == GESqlDialect.BIGQUERY:
                 if schema_name is not None:
                     logger.warning(
                         "schema_name should not be used when passing a table_name for biquery. Instead, include the schema name in the table_name string."
@@ -142,11 +142,11 @@ class SqlAlchemyBatchData(BatchData):
         elif create_temp_table:
             generated_table_name = generate_temporary_table_name()
             # mssql expects all temporary table names to have a prefix '#'
-            if dialect == GXSqlDialect.MSSQL:
+            if dialect == GESqlDialect.MSSQL:
                 generated_table_name = f"#{generated_table_name}"
 
             if selectable is not None:
-                if dialect in [GXSqlDialect.ORACLE, GXSqlDialect.MSSQL] and isinstance(
+                if dialect in [GESqlDialect.ORACLE, GESqlDialect.MSSQL] and isinstance(
                     selectable, str
                 ):
                     # oracle, mssql query could already be passed as a string
@@ -175,7 +175,7 @@ class SqlAlchemyBatchData(BatchData):
                 self._selectable = selectable.alias(self._record_set_name)
 
     @property
-    def dialect(self) -> GXSqlDialect:
+    def dialect(self) -> GESqlDialect:
         return self._dialect
 
     @property
@@ -211,9 +211,9 @@ class SqlAlchemyBatchData(BatchData):
         :param query:
         """
 
-        dialect: GXSqlDialect = self.dialect
+        dialect: GESqlDialect = self.dialect
 
-        if dialect == GXSqlDialect.BIGQUERY:
+        if dialect == GESqlDialect.BIGQUERY:
             # BigQuery Table is created using with an expiration of 24 hours using Google's Data Definition Language
             # https://stackoverflow.com/questions/20673986/how-to-create-temporary-table-in-google-bigquery
             stmt = f"""CREATE OR REPLACE TABLE `{temp_table_name}`
@@ -222,18 +222,18 @@ class SqlAlchemyBatchData(BatchData):
                         CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
                     )
                     AS {query}"""
-        elif dialect == GXSqlDialect.DREMIO:
+        elif dialect == GESqlDialect.DREMIO:
             stmt = f"CREATE OR REPLACE VDS {temp_table_name} AS {query}"
-        elif dialect == GXSqlDialect.SNOWFLAKE:
+        elif dialect == GESqlDialect.SNOWFLAKE:
             if temp_table_schema_name is not None:
                 temp_table_name = f"{temp_table_schema_name}.{temp_table_name}"
 
             stmt = f"CREATE OR REPLACE TEMPORARY TABLE {temp_table_name} AS {query}"
-        elif dialect == GXSqlDialect.MYSQL:
+        elif dialect == GESqlDialect.MYSQL:
             stmt = f"CREATE TEMPORARY TABLE {temp_table_name} AS {query}"
-        elif dialect == GXSqlDialect.HIVE:
+        elif dialect == GESqlDialect.HIVE:
             stmt = f"CREATE TEMPORARY TABLE `{temp_table_name}` AS {query}"
-        elif dialect == GXSqlDialect.MSSQL:
+        elif dialect == GESqlDialect.MSSQL:
             # Insert "into #{temp_table_name}" in the custom sql query right before the "from" clause
             # Split is case sensitive so detect case.
             # Note: transforming query to uppercase/lowercase has unintended consequences (i.e.,
@@ -252,17 +252,17 @@ class SqlAlchemyBatchData(BatchData):
             )
         # TODO: <WILL> logger.warning is emitted in situations where a permanent TABLE is created in _create_temporary_table()
         # Similar message may be needed in the future for Trino backend.
-        elif dialect == GXSqlDialect.TRINO:
+        elif dialect == GESqlDialect.TRINO:
             logger.warning(
                 f"GX has created permanent view {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
             )
             stmt = f"CREATE TABLE {temp_table_name} AS {query}"
-        elif dialect == GXSqlDialect.AWSATHENA:
+        elif dialect == GESqlDialect.AWSATHENA:
             logger.warning(
                 f"GX has created permanent TABLE {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
             )
             stmt = f"CREATE TABLE {temp_table_name} AS {query}"
-        elif dialect == GXSqlDialect.ORACLE:
+        elif dialect == GESqlDialect.ORACLE:
             # oracle 18c introduced PRIVATE temp tables which are transient objects
             stmt_1 = "CREATE PRIVATE TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE DEFINITION AS {query}".format(
                 temp_table_name=temp_table_name, query=query
@@ -273,11 +273,11 @@ class SqlAlchemyBatchData(BatchData):
                 temp_table_name=temp_table_name, query=query
             )
         # Please note that Teradata is currently experimental (as of 0.13.43)
-        elif dialect == GXSqlDialect.TERADATASQL:
+        elif dialect == GESqlDialect.TERADATASQL:
             stmt = 'CREATE VOLATILE TABLE "{temp_table_name}" AS ({query}) WITH DATA NO PRIMARY INDEX ON COMMIT PRESERVE ROWS'.format(
                 temp_table_name=temp_table_name, query=query
             )
-        elif dialect == GXSqlDialect.VERTICA:
+        elif dialect == GESqlDialect.VERTICA:
             full_table_name = (
                 f"{temp_table_schema_name}.{temp_table_name}"
                 if temp_table_schema_name is not None
@@ -286,7 +286,7 @@ class SqlAlchemyBatchData(BatchData):
             stmt = f"CREATE TEMPORARY TABLE {full_table_name} ON COMMIT PRESERVE ROWS AS {query}"
         else:
             stmt = f'CREATE TEMPORARY TABLE "{temp_table_name}" AS {query}'
-        if dialect == GXSqlDialect.ORACLE:
+        if dialect == GESqlDialect.ORACLE:
             try:
                 self._engine.execute(stmt_1)
             except DatabaseError:

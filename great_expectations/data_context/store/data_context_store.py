@@ -18,7 +18,7 @@ class DataContextStore(ConfigurationStore):
     _configuration_class = DataContextConfig
 
     ge_cloud_exclude_field_names: Set[DataContextVariableSchema] = {
-        DataContextVariableSchema.ANONYMOUS_USAGX_STATISTICS,
+        DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
         DataContextVariableSchema.CHECKPOINT_STORE_NAME,
         DataContextVariableSchema.DATASOURCES,
         DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,

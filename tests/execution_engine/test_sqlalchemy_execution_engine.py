@@ -15,7 +15,7 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -90,7 +90,7 @@ def test_instantiation_via_url_and_retrieve_data_with_other_dialect(sa):
     assert my_execution_engine.credentials is None
     assert my_execution_engine.url[-36:] == "test_cases_for_sql_data_connector.db"
 
-    # 2. Change dialect to one not listed in GXSqlDialect
+    # 2. Change dialect to one not listed in GESqlDialect
     my_execution_engine.engine.dialect.name = "other_dialect"
 
     # 3. Get data
@@ -105,7 +105,7 @@ def test_instantiation_via_url_and_retrieve_data_with_other_dialect(sa):
 
     # 4. Assert dialect and data are as expected
 
-    assert batch_data.dialect == GXSqlDialect.OTHER
+    assert batch_data.dialect == GESqlDialect.OTHER
 
     my_execution_engine.load_batch_data("__", batch_data)
     validator = Validator(my_execution_engine)

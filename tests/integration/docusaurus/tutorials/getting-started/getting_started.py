@@ -9,9 +9,9 @@ from great_expectations.profile.user_configurable_profiler import (
 from great_expectations.validator.validator import Validator
 
 from great_expectations.core.usage_statistics.anonymizers.types.base import (  # isort:skip
-    GXTTING_STARTED_DATASOURCE_NAME,
-    GXTTING_STARTED_EXPECTATION_SUITE_NAME,
-    GXTTING_STARTED_CHECKPOINT_NAME,
+    GETTING_STARTED_DATASOURCE_NAME,
+    GETTING_STARTED_EXPECTATION_SUITE_NAME,
+    GETTING_STARTED_CHECKPOINT_NAME,
 )
 
 context = gx.get_context()
@@ -46,7 +46,7 @@ data_connectors:
 # Note : this override is for internal GX purposes, and is intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users.
 datasource_yaml = datasource_yaml.replace(
-    "getting_started_datasource", GXTTING_STARTED_DATASOURCE_NAME
+    "getting_started_datasource", GETTING_STARTED_DATASOURCE_NAME
 )
 
 context.test_yaml_config(datasource_yaml)
@@ -63,7 +63,7 @@ batch_request = BatchRequest(
 # Note : this override is for internal GX purposes, and is intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users.
 batch_request = BatchRequest(
-    datasource_name=GXTTING_STARTED_DATASOURCE_NAME,
+    datasource_name=GETTING_STARTED_DATASOURCE_NAME,
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="yellow_tripdata_sample_2019-01.csv",
     limit=1000,
@@ -73,7 +73,7 @@ expectation_suite_name = "getting_started_expectation_suite_taxi.demo"
 
 # Note : this override is for internal GX purposes, and is intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users
-expectation_suite_name = GXTTING_STARTED_EXPECTATION_SUITE_NAME
+expectation_suite_name = GETTING_STARTED_EXPECTATION_SUITE_NAME
 
 context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
 
@@ -140,14 +140,14 @@ validations:
 # Note : these overrides are for internal GX purposes, and are intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users
 my_checkpoint_config = my_checkpoint_config.replace(
-    "getting_started_checkpoint", GXTTING_STARTED_CHECKPOINT_NAME
+    "getting_started_checkpoint", GETTING_STARTED_CHECKPOINT_NAME
 )
 yaml_config = my_checkpoint_config.replace(
-    "getting_started_datasource", GXTTING_STARTED_DATASOURCE_NAME
+    "getting_started_datasource", GETTING_STARTED_DATASOURCE_NAME
 )
 my_checkpoint_config = my_checkpoint_config.replace(
     "getting_started_expectation_suite_taxi.demo",
-    GXTTING_STARTED_EXPECTATION_SUITE_NAME,
+    GETTING_STARTED_EXPECTATION_SUITE_NAME,
 )
 
 
@@ -183,14 +183,14 @@ validations:
 # Note : this override is for internal GX purposes, and is intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users
 yaml_config = yaml_config.replace(
-    "getting_started_checkpoint", GXTTING_STARTED_CHECKPOINT_NAME
+    "getting_started_checkpoint", GETTING_STARTED_CHECKPOINT_NAME
 )
 yaml_config = yaml_config.replace(
-    "getting_started_datasource", GXTTING_STARTED_DATASOURCE_NAME
+    "getting_started_datasource", GETTING_STARTED_DATASOURCE_NAME
 )
 yaml_config = yaml_config.replace(
     "getting_started_expectation_suite_taxi.demo",
-    GXTTING_STARTED_EXPECTATION_SUITE_NAME,
+    GETTING_STARTED_EXPECTATION_SUITE_NAME,
 )
 
 my_new_checkpoint_config = yaml.load(yaml_config)
