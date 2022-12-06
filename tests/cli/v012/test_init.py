@@ -199,7 +199,7 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
 
         ge_dir = os.path.join(root_dir, DataContext.GE_DIR)
         assert os.path.isdir(ge_dir)
-        config_path = os.path.join(ge_dir, DataContext.GE_YML)
+        config_path = os.path.join(ge_dir, DataContext.GX_YML)
         assert os.path.isfile(config_path)
 
         config = yaml.load(open(config_path))

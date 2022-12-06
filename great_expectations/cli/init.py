@@ -62,7 +62,7 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
 
     if DataContext.does_config_exist_on_disk(ge_dir):
         message = (
-            f"""Warning. An existing `{DataContext.GE_YML}` was found here: {ge_dir}."""
+            f"""Warning. An existing `{DataContext.GX_YML}` was found here: {ge_dir}."""
         )
         warnings.warn(message)
         try:

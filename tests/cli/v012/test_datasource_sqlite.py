@@ -184,7 +184,7 @@ def test_cli_datasource_new_connection_string(
 
     assert result.exit_code == 0
 
-    config_path = os.path.join(project_root_dir, DataContext.GE_YML)
+    config_path = os.path.join(project_root_dir, DataContext.GX_YML)
     config = yaml.load(open(config_path))
     datasources = config["datasources"]
     assert "mynewsource" in datasources.keys()
