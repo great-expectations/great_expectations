@@ -3,10 +3,6 @@ from __future__ import annotations
 import os
 from typing import Mapping, Optional, Union
 
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.core.usage_statistics.usage_statistics import (
-    usage_statistics_enabled_method,
-)
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -22,9 +18,6 @@ from great_expectations.data_context.data_context.file_data_context import (
 from great_expectations.data_context.types.base import DataContextConfig, GXCloudConfig
 
 
-@usage_statistics_enabled_method(
-    event_name=UsageStatsEvents.DATA_CONTEXT___INIT__,
-)
 def BaseDataContext(
     project_config: Union[DataContextConfig, Mapping],
     context_root_dir: Optional[str] = None,

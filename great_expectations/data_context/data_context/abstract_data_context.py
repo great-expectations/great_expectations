@@ -41,6 +41,7 @@ from great_expectations.core.batch import (
     IDDict,
     get_batch_request_from_acceptable_arguments,
 )
+from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.config_provider import (
     _ConfigurationProvider,
     _ConfigurationVariablesConfigurationProvider,
@@ -161,7 +162,7 @@ yaml = YAMLHandler()
 T = TypeVar("T", dict, list, str)
 
 
-class AbstractDataContext(ABC):
+class AbstractDataContext(ConfigPeer, ABC):
     """
     Base class for all DataContexts that contain all context-agnostic data context operations.
 
@@ -184,6 +185,9 @@ class AbstractDataContext(ABC):
     PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND = 4
     PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND = 5
 
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT___INIT__,
+    )
     def __init__(self, runtime_environment: Optional[dict] = None) -> None:
         """
         Constructor for AbstractDataContext. Will handle instantiation logic that is common to all DataContext objects
