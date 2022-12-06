@@ -259,7 +259,7 @@ class BaseDatasourceNewYamlHelper:
         renderer = self.get_notebook_renderer(context)
         notebook_path = os.path.join(
             context.root_directory,
-            context.GE_UNCOMMITTED_DIR,
+            context.GX_UNCOMMITTED_DIR,
             "datasource_new.ipynb",
         )
         renderer.render_to_disk(notebook_path)

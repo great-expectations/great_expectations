@@ -85,7 +85,7 @@ def context_with_multiple_built_sites(empty_data_context):
         assert os.path.isfile(
             os.path.join(
                 context.root_directory,
-                context.GE_UNCOMMITTED_DIR,
+                context.GX_UNCOMMITTED_DIR,
                 "data_docs",
                 site,
                 "index.html",
@@ -186,7 +186,7 @@ def test_clean_data_docs_on_context_with_multiple_sites_with_no_site_name_cleans
         assert not os.path.isfile(
             os.path.join(
                 context.root_directory,
-                context.GE_UNCOMMITTED_DIR,
+                context.GX_UNCOMMITTED_DIR,
                 "data_docs",
                 site,
                 "index.html",
@@ -200,7 +200,7 @@ def test_clean_data_docs_on_context_with_multiple_sites_with_existing_site_name_
     context = context_with_multiple_built_sites
     assert context.clean_data_docs(site_name="another_local_site") is True
     data_docs_dir = os.path.join(
-        context.root_directory, context.GE_UNCOMMITTED_DIR, "data_docs"
+        context.root_directory, context.GX_UNCOMMITTED_DIR, "data_docs"
     )
     assert not os.path.isfile(
         os.path.join(data_docs_dir, "another_local_site", "index.html")

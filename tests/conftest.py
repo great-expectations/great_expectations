@@ -1095,7 +1095,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
             },
         ],
         evaluation_parameters={
-            "environment": "$GX_ENVIRONMENT",
+            "environment": "$GE_ENVIRONMENT",
             "tolerance": 1.0e-2,
             "aux_param_0": "$MY_PARAM",
             "aux_param_1": "1 + $MY_PARAM",
@@ -1206,7 +1206,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
             },
         ],
         evaluation_parameters={
-            "environment": "$GX_ENVIRONMENT",
+            "environment": "$GE_ENVIRONMENT",
             "tolerance": 1.0e-2,
             "aux_param_0": "$MY_PARAM",
             "aux_param_1": "1 + $MY_PARAM",
@@ -1256,7 +1256,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
             },
         ],
         evaluation_parameters={
-            "environment": "$GX_ENVIRONMENT",
+            "environment": "$GE_ENVIRONMENT",
             "tolerance": 1.0e-2,
             "aux_param_0": "$MY_PARAM",
             "aux_param_1": "1 + $MY_PARAM",

@@ -1146,7 +1146,7 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_dir_
 ):
     ge_dir = empty_context.root_directory
     # mangle project
-    shutil.rmtree(os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR))
+    shutil.rmtree(os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR))
 
     assert DataContext.is_project_initialized(ge_dir) == False
 
@@ -1156,7 +1156,7 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_data
 ):
     ge_dir = empty_context.root_directory
     # mangle project
-    shutil.rmtree(os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR, "data_docs"))
+    shutil.rmtree(os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR, "data_docs"))
 
     assert DataContext.is_project_initialized(ge_dir) == False
 
@@ -1166,7 +1166,7 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_vali
 ):
     ge_dir = empty_context.root_directory
     # mangle project
-    shutil.rmtree(os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR, "validations"))
+    shutil.rmtree(os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR, "validations"))
 
     assert DataContext.is_project_initialized(ge_dir) == False
 
@@ -1177,7 +1177,7 @@ def test_data_context_is_project_initialized_returns_false_when_config_variable_
     ge_dir = empty_context.root_directory
     # mangle project
     safe_remove(
-        os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR, "config_variables.yml")
+        os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR, "config_variables.yml")
     )
 
     assert DataContext.is_project_initialized(ge_dir) == False
