@@ -174,6 +174,15 @@ a.pagination-nav__link:hover {
     font-family:'Source Sans Pro', sans-serif ;
 }
 
+@media (max-width: 996px) {
+    .footer__links {
+        display: block !important;
+    }
+    .footer__row {
+        display: block !important;
+    }
+}
+
 .footer__link-item {
     font-size: 14px;
     font-weight: 600;
@@ -287,4 +296,8 @@ div[role="tabpanel"]{
   visibility: visible;
 }
 
-@import "api_docs/api_docs.scss";
+@media (max-width: 996px) {
+    .main-wrapper {
+        overflow: hidden;
+    }
+}
