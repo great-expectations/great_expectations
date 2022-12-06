@@ -649,7 +649,7 @@ def test_file_path_get_batch_successful_specification_spark_directory_batch_spec
 
     This tests the same behavior as the previous test, test_get_batch_successful_specification_spark_directory, but the
     batch_spec_passthrough is in the Datasource configuration, found in the data_context_with_datasource_spark_engine_batch_spec_passthrough
-    fixture. This is why the `batch_spec_passthrough` parameters are commented out, but GE is still able to read in the 3 CSV files
+    fixture. This is why the `batch_spec_passthrough` parameters are commented out, but GX is still able to read in the 3 CSV files
     as a single SparkDF with 30,000 lines.
 
     """

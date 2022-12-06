@@ -1196,7 +1196,7 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
     """
     Tests output of test_yaml_config() for a Datacontext configured with a Datasource with
     RuntimeDataConnector. Even though the test directory contains multiple files that can be read-in
-    by GE, the RuntimeDataConnector will output 0 data_assets, and return a "note" to the user.
+    by GX, the RuntimeDataConnector will output 0 data_assets, and return a "note" to the user.
 
     This is because the RuntimeDataConnector is not aware of data_assets until they are passed in
     through the RuntimeBatchRequest.

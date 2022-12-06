@@ -1134,7 +1134,7 @@ class CloudNotificationAction(ValidationAction):
 
         if not self.data_context.ge_cloud_mode:
             return Exception(
-                "CloudNotificationActions can only be used in GE Cloud Mode."
+                "CloudNotificationActions can only be used in GX Cloud Mode."
             )
         if not isinstance(validation_result_suite_identifier, GXCloudIdentifier):
             raise TypeError(

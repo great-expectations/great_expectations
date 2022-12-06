@@ -250,15 +250,15 @@ EXPR = EvaluationParameterParser()
 
 
 def find_evaluation_parameter_dependencies(parameter_expression):
-    """Parse a parameter expression to identify dependencies including GE URNs.
+    """Parse a parameter expression to identify dependencies including GX URNs.
 
     Args:
         parameter_expression: the parameter to parse
 
     Returns:
         a dictionary including:
-          - "urns": set of strings that are valid GE URN objects
-          - "other": set of non-GE URN strings that are required to evaluate the parameter expression
+          - "urns": set of strings that are valid GX URN objects
+          - "other": set of non-GX URN strings that are required to evaluate the parameter expression
 
     """
     expr = EvaluationParameterParser()
@@ -328,7 +328,7 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
 
     Valid variables must begin with an alphabetic character and may contain alphanumeric characters plus '_' and '$',
     EXCEPT if they begin with the string "urn:great_expectations" in which case they may also include additional
-    characters to support inclusion of GE URLs (see :ref:`evaluation_parameters` for more information).
+    characters to support inclusion of GX URLs (see :ref:`evaluation_parameters` for more information).
     """
     if evaluation_parameters is None:
         evaluation_parameters = {}
