@@ -52,9 +52,9 @@ def _decorate_with_deprecation(
     existing_docstring = func.__doc__ if func.__doc__ else ""
     split_docstring = existing_docstring.split("\n", 1)
 
-    func.__doc__ = add_rst_directive_to_method_docstring(
+    func.__doc__ = _add_text_to_method_docstring(
         split_docstring=split_docstring,
-        rst_directive=deprecation_rst,
+        text=deprecation_rst,
     )
     return func
 
@@ -92,14 +92,54 @@ def _decorate_argument_with_deprecation(
     deprecation_rst = f".. deprecated:: {version}" "\n" f"    {message}"
     existing_docstring = func.__doc__ if func.__doc__ else ""
 
-    func.__doc__ = add_text_below_docstring_argument(
+    func.__doc__ = _add_text_below_docstring_argument(
         docstring=existing_docstring, argument_name=argument_name, text=deprecation_rst
     )
 
     return func
 
 
-def add_text_below_docstring_argument(
+def new_argument(
+    argument_name: str,
+    version: str,
+    message: str = "",
+):
+    """Add note for new arguments about which version the argument was added.
+
+    Args:
+        argument_name: Name of the argument to associate with the note.
+        version: Version number to associate with the note.
+        message: Optional message.
+    """
+
+    def decorate(fn: F) -> F:
+        return _decorate_argument_with_new_note(
+            func=fn,
+            argument_name=argument_name,
+            version=version,
+            message=message,  # type: ignore[arg-type]
+        )
+
+    return decorate
+
+
+def _decorate_argument_with_new_note(
+    func: F,
+    argument_name: str,
+    version: str,
+    message: str,
+) -> F:
+    text = f".. versionadded:: {version}" "\n" f"    {message}"
+    existing_docstring = func.__doc__ if func.__doc__ else ""
+
+    func.__doc__ = _add_text_below_docstring_argument(
+        docstring=existing_docstring, argument_name=argument_name, text=text
+    )
+
+    return func
+
+
+def _add_text_below_docstring_argument(
     docstring: str, argument_name: str, text: str
 ) -> str:
     """Add text below an argument in a docstring.
@@ -162,24 +202,24 @@ def _decorate_with_version_added(
     existing_docstring = func.__doc__ if func.__doc__ else ""
     split_docstring = existing_docstring.split("\n", 1)
 
-    func.__doc__ = add_rst_directive_to_method_docstring(
+    func.__doc__ = _add_text_to_method_docstring(
         split_docstring=split_docstring,
-        rst_directive=version_added_rst,
+        text=version_added_rst,
     )
 
     return func
 
 
-def add_rst_directive_to_method_docstring(
-    split_docstring: List[str], rst_directive: str
+def _add_text_to_method_docstring(
+    split_docstring: List[str], text: str
 ) -> str:
     """Insert rst directive into docstring.
 
     Args:
         split_docstring: Docstring split into the first line (short description)
             and the rest of the docstring.
-        rst_directive: string of the rst directive to add e.g.:
-            rst_directive = (
+        text: string to add, can be a rst directive e.g.:
+            text = (
                 ".. versionadded:: 1.2.3\n"
                 "    Added in version 1.2.3\n"
             )
@@ -189,12 +229,12 @@ def add_rst_directive_to_method_docstring(
         return (
             f"{short_description.strip()}\n"
             "\n"
-            f"{rst_directive}\n"
+            f"{text}\n"
             "\n"
             f"{dedent(docstring)}"
         )
     elif len(split_docstring) == 1:
         short_description = split_docstring[0]
-        return f"{short_description.strip()}\n" "\n" f"{rst_directive}\n"
+        return f"{short_description.strip()}\n" "\n" f"{text}\n"
     elif len(split_docstring) == 0:
-        return f"{rst_directive}\n"
+        return f"{text}\n"
