@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
@@ -114,7 +114,7 @@ def test_render_section_page():
         }
     )
 
-    rendered_doc = ge.render.view.view.DefaultMarkdownPageView().render(
+    rendered_doc = gx.render.view.view.DefaultMarkdownPageView().render(
         RenderedDocumentContent(sections=[section])
     )
 

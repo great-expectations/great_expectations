@@ -4,7 +4,7 @@ import os
 import pytest
 from google.cloud import bigquery
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -38,7 +38,7 @@ CONNECTION_STRING: str = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
 yaml = YAMLHandler()
 
-context: DataContext = ge.get_context()
+context: DataContext = gx.get_context()
 
 datasource_yaml: str = f"""
 name: my_bigquery_datasource

@@ -36,10 +36,15 @@ def send_slack_notification(
     query = query
     headers = None
 
+    # Slack doc about overwritting the channel when using the legacy Incoming Webhooks
+    # https://api.slack.com/legacy/custom-integrations/messaging/webhooks
+    # ** Since it is legacy, it could be deprecated or removed in the future **
+    if slack_channel:
+        query["channel"] = slack_channel
+
     if not slack_webhook:
         url = "https://slack.com/api/chat.postMessage"
         headers = {"Authorization": f"Bearer {slack_token}"}
-        query["channel"] = slack_channel
 
     try:
         response = session.post(url=url, headers=headers, json=query)
