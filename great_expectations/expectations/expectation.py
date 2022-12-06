@@ -406,9 +406,6 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ):
-        """
-        Rendering function that is utilized by GX Cloud Front-end
-        """
         (
             template_str,
             params_with_json_schema,
@@ -843,10 +840,6 @@ class Expectation(metaclass=MetaExpectation):
         result: Optional[ExpectationValidationResult] = None,
         **kwargs: dict,
     ) -> RenderedAtomicContent:
-        """
-        Rendering function that is utilized by GX Cloud Front-end
-        """
-
         expectation_type: str
         expectation_kwargs: dict
         if configuration:
@@ -904,9 +897,6 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ) -> RenderedAtomicContent:
-        """
-        Rendering function that is utilized by GX Cloud Front-end
-        """
         observed_value: str = cls._get_observed_value_from_evr(result=result)
         value_obj = renderedAtomicValueSchema.load(
             {
