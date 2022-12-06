@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import warnings
 from typing import List, Mapping, Optional, Union
 
 from ruamel.yaml import YAML
@@ -189,9 +190,14 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             None
         """
-        if not cloud_mode:
+        if ge_cloud_mode or ge_cloud_config:
+            # deprecated-v0.15.37
+            warnings.warn(
+                f"The ge_cloud_mode/ge_cloud_config arguments are deprecated as of v0.15.37 and will be removed in a future release."
+                f" Please use the renamed cloud_mode/cloud_config moving forward.",
+                DeprecationWarning,
+            )
             cloud_mode = ge_cloud_mode
-        if not cloud_config:
             cloud_config = ge_cloud_config
 
         project_data_context_config: DataContextConfig = (
