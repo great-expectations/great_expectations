@@ -121,7 +121,7 @@ def test_instantiation_via_credentials(sa, test_backends, test_df):
             "drivername": "postgresql",
             "username": "postgres",
             "password": "",
-            "host": os.getenv("GX_TEST_LOCAL_DB_HOSTNAME", "localhost"),
+            "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
             "port": "5432",
             "database": "test_ci",
         }
@@ -130,7 +130,7 @@ def test_instantiation_via_credentials(sa, test_backends, test_df):
     assert my_execution_engine.credentials == {
         "username": "postgres",
         "password": "",
-        "host": os.getenv("GX_TEST_LOCAL_DB_HOSTNAME", "localhost"),
+        "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
         "port": "5432",
         "database": "test_ci",
     }
@@ -319,7 +319,7 @@ def test_get_domain_records_with_column_domain_and_filter_conditions(sa):
             "filter_conditions": [
                 RowCondition(
                     condition=f'col("b").notnull()',
-                    condition_type=RowConditionParserType.GX,
+                    condition_type=RowConditionParserType.GE,
                 )
             ],
         }
@@ -352,7 +352,7 @@ def test_get_domain_records_with_different_column_domain_and_filter_conditions(s
             "filter_conditions": [
                 RowCondition(
                     condition=f'col("b").notnull()',
-                    condition_type=RowConditionParserType.GX,
+                    condition_type=RowConditionParserType.GE,
                 )
             ],
         }
@@ -388,11 +388,11 @@ def test_get_domain_records_with_column_domain_and_filter_conditions_raises_erro
                 "filter_conditions": [
                     RowCondition(
                         condition=f'col("b").notnull()',
-                        condition_type=RowConditionParserType.GX,
+                        condition_type=RowConditionParserType.GE,
                     ),
                     RowCondition(
                         condition=f'col("c").notnull()',
-                        condition_type=RowConditionParserType.GX,
+                        condition_type=RowConditionParserType.GE,
                     ),
                 ],
             }

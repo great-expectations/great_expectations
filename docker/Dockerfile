@@ -9,7 +9,7 @@ ENV LANG C.UTF-8
 ENV HOME /root
 ENV PATH /usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:${HOME}/.local/bin
 # Path where the root of the GX project will be expected
-ENV GX_HOME /usr/app/great_expectations
+ENV GE_HOME /usr/app/great_expectations
 
 LABEL maintainer="great-expectations"
 LABEL org.opencontainers.image.title="Great Expectations"
@@ -32,7 +32,7 @@ RUN mkdir -p /usr/app ${HOME} && \
     pip install .[${GX_EXTRA_DEPS}] && \
     rm -rf /tmp/great_expectations_install
 
-WORKDIR ${GX_HOME}
+WORKDIR ${GE_HOME}
 
 ENTRYPOINT ["great_expectations"]
 CMD ["--help"]

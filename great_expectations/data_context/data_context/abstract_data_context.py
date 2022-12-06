@@ -2780,13 +2780,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _get_usage_stats_url_override(self) -> Optional[str]:
         """
-        Return GX_USAGE_STATISTICS_URL from environment variable if it exists
+        Return GE_USAGE_STATISTICS_URL from environment variable if it exists
 
         Returns:
-            Optional string that represents GX_USAGE_STATISTICS_URL
+            Optional string that represents GE_USAGE_STATISTICS_URL
         """
         return self._get_global_config_value(
-            environment_variable="GX_USAGE_STATISTICS_URL",
+            environment_variable="GE_USAGE_STATISTICS_URL",
             conf_file_section="anonymous_usage_statistics",
             conf_file_option="usage_statistics_url",
         )

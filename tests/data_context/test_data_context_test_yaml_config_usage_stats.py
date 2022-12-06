@@ -314,7 +314,7 @@ def test_rule_based_profiler_emits_valid_usage_stats(
     module_name: great_expectations.rule_based_profiler
     config_version: 1.0
     variables:
-      integer_type: INTEGXR
+      integer_type: INTEGER
       timestamp_type: TIMESTAMP
       max_user_id: 999999999999
       min_timestamp: 2004-10-19 10:23:54

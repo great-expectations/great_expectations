@@ -474,7 +474,7 @@ class DataContext(BaseDataContext):
     def find_context_root_dir(cls) -> str:
         result = None
         yml_path = None
-        ge_home_environment = os.getenv("GX_HOME")
+        ge_home_environment = os.getenv("GE_HOME")
         if ge_home_environment:
             ge_home_environment = os.path.expanduser(ge_home_environment)
             if os.path.isdir(ge_home_environment) and os.path.isfile(

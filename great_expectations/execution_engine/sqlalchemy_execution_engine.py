@@ -178,7 +178,7 @@ except ImportError:
             GESqlDialect.BIGQUERY, _BIGQUERY_MODULE_NAME, "dialect"
         )
         try:
-            getattr(sqla_bigquery, "INTEGXR")
+            getattr(sqla_bigquery, "INTEGER")
             bigquery_types_tuple = None
         except AttributeError:
             # In older versions of the pybigquery driver, types were not exported, so we use a hack
@@ -635,7 +635,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         if len(filter_conditions) == 1:
             filter_condition = filter_conditions[0]
             assert (
-                filter_condition.condition_type == RowConditionParserType.GX
+                filter_condition.condition_type == RowConditionParserType.GE
             ), "filter_condition must be of type GX for SqlAlchemyExecutionEngine"
 
             selectable = (

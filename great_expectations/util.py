@@ -1756,7 +1756,7 @@ def get_context(
 
     if ge_cloud_mode and not config_available:
         raise GXCloudConfigurationError(
-            "GX Cloud Mode enabled, but missing env vars: GX_CLOUD_ORGANIZATION_ID, GX_CLOUD_ACCESS_TOKEN"
+            "GX Cloud Mode enabled, but missing env vars: GE_CLOUD_ORGANIZATION_ID, GE_CLOUD_ACCESS_TOKEN"
         )
 
     # Second, check for which type of local

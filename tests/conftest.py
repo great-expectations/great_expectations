@@ -732,7 +732,7 @@ def postgresql_engine(test_backend):
         try:
             import sqlalchemy as sa
 
-            db_hostname = os.getenv("GX_TEST_LOCAL_DB_HOSTNAME", "localhost")
+            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
             engine = sa.create_engine(
                 f"postgresql://postgres@{db_hostname}/test_ci"
             ).connect()
@@ -750,7 +750,7 @@ def mysql_engine(test_backend):
         try:
             import sqlalchemy as sa
 
-            db_hostname = os.getenv("GX_TEST_LOCAL_DB_HOSTNAME", "localhost")
+            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
             engine = sa.create_engine(
                 f"mysql+pymysql://root@{db_hostname}/test_ci"
             ).connect()
@@ -2517,9 +2517,9 @@ def ge_cloud_config_e2e() -> GXCloudConfig:
     """
     Uses live credentials stored in the Great Expectations Cloud backend.
     """
-    base_url = os.environ["GX_CLOUD_BASE_URL"]
-    organization_id = os.environ["GX_CLOUD_ORGANIZATION_ID"]
-    access_token = os.environ["GX_CLOUD_ACCESS_TOKEN"]
+    base_url = os.environ["GE_CLOUD_BASE_URL"]
+    organization_id = os.environ["GE_CLOUD_ORGANIZATION_ID"]
+    access_token = os.environ["GE_CLOUD_ACCESS_TOKEN"]
     ge_cloud_config = GXCloudConfig(
         base_url=base_url,
         organization_id=organization_id,
@@ -2826,7 +2826,7 @@ def alice_columnar_table_single_batch(empty_data_context):
             expectation_type="expect_column_values_to_be_of_type",
             kwargs={
                 "column": "user_id",
-                "type_": "INTEGXR",
+                "type_": "INTEGER",
             },
             meta={},
         ),
@@ -3065,7 +3065,7 @@ def alice_columnar_table_single_batch(empty_data_context):
         "name": "alice user workflow",
         "config_version": 1.0,
         "variables": {
-            "integer_type": "INTEGXR",
+            "integer_type": "INTEGER",
             "timestamp_type": "TIMESTAMP",
             "very_small_user_id": 1000,
             "very_large_user_id": 999999999999,

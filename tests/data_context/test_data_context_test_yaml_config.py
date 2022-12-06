@@ -35,7 +35,7 @@ def test_connectable_postgresql_db(sa, test_backends, test_df):
         drivername="postgresql",
         username="postgres",
         password="",
-        host=os.getenv("GX_TEST_LOCAL_DB_HOSTNAME", "localhost"),
+        host=os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
         port="5432",
         database="test_ci",
     )
@@ -679,7 +679,7 @@ def test_golden_path_sql_datasource_configuration(
 
         context = gx.get_context()
 
-        db_hostname = os.getenv("GX_TEST_LOCAL_DB_HOSTNAME", "localhost")
+        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
         yaml_config = f"""
     class_name: SimpleSqlalchemyDatasource
     credentials:
@@ -1421,7 +1421,7 @@ def test_rule_based_profiler_integration(
     module_name: great_expectations.rule_based_profiler
     config_version: 1.0
     variables:
-      integer_type: INTEGXR
+      integer_type: INTEGER
       timestamp_type: TIMESTAMP
       max_user_id: 999999999999
       min_timestamp: 2004-10-19 10:23:54

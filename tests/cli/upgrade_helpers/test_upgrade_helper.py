@@ -13,7 +13,7 @@ from great_expectations.cli import cli
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.utils import (
-    VALIDATION_OPERATORS_DEPRECATION_MESSAGX,
+    VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
     escape_ansi,
 )
@@ -99,7 +99,7 @@ def test_project_upgrade_already_up_to_date(v10_project_directory, caplog):
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGX,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
 
 

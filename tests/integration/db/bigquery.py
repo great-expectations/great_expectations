@@ -28,10 +28,10 @@ This integration test tests the following:
     is turned off
 """
 
-gcp_project: str = os.environ.get("GX_TEST_GCP_PROJECT")
+gcp_project: str = os.environ.get("GE_TEST_GCP_PROJECT")
 if not gcp_project:
     raise ValueError(
-        "Environment Variable GX_TEST_GCP_PROJECT is required to run BigQuery integration tests"
+        "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
     )
 bigquery_dataset: str = "test_ci"
 CONNECTION_STRING: str = f"bigquery://{gcp_project}/{bigquery_dataset}"

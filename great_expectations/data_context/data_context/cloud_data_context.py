@@ -134,11 +134,11 @@ class CloudDataContext(AbstractDataContext):
 
         Args:
             ge_cloud_base_url: Optional, you may provide this alternatively via
-                environment variable GX_CLOUD_BASE_URL or within a config file.
+                environment variable GE_CLOUD_BASE_URL or within a config file.
             ge_cloud_access_token: Optional, you may provide this alternatively
-                via environment variable GX_CLOUD_ACCESS_TOKEN or within a config file.
+                via environment variable GE_CLOUD_ACCESS_TOKEN or within a config file.
             ge_cloud_organization_id: Optional, you may provide this alternatively
-                via environment variable GX_CLOUD_ORGANIZATION_ID or within a config file.
+                via environment variable GE_CLOUD_ORGANIZATION_ID or within a config file.
 
         Returns:
             bool: Is all the information needed to build a ge_cloud_config is available?
@@ -212,11 +212,11 @@ class CloudDataContext(AbstractDataContext):
 
         Args:
             ge_cloud_base_url: Optional, you may provide this alternatively via
-                environment variable GX_CLOUD_BASE_URL or within a config file.
+                environment variable GE_CLOUD_BASE_URL or within a config file.
             ge_cloud_access_token: Optional, you may provide this alternatively
-                via environment variable GX_CLOUD_ACCESS_TOKEN or within a config file.
+                via environment variable GE_CLOUD_ACCESS_TOKEN or within a config file.
             ge_cloud_organization_id: Optional, you may provide this alternatively
-                via environment variable GX_CLOUD_ORGANIZATION_ID or within a config file.
+                via environment variable GE_CLOUD_ORGANIZATION_ID or within a config file.
 
         Returns:
             GeCloudConfig

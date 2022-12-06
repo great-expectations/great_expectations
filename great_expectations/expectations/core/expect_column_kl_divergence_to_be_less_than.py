@@ -690,7 +690,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
 
                 # Main expected_weights and main observed weights had no tail_weights, so nothing needs to be removed.
 
-            # TODO: VERIFY THAT THIS STILL WORKS BASED ON CHANGX TO HIST
+            # TODO: VERIFY THAT THIS STILL WORKS BASED ON CHANGE TO HIST
             # comb_expected_weights = np.array(comb_expected_weights).astype(float)
             # comb_observed_weights = np.array(comb_observed_weights).astype(float)
 
