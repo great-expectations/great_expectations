@@ -254,7 +254,7 @@ def _add_text_below_string_docstring_argument(
                 param.description += "\n\n" + text + "\n\n"
 
     # RenderingStyle.EXPANDED used to make sure any line breaks before and
-    # after the added text are included.
+    # after the added text are included (for Sphinx html rendering).
     return docstring_parser.compose(
         docstring=parsed_docstring,
         rendering_style=docstring_parser.RenderingStyle.EXPANDED,
