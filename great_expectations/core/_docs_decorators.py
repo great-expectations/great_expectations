@@ -1,5 +1,5 @@
 from textwrap import dedent
-from typing import Callable, TypeVar, Any
+from typing import Any, Callable, TypeVar
 
 import docstring_parser
 

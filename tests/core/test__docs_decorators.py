@@ -1,11 +1,11 @@
 import pytest
 
 from great_expectations.core._docs_decorators import (
-    deprecated_method,
-    public_api,
-    new_method,
     deprecated_argument,
+    deprecated_method,
     new_argument,
+    new_method,
+    public_api,
 )
 
 # @public_api
