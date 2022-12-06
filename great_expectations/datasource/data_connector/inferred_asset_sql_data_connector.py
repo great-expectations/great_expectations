@@ -4,7 +4,7 @@ from great_expectations.datasource.data_connector.configured_asset_sql_data_conn
     ConfiguredAssetSqlDataConnector,
 )
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.util import deep_filter_properties_iterable
 
 try:
@@ -251,7 +251,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         # The following code fetches the names of external schemas and tables from a special table
         # 'svv_external_tables'.
         try:
-            if engine.dialect.name.lower() == GESqlDialect.REDSHIFT:
+            if engine.dialect.name.lower() == GXSqlDialect.REDSHIFT:
                 # noinspection SqlDialectInspection,SqlNoDataSourceInspection
                 result = engine.execute(
                     "select schemaname, tablename from svv_external_tables"

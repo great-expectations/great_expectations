@@ -69,7 +69,7 @@ from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.store.validations_store import ValidationsStore
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
-    CURRENT_GE_CONFIG_VERSION,
+    CURRENT_GX_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     ConcurrencyConfig,
@@ -431,7 +431,7 @@ class AbstractDataContext(ABC):
                     f"with no `checkpoints` directory.\n "
                     f"Please create the following directory: {checkpoint_store_directory}.\n "
                     f"To use the new 'Checkpoint Store' feature, please update your configuration "
-                    f"to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  "
+                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)}.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} "
                     f"to learn more about the upgrade process."
                 )
@@ -441,7 +441,7 @@ class AbstractDataContext(ABC):
                     f"with no `checkpoints` directory.\n  "
                     f"Please create a `checkpoints` directory in your Great Expectations directory."
                     f"To use the new 'Checkpoint Store' feature, please update your configuration "
-                    f"to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  "
+                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)}.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} "
                     f"to learn more about the upgrade process."
                 )
@@ -464,7 +464,7 @@ class AbstractDataContext(ABC):
                 logger.warning(
                     f"Checkpoint store named '{checkpoint_store_name}' is not a configured store, "
                     f"so will try to use default Checkpoint store.\n  Please update your configuration "
-                    f"to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "
+                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)} in order to use the new "
                     f"'Checkpoint Store' feature.\n  Visit {AbstractDataContext.MIGRATION_WEBSITE} "
                     f"to learn more about the upgrade process."
                 )
@@ -497,7 +497,7 @@ class AbstractDataContext(ABC):
                     f"with no `profilers` directory.\n  "
                     f"Please create the following directory: {checkpoint_store_directory}\n"
                     f"To use the new 'Profiler Store' feature, please update your configuration "
-                    f"to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  "
+                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)}.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} to learn more about the "
                     f"upgrade process."
                 )
@@ -508,7 +508,7 @@ class AbstractDataContext(ABC):
                     f"Please create a `profilers` directory in your Great Expectations project "
                     f"directory.\n  "
                     f"To use the new 'Profiler Store' feature, please update your configuration "
-                    f"to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  "
+                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)}.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} to learn more about the "
                     f"upgrade process."
                 )
@@ -527,7 +527,7 @@ class AbstractDataContext(ABC):
                 logger.warning(
                     f"Profiler store named '{profiler_store_name}' is not a configured store, so will try to use "
                     f"default Profiler store.\n  Please update your configuration to the new version number "
-                    f"{float(CURRENT_GE_CONFIG_VERSION)} in order to use the new 'Profiler Store' feature.\n  "
+                    f"{float(CURRENT_GX_CONFIG_VERSION)} in order to use the new 'Profiler Store' feature.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} to learn more about the upgrade process."
                 )
                 built_store: Optional[Store] = self._build_store_from_config(
@@ -615,7 +615,7 @@ class AbstractDataContext(ABC):
             name: the name for the new datasource to add
             initialize: if False, add the datasource to the config, but do not
                 initialize it, for example if a user needs to debug database connectivity.
-            save_changes (bool): should GE save the Datasource config?
+            save_changes (bool): should GX save the Datasource config?
             kwargs (keyword arguments): the configuration for the new datasource
 
         Returns:
@@ -686,9 +686,9 @@ class AbstractDataContext(ABC):
     ) -> DataContextConfig:
         """
         Substitute vars in config of form ${var} or $(var) with values found in the following places,
-        in order of precedence: ge_cloud_config (for Data Contexts in GE Cloud mode), runtime_environment,
+        in order of precedence: ge_cloud_config (for Data Contexts in GX Cloud mode), runtime_environment,
         environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
-        be optional in GE Cloud mode).
+        be optional in GX Cloud mode).
         """
         if not config:
             config = self._project_config
@@ -1731,12 +1731,12 @@ class AbstractDataContext(ABC):
         include_rendered_content: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> ExpectationSuite:
-        """Get an Expectation Suite by name or GE Cloud ID
+        """Get an Expectation Suite by name or GX Cloud ID
         Args:
             expectation_suite_name (str): The name of the Expectation Suite
             include_rendered_content (bool): Whether or not to re-populate rendered_content for each
                 ExpectationConfiguration.
-            ge_cloud_id (str): The GE Cloud ID for the Expectation Suite.
+            ge_cloud_id (str): The GX Cloud ID for the Expectation Suite.
 
         Returns:
             An existing ExpectationSuite
@@ -1837,7 +1837,7 @@ class AbstractDataContext(ABC):
             batch_list: Explicit list of Batch objects to supply data at runtime
             batch_request: Explicit batch_request used to supply data at runtime
             name: Identifier used to retrieve the profiler from a store.
-            ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
+            ge_cloud_id: Identifier used to retrieve the profiler from a store (GX Cloud specific).
             variables: Attribute name/value pairs (overrides)
             rules: Key-value pairs of name/configuration-dictionary (overrides)
 
@@ -1875,7 +1875,7 @@ class AbstractDataContext(ABC):
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
             name: Identifier used to retrieve the profiler from a store.
-            ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
+            ge_cloud_id: Identifier used to retrieve the profiler from a store (GX Cloud specific).
 
         Returns:
             Set of rule evaluation results in the form of an RuleBasedProfilerResult
@@ -2942,7 +2942,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 self._cached_datasources[datasource_name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
-                # this error will happen if our configuration contains datasources that GE can no longer connect to.
+                # this error will happen if our configuration contains datasources that GX can no longer connect to.
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch() step. So we just pass here.
                 pass

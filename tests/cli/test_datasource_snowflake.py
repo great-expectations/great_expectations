@@ -35,7 +35,7 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 #     assert "What data would you like Great Expectations to connect to?" in stdout
 #     assert "Which database backend are you using?" in stdout
 #
-#     uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
+#     uncommitted_dir = os.path.join(root_dir, context.GX_UNCOMMITTED_DIR)
 #     expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
 #     assert os.path.isfile(expected_notebook)
 #     mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])

@@ -283,7 +283,7 @@ class _YamlConfigValidator:
                 usage_stats_event_payload.get("parent_class") is None
                 and class_name in self.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
             ):
-                # add parent_class if it doesn't exist and class_name is one of our supported core GE types
+                # add parent_class if it doesn't exist and class_name is one of our supported core GX types
                 usage_stats_event_payload["parent_class"] = class_name
             send_usage_message_from_handler(
                 event=usage_stats_event_name,
