@@ -59,124 +59,6 @@ def _decorate_with_deprecation(
     return func
 
 
-def deprecated_argument(
-    argument_name: str,
-    version: str,
-    message: str = "",
-):
-    """Add an arg-specific deprecation warning to the docstring of the decorated method.
-
-    Args:
-        argument_name: Name of the argument to associate with the deprecation note.
-        version: Version number when the method was deprecated.
-        message: Optional deprecation message.
-    """
-
-    def decorate(fn: F) -> F:
-        return _decorate_argument_with_deprecation(
-            func=fn,
-            argument_name=argument_name,
-            version=version,
-            message=message,  # type: ignore[arg-type]
-        )
-
-    return decorate
-
-
-def _decorate_argument_with_deprecation(
-    func: F,
-    argument_name: str,
-    version: str,
-    message: str,
-) -> F:
-    deprecation_rst = f".. deprecated:: {version}" "\n" f"    {message}"
-    existing_docstring = func.__doc__ if func.__doc__ else ""
-
-    func.__doc__ = _add_text_below_docstring_argument(
-        docstring=existing_docstring, argument_name=argument_name, text=deprecation_rst
-    )
-
-    return func
-
-
-def new_argument(
-    argument_name: str,
-    version: str,
-    message: str = "",
-):
-    """Add note for new arguments about which version the argument was added.
-
-    Args:
-        argument_name: Name of the argument to associate with the note.
-        version: Version number to associate with the note.
-        message: Optional message.
-    """
-
-    def decorate(fn: F) -> F:
-        return _decorate_argument_with_new_note(
-            func=fn,
-            argument_name=argument_name,
-            version=version,
-            message=message,  # type: ignore[arg-type]
-        )
-
-    return decorate
-
-
-def _decorate_argument_with_new_note(
-    func: F,
-    argument_name: str,
-    version: str,
-    message: str,
-) -> F:
-    text = f".. versionadded:: {version}" "\n" f"    {message}"
-    existing_docstring = func.__doc__ if func.__doc__ else ""
-
-    func.__doc__ = _add_text_below_docstring_argument(
-        docstring=existing_docstring, argument_name=argument_name, text=text
-    )
-
-    return func
-
-
-def _add_text_below_docstring_argument(
-    docstring: str, argument_name: str, text: str
-) -> str:
-    """Add text below an argument in a docstring.
-
-    Note: Can be used for rst directives.
-
-    Args:
-        docstring: Docstring to modify.
-        argument_name: Argument to place text below.
-        text: Text to place below argument. Can be an rst directive.
-
-    Returns:
-        Modified docstring.
-    """
-    parsed_docstring = docstring_parser.parse(docstring)
-
-    if argument_name not in (param.arg_name for param in parsed_docstring.params):
-        raise ValueError(
-            f"Please specify an existing argument, you specified {argument_name}."
-        )
-
-    for idx, param in enumerate(parsed_docstring.params):
-        if param.arg_name == argument_name:
-            # description can be None
-            if not parsed_docstring.params[idx]:
-                parsed_docstring.params[idx].description = text
-            else:
-                parsed_docstring.params[idx].description += "\n\n" + text + "\n\n"  # type: ignore[operator]
-
-    # RenderingStyle.Expanded used to make sure any line breaks before and
-    # after the added text are included.
-    return docstring_parser.compose(
-        docstring=parsed_docstring,
-        rendering_style=docstring_parser.RenderingStyle.EXPANDED,
-    )
-
-
 def new_method(
     version: str,
     message: str = "",
@@ -215,6 +97,68 @@ def _decorate_with_new_method(
     return func
 
 
+def deprecated_argument(
+    argument_name: str,
+    version: str,
+    message: str = "",
+):
+    """Add an arg-specific deprecation warning to the docstring of the decorated method.
+
+    Used as a decorator:
+
+        @deprecated_argument(argument_name="some_argument", version="1.2.3", message="Optional message")
+        def my_method(some_argument):
+            ...
+
+    Args:
+        argument_name: Name of the argument to associate with the deprecation note.
+        version: Version number when the method was deprecated.
+        message: Optional deprecation message.
+    """
+
+    text = f".. deprecated:: {version}" "\n" f"    {message}"
+
+    def decorate(func: F) -> F:
+        return _add_text_below_method_docstring_argument(
+            func=func,
+            argument_name=argument_name,
+            text=text,
+        )
+
+    return decorate
+
+
+def new_argument(
+    argument_name: str,
+    version: str,
+    message: str = "",
+):
+    """Add note for new arguments about which version the argument was added.
+
+    Used as a decorator:
+
+        @new_argument(argument_name="some_argument", version="1.2.3", message="Optional message")
+        def my_method(some_argument):
+            ...
+
+    Args:
+        argument_name: Name of the argument to associate with the note.
+        version: Version number to associate with the note.
+        message: Optional message.
+    """
+
+    text = f".. versionadded:: {version}" "\n" f"    {message}"
+
+    def decorate(func: F) -> F:
+        return _add_text_below_method_docstring_argument(
+            func=func,
+            argument_name=argument_name,
+            text=text,
+        )
+
+    return decorate
+
+
 def _add_text_to_method_docstring(split_docstring: List[str], text: str) -> str:
     """Insert rst directive into docstring.
 
@@ -244,3 +188,65 @@ def _add_text_to_method_docstring(split_docstring: List[str], text: str) -> str:
         docstring = f"{text}\n"
 
     return docstring
+
+
+def _add_text_below_method_docstring_argument(
+    func: F,
+    argument_name: str,
+    text: str,
+) -> F:
+    """Add text below specified docstring argument.
+
+    Args:
+        func: Function whose docstring will be modified.
+        argument_name: Name of the argument to add text to its description.
+        text: Text to add to the argument description.
+
+    Returns:
+        Modified function.
+    """
+    existing_docstring = func.__doc__ if func.__doc__ else ""
+
+    func.__doc__ = _add_text_below_string_docstring_argument(
+        docstring=existing_docstring, argument_name=argument_name, text=text
+    )
+
+    return func
+
+
+def _add_text_below_string_docstring_argument(
+    docstring: str, argument_name: str, text: str
+) -> str:
+    """Add text below an argument in a docstring.
+
+    Note: Can be used for rst directives.
+
+    Args:
+        docstring: Docstring to modify.
+        argument_name: Argument to place text below.
+        text: Text to place below argument. Can be an rst directive.
+
+    Returns:
+        Modified docstring.
+    """
+    parsed_docstring = docstring_parser.parse(docstring)
+
+    if argument_name not in (param.arg_name for param in parsed_docstring.params):
+        raise ValueError(
+            f"Please specify an existing argument, you specified {argument_name}."
+        )
+
+    for idx, param in enumerate(parsed_docstring.params):
+        if param.arg_name == argument_name:
+            # description can be None
+            if not parsed_docstring.params[idx]:
+                parsed_docstring.params[idx].description = text
+            else:
+                parsed_docstring.params[idx].description += "\n\n" + text + "\n\n"  # type: ignore[operator]
+
+    # RenderingStyle.Expanded used to make sure any line breaks before and
+    # after the added text are included.
+    return docstring_parser.compose(
+        docstring=parsed_docstring,
+        rendering_style=docstring_parser.RenderingStyle.EXPANDED,
+    )
