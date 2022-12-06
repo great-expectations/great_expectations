@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Union
+from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -14,6 +14,10 @@ from great_expectations.render import (
     RenderedTableContent,
 )
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererSchemaType,
+)
 from great_expectations.render.util import (
     handle_strict_min_max,
     num_to_str,
@@ -41,6 +45,9 @@ except ImportError:
 from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import RendererParams
 
 
 class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
@@ -231,8 +238,9 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     )
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        """Ensures that min_value and max_value are both set."""
         super().validate_configuration(configuration)
 
         if configuration is None:
@@ -266,106 +274,67 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
+        renderer_configuration: RendererConfiguration,
     ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        add_param_args = (
+            ("column", RendererSchemaType.STRING),
+            ("min_value", RendererSchemaType.NUMBER),
+            ("max_value", RendererSchemaType.NUMBER),
+            ("row_condition", RendererSchemaType.STRING),
+            ("condition_parser", RendererSchemaType.STRING),
+            ("strict_min", RendererSchemaType.BOOLEAN),
+            ("strict_max", RendererSchemaType.BOOLEAN),
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            [
-                "column",
-                "min_value",
-                "max_value",
-                "mostly",
-                "row_condition",
-                "condition_parser",
-                "strict_min",
-                "strict_max",
-            ],
-        )
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "min_value": {
-                "schema": {"type": "number"},
-                "value": params.get("min_value"),
-            },
-            "max_value": {
-                "schema": {"type": "number"},
-                "value": params.get("max_value"),
-            },
-            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
-            "mostly_pct": {
-                "schema": {"type": "string"},
-                "value": params.get("mostly_pct"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-            "strict_min": {
-                "schema": {"type": "boolean"},
-                "value": params.get("strict_min"),
-            },
-            "strict_max": {
-                "schema": {"type": "boolean"},
-                "value": params.get("strict_max"),
-            },
-        }
+        for name, schema_type in add_param_args:
+            renderer_configuration.add_param(name=name, schema_type=schema_type)
 
-        if (params["min_value"] is None) and (params["max_value"] is None):
+        params: RendererParams = renderer_configuration.params
+
+        if not params.min_value and not params.max_value:
             template_str = "values may have any length."
         else:
-            at_least_str, at_most_str = handle_strict_min_max(params)
+            at_least_str: str = cls._get_strict_min_string(
+                renderer_configuration=renderer_configuration
+            )
+            at_most_str: str = cls._get_strict_max_string(
+                renderer_configuration=renderer_configuration
+            )
 
-            if params["mostly"] is not None and params["mostly"] < 1.0:
-                params_with_json_schema["mostly_pct"]["value"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
+            if params.mostly and params.mostly.value < 1.0:
+                renderer_configuration = cls._add_mostly_pct_param(
+                    renderer_configuration=renderer_configuration
                 )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-                if params["min_value"] is not None and params["max_value"] is not None:
+                if params.min_value and params.max_value:
                     template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
-
-                elif params["min_value"] is None:
+                elif not params.min_value:
                     template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
-
-                elif params["max_value"] is None:
+                else:
                     template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
             else:
-                if params["min_value"] is not None and params["max_value"] is not None:
+                if params.min_value and params.max_value:
                     template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
-
-                elif params["min_value"] is None:
+                elif not params.min_value:
                     template_str = f"values must always be {at_most_str} $max_value characters long."
-
-                elif params["max_value"] is None:
+                else:
                     template_str = f"values must always be {at_least_str} $min_value characters long."
 
-        if include_column_name:
+        if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
+        if params.row_condition:
+            renderer_configuration = cls._add_row_condition_params(
+                renderer_configuration=renderer_configuration
             )
-            template_str = f"{conditional_template_str}, then {template_str}"
-            params_with_json_schema.update(conditional_params)
+            row_condition_str: str = cls._get_row_condition_string(
+                renderer_configuration=renderer_configuration
+            )
+            template_str = f"{row_condition_str}, then {template_str}"
 
-        return (template_str, params_with_json_schema, styling)
+        renderer_configuration.template_str = template_str
+
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)

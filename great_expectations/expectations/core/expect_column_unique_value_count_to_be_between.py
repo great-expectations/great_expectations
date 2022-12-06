@@ -267,6 +267,8 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
             )
             template_str = f"{row_condition_str}, then {template_str}"
 
+        renderer_configuration.template_str = template_str
+
         return renderer_configuration
 
     @classmethod
