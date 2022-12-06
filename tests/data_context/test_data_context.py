@@ -933,7 +933,7 @@ def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
         ),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
-    monkeypatch.setenv("GE_HOME", context_path)
+    monkeypatch.setenv("GX_HOME", context_path)
     assert DataContext.find_context_root_dir() == context_path
 
 
