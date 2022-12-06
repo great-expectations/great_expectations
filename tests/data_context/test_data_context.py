@@ -1323,7 +1323,7 @@ def test_data_context_create_builds_base_directories(tmp_path_factory):
         "checkpoints",
         "uncommitted",
     ]:
-        base_dir = os.path.join(project_path, context.GE_DIR, directory)
+        base_dir = os.path.join(project_path, context.GX_DIR, directory)
         assert os.path.isdir(base_dir)
 
 

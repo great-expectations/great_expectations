@@ -62,7 +62,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
 
     assert "Great Expectations is now set up." in stdout
 
-    context = DataContext(os.path.join(root_dir, DataContext.GE_DIR))
+    context = DataContext(os.path.join(root_dir, DataContext.GX_DIR))
     uncommitted_dir = os.path.join(context.root_directory, "uncommitted")
     shutil.rmtree(uncommitted_dir)
     assert not os.path.isdir(uncommitted_dir)
@@ -197,7 +197,7 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
 
         assert result.exit_code == 1
 
-        ge_dir = os.path.join(root_dir, DataContext.GE_DIR)
+        ge_dir = os.path.join(root_dir, DataContext.GX_DIR)
         assert os.path.isdir(ge_dir)
         config_path = os.path.join(ge_dir, DataContext.GX_YML)
         assert os.path.isfile(config_path)

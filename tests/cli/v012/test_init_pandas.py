@@ -184,7 +184,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     initialized_project,
 ):
     project_dir = initialized_project
-    ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
+    ge_dir = os.path.join(project_dir, DataContext.GX_DIR)
 
     # mangle the project to remove all traces of a suite and validations
     _remove_all_datasources(ge_dir)
@@ -298,7 +298,7 @@ def initialized_project(mock_webbrowser, tmp_path_factory):
         in mock_webbrowser.call_args[0][0]
     )
 
-    context = DataContext(os.path.join(project_dir, DataContext.GE_DIR))
+    context = DataContext(os.path.join(project_dir, DataContext.GX_DIR))
     assert isinstance(context, DataContext)
     assert len(context.list_datasources()) == 1
     return project_dir
@@ -313,7 +313,7 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     mock_webbrowser, caplog, initialized_project, filesystem_csv_2
 ):
     project_dir = initialized_project
-    ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
+    ge_dir = os.path.join(project_dir, DataContext.GX_DIR)
 
     context = DataContext(ge_dir)
     context.add_datasource(
@@ -439,7 +439,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     initialized_project,
 ):
     project_dir = initialized_project
-    ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
+    ge_dir = os.path.join(project_dir, DataContext.GX_DIR)
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
 
     data_folder_path = os.path.join(project_dir, "data")

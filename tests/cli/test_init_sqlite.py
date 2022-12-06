@@ -311,7 +311,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     sa,
 ):
     project_dir = initialized_sqlite_project
-    ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
+    ge_dir = os.path.join(project_dir, DataContext.GX_DIR)
 
     _remove_all_datasources(ge_dir)
     os.remove(os.path.join(ge_dir, "expectations", "warning.json"))
@@ -452,7 +452,7 @@ def initialized_sqlite_project(
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
-    context = DataContext(os.path.join(project_dir, DataContext.GE_DIR))
+    context = DataContext(os.path.join(project_dir, DataContext.GX_DIR))
     assert isinstance(context, DataContext)
     assert len(context.list_datasources()) == 1
     assert context.list_datasources() == [
@@ -485,7 +485,7 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     empty_sqlite_db,
 ):
     project_dir = initialized_sqlite_project
-    ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
+    ge_dir = os.path.join(project_dir, DataContext.GX_DIR)
 
     context = DataContext(ge_dir)
     datasource_name = "wow_a_datasource"
@@ -616,7 +616,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     mock_webbrowser, caplog, monkeypatch, initialized_sqlite_project, sa
 ):
     project_dir = initialized_sqlite_project
-    ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
+    ge_dir = os.path.join(project_dir, DataContext.GX_DIR)
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
 
     # mangle the setup to remove all traces of any suite
