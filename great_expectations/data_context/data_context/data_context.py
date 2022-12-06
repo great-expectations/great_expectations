@@ -236,13 +236,21 @@ class DataContext(BaseDataContext):
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
-        if not cloud_mode:
+        if (
+            ge_cloud_mode
+            or ge_cloud_base_url
+            or ge_cloud_access_token
+            or ge_cloud_organization_id
+        ):
+            # deprecated-v0.15.37
+            warnings.warn(
+                f"The ge_cloud_mode/ge_cloud_base_url/ge_cloud_access_token/ge_cloud_organization_id arguments are deprecated as of v0.15.37 and will be removed in a future release."
+                f" Please use the renamed cloud_mode/cloud_base_url/cloud_access_token/cloud_organization_id moving forward.",
+                DeprecationWarning,
+            )
             cloud_mode = ge_cloud_mode
-        if not cloud_base_url:
             cloud_base_url = ge_cloud_base_url
-        if not cloud_access_token:
             cloud_access_token = ge_cloud_access_token
-        if not cloud_organization_id:
             cloud_organization_id = ge_cloud_organization_id
 
         self._sources: _SourceFactories = _SourceFactories(self)

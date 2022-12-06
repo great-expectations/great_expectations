@@ -12,6 +12,7 @@ import re
 import sys
 import time
 import uuid
+import warnings
 from collections import OrderedDict
 from functools import wraps
 from gc import get_referrers
@@ -1710,8 +1711,8 @@ def get_context(
     |  get_context params   |    Env Not Config'd |  Env Config'd |
     +-----------------------+---------------------+---------------+
     | ()                    | Local               | Cloud         |
-    | (ge_cloud_mode=True)  | Exception!          | Cloud         |
-    | (ge_cloud_mode=False) | Local               | Local         |
+    | (cloud_mode=True)  | Exception!          | Cloud         |
+    | (cloud_mode=False) | Local               | Local         |
     +-----------------------+---------------------+---------------+
 
     TODO: This method will eventually return FileDataContext and EphemeralDataContext, rather than DataContext and Base
@@ -1724,10 +1725,10 @@ def get_context(
             from environment variables.
 
         The following parameters are relevant when running ge_cloud
-        ge_cloud_base_url (str): url for ge_cloud endpoint.
-        ge_cloud_access_token (str): access_token for ge_cloud account.
-        ge_cloud_organization_id (str): org_id for ge_cloud account.
-        ge_cloud_mode (bool): bool flag to specify whether to run GX in cloud mode (default is None).
+        cloud_base_url (str): url for ge_cloud endpoint.
+        cloud_access_token (str): access_token for ge_cloud account.
+        cloud_organization_id (str): org_id for ge_cloud account.
+        cloud_mode (bool): bool flag to specify whether to run GX in cloud mode (default is None).
 
     Returns:
         DataContext. Either a DataContext, BaseDataContext, or CloudDataContext depending on environment and/or
@@ -1740,12 +1741,22 @@ def get_context(
         DataContext,
     )
 
-    if not cloud_base_url:
+    if (
+        ge_cloud_base_url
+        or ge_cloud_access_token
+        or ge_cloud_organization_id
+        or ge_cloud_mode
+    ):
+        # deprecated-v0.15.37
+        warnings.warn(
+            f"The ge_cloud_mode/ge_cloud_base_url/ge_cloud_access_token/ge_cloud_organization_id arguments are deprecated as of v0.15.37 and will be removed in a future release."
+            f" Please use the renamed cloud_mode/cloud_base_url/cloud_access_token/cloud_organization_id moving forward.",
+            DeprecationWarning,
+        )
         cloud_base_url = ge_cloud_base_url
-    if not cloud_access_token:
         cloud_access_token = ge_cloud_access_token
-    if not cloud_organization_id:
         cloud_organization_id = ge_cloud_organization_id
+        cloud_mode = ge_cloud_mode
 
     # First, check for ge_cloud conditions
 
@@ -1756,7 +1767,7 @@ def get_context(
     )
 
     # If config available and not explicitly disabled
-    if config_available and ge_cloud_mode is not False:
+    if config_available and cloud_mode is not False:
         return CloudDataContext(
             project_config=project_config,
             runtime_environment=runtime_environment,
@@ -1766,7 +1777,7 @@ def get_context(
             cloud_organization_id=cloud_organization_id,
         )
 
-    if ge_cloud_mode and not config_available:
+    if cloud_mode and not config_available:
         raise GXCloudConfigurationError(
             "GX Cloud Mode enabled, but missing env vars: GX_CLOUD_ORGANIZATION_ID, GX_CLOUD_ACCESS_TOKEN"
         )
