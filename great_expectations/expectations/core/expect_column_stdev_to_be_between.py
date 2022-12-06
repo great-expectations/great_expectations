@@ -232,11 +232,16 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
         if not params.min_value and not params.max_value:
             template_str = "standard deviation may have any numerical value."
         else:
-            at_least_str, at_most_str = handle_strict_min_max(params)
+            at_least_str: str = cls._get_strict_min_string(
+                renderer_configuration=renderer_configuration
+            )
+            at_most_str: str = cls._get_strict_max_string(
+                renderer_configuration=renderer_configuration
+            )
 
-            if params["min_value"] is not None and params["max_value"] is not None:
+            if params.min_value and params.max_value:
                 template_str = f"standard deviation must be {at_least_str} $min_value and {at_most_str} $max_value."
-            elif params["min_value"] is None:
+            elif not params.min_value:
                 template_str = f"standard deviation must be {at_most_str} $max_value."
             else:
                 template_str = f"standard deviation must be {at_least_str} $min_value."
@@ -252,6 +257,8 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
                 renderer_configuration=renderer_configuration
             )
             template_str = f"{row_condition_str}, then {template_str}"
+
+        renderer_configuration.template_str = template_str
 
         return renderer_configuration
 
