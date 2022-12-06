@@ -36,6 +36,7 @@ def _func_no_docstring_public_api():
 
 
 class TestPublicAPI:
+    @pytest.mark.unit
     def test_public_api_decorator_full_docstring(self):
         assert _func_full_docstring_public_api.__doc__ == (
             "--Public API--My docstring.\n"
@@ -52,10 +53,12 @@ class TestPublicAPI:
             == "_func_full_docstring_public_api"
         )
 
+    @pytest.mark.unit
     def test_public_api_decorator_only_summary(self):
         assert _func_only_summary_public_api.__doc__ == "--Public API--My docstring."
         assert _func_only_summary_public_api.__name__ == "_func_only_summary_public_api"
 
+    @pytest.mark.unit
     def test_public_api_decorator_no_docstring(self):
         assert _func_no_docstring_public_api.__doc__ == "--Public API--"
         assert _func_no_docstring_public_api.__name__ == "_func_no_docstring_public_api"
@@ -102,6 +105,7 @@ def _func_no_docstring_deprecated(some_arg, other_arg):
 
 
 class TestDeprecatedMethod:
+    @pytest.mark.unit
     def test_deprecated_decorator_full_docstring(self):
 
         assert _func_full_docstring_deprecated.__doc__ == (
@@ -118,6 +122,7 @@ class TestDeprecatedMethod:
             "    other_arg: describe other_arg\n"
         )
 
+    @pytest.mark.unit
     def test_deprecated_decorator_full_docstring_no_message(self):
 
         assert _func_full_docstring_deprecated_no_message.__doc__ == (
@@ -134,6 +139,7 @@ class TestDeprecatedMethod:
             "    other_arg: describe other_arg\n"
         )
 
+    @pytest.mark.unit
     def test_deprecated_decorator_only_summary(self):
 
         assert _func_only_summary_deprecated.__doc__ == (
@@ -143,6 +149,7 @@ class TestDeprecatedMethod:
             "    This is deprecated!!\n"
         )
 
+    @pytest.mark.unit
     def test_deprecated_decorator_no_docstring(self):
 
         assert _func_no_docstring_deprecated.__doc__ == (
@@ -191,6 +198,7 @@ def _func_no_docstring_new_method(some_arg, other_arg):
 
 
 class TestNewMethod:
+    @pytest.mark.unit
     def test_new_method_decorator_full_docstring(self):
 
         assert _func_full_docstring_new_method.__doc__ == (
@@ -207,6 +215,7 @@ class TestNewMethod:
             "    other_arg: describe other_arg\n"
         )
 
+    @pytest.mark.unit
     def test_new_method_decorator_full_docstring_no_message(self):
 
         assert _func_full_docstring_new_method_no_message.__doc__ == (
@@ -223,6 +232,7 @@ class TestNewMethod:
             "    other_arg: describe other_arg\n"
         )
 
+    @pytest.mark.unit
     def test_new_method_decorator_only_summary(self):
 
         assert _func_only_summary_new_method.__doc__ == (
@@ -232,6 +242,7 @@ class TestNewMethod:
             "    Added in version 1.2.3\n"
         )
 
+    @pytest.mark.unit
     def test_new_method_decorator_no_docstring(self):
 
         assert _func_no_docstring_new_method.__doc__ == (
@@ -257,6 +268,7 @@ def _func_full_docstring_all_methoddecorators(some_arg, other_arg):
     pass
 
 
+@pytest.mark.unit
 def test_all_method_decorators_full_docstring():
 
     assert _func_full_docstring_all_methoddecorators.__doc__ == (
@@ -308,6 +320,7 @@ def _func_full_docstring_deprecated_argument_no_description(some_arg, other_arg)
 
 
 class TestDeprecatedArgument:
+    @pytest.mark.unit
     def test_deprecated_decorator_full_docstring_deprecated_argument(self):
         assert _func_full_docstring_deprecated_argument.__doc__ == (
             "My docstring.\n"
@@ -325,6 +338,7 @@ class TestDeprecatedArgument:
             "        describe other_arg"
         )
 
+    @pytest.mark.unit
     def test_deprecated_decorator_full_docstring_deprecated_argument_no_description(
         self,
     ):
@@ -344,6 +358,7 @@ class TestDeprecatedArgument:
             "        describe other_arg"
         )
 
+    @pytest.mark.unit
     def test_deprecated_decorator_full_docstring_deprecated_argument_missing(self):
         with pytest.raises(ValueError) as e:
 
@@ -413,6 +428,7 @@ def _func_full_docstring_new_argument_no_description(some_arg, other_arg):
 
 
 class TestNewArgument:
+    @pytest.mark.unit
     def test_new_argument_decorator_full_docstring_new_argument(self):
         assert _func_full_docstring_new_argument.__doc__ == (
             "My docstring.\n"
@@ -430,6 +446,7 @@ class TestNewArgument:
             "        describe other_arg"
         )
 
+    @pytest.mark.unit
     def test_new_argument_decorator_full_docstring_two_new_arguments(self):
         assert _func_full_docstring_two_new_arguments.__doc__ == (
             "My docstring.\n"
@@ -450,6 +467,7 @@ class TestNewArgument:
             "            some other msg"
         )
 
+    @pytest.mark.unit
     def test_new_argument_full_docstring_new_argument_no_description(self):
         assert _func_full_docstring_new_argument_no_description.__doc__ == (
             "My docstring.\n"
@@ -467,6 +485,7 @@ class TestNewArgument:
             "        describe other_arg"
         )
 
+    @pytest.mark.unit
     def test_new_argument_full_docstring_new_argument_missing(self):
         with pytest.raises(ValueError) as e:
 
@@ -512,6 +531,7 @@ def _func_full_docstring_all_decorators(some_arg, other_arg):
     pass
 
 
+@pytest.mark.unit
 def test_all_decorators_full_docstring():
 
     assert _func_full_docstring_all_decorators.__doc__ == (
