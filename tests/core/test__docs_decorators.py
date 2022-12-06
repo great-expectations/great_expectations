@@ -3,7 +3,7 @@ import pytest
 from great_expectations.core._docs_decorators import (
     deprecated,
     public_api,
-    version_added,
+    new_method,
     deprecated_argument,
     new_argument,
 )
@@ -147,10 +147,10 @@ def test_deprecated_decorator_no_docstring():
     )
 
 
-# @version_added
+# @new_method
 
 
-@version_added(version="1.2.3", message="Added in version 1.2.3")
+@new_method(version="1.2.3", message="Added in version 1.2.3")
 def _func_full_docstring_version_added(some_arg, other_arg):
     """My docstring.
 
@@ -163,7 +163,7 @@ def _func_full_docstring_version_added(some_arg, other_arg):
     pass
 
 
-@version_added(version="1.2.3")
+@new_method(version="1.2.3")
 def _func_full_docstring_version_added_no_message(some_arg, other_arg):
     """My docstring.
 
@@ -176,13 +176,13 @@ def _func_full_docstring_version_added_no_message(some_arg, other_arg):
     pass
 
 
-@version_added(version="1.2.3", message="Added in version 1.2.3")
+@new_method(version="1.2.3", message="Added in version 1.2.3")
 def _func_only_summary_version_added(some_arg, other_arg):
     """My docstring."""
     pass
 
 
-@version_added(version="1.2.3", message="Added in version 1.2.3")
+@new_method(version="1.2.3", message="Added in version 1.2.3")
 def _func_no_docstring_version_added(some_arg, other_arg):
     pass
 
@@ -242,7 +242,7 @@ def test_version_added_decorator_no_docstring():
 
 
 @public_api
-@version_added(version="1.2.3", message="Added in version 1.2.3")
+@new_method(version="1.2.3", message="Added in version 1.2.3")
 @deprecated(version="1.2.3", message="This is deprecated!!")
 def _func_full_docstring_all_methoddecorators(some_arg, other_arg):
     """My docstring.
@@ -441,7 +441,7 @@ def test_new_argument_full_docstring_new_argument_missing():
 
 
 @public_api
-@version_added(version="1.2.3", message="Added in version 1.2.3")
+@new_method(version="1.2.3", message="Added in version 1.2.3")
 @deprecated(version="1.2.3", message="This is deprecated!!")
 @new_argument(argument_name="some_arg", version="1.2.3", message="some msg")
 @deprecated_argument(argument_name="other_arg", version="1.2.3", message="some msg")

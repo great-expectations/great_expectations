@@ -167,12 +167,12 @@ def _add_text_below_docstring_argument(
             if not parsed_docstring.params[idx]:
                 parsed_docstring.params[idx].description = text
             else:
-                parsed_docstring.params[idx].description += "\n" + text  # type: ignore[operator]
+                parsed_docstring.params[idx].description += "\n\n" + text + "\n\n"  # type: ignore[operator]
 
     return compose(parsed_docstring)
 
 
-def version_added(
+def new_method(
     version: str,
     message: str = "",
 ):
@@ -184,7 +184,7 @@ def version_added(
     """
 
     def decorate(fn: F) -> F:
-        return _decorate_with_version_added(
+        return _decorate_with_new_method(
             func=fn,
             version=version,
             message=message,  # type: ignore[arg-type]
@@ -193,7 +193,7 @@ def version_added(
     return decorate
 
 
-def _decorate_with_version_added(
+def _decorate_with_new_method(
     func: F,
     version: str,
     message: str,
