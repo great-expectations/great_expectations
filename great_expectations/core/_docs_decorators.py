@@ -46,14 +46,14 @@ def deprecated_method(
 
     text = f".. deprecated:: {version}" "\n" f"    {message}"
 
-    def decorate(func: F) -> F:
-
+    def wrapper(func: F) -> F:
+        """Wrapper method that accepts func, so we can modify the docstring."""
         return _add_text_to_function_docstring_after_summary(
             func=func,
             text=text,
         )
 
-    return decorate
+    return wrapper
 
 
 def new_method(
@@ -75,13 +75,14 @@ def new_method(
 
     text = f".. versionadded:: {version}" "\n" f"    {message}"
 
-    def decorate(func: F) -> F:
+    def wrapper(func: F) -> F:
+        """Wrapper method that accepts func, so we can modify the docstring."""
         return _add_text_to_function_docstring_after_summary(
             func=func,
             text=text,
         )
 
-    return decorate
+    return wrapper
 
 
 def deprecated_argument(
@@ -105,14 +106,15 @@ def deprecated_argument(
 
     text = f".. deprecated:: {version}" "\n" f"    {message}"
 
-    def decorate(func: F) -> F:
+    def wrapper(func: F) -> F:
+        """Wrapper method that accepts func, so we can modify the docstring."""
         return _add_text_below_function_docstring_argument(
             func=func,
             argument_name=argument_name,
             text=text,
         )
 
-    return decorate
+    return wrapper
 
 
 def new_argument(
@@ -136,14 +138,15 @@ def new_argument(
 
     text = f".. versionadded:: {version}" "\n" f"    {message}"
 
-    def decorate(func: F) -> F:
+    def wrapper(func: F) -> F:
+        """Wrapper method that accepts func, so we can modify the docstring."""
         return _add_text_below_function_docstring_argument(
             func=func,
             argument_name=argument_name,
             text=text,
         )
 
-    return decorate
+    return wrapper
 
 
 def _add_text_to_function_docstring_after_summary(func: F, text: str) -> F:
@@ -236,7 +239,7 @@ def _add_text_below_string_docstring_argument(
             if not parsed_docstring.params[idx]:
                 parsed_docstring.params[idx].description = text
             else:
-                parsed_docstring.params[idx].description += "\n\n" + text + "\n\n"  # type: ignore[operator]
+                parsed_docstring.params[idx].description += "\n\n" + text + "\n\n"
 
     # RenderingStyle.Expanded used to make sure any line breaks before and
     # after the added text are included.
