@@ -1,6 +1,11 @@
 from enum import Enum
 
-from great_expectations.types import ColorPalettes, PrimaryColors, SecondaryColors
+from great_expectations.types import (
+    ColorPalettes,
+    PrimaryColors,
+    SecondaryColors,
+    TintsAndShades,
+)
 
 # Size
 chart_width: int = 800
@@ -27,7 +32,7 @@ subtitle_font_size = 14
 subtitle_font_weight = "bold"
 
 # Both Axes
-axis_title_color = SecondaryColors.MIDNIGHT_BLUE
+axis_title_color = PrimaryColors.COAL_GRAY
 axis_title_font_size = 14
 axis_title_padding = 10
 axis_label_color = PrimaryColors.COAL_GRAY
@@ -45,7 +50,7 @@ x_axis_grid = True
 y_axis_title_x = -55
 
 # Legend
-legend_title_color = SecondaryColors.MIDNIGHT_BLUE
+legend_title_color = PrimaryColors.COAL_GRAY
 legend_title_font_size = 12
 
 # Scale
@@ -59,7 +64,7 @@ scale_band_padding_outer = 1.0
 category_color_scheme = ColorPalettes.CATEGORY_5.value
 diverging_color_scheme = ColorPalettes.DIVERGING_7.value
 heatmap_color_scheme = ColorPalettes.HEATMAP_6.value
-ordinal_color_scheme = ColorPalettes.ORDINAL_6.value
+ordinal_color_scheme = ColorPalettes.ORDINAL_5.value
 
 #
 # Chart Types
@@ -67,7 +72,7 @@ ordinal_color_scheme = ColorPalettes.ORDINAL_6.value
 
 # Area
 fill_opacity = 0.5
-fill_color = SecondaryColors.ROYAL_BLUE
+fill_color = TintsAndShades.MIDNIGHT_BLUE_20
 
 # Line Chart
 line_color = SecondaryColors.MIDNIGHT_BLUE
@@ -81,7 +86,7 @@ point_filled = True
 point_opacity = 1.0
 
 # Bar Chart
-bar_color = SecondaryColors.LAVENDER_PURPLE
+bar_color = SecondaryColors.MIDNIGHT_BLUE
 bar_opacity = 0.7
 bar_stroke_color = SecondaryColors.MIDNIGHT_BLUE
 bar_stroke_width = 1

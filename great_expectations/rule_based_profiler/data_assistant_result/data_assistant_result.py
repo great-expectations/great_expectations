@@ -70,7 +70,6 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 from great_expectations.types import (
-    ColorPalettes,
     SecondaryColors,
     SerializableDictDot,
     TintsAndShades,
@@ -1968,7 +1967,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         expectation_type: Optional[str] = None,
     ) -> alt.Chart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            TintsAndShades.MIDNIGHT_BLUE_50
+            TintsAndShades.MIDNIGHT_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2096,7 +2095,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         expectation_type: Optional[str] = None,
     ) -> alt.LayerChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            TintsAndShades.MIDNIGHT_BLUE_50
+            TintsAndShades.MIDNIGHT_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2225,7 +2224,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         expectation_type: Optional[str] = None,
     ) -> alt.Chart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            TintsAndShades.MIDNIGHT_BLUE_50
+            TintsAndShades.MIDNIGHT_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2590,7 +2589,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         predicates: List[Union[bool, int]],
     ) -> alt.LayerChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            TintsAndShades.MIDNIGHT_BLUE_50
+            TintsAndShades.MIDNIGHT_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2741,7 +2740,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         predicates: List[Union[bool, int]],
     ) -> alt.VConcatChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            TintsAndShades.MIDNIGHT_BLUE_50
+            TintsAndShades.MIDNIGHT_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2879,7 +2878,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         predicates: List[Union[bool, int]],
     ) -> alt.LayerChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            TintsAndShades.MIDNIGHT_BLUE_50
+            TintsAndShades.MIDNIGHT_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 

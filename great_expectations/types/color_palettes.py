@@ -117,6 +117,15 @@ class ColorPalettes(Enum):
         SecondaryColors.LEAF_GREEN,
         SecondaryColors.LAVENDER_PURPLE,
     ]
+    CATEGORY_7 = [
+        PrimaryColors.ORANGE,
+        SecondaryColors.ROYAL_BLUE,
+        SecondaryColors.TURQUOISE_BLUE,
+        SecondaryColors.LEAF_GREEN,
+        SecondaryColors.GOLD_YELLOW,
+        SecondaryColors.POMEGRANATE_PINK,
+        SecondaryColors.LAVENDER_PURPLE,
+    ]
     DIVERGING_7 = [
         TintsAndShades.GREEN_50,
         TintsAndShades.GREEN_30,
@@ -134,11 +143,10 @@ class ColorPalettes(Enum):
         TintsAndShades.MIDNIGHT_BLUE_70,
         TintsAndShades.MIDNIGHT_BLUE_90,
     ]
-    ORDINAL_6 = [
+    ORDINAL_5 = [
         TintsAndShades.ORANGE_90,
         TintsAndShades.ORANGE_70,
         TintsAndShades.ORANGE_50,
         TintsAndShades.YELLOW_50,
         TintsAndShades.YELLOW_30,
-        TintsAndShades.YELLOW_10,
     ]
