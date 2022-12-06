@@ -21,8 +21,8 @@ The feature can be used, e.g., to test if different encodings of identical piece
 
 .. code-block:: bash
 
-    >>> import great_expectations as ge
-    >>> my_df = ge.read_csv("./tests/test_sets/Titanic.csv")
+    >>> import great_expectations as gx
+    >>> my_df = gx.read_csv("./tests/test_sets/Titanic.csv")
     >>> my_df.expect_column_values_to_be_in_set(
             column='Sex',
             value_set=['male'],

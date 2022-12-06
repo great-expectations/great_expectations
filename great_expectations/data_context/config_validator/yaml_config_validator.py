@@ -5,8 +5,8 @@ This validator evaluates YAML configurations of core Great Expectations componen
  configuration of the Data Context in some cases if the configuration is valid.
 
  Typical usage example:
- import great_expectations as ge
- context = ge.get_context()
+ import great_expectations as gx
+ context = gx.get_context()
  context.test_yaml_config(my_config)
 """
 from __future__ import annotations
