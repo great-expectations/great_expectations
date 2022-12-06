@@ -35,8 +35,8 @@ configured. Take a look at our documentation for more configuration options.
 
 You can create or load a DataContext from disk via the following:
 ```
-import great_expectations as ge
-ge.get_context()
+import great_expectations as gx
+gx.get_context()
 ```
 
 

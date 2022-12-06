@@ -20,7 +20,7 @@ from typing import (
 
 from marshmallow import Schema, ValidationError, fields, pre_dump
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import __version__ as ge_version
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
@@ -154,7 +154,7 @@ class ExpectationSuite(SerializableDictDot):
             "profiler_config": profiler_config,
             "comment": comment,
         }
-        ge.util.filter_properties_dict(
+        gx.util.filter_properties_dict(
             properties=citation, clean_falsy=True, inplace=True
         )
         self.meta["citations"].append(citation)

@@ -61,8 +61,8 @@ Ensure you have added valid credentials to the ``config-variables.yml`` file:
 ### 2. In a notebook, get a test Batch of data to use for Validation
 
 ```python
-import great_expectations as ge
-context = ge.DataContext()
+import great_expectations as gx
+context = gx.DataContext()
 
 batch_kwargs = {
     "datasource": "movies_db",
