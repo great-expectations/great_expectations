@@ -208,7 +208,9 @@ class ExpectColumnSumToBeBetween(ColumnExpectation):
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
-    def _prescriptive_template(cls, renderer_configuration: RendererConfiguration):
+    def _prescriptive_template(
+        cls, renderer_configuration: RendererConfiguration
+    ) -> RendererConfiguration:
         add_param_args = (
             ("column", RendererSchemaType.STRING),
             ("min_value", RendererSchemaType.NUMBER),

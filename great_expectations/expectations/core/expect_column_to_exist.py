@@ -117,7 +117,7 @@ class ExpectColumnToExist(TableExpectation):
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
-    ):
+    ) -> RendererConfiguration:
         add_param_args = (
             ("column", RendererSchemaType.STRING),
             ("column_index", RendererSchemaType.NUMBER),

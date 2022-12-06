@@ -212,11 +212,12 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
-    ):
+    ) -> RendererConfiguration:
         add_param_args = (
             ("column", RendererSchemaType.STRING),
             ("min_value", RendererSchemaType.NUMBER),
             ("max_value", RendererSchemaType.NUMBER),
+            ("mostly", RendererSchemaType.NUMBER),
             ("row_condition", RendererSchemaType.STRING),
             ("condition_parser", RendererSchemaType.STRING),
             ("strict_min", RendererSchemaType.BOOLEAN),
@@ -230,14 +231,14 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
         if not params.min_value and not params.max_value:
             template_str = "may have any number of unique values."
         else:
+            at_least_str: str = cls._get_strict_min_string(
+                renderer_configuration=renderer_configuration
+            )
+            at_most_str: str = cls._get_strict_max_string(
+                renderer_configuration=renderer_configuration
+            )
             if params.mostly and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
-                    renderer_configuration=renderer_configuration
-                )
-                at_least_str: str = cls._get_strict_min_string(
-                    renderer_configuration=renderer_configuration
-                )
-                at_most_str: str = cls._get_strict_max_string(
                     renderer_configuration=renderer_configuration
                 )
 

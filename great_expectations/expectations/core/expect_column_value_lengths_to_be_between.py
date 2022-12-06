@@ -277,7 +277,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
-    ):
+    ) -> RendererConfiguration:
         add_param_args = (
             ("column", RendererSchemaType.STRING),
             ("min_value", RendererSchemaType.NUMBER),
