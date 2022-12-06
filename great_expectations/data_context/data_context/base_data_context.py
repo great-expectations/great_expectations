@@ -150,17 +150,17 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     """
 
     UNCOMMITTED_DIRECTORIES = ["data_docs", "validations"]
-    GE_UNCOMMITTED_DIR = "uncommitted"
+    GX_UNCOMMITTED_DIR = "uncommitted"
     BASE_DIRECTORIES = [
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.EXPECTATIONS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.PLUGINS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.PROFILERS_BASE_DIRECTORY.value,
-        GE_UNCOMMITTED_DIR,
+        GX_UNCOMMITTED_DIR,
     ]
-    GE_DIR = "great_expectations"
-    GE_YML = "great_expectations.yml"  # TODO: migrate this to FileDataContext. Still needed by DataContext
-    GE_EDIT_NOTEBOOK_DIR = GE_UNCOMMITTED_DIR
+    GX_DIR = "great_expectations"
+    GX_YML = "great_expectations.yml"  # TODO: migrate this to FileDataContext. Still needed by DataContext
+    GX_EDIT_NOTEBOOK_DIR = GX_UNCOMMITTED_DIR
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
 
     @usage_statistics_enabled_method(
@@ -328,9 +328,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         Args:
             name (str): Name of Datasource
-            initialize (bool): Should GE add and initialize the Datasource? If true then current
+            initialize (bool): Should GX add and initialize the Datasource? If true then current
                 method will return initialized Datasource
-            save_changes (Optional[bool]): should GE save the Datasource config?
+            save_changes (Optional[bool]): should GX save the Datasource config?
             **kwargs Optional[dict]: Additional kwargs that define Datasource initialization kwargs
 
         Returns:
@@ -371,7 +371,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             expectation_suite_name (str): The name of the Expectation Suite
             include_rendered_content (bool): Whether or not to re-populate rendered_content for each
                 ExpectationConfiguration.
-            ge_cloud_id (str): The GE Cloud ID for the Expectation Suite.
+            ge_cloud_id (str): The GX Cloud ID for the Expectation Suite.
 
         Returns:
             An existing ExpectationSuite

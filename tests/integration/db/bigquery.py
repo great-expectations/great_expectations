@@ -13,7 +13,7 @@ from great_expectations.validator.validator import Validator
 """
 What does this test and why?
 
-This integration test is part of the deprecation of the bigquery_temp_table parameter. As of GE 0.15.3,
+This integration test is part of the deprecation of the bigquery_temp_table parameter. As of GX 0.15.3,
 tables that are created as the result of a query are created as permanent tables with an expiration of 24 hours, with
 more information to be found:
 

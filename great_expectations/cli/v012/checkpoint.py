@@ -316,7 +316,7 @@ def checkpoint_script(checkpoint, directory) -> None:
 
     script_name = f"run_{checkpoint}.py"
     script_path = os.path.join(
-        context.root_directory, context.GE_UNCOMMITTED_DIR, script_name
+        context.root_directory, context.GX_UNCOMMITTED_DIR, script_name
     )
 
     if os.path.isfile(script_path):

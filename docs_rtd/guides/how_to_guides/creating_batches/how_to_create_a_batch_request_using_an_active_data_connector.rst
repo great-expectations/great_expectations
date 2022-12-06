@@ -24,7 +24,7 @@ Steps
 
 If you have the following ``reports`` directory in your filesystem, and you want to treat ``*.csv`` files as batches within the ``reports`` DataAsset:
 
-**Note** : In our example, the ``base_directory`` is set to ``../``. If we are running this Notebook in the same folder as Great Expectations home directory (ie ``great_expectations/``), GE will begin looking for the files in the parent directory.
+**Note** : In our example, the ``base_directory`` is set to ``../``. If we are running this Notebook in the same folder as Great Expectations home directory (ie ``great_expectations/``), GX will begin looking for the files in the parent directory.
 
   .. code-block:: bash
 

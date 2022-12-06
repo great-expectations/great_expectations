@@ -209,7 +209,7 @@ If you have the following ``numeric_example/`` directory in your filesystem, and
     numeric_example/test_555.csv
 
 **Note** : In our example, the ``base_directory`` is set to ``../``. If we are running this Notebook in the same folder as Great Expectations home directory (ie ``great_expectations/``),
-GE will begin looking for the files in the parent directory.
+GX will begin looking for the files in the parent directory.
 
 
 1. **Load or create a DataContext**
@@ -372,7 +372,7 @@ If you have the following ``datetime_example/`` directory in your filesystem, an
     datetime_example/test_20210102.csv
 
 **Note** : In our example, the ``base_directory`` is set to ``../``. If we are running this Notebook in the same folder as Great Expectations home directory (ie ``great_expectations/``),
-GE will begin looking for the files in the parent directory.
+GX will begin looking for the files in the parent directory.
 
 1. **Load or create a DataContext**
 
@@ -536,7 +536,7 @@ If you have the following ``elements/`` directory in your filesystem, and you wa
     elements_example/test_C.csv
 
 **Note** : In our example, the ``base_directory`` is set to ``../``. If we are running this Notebook in the same folder as Great Expectations home directory (ie ``great_expectations/``),
-GE will begin looking for the files in the parent directory.
+GX will begin looking for the files in the parent directory.
 
 
 1. **Load or create a DataContext**
@@ -708,7 +708,7 @@ files as batches within the ``my_data_asset`` DataAsset, sorting them by 1) Date
     multiple_sorters_example/test_EEE_555_20210103.csv
 
 **Note** : In our example, the ``base_directory`` is set to ``../``. If we are running this Notebook in the same folder as Great Expectations home directory (ie ``great_expectations/``),
-GE will begin looking for the files in the parent directory.
+GX will begin looking for the files in the parent directory.
 
 
 1. **Load or create a DataContext**
@@ -883,7 +883,7 @@ and we only wanted to consider the reports **on or after 2000**, and in **ascend
     year_reports/report_2020.csv
 
 **Note** : In our example, the ``base_directory`` is set to ``../``. If we are running this Notebook in the same folder as Great Expectations home directory (ie ``great_expectations/``),
-GE will begin looking for the files in the parent directory.
+GX will begin looking for the files in the parent directory.
 
 1. **Load or create a DataContext**
 
