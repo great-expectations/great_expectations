@@ -69,7 +69,12 @@ from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     ParameterNode,
 )
-from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
+from great_expectations.types import (
+    ColorPalettes,
+    SecondaryColors,
+    SerializableDictDot,
+    TintsAndShades,
+)
 
 if TYPE_CHECKING:
     from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
@@ -1071,7 +1076,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         if column_set is None:
             chart = (
                 alt.Chart(data=df, title=title)
-                .mark_point(color=Colors.PURPLE.value)
+                .mark_point(color=SecondaryColors.MIDNIGHT_BLUE)
                 .encode(
                     x=alt.X(
                         batch_plot_component.name,
@@ -1111,7 +1116,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 )
             ).mark_text(
                 text=text,
-                color=Colors.PURPLE.value,
+                color=SecondaryColors.MIDNIGHT_BLUE,
                 lineBreak=r"$",
                 dy=dy,
             )
@@ -1142,7 +1147,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         if column_set is None:
             chart = (
                 alt.Chart(data=df, title=title)
-                .mark_point(color=Colors.PURPLE.value)
+                .mark_point(color=SecondaryColors.MIDNIGHT_BLUE)
                 .encode(
                     x=alt.X(
                         batch_plot_component.name,
@@ -1182,7 +1187,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 )
             ).mark_text(
                 text=text,
-                color=Colors.PURPLE.value,
+                color=SecondaryColors.MIDNIGHT_BLUE,
                 lineBreak=r"$",
                 dy=dy,
             )
@@ -1963,7 +1968,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         expectation_type: Optional[str] = None,
     ) -> alt.Chart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            ColorPalettes.HEATMAP_6.value[4]
+            TintsAndShades.MIDNIGHT_BLUE_50
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2056,8 +2061,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             )
             point_color_condition = alt.condition(
                 predicate=predicate,
-                if_false=alt.value(Colors.GREEN.value),
-                if_true=alt.value(Colors.PINK.value),
+                if_false=alt.value(SecondaryColors.LEAF_GREEN),
+                if_true=alt.value(SecondaryColors.POMEGRANATE_PINK),
             )
 
             anomaly_coded_base = alt.Chart(data=df, title=title)
@@ -2091,7 +2096,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         expectation_type: Optional[str] = None,
     ) -> alt.LayerChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            ColorPalettes.HEATMAP_6.value[4]
+            TintsAndShades.MIDNIGHT_BLUE_50
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2194,8 +2199,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             )
             bar_color_condition: alt.condition = alt.condition(
                 predicate=predicate,
-                if_false=alt.value(Colors.GREEN.value),
-                if_true=alt.value(Colors.PINK.value),
+                if_false=alt.value(SecondaryColors.LEAF_GREEN),
+                if_true=alt.value(SecondaryColors.POMEGRANATE_PINK),
             )
 
             anomaly_coded_base = alt.Chart(data=df, title=title)
@@ -2220,7 +2225,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         expectation_type: Optional[str] = None,
     ) -> alt.Chart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            ColorPalettes.HEATMAP_6.value[4]
+            TintsAndShades.MIDNIGHT_BLUE_50
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2323,8 +2328,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             )
             point_color_condition = alt.condition(
                 predicate=predicate,
-                if_false=alt.value(Colors.GREEN.value),
-                if_true=alt.value(Colors.PINK.value),
+                if_false=alt.value(SecondaryColors.LEAF_GREEN),
+                if_true=alt.value(SecondaryColors.POMEGRANATE_PINK),
             )
 
             anomaly_coded_base = alt.Chart(data=df, title=title)
@@ -2585,7 +2590,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         predicates: List[Union[bool, int]],
     ) -> alt.LayerChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            ColorPalettes.HEATMAP_6.value[4]
+            TintsAndShades.MIDNIGHT_BLUE_50
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2704,8 +2709,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
             point_color_condition = alt.condition(
                 predicate=predicates[idx],
-                if_false=alt.value(Colors.PINK.value),
-                if_true=alt.value(Colors.GREEN.value),
+                if_false=alt.value(SecondaryColors.LEAF_GREEN),
+                if_true=alt.value(SecondaryColors.POMEGRANATE_PINK),
             )
 
             anomaly_coded_points = points.encode(
@@ -2736,7 +2741,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         predicates: List[Union[bool, int]],
     ) -> alt.VConcatChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            ColorPalettes.HEATMAP_6.value[4]
+            TintsAndShades.MIDNIGHT_BLUE_50
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2847,8 +2852,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
             bar_color_condition: alt.condition = alt.condition(
                 predicate=predicates[idx],
-                if_false=alt.value(Colors.PINK.value),
-                if_true=alt.value(Colors.GREEN.value),
+                if_false=alt.value(SecondaryColors.POMEGRANATE_PINK),
+                if_true=alt.value(SecondaryColors.LEAF_GREEN),
             )
 
             bars.layer[idx] = bar_layer.encode(
@@ -2874,7 +2879,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         predicates: List[Union[bool, int]],
     ) -> alt.LayerChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            ColorPalettes.HEATMAP_6.value[4]
+            TintsAndShades.MIDNIGHT_BLUE_50
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2995,8 +3000,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
             point_color_condition = alt.condition(
                 predicate=predicates[idx],
-                if_false=alt.value(Colors.PINK.value),
-                if_true=alt.value(Colors.GREEN.value),
+                if_false=alt.value(SecondaryColors.POMEGRANATE_PINK),
+                if_true=alt.value(SecondaryColors.LEAF_GREEN),
             )
 
             anomaly_coded_points = points.encode(
