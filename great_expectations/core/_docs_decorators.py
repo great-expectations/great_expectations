@@ -1,6 +1,8 @@
 from textwrap import dedent
 from typing import Callable, TypeVar, Any, List
 
+from docstring_parser import compose
+
 WHITELISTED_TAG = "--Public API--"
 
 
@@ -54,6 +56,60 @@ def _decorate_with_deprecation(
         split_docstring=split_docstring,
         rst_directive=deprecation_rst,
     )
+    return func
+
+
+def deprecated_argument(
+    argument_name: str,
+    version: str,
+    message: str = "",
+):
+    """Add an arg-specific deprecation warning to the docstring of the decorated method.
+
+    Args:
+        argument_name: Name of the argument to associate with the deprecation note.
+        version: Version number when the method was deprecated.
+        message: Optional deprecation message.
+    """
+
+    def decorate(fn: F) -> F:
+        return _decorate_argument_with_deprecation(
+            func=fn,
+            argument_name=argument_name,
+            version=version,
+            message=message,  # type: ignore[arg-type]
+        )
+
+    return decorate
+
+
+def _decorate_argument_with_deprecation(
+    func: F,
+    argument_name: str,
+    version: str,
+    message: str,
+) -> F:
+    deprecation_rst = f".. deprecated:: {version}" "\n" f"    {message}"
+    existing_docstring = func.__doc__ if func.__doc__ else ""
+    from docstring_parser import parse
+
+    parsed_docstring = parse(existing_docstring)
+
+    if not argument_name in (param.arg_name for param in parsed_docstring.params):
+        raise ValueError(
+            f"Please specify an existing argument, you specified {argument_name}."
+        )
+
+    for idx, param in enumerate(parsed_docstring.params):
+        if param.arg_name == argument_name:
+            # description can be None
+            if not parsed_docstring.params[idx]:
+                parsed_docstring.params[idx].description = deprecation_rst
+            else:
+                parsed_docstring.params[idx].description += "\n" + deprecation_rst  # type: ignore[operator]
+
+    func.__doc__ = compose(parsed_docstring)
+
     return func
 
 

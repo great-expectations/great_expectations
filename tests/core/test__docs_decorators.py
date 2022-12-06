@@ -1,7 +1,10 @@
+import pytest
+
 from great_expectations.core._docs_decorators import (
     deprecated,
     public_api,
     version_added,
+    deprecated_argument,
 )
 
 # @public_api
@@ -234,7 +237,7 @@ def test_version_added_decorator_no_docstring():
     )
 
 
-# All Decorators
+# All Method Level Decorators
 
 
 @public_api
@@ -270,4 +273,84 @@ def test_all_decorators_full_docstring():
         "Args:\n"
         "    some_arg: describe some_arg\n"
         "    other_arg: describe other_arg\n"
+    )
+
+
+# @deprecated_argument
+
+
+@deprecated_argument(argument_name="some_arg", version="1.2.3", message="some msg")
+def _func_full_docstring_deprecated_argument(some_arg, other_arg):
+    """My docstring.
+
+    Longer description.
+
+    Args:
+        some_arg: describe some_arg
+        other_arg: describe other_arg
+    """
+    pass
+
+
+def test_deprecated_decorator_full_docstring_deprecated_argument():
+    assert _func_full_docstring_deprecated_argument.__doc__ == (
+        "My docstring.\n"
+        "\n"
+        "Longer description.\n"
+        "\n"
+        "Args:\n"
+        "    some_arg: describe some_arg\n"
+        "        .. deprecated:: 1.2.3\n"
+        "            some msg\n"
+        "    other_arg: describe other_arg"
+    )
+
+
+@deprecated_argument(argument_name="some_arg", version="1.2.3", message="some msg")
+def _func_full_docstring_deprecated_argument_no_description(some_arg, other_arg):
+    """My docstring.
+
+    Longer description.
+
+    Args:
+        some_arg:
+        other_arg: describe other_arg
+    """
+    pass
+
+
+def test_deprecated_decorator_full_docstring_deprecated_argument_no_description():
+    assert _func_full_docstring_deprecated_argument_no_description.__doc__ == (
+        "My docstring.\n"
+        "\n"
+        "Longer description.\n"
+        "\n"
+        "Args:\n"
+        "    some_arg: \n"
+        "        .. deprecated:: 1.2.3\n"
+        "            some msg\n"
+        "    other_arg: describe other_arg"
+    )
+
+
+def test_deprecated_decorator_full_docstring_deprecated_argument_missing():
+    with pytest.raises(ValueError) as e:
+
+        @deprecated_argument(
+            argument_name="this_arg_doesnt_exist", version="1.2.3", message="some msg"
+        )
+        def _func_full_docstring_deprecated_argument_missing(some_arg, other_arg):
+            """My docstring.
+
+            Longer description.
+
+            Args:
+                some_arg: describe some_arg
+                other_arg: describe other_arg
+            """
+            pass
+
+    assert (
+        "Please specify an existing argument, you specified this_arg_doesnt_exist."
+        in str(e.value)
     )
