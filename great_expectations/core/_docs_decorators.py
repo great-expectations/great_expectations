@@ -253,11 +253,8 @@ def _add_text_below_string_docstring_argument(
                 parsed_docstring.params[idx].description = text
             else:
                 # To handle mypy issue with description type
-                description = parsed_docstring.params[idx].description
-                assert isinstance(description, str)
-
-                description += "\n\n" + text + "\n\n"
-                parsed_docstring.params[idx].description = description
+                assert isinstance(param.description, str)
+                param.description += "\n\n" + text + "\n\n"
 
     # RenderingStyle.Expanded used to make sure any line breaks before and
     # after the added text are included.
