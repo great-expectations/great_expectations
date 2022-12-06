@@ -1,5 +1,5 @@
 from textwrap import dedent
-from typing import Callable, TypeVar, Any, List
+from typing import Callable, TypeVar, Any
 
 import docstring_parser
 
@@ -8,6 +8,12 @@ WHITELISTED_TAG = "--Public API--"
 
 def public_api(func) -> Callable:
     """Add the public API tag for processing by the auto documentation generator.
+
+    Used as a decorator:
+
+        @public_api
+        def my_method(some_argument):
+            ...
 
     This tag is added at import time.
     """
@@ -28,35 +34,27 @@ def deprecated_method(
 ):
     """Add a deprecation warning to the docstring of the decorated method.
 
+    Used as a decorator:
+
+        @deprecated_method(version="1.2.3", message="Optional message")
+        def my_method(some_argument):
+            ...
+
     Args:
         version: Version number when the method was deprecated.
         message: Optional deprecation message.
     """
 
-    def decorate(fn: F) -> F:
-        return _decorate_with_deprecation(
-            func=fn,
-            version=version,
-            message=message,  # type: ignore[arg-type]
+    text = f".. deprecated:: {version}" "\n" f"    {message}"
+
+    def decorate(func: F) -> F:
+
+        return _add_text_to_function_docstring_after_summary(
+            func=func,
+            text=text,
         )
 
     return decorate
-
-
-def _decorate_with_deprecation(
-    func: F,
-    version: str,
-    message: str,
-) -> F:
-    deprecation_rst = f".. deprecated:: {version}" "\n" f"    {message}"
-    existing_docstring = func.__doc__ if func.__doc__ else ""
-    split_docstring = existing_docstring.split("\n", 1)
-
-    func.__doc__ = _add_text_to_method_docstring(
-        split_docstring=split_docstring,
-        text=deprecation_rst,
-    )
-    return func
 
 
 def new_method(
@@ -65,36 +63,26 @@ def new_method(
 ):
     """Add a version added note to the docstring of the decorated method.
 
+    Used as a decorator:
+
+        @new_method(version="1.2.3", message="Optional message")
+        def my_method(some_argument):
+            ...
+
     Args:
         version: Version number when the method was added.
         message: Optional message.
     """
 
-    def decorate(fn: F) -> F:
-        return _decorate_with_new_method(
-            func=fn,
-            version=version,
-            message=message,  # type: ignore[arg-type]
+    text = f".. versionadded:: {version}" "\n" f"    {message}"
+
+    def decorate(func: F) -> F:
+        return _add_text_to_function_docstring_after_summary(
+            func=func,
+            text=text,
         )
 
     return decorate
-
-
-def _decorate_with_new_method(
-    func: F,
-    version: str,
-    message: str,
-) -> F:
-    version_added_rst = f".. versionadded:: {version}" "\n" f"    {message}"
-    existing_docstring = func.__doc__ if func.__doc__ else ""
-    split_docstring = existing_docstring.split("\n", 1)
-
-    func.__doc__ = _add_text_to_method_docstring(
-        split_docstring=split_docstring,
-        text=version_added_rst,
-    )
-
-    return func
 
 
 def deprecated_argument(
@@ -119,7 +107,7 @@ def deprecated_argument(
     text = f".. deprecated:: {version}" "\n" f"    {message}"
 
     def decorate(func: F) -> F:
-        return _add_text_below_method_docstring_argument(
+        return _add_text_below_function_docstring_argument(
             func=func,
             argument_name=argument_name,
             text=text,
@@ -150,7 +138,7 @@ def new_argument(
     text = f".. versionadded:: {version}" "\n" f"    {message}"
 
     def decorate(func: F) -> F:
-        return _add_text_below_method_docstring_argument(
+        return _add_text_below_function_docstring_argument(
             func=func,
             argument_name=argument_name,
             text=text,
@@ -159,18 +147,23 @@ def new_argument(
     return decorate
 
 
-def _add_text_to_method_docstring(split_docstring: List[str], text: str) -> str:
-    """Insert rst directive into docstring.
+def _add_text_to_function_docstring_after_summary(func: F, text: str) -> F:
+    """Insert text into docstring, e.g. rst directive.
 
     Args:
-        split_docstring: Docstring split into the first line (short description)
-            and the rest of the docstring.
-        text: string to add, can be a rst directive e.g.:
+        func: Add text to provided func docstring.
+        text: String to add to the docstring, can be a rst directive e.g.:
             text = (
                 ".. versionadded:: 1.2.3\n"
                 "    Added in version 1.2.3\n"
             )
+
+    Returns:
+        func with modified docstring.
     """
+    existing_docstring = func.__doc__ if func.__doc__ else ""
+    split_docstring = existing_docstring.split("\n", 1)
+
     docstring = ""
     if len(split_docstring) == 2:
         short_description, docstring = split_docstring
@@ -187,10 +180,12 @@ def _add_text_to_method_docstring(split_docstring: List[str], text: str) -> str:
     elif len(split_docstring) == 0:
         docstring = f"{text}\n"
 
-    return docstring
+    func.__doc__ = docstring
+
+    return func
 
 
-def _add_text_below_method_docstring_argument(
+def _add_text_below_function_docstring_argument(
     func: F,
     argument_name: str,
     text: str,
@@ -203,7 +198,7 @@ def _add_text_below_method_docstring_argument(
         text: Text to add to the argument description.
 
     Returns:
-        Modified function.
+        func with modified docstring.
     """
     existing_docstring = func.__doc__ if func.__doc__ else ""
 
