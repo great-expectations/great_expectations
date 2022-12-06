@@ -22,7 +22,7 @@ def public_api(func) -> Callable:
 F = TypeVar("F", bound=Callable[..., Any])
 
 
-def deprecated(
+def deprecated_method(
     version: str,
     message: str = "",
 ):
@@ -156,7 +156,7 @@ def _add_text_below_docstring_argument(
     """
     parsed_docstring = docstring_parser.parse(docstring)
 
-    if not argument_name in (param.arg_name for param in parsed_docstring.params):
+    if argument_name not in (param.arg_name for param in parsed_docstring.params):
         raise ValueError(
             f"Please specify an existing argument, you specified {argument_name}."
         )
