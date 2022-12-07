@@ -22,10 +22,8 @@ from great_expectations.self_check.util import (
     sqliteDialect,
     trinoDialect,
 )
-from tests.conftest import (
-    build_in_memory_runtime_context,
-    build_test_backends_list_v3_api,
-)
+from great_expectations.util import build_in_memory_runtime_context
+from tests.conftest import build_test_backends_list_v3_api
 
 
 def pytest_generate_tests(metafunc):

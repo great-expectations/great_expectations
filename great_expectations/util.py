@@ -66,7 +66,10 @@ if TYPE_CHECKING:
         CloudDataContext,
         DataContext,
     )
-    from great_expectations.data_context.types.base import DataContextConfig
+    from great_expectations.data_context.types.base import (
+        DataContextConfig,
+        InMemoryStoreBackendDefaults,
+    )
 
 try:
     from typing import TypeGuard  # type: ignore[attr-defined]
@@ -886,6 +889,64 @@ def read_sas(
             expectation_suite=expectation_suite,
             profiler=profiler,
         )
+
+
+def build_in_memory_runtime_context():
+    from great_expectations.data_context.data_context.base_data_context import (
+        BaseDataContext,
+    )
+    from great_expectations.data_context.types.base import (
+        DataContextConfig,
+        InMemoryStoreBackendDefaults,
+    )
+
+    data_context_config: DataContextConfig = DataContextConfig(
+        datasources={
+            "pandas_datasource": {
+                "execution_engine": {
+                    "class_name": "PandasExecutionEngine",
+                    "module_name": "great_expectations.execution_engine",
+                },
+                "class_name": "Datasource",
+                "module_name": "great_expectations.datasource",
+                "data_connectors": {
+                    "runtime_data_connector": {
+                        "class_name": "RuntimeDataConnector",
+                        "batch_identifiers": [
+                            "id_key_0",
+                            "id_key_1",
+                        ],
+                    }
+                },
+            },
+            "spark_datasource": {
+                "execution_engine": {
+                    "class_name": "SparkDFExecutionEngine",
+                    "module_name": "great_expectations.execution_engine",
+                },
+                "class_name": "Datasource",
+                "module_name": "great_expectations.datasource",
+                "data_connectors": {
+                    "runtime_data_connector": {
+                        "class_name": "RuntimeDataConnector",
+                        "batch_identifiers": [
+                            "id_key_0",
+                            "id_key_1",
+                        ],
+                    }
+                },
+            },
+        },
+        expectations_store_name="expectations_store",
+        validations_store_name="validations_store",
+        evaluation_parameter_store_name="evaluation_parameter_store",
+        checkpoint_store_name="checkpoint_store",
+        store_backend_defaults=InMemoryStoreBackendDefaults(),
+    )
+
+    context: BaseDataContext = BaseDataContext(project_config=data_context_config)
+
+    return context
 
 
 def validate(
