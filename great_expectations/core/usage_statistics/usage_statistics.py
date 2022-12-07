@@ -198,7 +198,10 @@ class UsageStatisticsHandler:
     @staticmethod
     def validate_message(message: dict, schema: dict) -> bool:
         try:
-            jsonschema.validate(message, schema=schema)
+            jsonschema.validators.Draft202012Validator(
+                schema=schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message)
             return True
         except jsonschema.ValidationError as e:
             logger.debug(
