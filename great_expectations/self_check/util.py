@@ -1429,7 +1429,7 @@ def build_pandas_validator_with_data(
     batch = Batch(data=df, batch_definition=batch_definition)
 
     if context is None:
-        context = build_in_memory_runtime_context()
+        context = build_in_memory_runtime_context()  # type: ignore[assignment]
 
     return Validator(
         execution_engine=PandasExecutionEngine(),
@@ -1619,9 +1619,9 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
     if context is None:
-        context = build_in_memory_runtime_context()
+        context = build_in_memory_runtime_context()  # type: ignore[assignment]
 
-    context.datasources["my_test_datasource"] = Datasource(
+    context.datasources["my_test_datasource"] = Datasource(  # type: ignore[union-attr]
         name="my_test_datasource",
         # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
         execution_engine={
@@ -1720,7 +1720,7 @@ def build_spark_validator_with_data(
     )
 
     if context is None:
-        context = build_in_memory_runtime_context()
+        context = build_in_memory_runtime_context()  # type: ignore[assignment]
 
     return Validator(
         execution_engine=execution_engine,
