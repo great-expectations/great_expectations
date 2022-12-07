@@ -426,15 +426,15 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/jupyter.png" />
+				<div style="background-color: #fff;"><img height="40" src="./readme_assets/jupyter.png" /></div>
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_create_expectations/#creating-expectations-in-jupyter-notebooks">
-					Slack
+					Jupyter Notebooks
 				</a>
 			</td>
 			<td>
-				Jupyter Notebooks
+				Utility
 			</td>
 		</tr>
 	</tbody>
