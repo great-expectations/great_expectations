@@ -1,7 +1,7 @@
 """
 Test GXCloudStoreBackend behavior and adherence to StoreBackend contract.
 
-Since GXCloudStoreBackend relies on GE Cloud, we mock requests and assert the right calls
+Since GXCloudStoreBackend relies on GX Cloud, we mock requests and assert the right calls
 are made from the Store API (set, get, list, and remove_key).
 
 Note that although ge_cloud_access_token is provided (and is a valid UUID), no external

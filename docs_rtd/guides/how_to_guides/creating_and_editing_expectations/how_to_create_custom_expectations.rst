@@ -435,7 +435,7 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
 
         This guide will walk you through the process of creating your own Modular Expectations in 6 simple steps!
 
-        See also this `complete example <https://github.com/superconductive/ge_tutorials/blob/main/getting_started_tutorial_final_v3_api/great_expectations/plugins/column_custom_max_expectation.py>`_.
+        See also this `complete example <https://github.com/great-expectations/gx_tutorials/blob/main/getting_started_tutorial_final_v3_api/great_expectations/plugins/column_custom_max_expectation.py>`_.
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -454,7 +454,7 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
 
            Once you’ve decided on an Expectation to implement, think of the different aggregations, mappings, or metadata you’ll need to validate your data within the Expectation - each of these will be a separate metric that must be implemented prior to validating your Expectation.
 
-           Fortunately, many Metrics have already been implemented for pre-existing Expectations, so it is possible you will find that the Metric you’d like to implement already exists within the GE framework and can be readily deployed.
+           Fortunately, many Metrics have already been implemented for pre-existing Expectations, so it is possible you will find that the Metric you’d like to implement already exists within the GX framework and can be readily deployed.
 
 
         #. **Implement your Metric**

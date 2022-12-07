@@ -446,7 +446,7 @@ def test_data_context_variables_save_config(
     ephemeral_data_context_variables: EphemeralDataContextVariables,
     file_data_context_variables: FileDataContextVariables,
     cloud_data_context_variables: CloudDataContextVariables,
-    # The below GE Cloud variables were used to instantiate the above CloudDataContextVariables
+    # The below GX Cloud variables were used to instantiate the above CloudDataContextVariables
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
     ge_cloud_access_token: str,
@@ -568,7 +568,7 @@ def test_file_data_context_variables_e2e(
 
     # Review great_expectations.yml where values were written and confirm changes
     config_filepath = pathlib.Path(file_data_context.root_directory).joinpath(
-        file_data_context.GE_YML
+        file_data_context.GX_YML
     )
 
     with open(config_filepath) as f:

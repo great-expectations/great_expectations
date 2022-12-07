@@ -308,7 +308,12 @@ def test_anonymized_rule_based_profiler_validation():
     with pytest.raises(jsonschema.ValidationError) as e:
         message.pop("variable_count")
         jsonschema.validate(message, anonymized_rule_based_profiler_run_schema)
-    assert "'variable_count' is a required property" in str(e.value)
+
+    expected_error_msg = "'variable_count' is a required property"
+    assert any(
+        expected_error_msg in args
+        for args in [context.args for context in e.value.context]
+    )
 
     # Empty payload (valid)
     message.clear()
