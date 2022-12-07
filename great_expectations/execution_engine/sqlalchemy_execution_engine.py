@@ -211,7 +211,7 @@ if TYPE_CHECKING:
 class SqlAlchemyConnectionManager:
     def __init__(self) -> None:
         self.lock = threading.Lock()
-        self._connections: Dict[str, "Connection"] = {}  # type: ignore[attr-defined]
+        self._connections: Dict[str, "Connection"] = {}  # type: ignore[name-defined]
 
     def get_engine(self, connection_string, **kwargs):
         if sa is not None:
