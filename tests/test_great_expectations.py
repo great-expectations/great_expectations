@@ -463,7 +463,7 @@ class TestIO(unittest.TestCase):
 
     @pytest.mark.skipif(
         not is_library_loadable(library_name="openpyxl"),
-        reason="GE uses pandas to read excel files, which requires openpyxl",
+        reason="GX uses pandas to read excel files, which requires openpyxl",
     )
     def test_read_excel(self):
         script_path = os.path.dirname(os.path.realpath(__file__))

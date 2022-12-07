@@ -41,7 +41,6 @@ exclude = [
     'cli/checkpoint\.py',  # 9
     'cli/cli\.py',  # 10
     'cli/datasource\.py',  # 12
-    'cli/docs\.py',  # 1
     'cli/project\.py',  # 5
     'cli/python_subprocess\.py', # 6
     'cli/store\.py',  # 2
@@ -71,6 +70,7 @@ exclude = [
     'core/usage_statistics/usage_statistics\.py', # 19
     'core/usage_statistics/util\.py', # 2
     'core/util\.py', # 18
+    'docs/',  # Docs should not be type checked with the rest of the library.
     'dataset/sparkdf_dataset\.py', # 3
     'dataset/sqlalchemy_dataset\.py', # 16
     'datasource/data_connector/configured_asset_sql_data_connector\.py',  # 47
@@ -157,6 +157,7 @@ exclude = [
     'rule_based_profiler/rule_based_profiler_result\.py',  # 1
     'rule_based_profiler/rule_based_profiler\.py',  # 40
     'rule_based_profiler/rule/rule.py',  # 5
+    'tasks\.py',  # Excluded from type checking the rest of the library, may be added in a separate step.
     'validation_operators/types/validation_operator_result\.py', # 35
     'validation_operators/validation_operators\.py',  # 16
     'validator/exception_info\.py', # 1

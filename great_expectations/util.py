@@ -984,7 +984,7 @@ def validate(
     from great_expectations.dataset import Dataset, PandasDataset
 
     if data_asset_class is None:
-        # Guess the GE data_asset_type based on the type of the data_asset
+        # Guess the GX data_asset_type based on the type of the data_asset
         if isinstance(data_asset, pd.DataFrame):
             data_asset_class = PandasDataset
         # Add other data_asset_type conditions here as needed
@@ -1722,7 +1722,7 @@ def get_context(
         ge_cloud_base_url (str): url for ge_cloud endpoint.
         ge_cloud_access_token (str): access_token for ge_cloud account.
         ge_cloud_organization_id (str): org_id for ge_cloud account.
-        ge_cloud_mode (bool): bool flag to specify whether to run GE in cloud mode (default is None).
+        ge_cloud_mode (bool): bool flag to specify whether to run GX in cloud mode (default is None).
 
     Returns:
         DataContext. Either a DataContext, BaseDataContext, or CloudDataContext depending on environment and/or
@@ -1756,7 +1756,7 @@ def get_context(
 
     if ge_cloud_mode and not config_available:
         raise GXCloudConfigurationError(
-            "GE Cloud Mode enabled, but missing env vars: GE_CLOUD_ORGANIZATION_ID, GE_CLOUD_ACCESS_TOKEN"
+            "GX Cloud Mode enabled, but missing env vars: GE_CLOUD_ORGANIZATION_ID, GE_CLOUD_ACCESS_TOKEN"
         )
 
     # Second, check for which type of local

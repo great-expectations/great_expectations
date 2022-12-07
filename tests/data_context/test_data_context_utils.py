@@ -335,7 +335,7 @@ def test_sanitize_config_masks_cloud_store_backend_access_tokens(
                 ]["ge_cloud_credentials"]["access_token"]
                 == ge_cloud_access_token
             )
-            # expect that the GE Cloud token has been obscured
+            # expect that the GX Cloud token has been obscured
             assert (
                 store_config["store_backend"]["ge_cloud_credentials"]["access_token"]
                 != ge_cloud_access_token

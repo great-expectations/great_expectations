@@ -93,10 +93,10 @@ def _escape_markdown_special_characters(string_to_escape: str) -> str:
 
 
 def _reformat_url_to_docusaurus_path(url: str) -> str:
-    """Removes the site portion of a GE url.
+    """Removes the site portion of a GX url.
 
     Args:
-        url: the url including the GE site that should be converted to a Docusaurus absolute link.
+        url: the url including the GX site that should be converted to a Docusaurus absolute link.
     """
     return re.sub(r"^https://docs\.greatexpectations\.io", "", url).strip()
 

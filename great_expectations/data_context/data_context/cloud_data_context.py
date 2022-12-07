@@ -170,9 +170,9 @@ class CloudDataContext(AbstractDataContext):
         """
         Utilizes the GeCloudConfig instantiated in the constructor to create a request to the Cloud API.
         Given proper authorization, the request retrieves a data context config that is pre-populated with
-        GE objects specific to the user's Cloud environment (datasources, data connectors, etc).
+        GX objects specific to the user's Cloud environment (datasources, data connectors, etc).
 
-        Please note that substitution for ${VAR} variables is performed in GE Cloud before being sent
+        Please note that substitution for ${VAR} variables is performed in GX Cloud before being sent
         over the wire.
 
         :return: the configuration object retrieved from the Cloud API
@@ -191,7 +191,7 @@ class CloudDataContext(AbstractDataContext):
         response = requests.get(ge_cloud_url, headers=headers)
         if response.status_code != 200:
             raise ge_exceptions.GXCloudError(
-                f"Bad request made to GE Cloud; {response.text}"
+                f"Bad request made to GX Cloud; {response.text}"
             )
         config = response.json()
         return DataContextConfig(**config)
@@ -222,7 +222,7 @@ class CloudDataContext(AbstractDataContext):
             GeCloudConfig
 
         Raises:
-            GeCloudError if a GE Cloud variable is missing
+            GeCloudError if a GX Cloud variable is missing
         """
         ge_cloud_config_dict = cls._get_ge_cloud_config_dict(
             ge_cloud_base_url=ge_cloud_base_url,
@@ -324,7 +324,7 @@ class CloudDataContext(AbstractDataContext):
     def list_expectation_suite_names(self) -> List[str]:
         """
         Lists the available expectation suite names. If in ge_cloud_mode, a list of
-        GE Cloud ids is returned instead.
+        GX Cloud ids is returned instead.
         """
         return [suite_key.resource_name for suite_key in self.list_expectation_suites()]  # type: ignore[union-attr]
 
@@ -366,9 +366,9 @@ class CloudDataContext(AbstractDataContext):
     ) -> DataContextConfig:
         """
         Substitute vars in config of form ${var} or $(var) with values found in the following places,
-        in order of precedence: ge_cloud_config (for Data Contexts in GE Cloud mode), runtime_environment,
+        in order of precedence: ge_cloud_config (for Data Contexts in GX Cloud mode), runtime_environment,
         environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
-        be optional in GE Cloud mode).
+        be optional in GX Cloud mode).
         """
         if not config:
             config = self.config
@@ -479,12 +479,12 @@ class CloudDataContext(AbstractDataContext):
         include_rendered_content: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> ExpectationSuite:
-        """Get an Expectation Suite by name or GE Cloud ID
+        """Get an Expectation Suite by name or GX Cloud ID
         Args:
             expectation_suite_name (str): The name of the Expectation Suite
             include_rendered_content (bool): Whether or not to re-populate rendered_content for each
                 ExpectationConfiguration.
-            ge_cloud_id (str): The GE Cloud ID for the Expectation Suite.
+            ge_cloud_id (str): The GX Cloud ID for the Expectation Suite.
 
         Returns:
             An existing ExpectationSuite
@@ -571,7 +571,7 @@ class CloudDataContext(AbstractDataContext):
         if ge_cloud_id:
             if self.expectations_store.has_key(key):  # noqa: W601
                 raise ge_exceptions.DataContextError(
-                    f"expectation_suite with GE Cloud ID {ge_cloud_id} already exists. "
+                    f"expectation_suite with GX Cloud ID {ge_cloud_id} already exists. "
                     f"If you would like to overwrite this expectation_suite, set overwrite_existing=True."
                 )
 

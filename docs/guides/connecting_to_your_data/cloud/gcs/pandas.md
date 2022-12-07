@@ -61,7 +61,7 @@ It is also important to note that GCS `DataConnectors` support various methods o
   - This argument should contain the actual JSON data from your credentials file in the form of a string.
   - This method utilizes `google.oauth2.service_account.Credentials.from_service_account_info` under the hood.
 
-Please note that if you use the `filename` or `info` options, you must supply these options to any GE objects that interact with GCS (i.e. `PandasExecutionEngine`).
+Please note that if you use the `filename` or `info` options, you must supply these options to any GX objects that interact with GCS (i.e. `PandasExecutionEngine`).
 The `gcs_options` dictionary is also responsible for storing any `**kwargs` you wish to pass to the GCS `storage.Client()` connection object (i.e. `project`)
 
 For more details regarding storing credentials for use with Great Expectations see: [How to configure credentials](../../../setup/configuring_data_contexts/how_to_configure_credentials.md)
