@@ -9,7 +9,7 @@
 
 
 
-<img align="right" src="./static/img/generic_dickens_protagonist.png">
+<img align="right" src="./static/img/gx-mark.png">
 
 Great Expectations
 ================================================================================
@@ -73,7 +73,7 @@ Checkpoints are a transparent, central, and automatable mechanism for testing Ex
 
 Everyone stays on the same page about your data quality with GX’s inspectable, shareable, and human-readable Data Docs. You can publish Data Docs to the locations where you need them in a variety of formats, making it easy to integrate Data Docs into your existing data catalogs, dashboards, and other reporting and data governance tools.
 
-![Image of data docs](./readme_assets/datadocs-update.jpg.png)
+![Image of data docs](./readme_assets/datadocs-update.jpg)
 
 Quick start
 -------------------------------------------------------------
