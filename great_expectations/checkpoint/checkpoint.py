@@ -361,7 +361,6 @@ class BaseCheckpoint(ConfigPeer):
             result_format_validation = runtime_configuration_validation.get(
                 "result_format"
             )
-
             result_format = result_format or result_format_validation
 
             if result_format is None:

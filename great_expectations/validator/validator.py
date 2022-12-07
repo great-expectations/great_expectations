@@ -1101,10 +1101,10 @@ class Validator:
 
             expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
 
-            lower_level = configuration.kwargs.get("result_format")
-            if lower_level:
-                for key in lower_level.keys():
-                    runtime_configuration["result_format"][key] = lower_level[key]
+            runtime_configuration = self._override_runtime_configuration_with_config_in_expectation_configuration(
+                expectation_configuration=configuration,
+                runtime_configuration=runtime_configuration,
+            )
 
             validation_dependencies: ValidationDependencies = (
                 expectation_impl().get_validation_dependencies(
@@ -1151,9 +1151,39 @@ class Validator:
                     raise err
         return expectation_validation_graphs, evrs, processed_configurations
 
-    def _update_with_local(self):
-        # breakpoint()
-        pass
+    def _override_runtime_configuration_with_config_in_expectation_configuration(
+        self,
+        expectation_configuration: ExpectationConfiguration,
+        runtime_configuration: Union[dict, None] = None,
+    ) -> Union[dict, None]:
+        """
+        `runtime_configuration` can come from:
+            1. the Checkpoint.run() function at runtime
+            2. ExpectationConfiguration
+
+        This method allows for the configuration at the Expectation-level (lower) to override
+        the configuration at the Checkpoint-level (higher).  This is particularly important
+        for unexpected_index_list, which depends on primary key columns defined by the
+        `unexpected_index_columns` parameter in the result_format runtime configuration.
+
+        In the case of `unexpected_index_columns`, we want the columns defined at the
+        Expectation-level to take precedence over the ones defined at higher levels.
+        This functionality is enabled by the current function.
+        """
+        expectation_level_config: Union[
+            dict, None
+        ] = expectation_configuration.kwargs.get("result_format")
+
+        if expectation_level_config:
+            if not runtime_configuration:
+                runtime_configuration = expectation_level_config
+            else:
+                for key in expectation_level_config.keys():
+                    runtime_configuration["result_format"][
+                        key
+                    ] = expectation_level_config[key]
+
+        return runtime_configuration
 
     def _generate_suite_level_graph_from_expectation_level_sub_graphs(
         self,

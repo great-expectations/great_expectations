@@ -387,6 +387,7 @@ class ActionListValidationOperator(ValidationOperator):
                         expectation_suite_identifier=expectation_suite_identifier,
                         run_id=run_id,
                     )
+
                 validation_result = async_batch_validation_result.result()
                 validation_result.meta["validation_id"] = validation_id
                 validation_result.meta["checkpoint_id"] = (
