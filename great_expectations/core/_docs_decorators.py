@@ -30,15 +30,15 @@ def public_api(func) -> Callable:
     return func
 
 
-def deprecated_method(
+def deprecated_method_or_class(
     version: str,
     message: str = "",
 ):
-    """Add a deprecation warning to the docstring of the decorated method.
+    """Add a deprecation warning to the docstring of the decorated method or class.
 
     Used as a decorator:
 
-        @deprecated_method(version="1.2.3", message="Optional message")
+        @deprecated_method_or_class(version="1.2.3", message="Optional message")
         def my_method(some_argument):
             ...
 
@@ -59,15 +59,15 @@ def deprecated_method(
     return wrapper
 
 
-def new_method(
+def new_method_or_class(
     version: str,
     message: str = "",
 ):
-    """Add a version added note to the docstring of the decorated method.
+    """Add a version added note to the docstring of the decorated method or class.
 
     Used as a decorator:
 
-        @new_method(version="1.2.3", message="Optional message")
+        @new_method_or_class(version="1.2.3", message="Optional message")
         def my_method(some_argument):
             ...
 

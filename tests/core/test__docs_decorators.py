@@ -2,9 +2,9 @@ import pytest
 
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
-    deprecated_method,
+    deprecated_method_or_class,
     new_argument,
-    new_method,
+    new_method_or_class,
     public_api,
 )
 
@@ -67,7 +67,7 @@ class TestPublicAPI:
 # @deprecated
 
 
-@deprecated_method(version="1.2.3", message="This is deprecated!!")
+@deprecated_method_or_class(version="1.2.3", message="This is deprecated!!")
 def _func_full_docstring_deprecated(some_arg, other_arg):
     """My docstring.
 
@@ -80,7 +80,7 @@ def _func_full_docstring_deprecated(some_arg, other_arg):
     pass
 
 
-@deprecated_method(version="1.2.3")
+@deprecated_method_or_class(version="1.2.3")
 def _func_full_docstring_deprecated_no_message(some_arg, other_arg):
     """My docstring.
 
@@ -93,13 +93,13 @@ def _func_full_docstring_deprecated_no_message(some_arg, other_arg):
     pass
 
 
-@deprecated_method(version="1.2.3", message="This is deprecated!!")
+@deprecated_method_or_class(version="1.2.3", message="This is deprecated!!")
 def _func_only_summary_deprecated(some_arg, other_arg):
     """My docstring."""
     pass
 
 
-@deprecated_method(version="1.2.3", message="This is deprecated!!")
+@deprecated_method_or_class(version="1.2.3", message="This is deprecated!!")
 def _func_no_docstring_deprecated(some_arg, other_arg):
     pass
 
@@ -161,10 +161,10 @@ class TestDeprecatedMethod:
         )
 
 
-# @new_method
+# @new_method_or_class
 
 
-@new_method(version="1.2.3", message="Added in version 1.2.3")
+@new_method_or_class(version="1.2.3", message="Added in version 1.2.3")
 def _func_full_docstring_new_method(some_arg, other_arg):
     """My docstring.
 
@@ -177,7 +177,7 @@ def _func_full_docstring_new_method(some_arg, other_arg):
     pass
 
 
-@new_method(version="1.2.3")
+@new_method_or_class(version="1.2.3")
 def _func_full_docstring_new_method_no_message(some_arg, other_arg):
     """My docstring.
 
@@ -190,13 +190,13 @@ def _func_full_docstring_new_method_no_message(some_arg, other_arg):
     pass
 
 
-@new_method(version="1.2.3", message="Added in version 1.2.3")
+@new_method_or_class(version="1.2.3", message="Added in version 1.2.3")
 def _func_only_summary_new_method(some_arg, other_arg):
     """My docstring."""
     pass
 
 
-@new_method(version="1.2.3", message="Added in version 1.2.3")
+@new_method_or_class(version="1.2.3", message="Added in version 1.2.3")
 def _func_no_docstring_new_method(some_arg, other_arg):
     pass
 
@@ -258,8 +258,8 @@ class TestNewMethod:
 
 
 @public_api
-@new_method(version="1.2.3", message="Added in version 1.2.3")
-@deprecated_method(version="1.2.3", message="This is deprecated!!")
+@new_method_or_class(version="1.2.3", message="Added in version 1.2.3")
+@deprecated_method_or_class(version="1.2.3", message="This is deprecated!!")
 def _func_full_docstring_all_method_decorators(some_arg, other_arg):
     """My docstring.
 
@@ -531,8 +531,8 @@ class TestNewArgument:
 
 
 @public_api
-@new_method(version="1.2.3", message="Added in version 1.2.3")
-@deprecated_method(version="1.2.3", message="This is deprecated!!")
+@new_method_or_class(version="1.2.3", message="Added in version 1.2.3")
+@deprecated_method_or_class(version="1.2.3", message="This is deprecated!!")
 @new_argument(argument_name="some_arg", version="1.2.3", message="some msg")
 @deprecated_argument(argument_name="other_arg", version="1.2.3", message="some msg")
 def _func_full_docstring_all_decorators(some_arg, other_arg):
@@ -605,8 +605,8 @@ class _ClassFullDocstringPublicAPI:
 
 
 
-@deprecated_method(version="1.2.3", message="This is deprecated!!")
-@new_method(version="1.2.3", message="Added in version 1.2.3")
+@deprecated_method_or_class(version="1.2.3", message="This is deprecated!!")
+@new_method_or_class(version="1.2.3", message="Added in version 1.2.3")
 class _ClassFullDocstringDeprecatedAndNewAtClassLevel:
     """Docstring summary.
 
