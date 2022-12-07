@@ -501,6 +501,6 @@ def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
             resource_name=suite_name,
         )
     )
-    assert f"expectation_suite with GE Cloud ID {suite_id} already exists" in str(
+    assert f"expectation_suite with GX Cloud ID {suite_id} already exists" in str(
         e.value
     )

@@ -1103,9 +1103,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> RenderedAtomicContent:
-        """
-        Rendering function that is utilized by GE Cloud Front-end
-        """
         renderer_configuration = RendererConfiguration(
             configuration=configuration,
             result=result,

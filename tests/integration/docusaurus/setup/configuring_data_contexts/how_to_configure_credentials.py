@@ -72,7 +72,7 @@ try:
     # get context and set config variables in config_variables.yml
     context = gx.get_context()
     context_config_variables_relative_file_path = os.path.join(
-        context.GE_UNCOMMITTED_DIR, "config_variables.yml"
+        context.GX_UNCOMMITTED_DIR, "config_variables.yml"
     )
     assert (
         yaml.safe_load(config_variables_file_path)["config_variables_file_path"]

@@ -168,7 +168,7 @@ def render_evaluation_parameter_string(render_func) -> Callable:
                             rendered_string_template.append(rendered_content)
             else:
                 raise GreatExpectationsError(
-                    f"""GE was not able to render the value of evaluation parameters.
+                    f"""GX was not able to render the value of evaluation parameters.
                         Expectation {render_func} had evaluation parameters set, but they were not passed in."""
                 )
         return rendered_string_template
@@ -329,7 +329,7 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration: Optional[dict] = None,
     ) -> RenderedAtomicContent:
         """
-        Default rendering function that is utilized by GE Cloud Front-end if an implemented atomic renderer fails
+        Default rendering function that is utilized by GX Cloud Front-end if an implemented atomic renderer fails
         """
         renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
@@ -437,9 +437,7 @@ class Expectation(metaclass=MetaExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> RenderedAtomicContent:
-        """
-        Rendering function that is utilized by GE Cloud Front-end
-        """
+
         (template_str, params_with_json_schema, _) = cls._atomic_prescriptive_template(
             configuration=configuration,
             result=result,
@@ -851,9 +849,6 @@ class Expectation(metaclass=MetaExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> RenderedAtomicContent:
-        """
-        Rendering function that is utilized by GE Cloud Front-end
-        """
         renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
@@ -904,9 +899,6 @@ class Expectation(metaclass=MetaExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> RenderedAtomicContent:
-        """
-        Rendering function that is utilized by GE Cloud Front-end
-        """
         observed_value: str = cls._get_observed_value_from_evr(result=result)
         value_obj = renderedAtomicValueSchema.load(
             {

@@ -16,7 +16,7 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sample
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.self_check.util import build_sa_engine
 from great_expectations.util import import_library_module
 
@@ -76,22 +76,22 @@ def clean_query_for_comparison(query_string: str) -> str:
 
 @pytest.fixture
 def dialect_name_to_sql_statement():
-    def _dialect_name_to_sql_statement(dialect_name: GESqlDialect) -> str:
+    def _dialect_name_to_sql_statement(dialect_name: GXSqlDialect) -> str:
         dialect_name_to_sql_statement: dict = {
-            GESqlDialect.POSTGRESQL: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE LIMIT 10",
-            GESqlDialect.MYSQL: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE = 1 LIMIT 10",
-            GESqlDialect.ORACLE: "SELECT * FROM test_schema_name.test_table WHERE 1 = 1 AND ROWNUM <= 10",
-            GESqlDialect.MSSQL: "SELECT TOP 10 * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE 1 = 1",
-            GESqlDialect.SQLITE: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE 1 = 1 LIMIT 10 OFFSET 0",
-            GESqlDialect.BIGQUERY: "SELECT * FROM `TEST_SCHEMA_NAME`.`TEST_TABLE` WHERE TRUE LIMIT 10",
-            GESqlDialect.SNOWFLAKE: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE LIMIT 10",
-            GESqlDialect.REDSHIFT: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE LIMIT 10",
-            GESqlDialect.AWSATHENA: 'SELECT * FROM "TEST_SCHEMA_NAME"."TEST_TABLE" WHERE TRUE LIMIT 10',
-            GESqlDialect.DREMIO: 'SELECT * FROM "TEST_SCHEMA_NAME"."TEST_TABLE" WHERE 1 = 1 LIMIT 10',
-            GESqlDialect.TERADATASQL: "SELECT TOP 10 * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE 1 = 1",
-            GESqlDialect.TRINO: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE LIMIT 10",
-            GESqlDialect.HIVE: "SELECT * FROM `TEST_SCHEMA_NAME`.`TEST_TABLE` WHERE TRUE LIMIT 10",
-            GESqlDialect.VERTICA: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE LIMIT 10",
+            GXSqlDialect.POSTGRESQL: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE LIMIT 10",
+            GXSqlDialect.MYSQL: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE = 1 LIMIT 10",
+            GXSqlDialect.ORACLE: "SELECT * FROM test_schema_name.test_table WHERE 1 = 1 AND ROWNUM <= 10",
+            GXSqlDialect.MSSQL: "SELECT TOP 10 * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE 1 = 1",
+            GXSqlDialect.SQLITE: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE 1 = 1 LIMIT 10 OFFSET 0",
+            GXSqlDialect.BIGQUERY: "SELECT * FROM `TEST_SCHEMA_NAME`.`TEST_TABLE` WHERE TRUE LIMIT 10",
+            GXSqlDialect.SNOWFLAKE: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE LIMIT 10",
+            GXSqlDialect.REDSHIFT: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE LIMIT 10",
+            GXSqlDialect.AWSATHENA: 'SELECT * FROM "TEST_SCHEMA_NAME"."TEST_TABLE" WHERE TRUE LIMIT 10',
+            GXSqlDialect.DREMIO: 'SELECT * FROM "TEST_SCHEMA_NAME"."TEST_TABLE" WHERE 1 = 1 LIMIT 10',
+            GXSqlDialect.TERADATASQL: "SELECT TOP 10 * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE 1 = 1",
+            GXSqlDialect.TRINO: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE LIMIT 10",
+            GXSqlDialect.HIVE: "SELECT * FROM `TEST_SCHEMA_NAME`.`TEST_TABLE` WHERE TRUE LIMIT 10",
+            GXSqlDialect.VERTICA: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE LIMIT 10",
         }
         return dialect_name_to_sql_statement[dialect_name]
 
@@ -104,11 +104,11 @@ def dialect_name_to_sql_statement():
         pytest.param(
             dialect_name, id=dialect_name.value, marks=pytest.mark.external_sqldialect
         )
-        for dialect_name in GESqlDialect.get_all_dialects()
+        for dialect_name in GXSqlDialect.get_all_dialects()
     ],
 )
 def test_sample_using_limit_builds_correct_query_where_clause_none(
-    dialect_name: GESqlDialect, dialect_name_to_sql_statement, sa
+    dialect_name: GXSqlDialect, dialect_name_to_sql_statement, sa
 ):
     """What does this test and why?
 
@@ -118,34 +118,34 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
 
     # 1. Setup
     class MockSqlAlchemyExecutionEngine:
-        def __init__(self, dialect_name: GESqlDialect):
+        def __init__(self, dialect_name: GXSqlDialect):
             self._dialect_name = dialect_name
             self._connection_string = self.dialect_name_to_connection_string(
                 dialect_name
             )
 
         DIALECT_TO_CONNECTION_STRING_STUB: dict = {
-            GESqlDialect.POSTGRESQL: "postgresql://",
-            GESqlDialect.MYSQL: "mysql+pymysql://",
-            GESqlDialect.ORACLE: "oracle+cx_oracle://",
-            GESqlDialect.MSSQL: "mssql+pyodbc://",
-            GESqlDialect.SQLITE: "sqlite:///",
-            GESqlDialect.BIGQUERY: "bigquery://",
-            GESqlDialect.SNOWFLAKE: "snowflake://",
-            GESqlDialect.REDSHIFT: "redshift+psycopg2://",
-            GESqlDialect.AWSATHENA: f"awsathena+rest://@athena.us-east-1.amazonaws.com/some_test_db?s3_staging_dir=s3://some-s3-path/",
-            GESqlDialect.DREMIO: "dremio://",
-            GESqlDialect.TERADATASQL: "teradatasql://",
-            GESqlDialect.TRINO: "trino://",
-            GESqlDialect.HIVE: "hive://",
-            GESqlDialect.VERTICA: "vertica+vertica_python://",
+            GXSqlDialect.POSTGRESQL: "postgresql://",
+            GXSqlDialect.MYSQL: "mysql+pymysql://",
+            GXSqlDialect.ORACLE: "oracle+cx_oracle://",
+            GXSqlDialect.MSSQL: "mssql+pyodbc://",
+            GXSqlDialect.SQLITE: "sqlite:///",
+            GXSqlDialect.BIGQUERY: "bigquery://",
+            GXSqlDialect.SNOWFLAKE: "snowflake://",
+            GXSqlDialect.REDSHIFT: "redshift+psycopg2://",
+            GXSqlDialect.AWSATHENA: f"awsathena+rest://@athena.us-east-1.amazonaws.com/some_test_db?s3_staging_dir=s3://some-s3-path/",
+            GXSqlDialect.DREMIO: "dremio://",
+            GXSqlDialect.TERADATASQL: "teradatasql://",
+            GXSqlDialect.TRINO: "trino://",
+            GXSqlDialect.HIVE: "hive://",
+            GXSqlDialect.VERTICA: "vertica+vertica_python://",
         }
 
         @property
         def dialect_name(self) -> str:
             return self._dialect_name.value
 
-        def dialect_name_to_connection_string(self, dialect_name: GESqlDialect) -> str:
+        def dialect_name_to_connection_string(self, dialect_name: GXSqlDialect) -> str:
             return self.DIALECT_TO_CONNECTION_STRING_STUB.get(dialect_name)
 
         _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
@@ -154,18 +154,18 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
         def dialect(self) -> sa.engine.Dialect:
             # TODO: AJB 20220512 move this dialect retrieval to a separate class from the SqlAlchemyExecutionEngine
             #  and then use it here.
-            dialect_name: GESqlDialect = self._dialect_name
-            if dialect_name == GESqlDialect.ORACLE:
+            dialect_name: GXSqlDialect = self._dialect_name
+            if dialect_name == GXSqlDialect.ORACLE:
                 # noinspection PyUnresolvedReferences
                 return import_library_module(
                     module_name="sqlalchemy.dialects.oracle"
                 ).dialect()
-            elif dialect_name == GESqlDialect.SNOWFLAKE:
+            elif dialect_name == GXSqlDialect.SNOWFLAKE:
                 # noinspection PyUnresolvedReferences
                 return import_library_module(
                     module_name="snowflake.sqlalchemy.snowdialect"
                 ).dialect()
-            elif dialect_name == GESqlDialect.DREMIO:
+            elif dialect_name == GXSqlDialect.DREMIO:
                 # WARNING: Dremio Support is experimental, functionality is not fully under test
                 # noinspection PyUnresolvedReferences
                 return import_library_module(
@@ -177,12 +177,12 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
             #     return import_library_module(
             #         module_name="sqlalchemy_redshift.dialect"
             #     ).RedshiftDialect
-            elif dialect_name == GESqlDialect.BIGQUERY:
+            elif dialect_name == GXSqlDialect.BIGQUERY:
                 # noinspection PyUnresolvedReferences
                 return import_library_module(
                     module_name=self._BIGQUERY_MODULE_NAME
                 ).dialect()
-            elif dialect_name == GESqlDialect.TERADATASQL:
+            elif dialect_name == GXSqlDialect.TERADATASQL:
                 # WARNING: Teradata Support is experimental, functionality is not fully under test
                 # noinspection PyUnresolvedReferences
                 return import_library_module(

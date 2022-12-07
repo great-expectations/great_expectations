@@ -313,7 +313,7 @@ illegal.  Please check your config."""
                 raise ge_exceptions.ExecutionEngineError(
                     """
                                 Spark schema was not properly serialized.
-                                Please run the .jsonValue() method on the schema object before loading into GE.
+                                Please run the .jsonValue() method on the schema object before loading into GX.
                                 schema: your_schema.jsonValue()
                                 """
                 )

@@ -4,7 +4,6 @@ import copy
 import datetime
 import json
 import os
-import warnings
 from collections import defaultdict, namedtuple
 from dataclasses import asdict, dataclass, field
 from typing import (
@@ -69,7 +68,13 @@ from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     ParameterNode,
 )
-from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
+from great_expectations.types import (
+    FontFamily,
+    FontFamilyURL,
+    SecondaryColors,
+    SerializableDictDot,
+    TintsAndShades,
+)
 
 if TYPE_CHECKING:
     from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
@@ -655,23 +660,50 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 display_chart_dict[chart_titles[idx]] = themed_charts[idx]
 
             dropdown_title_color: str = altair_theme["legend"]["titleColor"]
-            dropdown_font: str = altair_theme["font"]
             dropdown_font_size: str = altair_theme["axis"]["titleFontSize"]
+            dropdown_font_weight: int = altair_theme["title"]["subtitleFontWeight"]
             dropdown_text_color: str = altair_theme["axis"]["labelColor"]
+
+            font_family: str = altair_theme["font"]
+
+            gx_font_family = True
+            try:
+                FontFamily(font_family)
+            except ValueError:
+                gx_font_family = False
+
+            if gx_font_family:
+                font_family_url = FontFamilyURL[FontFamily(font_family).name].value
+
+                title_font_weight: int = altair_theme["title"]["fontWeight"]
+                subtitle_font_weight: int = altair_theme["title"]["subtitleFontWeight"]
+                url_font_weights: str = ";".join(
+                    {str(title_font_weight), str(subtitle_font_weight)}
+                )
+
+                font_url = f"{font_family_url}:wght@{url_font_weights}&display=swap"
+
+                font_css = f"""
+                <style>
+                @import url('{font_url}');
+                </style>
+                """
+                display(HTML(font_css))
 
             # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
             altair_dropdown_css: str = f"""
                 <style>
                 span.vega-bind-name {{
                     color: {dropdown_title_color};
-                    font-family: {dropdown_font};
+                    font-family: {font_family};
                     font-size: {dropdown_font_size}px;
-                    font-weight: bold;
+                    font-weight: {dropdown_font_weight};
                 }}
                 form.vega-bindings {{
                     color: {dropdown_text_color};
-                    font-family: {dropdown_font};
+                    font-family: {font_family};
                     font-size: {dropdown_font_size}px;
+                    font-weight: {dropdown_font_weight};
                     position: absolute;
                     left: 75px;
                     top: 28px;
@@ -687,16 +719,17 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 <style>
                 .widget-inline-hbox .widget-label {{
                     color: {dropdown_title_color};
-                    font-family: {dropdown_font};
+                    font-family: {font_family};
                     font-size: {dropdown_font_size}px;
-                    font-weight: bold;
+                    font-weight: {dropdown_font_weight};
                 }}
                 .widget-dropdown > select {{
                     padding-right: 21px;
                     padding-left: 3px;
                     color: {dropdown_text_color};
-                    font-family: {dropdown_font};
+                    font-family: {font_family};
                     font-size: {dropdown_font_size}px;
+                    font-weight: {dropdown_font_weight};
                     height: 20px;
                     line-height: {dropdown_font_size}px;
                     background-size: 20px;
@@ -713,13 +746,6 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 layout={"width": "max-content", "margin": "0px"},
             )
 
-            # As of 19 July, 2022 there is a Deprecation Warning due to the latest ipywidgets' interaction with
-            # ipykernel (Kernel._parent_header deprecated in v6.0.0). Rather than add a version constraint to ipykernel,
-            # we suppress Deprecation Warnings produced by module ipywidgets.widgets.widget_output.
-            warnings.filterwarnings(
-                action="ignore",
-                module="ipywidgets.widgets.widget_output",
-            )
             widgets.interact(
                 DataAssistantResult._display_chart_from_dict,
                 display_chart_dict=widgets.fixed(display_chart_dict),
@@ -1071,7 +1097,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         if column_set is None:
             chart = (
                 alt.Chart(data=df, title=title)
-                .mark_point(color=Colors.PURPLE.value)
+                .mark_point(color=SecondaryColors.MIDNIGHT_BLUE)
                 .encode(
                     x=alt.X(
                         batch_plot_component.name,
@@ -1111,7 +1137,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 )
             ).mark_text(
                 text=text,
-                color=Colors.PURPLE.value,
+                color=SecondaryColors.MIDNIGHT_BLUE,
                 lineBreak=r"$",
                 dy=dy,
             )
@@ -1142,7 +1168,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         if column_set is None:
             chart = (
                 alt.Chart(data=df, title=title)
-                .mark_point(color=Colors.PURPLE.value)
+                .mark_point(color=SecondaryColors.MIDNIGHT_BLUE)
                 .encode(
                     x=alt.X(
                         batch_plot_component.name,
@@ -1182,7 +1208,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 )
             ).mark_text(
                 text=text,
-                color=Colors.PURPLE.value,
+                color=SecondaryColors.MIDNIGHT_BLUE,
                 lineBreak=r"$",
                 dy=dy,
             )
@@ -1963,7 +1989,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         expectation_type: Optional[str] = None,
     ) -> alt.Chart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            ColorPalettes.HEATMAP_6.value[4]
+            TintsAndShades.ROYAL_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2056,8 +2082,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             )
             point_color_condition = alt.condition(
                 predicate=predicate,
-                if_false=alt.value(Colors.GREEN.value),
-                if_true=alt.value(Colors.PINK.value),
+                if_false=alt.value(SecondaryColors.LEAF_GREEN),
+                if_true=alt.value(SecondaryColors.POMEGRANATE_PINK),
             )
 
             anomaly_coded_base = alt.Chart(data=df, title=title)
@@ -2091,7 +2117,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         expectation_type: Optional[str] = None,
     ) -> alt.LayerChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            ColorPalettes.HEATMAP_6.value[4]
+            TintsAndShades.ROYAL_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2194,8 +2220,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             )
             bar_color_condition: alt.condition = alt.condition(
                 predicate=predicate,
-                if_false=alt.value(Colors.GREEN.value),
-                if_true=alt.value(Colors.PINK.value),
+                if_false=alt.value(SecondaryColors.ROYAL_BLUE),
+                if_true=alt.value(SecondaryColors.POMEGRANATE_PINK),
             )
 
             anomaly_coded_base = alt.Chart(data=df, title=title)
@@ -2220,7 +2246,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         expectation_type: Optional[str] = None,
     ) -> alt.Chart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            ColorPalettes.HEATMAP_6.value[4]
+            TintsAndShades.ROYAL_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2323,8 +2349,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             )
             point_color_condition = alt.condition(
                 predicate=predicate,
-                if_false=alt.value(Colors.GREEN.value),
-                if_true=alt.value(Colors.PINK.value),
+                if_false=alt.value(SecondaryColors.LEAF_GREEN),
+                if_true=alt.value(SecondaryColors.POMEGRANATE_PINK),
             )
 
             anomaly_coded_base = alt.Chart(data=df, title=title)
@@ -2585,7 +2611,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         predicates: List[Union[bool, int]],
     ) -> alt.LayerChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            ColorPalettes.HEATMAP_6.value[4]
+            TintsAndShades.ROYAL_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2704,8 +2730,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
             point_color_condition = alt.condition(
                 predicate=predicates[idx],
-                if_false=alt.value(Colors.PINK.value),
-                if_true=alt.value(Colors.GREEN.value),
+                if_false=alt.value(SecondaryColors.POMEGRANATE_PINK),
+                if_true=alt.value(SecondaryColors.LEAF_GREEN),
             )
 
             anomaly_coded_points = points.encode(
@@ -2736,7 +2762,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         predicates: List[Union[bool, int]],
     ) -> alt.VConcatChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            ColorPalettes.HEATMAP_6.value[4]
+            TintsAndShades.ROYAL_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2847,8 +2873,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
             bar_color_condition: alt.condition = alt.condition(
                 predicate=predicates[idx],
-                if_false=alt.value(Colors.PINK.value),
-                if_true=alt.value(Colors.GREEN.value),
+                if_false=alt.value(SecondaryColors.POMEGRANATE_PINK),
+                if_true=alt.value(SecondaryColors.ROYAL_BLUE),
             )
 
             bars.layer[idx] = bar_layer.encode(
@@ -2874,7 +2900,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         predicates: List[Union[bool, int]],
     ) -> alt.LayerChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            ColorPalettes.HEATMAP_6.value[4]
+            TintsAndShades.ROYAL_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2995,8 +3021,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
             point_color_condition = alt.condition(
                 predicate=predicates[idx],
-                if_false=alt.value(Colors.PINK.value),
-                if_true=alt.value(Colors.GREEN.value),
+                if_false=alt.value(SecondaryColors.POMEGRANATE_PINK),
+                if_true=alt.value(SecondaryColors.LEAF_GREEN),
             )
 
             anomaly_coded_points = points.encode(

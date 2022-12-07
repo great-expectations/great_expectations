@@ -55,5 +55,5 @@ The Upgrade Helper has performed the automated upgrade steps as part of upgradin
 
 A log detailing the upgrade can be found here:
 
-    - GE_PROJECT_DIR/uncommitted/logs/project_upgrades/UpgradeHelperV13_20210119T132639.000000Z.json
+    - GX_PROJECT_DIR/uncommitted/logs/project_upgrades/UpgradeHelperV13_20210119T132639.000000Z.json
 Your project requires manual upgrade steps in order to be up-to-date.
