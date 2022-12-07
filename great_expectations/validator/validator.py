@@ -1174,8 +1174,10 @@ class Validator:
             dict, str, None
         ] = expectation_configuration.kwargs.get("result_format")
         if expectation_level_config and isinstance(expectation_level_config, dict):
-            if not runtime_configuration:
+            if runtime_configuration is None:
                 runtime_configuration = expectation_level_config
+            elif runtime_configuration == {}:
+                runtime_configuration["result_format"] = expectation_level_config
             else:
                 for key in expectation_level_config.keys():
                     runtime_configuration["result_format"][
