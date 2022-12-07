@@ -1,9 +1,3 @@
-<style>
-	.markdown-body table td {
-		background-color: #fff;
-	}
-</style>
-
 
 [![PyPI](https://img.shields.io/pypi/v/great_expectations)](https://pypi.org/project/great-expectations/#history)
 [![Build Status](https://dev.azure.com/great-expectations/great_expectations/_apis/build/status/great_expectations?branchName=develop&stageName=required)](https://dev.azure.com/great-expectations/great_expectations/_build/latest?definitionId=1&branchName=develop)
