@@ -238,10 +238,11 @@ class DataContext(BaseDataContext):
     ) -> None:
         # If any deprecated args deviate from their defaults, we should flag the issue
         if (
-            ge_cloud_mode is not False
-            or ge_cloud_base_url is not None
-            or ge_cloud_access_token is not None
-            or ge_cloud_organization_id is not None
+            ge_cloud_mode
+            is not False  # Due to this being Optional[bool], we can't rely on a falsy check
+            or ge_cloud_base_url
+            or ge_cloud_access_token
+            or ge_cloud_organization_id
         ):
             # deprecated-v0.15.37
             warnings.warn(

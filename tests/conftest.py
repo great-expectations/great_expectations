@@ -35,7 +35,10 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import BaseDataContext, CloudDataContext
-from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.cloud_constants import (
+    GXCloudEnvironmentVariable,
+    GXCloudRESTResource,
+)
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
@@ -2519,12 +2522,17 @@ def ge_cloud_config_e2e() -> GXCloudConfig:
     """
     env_vars = os.environ
 
-    base_url = env_vars.get("GX_CLOUD_BASE_URL", env_vars.get("GE_CLOUD_BASE_URL"))
+    base_url = env_vars.get(
+        GXCloudEnvironmentVariable.BASE_URL,
+        env_vars.get(GXCloudEnvironmentVariable._BASE_URL),
+    )
     organization_id = env_vars.get(
-        "GX_CLOUD_ORGANIZATION_ID", env_vars.get("GE_CLOUD_ORGANIZATION_ID")
+        GXCloudEnvironmentVariable.ORGANIZATION_ID,
+        env_vars.get(GXCloudEnvironmentVariable._ORGANIZATION_ID),
     )
     access_token = env_vars.get(
-        "GX_CLOUD_ACCESS_TOKEN", env_vars.get("GE_CLOUD_ACCESS_TOKEN")
+        GXCloudEnvironmentVariable.ACCESS_TOKEN,
+        env_vars.get(GXCloudEnvironmentVariable._ACCESS_TOKEN),
     )
     cloud_config = GXCloudConfig(
         base_url=base_url,

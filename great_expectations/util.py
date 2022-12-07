@@ -1743,10 +1743,10 @@ def get_context(
 
     # If any deprecated args deviate from their defaults, we should flag the issue
     if (
-        ge_cloud_base_url is not None
-        or ge_cloud_access_token is not None
-        or ge_cloud_organization_id is not None
-        or ge_cloud_mode is not None
+        ge_cloud_base_url
+        or ge_cloud_access_token
+        or ge_cloud_organization_id
+        or ge_cloud_mode
     ):
         # deprecated-v0.15.37
         warnings.warn(
