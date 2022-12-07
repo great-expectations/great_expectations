@@ -2,6 +2,7 @@ from enum import Enum
 
 from great_expectations.types import (
     ColorPalettes,
+    FontFamily,
     PrimaryColors,
     SecondaryColors,
     TintsAndShades,
@@ -15,7 +16,7 @@ chart_height: int = 250
 chart_border_opacity: float = 0
 
 # Font
-font = "Verdana"
+font = FontFamily.ROBOTO_MONO.value
 
 #
 # Chart Components
@@ -27,7 +28,7 @@ title_font_size = 15
 title_color = PrimaryColors.ORANGE
 title_dy = -10
 subtitle_color = PrimaryColors.COAL_GRAY
-subtitle_font: str = font
+subtitle_font = font
 subtitle_font_size = 14
 subtitle_font_weight = "bold"
 

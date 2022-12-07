@@ -4,7 +4,6 @@ import copy
 import datetime
 import json
 import os
-import warnings
 from collections import defaultdict, namedtuple
 from dataclasses import asdict, dataclass, field
 from typing import (
@@ -70,6 +69,8 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 from great_expectations.types import (
+    FontFamily,
+    FontFamilyURL,
     SecondaryColors,
     SerializableDictDot,
     TintsAndShades,
@@ -659,22 +660,38 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 display_chart_dict[chart_titles[idx]] = themed_charts[idx]
 
             dropdown_title_color: str = altair_theme["legend"]["titleColor"]
-            dropdown_font: str = altair_theme["font"]
             dropdown_font_size: str = altair_theme["axis"]["titleFontSize"]
             dropdown_text_color: str = altair_theme["axis"]["labelColor"]
+
+            font_family: str = altair_theme["font"]
+            font_url = FontFamilyURL[FontFamily(font_family).name].value
+            font_format = font_url.split(".")[-1]
+
+            font_css = f"""
+                <style>
+                @font-face {{
+                  font-family: '{font_family}';
+                  font-style: normal;
+                  font-weight: 400;
+                  src: url({font_url}) format('{font_format}');
+                  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+                }}
+                </style>
+            """
+            display(HTML(font_css))
 
             # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
             altair_dropdown_css: str = f"""
                 <style>
                 span.vega-bind-name {{
                     color: {dropdown_title_color};
-                    font-family: {dropdown_font};
+                    font-family: {font_family};
                     font-size: {dropdown_font_size}px;
                     font-weight: bold;
                 }}
                 form.vega-bindings {{
                     color: {dropdown_text_color};
-                    font-family: {dropdown_font};
+                    font-family: {font_family};
                     font-size: {dropdown_font_size}px;
                     position: absolute;
                     left: 75px;
@@ -691,7 +708,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 <style>
                 .widget-inline-hbox .widget-label {{
                     color: {dropdown_title_color};
-                    font-family: {dropdown_font};
+                    font-family: {font_family};
                     font-size: {dropdown_font_size}px;
                     font-weight: bold;
                 }}
@@ -699,7 +716,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                     padding-right: 21px;
                     padding-left: 3px;
                     color: {dropdown_text_color};
-                    font-family: {dropdown_font};
+                    font-family: {font_family};
                     font-size: {dropdown_font_size}px;
                     height: 20px;
                     line-height: {dropdown_font_size}px;
@@ -717,13 +734,6 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 layout={"width": "max-content", "margin": "0px"},
             )
 
-            # As of 19 July, 2022 there is a Deprecation Warning due to the latest ipywidgets' interaction with
-            # ipykernel (Kernel._parent_header deprecated in v6.0.0). Rather than add a version constraint to ipykernel,
-            # we suppress Deprecation Warnings produced by module ipywidgets.widgets.widget_output.
-            warnings.filterwarnings(
-                action="ignore",
-                module="ipywidgets.widgets.widget_output",
-            )
             widgets.interact(
                 DataAssistantResult._display_chart_from_dict,
                 display_chart_dict=widgets.fixed(display_chart_dict),
