@@ -115,7 +115,7 @@ Great Expectations works with the tools and systems that you're already using wi
 	<tbody>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/datahub_logo.webp" />
+				<img height="40" src="./readme_assets/datahub_logo.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/integrations/integration_datahub/">
@@ -128,7 +128,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/aws-glue-logo__1_.webp" />
+				<img height="40" src="./readme_assets/aws-glue-logo__1_.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_aws_glue/">
@@ -141,7 +141,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/Athena_logo.webp" />
+				<img height="40" src="./readme_assets/Athena_logo.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/athena/">
@@ -154,7 +154,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/datasource_redshift.webp" />
+				<img height="40" src="./readme_assets/datasource_redshift.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/redshift/">
@@ -167,7 +167,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/awss3.webp" />
+				<img height="40" src="./readme_assets/awss3.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3/">
@@ -180,7 +180,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/bigquery.webp" />
+				<img height="40" src="./readme_assets/bigquery.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery/">
@@ -193,7 +193,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/og-databricks.webp" />
+				<img height="40" src="./readme_assets/og-databricks.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_databricks/">
@@ -206,7 +206,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/deepnote_logo_400x.webp" />
+				<img height="40" src="./readme_assets/deepnote_logo_400x.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_deepnote/">
@@ -219,7 +219,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/Google_Cloud_logo.png" />
+				<img height="40" src="./readme_assets/Google_Cloud_logo.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery/">
@@ -232,7 +232,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/microsoft-azure-blob-storage-logo.png" />                         
+				<img height="40" src="./readme_assets/microsoft-azure-blob-storage-logo.jpg" />                         
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage/">
@@ -245,7 +245,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/microsoft-sql-server-logo-96AF49E2B3-seeklogo.png" />                         
+				<img height="40" src="./readme_assets/microsoft-sql-server-logo-96AF49E2B3-seeklogo.jpg" />                         
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/mssql">
@@ -258,7 +258,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/mysql.png" />                         
+				<img height="40" src="./readme_assets/mysql.jpg" />                         
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/mysql/">
@@ -271,7 +271,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/pandas.png" />                         
+				<img height="40" src="./readme_assets/pandas.jpg" />                         
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/in_memory/pandas/">
@@ -284,7 +284,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/postgres.png" />                         
+				<img height="40" src="./readme_assets/postgres.jpg" />                         
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/postgres/">
@@ -297,7 +297,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/snowflake.png" />                         
+				<img height="40" src="./readme_assets/snowflake.jpg" />                         
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/snowflake/">
@@ -310,7 +310,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/spark.png" />                         
+				<img height="40" src="./readme_assets/spark.jpg" />                         
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster/">
@@ -323,7 +323,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/SQLite370.png" />                         
+				<img height="40" src="./readme_assets/SQLite370.jpg" />                         
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/sqlite/">
@@ -336,7 +336,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/trino-og.png" />                         
+				<img height="40" src="./readme_assets/trino-og.jpg" />                         
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/trino/">
@@ -349,7 +349,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/Apache_Airflow.png" />                         
+				<img height="40" src="./readme_assets/Apache_Airflow.jpg" />                         
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_airflow/">
@@ -362,7 +362,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/flyte_logo.png" />                         
+				<img height="40" src="./readme_assets/flyte_logo.jpg" />                         
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_flyte/">
@@ -375,7 +375,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/meltano-logo.png" />                         
+				<img height="40" src="./readme_assets/meltano-logo.jpg" />                         
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_meltano/">
@@ -388,7 +388,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/prefect-logo-gradient-navy.png" />                         
+				<img height="40" src="./readme_assets/prefect-logo-gradient-navy.jpg" />                         
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_prefect/">
@@ -401,7 +401,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/zenml.png" />                         
+				<img height="40" src="./readme_assets/zenml.jpg" />                         
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/integrations/integration_zenml/">
@@ -414,7 +414,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/slack.png" />
+				<img height="40" src="./readme_assets/slack.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action/">
@@ -427,7 +427,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/jupyter.png" />
+				<img height="40" src="./readme_assets/jupyter.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_create_expectations/#creating-expectations-in-jupyter-notebooks">
