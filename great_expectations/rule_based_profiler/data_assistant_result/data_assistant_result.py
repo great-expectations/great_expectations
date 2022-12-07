@@ -661,7 +661,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
             dropdown_title_color: str = altair_theme["legend"]["titleColor"]
             dropdown_font_size: str = altair_theme["axis"]["titleFontSize"]
-            dropdown_font_weight: int = altair_theme["title"]["fontWeight"]
+            dropdown_font_weight: int = altair_theme["title"]["subtitleFontWeight"]
             dropdown_text_color: str = altair_theme["axis"]["labelColor"]
 
             font_family: str = altair_theme["font"]
