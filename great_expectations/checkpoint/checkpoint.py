@@ -142,9 +142,11 @@ class BaseCheckpoint(ConfigPeer):
             "profilers": profilers or [],
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
+
         substituted_runtime_config: dict = self.get_substituted_config(
             runtime_kwargs=runtime_kwargs
         )
+
         run_name_template = substituted_runtime_config.get("run_name_template")
 
         batch_request = substituted_runtime_config.get("batch_request")
@@ -359,12 +361,11 @@ class BaseCheckpoint(ConfigPeer):
             result_format_validation = runtime_configuration_validation.get(
                 "result_format"
             )
+
             result_format = result_format or result_format_validation
-            # breakpoint()
+
             if result_format is None:
                 result_format = {"result_format": "SUMMARY"}
-
-            # TODO: see if this is where the substitution needs to happen
 
             action_list_validation_operator: ActionListValidationOperator = (
                 ActionListValidationOperator(
@@ -387,8 +388,7 @@ class BaseCheckpoint(ConfigPeer):
                 operator_run_kwargs["catch_exceptions"] = catch_exceptions_validation
 
             validation_id: Optional[str] = substituted_validation_dict.get("id")
-            # here is something written by us
-            # is the validator going tob edoing
+
             async_validation_operator_result = async_executor.submit(
                 action_list_validation_operator.run,
                 assets_to_validate=[validator],
