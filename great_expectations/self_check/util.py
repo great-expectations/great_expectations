@@ -8,7 +8,6 @@ import platform
 import random
 import re
 import string
-import threading
 import time
 import traceback
 import warnings
@@ -67,6 +66,9 @@ from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchD
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+    LockingConnectionCheck,
+)
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.util import (
     build_in_memory_runtime_context,
@@ -75,8 +77,6 @@ from great_expectations.util import (
 from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
-    from sqlalchemy.engine import Connection
-
     from great_expectations.data_context import DataContext
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
@@ -493,52 +493,6 @@ BACKEND_TO_ENGINE_NAME_DICT = {
 }
 
 BACKEND_TO_ENGINE_NAME_DICT.update({name: "sqlalchemy" for name in SQL_DIALECT_NAMES})
-
-
-class SqlAlchemyConnectionManager:
-    def __init__(self) -> None:
-        self.lock = threading.Lock()
-        self._connections: Dict[str, "Connection"] = {}
-
-    def get_engine(self, connection_string):
-        if sqlalchemy is not None:
-            with self.lock:
-                if connection_string not in self._connections:
-                    try:
-                        engine = create_engine(connection_string)
-                        conn = engine.connect()
-                        self._connections[connection_string] = conn
-                    except (ImportError, SQLAlchemyError):
-                        print(
-                            f"Unable to establish connection with {connection_string}"
-                        )
-                        raise
-                return self._connections[connection_string]
-        return None
-
-
-connection_manager = SqlAlchemyConnectionManager()
-
-
-class LockingConnectionCheck:
-    def __init__(self, sa, connection_string) -> None:
-        self.lock = threading.Lock()
-        self.sa = sa
-        self.connection_string = connection_string
-        self._is_valid = None
-
-    def is_valid(self):
-        with self.lock:
-            if self._is_valid is None:
-                try:
-                    engine = self.sa.create_engine(self.connection_string)
-                    conn = engine.connect()
-                    conn.close()
-                    self._is_valid = True
-                except (ImportError, self.sa.exc.SQLAlchemyError) as e:
-                    print(f"{str(e)}")
-                    self._is_valid = False
-            return self._is_valid
 
 
 def get_sqlite_connection_url(sqlite_db_path):
@@ -1505,43 +1459,61 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
         connection_string = get_sqlite_connection_url(sqlite_db_path)
-        engine = create_engine(connection_string)
     elif sa_engine_name == "postgresql":
         connection_string = f"postgresql://postgres@{db_hostname}/test_ci"
-        engine = connection_manager.get_engine(connection_string)
     elif sa_engine_name == "mysql":
         connection_string = f"mysql+pymysql://root@{db_hostname}/test_ci"
-        engine = create_engine(connection_string)
     elif sa_engine_name == "mssql":
         connection_string = f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true"
-        engine = create_engine(
-            connection_string,
-            # echo=True,
-        )
     elif sa_engine_name == "bigquery":
         connection_string = _get_bigquery_connection_string()
-        engine = create_engine(connection_string)
     elif sa_engine_name == "trino":
         connection_string = _get_trino_connection_string()
-        engine = create_engine(connection_string)
     elif sa_engine_name == "redshift":
         connection_string = _get_redshift_connection_string()
-        engine = create_engine(connection_string)
     elif sa_engine_name == "athena":
         connection_string = _get_athena_connection_string()
-        engine = create_engine(connection_string)
     elif sa_engine_name == "snowflake":
         connection_string = _get_snowflake_connection_string()
-        engine = create_engine(connection_string)
     else:
         connection_string = None
-        engine = None
 
     # If "autocommit" is not desired to be on by default, then use the following pattern when explicit "autocommit"
     # is desired (e.g., for temporary tables, "autocommit" is off by default, so the override option may be useful).
     # engine.execute(sa.text(sql_query_string).execution_options(autocommit=True))
 
     # Add the data to the database as a new table
+
+    if context is None:
+        context = build_in_memory_runtime_context()  # type: ignore[assignment]
+
+    assert (
+        context is not None
+    ), 'Instance of any child of "AbstractDataContext" class is required.'
+
+    context.datasources["my_test_datasource"] = Datasource(
+        name="my_test_datasource",
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        execution_engine={
+            "class_name": "SqlAlchemyExecutionEngine",
+            "connection_string": connection_string,
+        },
+        data_connectors={
+            "my_sql_data_connector": {
+                "class_name": "ConfiguredAssetSqlDataConnector",
+                "assets": {
+                    "my_asset": {
+                        "table_name": "animal_names",
+                    },
+                },
+            },
+        },
+    )
+    execution_engine: SqlAlchemyExecutionEngine = cast(
+        SqlAlchemyExecutionEngine,
+        context.datasources["my_test_datasource"].execution_engine,
+    )
+    engine = execution_engine.engine
 
     if sa_engine_name == "bigquery":
         df.columns = df.columns.str.replace(" ", "_")
@@ -1613,34 +1585,6 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         f"Took {_end - _start} seconds to df.to_sql for {sa_engine_name} {extra_debug_info}"
     )
 
-    if context is None:
-        context = build_in_memory_runtime_context()  # type: ignore[assignment]
-
-    assert (
-        context is not None
-    ), 'Instance of any child of "AbstractDataContext" class is required.'
-
-    context.datasources["my_test_datasource"] = Datasource(
-        name="my_test_datasource",
-        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
-        execution_engine={
-            "class_name": "SqlAlchemyExecutionEngine",
-            "connection_string": connection_string,
-        },
-        data_connectors={
-            "my_sql_data_connector": {
-                "class_name": "ConfiguredAssetSqlDataConnector",
-                "assets": {
-                    "my_asset": {
-                        "table_name": "animal_names",
-                    },
-                },
-            },
-        },
-    )
-    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
-    context.datasources["my_test_datasource"]._execution_engine = execution_engine  # type: ignore[union-attr]
     my_data_connector: ConfiguredAssetSqlDataConnector = (
         ConfiguredAssetSqlDataConnector(
             name="my_sql_data_connector",

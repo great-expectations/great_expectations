@@ -9,6 +9,7 @@ import os
 import random
 import re
 import string
+import threading
 import traceback
 import warnings
 from pathlib import Path
@@ -95,7 +96,7 @@ except ImportError:
 
 try:
     from sqlalchemy.engine import Dialect, Row
-    from sqlalchemy.exc import OperationalError
+    from sqlalchemy.exc import OperationalError, SQLAlchemyError
     from sqlalchemy.sql import Selectable
     from sqlalchemy.sql.elements import (
         BooleanClauseList,
@@ -117,6 +118,7 @@ except ImportError:
     TextClause = None
     TextualSelect = None
     quoted_name = None
+    SQLAlchemyError = None
 
 
 try:
@@ -204,6 +206,52 @@ except ImportError:
 if TYPE_CHECKING:
     import sqlalchemy as sa
     from sqlalchemy.engine import Engine as SaEngine
+
+
+class SqlAlchemyConnectionManager:
+    def __init__(self) -> None:
+        self.lock = threading.Lock()
+        self._connections: Dict[str, "Connection"] = {}  # noqa: F821
+
+    def get_engine(self, connection_string, **kwargs):
+        if sa is not None:
+            with self.lock:
+                if connection_string not in self._connections:
+                    try:
+                        engine = sa.create_engine(connection_string, **kwargs)
+                        conn = engine.connect()
+                        self._connections[connection_string] = conn
+                    except (ImportError, SQLAlchemyError):
+                        print(
+                            f"Unable to establish connection with {connection_string}"
+                        )
+                        raise
+                return self._connections[connection_string]
+        return None
+
+
+class LockingConnectionCheck:
+    def __init__(self, sa, connection_string) -> None:
+        self.lock = threading.Lock()
+        self.sa = sa
+        self.connection_string = connection_string
+        self._is_valid = None
+
+    def is_valid(self):
+        with self.lock:
+            if self._is_valid is None:
+                try:
+                    engine = self.sa.create_engine(self.connection_string)
+                    conn = engine.connect()
+                    conn.close()
+                    self._is_valid = True
+                except (ImportError, self.sa.exc.SQLAlchemyError) as e:
+                    print(f"{str(e)}")
+                    self._is_valid = False
+            return self._is_valid
+
+
+connection_manager = SqlAlchemyConnectionManager()
 
 
 def _get_dialect_type_module(dialect):
@@ -319,7 +367,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             if credentials is not None:
                 self.engine = self._build_engine(credentials=credentials, **kwargs)
             elif connection_string is not None:
-                self.engine = sa.create_engine(connection_string, **kwargs)
+                self.engine = connection_manager.get_engine(connection_string, **kwargs)
             elif url is not None:
                 parsed_url = make_url(url)
                 self.drivername = parsed_url.drivername
