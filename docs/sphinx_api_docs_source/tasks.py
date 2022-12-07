@@ -39,7 +39,7 @@ def _exit_with_error_if_not_run_from_correct_dir(
             os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
         )
     curdir = pathlib.Path(os.path.realpath(os.getcwd()))
-    exit_message = f"The {task_name} task must be invoked from the same directory as the task.py file at the top of the repo."
+    exit_message = f"The {task_name} task must be invoked from the same directory as the tasks.py file."
     if correct_dir != curdir:
         raise invoke.Exit(
             exit_message,
