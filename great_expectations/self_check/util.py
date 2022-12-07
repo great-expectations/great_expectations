@@ -1616,6 +1616,10 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     if context is None:
         context = build_in_memory_runtime_context()  # type: ignore[assignment]
 
+    assert (
+        context is not None
+    ), 'Instance of any child of "AbstractDataContext" class is required.'
+
     context.datasources["my_test_datasource"] = Datasource(  # type: ignore[union-attr]
         name="my_test_datasource",
         # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
