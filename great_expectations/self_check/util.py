@@ -170,8 +170,6 @@ try:
         pass
 except ImportError:
     try:
-        # noinspection PyUnresolvedReferences
-        # noinspection PyUnresolvedReferences
         import pybigquery.sqlalchemy_bigquery as sqla_bigquery
         import pybigquery.sqlalchemy_bigquery as BigQueryDialect
 
