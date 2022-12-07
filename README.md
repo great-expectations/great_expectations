@@ -11,7 +11,7 @@
 
 
 
-<img align="right" src="./static/img/gx-mark.png">
+<img align="right" src="./static/img/gx-mark-160.png">
 
 Great Expectations
 ================================================================================
@@ -85,10 +85,6 @@ To see Great Expectations in action on your own data:
 You can install it using pip
 ```
 pip install great_expectations
-```
-or conda
-```
-conda install -c conda-forge great-expectations
 ```
 and then run
 
