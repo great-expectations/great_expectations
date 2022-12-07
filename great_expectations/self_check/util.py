@@ -2286,6 +2286,7 @@ def build_test_backends_list(  # noqa: C901 - 48
 
 def generate_expectation_tests(  # noqa: C901 - 43
     expectation_type: str,
+    context: DataContext,
     test_data_cases: List[ExpectationTestDataCases],
     execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
     raise_exceptions_for_backends: bool = False,
@@ -2293,11 +2294,11 @@ def generate_expectation_tests(  # noqa: C901 - 43
     ignore_only_for: bool = False,
     debug_logger: Optional[logging.Logger] = None,
     only_consider_these_backends: Optional[List[str]] = None,
-    context: Optional["DataContext"] = None,
 ):
     """Determine tests to run
 
     :param expectation_type: snake_case name of the expectation type
+    :param context: Instance of any extension of "AbstractDataContext" class
     :param test_data_cases: list of ExpectationTestDataCases that has data, tests, schemas, and backends to use
     :param execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics object specifying the engines the expectation is implemented for
     :param raise_exceptions_for_backends: bool object that when True will raise an Exception if a backend fails to connect

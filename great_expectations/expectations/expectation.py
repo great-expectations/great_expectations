@@ -1548,6 +1548,7 @@ class Expectation(metaclass=MetaExpectation):
 
         exp_tests = generate_expectation_tests(
             expectation_type=expectation_type,
+            context=context,
             test_data_cases=test_data_cases,
             execution_engine_diagnostics=execution_engine_diagnostics,
             raise_exceptions_for_backends=raise_exceptions_for_backends,
@@ -1555,7 +1556,6 @@ class Expectation(metaclass=MetaExpectation):
             ignore_only_for=ignore_only_for,
             debug_logger=debug_logger,
             only_consider_these_backends=only_consider_these_backends,
-            context=context,
         )
 
         error_diagnostics: Optional[ExpectationErrorDiagnostics]
