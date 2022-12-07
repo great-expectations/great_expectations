@@ -100,7 +100,11 @@ bar_stroke_opacity = 1.0
 
 
 class AltairThemes(Enum):
-    # https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+    """
+    Altair theme configuration reference:
+        https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+    """
+
     DEFAULT_THEME = {
         "view": {
             "width": chart_width,
