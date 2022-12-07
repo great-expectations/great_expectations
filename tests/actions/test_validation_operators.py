@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 from freezegun import freeze_time
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import BaseDataContext
 from great_expectations.self_check.util import modify_locale
@@ -19,28 +19,28 @@ def assets_to_validate():
     # succeeded "failure-level" suite
     # failed "warning-level" suite
     my_df_1 = pd.DataFrame({"x": [1, 2, 3, 4, 5], "y": [1, 2, 3, 4, None]})
-    my_ge_df_1 = ge.dataset.PandasDataset(
+    my_ge_df_1 = gx.dataset.PandasDataset(
         my_df_1, batch_kwargs={"ge_batch_id": "82a8de83-e063-11e9-8226-acde48001122"}
     )
 
     # failed "failure-level" suite
     # failed "warning-level" suite
     my_df_2 = pd.DataFrame({"x": [1, 2, 3, 4, 99], "y": [1, 2, 3, 4, None]})
-    my_ge_df_2 = ge.dataset.PandasDataset(
+    my_ge_df_2 = gx.dataset.PandasDataset(
         my_df_2, batch_kwargs={"ge_batch_id": "82a8de83-e063-11e9-8133-acde48001122"}
     )
 
     # succeeded "failure-level" suite
     # succeeded "warning-level" suite
     my_df_3 = pd.DataFrame({"x": [1, 2, 3, 4, 5], "y": [1, 2, 3, 4, 5]})
-    my_ge_df_3 = ge.dataset.PandasDataset(
+    my_ge_df_3 = gx.dataset.PandasDataset(
         my_df_3, batch_kwargs={"ge_batch_id": "82a8de83-e063-11e9-a53d-acde48001122"}
     )
 
     # failed "failure-level" suite
     # succeeded "warning-level" suite
     my_df_4 = pd.DataFrame({"x": [1, 2, 3, 4, 99], "y": [1, 2, 3, 4, 5]})
-    my_ge_df_4 = ge.dataset.PandasDataset(
+    my_ge_df_4 = gx.dataset.PandasDataset(
         my_df_4, batch_kwargs={"ge_batch_id": "82a8de83-e063-11e9-8133-acde48001122"}
     )
     return [my_ge_df_1, my_ge_df_2, my_ge_df_3, my_ge_df_4]

@@ -2,7 +2,7 @@ import logging
 
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux as jux
 
 
@@ -199,7 +199,7 @@ def test_configure_logging(caplog):
     root.info("do_not_show")
 
     # This df is used only for logging; we don't want to test against different backends
-    df = ge.dataset.PandasDataset({"a": [1, 2, 3]})
+    df = gx.dataset.PandasDataset({"a": [1, 2, 3]})
     df.expect_column_to_exist("a")
     df.get_expectation_suite()
 
@@ -212,7 +212,7 @@ def test_configure_logging(caplog):
     # Now use the logging setup from the notebook
     logger = logging.getLogger("great_expectations")
     jux.setup_notebook_logging(logger)
-    df = ge.dataset.PandasDataset({"a": [1, 2, 3]})
+    df = gx.dataset.PandasDataset({"a": [1, 2, 3]})
     df.expect_column_to_exist("a")
     df.get_expectation_suite()
 

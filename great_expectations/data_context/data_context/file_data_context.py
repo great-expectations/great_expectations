@@ -27,7 +27,7 @@ class FileDataContext(AbstractDataContext):
     class will exist only for backwards-compatibility reasons.
     """
 
-    GE_YML = "great_expectations.yml"
+    GX_YML = "great_expectations.yml"
 
     def __init__(
         self,

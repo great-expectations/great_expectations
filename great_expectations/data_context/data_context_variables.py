@@ -389,7 +389,7 @@ class CloudDataContextVariables(DataContextVariables):
 
     def get_key(self) -> GXCloudIdentifier:
         """
-        Generates a GE Cloud-specific key for use with Stores. See parent "DataContextVariables.get_key" for more details.
+        Generates a GX Cloud-specific key for use with Stores. See parent "DataContextVariables.get_key" for more details.
         """
         from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 

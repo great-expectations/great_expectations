@@ -4,7 +4,7 @@
 from ruamel import yaml
 
 # </snippet>
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.checkpoint import Checkpoint
 
 # Imports used for testing purposes (and can be left out of typical scripts):
@@ -24,7 +24,7 @@ yaml = yaml.YAML(typ="safe")
 
 # Initialize your data context.
 # <snippet>
-context = ge.get_context()
+context = gx.get_context()
 # </snippet>
 
 # Add datasource for all tests
