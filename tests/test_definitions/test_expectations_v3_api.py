@@ -77,22 +77,22 @@ def pytest_generate_tests(metafunc):
                             for dataset in d["data"]:
                                 datasets.append(
                                     get_test_validator_with_data(
-                                        execution_engine=c,
-                                        data=dataset["data"],
-                                        context=build_in_memory_runtime_context(),
-                                        schemas=dataset.get("schemas"),
+                                        c,
+                                        dataset["data"],
+                                        dataset.get("schemas"),
                                         table_name=dataset.get("dataset_name"),
                                         sqlite_db_path=sqlite_db_path,
+                                        context=build_in_memory_runtime_context(),
                                     )
                                 )
                             validator_with_data = datasets[0]
                         else:
                             schemas = d["schemas"] if "schemas" in d else None
                             validator_with_data = get_test_validator_with_data(
-                                execution_engine=c,
-                                data=d["data"],
-                                context=build_in_memory_runtime_context(),
+                                c,
+                                d["data"],
                                 schemas=schemas,
+                                context=build_in_memory_runtime_context(),
                             )
 
                     for test in d["tests"]:

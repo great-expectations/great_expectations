@@ -1207,13 +1207,13 @@ def get_dataset(  # noqa: C901 - 110
 def get_test_validator_with_data(  # noqa: C901 - 31
     execution_engine,
     data,
-    context: DataContext,
     schemas=None,
     caching=True,
     table_name=None,
     sqlite_db_path=None,
     extra_debug_info="",
     debug_logger: Optional[logging.Logger] = None,
+    context: Optional[DataContext] = None,
 ):
     """Utility to create datasets for json-formatted tests."""
 
@@ -1262,9 +1262,7 @@ def get_test_validator_with_data(  # noqa: C901 - 31
         )
 
         return build_pandas_validator_with_data(
-            df=df,
-            context=context,
-            batch_definition=batch_definition,
+            df=df, batch_definition=batch_definition, context=context
         )
 
     elif execution_engine in SQL_DIALECT_NAMES:
@@ -1277,7 +1275,6 @@ def get_test_validator_with_data(  # noqa: C901 - 31
         return build_sa_validator_with_data(
             df=df,
             sa_engine_name=execution_engine,
-            context=context,
             schemas=schemas,
             caching=caching,
             table_name=table_name,
@@ -1285,6 +1282,7 @@ def get_test_validator_with_data(  # noqa: C901 - 31
             extra_debug_info=extra_debug_info,
             debug_logger=debug_logger,
             batch_definition=None,
+            context=context,
         )
 
     elif execution_engine == "spark":
@@ -1407,8 +1405,8 @@ def get_test_validator_with_data(  # noqa: C901 - 31
         return build_spark_validator_with_data(
             df=spark_df,
             spark=spark,
-            context=context,
             batch_definition=batch_definition,
+            context=context,
         )
 
     else:
@@ -1417,8 +1415,8 @@ def get_test_validator_with_data(  # noqa: C901 - 31
 
 def build_pandas_validator_with_data(
     df: pd.DataFrame,
-    context: DataContext,
     batch_definition: Optional[BatchDefinition] = None,
+    context: Optional[DataContext] = None,
 ) -> Validator:
     batch = Batch(data=df, batch_definition=batch_definition)
     return Validator(
@@ -1433,7 +1431,6 @@ def build_pandas_validator_with_data(
 def build_sa_validator_with_data(  # noqa: C901 - 39
     df,
     sa_engine_name,
-    context: DataContext,
     schemas=None,
     caching=True,
     table_name=None,
@@ -1441,6 +1438,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     extra_debug_info="",
     batch_definition: Optional[BatchDefinition] = None,
     debug_logger: Optional[logging.Logger] = None,
+    context: Optional[DataContext] = None,
 ):
     _debug = lambda x: x  # noqa: E731
     if debug_logger:
@@ -1626,7 +1624,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         },
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    context.datasources["my_test_datasource"]._execution_engine = execution_engine  # type: ignore[union-attr]
+    context.datasources["my_test_datasource"]._execution_engine = execution_engine
     my_data_connector: ConfiguredAssetSqlDataConnector = (
         ConfiguredAssetSqlDataConnector(
             name="my_sql_data_connector",
@@ -1683,8 +1681,8 @@ def modify_locale(func):
 def build_spark_validator_with_data(
     df: Union[pd.DataFrame, SparkDataFrame],
     spark: SparkSession,
-    context: DataContext,
     batch_definition: Optional[BatchDefinition] = None,
+    context: Optional["DataContext"] = None,
 ) -> Validator:
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
@@ -2290,7 +2288,6 @@ def build_test_backends_list(  # noqa: C901 - 48
 
 def generate_expectation_tests(  # noqa: C901 - 43
     expectation_type: str,
-    context: DataContext,
     test_data_cases: List[ExpectationTestDataCases],
     execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
     raise_exceptions_for_backends: bool = False,
@@ -2298,11 +2295,11 @@ def generate_expectation_tests(  # noqa: C901 - 43
     ignore_only_for: bool = False,
     debug_logger: Optional[logging.Logger] = None,
     only_consider_these_backends: Optional[List[str]] = None,
+    context: Optional["DataContext"] = None,
 ):
     """Determine tests to run
 
     :param expectation_type: snake_case name of the expectation type
-    :param context: Instance of any extension of "AbstractDataContext" class
     :param test_data_cases: list of ExpectationTestDataCases that has data, tests, schemas, and backends to use
     :param execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics object specifying the engines the expectation is implemented for
     :param raise_exceptions_for_backends: bool object that when True will raise an Exception if a backend fails to connect
@@ -2474,25 +2471,25 @@ def generate_expectation_tests(  # noqa: C901 - 43
                     for dataset in d["data"]:
                         datasets.append(
                             get_test_validator_with_data(
-                                execution_engine=c,
-                                data=dataset["data"],
-                                context=context,
-                                schemas=dataset.get("schemas"),
+                                c,
+                                dataset["data"],
+                                dataset.get("schemas"),
                                 table_name=dataset.get("dataset_name"),
                                 sqlite_db_path=sqlite_db_path,
                                 extra_debug_info=expectation_type,
                                 debug_logger=debug_logger,
+                                context=context,
                             )
                         )
                     validator_with_data = datasets[0]
                 else:
                     validator_with_data = get_test_validator_with_data(
-                        execution_engine=c,
-                        data=d["data"],
-                        context=context,
-                        schemas=d["schemas"],
+                        c,
+                        d["data"],
+                        d["schemas"],
                         extra_debug_info=expectation_type,
                         debug_logger=debug_logger,
+                        context=context,
                     )
             except Exception as e:
                 _error(
@@ -2516,25 +2513,25 @@ def generate_expectation_tests(  # noqa: C901 - 43
                             for dataset in d["data_alt"]:
                                 datasets.append(
                                     get_test_validator_with_data(
-                                        execution_engine=c,
-                                        data=dataset["data_alt"],
-                                        context=context,
-                                        schemas=dataset.get("schemas"),
+                                        c,
+                                        dataset["data_alt"],
+                                        dataset.get("schemas"),
                                         table_name=dataset.get("dataset_name"),
                                         sqlite_db_path=sqlite_db_path,
                                         extra_debug_info=expectation_type,
                                         debug_logger=debug_logger,
+                                        context=context,
                                     )
                                 )
                             validator_with_data = datasets[0]
                         else:
                             validator_with_data = get_test_validator_with_data(
-                                execution_engine=c,
-                                data=d["data_alt"],
-                                context=context,
-                                schemas=d["schemas"],
+                                c,
+                                d["data_alt"],
+                                d["schemas"],
                                 extra_debug_info=expectation_type,
                                 debug_logger=debug_logger,
+                                context=context,
                             )
                     except Exception:
                         # print(
