@@ -437,7 +437,6 @@ class Expectation(metaclass=MetaExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> RenderedAtomicContent:
-
         (template_str, params_with_json_schema, _) = cls._atomic_prescriptive_template(
             configuration=configuration,
             result=result,

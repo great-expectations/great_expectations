@@ -22,6 +22,7 @@ from great_expectations.render import (
 )
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
+    ParamSchemaType,
     RendererConfiguration,
     RendererSchemaType,
 )
