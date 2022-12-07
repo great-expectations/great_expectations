@@ -188,7 +188,7 @@ class InlineStoreBackend(StoreBackend):
 
     def _save_changes(self) -> None:
         context = self._data_context
-        config_filepath = pathlib.Path(context.root_directory) / context.GE_YML  # type: ignore[arg-type]
+        config_filepath = pathlib.Path(context.root_directory) / context.GX_YML  # type: ignore[arg-type]
 
         try:
             with open(config_filepath, "w") as outfile:

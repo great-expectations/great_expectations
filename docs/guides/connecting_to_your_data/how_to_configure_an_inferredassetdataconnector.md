@@ -123,7 +123,7 @@ Imagine you have the following files in `my_directory/`:
 <MY DIRECTORY>/yellow_tripdata_2019-03.csv
 ```
 
-We can imagine two approaches to loading the data into GE.
+We can imagine two approaches to loading the data into GX.
 
 The simplest approach would be to consider each file to be its own Data Asset. In that case, the configuration would look like the following:
 

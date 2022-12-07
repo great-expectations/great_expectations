@@ -143,7 +143,7 @@ def run_onboarding_data_assistant_result_jupyter_notebook_with_new_cell(
 
     import uuid
 
-    import great_expectations as ge
+    import great_expectations as gx
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.validator.validator import Validator
     from great_expectations.rule_based_profiler.data_assistant import (
@@ -154,7 +154,7 @@ def run_onboarding_data_assistant_result_jupyter_notebook_with_new_cell(
     from great_expectations.rule_based_profiler.helpers.util import get_validator_with_expectation_suite
     import great_expectations.exceptions as ge_exceptions
 
-    context = ge.get_context()
+    context = gx.get_context()
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",

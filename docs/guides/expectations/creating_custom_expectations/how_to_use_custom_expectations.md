@@ -49,7 +49,7 @@ To do this, we first need to instantiate our Data Context.
 For example, a pattern for importing a Custom Expectation `ExpectColumnValuesToBeAlphabetical` could look like:
 
 ```python
-context = ge.get_context()
+context = gx.get_context()
 from expectations.expect_column_values_to_be_alphabetical import ExpectColumnValuesToBeAlphabetical
 ```
 
@@ -80,7 +80,7 @@ To do this, execute the following from your command line:
 great_expectations checkpoint script <my_checkpoint_name>
 ```
 
-This will create a script in your GE directory at `great_expectations/uncommitted/run_my_checkpoint_name.py`. 
+This will create a script in your GX directory at `great_expectations/uncommitted/run_my_checkpoint_name.py`. 
 That script can be edited that script to include the Custom Expectation import(s) you need:
 
 ```python
@@ -163,7 +163,7 @@ To do this, execute the following from your command line:
 great_expectations checkpoint script <my_checkpoint_name>
 ```
 
-This will create a script in your GE directory at `great_expectations/uncommitted/run_my_checkpoint_name.py`. 
+This will create a script in your GX directory at `great_expectations/uncommitted/run_my_checkpoint_name.py`. 
 That script can be edited that script to include the Custom Expectation import(s) you need:
 
 ```python
