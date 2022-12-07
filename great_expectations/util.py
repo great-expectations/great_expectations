@@ -66,10 +66,6 @@ if TYPE_CHECKING:
         CloudDataContext,
         DataContext,
     )
-    from great_expectations.data_context.types.base import (
-        DataContextConfig,
-        InMemoryStoreBackendDefaults,
-    )
 
 try:
     from typing import TypeGuard  # type: ignore[attr-defined]
@@ -891,7 +887,10 @@ def read_sas(
         )
 
 
-def build_in_memory_runtime_context():
+def build_in_memory_runtime_context() -> "BaseDataContext":  # noqa: F821
+    """
+    Create generic in-memory "BaseDataContext" context for manipulations as required by tests.
+    """
     from great_expectations.data_context.data_context.base_data_context import (
         BaseDataContext,
     )
