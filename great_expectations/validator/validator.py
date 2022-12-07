@@ -1179,6 +1179,10 @@ class Validator:
             elif runtime_configuration == {}:
                 runtime_configuration["result_format"] = expectation_level_config
             else:
+                if type(runtime_configuration) == str:
+                    prev_value = runtime_configuration
+                    runtime_configuration = {"result_format": prev_value}
+
                 for key in expectation_level_config.keys():
                     runtime_configuration["result_format"][
                         key
