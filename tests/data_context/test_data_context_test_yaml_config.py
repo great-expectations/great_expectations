@@ -10,7 +10,9 @@ import pytest
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
-from great_expectations.data_context.data_context import BaseDataContext
+from great_expectations.data_context.config_validator.yaml_config_validator import (
+    _YamlConfigValidator,
+)
 from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
@@ -626,7 +628,7 @@ introspection:
     assert report_object["data_connectors"]["count"] == 1
     assert set(report_object["data_connectors"].keys()) == {
         "count",
-        "my_very_awesome_data_connector",
+        "${data_connector_name}",
     }
     assert mock_emit.call_count == 2
     expected_call_args_list.append(
@@ -673,9 +675,9 @@ def test_golden_path_sql_datasource_configuration(
     with set_directory(context.root_directory):
 
         # Everything below this line (except for asserts) is what we expect users to run as part of the golden path.
-        import great_expectations as ge
+        import great_expectations as gx
 
-        context = ge.get_context()
+        context = gx.get_context()
 
         db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
         yaml_config = f"""
@@ -816,9 +818,9 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
     context: DataContext = empty_data_context_stats_enabled
 
     with set_directory(context.root_directory):
-        import great_expectations as ge
+        import great_expectations as gx
 
-        context = ge.get_context()
+        context = gx.get_context()
         mock_emit.reset_mock()  # Remove data_context.__init__ call
 
         yaml_config = f"""
@@ -1010,9 +1012,9 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
     context: DataContext = empty_data_context_stats_enabled
 
     with set_directory(context.root_directory):
-        import great_expectations as ge
+        import great_expectations as gx
 
-        context = ge.get_context()
+        context = gx.get_context()
         mock_emit.reset_mock()  # Remove data_context.__init__ call
 
         yaml_config = f"""
@@ -1194,7 +1196,7 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
     """
     Tests output of test_yaml_config() for a Datacontext configured with a Datasource with
     RuntimeDataConnector. Even though the test directory contains multiple files that can be read-in
-    by GE, the RuntimeDataConnector will output 0 data_assets, and return a "note" to the user.
+    by GX, the RuntimeDataConnector will output 0 data_assets, and return a "note" to the user.
 
     This is because the RuntimeDataConnector is not aware of data_assets until they are passed in
     through the RuntimeBatchRequest.
@@ -1218,9 +1220,9 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
     context: DataContext = empty_data_context_stats_enabled
 
     with set_directory(context.root_directory):
-        import great_expectations as ge
+        import great_expectations as gx
 
-        context = ge.get_context()
+        context = gx.get_context()
         mock_emit.reset_mock()  # Remove data_context.__init__ call
 
         yaml_config = """
@@ -1319,9 +1321,9 @@ def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_d
     context: DataContext = empty_data_context_stats_enabled
 
     with set_directory(context.root_directory):
-        import great_expectations as ge
+        import great_expectations as gx
 
-        context = ge.get_context()
+        context = gx.get_context()
         mock_emit.reset_mock()  # Remove data_context.__init__ call
 
         yaml_config = f"""
@@ -1448,23 +1450,23 @@ def test_test_yaml_config_supported_types_have_self_check():
     # Each major category of test_yaml_config supported types has its own origin module_name
     supported_types = [
         (
-            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES,
+            _YamlConfigValidator.TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES,
             "great_expectations.data_context.store",
         ),
         (
-            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES,
+            _YamlConfigValidator.TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES,
             "great_expectations.datasource",
         ),
         (
-            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES,
+            _YamlConfigValidator.TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES,
             "great_expectations.datasource.data_connector",
         ),
         (
-            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES,
+            _YamlConfigValidator.TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES,
             "great_expectations.checkpoint",
         ),
         (
-            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES,
+            _YamlConfigValidator.TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES,
             "great_expectations.rule_based_profiler",
         ),
     ]
@@ -1472,7 +1474,7 @@ def test_test_yaml_config_supported_types_have_self_check():
     # Quick sanity check to ensure that we are testing ALL supported types herein
     all_types = list(itertools.chain.from_iterable(t[0] for t in supported_types))
     assert sorted(all_types) == sorted(
-        BaseDataContext.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
+        _YamlConfigValidator.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
     )
 
     # Use class_name and module_name to get the class type and introspect to confirm adherence to self_check requirement
@@ -1482,3 +1484,48 @@ def test_test_yaml_config_supported_types_have_self_check():
             assert hasattr(class_, "self_check") and callable(
                 class_.self_check
             ), f"Class '{class_}' is missing the required `self_check()` method"
+
+
+@pytest.mark.integration
+def test_test_yaml_config_on_datasource_sanitizes_instantiated_objs_config(
+    empty_data_context_stats_enabled,
+    monkeypatch,
+):
+    context = empty_data_context_stats_enabled
+    validator = _YamlConfigValidator(context)
+
+    variable = "DATA_DIR"
+    value_associated_with_variable = "a/b/c"
+    data_connector_name = "my_data_connector"
+
+    monkeypatch.setenv(variable, value_associated_with_variable)
+
+    yaml_config = f"""
+name: my_datasource
+class_name: Datasource
+execution_engine:
+  class_name: PandasExecutionEngine
+data_connectors:
+  {data_connector_name}:
+    class_name: InferredAssetFilesystemDataConnector
+    base_directory: ${variable}
+"""
+    instantiated_class = validator.test_yaml_config(yaml_config=yaml_config)
+
+    # Runtime object should have the substituted value for downstream usage
+    assert instantiated_class.data_connectors[
+        data_connector_name
+    ].base_directory.endswith(value_associated_with_variable)
+
+    # Config attached to object should mirror the runtime object
+    assert instantiated_class.config["data_connectors"][data_connector_name][
+        "base_directory"
+    ].endswith(value_associated_with_variable)
+
+    # Raw config attached to object should reflect what needs to be persisted (no sensitive credentials!)
+    assert (
+        instantiated_class._raw_config["data_connectors"][data_connector_name][
+            "base_directory"
+        ]
+        == f"${variable}"
+    )

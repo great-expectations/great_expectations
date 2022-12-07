@@ -8,11 +8,11 @@ from typing import Any
 import numpy as np
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.util import nested_update
 from great_expectations.util import (
     convert_json_string_to_be_python_compliant,
-    convert_ndarray_datetime_to_float_dtype,
+    convert_ndarray_datetime_to_float_dtype_utc_timezone,
     convert_ndarray_float_to_datetime_tuple,
     convert_ndarray_to_datetime_dtype_best_effort,
     deep_filter_properties_iterable,
@@ -41,7 +41,7 @@ def file_data_asset(tmp_path):
     with open(path, "w+") as file:
         file.write(json.dumps([0, 1, 2, 3, 4]))
 
-    return ge.data_asset.FileDataAsset(file_path=path)
+    return gx.data_asset.FileDataAsset(file_path=path)
 
 
 @pytest.fixture
@@ -80,23 +80,23 @@ def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
             Warning,
             match="No great_expectations version found in configuration object.",
         ):
-            ge.validate(
+            gx.validate(
                 file_data_asset,
                 empty_expectation_suite,
-                data_asset_class=ge.data_asset.FileDataAsset,
+                data_asset_class=gx.data_asset.FileDataAsset,
             )
 
 
 @pytest.mark.unit
 def test_validate_dataset(dataset, basic_expectation_suite):
-    res = ge.validate(dataset, basic_expectation_suite)
+    res = gx.validate(dataset, basic_expectation_suite)
     # assert res.success is True  # will not be true for mysql, where "infinities" column is missing
     assert res["statistics"]["evaluated_expectations"] == 4
-    if isinstance(dataset, ge.dataset.PandasDataset):
-        res = ge.validate(
+    if isinstance(dataset, gx.dataset.PandasDataset):
+        res = gx.validate(
             dataset,
             expectation_suite=basic_expectation_suite,
-            data_asset_class=ge.dataset.PandasDataset,
+            data_asset_class=gx.dataset.PandasDataset,
         )
         assert res.success is True
         assert res["statistics"]["evaluated_expectations"] == 4
@@ -104,20 +104,20 @@ def test_validate_dataset(dataset, basic_expectation_suite):
             ValueError,
             match=r"The validate util method only supports validation for subtypes of the provided data_asset_type",
         ):
-            ge.validate(
+            gx.validate(
                 dataset,
                 basic_expectation_suite,
-                data_asset_class=ge.dataset.SqlAlchemyDataset,
+                data_asset_class=gx.dataset.SqlAlchemyDataset,
             )
 
     elif (
-        isinstance(dataset, ge.dataset.SqlAlchemyDataset)
+        isinstance(dataset, gx.dataset.SqlAlchemyDataset)
         and dataset.sql_engine_dialect.name.lower() != "mysql"
     ):
-        res = ge.validate(
+        res = gx.validate(
             dataset,
             expectation_suite=basic_expectation_suite,
-            data_asset_class=ge.dataset.SqlAlchemyDataset,
+            data_asset_class=gx.dataset.SqlAlchemyDataset,
         )
         assert res.success is True
         assert res["statistics"]["evaluated_expectations"] == 4
@@ -125,21 +125,21 @@ def test_validate_dataset(dataset, basic_expectation_suite):
             ValueError,
             match=r"The validate util method only supports validation for subtypes of the provided data_asset_type",
         ):
-            ge.validate(
+            gx.validate(
                 dataset,
                 expectation_suite=basic_expectation_suite,
-                data_asset_class=ge.dataset.PandasDataset,
+                data_asset_class=gx.dataset.PandasDataset,
             )
 
     elif (
-        isinstance(dataset, ge.dataset.SqlAlchemyDataset)
+        isinstance(dataset, gx.dataset.SqlAlchemyDataset)
         and dataset.sql_engine_dialect.name.lower() == "mysql"
     ):
         # mysql cannot use the infinities column
-        res = ge.validate(
+        res = gx.validate(
             dataset,
             expectation_suite=basic_expectation_suite,
-            data_asset_class=ge.dataset.SqlAlchemyDataset,
+            data_asset_class=gx.dataset.SqlAlchemyDataset,
         )
         assert res.success is False
         assert res["statistics"]["evaluated_expectations"] == 4
@@ -147,15 +147,15 @@ def test_validate_dataset(dataset, basic_expectation_suite):
             ValueError,
             match=r"The validate util method only supports validation for subtypes of the provided data_asset_type",
         ):
-            ge.validate(
+            gx.validate(
                 dataset,
                 expectation_suite=basic_expectation_suite,
-                data_asset_class=ge.dataset.PandasDataset,
+                data_asset_class=gx.dataset.PandasDataset,
             )
 
-    elif isinstance(dataset, ge.dataset.SparkDFDataset):
-        res = ge.validate(
-            dataset, basic_expectation_suite, data_asset_class=ge.dataset.SparkDFDataset
+    elif isinstance(dataset, gx.dataset.SparkDFDataset):
+        res = gx.validate(
+            dataset, basic_expectation_suite, data_asset_class=gx.dataset.SparkDFDataset
         )
         assert res.success is True
         assert res["statistics"]["evaluated_expectations"] == 4
@@ -163,10 +163,10 @@ def test_validate_dataset(dataset, basic_expectation_suite):
             ValueError,
             match=r"The validate util method only supports validation for subtypes of the provided data_asset_type",
         ):
-            ge.validate(
+            gx.validate(
                 dataset,
                 expectation_suite=basic_expectation_suite,
-                data_asset_class=ge.dataset.PandasDataset,
+                data_asset_class=gx.dataset.PandasDataset,
             )
 
 
@@ -180,7 +180,7 @@ def test_validate_using_data_context(
         is False
     )
 
-    res = ge.validate(
+    res = gx.validate(
         dataset,
         expectation_suite_name="my_dag_node.default",
         data_context=data_context_parameterized_expectation_suite,
@@ -203,7 +203,7 @@ def test_validate_using_data_context_path(
     dataset, data_context_parameterized_expectation_suite
 ):
     data_context_path = data_context_parameterized_expectation_suite.root_directory
-    res = ge.validate(
+    res = gx.validate(
         dataset,
         expectation_suite_name="my_dag_node.default",
         data_context=data_context_path,
@@ -214,7 +214,7 @@ def test_validate_using_data_context_path(
     assert res["statistics"]["evaluated_expectations"] == 2
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.slow  # 1.61s
 def test_validate_invalid_parameters(
     dataset, basic_expectation_suite, data_context_parameterized_expectation_suite
@@ -223,7 +223,7 @@ def test_validate_invalid_parameters(
         ValueError,
         match="Either an expectation suite or a DataContext is required for validation.",
     ):
-        ge.validate(dataset)
+        gx.validate(dataset)
 
 
 @pytest.mark.unit
@@ -237,7 +237,7 @@ def test_gen_directory_tree_str(tmpdir):
 
     os.mkdir(os.path.join(project_dir, "AAA"))
 
-    res = ge.util.gen_directory_tree_str(project_dir)
+    res = gx.util.gen_directory_tree_str(project_dir)
     print(res)
 
     # Note: files and directories are sorteds alphabetically, so that this method can be used for testing.
@@ -662,29 +662,29 @@ def test_is_ndarray_datetime_dtype(
     numeric_array,
 ):
     assert is_ndarray_datetime_dtype(
-        data=datetime_array, parse_strings_as_datetimes=False
+        data=datetime_array, parse_strings_as_datetimes=False, fuzzy=False
     )
     assert is_ndarray_datetime_dtype(
-        data=datetime_array, parse_strings_as_datetimes=True
+        data=datetime_array, parse_strings_as_datetimes=True, fuzzy=False
     )
 
     assert not is_ndarray_datetime_dtype(
-        data=datetime_string_array, parse_strings_as_datetimes=False
+        data=datetime_string_array, parse_strings_as_datetimes=False, fuzzy=False
     )
     assert is_ndarray_datetime_dtype(
-        data=datetime_string_array, parse_strings_as_datetimes=True
+        data=datetime_string_array, parse_strings_as_datetimes=True, fuzzy=False
     )
 
     assert not is_ndarray_datetime_dtype(
-        data=numeric_array, parse_strings_as_datetimes=False
+        data=numeric_array, parse_strings_as_datetimes=False, fuzzy=False
     )
     assert not is_ndarray_datetime_dtype(
-        data=numeric_array, parse_strings_as_datetimes=True
+        data=numeric_array, parse_strings_as_datetimes=True, fuzzy=False
     )
 
     datetime_string_array[-1] = "malformed_datetime_string"
     assert not is_ndarray_datetime_dtype(
-        data=datetime_string_array, parse_strings_as_datetimes=True
+        data=datetime_string_array, parse_strings_as_datetimes=True, fuzzy=False
     )
 
 
@@ -814,26 +814,30 @@ def test_convert_ndarray_to_datetime_dtype_best_effort(
 
 
 @pytest.mark.unit
-def test_convert_ndarray_datetime_to_float_dtype(
+def test_convert_ndarray_datetime_to_float_dtype_utc_timezone(
     datetime_array,
     datetime_string_array,
     numeric_array,
 ):
     element: Any
-
-    assert convert_ndarray_datetime_to_float_dtype(data=datetime_array).tolist() == [
-        element.timestamp() for element in datetime_array
+    assert convert_ndarray_datetime_to_float_dtype_utc_timezone(
+        data=datetime_array
+    ).tolist() == [
+        element.replace(tzinfo=datetime.timezone.utc).timestamp()
+        for element in datetime_array
     ]
 
     with pytest.raises(AttributeError) as e:
-        _ = convert_ndarray_datetime_to_float_dtype(data=numeric_array)
+        _ = convert_ndarray_datetime_to_float_dtype_utc_timezone(data=numeric_array)
 
-    assert str(e.value) == "'int' object has no attribute 'timestamp'"
+    assert "'int' object has no attribute 'replace'" in str(e.value)
 
-    with pytest.raises(AttributeError) as e:
-        _ = convert_ndarray_datetime_to_float_dtype(data=datetime_string_array)
+    with pytest.raises(TypeError) as e:
+        _ = convert_ndarray_datetime_to_float_dtype_utc_timezone(
+            data=datetime_string_array
+        )
 
-    assert str(e.value) == "'str' object has no attribute 'timestamp'"
+    assert "replace() takes no keyword arguments" in str(e.value)
 
 
 @pytest.mark.unit
@@ -841,9 +845,11 @@ def test_convert_ndarray_float_to_datetime_tuple(
     datetime_array,
 ):
     element: Any
-
     assert convert_ndarray_float_to_datetime_tuple(
-        data=[element.timestamp() for element in datetime_array]
+        data=[
+            element.replace(tzinfo=datetime.timezone.utc).timestamp()
+            for element in datetime_array
+        ]
     ) == tuple([element for element in datetime_array])
 
     with pytest.raises(TypeError) as e:

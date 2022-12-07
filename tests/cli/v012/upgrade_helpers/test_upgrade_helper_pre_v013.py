@@ -14,6 +14,7 @@ from great_expectations import DataContext
 from great_expectations.cli.v012 import cli
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
+from tests.cli.utils import escape_ansi
 from tests.cli.v012.utils import (
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
@@ -60,7 +61,7 @@ def test_upgrade_helper_intervention_on_cli_command(v10_project_directory, caplo
         input="n\n",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout = escape_ansi(result.stdout).strip()
 
     assert (
         "Your project appears to have an out-of-date config version (1.0) - the version number must be at least 3."
@@ -72,12 +73,12 @@ def test_upgrade_helper_intervention_on_cli_command(v10_project_directory, caplo
         in stdout
     )
     assert (
-        "Ok, exiting now. To upgrade at a later time, use the following command: [36mgreat_expectations project "
-        "upgrade[0m" in stdout
+        "Ok, exiting now. To upgrade at a later time, use the following command: great_expectations project "
+        "upgrade" in stdout
     )
     assert (
-        "To learn more about the upgrade process, visit ["
-        "36mhttps://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html"
+        "To learn more about the upgrade process, visit "
+        "https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html"
         in stdout
     )
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -135,7 +136,7 @@ def test_basic_project_upgrade(v10_project_directory, caplog):
         input="\n",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout = escape_ansi(result.stdout).strip()
 
     with open(
         file_relative_path(
@@ -143,9 +144,9 @@ def test_basic_project_upgrade(v10_project_directory, caplog):
             "../../../test_fixtures/upgrade_helper/test_basic_project_upgrade_expected_v012_stdout.fixture",
         )
     ) as f:
-        expected_stdout = f.read()
+        expected_stdout = f.read().strip()
         expected_stdout = expected_stdout.replace(
-            "GE_PROJECT_DIR", v10_project_directory
+            "GX_PROJECT_DIR", v10_project_directory
         )
         assert stdout == expected_stdout
 
@@ -206,7 +207,7 @@ great_expectations/
         expected_upgrade_log_dict = json.load(f)
         expected_upgrade_log_str = json.dumps(expected_upgrade_log_dict)
         expected_upgrade_log_str = expected_upgrade_log_str.replace(
-            "GE_PROJECT_DIR", v10_project_directory
+            "GX_PROJECT_DIR", v10_project_directory
         )
         expected_upgrade_log_dict = json.loads(expected_upgrade_log_str)
 
@@ -241,7 +242,7 @@ def test_project_upgrade_with_manual_steps(
         input="\n",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout = escape_ansi(result.stdout).strip()
 
     with open(
         file_relative_path(
@@ -249,9 +250,9 @@ def test_project_upgrade_with_manual_steps(
             "../../../test_fixtures/upgrade_helper/test_project_upgrade_with_manual_steps_expected_v012_stdout.fixture",
         )
     ) as f:
-        expected_stdout = f.read()
+        expected_stdout = f.read().strip()
         expected_stdout = expected_stdout.replace(
-            "GE_PROJECT_DIR", v10_project_directory
+            "GX_PROJECT_DIR", v10_project_directory
         )
         assert stdout == expected_stdout
 
@@ -319,7 +320,7 @@ great_expectations/
         expected_upgrade_log_dict = json.load(f)
         expected_upgrade_log_str = json.dumps(expected_upgrade_log_dict)
         expected_upgrade_log_str = expected_upgrade_log_str.replace(
-            "GE_PROJECT_DIR", v10_project_directory
+            "GX_PROJECT_DIR", v10_project_directory
         )
         expected_upgrade_log_dict = json.loads(expected_upgrade_log_str)
 
@@ -352,7 +353,7 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
         input="\n",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout = escape_ansi(result.stdout).strip()
 
     with open(
         file_relative_path(
@@ -360,9 +361,9 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
             "../../../test_fixtures/upgrade_helper/test_project_upgrade_with_exception_expected_v012_stdout.fixture",
         )
     ) as f:
-        expected_stdout = f.read()
+        expected_stdout = f.read().strip()
         expected_stdout = expected_stdout.replace(
-            "GE_PROJECT_DIR", v10_project_directory
+            "GX_PROJECT_DIR", v10_project_directory
         )
         assert stdout == expected_stdout
 
@@ -422,7 +423,7 @@ great_expectations/
         expected_upgrade_log_dict = json.load(f)
         expected_upgrade_log_str = json.dumps(expected_upgrade_log_dict)
         expected_upgrade_log_str = expected_upgrade_log_str.replace(
-            "GE_PROJECT_DIR", v10_project_directory
+            "GX_PROJECT_DIR", v10_project_directory
         )
         expected_upgrade_log_str = expected_upgrade_log_str.replace(
             "GE_PATH", os.path.split(great_expectations.__file__)[0]
@@ -449,7 +450,7 @@ def test_v2_to_v3_project_upgrade(v20_project_directory, caplog):
         input="\n",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout = escape_ansi(result.stdout).strip()
 
     with open(
         file_relative_path(
@@ -457,9 +458,9 @@ def test_v2_to_v3_project_upgrade(v20_project_directory, caplog):
             "../../../test_fixtures/upgrade_helper/test_v2_to_v3_project_upgrade_expected_v012_stdout.fixture",
         )
     ) as f:
-        expected_stdout = f.read()
+        expected_stdout = f.read().strip()
         expected_stdout = expected_stdout.replace(
-            "GE_PROJECT_DIR", v20_project_directory
+            "GX_PROJECT_DIR", v20_project_directory
         )
         assert stdout == expected_stdout
 
@@ -527,7 +528,7 @@ great_expectations/
         expected_upgrade_log_dict = json.load(f)
         expected_upgrade_log_str = json.dumps(expected_upgrade_log_dict)
         expected_upgrade_log_str = expected_upgrade_log_str.replace(
-            "GE_PROJECT_DIR", v20_project_directory
+            "GX_PROJECT_DIR", v20_project_directory
         )
         expected_upgrade_log_dict = json.loads(expected_upgrade_log_str)
 

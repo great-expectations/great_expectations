@@ -3,13 +3,14 @@ import json
 import os
 import shutil
 from collections import OrderedDict
+from typing import Dict, List, Union
 
 import pandas as pd
 import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -42,7 +43,14 @@ from great_expectations.datasource import (
     SimpleSqlalchemyDatasource,
 )
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
-from great_expectations.render.types import RenderedAtomicContent
+from great_expectations.expectations.expectation import TableExpectation
+from great_expectations.render import (
+    AtomicPrescriptiveRendererType,
+    AtomicRendererType,
+    RenderedAtomicContent,
+    renderedAtomicValueSchema,
+)
+from great_expectations.render.renderer.renderer import renderer
 from great_expectations.util import (
     deep_filter_properties_iterable,
     gen_directory_tree_str,
@@ -58,18 +66,6 @@ except ImportError:
 yaml = YAML()
 
 parameterized_expectation_suite_name = "my_dag_node.default"
-
-
-@pytest.fixture()
-def parameterized_expectation_suite():
-    fixture_path = file_relative_path(
-        __file__,
-        "../test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
-    )
-    with open(
-        fixture_path,
-    ) as suite:
-        return json.load(suite)
 
 
 @pytest.fixture(scope="function")
@@ -99,7 +95,7 @@ def titanic_multibatch_data_context(
         file_relative_path(__file__, "../test_sets/Titanic.csv"),
         str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
     )
-    return ge.data_context.DataContext(context_path)
+    return gx.data_context.DataContext(context_path)
 
 
 @pytest.fixture
@@ -125,7 +121,7 @@ def data_context_with_bad_datasource(tmp_path_factory):
         os.path.join(fixture_dir, "great_expectations_bad_datasource.yml"),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
-    return ge.data_context.DataContext(context_path)
+    return gx.data_context.DataContext(context_path)
 
 
 def test_create_duplicate_expectation_suite(titanic_data_context):
@@ -937,7 +933,7 @@ def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
         ),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
-    monkeypatch.setenv("GE_HOME", context_path)
+    monkeypatch.setenv("GX_HOME", context_path)
     assert DataContext.find_context_root_dir() == context_path
 
 
@@ -1045,7 +1041,7 @@ def empty_context(tmp_path_factory):
     DataContext.create(project_path)
     ge_dir = os.path.join(project_path, "great_expectations")
     assert os.path.isdir(ge_dir)
-    assert os.path.isfile(os.path.join(ge_dir, DataContext.GE_YML))
+    assert os.path.isfile(os.path.join(ge_dir, DataContext.GX_YML))
     context = DataContext(ge_dir)
     assert isinstance(context, DataContext)
     return context
@@ -1061,7 +1057,7 @@ def test_data_context_does_ge_yml_exist_returns_false_when_it_does_not_exist(
 ):
     ge_dir = empty_context.root_directory
     # mangle project
-    safe_remove(os.path.join(ge_dir, empty_context.GE_YML))
+    safe_remove(os.path.join(ge_dir, empty_context.GX_YML))
     assert DataContext.does_config_exist_on_disk(ge_dir) == False
 
 
@@ -1084,7 +1080,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     empty_context,
 ):
     ge_dir = empty_context.root_directory
-    safe_remove(os.path.join(ge_dir, empty_context.GE_YML))
+    safe_remove(os.path.join(ge_dir, empty_context.GX_YML))
     assert DataContext.does_project_have_a_datasource_in_config_file(ge_dir) == False
 
 
@@ -1100,7 +1096,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     empty_context,
 ):
     ge_dir = empty_context.root_directory
-    with open(os.path.join(ge_dir, DataContext.GE_YML), "w") as yml:
+    with open(os.path.join(ge_dir, DataContext.GX_YML), "w") as yml:
         yml.write("this file: is not a valid ge config")
     assert DataContext.does_project_have_a_datasource_in_config_file(ge_dir) == False
 
@@ -1140,7 +1136,7 @@ def test_data_context_is_project_initialized_returns_false_when_config_yml_is_mi
 ):
     ge_dir = empty_context.root_directory
     # mangle project
-    safe_remove(os.path.join(ge_dir, empty_context.GE_YML))
+    safe_remove(os.path.join(ge_dir, empty_context.GX_YML))
 
     assert DataContext.is_project_initialized(ge_dir) == False
 
@@ -1150,7 +1146,7 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_dir_
 ):
     ge_dir = empty_context.root_directory
     # mangle project
-    shutil.rmtree(os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR))
+    shutil.rmtree(os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR))
 
     assert DataContext.is_project_initialized(ge_dir) == False
 
@@ -1160,7 +1156,7 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_data
 ):
     ge_dir = empty_context.root_directory
     # mangle project
-    shutil.rmtree(os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR, "data_docs"))
+    shutil.rmtree(os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR, "data_docs"))
 
     assert DataContext.is_project_initialized(ge_dir) == False
 
@@ -1170,7 +1166,7 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_vali
 ):
     ge_dir = empty_context.root_directory
     # mangle project
-    shutil.rmtree(os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR, "validations"))
+    shutil.rmtree(os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR, "validations"))
 
     assert DataContext.is_project_initialized(ge_dir) == False
 
@@ -1181,7 +1177,7 @@ def test_data_context_is_project_initialized_returns_false_when_config_variable_
     ge_dir = empty_context.root_directory
     # mangle project
     safe_remove(
-        os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR, "config_variables.yml")
+        os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR, "config_variables.yml")
     )
 
     assert DataContext.is_project_initialized(ge_dir) == False
@@ -1327,7 +1323,7 @@ def test_data_context_create_builds_base_directories(tmp_path_factory):
         "checkpoints",
         "uncommitted",
     ]:
-        base_dir = os.path.join(project_path, context.GE_DIR, directory)
+        base_dir = os.path.join(project_path, context.GX_DIR, directory)
         assert os.path.isdir(base_dir)
 
 
@@ -3087,3 +3083,192 @@ def test_check_for_usage_stats_sync_short_circuits_due_to_disabled_usage_stats(
 
     res = context._check_for_usage_stats_sync(project_config=project_config)
     assert res is False
+
+
+class ExpectSkyToBeColor(TableExpectation):
+    metric_dependencies = ("table.color",)
+    success_keys = ("color",)
+    args_keys = ("color",)
+
+    @classmethod
+    @renderer(
+        renderer_type=".".join(
+            [AtomicRendererType.PRESCRIPTIVE, "custom_renderer_type"]
+        )
+    )
+    def _prescriptive_renderer_custom(
+        cls,
+        **kwargs: dict,
+    ) -> None:
+        raise ValueError("This renderer is broken!")
+
+    def _validate(
+        self,
+        **kwargs: dict,
+    ) -> Dict[str, Union[bool, dict]]:
+        return {
+            "success": True,
+            "result": {"observed_value": "blue"},
+        }
+
+
+@pytest.mark.integration
+def test_unrendered_and_failed_prescriptive_renderer_behavior(
+    empty_data_context: DataContext,
+):
+    context: DataContext = empty_data_context
+
+    expectation_suite_name: str = "test_suite"
+
+    expectation_suite = ExpectationSuite(
+        expectation_suite_name=expectation_suite_name,
+        data_context=context,
+        expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_table_row_count_to_equal", kwargs={"value": 0}
+            ),
+        ],
+    )
+    context.save_expectation_suite(expectation_suite=expectation_suite)
+
+    # Without include_rendered_content set, all legacy rendered_content was None.
+    expectation_suite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+    assert not any(
+        [
+            expectation_configuration.rendered_content
+            for expectation_configuration in expectation_suite.expectations
+        ]
+    )
+
+    # Once we include_rendered_content, we get rendered_content on each ExpectationConfiguration in the ExpectationSuite.
+    context.variables.include_rendered_content.expectation_suite = True
+    expectation_suite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+    for expectation_configuration in expectation_suite.expectations:
+        assert all(
+            [
+                isinstance(rendered_content_block, RenderedAtomicContent)
+                for rendered_content_block in expectation_configuration.rendered_content
+            ]
+        )
+
+    # If we change the ExpectationSuite to use an Expectation that has two content block renderers, one of which is
+    # broken, we should get the failure message for one of the content blocks.
+    expectation_suite = ExpectationSuite(
+        expectation_suite_name=expectation_suite_name,
+        data_context=context,
+        expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_sky_to_be_color", kwargs={"color": "blue"}
+            ),
+        ],
+    )
+    context.save_expectation_suite(expectation_suite=expectation_suite)
+    expectation_suite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+
+    expected_rendered_content: List[RenderedAtomicContent] = [
+        RenderedAtomicContent(
+            name=AtomicPrescriptiveRendererType.FAILED,
+            value=renderedAtomicValueSchema.load(
+                {
+                    "template": "Rendering failed for Expectation: $expectation_type(**$kwargs).",
+                    "params": {
+                        "expectation_type": {
+                            "schema": {"type": "string"},
+                            "value": "expect_sky_to_be_color",
+                        },
+                        "kwargs": {
+                            "schema": {"type": "string"},
+                            "value": {"color": "blue"},
+                        },
+                    },
+                    "schema": {"type": "com.superconductive.rendered.string"},
+                }
+            ),
+            value_type="StringValueType",
+        ),
+        RenderedAtomicContent(
+            name=AtomicPrescriptiveRendererType.SUMMARY,
+            value=renderedAtomicValueSchema.load(
+                {
+                    "schema": {"type": "com.superconductive.rendered.string"},
+                    "template": "$expectation_type(**$kwargs)",
+                    "params": {
+                        "expectation_type": {
+                            "schema": {"type": "string"},
+                            "value": "expect_sky_to_be_color",
+                        },
+                        "kwargs": {
+                            "schema": {"type": "string"},
+                            "value": {"color": "blue"},
+                        },
+                    },
+                }
+            ),
+            value_type="StringValueType",
+        ),
+    ]
+
+    actual_rendered_content: List[RenderedAtomicContent] = []
+    for expectation_configuration in expectation_suite.expectations:
+        actual_rendered_content.extend(expectation_configuration.rendered_content)
+
+    assert actual_rendered_content == expected_rendered_content
+
+    # If we have a legacy ExpectationSuite with successful rendered_content blocks, but the new renderer is broken,
+    # we should not update the existing rendered_content.
+    legacy_rendered_content = [
+        RenderedAtomicContent(
+            name=".".join([AtomicRendererType.PRESCRIPTIVE, "custom_renderer_type"]),
+            value=renderedAtomicValueSchema.load(
+                {
+                    "schema": {"type": "com.superconductive.rendered.string"},
+                    "template": "This is a working renderer for $expectation_type(**$kwargs).",
+                    "params": {
+                        "expectation_type": {
+                            "schema": {"type": "string"},
+                            "value": "expect_sky_to_be_color",
+                        },
+                        "kwargs": {
+                            "schema": {"type": "string"},
+                            "value": {"color": "blue"},
+                        },
+                    },
+                }
+            ),
+            value_type="StringValueType",
+        ),
+        RenderedAtomicContent(
+            name=AtomicPrescriptiveRendererType.SUMMARY,
+            value=renderedAtomicValueSchema.load(
+                {
+                    "schema": {"type": "com.superconductive.rendered.string"},
+                    "template": "$expectation_type(**$kwargs)",
+                    "params": {
+                        "expectation_type": {
+                            "schema": {"type": "string"},
+                            "value": "expect_sky_to_be_color",
+                        },
+                        "kwargs": {
+                            "schema": {"type": "string"},
+                            "value": {"color": "blue"},
+                        },
+                    },
+                }
+            ),
+            value_type="StringValueType",
+        ),
+    ]
+
+    expectation_suite.expectations[0].rendered_content = legacy_rendered_content
+
+    actual_rendered_content: List[RenderedAtomicContent] = []
+    for expectation_configuration in expectation_suite.expectations:
+        actual_rendered_content.extend(expectation_configuration.rendered_content)
+
+    assert actual_rendered_content == legacy_rendered_content

@@ -36,7 +36,7 @@ SNIPPETS_USER_CONFIGURABLE_PROFILER: List[str] = [
 
 import pandas as pd
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
@@ -71,17 +71,18 @@ import datetime
 
 import pandas as pd
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.exceptions import DataContextError""",
     # Batch request
-    """batch_request = {
-        "datasource_name": "my_datasource",
-        "data_connector_name": "my_basic_data_connector",
-        "data_asset_name": "Titanic_1912",
-    }
+    """
+batch_request = {
+    "datasource_name": "my_datasource",
+    "data_connector_name": "my_basic_data_connector",
+    "data_asset_name": "Titanic_1912",
+}
 """,
     # OnboardingDataAssistant instantiation/usage
     """\
@@ -100,7 +101,7 @@ import datetime
 
 import pandas as pd
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint
@@ -173,7 +174,6 @@ EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT: List[
                 "profiler_details": {
                     "metric_configuration": {
                         "domain_kwargs": {},
-                        "metric_dependencies": None,
                         "metric_name": "table.row_count",
                         "metric_value_kwargs": None,
                     },
@@ -219,7 +219,7 @@ def test_suite_notebook_renderer_render_onboarding_data_assistant_configuration(
     )
     notebook = renderer.render()
 
-    snippets = SNIPPETS_USER_CONFIGURABLE_PROFILER
+    snippets = SNIPPETS_ONBOARDING_DATA_ASSISTANT
 
     for snippet in snippets:
         assert find_code_in_notebook(
@@ -380,10 +380,9 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
         "success_percent": 100.0,
     }
 
-    # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
     expected_expectation_configurations: List[
         ExpectationConfiguration
-    ] = EXPECTED_EXPECTATION_CONFIGURATIONS_USER_CONFIGURABLE_PROFILER
+    ] = EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT
 
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
@@ -411,8 +410,7 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
         expectations_from_suite,
     ) = get_set_of_columns_and_expectations_from_suite(suite=suite)
 
-    # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
-    expected_expectations: Set[str] = EXPECTED_EXPECTATIONS_USER_CONFIGURABLE_PROFILER
+    expected_expectations: Set[str] = EXPECTED_EXPECTATIONS_ONBOARDING_DATA_ASSISTANT
 
     assert columns_with_expectations == set()
     assert expectations_from_suite == expected_expectations
@@ -629,7 +627,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {},
-                            "metric_dependencies": None,
                             "metric_name": "table.row_count",
                             "metric_value_kwargs": None,
                         },
@@ -646,7 +643,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Unnamed: 0"},
-                            "metric_dependencies": None,
                             "metric_name": "column.min",
                             "metric_value_kwargs": None,
                         },
@@ -668,7 +664,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Unnamed: 0"},
-                            "metric_dependencies": None,
                             "metric_name": "column.max",
                             "metric_value_kwargs": None,
                         },
@@ -690,7 +685,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Age"},
-                            "metric_dependencies": None,
                             "metric_name": "column.min",
                             "metric_value_kwargs": None,
                         },
@@ -712,7 +706,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Age"},
-                            "metric_dependencies": None,
                             "metric_name": "column.max",
                             "metric_value_kwargs": None,
                         },
@@ -734,7 +727,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Survived"},
-                            "metric_dependencies": None,
                             "metric_name": "column.min",
                             "metric_value_kwargs": None,
                         },
@@ -756,7 +748,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Survived"},
-                            "metric_dependencies": None,
                             "metric_name": "column.max",
                             "metric_value_kwargs": None,
                         },
@@ -778,7 +769,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "SexCode"},
-                            "metric_dependencies": None,
                             "metric_name": "column.min",
                             "metric_value_kwargs": None,
                         },
@@ -800,7 +790,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "SexCode"},
-                            "metric_dependencies": None,
                             "metric_name": "column.max",
                             "metric_value_kwargs": None,
                         },

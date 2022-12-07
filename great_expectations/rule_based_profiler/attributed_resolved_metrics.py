@@ -1,16 +1,16 @@
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any, Dict, Iterator, List, Optional, Sized
 
 import numpy as np
 import pandas as pd
 
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.metric_computation_result import (
-    MetricValue,
     MetricValues,
 )
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.attributes import Attributes
+from great_expectations.validator.computed_metric import MetricValue
 
 
 def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
@@ -35,10 +35,10 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
                     return True
 
                 # Components of different lengths cannot be packaged into "numpy.ndarray" type (due to undefined shape).
-                if all(isinstance(value, list) for value in values):
+                if all(isinstance(value, (list, tuple)) for value in values):
                     values_iterator: Iterator = iter(values)
                     first_value_length: int = len(next(values_iterator))
-                    current_value: List[Any]
+                    current_value: Sized[Any]
                     if not all(
                         len(current_value) == first_value_length
                         for current_value in values_iterator
@@ -53,6 +53,14 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
         return False
 
     if _detect_illegal_array_type_or_shape(values=metric_values):
+        value: MetricValue
+        if (
+            metric_values is not None
+            and isinstance(metric_values, (list, tuple))
+            and all(value is None for value in metric_values)
+        ):
+            return np.asarray(metric_values)
+
         return metric_values
     else:
         return np.asarray(metric_values)

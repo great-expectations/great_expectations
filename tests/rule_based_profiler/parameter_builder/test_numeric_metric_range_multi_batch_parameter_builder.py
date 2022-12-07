@@ -6,10 +6,10 @@ import pytest
 import scipy.stats as stats
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import NP_EPSILON
 from great_expectations.rule_based_profiler.parameter_builder import (
     NumericMetricRangeMultiBatchParameterBuilder,
@@ -23,6 +23,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 
+@pytest.mark.integration
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -79,14 +80,13 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
-    expected_value_dict: Dict[str, Optional[str]] = {
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "details": {
             "metric_configuration": {
                 "domain_kwargs": {},
                 "metric_name": "table.row_count",
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
@@ -107,7 +107,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     expected_value: np.ndarray = np.asarray([7510, 8806])
 
@@ -149,6 +149,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert p_value > 9.5e-1
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # 1.10s
 def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -209,14 +210,13 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
     )
     assert len(parameter_nodes) == 1
 
-    expected_value_dict: Dict[str, Optional[str]] = {
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "details": {
             "metric_configuration": {
                 "domain_kwargs": {"column": "fare_amount"},
                 "metric_name": "column.min",
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
@@ -237,7 +237,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     actual_value_01_lower: float = actual_values_01[0]
     actual_value_01_upper: float = actual_values_01[1]
@@ -309,7 +309,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     actual_value_05_lower: float = actual_values_05[0]
     actual_value_05_upper: float = actual_values_05[1]
@@ -347,6 +347,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert p_value > 9.5e-1
 
 
+@pytest.mark.integration
 def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -406,14 +407,13 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
     )
     assert len(parameter_nodes) == 1
 
-    expected_value_dict: Dict[str, Optional[str]] = {
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "details": {
             "metric_configuration": {
                 "domain_kwargs": {"column": "fare_amount"},
                 "metric_name": "column.min",
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
@@ -434,7 +434,7 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     actual_value_01_lower: float = actual_values_01[0]
     actual_value_01_upper: float = actual_values_01[1]
@@ -468,6 +468,7 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert p_value > 9.5e-1
 
 
+@pytest.mark.integration
 def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evaluation_dependency_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -542,14 +543,13 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
     )
     assert len(parameter_nodes) == 1
 
-    expected_value_dict: Dict[str, Optional[str]] = {
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "details": {
             "metric_configuration": {
                 "domain_kwargs": {"column": "fare_amount"},
                 "metric_name": "column.min",
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
@@ -570,7 +570,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     actual_value_01_lower: float = actual_values_01[0]
     actual_value_01_upper: float = actual_values_01[1]
@@ -642,7 +642,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     actual_value_05_lower: float = actual_values_05[0]
     actual_value_05_upper: float = actual_values_05[1]
@@ -680,6 +680,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
     assert p_value > 9.5e-1
 
 
+@pytest.mark.integration
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_one(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -737,6 +738,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
         )
 
 
+@pytest.mark.integration
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_negative(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -794,6 +796,7 @@ provided.
         )
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # 2.51s
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_zero(
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -852,6 +855,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
         )
 
 
+@pytest.mark.integration
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_very_small(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -916,6 +920,7 @@ to 0.  A false_positive_rate of {NP_EPSILON} has been selected instead.
         )
 
 
+@pytest.mark.integration
 def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -972,14 +977,13 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
-    expected_value_dict: Dict[str, Optional[str]] = {
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "details": {
             "metric_configuration": {
                 "domain_kwargs": {},
                 "metric_name": "table.row_count",
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
@@ -1000,7 +1004,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     expected_value: np.ndarray = np.asarray([6180, 10277])
 
@@ -1042,6 +1046,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert p_value > 9.5e-1
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # 1.12s
 def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstrap_marginal_info_at_boundary(
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -1165,6 +1170,7 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstr
     assert kde_value[1] > bootstrap_value[1]
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # 1.12s
 def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
     bobby_columnar_table_multi_batch_deterministic_data_context,

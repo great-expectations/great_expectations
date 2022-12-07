@@ -6,17 +6,15 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationSuiteValidationResultSchema,
 )
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
-)
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
 )
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import load_class
@@ -95,7 +93,7 @@ class ValidationsStore(Store):
     --ge-feature-maturity-info--
     """
 
-    _key_class = ValidationResultIdentifier  # type: ignore[assignment]
+    _key_class: type = ValidationResultIdentifier
 
     def __init__(
         self, store_backend=None, runtime_environment=None, store_name=None
@@ -155,8 +153,8 @@ class ValidationsStore(Store):
 
     def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
         """
-        This method takes full json response from GE cloud and outputs a dict appropriate for
-        deserialization into a GE object
+        This method takes full json response from GX cloud and outputs a dict appropriate for
+        deserialization into a GX object
         """
         ge_cloud_suite_validation_result_id = response_json["data"]["id"]
         suite_validation_result_dict = response_json["data"]["attributes"]["result"]
@@ -205,8 +203,8 @@ class ValidationsStore(Store):
         )
 
         if self.ge_cloud_mode:
-            test_key: GeCloudIdentifier = self.key_class(
-                resource_type=GeCloudRESTResource.CHECKPOINT,
+            test_key: GXCloudIdentifier = self.key_class(
+                resource_type=GXCloudRESTResource.CHECKPOINT,
                 ge_cloud_id=str(uuid.uuid4()),
             )
 

@@ -36,19 +36,28 @@ def send_slack_notification(
     query = query
     headers = None
 
+    # Slack doc about overwritting the channel when using the legacy Incoming Webhooks
+    # https://api.slack.com/legacy/custom-integrations/messaging/webhooks
+    # ** Since it is legacy, it could be deprecated or removed in the future **
+    if slack_channel:
+        query["channel"] = slack_channel
+
     if not slack_webhook:
         url = "https://slack.com/api/chat.postMessage"
         headers = {"Authorization": f"Bearer {slack_token}"}
-        query["channel"] = slack_channel
 
     try:
         response = session.post(url=url, headers=headers, json=query)
+        if slack_webhook:
+            ok_status = response.text == "ok"
+        else:
+            ok_status = response.json()["ok"]
     except requests.ConnectionError:
         logger.warning(f"Failed to connect to Slack webhook after {10} retries.")
     except Exception as e:
         logger.error(str(e))
     else:
-        if response.status_code != 200:
+        if response.status_code != 200 or not ok_status:
             logger.warning(
                 "Request to Slack webhook "
                 f"returned error {response.status_code}: {response.text}"
@@ -477,7 +486,7 @@ def validate_validation_dict(validation_dict: dict) -> None:
 
 def send_cloud_notification(url: str, headers: dict):
     """
-    Post a CloudNotificationAction to GE Cloud Backend for processing.
+    Post a CloudNotificationAction to GX Cloud Backend for processing.
     """
     session = requests.Session()
 

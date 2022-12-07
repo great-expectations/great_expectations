@@ -6,15 +6,16 @@ from typing import Optional, Set
 import pandas as pd
 
 from .base import SerializableDotDict
-from .color_palettes import ColorPalettes, Colors
+from .colors import ColorPalettes, PrimaryColors, SecondaryColors, TintsAndShades
 from .configurations import ClassConfig
+from .fonts import FontFamily, FontFamilyURL
 
 logger = logging.getLogger(__name__)
 
 try:
     import pyspark
 except ImportError:
-    pyspark = None  # type: ignore
+    pyspark = None
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )

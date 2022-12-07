@@ -62,7 +62,7 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
 
     if DataContext.does_config_exist_on_disk(ge_dir):
         message = (
-            f"""Warning. An existing `{DataContext.GE_YML}` was found here: {ge_dir}."""
+            f"""Warning. An existing `{DataContext.GX_YML}` was found here: {ge_dir}."""
         )
         warnings.warn(message)
         try:
@@ -105,7 +105,7 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
             )
             send_usage_message(
                 data_context=context,
-                event=UsageStatsEvents.CLI_INIT_CREATE.value,
+                event=UsageStatsEvents.CLI_INIT_CREATE,
                 success=True,
             )
         except DataContextError as e:
@@ -119,4 +119,4 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
 
 
 def _get_full_path_to_ge_dir(target_directory: str) -> str:
-    return os.path.abspath(os.path.join(target_directory, DataContext.GE_DIR))
+    return os.path.abspath(os.path.join(target_directory, DataContext.GX_DIR))

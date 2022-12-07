@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import enum
@@ -27,10 +29,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.core.util import (
-    convert_to_json_serializable,
-    get_datetime_string_from_strftime_format,
-)
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable
@@ -38,7 +37,7 @@ from great_expectations.util import deep_filter_properties_iterable
 try:
     from pyspark.sql.types import StructType
 except ImportError:
-    StructType = None  # type: ignore
+    StructType = None
 
 if TYPE_CHECKING:
     from io import TextIOWrapper
@@ -51,8 +50,8 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-CURRENT_GE_CONFIG_VERSION = 3
-FIRST_GE_CONFIG_VERSION_WITH_CHECKPOINT_STORE = 3
+CURRENT_GX_CONFIG_VERSION = 3
+FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE = 3
 CURRENT_CHECKPOINT_CONFIG_VERSION = 1
 MINIMUM_SUPPORTED_CONFIG_VERSION = 2
 DEFAULT_USAGE_STATISTICS_URL = (
@@ -60,7 +59,7 @@ DEFAULT_USAGE_STATISTICS_URL = (
 )
 
 
-def object_to_yaml_str(obj):  # type: ignore[no-untyped-def]
+def object_to_yaml_str(obj):
     output_str: str
     with StringIO() as string_stream:
         yaml.dump(obj, string_stream)
@@ -107,7 +106,7 @@ class BaseYamlConfig(SerializableDictDot):
     @classmethod
     def from_commented_map(
         cls, commented_map: Union[CommentedMap, Dict]
-    ) -> "BaseYamlConfig":
+    ) -> BaseYamlConfig:
         try:
             schema_instance: Schema = cls._get_schema_instance()
             config: Union[dict, BaseYamlConfig] = schema_instance.load(commented_map)
@@ -151,16 +150,134 @@ class BaseYamlConfig(SerializableDictDot):
         return self._get_schema_validated_updated_commented_map()
 
     @classmethod
-    def get_config_class(cls):  # type: ignore[no-untyped-def]
+    def get_config_class(cls):
         raise NotImplementedError
 
     @classmethod
-    def get_schema_class(cls):  # type: ignore[no-untyped-def]
+    def get_schema_class(cls):
         raise NotImplementedError
 
 
-class AssetConfig(SerializableDictDot):
+class SorterConfig(DictDot):
     def __init__(
+        self,
+        name,
+        class_name=None,
+        module_name=None,
+        orderby="asc",
+        reference_list=None,
+        order_keys_by=None,
+        key_reference_list=None,
+        datetime_format=None,
+        **kwargs,
+    ) -> None:
+        self._name = name
+        self._class_name = class_name
+        self._module_name = module_name
+        self._orderby = orderby
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+        if reference_list is not None:
+            self._reference_list = reference_list
+
+        if order_keys_by is not None:
+            self._order_keys_by = order_keys_by
+
+        if key_reference_list is not None:
+            self._key_reference_list = key_reference_list
+
+        if datetime_format is not None:
+            self._datetime_format = datetime_format
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def module_name(self):
+        return self._module_name
+
+    @property
+    def class_name(self):
+        return self._class_name
+
+    @property
+    def orderby(self):
+        return self._orderby
+
+    @property
+    def reference_list(self):
+        return self._reference_list
+
+    @property
+    def order_keys_by(self):
+        return self._order_keys_by
+
+    @property
+    def key_reference_list(self):
+        return self._key_reference_list
+
+    @property
+    def datetime_format(self):
+        return self._datetime_format
+
+
+class SorterConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    name = fields.String(required=True)
+    class_name = fields.String(
+        required=True,
+        allow_none=False,
+    )
+    module_name = fields.String(
+        required=False,
+        allow_none=True,
+        missing="great_expectations.datasource.data_connector.sorter",
+    )
+    orderby = fields.String(
+        required=False,
+        allow_none=True,
+        missing="asc",
+    )
+
+    # allow_none = True because it is only used by some Sorters
+    reference_list = fields.List(
+        cls_or_instance=fields.Str(),
+        required=False,
+        missing=None,
+        allow_none=True,
+    )
+    order_keys_by = fields.String(
+        required=False,
+        allow_none=True,
+    )
+    key_reference_list = fields.List(
+        cls_or_instance=fields.Str(),
+        required=False,
+        missing=None,
+        allow_none=True,
+    )
+    datetime_format = fields.String(
+        required=False,
+        missing=None,
+        allow_none=True,
+    )
+
+    @validates_schema
+    def validate_schema(self, data, **kwargs) -> None:
+        pass
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_sorter_config(self, data, **kwargs):
+        return SorterConfig(**data)
+
+
+class AssetConfig(SerializableDictDot):
+    def __init__(  # noqa: C901 - complexity 16
         self,
         name: Optional[str] = None,
         class_name: Optional[str] = None,
@@ -174,6 +291,7 @@ class AssetConfig(SerializableDictDot):
         batch_identifiers: Optional[List[str]] = None,
         splitter_method: Optional[str] = None,
         splitter_kwargs: Optional[Dict[str, str]] = None,
+        sorters: Optional[dict] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[Dict[str, str]] = None,
         reader_options: Optional[Dict[str, Any]] = None,
@@ -201,6 +319,8 @@ class AssetConfig(SerializableDictDot):
             self.splitter_method = splitter_method
         if splitter_kwargs is not None:
             self.splitter_kwargs = splitter_kwargs
+        if sorters is not None:
+            self.sorters = sorters
         if sampling_method is not None:
             self.sampling_method = sampling_method
         if sampling_kwargs is not None:
@@ -259,6 +379,20 @@ class AssetConfigSchema(Schema):
     schema_name = fields.String(required=False, allow_none=True)
     batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
 
+    """
+    Necessary addition for AWS Glue Data Catalog assets.
+    By using AWS Glue Data Catalog, we need to have both database and table names.
+    The partitions are optional, it must match the partitions defined in the table
+    and it is used to create batch identifiers that allows the validation of a single
+    partition. Example: if we have two partitions (year, month), specifying these would
+    create one batch id per combination of year and month. The connector gets the partition
+    values from the AWS Glue Data Catalog.
+    """
+    database_name = fields.String(required=False, allow_none=True)
+    partitions = fields.List(
+        cls_or_instance=fields.Str(), required=False, allow_none=True
+    )
+
     # Necessary addition for Cloud assets
     table_name = fields.String(required=False, allow_none=True)
     type = fields.String(required=False, allow_none=True)
@@ -272,13 +406,20 @@ class AssetConfigSchema(Schema):
     include_schema_name = fields.Boolean(required=False, allow_none=True)
     splitter_method = fields.String(required=False, allow_none=True)
     splitter_kwargs = fields.Dict(required=False, allow_none=True)
+    sorters = fields.List(
+        cls_or_instance=fields.Nested(
+            SorterConfigSchema, required=False, allow_none=True
+        ),
+        required=False,
+        allow_none=True,
+    )
     sampling_method = fields.String(required=False, allow_none=True)
     sampling_kwargs = fields.Dict(required=False, allow_none=True)
 
     reader_options = fields.Dict(keys=fields.Str(), required=False, allow_none=True)
 
     @validates_schema
-    def validate_schema(self, data, **kwargs) -> None:  # type: ignore[no-untyped-def]
+    def validate_schema(self, data, **kwargs) -> None:
         pass
 
     @pre_dump
@@ -304,100 +445,8 @@ class AssetConfigSchema(Schema):
 
     # noinspection PyUnusedLocal
     @post_load
-    def make_asset_config(self, data, **kwargs):  # type: ignore[no-untyped-def]
+    def make_asset_config(self, data, **kwargs):
         return AssetConfig(**data)
-
-
-class SorterConfig(DictDot):
-    def __init__(  # type: ignore[no-untyped-def]
-        self,
-        name,
-        class_name=None,
-        module_name=None,
-        orderby="asc",
-        reference_list=None,
-        datetime_format=None,
-        **kwargs,
-    ) -> None:
-        self._name = name
-        self._class_name = class_name
-        self._module_name = module_name
-        self._orderby = orderby
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
-        if reference_list is not None:
-            self._reference_list = reference_list
-
-        if datetime_format is not None:
-            self._datetime_format = datetime_format
-
-    @property
-    def name(self):  # type: ignore[no-untyped-def]
-        return self._name
-
-    @property
-    def module_name(self):  # type: ignore[no-untyped-def]
-        return self._module_name
-
-    @property
-    def class_name(self):  # type: ignore[no-untyped-def]
-        return self._class_name
-
-    @property
-    def orderby(self):  # type: ignore[no-untyped-def]
-        return self._orderby
-
-    @property
-    def reference_list(self):  # type: ignore[no-untyped-def]
-        return self._reference_list
-
-    @property
-    def datetime_format(self):  # type: ignore[no-untyped-def]
-        return self._datetime_format
-
-
-class SorterConfigSchema(Schema):
-    class Meta:
-        unknown = INCLUDE
-
-    name = fields.String(required=True)
-    class_name = fields.String(
-        required=True,
-        allow_none=False,
-    )
-    module_name = fields.String(
-        required=False,
-        allow_none=True,
-        missing="great_expectations.datasource.data_connector.sorter",
-    )
-    orderby = fields.String(
-        required=False,
-        allow_none=True,
-        missing="asc",
-    )
-
-    # allow_none = True because it is only used by some Sorters
-    reference_list = fields.List(
-        cls_or_instance=fields.Str(),
-        required=False,
-        missing=None,
-        allow_none=True,
-    )
-    datetime_format = fields.String(
-        required=False,
-        missing=None,
-        allow_none=True,
-    )
-
-    @validates_schema
-    def validate_schema(self, data, **kwargs) -> None:
-        pass
-
-    # noinspection PyUnusedLocal
-    @post_load
-    def make_sorter_config(self, data, **kwargs):
-        return SorterConfig(**data)
 
 
 class DataConnectorConfig(AbstractConfig):
@@ -413,7 +462,6 @@ class DataConnectorConfig(AbstractConfig):
         glob_directive=None,
         default_regex=None,
         batch_identifiers=None,
-        sorters=None,
         # S3
         boto3_options=None,
         bucket=None,
@@ -434,6 +482,7 @@ class DataConnectorConfig(AbstractConfig):
         include_schema_name=None,
         splitter_method=None,
         splitter_kwargs=None,
+        sorters=None,
         sampling_method=None,
         sampling_kwargs=None,
         excluded_tables=None,
@@ -457,8 +506,6 @@ class DataConnectorConfig(AbstractConfig):
             self.default_regex = default_regex
         if batch_identifiers is not None:
             self.batch_identifiers = batch_identifiers
-        if sorters is not None:
-            self.sorters = sorters
         if data_asset_name_prefix is not None:
             self.data_asset_name_prefix = data_asset_name_prefix
         if data_asset_name_suffix is not None:
@@ -469,6 +516,8 @@ class DataConnectorConfig(AbstractConfig):
             self.splitter_method = splitter_method
         if splitter_kwargs is not None:
             self.splitter_kwargs = splitter_kwargs
+        if sorters is not None:
+            self.sorters = sorters
         if sampling_method is not None:
             self.sampling_method = sampling_method
         if sampling_kwargs is not None:
@@ -574,11 +623,6 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
 
     base_directory = fields.String(required=False, allow_none=True)
     glob_directive = fields.String(required=False, allow_none=True)
-    sorters = fields.List(
-        fields.Nested(SorterConfigSchema, required=False, allow_none=True),
-        required=False,
-        allow_none=True,
-    )
     default_regex = fields.Dict(required=False, allow_none=True)
     credentials = fields.Raw(required=False, allow_none=True)
     batch_identifiers = fields.List(
@@ -617,6 +661,13 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     include_schema_name = fields.Boolean(required=False, allow_none=True)
     splitter_method = fields.String(required=False, allow_none=True)
     splitter_kwargs = fields.Dict(required=False, allow_none=True)
+    sorters = fields.List(
+        cls_or_instance=fields.Nested(
+            SorterConfigSchema, required=False, allow_none=True
+        ),
+        required=False,
+        allow_none=True,
+    )
     sampling_method = fields.String(required=False, allow_none=True)
     sampling_kwargs = fields.Dict(required=False, allow_none=True)
 
@@ -630,9 +681,16 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     introspection_directives = fields.Dict(required=False, allow_none=True)
     batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
 
+    # AWS Glue Data Catalog
+    glue_introspection_directives = fields.Dict(required=False, allow_none=True)
+    catalog_id = fields.String(required=False, allow_none=True)
+    partitions = fields.List(
+        cls_or_instance=fields.Str(), required=False, allow_none=True
+    )
+
     # noinspection PyUnusedLocal
-    @validates_schema
-    def validate_schema(self, data, **kwargs):
+    @validates_schema  # noqa: C901
+    def validate_schema(self, data, **kwargs):  # noqa: C901 - complexity 16
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
         if data["class_name"][0] == "$":
             return
@@ -770,15 +828,11 @@ data connector. You must only select one between `filename` (from_service_accoun
 """
                 )
         if (
-            "data_asset_name_prefix" in data
-            or "data_asset_name_suffix" in data
-            or "include_schema_name" in data
+            "include_schema_name" in data
             or "splitter_method" in data
             or "splitter_kwargs" in data
             or "sampling_method" in data
             or "sampling_kwargs" in data
-            or "excluded_tables" in data
-            or "included_tables" in data
             or "skip_inapplicable_tables" in data
         ) and not (
             data["class_name"]
@@ -790,6 +844,44 @@ data connector. You must only select one between `filename` (from_service_accoun
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
 SQL type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
+continue.
+                """
+            )
+        if (
+            "data_asset_name_prefix" in data
+            or "data_asset_name_suffix" in data
+            or "excluded_tables" in data
+            or "included_tables" in data
+        ) and not (
+            data["class_name"]
+            in [
+                "InferredAssetSqlDataConnector",
+                "ConfiguredAssetSqlDataConnector",
+                "InferredAssetAWSGlueDataCatalogDataConnector",
+                "ConfiguredAssetAWSGlueDataCatalogDataConnector",
+            ]
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector that are required only by an
+SQL/GlueCatalog type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
+continue.
+                """
+            )
+
+        if (
+            "partitions" in data
+            or "catalog_id" in data
+            or "glue_introspection_directives" in data
+        ) and not (
+            data["class_name"]
+            in [
+                "InferredAssetAWSGlueDataCatalogDataConnector",
+                "ConfiguredAssetAWSGlueDataCatalogDataConnector",
+            ]
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector that are required only by an
+GlueCatalog type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
                 """
             )
@@ -884,7 +976,7 @@ class ExecutionEngineConfigSchema(Schema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        missing="great_expectations.execution_engine",
+        load_default="great_expectations.execution_engine",
     )
     connection_string = fields.String(required=False, allow_none=True)
     credentials = fields.Raw(required=False, allow_none=True)
@@ -904,6 +996,8 @@ class ExecutionEngineConfigSchema(Schema):
     # BigQuery Service Account Credentials
     # https://googleapis.dev/python/sqlalchemy-bigquery/latest/README.html#connection-string-parameters
     credentials_info = fields.Dict(required=False, allow_none=True)
+
+    create_temp_table = fields.Boolean(required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
     @validates_schema
@@ -1112,7 +1206,7 @@ class DatasourceConfigSchema(AbstractConfigSchema):
         if "generators" in data:
             raise ge_exceptions.InvalidConfigError(
                 'Your current configuration uses the "generators" key in a datasource, but in version 0.10 of '
-                'GE that key is renamed to "batch_kwargs_generators". Please update your configuration to continue.'
+                'GX that key is renamed to "batch_kwargs_generators". Please update your configuration to continue.'
             )
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
         if data["class_name"][0] == "$":
@@ -1446,41 +1540,20 @@ class ConcurrencyConfigSchema(Schema):
     enabled = fields.Boolean(default=False)
 
 
-class GeCloudConfig(DictDot):
-    # TODO: deprecate account_id arg
+class GXCloudConfig(DictDot):
     def __init__(
         self,
         base_url: str,
-        account_id: str = None,
-        access_token: str = None,
-        organization_id: str = None,
+        access_token: Optional[str] = None,
+        organization_id: Optional[str] = None,
     ) -> None:
-        # access_token was given a default value to maintain arg position of account_id
+        # access_token was given a default value to maintain arg position of organization_id
         if access_token is None:
             raise ValueError("Access token cannot be None.")
-        # exclusive or
-        if not (bool(account_id) ^ bool(organization_id)):
-            raise ValueError(
-                "Must provide either (and only) account_id or organization_id."
-            )
-        if account_id is not None:
-            logger.warning(
-                'The "account_id" argument has been renamed "organization_id" and will be deprecated in '
-                "the next major release."
-            )
 
         self.base_url = base_url
-        self.organization_id = organization_id or account_id
+        self.organization_id = organization_id
         self.access_token = access_token
-
-    # TODO: remove property when account_id is deprecated
-    @property
-    def account_id(self):
-        logger.warning(
-            'The "account_id" attribute has been renamed to "organization_id" and will be deprecated in '
-            "the next major release."
-        )
-        return self.organization_id
 
     def to_json_dict(self):
         # postpone importing to avoid circular imports
@@ -1490,7 +1563,6 @@ class GeCloudConfig(DictDot):
             "base_url": self.base_url,
             "organization_id": self.organization_id,
             "access_token": PasswordMasker.MASKED_PASSWORD_STRING,
-            "account_id": self.account_id,  # TODO: remove when account_id is deprecated
         }
 
 
@@ -1548,7 +1620,7 @@ class DataContextConfigSchema(Schema):
                 data.pop(key)
         return data
 
-    def handle_error(self, exc, data, **kwargs) -> None:  # type: ignore[override]
+    def handle_error(self, exc, data, **kwargs) -> None:
         """Log and raise our custom exception when (de)serialization fails."""
         if (
             exc
@@ -1600,15 +1672,15 @@ class DataContextConfigSchema(Schema):
                 ),
             )
 
-        if data["config_version"] > CURRENT_GE_CONFIG_VERSION:
+        if data["config_version"] > CURRENT_GX_CONFIG_VERSION:
             raise ge_exceptions.InvalidDataContextConfigError(
                 "You appear to have an invalid config version ({}).\n    The maximum valid version is {}.".format(
-                    data["config_version"], CURRENT_GE_CONFIG_VERSION
+                    data["config_version"], CURRENT_GX_CONFIG_VERSION
                 ),
                 validation_error=ValidationError(message="config version too high"),
             )
 
-        if data["config_version"] < CURRENT_GE_CONFIG_VERSION and (
+        if data["config_version"] < CURRENT_GX_CONFIG_VERSION and (
             "checkpoint_store_name" in data
             or any(
                 [
@@ -1619,17 +1691,17 @@ class DataContextConfigSchema(Schema):
         ):
             raise ge_exceptions.InvalidDataContextConfigError(
                 "You appear to be using a Checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a Checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a Checkpoint store.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.".format(
-                    data["config_version"], float(CURRENT_GE_CONFIG_VERSION)
+                    data["config_version"], float(CURRENT_GX_CONFIG_VERSION)
                 ),
                 validation_error=ValidationError(
                     message="You appear to be using a Checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a Checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a Checkpoint store.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.".format(
-                        data["config_version"], float(CURRENT_GE_CONFIG_VERSION)
+                        data["config_version"], float(CURRENT_GX_CONFIG_VERSION)
                     )
                 ),
             )
 
         if (
-            data["config_version"] >= FIRST_GE_CONFIG_VERSION_WITH_CHECKPOINT_STORE
+            data["config_version"] >= FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE
             and "validation_operators" in data
             and data["validation_operators"] is not None
         ):
@@ -1638,14 +1710,14 @@ class DataContextConfigSchema(Schema):
 ({data["config_version"]}).\n    Your data context with this configuration version uses validation_operators, which \
 are being deprecated.  Please consult the V3 API migration guide \
 https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and \
-update your configuration to be compatible with the version number {CURRENT_GE_CONFIG_VERSION}.\n    (This message \
+update your configuration to be compatible with the version number {CURRENT_GX_CONFIG_VERSION}.\n    (This message \
 will appear repeatedly until your configuration is updated.)
 """
             )
 
 
 class DataContextConfigDefaults(enum.Enum):
-    DEFAULT_CONFIG_VERSION = CURRENT_GE_CONFIG_VERSION
+    DEFAULT_CONFIG_VERSION = CURRENT_GX_CONFIG_VERSION
     DEFAULT_EXPECTATIONS_STORE_NAME = "expectations_store"
     EXPECTATIONS_BASE_DIRECTORY = "expectations"
     DEFAULT_EXPECTATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
@@ -1765,9 +1837,9 @@ class BaseStoreBackendDefaults(DictDot):
         checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
         profiler_store_name: str = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
         data_docs_site_name: str = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value,
-        validation_operators: dict = None,
-        stores: dict = None,
-        data_docs_sites: dict = None,
+        validation_operators: Optional[dict] = None,
+        stores: Optional[dict] = None,
+        data_docs_sites: Optional[dict] = None,
     ) -> None:
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
@@ -2305,11 +2377,11 @@ class DataContextConfig(BaseYamlConfig):
 
     # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
     @classmethod
-    def get_config_class(cls):  # type: ignore[no-untyped-def]
+    def get_config_class(cls):
         return cls  # DataContextConfig
 
     @classmethod
-    def get_schema_class(cls):  # type: ignore[no-untyped-def]
+    def get_schema_class(cls):
         return DataContextConfigSchema
 
     @property
@@ -2388,7 +2460,7 @@ class CheckpointValidationConfigSchema(AbstractConfigSchema):
 
     id = fields.String(required=False, allow_none=False)
 
-    def dump(self, obj: dict, *, many: Optional[bool] = None) -> dict:  # type: ignore[override]
+    def dump(self, obj: dict, *, many: Optional[bool] = None) -> dict:
         """
         Chetan - 20220803 - By design, Marshmallow accepts unknown fields through the
         `unknown = INCLUDE` directive but only upon load. When dumping, it validates
@@ -2623,11 +2695,11 @@ class CheckpointConfig(BaseYamlConfig):
 
     # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
     @classmethod
-    def get_config_class(cls):  # type: ignore[no-untyped-def]
+    def get_config_class(cls):
         return cls  # CheckpointConfig
 
     @classmethod
-    def get_schema_class(cls):  # type: ignore[no-untyped-def]
+    def get_schema_class(cls):
         return CheckpointConfigSchema
 
     @property
@@ -2940,9 +3012,8 @@ class CheckpointConfig(BaseYamlConfig):
             )
 
         if run_name is None and run_name_template is not None:
-            run_name = get_datetime_string_from_strftime_format(
-                format_str=run_name_template, datetime_obj=run_time  # type: ignore[arg-type]
-            )
+            if isinstance(run_time, datetime.datetime):
+                run_name = run_time.strftime(run_name_template)
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 

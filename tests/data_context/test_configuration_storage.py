@@ -4,7 +4,7 @@ import shutil
 
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.data_context.util import file_relative_path
 
 logger = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ def data_context_parameterized_expectation_suite_with_usage_statistics_enabled(
         os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
         str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
     )
-    return ge.data_context.DataContext(context_path)
+    return gx.data_context.DataContext(context_path)
 
 
 def test_preserve_comments_in_yml_after_adding_datasource(

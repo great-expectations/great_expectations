@@ -12,9 +12,9 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
-from great_expectations.render.renderer.renderer import Renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
     CollapseContent,
+    LegacyDiagnosticRendererType,
     RenderedComponentContent,
     RenderedDocumentContent,
     RenderedHeaderContent,
@@ -24,6 +24,7 @@ from great_expectations.render.types import (
     RenderedTableContent,
     TextContent,
 )
+from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.util import num_to_str
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
@@ -319,7 +320,7 @@ class ValidationResultsPageRenderer(Renderer):
                 "dimension": "properties.dimension",
                 "severity": "properties.severity"
             },
-            "format": "renderer.diagnostic.meta_properties"
+            "format": LegacyDiagnosticRendererType.META_PROPERTIES
         }
         expectation level
         {
@@ -346,7 +347,8 @@ class ValidationResultsPageRenderer(Renderer):
             suite_meta is not None
             and "notes" in suite_meta
             and "format" in suite_meta["notes"]
-            and suite_meta["notes"]["format"] == "renderer.diagnostic.meta_properties"
+            and suite_meta["notes"]["format"]
+            == LegacyDiagnosticRendererType.META_PROPERTIES
         ):
             return suite_meta["notes"]["content"]
         else:

@@ -58,12 +58,20 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         column: sa_sql_expression_ColumnClause = sa.column(column_name)
         sqlalchemy_engine = execution_engine.engine
 
-        distinct_values: List[sqlalchemy_engine_Engine] = sqlalchemy_engine.execute(
-            sa.select([column])
-            .where(column.is_not(None))
-            .distinct()
-            .select_from(selectable)
-        ).fetchall()
+        if hasattr(column, "is_not"):
+            distinct_values: List[sqlalchemy_engine_Engine] = sqlalchemy_engine.execute(
+                sa.select([column])
+                .where(column.is_not(None))
+                .distinct()
+                .select_from(selectable)
+            ).fetchall()
+        else:
+            distinct_values: List[sqlalchemy_engine_Engine] = sqlalchemy_engine.execute(
+                sa.select([column])
+                .where(column.isnot(None))
+                .distinct()
+                .select_from(selectable)
+            ).fetchall()
         # Vectorized operation is not faster here due to overhead of converting to and from numpy array
         return {row[0] for row in distinct_values}
 
@@ -86,7 +94,8 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         )
         column_name: str = accessor_domain_kwargs["column"]
         distinct_values: List[pyspark_sql_Row] = (
-            df.distinct()
+            df.select(F.col(column_name))
+            .distinct()
             .where(F.col(column_name).isNotNull())
             .rdd.flatMap(lambda x: x)
             .collect()

@@ -1,18 +1,21 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from great_expectations.datasource.data_connector.configured_asset_sql_data_connector import (
     ConfiguredAssetSqlDataConnector,
 )
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.util import deep_filter_properties_iterable
 
 try:
     import sqlalchemy as sa
     from sqlalchemy.engine import Engine
+    from sqlalchemy.engine.reflection import Inspector
     from sqlalchemy.exc import OperationalError
 except ImportError:
     sa = None
     Engine = None
+    Inspector = None
     OperationalError = None
 
 
@@ -67,8 +70,6 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             name=name,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
-            data_asset_name_prefix=data_asset_name_prefix,
-            data_asset_name_suffix=data_asset_name_suffix,
             include_schema_name=include_schema_name,
             splitter_method=splitter_method,
             splitter_kwargs=splitter_kwargs,
@@ -78,6 +79,9 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             batch_spec_passthrough=batch_spec_passthrough,
             id=id,
         )
+
+        self._data_asset_name_prefix = data_asset_name_prefix
+        self._data_asset_name_suffix = data_asset_name_suffix
 
         self._excluded_tables = excluded_tables
         self._included_tables = included_tables
@@ -92,6 +96,14 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         # Note: We should probably turn them into AssetConfig objects
 
         self._refresh_introspected_assets_cache()
+
+    @property
+    def data_asset_name_prefix(self) -> str:
+        return self._data_asset_name_prefix
+
+    @property
+    def data_asset_name_suffix(self) -> str:
+        return self._data_asset_name_suffix
 
     def _refresh_data_references_cache(self) -> None:
         self._refresh_introspected_assets_cache()
@@ -117,14 +129,17 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             ):
                 continue
 
+            schema_name: str = metadata["schema_name"]
             table_name: str = metadata["table_name"]
 
             data_asset_config: dict = deep_filter_properties_iterable(
                 properties={
                     "type": metadata["type"],
                     "table_name": table_name,
+                    "data_asset_name_prefix": self.data_asset_name_prefix,
+                    "data_asset_name_suffix": self.data_asset_name_suffix,
                     "include_schema_name": self.include_schema_name,
-                    "schema_name": metadata["schema_name"],
+                    "schema_name": schema_name,
                     "splitter_method": self.splitter_method,
                     "splitter_kwargs": self.splitter_kwargs,
                     "sampling_method": self.sampling_method,
@@ -154,13 +169,12 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                     ) from e
 
             # Store an asset config for each introspected data asset.
-            introspected_assets[table_name] = data_asset_config
-
-        self._refresh_data_assets_cache(assets=introspected_assets)
+            introspected_assets[data_asset_name] = data_asset_config
+            self.add_data_asset(name=table_name, config=data_asset_config)
 
     def _introspect_db(  # noqa: C901 - 16
         self,
-        schema_name: str = None,
+        schema_name: Union[str, None] = None,
         ignore_information_schemas_and_system_tables: bool = True,
         information_schemas: Optional[List[str]] = None,
         system_tables: Optional[List[str]] = None,
@@ -179,12 +193,13 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             system_tables = ["sqlite_master"]  # sqlite
 
         engine: Engine = self.execution_engine.engine
-        inspector = sa.inspect(engine)
+        inspector: Inspector = sa.inspect(engine)
 
         selected_schema_name = schema_name
 
         tables: List[Dict[str, str]] = []
-        for schema_name in inspector.get_schema_names():
+        schema_names: List[str] = inspector.get_schema_names()
+        for schema_name in schema_names:
             if (
                 ignore_information_schemas_and_system_tables
                 and schema_name in information_schemas
@@ -194,7 +209,8 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             if selected_schema_name is not None and schema_name != selected_schema_name:
                 continue
 
-            for table_name in inspector.get_table_names(schema=schema_name):
+            table_names: List[str] = inspector.get_table_names(schema=schema_name)
+            for table_name in table_names:
                 if ignore_information_schemas_and_system_tables and (
                     table_name in system_tables
                 ):
@@ -235,7 +251,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         # The following code fetches the names of external schemas and tables from a special table
         # 'svv_external_tables'.
         try:
-            if "redshift" == engine.dialect.name.lower():
+            if engine.dialect.name.lower() == GXSqlDialect.REDSHIFT:
                 # noinspection SqlDialectInspection,SqlNoDataSourceInspection
                 result = engine.execute(
                     "select schemaname, tablename from svv_external_tables"

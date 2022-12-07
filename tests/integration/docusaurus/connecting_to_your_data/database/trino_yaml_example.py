@@ -1,6 +1,6 @@
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
 CONNECTION_STRING = "trino://test@localhost:8088/memory/schema"
@@ -14,7 +14,7 @@ load_data_into_test_database(
     connection_string=CONNECTION_STRING,
 )
 
-context = ge.get_context()
+context = gx.get_context()
 
 datasource_yaml = r"""
 name: my_trino_datasource
@@ -60,13 +60,13 @@ validator = context.get_validator(
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 
 # Here is a BatchRequest naming a table
 batch_request = BatchRequest(
     datasource_name="my_trino_datasource",
     data_connector_name="default_inferred_data_connector_name",
-    data_asset_name="taxi_data",  # this is the name of the table you want to retrieve
+    data_asset_name="schema.taxi_data",  # this is the name of the table you want to retrieve
 )
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
@@ -77,9 +77,9 @@ validator = context.get_validator(
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_trino_datasource"]
-assert "taxi_data" in set(
+assert "schema.taxi_data" in set(
     context.get_available_data_asset_names()["my_trino_datasource"][
         "default_inferred_data_connector_name"
     ]

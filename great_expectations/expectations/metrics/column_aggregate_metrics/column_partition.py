@@ -30,10 +30,10 @@ class ColumnPartition(ColumnAggregateMetricProvider):
     def _pandas(
         cls,
         execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         bins = metric_value_kwargs.get("bins", cls.default_kwarg_values["bins"])
         n_bins = metric_value_kwargs.get("n_bins", cls.default_kwarg_values["n_bins"])
@@ -45,10 +45,10 @@ class ColumnPartition(ColumnAggregateMetricProvider):
     def _sqlalchemy(
         cls,
         execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         bins = metric_value_kwargs.get("bins", cls.default_kwarg_values["bins"])
         n_bins = metric_value_kwargs.get("n_bins", cls.default_kwarg_values["n_bins"])
@@ -60,10 +60,10 @@ class ColumnPartition(ColumnAggregateMetricProvider):
     def _spark(
         cls,
         execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         bins = metric_value_kwargs.get("bins", cls.default_kwarg_values["bins"])
         n_bins = metric_value_kwargs.get("n_bins", cls.default_kwarg_values["n_bins"])
@@ -221,7 +221,7 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
 
 def _determine_bins_using_proper_units(
     ndarray_is_datetime_type: bool, n_bins: int, min_: Any, max_: Any
-) -> List[Any]:
+) -> Optional[List[Any]]:
     if ndarray_is_datetime_type:
         if n_bins == 0:
             bins = [min_]
@@ -234,6 +234,9 @@ def _determine_bins_using_proper_units(
         # PRECISION NOTE: some implementations of quantiles could produce
         # varying levels of precision (e.g. a NUMERIC column producing
         # Decimal from a SQLAlchemy source, so we cast to float for numpy)
+        if min_ is None or max_ is None:
+            return None
+
         bins = np.linspace(start=float(min_), stop=float(max_), num=n_bins + 1).tolist()
 
     return bins

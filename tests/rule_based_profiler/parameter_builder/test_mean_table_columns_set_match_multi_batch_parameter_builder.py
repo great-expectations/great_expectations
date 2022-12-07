@@ -1,8 +1,10 @@
 from typing import Dict, Optional
 
+import pytest
+
 from great_expectations import DataContext
+from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -18,6 +20,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 
+@pytest.mark.integration
 def test_instantiation_mean_table_columns_set_match_multi_batch_parameter_builder(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -34,6 +37,7 @@ def test_instantiation_mean_table_columns_set_match_multi_batch_parameter_builde
     )
 
 
+@pytest.mark.integration
 def test_execution_mean_table_columns_set_match_multi_batch_parameter_builder(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -70,7 +74,7 @@ def test_execution_mean_table_columns_set_match_multi_batch_parameter_builder(
         domain.id: parameter_container,
     }
 
-    expected_parameter_value: dict = {
+    expected_parameter_node_as_dict: dict = {
         "value": {
             "VendorID",
             "pickup_datetime",
@@ -112,10 +116,10 @@ def test_execution_mean_table_columns_set_match_multi_batch_parameter_builder(
     )
 
     assert len(parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]) == len(
-        expected_parameter_value[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
+        expected_parameter_node_as_dict[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
     )
 
     parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY] = set(
         parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
     )
-    assert parameter_node == expected_parameter_value
+    assert parameter_node == expected_parameter_node_as_dict

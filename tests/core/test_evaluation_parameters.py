@@ -85,7 +85,7 @@ def test_parse_evaluation_parameter():
         == 9
     )
 
-    # Non GE URN syntax fails
+    # Non GX URN syntax fails
     with pytest.raises(EvaluationParameterError) as err:
         parse_evaluation_parameter("urn:ieee:not_ge * 10", {"urn:ieee:not_ge": 1})
     assert "Parse Failure" in str(err.value)
@@ -337,7 +337,9 @@ def test_evaluation_parameters_for_between_expectations_parse_correctly(
         batch_request=RuntimeBatchRequest(**batch_request),
         expectation_suite_name=expectation_suite_name,
     )
-    column_names = [f'"{column_name}"' for column_name in validator.columns()]
+    column_names = [
+        f'"{column_name}"' for column_name in validator.metrics_calculator.columns()
+    ]
     print(f"Columns: {', '.join(column_names)}.")
 
     validator.set_evaluation_parameter("my_min", 1)

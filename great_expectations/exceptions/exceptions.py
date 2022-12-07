@@ -2,7 +2,7 @@ import importlib
 import itertools
 import json
 from collections.abc import Iterable
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 from marshmallow import ValidationError
 
@@ -304,7 +304,10 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
 
 class ClassInstantiationError(GreatExpectationsError):
     def __init__(self, module_name, package_name, class_name) -> None:
-        module_spec = importlib.util.find_spec(module_name, package=package_name)  # type: ignore[attr-defined]
+        # noinspection PyUnresolvedReferences
+        module_spec: Optional[
+            importlib.machinery.ModuleSpec
+        ] = importlib.util.find_spec(module_name, package=package_name)
         if not module_spec:
             if not package_name:
                 package_name = ""
@@ -429,15 +432,21 @@ class MetricResolutionError(MetricError):
         self.failed_metrics = failed_metrics
 
 
-class GeCloudError(GreatExpectationsError):
+class GXCloudError(GreatExpectationsError):
     """
     Generic error used to provide additional context around Cloud-specific issues.
     """
 
-    pass
+
+class GXCloudConfigurationError(GreatExpectationsError):
+    """
+    Error finding and verifying the required configuration values when preparing to connect to GX Cloud
+    """
 
 
 class DatabaseConnectionError(GreatExpectationsError):
     """Error connecting to a database including during an integration test."""
 
-    pass
+
+class MigrationError(GreatExpectationsError):
+    """Error when using the migration tool."""

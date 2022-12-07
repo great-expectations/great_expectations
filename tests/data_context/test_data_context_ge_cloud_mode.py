@@ -1,124 +1,17 @@
 from unittest import mock
 
 import pytest
-from ruamel import yaml
 
 from great_expectations.data_context import BaseDataContext, DataContext
-from great_expectations.data_context.store import GeCloudStoreBackend
-from great_expectations.data_context.types.base import DataContextConfig
-from great_expectations.exceptions import DataContextError, GeCloudError
-
-
-@pytest.fixture
-def ge_cloud_data_context_config(
-    ge_cloud_runtime_base_url,
-    ge_cloud_runtime_organization_id,
-    ge_cloud_access_token,
-):
-    """
-    This fixture is used to replicate a response retrieved from a GE Cloud API request.
-    The resulting data is packaged into a DataContextConfig.
-
-    Please see DataContext._retrieve_data_context_config_from_ge_cloud for more details.
-    """
-    DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG = f"""
-    datasources:
-      default_spark_datasource:
-        execution_engine:
-          module_name: great_expectations.execution_engine
-          class_name: SparkDFExecutionEngine
-        module_name: great_expectations.datasource
-        class_name: Datasource
-        data_connectors:
-          default_runtime_data_connector:
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-                - timestamp
-      default_pandas_datasource:
-          execution_engine:
-            module_name: great_expectations.execution_engine
-            class_name: PandasExecutionEngine
-          module_name: great_expectations.datasource
-          class_name: Datasource
-          data_connectors:
-            default_runtime_data_connector:
-              class_name: RuntimeDataConnector
-              batch_identifiers:
-                - timestamp
-
-    stores:
-      default_evaluation_parameter_store:
-        class_name: EvaluationParameterStore
-
-      default_expectations_store:
-        class_name: ExpectationsStore
-        store_backend:
-          class_name: GeCloudStoreBackend
-          ge_cloud_base_url: {ge_cloud_runtime_base_url}
-          ge_cloud_resource_type: expectation_suite
-          ge_cloud_credentials:
-            access_token: {ge_cloud_access_token}
-            organization_id: {ge_cloud_runtime_organization_id}
-          suppress_store_backend_id: True
-
-      default_validations_store:
-        class_name: ValidationsStore
-        store_backend:
-          class_name: GeCloudStoreBackend
-          ge_cloud_base_url: {ge_cloud_runtime_base_url}
-          ge_cloud_resource_type: validation_result
-          ge_cloud_credentials:
-            access_token: {ge_cloud_access_token}
-            organization_id: {ge_cloud_runtime_organization_id}
-          suppress_store_backend_id: True
-
-      default_checkpoint_store:
-        class_name: CheckpointStore
-        store_backend:
-          class_name: GeCloudStoreBackend
-          ge_cloud_base_url: {ge_cloud_runtime_base_url}
-          ge_cloud_resource_type: checkpoint
-          ge_cloud_credentials:
-            access_token: {ge_cloud_access_token}
-            organization_id: {ge_cloud_runtime_organization_id}
-          suppress_store_backend_id: True
-
-    evaluation_parameter_store_name: default_evaluation_parameter_store
-    expectations_store_name: default_expectations_store
-    validations_store_name: default_validations_store
-    checkpoint_store_name: default_checkpoint_store
-
-    data_docs_sites:
-      default_site:
-        class_name: SiteBuilder
-        show_how_to_buttons: true
-        store_backend:
-          class_name: GeCloudStoreBackend
-          ge_cloud_base_url: {ge_cloud_runtime_base_url}
-          ge_cloud_resource_type: rendered_data_doc
-          ge_cloud_credentials:
-            access_token: {ge_cloud_access_token}
-            organization_id: {ge_cloud_runtime_organization_id}
-          suppress_store_backend_id: True
-        site_index_builder:
-          class_name: DefaultSiteIndexBuilder
-        site_section_builders:
-          profiling: None
-
-    anonymous_usage_statistics:
-      enabled: true
-      usage_statistics_url: https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
-      data_context_id: {ge_cloud_data_context_config}
-    """
-    config = yaml.load(DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG)
-    return DataContextConfig(**config)
+from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
+from great_expectations.exceptions import DataContextError, GXCloudError
 
 
 @pytest.mark.cloud
 def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_error():
     # Don't want to make a real request in a unit test so we simply patch the config fixture
     with mock.patch(
-        "great_expectations.data_context.DataContext._get_ge_cloud_config_dict",
+        "great_expectations.data_context.CloudDataContext._get_ge_cloud_config_dict",
         return_value={"base_url": None, "organization_id": None, "access_token": None},
     ):
         with pytest.raises(DataContextError):
@@ -166,7 +59,7 @@ def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_e
     # Ensure that the request fails
     mock_request.return_value.status_code = 401
 
-    with pytest.raises(GeCloudError):
+    with pytest.raises(GXCloudError):
         DataContext(
             ge_cloud_mode=True,
             ge_cloud_base_url=ge_cloud_runtime_base_url,
@@ -193,7 +86,7 @@ def test_data_context_in_cloud_mode_passes_base_url_to_store_backend(
     context: BaseDataContext = empty_base_data_context_in_cloud_mode_custom_base_url
 
     # Assertions that the context fixture is set up properly
-    assert not context.ge_cloud_config.base_url == GeCloudStoreBackend.DEFAULT_BASE_URL
+    assert not context.ge_cloud_config.base_url == CLOUD_DEFAULT_BASE_URL
     assert not context.ge_cloud_config.base_url == ge_cloud_base_url
     assert (
         not context.ge_cloud_config.base_url == "https://app.test.greatexpectations.io"
@@ -202,7 +95,7 @@ def test_data_context_in_cloud_mode_passes_base_url_to_store_backend(
     # The DatasourceStore should not have the default base_url or commonly used test base urls
     assert (
         not context._datasource_store.store_backend.config["ge_cloud_base_url"]
-        == GeCloudStoreBackend.DEFAULT_BASE_URL
+        == CLOUD_DEFAULT_BASE_URL
     )
     assert (
         not context._datasource_store.store_backend.config["ge_cloud_base_url"]

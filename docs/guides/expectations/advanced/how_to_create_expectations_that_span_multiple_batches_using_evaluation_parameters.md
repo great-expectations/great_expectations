@@ -24,8 +24,8 @@ In a notebook,
 ### 1. Import great_expectations and instantiate your Data Context
 
 ```python
-import great_expectations as ge
-context = ge.DataContext()
+import great_expectations as gx
+context = gx.DataContext()
 ```
 
 ### 2. Instantiate two Validators, one for each Data Asset
