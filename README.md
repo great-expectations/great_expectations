@@ -113,7 +113,7 @@ Great Expectations works with the tools and systems that you're already using wi
 	</thead>
 	<tbody>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/datahub_logo.webp" />
 			</td>
 			<td style="width: 200px;">
@@ -126,7 +126,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/aws-glue-logo__1_.webp" />
 			</td>
 			<td style="width: 200px;">
@@ -139,7 +139,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/Athena_logo.webp" />
 			</td>
 			<td style="width: 200px;">
@@ -152,7 +152,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/datasource_redshift.webp" />
 			</td>
 			<td style="width: 200px;">
@@ -165,7 +165,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/awss3.webp" />
 			</td>
 			<td style="width: 200px;">
@@ -178,7 +178,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/bigquery.webp" />
 			</td>
 			<td style="width: 200px;">
@@ -191,7 +191,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/og-databricks.webp" />
 			</td>
 			<td style="width: 200px;">
@@ -204,7 +204,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/deepnote_logo_400x.webp" />
 			</td>
 			<td style="width: 200px;">
@@ -217,7 +217,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/Google_Cloud_logo.png" />
 			</td>
 			<td style="width: 200px;">
@@ -230,7 +230,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/microsoft-azure-blob-storage-logo.png" />                         
 			</td>
 			<td style="width: 200px;">
@@ -243,7 +243,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/microsoft-sql-server-logo-96AF49E2B3-seeklogo.png" />                         
 			</td>
 			<td style="width: 200px;">
@@ -256,7 +256,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/mysql.png" />                         
 			</td>
 			<td style="width: 200px;">
@@ -269,7 +269,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/pandas.png" />                         
 			</td>
 			<td style="width: 200px;">
@@ -282,7 +282,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/postgres.png" />                         
 			</td>
 			<td style="width: 200px;">
@@ -295,7 +295,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/snowflake.png" />                         
 			</td>
 			<td style="width: 200px;">
@@ -308,7 +308,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/spark.png" />                         
 			</td>
 			<td style="width: 200px;">
@@ -321,7 +321,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/SQLite370.png" />                         
 			</td>
 			<td style="width: 200px;">
@@ -334,7 +334,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/trino-og.png" />                         
 			</td>
 			<td style="width: 200px;">
@@ -347,7 +347,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/Apache_Airflow.png" />                         
 			</td>
 			<td style="width: 200px;">
@@ -360,7 +360,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/flyte_logo.png" />                         
 			</td>
 			<td style="width: 200px;">
@@ -373,7 +373,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/meltano-logo.png" />                         
 			</td>
 			<td style="width: 200px;">
@@ -386,7 +386,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/prefect-logo-gradient-navy.png" />                         
 			</td>
 			<td style="width: 200px;">
@@ -399,7 +399,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/zenml.png" />                         
 			</td>
 			<td style="width: 200px;">
@@ -412,7 +412,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/slack.png" />
 			</td>
 			<td style="width: 200px;">
@@ -425,7 +425,7 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align: center; height: 40px;">
+			<td style="text-align: center; height: 40px; background-color: #fff;">
 				<img height="40" src="./readme_assets/jupyter.png" />
 			</td>
 			<td style="width: 200px;">
