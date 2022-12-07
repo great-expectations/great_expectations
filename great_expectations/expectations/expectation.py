@@ -1224,6 +1224,7 @@ class Expectation(metaclass=MetaExpectation):
         _debug("Getting test results")
         test_results: List[ExpectationTestDiagnostics] = self._get_test_results(
             expectation_type=description_diagnostics.snake_name,
+            context=context,
             test_data_cases=examples,
             execution_engine_diagnostics=introspected_execution_engines,
             raise_exceptions_for_backends=raise_exceptions_for_backends,
@@ -1231,7 +1232,6 @@ class Expectation(metaclass=MetaExpectation):
             ignore_only_for=ignore_only_for,
             debug_logger=debug_logger,
             only_consider_these_backends=only_consider_these_backends,
-            context=context,
         )
 
         backend_test_result_counts: List[
@@ -1525,6 +1525,7 @@ class Expectation(metaclass=MetaExpectation):
     def _get_test_results(
         cls,
         expectation_type: str,
+        context: DataContext,
         test_data_cases: List[ExpectationTestDataCases],
         execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
         raise_exceptions_for_backends: bool = False,
@@ -1532,7 +1533,6 @@ class Expectation(metaclass=MetaExpectation):
         ignore_only_for: bool = False,
         debug_logger: Optional[logging.Logger] = None,
         only_consider_these_backends: Optional[List[str]] = None,
-        context: Optional[DataContext] = None,
     ) -> List[ExpectationTestDiagnostics]:
         """Generate test results. This is an internal method for run_diagnostics."""
 
