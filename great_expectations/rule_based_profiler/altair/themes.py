@@ -32,14 +32,16 @@ title_dy = -10
 subtitle_color = PrimaryColors.COAL_GRAY
 subtitle_font = font
 subtitle_font_size = 14
-subtitle_font_weight = 700
+subtitle_font_weight = 500
 
 # Both Axes
 axis_title_color = PrimaryColors.COAL_GRAY
 axis_title_font_size = 14
+axis_title_font_weight = 500
 axis_title_padding = 10
 axis_label_color = PrimaryColors.COAL_GRAY
 axis_label_font_size = 12
+axis_label_font_weight = 500
 axis_label_flush = True
 axis_label_overlap_reduction = True
 
@@ -55,6 +57,7 @@ y_axis_title_x = -55
 # Legend
 legend_title_color = PrimaryColors.COAL_GRAY
 legend_title_font_size = 12
+legend_title_font_weight = 500
 
 # Scale
 scale_continuous_padding = 33
@@ -118,9 +121,11 @@ class AltairThemes(Enum):
         },
         "axis": {
             "titleFontSize": axis_title_font_size,
+            "titleFontWeight": axis_title_font_weight,
             "titleColor": axis_title_color,
             "titlePadding": axis_title_padding,
             "labelFontSize": axis_label_font_size,
+            "labelFontWeight": axis_label_font_weight,
             "labelColor": axis_label_color,
             "labelFlush": axis_label_flush,
             "labelOverlap": axis_label_overlap_reduction,
@@ -137,6 +142,7 @@ class AltairThemes(Enum):
         "legend": {
             "titleColor": legend_title_color,
             "titleFontSize": legend_title_font_size,
+            "titleFontWeight": legend_title_font_weight,
         },
         "range": {
             "category": category_color_scheme,

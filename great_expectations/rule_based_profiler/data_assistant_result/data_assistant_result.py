@@ -665,23 +665,24 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             dropdown_text_color: str = altair_theme["axis"]["labelColor"]
 
             font_family: str = altair_theme["font"]
-            font_family_url = FontFamilyURL[FontFamily(font_family).name].value
 
-            title_font_weight: int = altair_theme["title"]["fontWeight"]
-            subtitle_font_weight: int = altair_theme["title"]["subtitleFontWeight"]
-            url_font_weights: str = ";".join(
-                {str(title_font_weight), str(subtitle_font_weight)}
-            )
+            if font_family in FontFamily:
+                font_family_url = FontFamilyURL[FontFamily(font_family).name].value
 
-            font_url = f"{font_family_url}:wght@{url_font_weights}&display=swap"
-            print(font_url)
+                title_font_weight: int = altair_theme["title"]["fontWeight"]
+                subtitle_font_weight: int = altair_theme["title"]["subtitleFontWeight"]
+                url_font_weights: str = ";".join(
+                    {str(title_font_weight), str(subtitle_font_weight)}
+                )
 
-            font_css = f"""
-            <style>
-            @import url('{font_url}');
-            </style>
-            """
-            display(HTML(font_css))
+                font_url = f"{font_family_url}:wght@{url_font_weights}&display=swap"
+
+                font_css = f"""
+                <style>
+                @import url('{font_url}');
+                </style>
+                """
+                display(HTML(font_css))
 
             # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
             altair_dropdown_css: str = f"""
