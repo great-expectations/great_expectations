@@ -7,6 +7,9 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchIdError
+from great_expectations.experimental.datasources.interfaces import (
+    BatchRequest as XBatchRequest,
+)
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -530,7 +533,7 @@ BatchDataType = Union[BatchData, pd.DataFrame, SparkDataFrame]
 class Batch(SerializableDictDot):
     def __init__(
         self,
-        data: BatchDataType,
+        data: Optional[BatchDataType] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         batch_definition: Optional[BatchDefinition] = None,
         batch_spec: Optional[BatchSpec] = None,
@@ -544,12 +547,17 @@ class Batch(SerializableDictDot):
         self._data = data
         if batch_request is None:
             batch_request = {}
+
         self._batch_request = batch_request
+
         if batch_definition is None:
             batch_definition = IDDict()
+
         self._batch_definition = batch_definition
+
         if batch_spec is None:
             batch_spec = BatchSpec()
+
         self._batch_spec = batch_spec
 
         if batch_markers is None:
@@ -560,6 +568,7 @@ class Batch(SerializableDictDot):
                     ).strftime("%Y%m%dT%H%M%S.%fZ")
                 }
             )
+
         self._batch_markers = batch_markers
 
         # The remaining parameters are for backward compatibility.
@@ -642,11 +651,16 @@ class Batch(SerializableDictDot):
     @property
     def id(self):
         batch_definition = self._batch_definition
-        return (
-            batch_definition.id
-            if isinstance(batch_definition, BatchDefinition)
-            else batch_definition.to_id()
-        )
+        if isinstance(batch_definition, BatchDefinition):
+            return batch_definition.id
+
+        if isinstance(batch_definition, IDDict):
+            return batch_definition.to_id()
+
+        if isinstance(batch_definition, dict):
+            return IDDict(batch_definition).to_id()
+
+        return IDDict({}).to_id()
 
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
@@ -771,10 +785,12 @@ def get_batch_request_from_acceptable_arguments(  # noqa: C901 - complexity 21
     """
 
     if batch_request:
-        if not isinstance(batch_request, (BatchRequest, RuntimeBatchRequest)):
+        if not isinstance(
+            batch_request, (BatchRequest, RuntimeBatchRequest, XBatchRequest)
+        ):
             raise TypeError(
-                f"""batch_request must be an instance of BatchRequest or RuntimeBatchRequest object, not \
-{type(batch_request)}"""
+                "batch_request must be a BatchRequest, RuntimeBatchRequest, or a "
+                f"experimental.datasources.interfaces.BatchRequest object, not {type(batch_request)}"
             )
         datasource_name = batch_request.datasource_name
 

@@ -15,8 +15,8 @@ from pyparsing import (
 )
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.domain import Domain
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.types import SerializableDictDot, SerializableDotDict
 
 FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER: str = "$"
@@ -227,21 +227,47 @@ class ParameterContainer(SerializableDictDot):
         return convert_to_json_serializable(data=self.to_dict())
 
 
-def convert_dictionary_to_parameter_node(
+def deep_convert_properties_iterable_to_parameter_node(
     source: Union[T, dict]
 ) -> Union[T, ParameterNode]:
-    if not isinstance(source, dict):
-        return source
+    if isinstance(source, dict):
+        return _deep_convert_properties_iterable_to_parameter_node(
+            source=ParameterNode(source)
+        )
 
-    return _convert_dictionary_to_parameter_node(source)
+    # Must allow for non-dictionary source types, since their internal nested structures may contain dictionaries.
+    if isinstance(source, (list, set, tuple)):
+        data_type: type = type(source)
+
+        element: Any
+        return data_type(
+            [
+                deep_convert_properties_iterable_to_parameter_node(source=element)
+                for element in source
+            ]
+        )
+
+    return source
 
 
-def _convert_dictionary_to_parameter_node(source: dict) -> ParameterNode:
+def _deep_convert_properties_iterable_to_parameter_node(source: dict) -> ParameterNode:
     key: str
     value: Any
     for key, value in source.items():
         if isinstance(value, dict):
-            source[key] = _convert_dictionary_to_parameter_node(value)
+            source[key] = _deep_convert_properties_iterable_to_parameter_node(
+                source=value
+            )
+        elif isinstance(value, (list, set, tuple)):
+            data_type: type = type(value)
+
+            element: Any
+            source[key] = data_type(
+                [
+                    deep_convert_properties_iterable_to_parameter_node(source=element)
+                    for element in value
+                ]
+            )
 
     return ParameterNode(source)
 
@@ -389,9 +415,9 @@ def _build_parameter_node_tree_for_one_parameter(
             node[parameter_name] = ParameterNode({})
             node = node[parameter_name]
 
-    node[parameter_name_as_list[-1]] = convert_dictionary_to_parameter_node(
-        parameter_value
-    )
+    node[
+        parameter_name_as_list[-1]
+    ] = deep_convert_properties_iterable_to_parameter_node(parameter_value)
 
 
 def get_parameter_value_by_fully_qualified_parameter_name(

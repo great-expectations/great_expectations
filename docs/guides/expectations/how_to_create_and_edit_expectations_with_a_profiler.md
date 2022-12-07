@@ -40,7 +40,7 @@ Thus, the intention is for this Expectation Suite to be edited and updated to be
 You can access this same functionality from the Great Expectations <TechnicalTag tag="cli" text="CLI" /> by running
 
 ```console
-great_expectations suite new --profile
+great_expectations suite new --profile rule_based_profiler
 ```
 
 If you go that route, you can follow along in the resulting Jupyter Notebook instead of using this guide.

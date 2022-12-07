@@ -10,7 +10,7 @@ import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -95,7 +95,7 @@ def titanic_multibatch_data_context(
         file_relative_path(__file__, "../test_sets/Titanic.csv"),
         str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
     )
-    return ge.data_context.DataContext(context_path)
+    return gx.data_context.DataContext(context_path)
 
 
 @pytest.fixture
@@ -121,7 +121,7 @@ def data_context_with_bad_datasource(tmp_path_factory):
         os.path.join(fixture_dir, "great_expectations_bad_datasource.yml"),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
-    return ge.data_context.DataContext(context_path)
+    return gx.data_context.DataContext(context_path)
 
 
 def test_create_duplicate_expectation_suite(titanic_data_context):
@@ -933,7 +933,7 @@ def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
         ),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
-    monkeypatch.setenv("GE_HOME", context_path)
+    monkeypatch.setenv("GX_HOME", context_path)
     assert DataContext.find_context_root_dir() == context_path
 
 
@@ -1041,7 +1041,7 @@ def empty_context(tmp_path_factory):
     DataContext.create(project_path)
     ge_dir = os.path.join(project_path, "great_expectations")
     assert os.path.isdir(ge_dir)
-    assert os.path.isfile(os.path.join(ge_dir, DataContext.GE_YML))
+    assert os.path.isfile(os.path.join(ge_dir, DataContext.GX_YML))
     context = DataContext(ge_dir)
     assert isinstance(context, DataContext)
     return context
@@ -1057,7 +1057,7 @@ def test_data_context_does_ge_yml_exist_returns_false_when_it_does_not_exist(
 ):
     ge_dir = empty_context.root_directory
     # mangle project
-    safe_remove(os.path.join(ge_dir, empty_context.GE_YML))
+    safe_remove(os.path.join(ge_dir, empty_context.GX_YML))
     assert DataContext.does_config_exist_on_disk(ge_dir) == False
 
 
@@ -1080,7 +1080,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     empty_context,
 ):
     ge_dir = empty_context.root_directory
-    safe_remove(os.path.join(ge_dir, empty_context.GE_YML))
+    safe_remove(os.path.join(ge_dir, empty_context.GX_YML))
     assert DataContext.does_project_have_a_datasource_in_config_file(ge_dir) == False
 
 
@@ -1096,7 +1096,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     empty_context,
 ):
     ge_dir = empty_context.root_directory
-    with open(os.path.join(ge_dir, DataContext.GE_YML), "w") as yml:
+    with open(os.path.join(ge_dir, DataContext.GX_YML), "w") as yml:
         yml.write("this file: is not a valid ge config")
     assert DataContext.does_project_have_a_datasource_in_config_file(ge_dir) == False
 
@@ -1136,7 +1136,7 @@ def test_data_context_is_project_initialized_returns_false_when_config_yml_is_mi
 ):
     ge_dir = empty_context.root_directory
     # mangle project
-    safe_remove(os.path.join(ge_dir, empty_context.GE_YML))
+    safe_remove(os.path.join(ge_dir, empty_context.GX_YML))
 
     assert DataContext.is_project_initialized(ge_dir) == False
 
@@ -1146,7 +1146,7 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_dir_
 ):
     ge_dir = empty_context.root_directory
     # mangle project
-    shutil.rmtree(os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR))
+    shutil.rmtree(os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR))
 
     assert DataContext.is_project_initialized(ge_dir) == False
 
@@ -1156,7 +1156,7 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_data
 ):
     ge_dir = empty_context.root_directory
     # mangle project
-    shutil.rmtree(os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR, "data_docs"))
+    shutil.rmtree(os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR, "data_docs"))
 
     assert DataContext.is_project_initialized(ge_dir) == False
 
@@ -1166,7 +1166,7 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_vali
 ):
     ge_dir = empty_context.root_directory
     # mangle project
-    shutil.rmtree(os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR, "validations"))
+    shutil.rmtree(os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR, "validations"))
 
     assert DataContext.is_project_initialized(ge_dir) == False
 
@@ -1177,7 +1177,7 @@ def test_data_context_is_project_initialized_returns_false_when_config_variable_
     ge_dir = empty_context.root_directory
     # mangle project
     safe_remove(
-        os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR, "config_variables.yml")
+        os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR, "config_variables.yml")
     )
 
     assert DataContext.is_project_initialized(ge_dir) == False
@@ -1323,7 +1323,7 @@ def test_data_context_create_builds_base_directories(tmp_path_factory):
         "checkpoints",
         "uncommitted",
     ]:
-        base_dir = os.path.join(project_path, context.GE_DIR, directory)
+        base_dir = os.path.join(project_path, context.GX_DIR, directory)
         assert os.path.isdir(base_dir)
 
 
@@ -3176,7 +3176,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
             name=AtomicPrescriptiveRendererType.FAILED,
             value=renderedAtomicValueSchema.load(
                 {
-                    "template": "Rendering of Expectation Configuration failed for $expectation_type(**$kwargs).",
+                    "template": "Rendering failed for Expectation: $expectation_type(**$kwargs).",
                     "params": {
                         "expectation_type": {
                             "schema": {"type": "string"},

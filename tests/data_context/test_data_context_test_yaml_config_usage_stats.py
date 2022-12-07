@@ -75,7 +75,7 @@ def test_test_yaml_config_usage_stats_custom_type(
 ):
     """
     What does this test and why?
-    We should be able to discern the GE parent class for a custom type and construct
+    We should be able to discern the GX parent class for a custom type and construct
     a useful usage stats event message.
     """
     data_context: DataContext = empty_data_context_stats_enabled
@@ -199,7 +199,7 @@ def test_test_yaml_config_usage_stats_custom_type_not_ge_subclass(
 ):
     """
     What does this test and why?
-    We should be able to discern the GE parent class for a custom type and construct
+    We should be able to discern the GX parent class for a custom type and construct
     a useful usage stats event message.
     """
     data_context: DataContext = empty_data_context_stats_enabled
@@ -235,7 +235,7 @@ def test_test_yaml_config_usage_stats_simple_sqlalchemy_datasource_subclass(
 ):
     """
     What does this test and why?
-    We should be able to discern the GE parent class for a custom type and construct
+    We should be able to discern the GX parent class for a custom type and construct
     a useful usage stats event message. This should be true for SimpleSqlalchemyDatasources.
     """
 

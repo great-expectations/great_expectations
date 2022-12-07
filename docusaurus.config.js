@@ -1,7 +1,7 @@
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 
 const remarkCodeImport = require('remark-code-import')
-const remarkNamedSnippets = require('./scripts/remark-named-snippets/index')
+const remarkNamedSnippets = require('./docs/scripts/remark-named-snippets/index')
 
 module.exports = {
   title: 'Great Expectations',
@@ -16,7 +16,8 @@ module.exports = {
   plugins: [
     // ["plugin-image-zoom"],
     require.resolve('@cmfcmf/docusaurus-search-local'),
-    '@docusaurus-terminology/parser'
+    '@docusaurus-terminology/parser',
+    'docusaurus-plugin-sass'
   ],
 
   themeConfig: {
@@ -170,7 +171,7 @@ module.exports = {
                         'https://github.com/great-expectations/great_expectations/tree/develop/'
         },
         theme: {
-          customCss: require.resolve('./src/css/custom.css')
+          customCss: require.resolve('./src/css/custom.scss')
         },
         gtag: {
           // You can also use your "G-" Measurement ID here.

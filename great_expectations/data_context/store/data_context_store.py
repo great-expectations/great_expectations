@@ -32,7 +32,7 @@ class DataContextStore(ConfigurationStore):
         """
         Please see `ConfigurationStore.serialize` for more information.
 
-        Note that GE Cloud utilizes a subset of the config; as such, an explicit
+        Note that GX Cloud utilizes a subset of the config; as such, an explicit
         step to remove unnecessary keys is a required part of the serialization process.
 
         Args:

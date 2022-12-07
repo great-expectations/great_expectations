@@ -71,7 +71,7 @@ def test_all_expectations_using_test_definitions():
     # The 5 Expectations noted below are implemented or updated after v0.13.0 and are incompatible with this test fixture due to
     # having incomplete render methods.
     #
-    # As this behavior is implemented, the `UNSUPPORTED_EXPECTATIONS` list will be updated to reflect GE's current capabilities.
+    # As this behavior is implemented, the `UNSUPPORTED_EXPECTATIONS` list will be updated to reflect GX's current capabilities.
 
     dir_path = os.path.dirname(os.path.abspath(__file__))
     pattern = os.path.join(
@@ -81,7 +81,7 @@ def test_all_expectations_using_test_definitions():
 
     # Historically, collecting all the JSON tests was an issue - this step ensures we actually have test data.
     assert (
-        len(test_files) == 60
+        len(test_files) == 61
     ), "Something went wrong when collecting JSON Expectation test fixtures"
 
     # The following do not work with this parameterized test due to incomplete render methods.

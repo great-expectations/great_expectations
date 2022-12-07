@@ -1,12 +1,11 @@
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.render.renderer import ProfilingResultsPageRenderer
-from great_expectations.render.types import (
+from great_expectations.render import (
     RenderedGraphContent,
     RenderedHeaderContent,
     RenderedSectionContent,
@@ -15,6 +14,7 @@ from great_expectations.render.types import (
     TextContent,
     ValueListContent,
 )
+from great_expectations.render.renderer import ProfilingResultsPageRenderer
 from great_expectations.render.view import DefaultJinjaPageView
 
 
@@ -88,7 +88,7 @@ def test_render_section_page():
         }
     ).to_json_dict()
 
-    rendered_doc = ge.render.view.view.DefaultJinjaSectionView().render(
+    rendered_doc = gx.render.view.view.DefaultJinjaSectionView().render(
         {
             "section": section,
             "section_loop": {"index": 1},
@@ -151,7 +151,7 @@ def test_rendering_components_without_section_loop_index():
             "header": "Overview",
         }
     ).to_json_dict()
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
+    rendered_doc = gx.render.view.view.DefaultJinjaComponentView().render(
         {
             "content_block": header_component_content,
             "content_block_loop": {"index": 2},
@@ -175,7 +175,7 @@ def test_rendering_components_without_section_loop_index():
         .replace("\n", "")
     )
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
+    rendered_doc = gx.render.view.view.DefaultJinjaComponentView().render(
         {
             "content_block": header_component_content,
         }
@@ -198,7 +198,7 @@ def test_rendering_components_without_section_loop_index():
         .replace("\n", "")
     )
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
+    rendered_doc = gx.render.view.view.DefaultJinjaComponentView().render(
         {
             "content_block": header_component_content,
             "section_loop": {"index": 3},
@@ -289,7 +289,7 @@ def test_rendering_components_with_styling():
             },
         }
     ).to_json_dict()
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
+    rendered_doc = gx.render.view.view.DefaultJinjaComponentView().render(
         {
             "content_block": header_component_content,
             "section_loop": {"index": 1},
@@ -351,7 +351,7 @@ def test_render_header_component():
             "header": "Overview",
         }
     ).to_json_dict()
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
+    rendered_doc = gx.render.view.view.DefaultJinjaComponentView().render(
         {
             "content_block": header_component_content,
             "section_loop": {"index": 1},
@@ -391,7 +391,7 @@ def test_render_table_component():
             },
         }
     ).to_json_dict()
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
+    rendered_doc = gx.render.view.view.DefaultJinjaComponentView().render(
         {
             "content_block": table_component_content,
             "section_loop": {"index": 1},
@@ -462,7 +462,7 @@ def test_render_value_list():
         }
     ).to_json_dict()
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
+    rendered_doc = gx.render.view.view.DefaultJinjaComponentView().render(
         {
             "content_block": value_list_component_content,
             "section_loop": {"index": 1},
@@ -506,7 +506,7 @@ def test_render_graph():
         }
     ).to_json_dict()
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
+    rendered_doc = gx.render.view.view.DefaultJinjaComponentView().render(
         {
             "content_block": graph_component_content,
             "section_loop": {"index": 1},
@@ -554,7 +554,7 @@ def test_render_text():
         }
     ).to_json_dict()
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
+    rendered_doc = gx.render.view.view.DefaultJinjaComponentView().render(
         {
             "content_block": text_component_content,
             "section_loop": {"index": 1},
@@ -592,7 +592,7 @@ def test_render_text():
         }
     ).to_json_dict()
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
+    rendered_doc = gx.render.view.view.DefaultJinjaComponentView().render(
         {
             "content_block": text_component_content,
             "section_loop": {"index": 1},

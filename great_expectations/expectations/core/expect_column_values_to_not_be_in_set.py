@@ -3,7 +3,10 @@ from typing import Dict, Optional
 import numpy as np
 import pandas as pd
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -11,9 +14,8 @@ from great_expectations.expectations.expectation import (
     add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
-from great_expectations.render import LegacyRendererType
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -29,24 +31,23 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
 
         # my_df.my_col = [1,2,2,3,3,3]
         >>> my_df.expect_column_values_to_not_be_in_set(
-            "my_col",
-            [1,2]
-        )
+                "my_col",
+                [1,2]
+            )
         {
-          "success": false
-          "result": {
-            "unexpected_count": 3
-            "unexpected_percent": 50.0,
-            "unexpected_percent_nonmissing": 50.0,
-            "partial_unexpected_list": [
-              1, 2, 2
-            ],
-          },
+            "success": false
+            "result": {
+                "unexpected_count": 3
+                "unexpected_percent": 50.0,
+                "unexpected_percent_nonmissing": 50.0,
+                "partial_unexpected_list": [
+                    1, 2, 2
+                ],
+            },
         }
 
     expect_column_values_to_not_be_in_set is a \
-    :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine
-    .column_map_expectation>`.
+    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
     Args:
         column (str): \
@@ -56,33 +57,29 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
 
     Keyword Args:
         mostly (None or a float between 0 and 1): \
-            Return `"success": True` if at least mostly fraction of values match the expectation. \
-            For more detail, see :ref:`mostly`.
+            Successful if at least mostly fraction of values match the expectation. \
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
 
     Other Parameters:
         result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
         include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
+            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
         meta (dict or None): \
             A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-            modification. For more detail, see :ref:`meta`.
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
 
     See Also:
-        :func:`expect_column_values_to_be_in_set \
-        <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_values_to_be_in_set>`
-
+        [expect_column_values_to_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_be_in_set)
     """
 
     library_metadata = {
@@ -137,16 +134,14 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -234,20 +229,22 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
+        if configuration:
+            kwargs = configuration.kwargs
+        elif result and result.expectation_config:
+            kwargs = result.expectation_config.kwargs
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            kwargs,
             [
                 "column",
                 "value_set",
@@ -310,8 +307,8 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         self,
         series: pd.Series,
         metrics: Dict,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         runtime_configuration: Optional[dict] = None,
         filter_column_isnull: bool = True,
     ):

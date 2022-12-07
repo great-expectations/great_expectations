@@ -507,7 +507,6 @@ def test_result_format_configured_no_set_default_override(
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
         "partial_unexpected_list": [],
-        "partial_unexpected_index_list": None,
         "partial_unexpected_counts": [],
     }
 

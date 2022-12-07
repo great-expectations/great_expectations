@@ -6,7 +6,10 @@ import numpy as np
 import pandas as pd
 from packaging import version
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -24,9 +27,8 @@ from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
 from great_expectations.expectations.registry import get_metric_kwargs
-from great_expectations.render import LegacyRendererType
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -34,6 +36,7 @@ from great_expectations.render.util import (
 )
 from great_expectations.util import get_pyathena_potential_type
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validator import ValidationDependencies
 
 logger = logging.getLogger(__name__)
 
@@ -51,52 +54,49 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     Expect a column to contain values from a specified type list.
 
     expect_column_values_to_be_in_type_list is a \
-    :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine
-    .column_map_expectation>` for typed-column backends,
-    and also for PandasDataset where the column dtype provides an unambiguous constraints (any dtype except
-    'object'). For PandasDataset columns with dtype of 'object' expect_column_values_to_be_of_type is a
-    :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>` and will
+    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations) \
+    for typed-column backends, and also for PandasDataset where the column dtype provides an \
+    unambiguous constraints (any dtype except 'object').
+
+    For PandasDataset columns with dtype of 'object' expect_column_values_to_be_in_type_list will \
     independently check each row's type.
 
     Args:
         column (str): \
             The column name.
         type_list (str): \
-            A list of strings representing the data type that each column should have as entries. Valid types are
-            defined by the current backend implementation and are dynamically loaded. For example, valid types for
-            PandasDataset include any numpy dtype values (such as 'int64') or native python types (such as 'int'),
-            whereas valid types for a SqlAlchemyDataset include types named by the current driver such as 'INTEGER'
-            in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for SparkDFDataset include
+            A list of strings representing the data type that each column should have as entries. Valid types are \
+            defined by the current backend implementation and are dynamically loaded. For example, valid types for \
+            PandasDataset include any numpy dtype values (such as 'int64') or native python types (such as 'int'), \
+            whereas valid types for a SqlAlchemyDataset include types named by the current driver such as 'INTEGER' \
+            in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for SparkDFDataset include \
             'StringType', 'BooleanType' and other pyspark-defined type names.
 
     Keyword Args:
         mostly (None or a float between 0 and 1): \
-            Return `"success": True` if at least mostly fraction of values match the expectation. \
-            For more detail, see :ref:`mostly`.
+            Successful if at least mostly fraction of values match the expectation. \
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
 
     Other Parameters:
         result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
         include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
+            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
         meta (dict or None): \
             A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-            modification. For more detail, see :ref:`meta`.
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
 
     See also:
-        :func:`expect_column_values_to_be_of_type \
-        <great_expectations.dataset.dataset.Dataset.expect_column_values_to_be_of_type>`
+        [expect_column_values_to_be_of_type](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type)
     """
 
     # This dictionary contains metadata for display in the public gallery
@@ -147,16 +147,14 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     @classmethod
     def _atomic_prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -247,16 +245,14 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -472,14 +468,17 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
-    ):
-        # This calls TableExpectation.get_validation_dependencies to set baseline dependencies for the aggregate version
+        **kwargs,
+    ) -> ValidationDependencies:
+        # This calls TableExpectation.get_validation_dependencies to set baseline validation_dependencies for the aggregate version
         # of the expectation.
         # We need to keep this as super(ColumnMapExpectation, self), which calls
         # TableExpectation.get_validation_dependencies instead of ColumnMapExpectation.get_validation_dependencies.
         # This is because the map version of this expectation is only supported for Pandas, so we want the aggregate
         # version for the other backends.
-        dependencies = super(ColumnMapExpectation, self).get_validation_dependencies(
+        validation_dependencies: ValidationDependencies = super(
+            ColumnMapExpectation, self
+        ).get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
 
@@ -517,8 +516,8 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 and actual_column_type.type.__name__ == "object_"
                 and expected_types_list is not None
             ):
-                # this resets dependencies using  ColumnMapExpectation.get_validation_dependencies
-                dependencies = super().get_validation_dependencies(
+                # this resets validation_dependencies using  ColumnMapExpectation.get_validation_dependencies
+                validation_dependencies = super().get_validation_dependencies(
                     configuration, execution_engine, runtime_configuration
                 )
 
@@ -528,13 +527,16 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
-        dependencies["metrics"]["table.column_types"] = MetricConfiguration(
+        validation_dependencies.set_metric_configuration(
             metric_name="table.column_types",
-            metric_domain_kwargs=column_types_metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=column_types_metric_kwargs["metric_value_kwargs"],
+            metric_configuration=MetricConfiguration(
+                metric_name="table.column_types",
+                metric_domain_kwargs=column_types_metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=column_types_metric_kwargs["metric_value_kwargs"],
+            ),
         )
 
-        return dependencies
+        return validation_dependencies
 
     def _validate(
         self,

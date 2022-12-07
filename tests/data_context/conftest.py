@@ -9,11 +9,13 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.store import GeCloudStoreBackend
-from great_expectations.data_context.store.ge_cloud_store_backend import AnyPayload
+from great_expectations.data_context.store.gx_cloud_store_backend import (
+    AnyPayload,
+    GXCloudStoreBackend,
+)
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
@@ -40,7 +42,7 @@ def data_context_without_config_variables_filepath_configured(tmp_path_factory):
         config_variables_fixture_filename=None,
     )
 
-    return ge.data_context.DataContext(context_path)
+    return gx.data_context.DataContext(context_path)
 
 
 @pytest.fixture()
@@ -59,7 +61,7 @@ def data_context_with_variables_in_config(tmp_path_factory, monkeypatch):
         config_variables_fixture_filename="config_variables.yml",
     )
 
-    return ge.data_context.DataContext(context_path)
+    return gx.data_context.DataContext(context_path)
 
 
 def create_data_context_files(
@@ -335,7 +337,7 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                 "default_checkpoint_store": {
                     "class_name": "CheckpointStore",
                     "store_backend": {
-                        "class_name": "GeCloudStoreBackend",
+                        "class_name": GXCloudStoreBackend.__name__,
                         "ge_cloud_base_url": "http://foo/bar/",
                         "ge_cloud_credentials": {
                             "access_token": ge_cloud_access_token,
@@ -351,7 +353,7 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                 "default_expectations_store": {
                     "class_name": "ExpectationsStore",
                     "store_backend": {
-                        "class_name": "GeCloudStoreBackend",
+                        "class_name": GXCloudStoreBackend.__name__,
                         "ge_cloud_base_url": "http://foo/bar/",
                         "ge_cloud_credentials": {
                             "access_token": ge_cloud_access_token,
@@ -364,7 +366,7 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                 "default_validations_store": {
                     "class_name": "ValidationsStore",
                     "store_backend": {
-                        "class_name": "GeCloudStoreBackend",
+                        "class_name": GXCloudStoreBackend.__name__,
                         "ge_cloud_base_url": "http://foo/bar/",
                         "ge_cloud_credentials": {
                             "access_token": ge_cloud_access_token,
@@ -659,9 +661,9 @@ def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
         """,
     )
     with patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
+        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.list_keys"
     ), patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
+        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend._set"
     ), patch(
         "requests.Session.get",
         autospec=True,

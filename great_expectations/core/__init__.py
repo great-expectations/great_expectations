@@ -1,5 +1,6 @@
 import logging
 
+from .domain import Domain
 from .expectation_suite import (
     ExpectationConfiguration,
     ExpectationConfigurationSchema,

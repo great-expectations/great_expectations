@@ -32,12 +32,12 @@ We'd love it if you'd **reach out to us on** the [**Great Expectations Slack Cha
             self.batch_kwargs = {}
         self.add_code_cell(
             f"""\
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.checkpoint import LegacyCheckpoint
 from great_expectations.profile.user_configurable_profiler import UserConfigurableProfiler
 from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 
-context = ge.data_context.DataContext()
+context = gx.data_context.DataContext()
 
 expectation_suite_name = "{self.suite_name}"
 
