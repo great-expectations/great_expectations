@@ -588,6 +588,7 @@ def test_all_decorators_do_not_change_function_name():
 
 # Class level decorators
 
+
 @public_api
 class _ClassFullDocstringPublicAPI:
     """Docstring summary.
@@ -602,7 +603,6 @@ class _ClassFullDocstringPublicAPI:
     def __init__(self, some_arg, other_arg) -> None:
         self.some_arg = some_arg
         self.other_arg = other_arg
-
 
 
 @deprecated_method_or_class(version="1.2.3", message="This is deprecated!!")
