@@ -19,6 +19,18 @@ This guide will help you integrate Great Expectations (GX) with [Google Cloud Pl
 </Prerequisites>
 
 
+:::caution Note on Installing Great Expectations in Google Cloud Composer
+
+  Currently, Great Expectations will only install in Composer 1 and Composer 2 environments with the following packages pinned. 
+
+  `[tornado]==6.2`
+  `[nbconvert]==6.4.5`
+  `[mistune]==0.8.4`
+
+  We are currently investigating ways to provide a smoother deployment experience in Google Composer, and will have more updates soon. 
+
+:::
+
 We recommend that you use Great Expectations in GCP by using the following services:
   - [Google Cloud Composer](https://cloud.google.com/composer) (GCC) for managing workflow orchestration including validating your data. GCC is built on [Apache Airflow](https://airflow.apache.org/).
   - [BigQuery](https://cloud.google.com/bigquery) or files in [Google Cloud Storage](https://cloud.google.com/storage) (GCS) as your <TechnicalTag tag="datasource" text="Datasource"/>
