@@ -6,6 +6,10 @@ class FontFamily(Enum):
     ROBOTO_MONO = "Roboto Mono"
     SOURCE_SANS_PRO = "Source Sans Pro"
 
+    @classmethod
+    def has_member_key(cls, key):
+        return key in cls.__members__
+
 
 class FontFamilyURL(Enum):
     MONTSERRAT = "https://fonts.googleapis.com/css2?family=Montserrat"
