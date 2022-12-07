@@ -1511,7 +1511,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     )
     execution_engine: SqlAlchemyExecutionEngine = cast(
         SqlAlchemyExecutionEngine,
-        context.datasources["my_test_datasource"].execution_engine,
+        cast(Datasource, context.datasources["my_test_datasource"]).execution_engine,
     )
     engine = execution_engine.engine
 
