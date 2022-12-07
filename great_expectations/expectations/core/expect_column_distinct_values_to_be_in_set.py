@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 import altair as alt
 import pandas as pd
@@ -22,13 +22,16 @@ from great_expectations.render import (
 )
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
+    ParamSchemaType,
     RendererConfiguration,
-    RendererParams,
 )
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import RendererParams
 
 
 class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
@@ -135,77 +138,55 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
     )
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-    ) -> Tuple[str, dict, Union[dict, None]]:
-        renderer_configuration = RendererConfiguration(
-            configuration=configuration,
-            result=result,
-            runtime_configuration=runtime_configuration,
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args = (
+            ("column", ParamSchemaType.STRING),
+            ("value_set", ParamSchemaType.ARRAY),
+            ("row_condition", ParamSchemaType.STRING),
+            ("condition_parser", ParamSchemaType.STRING),
         )
-        renderer_configuration.add_param(
-            name="column",
-            schema_type="string",
-        )
-        renderer_configuration.add_param(
-            name="value_set",
-            schema_type="array",
-        )
-        renderer_configuration.add_param(
-            name="row_condition",
-            schema_type="string",
-        )
-        renderer_configuration.add_param(
-            name="condition_parser",
-            schema_type="string",
-        )
+        for name, schema_type in add_param_args:
+            renderer_configuration.add_param(name=name, schema_type=schema_type)
 
-        params: RendererParams
-        params = renderer_configuration.params
+        params: RendererParams = renderer_configuration.params
 
         if not params.value_set or len(params.value_set.value) == 0:
             if renderer_configuration.include_column_name:
                 template_str = "$column distinct values must belong to this set: [ ]"
             else:
                 template_str = "distinct values must belong to a set, but that set is not specified."
-
         else:
-            for i, v in enumerate(params.value_set.value):
-                renderer_configuration.add_param(
-                    name=f"v__{str(i)}", schema_type="string", value=v
-                )
-
-            params = renderer_configuration.params
-
-            values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params.value_set.value)]
+            renderer_configuration = cls._add_value_set_params(
+                renderer_configuration=renderer_configuration
+            )
+            value_set_str: str = cls._get_value_set_string(
+                renderer_configuration=renderer_configuration
             )
 
             if renderer_configuration.include_column_name:
                 template_str = (
-                    f"$column distinct values must belong to this set: {values_string}."
+                    f"$column distinct values must belong to this set: {value_set_str}."
                 )
             else:
                 template_str = (
-                    f"distinct values must belong to this set: {values_string}."
+                    f"distinct values must belong to this set: {value_set_str}."
                 )
 
-        params_with_json_schema: dict = params.dict()
-
         if params.row_condition:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params.row_condition.value, with_schema=True
+            renderer_configuration = cls._add_row_condition_params(
+                renderer_configuration=renderer_configuration
             )
-            template_str = f"{conditional_template_str}, then {template_str}"
-            params_with_json_schema.update(conditional_params)
+            row_condition_str: str = cls._get_row_condition_string(
+                renderer_configuration=renderer_configuration
+            )
+            template_str = f"{row_condition_str}, then {template_str}"
 
-        return template_str, params_with_json_schema, renderer_configuration.styling
+        renderer_configuration.template_str = template_str
+
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
@@ -351,7 +332,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         return new_block
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """Validating that user has inputted a value set and that configuration has been initialized"""
         super().validate_configuration(configuration)
