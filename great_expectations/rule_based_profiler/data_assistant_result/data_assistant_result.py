@@ -661,22 +661,25 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
             dropdown_title_color: str = altair_theme["legend"]["titleColor"]
             dropdown_font_size: str = altair_theme["axis"]["titleFontSize"]
+            dropdown_font_weight: int = altair_theme["title"]["fontWeight"]
             dropdown_text_color: str = altair_theme["axis"]["labelColor"]
 
             font_family: str = altair_theme["font"]
-            font_url = FontFamilyURL[FontFamily(font_family).name].value
-            font_format = font_url.split(".")[-1]
+            font_family_url = FontFamilyURL[FontFamily(font_family).name].value
+
+            title_font_weight: int = altair_theme["title"]["fontWeight"]
+            subtitle_font_weight: int = altair_theme["title"]["subtitleFontWeight"]
+            url_font_weights: str = ";".join(
+                {str(title_font_weight), str(subtitle_font_weight)}
+            )
+
+            font_url = f"{font_family_url}:wght@{url_font_weights}&display=swap"
+            print(font_url)
 
             font_css = f"""
-                <style>
-                @font-face {{
-                  font-family: '{font_family}';
-                  font-style: normal;
-                  font-weight: 400;
-                  src: url({font_url}) format('{font_format}');
-                  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-                }}
-                </style>
+            <style>
+            @import url('{font_url}');
+            </style>
             """
             display(HTML(font_css))
 
@@ -687,12 +690,13 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                     color: {dropdown_title_color};
                     font-family: {font_family};
                     font-size: {dropdown_font_size}px;
-                    font-weight: bold;
+                    font-weight: {dropdown_font_weight};
                 }}
                 form.vega-bindings {{
                     color: {dropdown_text_color};
                     font-family: {font_family};
                     font-size: {dropdown_font_size}px;
+                    font-weight: {dropdown_font_weight};
                     position: absolute;
                     left: 75px;
                     top: 28px;
@@ -710,7 +714,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                     color: {dropdown_title_color};
                     font-family: {font_family};
                     font-size: {dropdown_font_size}px;
-                    font-weight: bold;
+                    font-weight: {dropdown_font_weight};
                 }}
                 .widget-dropdown > select {{
                     padding-right: 21px;
@@ -718,6 +722,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                     color: {dropdown_text_color};
                     font-family: {font_family};
                     font-size: {dropdown_font_size}px;
+                    font-weight: {dropdown_font_weight};
                     height: 20px;
                     line-height: {dropdown_font_size}px;
                     background-size: 20px;

@@ -25,13 +25,14 @@ font = font_family.value
 
 # Title
 title_align = "center"
-title_font_size = 15
 title_color = PrimaryColors.ORANGE
+title_font_size = 15
+title_font_weight = 500
 title_dy = -10
 subtitle_color = PrimaryColors.COAL_GRAY
 subtitle_font = font
 subtitle_font_size = 14
-subtitle_font_weight = "bold"
+subtitle_font_weight = 700
 
 # Both Axes
 axis_title_color = PrimaryColors.COAL_GRAY
@@ -108,6 +109,7 @@ class AltairThemes(Enum):
             "align": title_align,
             "color": title_color,
             "fontSize": title_font_size,
+            "fontWeight": title_font_weight,
             "dy": title_dy,
             "subtitleFont": subtitle_font,
             "subtitleFontSize": subtitle_font_size,
