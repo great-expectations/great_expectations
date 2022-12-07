@@ -70,12 +70,12 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.util import import_library_module
 from great_expectations.validator.validator import Validator
-from tests.conftest import build_in_memory_runtime_context
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Connection
 
     from great_expectations.data_context import DataContext
+    from tests.conftest import build_in_memory_runtime_context
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
@@ -1216,6 +1216,9 @@ def get_test_validator_with_data(  # noqa: C901 - 31
     debug_logger: Optional[logging.Logger] = None,
 ):
     """Utility to create datasets for json-formatted tests."""
+
+    if context is None:
+        context = build_in_memory_runtime_context()
 
     df = pd.DataFrame(data)
     if execution_engine == "pandas":
@@ -2464,9 +2467,6 @@ def generate_expectation_tests(  # noqa: C901 - 43
                 continue
 
             datasets = []
-
-            if context is None:
-                context = build_in_memory_runtime_context()
 
             try:
                 if isinstance(d["data"], list):

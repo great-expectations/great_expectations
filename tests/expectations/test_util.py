@@ -38,7 +38,6 @@ from great_expectations.self_check.util import (
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
-from tests.conftest import build_in_memory_runtime_context
 
 logger = logging.getLogger(__name__)
 
@@ -477,7 +476,6 @@ def test__generate_expectation_tests__with_test_backends():
 
     results = generate_expectation_tests(
         expectation_type=expectation_type,
-        context=build_in_memory_runtime_context(),
         test_data_cases=test_data_cases,
         execution_engine_diagnostics=engines,
         raise_exceptions_for_backends=False,
@@ -527,7 +525,6 @@ def test__generate_expectation_tests__with_test_backends2():
 
     results = generate_expectation_tests(
         expectation_type=expectation_type,
-        context=build_in_memory_runtime_context(),
         test_data_cases=test_data_cases,
         execution_engine_diagnostics=engines,
         raise_exceptions_for_backends=False,
@@ -571,7 +568,6 @@ def test__generate_expectation_tests__with_no_test_backends():
 
     results = generate_expectation_tests(
         expectation_type=expectation_type,
-        context=build_in_memory_runtime_context(),
         test_data_cases=test_data_cases,
         execution_engine_diagnostics=engines,
         raise_exceptions_for_backends=False,
