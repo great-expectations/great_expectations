@@ -1613,9 +1613,6 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         f"Took {_end - _start} seconds to df.to_sql for {sa_engine_name} {extra_debug_info}"
     )
 
-    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
-    execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
-
     if context is None:
         context = build_in_memory_runtime_context()  # type: ignore[assignment]
 
@@ -1638,6 +1635,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         },
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
     context.datasources["my_test_datasource"]._execution_engine = execution_engine  # type: ignore[union-attr]
     my_data_connector: ConfiguredAssetSqlDataConnector = (
         ConfiguredAssetSqlDataConnector(
@@ -1663,6 +1661,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
             )
         )[0]
 
+    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
     batch = Batch(data=batch_data, batch_definition=batch_definition)
 
     return Validator(
