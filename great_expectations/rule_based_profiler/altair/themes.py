@@ -16,7 +16,8 @@ chart_height: int = 250
 chart_border_opacity: float = 0
 
 # Font
-font = FontFamily.ROBOTO_MONO.value
+font_family = FontFamily.MONTSERRAT
+font = font_family.value
 
 #
 # Chart Components
