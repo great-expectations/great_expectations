@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 from freezegun import freeze_time
 
-import great_expectations as ge
+import great_expectations as gx
 
 # noinspection PyUnresolvedReferences
 from contrib.experimental.great_expectations_experimental.rule_based_profiler.data_assistant import (
@@ -318,7 +318,7 @@ def test_pandas_happy_path_growth_numeric_data_assistant(empty_data_context) -> 
     3. Running GrowthNumericDataAssistantResult and saving resulting ExpectationSuite as 'taxi_data_2019_suite'
     4. Configuring BatchRequest to load 2020 January data
     """
-    data_context: ge.DataContext = empty_data_context
+    data_context: gx.DataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__,
         os.path.join(
@@ -429,7 +429,7 @@ def test_spark_happy_path_growth_numeric_data_assistant(
     from pyspark.sql.types import StructType
 
     schema: StructType = spark_df_taxi_data_schema
-    data_context: ge.DataContext = empty_data_context
+    data_context: gx.DataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__, os.path.join("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
     )
@@ -531,7 +531,7 @@ def test_sql_happy_path_growth_numeric_data_assistant(
     else:
         load_data_into_postgres_database(sa)
 
-    data_context: ge.DataContext = empty_data_context
+    data_context: gx.DataContext = empty_data_context
 
     datasource_config = {
         "name": "taxi_multi_batch_sql_datasource",

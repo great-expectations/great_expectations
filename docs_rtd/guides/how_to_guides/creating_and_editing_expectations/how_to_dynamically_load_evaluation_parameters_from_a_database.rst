@@ -59,8 +59,8 @@ Steps
 
     .. code-block:: python
 
-        import great_expectations as ge
-        context = ge.DataContext()
+        import great_expectations as gx
+        context = gx.DataContext()
 
 
         batch_kwargs = {
