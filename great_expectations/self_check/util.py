@@ -70,6 +70,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.util import import_library_module
 from great_expectations.validator.validator import Validator
+from tests.conftest import build_in_memory_runtime_context
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Connection
@@ -2463,6 +2464,9 @@ def generate_expectation_tests(  # noqa: C901 - 43
                 continue
 
             datasets = []
+
+            if context is None:
+                context = build_in_memory_runtime_context()
 
             try:
                 if isinstance(d["data"], list):
