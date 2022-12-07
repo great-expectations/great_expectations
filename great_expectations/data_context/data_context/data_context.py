@@ -255,7 +255,7 @@ class DataContext(BaseDataContext):
             cloud_organization_id = ge_cloud_organization_id
 
         self._sources: _SourceFactories = _SourceFactories(self)
-        self._cloud_mode = ge_cloud_mode
+        self._cloud_mode = cloud_mode
         self._cloud_config = self._init_cloud_config(
             cloud_mode=cloud_mode,
             cloud_base_url=cloud_base_url,
