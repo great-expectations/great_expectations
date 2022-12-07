@@ -19,15 +19,15 @@ This guide will help you integrate Great Expectations (GX) with [Google Cloud Pl
 </Prerequisites>
 
 
-:::note Note on Installing Great Expectations in Google Cloud Composer
+:::caution Note on Installing Great Expectations in Google Cloud Composer
 
   Currently, Great Expectations will only install in Composer 1 and Composer 2 environments with the following packages pinned. 
 
-  - `[tornado]==6.2`
-  - `[nbconvert]==6.4.5`
-  - `[mistune]==0.8.4`
+  `[tornado]==6.2`
+  `[nbconvert]==6.4.5`
+  `[mistune]==0.8.4`
 
-  We are investigating ways to provide a smoother deployment experience in Google Composer, and will have more updates soon. 
+  We are currently investigating ways to provide a smoother deployment experience in Google Composer, and will have more updates soon. 
 
 :::
 
