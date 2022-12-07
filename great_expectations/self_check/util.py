@@ -68,6 +68,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 )
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     LockingConnectionCheck,
+    connection_manager,
 )
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.util import (
