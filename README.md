@@ -104,7 +104,7 @@ Integrations
 -------------------------------------------------------------------------------
 Great Expectations works with the tools and systems that you're already using with your data, including:
 
-<table>
+<table style="background-color: #fff;">
 	<thead>
 		<tr>
 			<th colspan="2">Integration</th>
