@@ -66,6 +66,7 @@ if TYPE_CHECKING:
         CloudDataContext,
         DataContext,
     )
+    from great_expectations.data_context.types.base import DataContextConfig
 
 try:
     from typing import TypeGuard  # type: ignore[attr-defined]
@@ -900,7 +901,7 @@ def build_in_memory_runtime_context() -> "BaseDataContext":  # noqa: F821
     )
 
     data_context_config: DataContextConfig = DataContextConfig(
-        datasources={
+        datasources={  # type: ignore[arg-type]
             "pandas_datasource": {
                 "execution_engine": {
                     "class_name": "PandasExecutionEngine",
