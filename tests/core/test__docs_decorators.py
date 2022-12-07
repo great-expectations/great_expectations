@@ -584,3 +584,125 @@ def test_all_decorators_do_not_change_function_name():
         _func_full_docstring_all_decorators.__name__
         == "_func_full_docstring_all_decorators"
     )
+
+
+# Class level decorators
+
+@public_api
+class _ClassFullDocstringPublicAPI:
+    """Docstring summary.
+
+    Longer description.
+
+    Args:
+        some_arg: some_arg description.
+        other_arg: other_arg description.
+    """
+
+    def __init__(self, some_arg, other_arg) -> None:
+        self.some_arg = some_arg
+        self.other_arg = other_arg
+
+
+
+@deprecated_method(version="1.2.3", message="This is deprecated!!")
+@new_method(version="1.2.3", message="Added in version 1.2.3")
+class _ClassFullDocstringDeprecatedAndNewAtClassLevel:
+    """Docstring summary.
+
+    Longer description.
+
+    Args:
+        some_arg: some_arg description.
+        other_arg: other_arg description.
+    """
+
+    def __init__(self, some_arg, other_arg) -> None:
+        self.some_arg = some_arg
+        self.other_arg = other_arg
+
+
+@deprecated_argument(
+    argument_name="some_arg", version="1.2.3", message="This is deprecated!!"
+)
+@new_argument(
+    argument_name="other_arg", version="1.2.3", message="Added in version 1.2.3"
+)
+class _ClassFullDocstringDeprecatedAndNewAtArgumentLevel:
+    """Docstring summary.
+
+    Longer description.
+
+    Args:
+        some_arg: some_arg description.
+        other_arg: other_arg description.
+    """
+
+    def __init__(self, some_arg, other_arg) -> None:
+        self.some_arg = some_arg
+        self.other_arg = other_arg
+
+
+class TestClassDocstringDecorators:
+    @pytest.mark.unit
+    def test_class_full_docstring_public_api(self):
+        assert _ClassFullDocstringPublicAPI.__doc__ == (
+            "--Public API--Docstring summary.\n"
+            "\n"
+            "    Longer description.\n"
+            "\n"
+            "    Args:\n"
+            "        some_arg: some_arg description.\n"
+            "        other_arg: other_arg description.\n"
+            "    "
+        )
+        assert _ClassFullDocstringPublicAPI.__name__ == "_ClassFullDocstringPublicAPI"
+
+    @pytest.mark.unit
+    def test_class_full_docstring_deprecated_and_new_class_level(self):
+        assert _ClassFullDocstringDeprecatedAndNewAtClassLevel.__doc__ == (
+            "Docstring summary.\n"
+            "\n"
+            ".. deprecated:: 1.2.3\n"
+            "    This is deprecated!!\n"
+            "\n"
+            "\n"
+            ".. versionadded:: 1.2.3\n"
+            "    Added in version 1.2.3\n"
+            "\n"
+            "\n"
+            "Longer description.\n"
+            "\n"
+            "Args:\n"
+            "    some_arg: some_arg description.\n"
+            "    other_arg: other_arg description.\n"
+        )
+        assert (
+            _ClassFullDocstringDeprecatedAndNewAtClassLevel.__name__
+            == "_ClassFullDocstringDeprecatedAndNewAtClassLevel"
+        )
+
+    @pytest.mark.unit
+    def test_class_full_docstring_deprecated_and_new_argument_level(self):
+        assert _ClassFullDocstringDeprecatedAndNewAtArgumentLevel.__doc__ == (
+            "Docstring summary.\n"
+            "\n"
+            "Longer description.\n"
+            "\n"
+            "Args:\n"
+            "    some_arg:\n"
+            "        some_arg description.\n"
+            "        \n"
+            "        .. deprecated:: 1.2.3\n"
+            "            This is deprecated!!\n"
+            "        \n"
+            "    other_arg:\n"
+            "        other_arg description.\n"
+            "        \n"
+            "        .. versionadded:: 1.2.3\n"
+            "            Added in version 1.2.3"
+        )
+        assert (
+            _ClassFullDocstringDeprecatedAndNewAtArgumentLevel.__name__
+            == "_ClassFullDocstringDeprecatedAndNewAtArgumentLevel"
+        )
