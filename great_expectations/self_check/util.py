@@ -1716,7 +1716,7 @@ def build_spark_validator_with_data(
     execution_engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark,
         df=df,
-        batch_definition=batch_definition,
+        batch_id=batch.id,
     )
 
     if context is None:
