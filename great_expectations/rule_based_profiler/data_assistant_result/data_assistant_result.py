@@ -666,7 +666,13 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
             font_family: str = altair_theme["font"]
 
-            if FontFamily.has_member_key(font_family):
+            gx_font_family = True
+            try:
+                FontFamily(font_family)
+            except ValueError:
+                gx_font_family = False
+
+            if gx_font_family:
                 font_family_url = FontFamilyURL[FontFamily(font_family).name].value
 
                 title_font_weight: int = altair_theme["title"]["fontWeight"]
