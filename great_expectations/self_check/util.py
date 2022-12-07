@@ -1206,13 +1206,13 @@ def get_dataset(  # noqa: C901 - 110
 def get_test_validator_with_data(  # noqa: C901 - 31
     execution_engine,
     data,
+    context: DataContext,
     schemas=None,
     caching=True,
     table_name=None,
     sqlite_db_path=None,
     extra_debug_info="",
     debug_logger: Optional[logging.Logger] = None,
-    context: Optional[DataContext] = None,
 ):
     """Utility to create datasets for json-formatted tests."""
 
@@ -2469,25 +2469,25 @@ def generate_expectation_tests(  # noqa: C901 - 43
                     for dataset in d["data"]:
                         datasets.append(
                             get_test_validator_with_data(
-                                c,
-                                dataset["data"],
-                                dataset.get("schemas"),
+                                execution_engine=c,
+                                data=dataset["data"],
+                                context=context,
+                                schemas=dataset.get("schemas"),
                                 table_name=dataset.get("dataset_name"),
                                 sqlite_db_path=sqlite_db_path,
                                 extra_debug_info=expectation_type,
                                 debug_logger=debug_logger,
-                                context=context,
                             )
                         )
                     validator_with_data = datasets[0]
                 else:
                     validator_with_data = get_test_validator_with_data(
-                        c,
-                        d["data"],
-                        d["schemas"],
+                        execution_engine=c,
+                        data=d["data"],
+                        context=context,
+                        schemas=d["schemas"],
                         extra_debug_info=expectation_type,
                         debug_logger=debug_logger,
-                        context=context,
                     )
             except Exception as e:
                 _error(
@@ -2511,25 +2511,25 @@ def generate_expectation_tests(  # noqa: C901 - 43
                             for dataset in d["data_alt"]:
                                 datasets.append(
                                     get_test_validator_with_data(
-                                        c,
-                                        dataset["data_alt"],
-                                        dataset.get("schemas"),
+                                        execution_engine=c,
+                                        data=dataset["data_alt"],
+                                        context=context,
+                                        schemas=dataset.get("schemas"),
                                         table_name=dataset.get("dataset_name"),
                                         sqlite_db_path=sqlite_db_path,
                                         extra_debug_info=expectation_type,
                                         debug_logger=debug_logger,
-                                        context=context,
                                     )
                                 )
                             validator_with_data = datasets[0]
                         else:
                             validator_with_data = get_test_validator_with_data(
-                                c,
-                                d["data_alt"],
-                                d["schemas"],
+                                execution_engine=c,
+                                data=d["data_alt"],
+                                context=context,
+                                schemas=d["schemas"],
                                 extra_debug_info=expectation_type,
                                 debug_logger=debug_logger,
-                                context=context,
                             )
                     except Exception:
                         # print(
