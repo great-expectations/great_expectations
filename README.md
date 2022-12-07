@@ -1,3 +1,10 @@
+<style>
+	.markdown-body table td {
+		background-color: #fff;
+	}
+</style>
+
+
 [![PyPI](https://img.shields.io/pypi/v/great_expectations)](https://pypi.org/project/great-expectations/#history)
 [![Build Status](https://dev.azure.com/great-expectations/great_expectations/_apis/build/status/great_expectations?branchName=develop&stageName=required)](https://dev.azure.com/great-expectations/great_expectations/_build/latest?definitionId=1&branchName=develop)
 ![Coverage](https://img.shields.io/azure-devops/coverage/great-expectations/great_expectations/1/main)
@@ -426,7 +433,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<div style="background-color: #fff;"><img height="40" src="./readme_assets/jupyter.png" /></div>
+				<img height="40" src="./readme_assets/jupyter.png" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_create_expectations/#creating-expectations-in-jupyter-notebooks">
