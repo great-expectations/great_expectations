@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -8,6 +8,7 @@ from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.content_block.content_block import (
     ContentBlockRenderer,
 )
+from great_expectations.render.renderer_configuration import RendererConfiguration
 
 
 class ExpectationStringRenderer(ContentBlockRenderer):
@@ -18,7 +19,12 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
-    ):
+    ) -> List[RenderedStringTemplateContent]:
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            runtime_configuration=runtime_configuration,
+        )
         return [
             RenderedStringTemplateContent(
                 **{
@@ -27,8 +33,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                     "string_template": {
                         "template": "$expectation_type(**$kwargs)",
                         "params": {
-                            "expectation_type": configuration.expectation_type,
-                            "kwargs": configuration.kwargs,
+                            "expectation_type": renderer_configuration.expectation_type,
+                            "kwargs": renderer_configuration.kwargs,
                         },
                         "styling": {
                             "params": {
