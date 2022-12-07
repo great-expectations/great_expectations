@@ -179,8 +179,8 @@ def render_evaluation_parameter_string(render_func) -> Callable:
 def param_method(param_name: str) -> Callable:
     """
     Decorator that wraps helper methods dealing with dynamic attributes on RendererConfiguration.params. Ensures a given
-    param_name exists on RendererConfiguration.params before executing the helper method because params are defined by
-    the renderer.
+    param_name exists and is not None before executing the helper method. Params are unknown as they are defined by the
+    renderer, and if a given param is None, no value was set/found that can be used in the helper method.
     """
 
     def _param_method(param_func: Callable) -> Callable:
@@ -189,9 +189,10 @@ def param_method(param_name: str) -> Callable:
             renderer_configuration: RendererConfiguration,
         ) -> RendererConfiguration:
             if hasattr(renderer_configuration.params, param_name):
-                renderer_configuration = param_func(
-                    renderer_configuration=renderer_configuration
-                )
+                if getattr(renderer_configuration.params, param_name, None):
+                    renderer_configuration = param_func(
+                        renderer_configuration=renderer_configuration
+                    )
             else:
                 raise AttributeError(
                     f"RendererConfiguration.param does not have a param called {param_name}. "
