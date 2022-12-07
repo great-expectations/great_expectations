@@ -1258,7 +1258,9 @@ def get_test_validator_with_data(  # noqa: C901 - 31
         )
 
         return build_pandas_validator_with_data(
-            df=df, batch_definition=batch_definition, context=context
+            df=df,
+            context=context,
+            batch_definition=batch_definition,
         )
 
     elif execution_engine in SQL_DIALECT_NAMES:
@@ -1271,6 +1273,7 @@ def get_test_validator_with_data(  # noqa: C901 - 31
         return build_sa_validator_with_data(
             df=df,
             sa_engine_name=execution_engine,
+            context=context,
             schemas=schemas,
             caching=caching,
             table_name=table_name,
@@ -1278,7 +1281,6 @@ def get_test_validator_with_data(  # noqa: C901 - 31
             extra_debug_info=extra_debug_info,
             debug_logger=debug_logger,
             batch_definition=None,
-            context=context,
         )
 
     elif execution_engine == "spark":
@@ -1401,8 +1403,8 @@ def get_test_validator_with_data(  # noqa: C901 - 31
         return build_spark_validator_with_data(
             df=spark_df,
             spark=spark,
-            batch_definition=batch_definition,
             context=context,
+            batch_definition=batch_definition,
         )
 
     else:
@@ -1411,8 +1413,8 @@ def get_test_validator_with_data(  # noqa: C901 - 31
 
 def build_pandas_validator_with_data(
     df: pd.DataFrame,
+    context: DataContext,
     batch_definition: Optional[BatchDefinition] = None,
-    context: Optional[DataContext] = None,
 ) -> Validator:
     batch = Batch(data=df, batch_definition=batch_definition)
     return Validator(
@@ -1427,6 +1429,7 @@ def build_pandas_validator_with_data(
 def build_sa_validator_with_data(  # noqa: C901 - 39
     df,
     sa_engine_name,
+    context: DataContext,
     schemas=None,
     caching=True,
     table_name=None,
@@ -1434,7 +1437,6 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     extra_debug_info="",
     batch_definition: Optional[BatchDefinition] = None,
     debug_logger: Optional[logging.Logger] = None,
-    context: Optional[DataContext] = None,
 ):
     _debug = lambda x: x  # noqa: E731
     if debug_logger:
@@ -1677,8 +1679,8 @@ def modify_locale(func):
 def build_spark_validator_with_data(
     df: Union[pd.DataFrame, SparkDataFrame],
     spark: SparkSession,
+    context: DataContext,
     batch_definition: Optional[BatchDefinition] = None,
-    context: Optional["DataContext"] = None,
 ) -> Validator:
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
