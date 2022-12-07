@@ -184,7 +184,11 @@ def test_result_format_only_in_expectation(
     )
     evrs = result.list_validation_results()
     first_result = evrs[0]["results"][0]["result"]["unexpected_index_list"]
-    assert first_result == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    assert first_result == [
+        {"pk_1": 3, "pk_2": "three"},
+        {"pk_1": 4, "pk_2": "four"},
+        {"pk_1": 5, "pk_2": "five"},
+    ]
 
 
 def test_result_format_in_checkpoint_and_expectation_configuration_expectation_ovverides(
@@ -227,3 +231,7 @@ def test_result_format_in_checkpoint_and_expectation_configuration_expectation_o
         {"pk_1": 4, "pk_2": "four"},
         {"pk_1": 5, "pk_2": "five"},
     ]
+
+
+# what we want
+# TODO: add anothher Expectation, so that we are overridding something at the Expectation level

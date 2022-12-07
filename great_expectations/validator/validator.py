@@ -966,6 +966,7 @@ class Validator:
             expectation for expectation in keys if expectation.startswith("expect_")
         ]
 
+    # WILL marker
     def graph_validate(
         self,
         configurations: List[ExpectationConfiguration],
@@ -1043,7 +1044,7 @@ class Validator:
                 return evrs
             else:
                 raise err
-
+        print("world")
         configuration: ExpectationConfiguration
         result: ExpectationValidationResult
         for configuration in processed_configurations:
@@ -1065,6 +1066,8 @@ class Validator:
                     )
                 else:
                     raise err
+        print(evrs)
+        # breakpoint()
 
         return evrs
 
@@ -1100,6 +1103,12 @@ class Validator:
             evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
 
             expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
+
+            lower_level = configuration.kwargs.get("result_format")
+            if lower_level:
+                for key in lower_level.keys():
+                    runtime_configuration["result_format"][key] = lower_level[key]
+
             validation_dependencies: ValidationDependencies = (
                 expectation_impl().get_validation_dependencies(
                     configuration=evaluated_config,
@@ -1108,6 +1117,11 @@ class Validator:
                 )
             )
 
+            # update runtime_configuration with lower prioerity?
+            # runtime_configuration: dict = self._update_with_local()
+
+            # breakpoint()
+            # runtime_configuration["result_format"] = configuration.kwargs.get("result_format")
             try:
                 expectation_validation_graph: ExpectationValidationGraph = (
                     ExpectationValidationGraph(
@@ -1143,8 +1157,11 @@ class Validator:
                     evrs.append(result)
                 else:
                     raise err
-
         return expectation_validation_graphs, evrs, processed_configurations
+
+    def _update_with_local(self):
+        # breakpoint()
+        pass
 
     def _generate_suite_level_graph_from_expectation_level_sub_graphs(
         self,
@@ -1183,6 +1200,8 @@ class Validator:
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ]
+        # breakpoint()
+
         resolved_metrics, aborted_metrics_info = graph.resolve(
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=0,
@@ -1757,7 +1776,8 @@ class Validator:
 
             # Group expectations by column
             columns = {}
-
+            # this is where we are going through the expectationsj
+            # breakpoint()
             for expectation in expectation_suite.expectations:
                 expectation.process_evaluation_parameters(
                     evaluation_parameters=runtime_evaluation_parameters,
@@ -2037,7 +2057,9 @@ class Validator:
 
         if catch_exceptions is not None:
             runtime_configuration.update({"catch_exceptions": catch_exceptions})
-
+        # this will be needed to change the result format and ensure that the
+        # expectation-level result_format will override the Checkpoint level one
+        # breakpoint()
         if (
             self.default_expectation_args["result_format"]
             == Validator.DEFAULT_RUNTIME_CONFIGURATION["result_format"]

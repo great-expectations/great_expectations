@@ -119,6 +119,7 @@ class BaseCheckpoint(ConfigPeer):
 
         run_time = run_time or datetime.datetime.now()
         runtime_configuration = runtime_configuration or {}
+        # todo : find out how the runtime_configuration is loaded
         result_format = result_format or runtime_configuration.get("result_format")
         _result_format_types = (type(None), str, dict)
         assert isinstance(
@@ -142,11 +143,13 @@ class BaseCheckpoint(ConfigPeer):
             "profilers": profilers or [],
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
-
+        # WILL : where do we get the substituiton information
+        # runtime kwargs are passed into the Checkpoint.run() method
         substituted_runtime_config: dict = self.get_substituted_config(
             runtime_kwargs=runtime_kwargs
         )
-
+        # TODO: see if this run_name_template contains the information that we need.
+        # do we ensure that the substitution happsn here:?
         run_name_template = substituted_runtime_config.get("run_name_template")
 
         batch_request = substituted_runtime_config.get("batch_request")
@@ -278,6 +281,7 @@ class BaseCheckpoint(ConfigPeer):
 
         return self._substitute_config_variables(config=substituted_config)
 
+    # do we do this?
     def _get_substituted_runtime_kwargs(
         self,
         source_config: dict,
@@ -285,7 +289,7 @@ class BaseCheckpoint(ConfigPeer):
     ) -> dict:
         if runtime_kwargs is None:
             runtime_kwargs = {}
-
+        # breakpoint()
         substituted_config: dict = substitute_runtime_config(
             source_config=source_config, runtime_kwargs=runtime_kwargs
         )
@@ -362,9 +366,11 @@ class BaseCheckpoint(ConfigPeer):
                 "result_format"
             )
             result_format = result_format or result_format_validation
-
+            # breakpoint()
             if result_format is None:
                 result_format = {"result_format": "SUMMARY"}
+
+            # TODO: see if this is where the substitution needs to happen
 
             action_list_validation_operator: ActionListValidationOperator = (
                 ActionListValidationOperator(
@@ -387,7 +393,8 @@ class BaseCheckpoint(ConfigPeer):
                 operator_run_kwargs["catch_exceptions"] = catch_exceptions_validation
 
             validation_id: Optional[str] = substituted_validation_dict.get("id")
-
+            # here is something written by us
+            # is the validator going tob edoing
             async_validation_operator_result = async_executor.submit(
                 action_list_validation_operator.run,
                 assets_to_validate=[validator],

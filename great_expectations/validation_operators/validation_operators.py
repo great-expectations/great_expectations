@@ -82,6 +82,7 @@ class ValidationOperator:
         raise NotImplementedError
 
 
+# add note: this is the action list like "store_validation_result" and weveryting that is run. it has access to result_format
 class ActionListValidationOperator(ValidationOperator):
     """
 
@@ -343,9 +344,12 @@ class ActionListValidationOperator(ValidationOperator):
                 else:
                     batch_identifier = batch.batch_id
 
+                #
                 if result_format is None:
                     result_format = self.result_format
+                # is this where the change needs to be loaded?
 
+                # this is going to be something that might
                 batch_validate_arguments = {
                     "run_id": run_id,
                     "result_format": result_format,
@@ -357,7 +361,9 @@ class ActionListValidationOperator(ValidationOperator):
 
                 if checkpoint_name is not None:
                     batch_validate_arguments["checkpoint_name"] = checkpoint_name
-
+                # this is the submit that will do the validateion
+                # 1. `batch_validate_arguments` currently contains the result format, but only the global ones
+                # 2. Validator : has a validate() method
                 batch_and_async_result_tuples.append(
                     (
                         batch,
@@ -387,7 +393,7 @@ class ActionListValidationOperator(ValidationOperator):
                         expectation_suite_identifier=expectation_suite_identifier,
                         run_id=run_id,
                     )
-
+                # this is the validation result that we want
                 validation_result = async_batch_validation_result.result()
                 validation_result.meta["validation_id"] = validation_id
                 validation_result.meta["checkpoint_id"] = (
@@ -439,6 +445,7 @@ class ActionListValidationOperator(ValidationOperator):
         :param run_id:
         :return: a dictionary: {action name -> result returned by the action}
         """
+        # the action list: we aren't at hte level of expecation yet
         batch_actions_results = {}
         for action in self.action_list:
             # NOTE: Eugene: 2019-09-23: log the info about the batch and the expectation suite
@@ -464,6 +471,7 @@ class ActionListValidationOperator(ValidationOperator):
                     expectation_suite_identifier=expectation_suite_identifier,
                     checkpoint_identifier=checkpoint_identifier,
                 )
+                # breakpoint()
 
                 # add action_result
                 batch_actions_results[action["name"]] = (
