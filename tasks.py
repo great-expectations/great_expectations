@@ -360,7 +360,7 @@ def _exit_with_error_if_not_in_repo_root(task_name: str):
     """Exit if the command was not run from the repository root."""
     filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
     curdir = os.path.realpath(os.getcwd())
-    exit_message = f"The {task_name} task must be invoked from the same directory as the task.py file at the top of the repo."
+    exit_message = f"The {task_name} task must be invoked from the same directory as the tasks.py file at the top of the repo."
     if filedir != curdir:
         raise invoke.Exit(
             exit_message,
