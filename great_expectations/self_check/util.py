@@ -1628,7 +1628,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         },
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    context.datasources["my_test_datasource"]._execution_engine = execution_engine
+    context.datasources["my_test_datasource"]._execution_engine = execution_engine  # type: ignore[union-attr]
     my_data_connector: ConfiguredAssetSqlDataConnector = (
         ConfiguredAssetSqlDataConnector(
             name="my_sql_data_connector",
