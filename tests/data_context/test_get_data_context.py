@@ -148,7 +148,7 @@ def test_cloud_context_env(
         return_value=empty_ge_cloud_data_context_config,
     ):
         assert isinstance(
-            gx.get_context(ge_cloud_mode=ge_cloud_mode),
+            gx.get_context(cloud_mode=ge_cloud_mode),
             CloudDataContext,
         )
 
@@ -160,7 +160,7 @@ def test_cloud_context_disabled(set_up_cloud_envs, tmp_path: pathlib.Path):
     project_path_str = str(project_path)
     gx.data_context.DataContext.create(project_path_str)
     with working_directory(project_path_str):
-        assert isinstance(gx.get_context(ge_cloud_mode=False), DataContext)
+        assert isinstance(gx.get_context(cloud_mode=False), DataContext)
 
 
 @pytest.mark.cloud
@@ -168,7 +168,7 @@ def test_cloud_missing_env_throws_exception(
     clear_env_vars, empty_ge_cloud_data_context_config
 ):
     with pytest.raises(Exception):
-        gx.get_context(ge_cloud_mode=True),
+        gx.get_context(cloud_mode=True),
 
 
 @pytest.mark.parametrize("params", [GX_CLOUD_PARAMS_REQUIRED, GX_CLOUD_PARAMS_ALL])
@@ -195,9 +195,9 @@ def test_cloud_context_with_in_memory_config_overrides(
         return_value=empty_ge_cloud_data_context_config,
     ):
         context = gx.get_context(
-            ge_cloud_base_url="http://hello.com",
-            ge_cloud_organization_id="bd20fead-2c31-4392-bcd1-f1e87ad5a79c",
-            ge_cloud_access_token="i_am_a_token",
+            cloud_base_url="http://hello.com",
+            cloud_organization_id="bd20fead-2c31-4392-bcd1-f1e87ad5a79c",
+            cloud_access_token="i_am_a_token",
         )
         assert isinstance(context, CloudDataContext)
         assert context.expectations_store_name == "default_expectations_store"
@@ -221,9 +221,9 @@ def test_cloud_context_with_in_memory_config_overrides(
         )
         context = gx.get_context(
             project_config=config,
-            ge_cloud_base_url="http://hello.com",
-            ge_cloud_organization_id="bd20fead-2c31-4392-bcd1-f1e87ad5a79c",
-            ge_cloud_access_token="i_am_a_token",
+            cloud_base_url="http://hello.com",
+            cloud_organization_id="bd20fead-2c31-4392-bcd1-f1e87ad5a79c",
+            cloud_access_token="i_am_a_token",
         )
         assert isinstance(context, CloudDataContext)
         assert context.expectations_store_name == "new_expectations_store"

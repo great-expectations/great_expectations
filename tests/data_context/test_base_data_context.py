@@ -270,7 +270,7 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
     Saving of ExpectationSuites using such a Validator should send payloads to the Cloud
     backend.
     """
-    context = DataContext(ge_cloud_mode=True)
+    context = DataContext(cloud_mode=True)
 
     (
         validator,
@@ -304,7 +304,7 @@ def test_validator_e2e_workflow_with_cloud_enabled_context(
     Saving of ExpectationSuites using such a Validator should send payloads to the Cloud
     backend.
     """
-    context = DataContext(ge_cloud_mode=True)
+    context = DataContext(cloud_mode=True)
 
     (
         validator,

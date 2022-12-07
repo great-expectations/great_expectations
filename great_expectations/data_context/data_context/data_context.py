@@ -273,8 +273,8 @@ class DataContext(BaseDataContext):
             project_config=project_config,
             context_root_dir=self._context_root_directory,
             runtime_environment=runtime_environment,
-            ge_cloud_mode=self._cloud_mode,
-            ge_cloud_config=self._cloud_config,
+            cloud_mode=self._cloud_mode,
+            cloud_config=self._cloud_config,
         )
 
         # Save project config if data_context_id auto-generated

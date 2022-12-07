@@ -210,8 +210,8 @@ def test_list_expectation_suites(
     context = BaseDataContext(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path_name,
-        ge_cloud_config=ge_cloud_config,
-        ge_cloud_mode=True,
+        cloud_config=ge_cloud_config,
+        cloud_mode=True,
     )
 
     with mock.patch("requests.Session.get", autospec=True) as mock_get:

@@ -2552,8 +2552,8 @@ def empty_base_data_context_in_cloud_mode(
     context = gx.data_context.BaseDataContext(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path,
-        ge_cloud_mode=True,
-        ge_cloud_config=ge_cloud_config,
+        cloud_mode=True,
+        cloud_config=ge_cloud_config,
     )
     assert context.list_datasources() == []
     return context
@@ -2588,7 +2588,7 @@ def empty_data_context_in_cloud_mode(
         side_effect=mocked_get_cloud_config,
     ):
         context = DataContext(
-            ge_cloud_mode=True,
+            cloud_mode=True,
             context_root_dir=project_path_name,
         )
         return context
