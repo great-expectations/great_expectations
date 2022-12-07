@@ -1217,9 +1217,6 @@ def get_test_validator_with_data(  # noqa: C901 - 31
 ):
     """Utility to create datasets for json-formatted tests."""
 
-    if context is None:
-        context = build_in_memory_runtime_context()
-
     df = pd.DataFrame(data)
     if execution_engine == "pandas":
         if schemas and "pandas" in schemas:
@@ -1419,6 +1416,10 @@ def build_pandas_validator_with_data(
     context: Optional[DataContext] = None,
 ) -> Validator:
     batch = Batch(data=df, batch_definition=batch_definition)
+
+    if context is None:
+        context = build_in_memory_runtime_context()
+
     return Validator(
         execution_engine=PandasExecutionEngine(),
         batches=[
@@ -1605,6 +1606,9 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
+    if context is None:
+        context = build_in_memory_runtime_context()
+
     context.datasources["my_test_datasource"] = Datasource(
         name="my_test_datasource",
         # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
@@ -1695,12 +1699,17 @@ def build_spark_validator_with_data(
             ],
             df.columns.tolist(),
         )
+
     batch = Batch(data=df, batch_definition=batch_definition)
     execution_engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark,
         df=df,
         batch_definition=batch_definition,
     )
+
+    if context is None:
+        context = build_in_memory_runtime_context()
+
     return Validator(
         execution_engine=execution_engine,
         batches=[
