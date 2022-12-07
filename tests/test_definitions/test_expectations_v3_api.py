@@ -22,7 +22,10 @@ from great_expectations.self_check.util import (
     sqliteDialect,
     trinoDialect,
 )
-from tests.conftest import build_test_backends_list_v3_api
+from tests.conftest import (
+    build_in_memory_runtime_context,
+    build_test_backends_list_v3_api,
+)
 
 
 def pytest_generate_tests(metafunc):
@@ -79,13 +82,17 @@ def pytest_generate_tests(metafunc):
                                         dataset.get("schemas"),
                                         table_name=dataset.get("dataset_name"),
                                         sqlite_db_path=sqlite_db_path,
+                                        context=build_in_memory_runtime_context(),
                                     )
                                 )
                             validator_with_data = datasets[0]
                         else:
                             schemas = d["schemas"] if "schemas" in d else None
                             validator_with_data = get_test_validator_with_data(
-                                c, d["data"], schemas=schemas
+                                c,
+                                d["data"],
+                                schemas=schemas,
+                                context=build_in_memory_runtime_context(),
                             )
 
                     for test in d["tests"]:
