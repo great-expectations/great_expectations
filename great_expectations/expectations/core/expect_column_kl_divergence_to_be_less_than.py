@@ -1129,9 +1129,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
-        """
-        Rendering function that is utilized by GE Cloud Front-end
-        """
         (
             header_template_str,
             header_params_with_json_schema,

@@ -56,7 +56,7 @@ HOW_TO_CUSTOMIZE = f"""\n<cyan>You can customize your configuration in many ways
     - Run `<green>great_expectations suite --help</green>` to create, edit, list, profile Expectation Suites.
     - Run `<green>great_expectations docs --help</green>` to build and manage Data Docs sites.
 
-  <cyan>Edit your configuration in {DataContext.GE_YML} to:</cyan>
+  <cyan>Edit your configuration in {DataContext.GX_YML} to:</cyan>
     - Move Stores to the cloud
     - Add Slack notifications, PagerDuty alerts, etc.
     - Customize your Data Docs

@@ -195,7 +195,7 @@ def test_docs_build_happy_paths_build_site_on_single_site_context(
             in obs_urls[0]["site_url"]
         )
         site_dir = os.path.join(
-            root_dir, context.GE_UNCOMMITTED_DIR, "data_docs", "local_site"
+            root_dir, context.GX_UNCOMMITTED_DIR, "data_docs", "local_site"
         )
         assert os.path.isdir(site_dir)
         # Note the fixture has no expectations or validations - only check the index
@@ -418,7 +418,7 @@ def test_docs_build_happy_paths_build_site_on_multiple_site_context(
     for expected_site_name in expected_built_site_names:
         assert expected_site_name in stdout
         site_dir = os.path.join(
-            root_dir, context.GE_UNCOMMITTED_DIR, "data_docs", expected_site_name
+            root_dir, context.GX_UNCOMMITTED_DIR, "data_docs", expected_site_name
         )
         assert os.path.isdir(site_dir)
         # Note the fixture has no expectations or validations - only check the index
@@ -507,7 +507,7 @@ def context_with_site_built(titanic_data_context_stats_enabled_config_version_3)
     assert len(obs_urls) == 1
     expected_index_path = os.path.join(
         context.root_directory,
-        context.GE_UNCOMMITTED_DIR,
+        context.GX_UNCOMMITTED_DIR,
         "data_docs",
         "local_site",
         "index.html",
@@ -656,7 +656,7 @@ def test_docs_clean_happy_paths_clean_expected_sites(
     ]
     expected_index_path = os.path.join(
         context.root_directory,
-        context.GE_UNCOMMITTED_DIR,
+        context.GX_UNCOMMITTED_DIR,
         "data_docs",
         "local_site",
         "index.html",

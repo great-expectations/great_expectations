@@ -11,7 +11,7 @@ from great_expectations.cli import toolkit
 from great_expectations.cli.cli_logging import _set_up_logger
 from great_expectations.cli.pretty_printing import cli_message
 from great_expectations.data_context.types.base import (
-    FIRST_GE_CONFIG_VERSION_WITH_CHECKPOINT_STORE,
+    FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE,
 )
 
 try:
@@ -180,7 +180,7 @@ def cli(
         ge_config_version: float = (
             ctx.obj.get_data_context_from_config_file().get_config().config_version
         )
-        if ge_config_version >= FIRST_GE_CONFIG_VERSION_WITH_CHECKPOINT_STORE:
+        if ge_config_version >= FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE:
             raise ge_exceptions.InvalidDataContextConfigError(
                 f"Using the legacy v2 (Batch Kwargs) API with a recent config version ({ge_config_version}) is illegal."
             )

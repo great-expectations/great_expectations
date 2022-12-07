@@ -27,7 +27,7 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
 )
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.execution_environment import (
-    GEExecutionEnvironment,
+    GXExecutionEnvironment,
     PackageInfo,
     PackageInfoSchema,
 )
@@ -160,8 +160,8 @@ class UsageStatisticsHandler:
 
     @staticmethod
     def _get_serialized_dependencies() -> List[dict]:
-        """Get the serialized dependencies from the GEExecutionEnvironment."""
-        ge_execution_environment = GEExecutionEnvironment()
+        """Get the serialized dependencies from the GXExecutionEnvironment."""
+        ge_execution_environment = GXExecutionEnvironment()
         dependencies: List[PackageInfo] = ge_execution_environment.dependencies
 
         schema = PackageInfoSchema()

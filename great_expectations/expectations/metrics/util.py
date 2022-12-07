@@ -12,7 +12,7 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.util import check_sql_engine_dialect
 from great_expectations.util import get_sqlalchemy_inspector
 
@@ -599,7 +599,7 @@ def column_reflection_fallback(
             query: TextClause = selectable
         else:
             # noinspection PyUnresolvedReferences
-            if dialect.name.lower() == GESqlDialect.REDSHIFT:
+            if dialect.name.lower() == GXSqlDialect.REDSHIFT:
                 # Redshift needs temp tables to be declared as text
                 query: Select = (
                     sa.select([sa.text("*")]).select_from(sa.text(selectable)).limit(1)
@@ -920,7 +920,7 @@ def validate_distribution_parameters(distribution, params):
 
     else:
         raise ValueError(
-            "params must be a dict or list, or use ge.dataset.util.infer_distribution_parameters(data, distribution)"
+            "params must be a dict or list, or use great_expectations.dataset.util.infer_distribution_parameters(data, distribution)"
         )
 
     return
