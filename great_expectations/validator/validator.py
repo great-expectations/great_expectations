@@ -1171,10 +1171,9 @@ class Validator:
         This functionality is enabled by the current function.
         """
         expectation_level_config: Union[
-            dict, None
+            dict, str, None
         ] = expectation_configuration.kwargs.get("result_format")
-
-        if expectation_level_config:
+        if expectation_level_config and isinstance(expectation_level_config, dict):
             if not runtime_configuration:
                 runtime_configuration = expectation_level_config
             else:
