@@ -403,11 +403,22 @@ class ExecutionEngine(ABC):
                 )
 
             try:
-                # NOTE: DH 20220328: This is where we can introduce the Batch Metrics Store (BMS)
+                # TODO: <Alex>ALEX</Alex>
+                try:
+                    w = dict(**metric_provider_kwargs)
+                    # print(f'\n[ALEX_TEST] [EXECUTION_ENGINE.resolve_metrics()] METRIC_PROVIDER_KWARGS-0:\n{w} ; TYPE: {str(type(w))}')
+                except Exception as e100:
+                    # print(f'\n[ALEX_TEST] [EXECUTION_ENGINE.resolve_metrics()] EXCEPTION!!!!-EH?!:\n{e100} ; TYPE: {str(type(e100))}')
+                    raise e100
+                # TODO: <Alex>ALEX</Alex>
+                # print(f'\n[ALEX_TEST] [EXECUTION_ENGINE.resolve_metrics()] METRIC_FN:\n{metric_fn} ; TYPE: {str(type(metric_fn))}')
+                # print(f'\n[ALEX_TEST] [EXECUTION_ENGINE.resolve_metrics()] METRIC_PROVIDER_KWARGS-1:\n{metric_provider_kwargs} ; TYPE: {str(type(metric_provider_kwargs))}')
                 resolved_metrics[metric_to_resolve.id] = metric_fn(
                     **metric_provider_kwargs
                 )
             except Exception as e:
+                # print(f'\n[ALEX_TEST] [EXECUTION_ENGINE.resolve_metrics()] EXCEPTION!!!!-FAILED_METRIC:\n{metric_to_resolve} ; TYPE: {str(type(metric_to_resolve))}')
+                # print(f'\n[ALEX_TEST] [EXECUTION_ENGINE.resolve_metrics()] EXCEPTION!!!!-FAILED_METRIC.ID:\n{metric_to_resolve.id} ; TYPE: {str(type(metric_to_resolve.id))}')
                 raise ge_exceptions.MetricResolutionError(
                     message=str(e),
                     failed_metrics=(metric_to_resolve,),

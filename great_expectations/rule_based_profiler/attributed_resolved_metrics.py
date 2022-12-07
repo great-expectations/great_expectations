@@ -45,6 +45,18 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
                     ):
                         return True
 
+                # TODO: <Alex>ALEX</Alex>
+                # Components of different types cannot be packaged into "numpy.ndarray" type (due to type mismatch).
+                values_iterator: Iterator = iter(values)
+                first_value_type: type = type(next(values_iterator))
+                current_type: type
+                if not all(
+                    type(current_value) == first_value_type
+                    for current_value in values_iterator
+                ):
+                    return True
+                # TODO: <Alex>ALEX</Alex>
+
                 # Recursively evaluate each element of properly shaped iterable (list or tuple).
                 for value in values:
                     if _detect_illegal_array_type_or_shape(values=value):
@@ -63,7 +75,12 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
 
         return metric_values
     else:
+        # TODO: <Alex>ALEX</Alex>
         return np.asarray(metric_values)
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # return np.asarray(metric_values, dtype=np.dtype(object))
+        # TODO: <Alex>ALEX</Alex>
 
 
 @dataclass

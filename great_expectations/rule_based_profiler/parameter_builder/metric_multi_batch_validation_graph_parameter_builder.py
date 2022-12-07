@@ -19,8 +19,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 from great_expectations.types.attributes import Attributes
 
 # TODO: <Alex>ALEX</Alex>
-from great_expectations.validator.validation_graph import ValidationGraph
-
+# from great_expectations.validator.validation_graph import ValidationGraph
 # TODO: <Alex>ALEX</Alex>
 
 if TYPE_CHECKING:

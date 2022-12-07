@@ -213,6 +213,12 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
                 # TODO: <Alex>ALEX</Alex>
             # TODO: <Alex>ALEX</Alex>
 
+            # TODO: <Alex>ALEX</Alex>
+            # a = 'column_pair_values_equal_unexpected_values'
+            # if self.name == a:
+            #     print(f'\n[ALEX_TEST] [*************************************MetricMultiBatchParameterBuilder._build_parameters()] {FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}:\n{metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values} ; TYPE: {str(type(metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values))}')
+            #     print(f'\n[ALEX_TEST] [*************************************MetricMultiBatchParameterBuilder._build_parameters()] {FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY}:\n{metric_computation_result.attributed_resolved_metrics[0].conditioned_attributed_metric_values} ; TYPE: {str(type(metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values))}')
+            # TODO: <Alex>ALEX</Alex>
             return Attributes(
                 {
                     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[

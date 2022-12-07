@@ -36,8 +36,9 @@ from great_expectations.core import (
     ExpectationSuiteSchema,
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
+    IDDict,
 )
-from great_expectations.core.batch import Batch, BatchDefinition
+from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
     ExpectationTestCase,
     ExpectationTestDataCases,
@@ -50,8 +51,12 @@ from great_expectations.core.util import (
     get_sql_dialect_floating_point_infinity_value,
 )
 
+# TODO: <Alex>ALEX</Alex>
 # from great_expectations.data_context.data_context import DataContext
+# TODO: <Alex>ALEX</Alex>
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
+from great_expectations.datasource import Datasource
+from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
     MetricProviderError,
@@ -1248,7 +1253,17 @@ def get_test_validator_with_data(  # noqa: C901 - 31
             # noinspection PyUnusedLocal
             table_name = generate_test_table_name()
 
-        return build_pandas_validator_with_data(df=df, context=context)
+        batch_definition = BatchDefinition(
+            datasource_name="pandas_datasource",
+            data_connector_name="runtime_data_connector",
+            data_asset_name="my_asset",
+            batch_identifiers=IDDict({}),
+            batch_spec_passthrough=None,
+        )
+
+        return build_pandas_validator_with_data(
+            df=df, batch_definition=batch_definition, context=context
+        )
 
     elif execution_engine in SQL_DIALECT_NAMES:
         if not create_engine:
@@ -1257,7 +1272,7 @@ def get_test_validator_with_data(  # noqa: C901 - 31
         if table_name is None:
             table_name = generate_test_table_name().lower()
 
-        result = build_sa_validator_with_data(
+        return build_sa_validator_with_data(
             df=df,
             sa_engine_name=execution_engine,
             schemas=schemas,
@@ -1266,9 +1281,9 @@ def get_test_validator_with_data(  # noqa: C901 - 31
             sqlite_db_path=sqlite_db_path,
             extra_debug_info=extra_debug_info,
             debug_logger=debug_logger,
+            batch_definition=None,
             context=context,
         )
-        return result
 
     elif execution_engine == "spark":
         import pyspark.sql.types as sparktypes
@@ -1380,8 +1395,18 @@ def get_test_validator_with_data(  # noqa: C901 - 31
             # noinspection PyUnusedLocal
             table_name = generate_test_table_name()
 
+        batch_definition = BatchDefinition(
+            datasource_name="spark_datasource",
+            data_connector_name="runtime_data_connector",
+            data_asset_name="my_asset",
+            batch_identifiers=IDDict({}),
+            batch_spec_passthrough=None,
+        )
         return build_spark_validator_with_data(
-            df=spark_df, spark=spark, context=context
+            df=spark_df,
+            spark=spark,
+            batch_definition=batch_definition,
+            context=context,
         )
 
     else:
@@ -1469,30 +1494,37 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
 
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
-        engine = create_engine(get_sqlite_connection_url(sqlite_db_path))
+        connection_string = get_sqlite_connection_url(sqlite_db_path)
+        engine = create_engine(connection_string)
     elif sa_engine_name == "postgresql":
-        engine = connection_manager.get_engine(
-            f"postgresql://postgres@{db_hostname}/test_ci"
-        )
+        connection_string = f"postgresql://postgres@{db_hostname}/test_ci"
+        engine = connection_manager.get_engine(connection_string)
     elif sa_engine_name == "mysql":
-        engine = create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
+        connection_string = f"mysql+pymysql://root@{db_hostname}/test_ci"
+        engine = create_engine(connection_string)
     elif sa_engine_name == "mssql":
+        connection_string = f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true"
         engine = create_engine(
-            f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?driver=ODBC Driver 17 "
-            "for SQL Server&charset=utf8&autocommit=true",
+            connection_string,
             # echo=True,
         )
     elif sa_engine_name == "bigquery":
-        engine = _create_bigquery_engine()
+        connection_string = _get_bigquery_connection_string()
+        engine = create_engine(connection_string)
     elif sa_engine_name == "trino":
-        engine = _create_trino_engine(db_hostname)
+        connection_string = _get_trino_connection_string()
+        engine = create_engine(connection_string)
     elif sa_engine_name == "redshift":
-        engine = _create_redshift_engine()
+        connection_string = _get_redshift_connection_string()
+        engine = create_engine(connection_string)
     elif sa_engine_name == "athena":
-        engine = _create_athena_engine()
+        connection_string = _get_athena_connection_string()
+        engine = create_engine(connection_string)
     elif sa_engine_name == "snowflake":
-        engine = _create_snowflake_engine()
+        connection_string = _get_snowflake_connection_string()
+        engine = create_engine(connection_string)
     else:
+        connection_string = None
         engine = None
 
     # If "autocommit" is not desired to be on by default, then use the following pattern when explicit "autocommit"
@@ -1571,15 +1603,60 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     )
 
     batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
-    batch = Batch(data=batch_data, batch_definition=batch_definition)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
+
+    context.datasources["my_test_datasource"] = Datasource(
+        name="my_test_datasource",
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        execution_engine={
+            "class_name": "SqlAlchemyExecutionEngine",
+            "connection_string": connection_string,
+        },
+        data_connectors={
+            "my_sql_data_connector": {
+                "class_name": "ConfiguredAssetSqlDataConnector",
+                "assets": {
+                    "my_asset": {
+                        "table_name": "animal_names",
+                    },
+                },
+            },
+        },
+    )
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    context.datasources["my_test_datasource"]._execution_engine = execution_engine
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=execution_engine,
+            assets={
+                "my_asset": {
+                    "table_name": "animals_table",
+                },
+            },
+        )
+    )
+
+    if batch_definition is None:
+        batch_definition = (
+            my_data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=BatchRequest(
+                    datasource_name="my_test_datasource",
+                    data_connector_name="my_sql_data_connector",
+                    data_asset_name="my_asset",
+                )
+            )
+        )[0]
+
+    batch = Batch(data=batch_data, batch_definition=batch_definition)
 
     return Validator(
         execution_engine=execution_engine,
+        data_context=context,
         batches=[
             batch,
         ],
-        data_context=context,
     )
 
 
@@ -1618,11 +1695,20 @@ def build_spark_validator_with_data(
             ],
             df.columns.tolist(),
         )
+    # TODO: <Alex>ALEX</Alex>
+    # batch_definition = None
+    # context = None
+    # TODO: <Alex>ALEX</Alex>
     batch = Batch(data=df, batch_definition=batch_definition)
     execution_engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark,
         df=df,
+        # TODO: <Alex>ALEX</Alex>
         batch_id=batch.id,
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # batch_definition=batch_definition,
+        # TODO: <Alex>ALEX</Alex>
     )
     return Validator(
         execution_engine=execution_engine,
@@ -1637,7 +1723,6 @@ def build_pandas_engine(
     df: pd.DataFrame,
 ) -> PandasExecutionEngine:
     batch = Batch(data=df)
-
     execution_engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     return execution_engine
 
@@ -1723,9 +1808,24 @@ def build_spark_engine(
         df = spark.createDataFrame(data=data, schema=schema)
 
     conf: Iterable[Tuple[str, str]] = spark.sparkContext.getConf().getAll()
+    # print(f'\n[ALEX_TEST] [SELF_CHECK/UTIL.BUILD_SPARK_ENGINE()] CONF:\n{conf} ; TYPE: {str(type(conf))}')
     spark_config: Dict[str, str] = dict(conf)
-    execution_engine = SparkDFExecutionEngine(spark_config=spark_config)
-    execution_engine.load_batch_data(batch_id=batch_id, batch_data=df)
+    # print(f'\n[ALEX_TEST] [SELF_CHECK/UTIL.BUILD_SPARK_ENGINE()] SPARK_CONFIG:\n{spark_config} ; TYPE: {str(type(spark_config))}')
+    # TODO: <Alex>ALEX</Alex>
+    # execution_engine = SparkDFExecutionEngine(spark_config=spark_config)
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    execution_engine = SparkDFExecutionEngine(
+        spark_config=spark_config,
+        batch_data_dict={
+            batch_id: df,
+        },
+        force_reuse_spark_context=True,
+    )
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    # execution_engine.load_batch_data(batch_id=batch_id, batch_data=df)
+    # TODO: <Alex>ALEX</Alex>
     return execution_engine
 
 
@@ -2938,6 +3038,8 @@ def check_json_test_result(test, result, data_asset=None) -> None:  # noqa: C901
 
             elif key == "unexpected_list":
                 try:
+                    # print(f'\n[ALEX_TEST] [WOUTPUT] WOUTPUT-ACTUAL:\n{result["result"]["unexpected_list"]} ; TYPE: {str(type(result["result"]["unexpected_list"]))}')
+                    # print(f'\n[ALEX_TEST] [WOUTPUT] WOUTPUT-EXPECT:\n{value} ; TYPE: {str(type(value))}')
                     assert result["result"]["unexpected_list"] == value, (
                         "expected "
                         + str(value)
@@ -2945,6 +3047,7 @@ def check_json_test_result(test, result, data_asset=None) -> None:  # noqa: C901
                         + str(result["result"]["unexpected_list"])
                     )
                 except AssertionError:
+                    # print(f'\n[ALEX_TEST] [WOUTPUT] WOUTPUT-ACTUAL-EXCEPTIONS!!!!!!!!!:\n{result["result"]["unexpected_list"]} ; TYPE: {str(type(result["result"]["unexpected_list"]))}')
                     if result["result"]["unexpected_list"]:
                         if type(result["result"]["unexpected_list"][0]) == list:
                             unexpected_list_tup = [
@@ -3062,12 +3165,17 @@ def generate_test_table_name(
 
 
 def _create_bigquery_engine() -> Engine:
+    return create_engine(_get_bigquery_connection_string())
+
+
+def _get_bigquery_connection_string() -> str:
     gcp_project = os.getenv("GE_TEST_GCP_PROJECT")
     if not gcp_project:
         raise ValueError(
             "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery expectation tests"
         )
-    return create_engine(f"bigquery://{gcp_project}/{_bigquery_dataset()}")
+
+    return f"bigquery://{gcp_project}/{_bigquery_dataset()}"
 
 
 def _bigquery_dataset() -> str:
@@ -3082,7 +3190,9 @@ def _bigquery_dataset() -> str:
 def _create_trino_engine(
     hostname: str = "localhost", schema_name: str = "schema"
 ) -> Engine:
-    engine = create_engine(f"trino://test@{hostname}:8088/memory/{schema_name}")
+    engine = create_engine(
+        _get_trino_connection_string(hostname=hostname, schema_name=schema_name)
+    )
     from sqlalchemy import text
     from trino.exceptions import TrinoUserError
 
@@ -3095,6 +3205,7 @@ def _create_trino_engine(
                 conn.execute(text(f"create schema {schema_name}"))
         except TrinoUserError:
             pass
+
     return engine
     # trino_user = os.getenv("GE_TEST_TRINO_USER")
     # if not trino_user:
@@ -3125,7 +3236,17 @@ def _create_trino_engine(
     # )
 
 
+def _get_trino_connection_string(
+    hostname: str = "localhost", schema_name: str = "schema"
+) -> str:
+    return f"trino://test@{hostname}:8088/memory/{schema_name}"
+
+
 def _create_redshift_engine() -> Engine:
+    return create_engine(_get_redshift_connection_string())
+
+
+def _get_redshift_connection_string() -> str:
     """
     Copied get_redshift_connection_url func from tests/test_utils.py
     """
@@ -3162,30 +3283,42 @@ def _create_redshift_engine() -> Engine:
         )
 
     url = f"redshift+psycopg2://{user}:{pswd}@{host}:{port}/{db}?sslmode={ssl}"
-    return create_engine(url)
+
+    return url
 
 
 def _create_athena_engine(db_name_env_var: str = "ATHENA_DB_NAME") -> Engine:
+    return create_engine(_get_athena_connection_string(db_name_env_var=db_name_env_var))
+
+
+def _get_athena_connection_string(db_name_env_var: str = "ATHENA_DB_NAME") -> str:
     """
     Copied get_awsathena_connection_url and get_awsathena_db_name funcs from
     tests/test_utils.py
     """
     ATHENA_DB_NAME: Optional[str] = os.getenv(db_name_env_var)
     ATHENA_STAGING_S3: Optional[str] = os.getenv("ATHENA_STAGING_S3")
+
     if not ATHENA_DB_NAME:
         raise ValueError(
             f"Environment Variable {db_name_env_var} is required to run integration tests against AWS Athena"
         )
+
     if not ATHENA_STAGING_S3:
         raise ValueError(
             "Environment Variable ATHENA_STAGING_S3 is required to run integration tests against AWS Athena"
         )
 
     url = f"awsathena+rest://@athena.us-east-1.amazonaws.com/{ATHENA_DB_NAME}?s3_staging_dir={ATHENA_STAGING_S3}"
-    return create_engine(url)
+
+    return url
 
 
 def _create_snowflake_engine() -> Engine:
+    return create_engine(_get_snowflake_connection_string())
+
+
+def _get_snowflake_connection_string() -> str:
     """
     Copied get_snowflake_connection_url func from tests/test_utils.py
     """
@@ -3198,7 +3331,8 @@ def _create_snowflake_engine() -> Engine:
     sfRole = os.environ.get("SNOWFLAKE_ROLE") or "PUBLIC"
 
     url = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}&role={sfRole}"
-    return create_engine(url)
+
+    return url
 
 
 def generate_sqlite_db_path():

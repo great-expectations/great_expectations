@@ -544,6 +544,7 @@ is not supported).
             min_graph_edges_pbar_enable=0,
             show_progress_bars=True,
         )
+        # print(f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] RESOLVED_METRICS:\n{resolved_metrics} ; TYPE: {str(type(resolved_metrics))}")
 
         # Step-5: Map resolved metrics to their attributes for identification and recovery by receiver.
 
@@ -570,6 +571,11 @@ is not supported).
 
             if metric_configuration.id in resolved_metrics:
                 resolved_metric_value = resolved_metrics[metric_configuration.id]
+                # TODO: <Alex>ALEX</Alex>
+                # a = 'column_pair_values.equal.unexpected_values'
+                # if metric_configuration.metric_name == a:
+                #     print(f'\n[ALEX_TEST] [@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@PARAMETER_BUILDER.get_metrics()] {a}:\n{resolved_metric_value} ; TYPE: {str(type(resolved_metric_value))}')
+                # TODO: <Alex>ALEX</Alex>
                 attributed_resolved_metrics.add_resolved_metric(
                     batch_id=metric_configuration.metric_domain_kwargs["batch_id"],
                     value=resolved_metric_value,

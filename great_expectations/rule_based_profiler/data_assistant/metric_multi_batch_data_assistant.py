@@ -123,8 +123,8 @@ class MetricMultiBatchDataAssistant(DataAssistant):
             )
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
             domain_builder = MultiColumnDomainBuilder(
-                include_column_names=[
-                    self._metric_configuration.metric_domain_kwargs["column_list"]
+                include_column_names=self._metric_configuration.metric_domain_kwargs[
+                    "column_list"
                 ],
                 data_context=None,
             )

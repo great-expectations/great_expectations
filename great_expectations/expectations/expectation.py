@@ -1017,7 +1017,7 @@ class Expectation(metaclass=MetaExpectation):
             # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] METRICS_BY_DOMAIN.MULTI_BATCH_METRIC_VALUE:\n{m} ; TYPE: {str(type(m))}")
             s = list(m.values())[-1][0]
             # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] METRICS_BY_DOMAIN.ACTIVE_BATCH_METRIC_VALUE:\n{s} ; TYPE: {str(type(s))}")
-            # j = convert_to_json_serializable(data=s)
+            j = convert_to_json_serializable(data=s)
             # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] METRICS_BY_DOMAIN.ACTIVE_BATCH_METRIC_VALUE_JSON_SERIALIZED:\n{j} ; TYPE: {str(type(j))}")
             # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>

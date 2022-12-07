@@ -479,14 +479,17 @@ def column_condition_partial(
                 )
 
                 column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+                # print(f'\n[ALEX_TEST] [COLUMN_CONDITION_PARTIAL] COLUMN_NAME-0:\n{column_name} ; TYPE: {str(type(column_name))}')
 
                 column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
                     execution_engine=execution_engine,
                 )
+                # print(f'\n[ALEX_TEST] [COLUMN_CONDITION_PARTIAL] COLUMN_NAME-1:\n{column_name} ; TYPE: {str(type(column_name))}')
 
                 column = data[column_name]
+                # print(f'\n[ALEX_TEST] [COLUMN_CONDITION_PARTIAL] COLUMN:\n{column} ; TYPE: {str(type(column))}')
                 expected_condition = metric_fn(
                     cls,
                     column,
@@ -496,6 +499,7 @@ def column_condition_partial(
                     _compute_domain_kwargs=compute_domain_kwargs,
                     _accessor_domain_kwargs=accessor_domain_kwargs,
                 )
+                # print(f'\n[ALEX_TEST] [COLUMN_CONDITION_PARTIAL] EXPECTED_CONDITION:\n{expected_condition} ; TYPE: {str(type(expected_condition))}')
 
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", True)
@@ -513,6 +517,10 @@ def column_condition_partial(
                         unexpected_condition = column.isNotNull() & ~expected_condition
                     else:
                         unexpected_condition = ~expected_condition
+
+                # print(f'\n[ALEX_TEST] [COLUMN_CONDITION_PARTIAL] UNEXPECTED_CONDITION:\n{unexpected_condition} ; TYPE: {str(type(unexpected_condition))}')
+                # print(f'\n[ALEX_TEST] [COLUMN_CONDITION_PARTIAL] COMPUTE_DOMAIN_KWARGS:\n{compute_domain_kwargs} ; TYPE: {str(type(compute_domain_kwargs))}')
+                # print(f'\n[ALEX_TEST] [COLUMN_CONDITION_PARTIAL] ACCESSOR_DOMAIN_KWARGS:\n{accessor_domain_kwargs} ; TYPE: {str(type(accessor_domain_kwargs))}')
                 return (
                     unexpected_condition,
                     compute_domain_kwargs,
