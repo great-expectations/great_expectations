@@ -97,6 +97,7 @@ from great_expectations.util import camel_to_snake, is_parseable_date
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import ValidationDependencies, Validator
+from tests.conftest import build_in_memory_runtime_context
 
 if TYPE_CHECKING:
     from great_expectations.data_context import DataContext
@@ -1224,7 +1225,7 @@ class Expectation(metaclass=MetaExpectation):
         _debug("Getting test results")
         test_results: List[ExpectationTestDiagnostics] = self._get_test_results(
             expectation_type=description_diagnostics.snake_name,
-            context=context,
+            context=context or build_in_memory_runtime_context(),
             test_data_cases=examples,
             execution_engine_diagnostics=introspected_execution_engines,
             raise_exceptions_for_backends=raise_exceptions_for_backends,
