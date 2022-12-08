@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -17,8 +17,8 @@ from great_expectations.render import (
 )
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
+    ParamSchemaType,
     RendererConfiguration,
-    RendererParams,
 )
 from great_expectations.render.util import (
     num_to_str,
@@ -45,6 +45,9 @@ except ImportError:
 from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import RendererParams
 
 
 class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
@@ -185,92 +188,59 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     }
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-    ) -> Tuple[str, dict, Union[dict, None]]:
-        renderer_configuration = RendererConfiguration(
-            configuration=configuration,
-            result=result,
-            runtime_configuration=runtime_configuration,
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args = (
+            ("column", ParamSchemaType.STRING),
+            ("value_set", ParamSchemaType.ARRAY),
+            ("mostly", ParamSchemaType.NUMBER),
+            ("parse_strings_as_datetimes", ParamSchemaType.BOOLEAN),
+            ("row_condition", ParamSchemaType.STRING),
+            ("condition_parser", ParamSchemaType.STRING),
         )
-        renderer_configuration.add_param(
-            name="column",
-            schema_type="string",
-        )
-        renderer_configuration.add_param(
-            name="value_set",
-            schema_type="array",
-        )
-        renderer_configuration.add_param(
-            name="mostly",
-            schema_type="number",
-        )
-        renderer_configuration.add_param(
-            name="mostly_pct",
-            schema_type="string",
-        )
-        renderer_configuration.add_param(
-            name="parse_strings_as_datetimes",
-            schema_type="boolean",
-        )
-        renderer_configuration.add_param(
-            name="row_condition",
-            schema_type="string",
-        )
-        renderer_configuration.add_param(
-            name="condition_parser",
-            schema_type="string",
-        )
+        for name, schema_type in add_param_args:
+            renderer_configuration.add_param(name=name, schema_type=schema_type)
 
-        params: RendererParams
-        params = renderer_configuration.params
+        params: RendererParams = renderer_configuration.params
+        template_str = ""
 
-        if not params.value_set or len(params.value_set.value) == 0:
-            values_string = "[ ]"
-        else:
-            for i, v in enumerate(params.value_set.value):
-                renderer_configuration.add_param(
-                    name=f"v__{str(i)}", schema_type="string", value=v
+        if params.value_set:
+            renderer_configuration = cls._add_value_set_params(
+                renderer_configuration=renderer_configuration
+            )
+            value_set_str: str = cls._get_value_set_string(
+                renderer_configuration=renderer_configuration
+            )
+            template_str += f"values must belong to this set: {value_set_str}"
+
+            if params.mostly and params.mostly.value < 1.0:
+                renderer_configuration = cls._add_mostly_pct_param(
+                    renderer_configuration=renderer_configuration
                 )
+                template_str += ", at least $mostly_pct % of the time."
+            else:
+                template_str += "."
 
-            params = renderer_configuration.params
-
-            values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params.value_set.value)]
-            )
-
-        template_str = f"values must belong to this set: {values_string}"
-
-        params_with_json_schema: dict = params.dict()
-
-        if params.mostly and params.mostly.value < 1.0:
-            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
-                params.mostly.value * 100, precision=15, no_scientific=True
-            )
-            template_str += ", at least $mostly_pct % of the time."
-        else:
-            template_str += "."
-
-        if params.parse_strings_as_datetimes:
-            template_str += " Values should be parsed as datetimes."
+            if params.parse_strings_as_datetimes:
+                template_str += " Values should be parsed as datetimes."
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
         if params.row_condition:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params.row_condition.value, with_schema=True
+            renderer_configuration = cls._add_row_condition_params(
+                renderer_configuration=renderer_configuration
             )
-            template_str = f"{conditional_template_str}, then {template_str}"
-            params_with_json_schema.update(conditional_params)
+            row_condition_str: str = cls._get_row_condition_string(
+                renderer_configuration=renderer_configuration
+            )
+            template_str = f"{row_condition_str}, then {template_str}"
 
-        return template_str, params_with_json_schema, renderer_configuration.styling
+        renderer_configuration.template_str = template_str
+
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
@@ -287,7 +257,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             runtime_configuration=runtime_configuration,
         )
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            renderer_configuration.kwargs,
             [
                 "column",
                 "value_set",
@@ -412,8 +382,9 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         return new_block
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        """Validates that a value_set has been provided."""
         super().validate_configuration(configuration)
         # supports extensibility by allowing value_set to not be provided in config but captured via child-class default_kwarg_values, e.g. parameterized expectations
         value_set = configuration.kwargs.get(

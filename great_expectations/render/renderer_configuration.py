@@ -1,8 +1,20 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
+from enum import Enum
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Generic,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 from pydantic import BaseModel, Field, create_model
+from pydantic.generics import GenericModel
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -13,7 +25,16 @@ if TYPE_CHECKING:
     from pydantic.typing import AbstractSetIntStr, DictStrAny, MappingIntStrAny
 
 
-class RendererParams(BaseModel):
+class ParamSchemaType(str, Enum):
+    """schema_type passed to RendererConfiguration.add_param()"""
+
+    STRING = "string"
+    NUMBER = "number"
+    BOOLEAN = "boolean"
+    ARRAY = "array"
+
+
+class _RendererParamsBase(BaseModel):
     class Config:
         validate_assignment = True
         arbitrary_types_allowed = True
@@ -26,14 +47,16 @@ class RendererParams(BaseModel):
         skip_defaults: Optional[bool] = None,
         exclude_unset: bool = False,
         exclude_defaults: bool = False,
-        exclude_none: bool = False,
+        exclude_none: bool = True,
     ) -> DictStrAny:
         """
-        Override BaseModel dict to make the default by_alias True instead of False.
-        We need by_alias to be set to True in RendererParams, because we have an existing
-        attribute named schema, and schema is already a Pydantic BaseModel attribute.
-        In practice this means the renderer implementer doesn't need to use
-        .dict(by_alias=True) everywhere.
+        Override BaseModel dict to make the defaults:
+            - by_alias=True because we have an existing attribute named schema, and schema is already a Pydantic
+              BaseModel attribute.
+            - exclude_none=True to ensure that None values aren't included in the json dict.
+
+        In practice this means the renderer implementer doesn't need to use .dict(by_alias=True, exclude_none=True)
+        everywhere.
         """
         return super().dict(
             include=include,
@@ -46,37 +69,46 @@ class RendererParams(BaseModel):
         )
 
 
-class RendererConfiguration(BaseModel):
+RendererParams = TypeVar("RendererParams", bound=_RendererParamsBase)
+
+
+class RendererConfiguration(GenericModel, Generic[RendererParams]):
     """Configuration object built for each renderer."""
 
     configuration: Union[ExpectationConfiguration, None] = Field(
-        ..., allow_mutation=False
+        None, allow_mutation=False
     )
-    result: Union[ExpectationValidationResult, None] = Field(..., allow_mutation=False)
-    runtime_configuration: Union[dict, None] = Field({}, allow_mutation=False)
+    result: Optional[ExpectationValidationResult] = Field(None, allow_mutation=False)
+    runtime_configuration: Optional[dict] = Field({}, allow_mutation=False)
     expectation_type: str = Field("", allow_mutation=False)
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
-    styling: Union[dict, None] = Field(None, allow_mutation=False)
-    params: BaseModel = Field(default_factory=RendererParams, allow_mutation=True)
+    styling: Optional[dict] = Field(None, allow_mutation=False)
+    params: RendererParams = Field(..., allow_mutation=True)
+    template_str: str = Field("", allow_mutation=True)
 
     class Config:
         validate_assignment = True
         arbitrary_types_allowed = True
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         kwargs = RendererConfiguration._set_expectation_type_and_kwargs(kwargs=kwargs)
         kwargs = RendererConfiguration._set_include_column_name_and_styling(
             kwargs=kwargs
         )
+        kwargs["params"] = _RendererParamsBase()
         super().__init__(**kwargs)
 
     @staticmethod
     def _set_expectation_type_and_kwargs(kwargs: dict) -> dict:
-        if kwargs["configuration"]:
+        if "configuration" in kwargs and kwargs["configuration"]:
             kwargs["expectation_type"] = kwargs["configuration"].expectation_type
             kwargs["kwargs"] = kwargs["configuration"].kwargs
-        elif kwargs["result"] and kwargs["result"].expectation_config:
+        elif (
+            "result" in kwargs
+            and kwargs["result"]
+            and kwargs["result"].expectation_config
+        ):
             kwargs["expectation_type"] = kwargs[
                 "result"
             ].expectation_config.expectation_type
@@ -85,7 +117,7 @@ class RendererConfiguration(BaseModel):
 
     @staticmethod
     def _set_include_column_name_and_styling(kwargs: dict) -> dict:
-        if kwargs["runtime_configuration"]:
+        if "runtime_configuration" in kwargs and kwargs["runtime_configuration"]:
             kwargs["include_column_name"] = (
                 False
                 if kwargs["runtime_configuration"].get("include_column_name") is False
@@ -94,8 +126,9 @@ class RendererConfiguration(BaseModel):
             kwargs["styling"] = kwargs["runtime_configuration"].get("styling")
         return kwargs
 
-    class RendererParam(BaseModel):
-        value: Optional[Any]
+    class _RendererParamBase(BaseModel):
+        renderer_schema: Optional[ParamSchemaType] = Field(..., allow_mutation=False)
+        value: Optional[Any] = Field(..., allow_mutation=False)
 
         class Config:
             validate_assignment = True
@@ -107,31 +140,24 @@ class RendererConfiguration(BaseModel):
             elif isinstance(other, dict):
                 return self.dict() == other
             else:
-                return self.value == other
-
-        def __bool__(self):
-            """
-            RendererConfiguration.add_param() will always add a new attribute to RendererConfiguration.params.
-            In order to make the truthiness of a given attribute meaningful (not always True), we overload the
-            __bool__ and check the truthiness of .value.
-            """
-            return bool(self.value)
+                return self == other
 
     def add_param(
-        self, name: str, schema_type: str, value: Optional[Any] = None
+        self,
+        name: str,
+        schema_type: Union[ParamSchemaType, str],
+        value: Optional[Any] = None,
     ) -> None:
-        """RendererConfiguration add_param method.
-
-        This method will add a param that can be substituted into a template string during rendering.
+        """Adds a param that can be substituted into a template string during rendering.
 
         Attributes:
             name (str): A name for the attribute to be added to this RendererConfiguration instance.
-            schema_type (str): The type of value being substituted. One of:
+            schema_type (ParamSchemaType or string): The type of value being substituted. One of:
                 - string
                 - number
                 - boolean
                 - array
-            value: Optional[Any]: The value to be substituted into the template string. If no value is
+            value (Optional[Any]): The value to be substituted into the template string. If no value is
                 provided, a value lookup will be attempted in RendererConfiguration.kwargs using the
                 provided name.
 
@@ -140,11 +166,16 @@ class RendererConfiguration(BaseModel):
         """
         renderer_param: Type[BaseModel] = create_model(
             name,
-            renderer_schema=(Dict[str, str], Field(..., alias="schema")),
+            renderer_schema=(
+                Dict[str, Optional[ParamSchemaType]],
+                Field(..., alias="schema"),
+            ),
             value=(Union[Any, None], ...),
-            __base__=RendererConfiguration.RendererParam,
+            __base__=RendererConfiguration._RendererParamBase,
         )
-        renderer_param_definition: Dict[str, Any] = {name: (renderer_param, ...)}
+        renderer_param_definition: Dict[str, Any] = {
+            name: (Optional[renderer_param], ...)
+        }
 
         # As of Nov 30, 2022 there is a bug in autocompletion for pydantic dynamic models
         # See: https://github.com/pydantic/pydantic/issues/3930
@@ -157,8 +188,18 @@ class RendererConfiguration(BaseModel):
         if value is None:
             value = self.kwargs.get(name)
 
-        renderer_params_definition: Dict[str, Any] = {
-            **self.params.dict(),
-            name: renderer_param(schema={"type": schema_type}, value=value),
-        }
-        self.params: BaseModel = renderer_params(**renderer_params_definition)
+        renderer_params_definition: Dict[str, Optional[Any]]
+        if value is None:
+            renderer_params_definition = {
+                **self.params.dict(exclude_none=False),
+                name: None,
+            }
+        else:
+            renderer_params_definition = {
+                **self.params.dict(exclude_none=False),
+                name: renderer_param(schema={"type": schema_type}, value=value),
+            }
+
+        self.params = cast(
+            RendererParams, renderer_params(**renderer_params_definition)
+        )

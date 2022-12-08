@@ -2,6 +2,7 @@ import json
 
 import jsonschema
 
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -37,12 +38,15 @@ class ColumnValuesMatchJsonSchema(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, json_schema, **kwargs):
+        # This step insures that Spark UDF defined can be pickled; otherwise, pickle serialization exceptions may occur.
+        json_schema = convert_to_json_serializable(data=json_schema)
+
         def matches_json_schema(val):
             if val is None:
                 return False
             try:
                 val_json = json.loads(val)
-                jsonschema.validate(val_json, json_schema)
+                jsonschema.validate(instance=val_json, schema=json_schema)
                 # jsonschema.validate raises an error if validation fails.
                 # So if we make it this far, we know that the validation succeeded.
                 return True
@@ -53,6 +57,8 @@ class ColumnValuesMatchJsonSchema(ColumnMapMetricProvider):
             except:
                 raise
 
-        matches_json_schema_udf = F.udf(matches_json_schema, sparktypes.BooleanType())
+        matches_json_schema_udf = F.udf(
+            lambda val: matches_json_schema(val=val), sparktypes.BooleanType()
+        )
 
         return matches_json_schema_udf(column)
