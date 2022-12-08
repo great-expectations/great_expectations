@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import os
-import warnings
 from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Union, cast
 
 import requests
