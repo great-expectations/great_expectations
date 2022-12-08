@@ -349,6 +349,8 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                 ]
             )
 
+        renderer_configuration.table = table
+
         return renderer_configuration
 
     @classmethod
