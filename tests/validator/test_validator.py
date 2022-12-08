@@ -1103,29 +1103,46 @@ def test_list_available_expectation_types(
     assert all(e.startswith("expect_") for e in available)
 
 
-@pytest.mark.unit
-def test_override_runtime_config_by_validator_default(
-    validator_with_mock_execution_engine: Validator,
-):
-    expectation_configuration = ExpectationConfiguration(
+@pytest.fixture
+def expectation_config_with_result_format_dict() -> ExpectationConfiguration:
+    return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
-            "column": "animals",
-            "mostly": 0.9,
-            "value_set": ["cat", "fish", "dog"],
             "result_format": {
-                "result_format": "BASIC",
+                "result_format": "COMPLETE",
                 "include_unexpected_rows": True,
             },
         },
     )
+
+
+@pytest.fixture
+def expectation_config_with_result_format_str() -> ExpectationConfiguration:
+    return ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={"result_format": "COMPLETE"},
+    )
+
+
+@pytest.fixture
+def expectation_config_with_result_format_empty_dict() -> ExpectationConfiguration:
+    return ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set", kwargs={}
+    )
+
+
+@pytest.mark.unit
+def test_override_expectation_config_is_dict_runtime_is_str(
+    expectation_config_with_result_format_dict: ExpectationConfiguration,
+    validator_with_mock_execution_engine: Validator,
+):
     runtime_configuration: dict = {
         "include_config": True,
         "catch_exceptions": False,
         "result_format": "BOOLEAN",
     }
     overridden = validator_with_mock_execution_engine._override_runtime_configuration_with_config_in_expectation_configuration(
-        expectation_configuration=expectation_configuration,
+        expectation_configuration=expectation_config_with_result_format_dict,
         runtime_configuration=runtime_configuration,
     )
     assert overridden == {
@@ -1133,28 +1150,129 @@ def test_override_runtime_config_by_validator_default(
         "include_config": True,
         "result_format": {
             "include_unexpected_rows": True,
-            "result_format": "BASIC",
+            "result_format": "COMPLETE",
         },
     }
 
 
-#
-#
-# @pytest.mark.unit
-# def test_override_runtime_config_by_validator_default():
-#     pass
-#
-#
-# @pytest.mark.unit
-# def test_override_runtime_config_by_validator_default():
-#     pass
-#
-#
-# @pytest.mark.unit
-# def test_override_runtime_config_by_validator_default():
-#     pass
-#
-#
-# @pytest.mark.unit
-# def test_override_runtime_config_by_validator_default():
-#     pass
+@pytest.mark.unit
+def test_override_expectation_config_is_str_runtime_is_str(
+    expectation_config_with_result_format_str: ExpectationConfiguration,
+    validator_with_mock_execution_engine: Validator,
+):
+    runtime_configuration: dict = {
+        "include_config": True,
+        "catch_exceptions": False,
+        "result_format": "BOOLEAN",
+    }
+    overridden = validator_with_mock_execution_engine._override_runtime_configuration_with_config_in_expectation_configuration(
+        expectation_configuration=expectation_config_with_result_format_str,
+        runtime_configuration=runtime_configuration,
+    )
+    assert overridden == {
+        "catch_exceptions": False,
+        "include_config": True,
+        "result_format": "COMPLETE",
+    }
+
+
+@pytest.mark.unit
+def test_override_expectation_config_is_empty_dict_runtime_is_str(
+    expectation_config_with_result_format_empty_dict: ExpectationConfiguration,
+    validator_with_mock_execution_engine: Validator,
+):
+    runtime_configuration: dict = {
+        "include_config": True,
+        "catch_exceptions": False,
+        "result_format": "BOOLEAN",
+    }
+    overridden = validator_with_mock_execution_engine._override_runtime_configuration_with_config_in_expectation_configuration(
+        expectation_configuration=expectation_config_with_result_format_empty_dict,
+        runtime_configuration=runtime_configuration,
+    )
+    assert overridden == {
+        "catch_exceptions": False,
+        "include_config": True,
+        "result_format": "BOOLEAN",
+    }
+
+
+@pytest.mark.unit
+def test_override_expectation_config_is_dict_runtime_is_dict(
+    expectation_config_with_result_format_dict: ExpectationConfiguration,
+    validator_with_mock_execution_engine: Validator,
+):
+    runtime_configuration: dict = {
+        "include_config": True,
+        "catch_exceptions": False,
+        "result_format": {
+            "result_format": "BOOLEAN",
+            "include_unexpected_rows": False,
+        },
+    }
+    overridden = validator_with_mock_execution_engine._override_runtime_configuration_with_config_in_expectation_configuration(
+        expectation_configuration=expectation_config_with_result_format_dict,
+        runtime_configuration=runtime_configuration,
+    )
+    assert overridden == {
+        "catch_exceptions": False,
+        "include_config": True,
+        "result_format": {
+            "include_unexpected_rows": True,
+            "result_format": "COMPLETE",
+        },
+    }
+
+
+@pytest.mark.unit
+def test_override_expectation_config_is_str_runtime_is_dict(
+    expectation_config_with_result_format_str: ExpectationConfiguration,
+    validator_with_mock_execution_engine: Validator,
+):
+    runtime_configuration: dict = {
+        "include_config": True,
+        "catch_exceptions": False,
+        "result_format": {
+            "result_format": "BOOLEAN",
+            "include_unexpected_rows": False,
+        },
+    }
+    overridden = validator_with_mock_execution_engine._override_runtime_configuration_with_config_in_expectation_configuration(
+        expectation_configuration=expectation_config_with_result_format_str,
+        runtime_configuration=runtime_configuration,
+    )
+    assert overridden == {
+        "catch_exceptions": False,
+        "include_config": True,
+        "result_format": {
+            "result_format": "COMPLETE",
+            "include_unexpected_rows": False,
+        },
+    }
+
+
+@pytest.mark.unit
+def test_override_expectation_config_is_empty_dict_runtime_is_dict(
+    expectation_config_with_result_format_empty_dict: ExpectationConfiguration,
+    validator_with_mock_execution_engine: Validator,
+):
+    runtime_configuration: dict = {
+        "include_config": True,
+        "catch_exceptions": False,
+        "result_format": {
+            "result_format": "BOOLEAN",
+            "include_unexpected_rows": False,
+        },
+    }
+    overridden = validator_with_mock_execution_engine._override_runtime_configuration_with_config_in_expectation_configuration(
+        expectation_configuration=expectation_config_with_result_format_empty_dict,
+        runtime_configuration=runtime_configuration,
+    )
+    assert overridden == {
+        "include_config": True,
+        "catch_exceptions": False,
+        "result_format": {
+            "result_format": "BOOLEAN",
+            "include_unexpected_rows": False,
+        },
+    }

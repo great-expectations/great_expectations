@@ -966,6 +966,7 @@ class Validator:
             expectation for expectation in keys if expectation.startswith("expect_")
         ]
 
+    # marker
     def graph_validate(
         self,
         configurations: List[ExpectationConfiguration],
@@ -984,6 +985,8 @@ class Validator:
         Returns:
             A list of Validations, validating that all necessary metrics are available.
         """
+        # this is where we actually catch the eror
+
         if runtime_configuration is None:
             runtime_configuration = self.default_expectation_args
 
@@ -1002,13 +1005,18 @@ class Validator:
             expectation_validation_graphs,
             evrs,
             processed_configurations,
+            runtime_configuration,
         ) = self._generate_metric_dependency_subgraphs_for_each_expectation_configuration(
             expectation_configurations=configurations,
             processed_configurations=processed_configurations,
             catch_exceptions=catch_exceptions,
             runtime_configuration=runtime_configuration,
         )
-
+        # override
+        runtime_configuration = runtime_configuration
+        print(f"runtime_configuration: {runtime_configuration}")
+        catch_exceptions = runtime_configuration.get("catch_exceptions", False)
+        print(f"catch exceptions!{catch_exceptions}")
         graph: ValidationGraph = (
             self._generate_suite_level_graph_from_expectation_level_sub_graphs(
                 expectation_validation_graphs=expectation_validation_graphs
@@ -1078,6 +1086,7 @@ class Validator:
         List[ExpectationValidationGraph],
         List[ExpectationValidationResult],
         List[ExpectationConfiguration],
+        dict,
     ]:
         # While evaluating expectation configurations, create sub-graph for every metric dependency and incorporate
         # these sub-graphs under corresponding expectation-level sub-graph (state of ExpectationValidationGraph object).
@@ -1101,11 +1110,17 @@ class Validator:
 
             expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
 
+            print(f"expectation_conf: {configuration}")
+            print(f"runtime conf: {runtime_configuration}")
             runtime_configuration = self._override_runtime_configuration_with_config_in_expectation_configuration(
                 expectation_configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
+            # override
+            if runtime_configuration.get("catch_exceptions"):
+                catch_exceptions = runtime_configuration.get("catch_exceptions")
 
+            print(f"runtime conf overridden: {runtime_configuration}")
             validation_dependencies: ValidationDependencies = (
                 expectation_impl().get_validation_dependencies(
                     configuration=evaluated_config,
@@ -1134,6 +1149,7 @@ class Validator:
                 expectation_validation_graphs.append(expectation_validation_graph)
                 processed_configurations.append(evaluated_config)
             except Exception as err:
+                # this is where we are
                 if catch_exceptions:
                     exception_traceback: str = traceback.format_exc()
                     exception_message: str = str(err)
@@ -1149,12 +1165,17 @@ class Validator:
                     evrs.append(result)
                 else:
                     raise err
-        return expectation_validation_graphs, evrs, processed_configurations
+        return (
+            expectation_validation_graphs,
+            evrs,
+            processed_configurations,
+            runtime_configuration,
+        )
 
     def _override_runtime_configuration_with_config_in_expectation_configuration(
         self,
         expectation_configuration: ExpectationConfiguration,
-        runtime_configuration: Union[dict, None] = None,
+        runtime_configuration: dict,
     ) -> Union[dict, None]:
         """
         `runtime_configuration` can come from:
@@ -1171,12 +1192,18 @@ class Validator:
         Expectation-level to take precedence over the ones defined at higher levels.
         This functionality is enabled by the current function.
         """
+
+        if expectation_configuration.kwargs.get("catch_exceptions"):
+            runtime_configuration[
+                "catch_exceptions"
+            ] = expectation_configuration.kwargs["catch_exceptions"]
+
         expectation_level_result_format_config: Union[
-            dict, str, None
+            dict, str
         ] = expectation_configuration.kwargs.get("result_format")
 
         if not expectation_level_result_format_config:
-            return
+            return runtime_configuration
 
         runtime_level_result_format_config: Union[dict, str] = runtime_configuration[
             "result_format"
@@ -1208,7 +1235,6 @@ class Validator:
                 runtime_configuration["result_format"][
                     key
                 ] = expectation_level_result_format_config[key]
-
         return runtime_configuration
 
     def _generate_suite_level_graph_from_expectation_level_sub_graphs(
@@ -2099,6 +2125,9 @@ class Validator:
         catch_exceptions: Optional[bool] = None,
         result_format: Optional[Union[dict, str]] = None,
     ) -> dict:
+
+        # marker
+
         runtime_configuration = copy.deepcopy(self.default_expectation_args)
 
         if catch_exceptions is not None:

@@ -14,6 +14,7 @@ from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
+from great_expectations.exceptions.exceptions import MetricResolutionError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -1490,7 +1491,7 @@ def test_sql_multiple_unexpected_index_column_names_basic_result_format(
     }
 
 
-def test_sql_single_unexpected_index_column_names_complete_result_format_non_existing_column(
+def test_sql_single_unexpected_index_column_names_complete_result_format_non_existing_column_catch_exceptions(
     sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):
     expectation_configuration = ExpectationConfiguration(
@@ -1510,6 +1511,55 @@ def test_sql_single_unexpected_index_column_names_complete_result_format_non_exi
             context=in_memory_runtime_context,
         )
     )
+
+
+def test_sql_single_unexpected_index_column_names_complete_result_format_non_existing_column_catch_exceptions(
+    sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
+):
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
+            "catch_exceptions": True,
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["i_dont_exist"],  # Single column
+            },
+        },
+    )
+    with pytest.raises(MetricResolutionError):
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration,
+            context=in_memory_runtime_context,
+        )
+
+
+def test_sql_multiple_unexpected_index_column_names_complete_result_format_non_existing_column_catch_exceptions(
+    sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
+):
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
+            "catch_exceptions": True,
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": [
+                    "pk_1",
+                    "i_dont_exist",
+                ],  # Only 1 column is valid
+            },
+        },
+    )
+
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration,
+            context=in_memory_runtime_context,
+        )
+    )
     assert result.success is False
     assert result.exception_info
     assert (
@@ -1518,7 +1568,7 @@ def test_sql_single_unexpected_index_column_names_complete_result_format_non_exi
     )
 
 
-def test_sql_multiple_unexpected_index_column_names_complete_result_format_non_existing_column(
+def test_sql_multiple_unexpected_index_column_names_complete_result_format_non_existing_column_catch_exceptions(
     sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):
     expectation_configuration = ExpectationConfiguration(
@@ -1535,15 +1585,8 @@ def test_sql_multiple_unexpected_index_column_names_complete_result_format_non_e
             },
         },
     )
-    result: ExpectationValidationResult = (
+    with pytest.raises(MetricResolutionError):
         _expecation_configuration_to_validation_result_sql(
             expectation_configuration=expectation_configuration,
             context=in_memory_runtime_context,
         )
-    )
-    assert result.success is False
-    assert result.exception_info
-    assert (
-        result.exception_info["exception_message"]
-        == 'Error: The unexpected_index_column: "i_dont_exist" in does not exist in SQL Table. Please check your configuration and try again.'
-    )
