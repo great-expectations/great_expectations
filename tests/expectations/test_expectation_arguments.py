@@ -781,7 +781,7 @@ def test_result_format_configured_with_set_default_override(
         batch_request=runtime_batch_request,
         expectation_suite=suite,
     )
-
+    # marker
     validator.set_default_expectation_argument("result_format", "BOOLEAN_ONLY")
 
     validator_validation = validator.validate()

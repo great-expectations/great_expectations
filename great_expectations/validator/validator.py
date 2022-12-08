@@ -985,7 +985,7 @@ class Validator:
             A list of Validations, validating that all necessary metrics are available.
         """
         if runtime_configuration is None:
-            runtime_configuration = {}
+            runtime_configuration = self.default_expectation_args
 
         if runtime_configuration.get("catch_exceptions", True):
             catch_exceptions = True
@@ -1158,8 +1158,9 @@ class Validator:
     ) -> Union[dict, None]:
         """
         `runtime_configuration` can come from:
-            1. the Checkpoint.run() function at runtime
-            2. ExpectationConfiguration
+            1. The Checkpoint.run() function at runtime
+            2. Validator's default_expectation_args property (can be overriden by set_default_expectation_argument())
+            3. ExpectationConfiguration
 
         This method allows for the configuration at the Expectation-level (lower) to override
         the configuration at the Checkpoint-level (higher).  This is particularly important
@@ -1170,25 +1171,47 @@ class Validator:
         Expectation-level to take precedence over the ones defined at higher levels.
         This functionality is enabled by the current function.
         """
-        expectation_level_config: Union[
+        """
+         DEFAULT_RUNTIME_CONFIGURATION = {
+        "include_config": True,
+        "catch_exceptions": False,
+        "result_format": "BASIC",
+        }
+        """
+        expectation_level_result_format_config: Union[
             dict, str, None
         ] = expectation_configuration.kwargs.get("result_format")
-        if expectation_level_config and isinstance(expectation_level_config, dict):
-            if runtime_configuration is None:
-                runtime_configuration = expectation_level_config
-            elif runtime_configuration == {}:
-                runtime_configuration["result_format"] = expectation_level_config
-            else:
-                if type(runtime_configuration["result_format"]) == str:
-                    prev_value = runtime_configuration
-                    runtime_configuration["result_format"] = {
-                        "result_format": prev_value
-                    }
 
-                for key in expectation_level_config.keys():
-                    runtime_configuration["result_format"][
-                        key
-                    ] = expectation_level_config[key]
+        runtime_level_result_format_config: Union[dict, str] = runtime_configuration[
+            "result_format"
+        ]
+
+        runtime_config_type = type(runtime_level_result_format_config)
+        expectation_config_type = type(expectation_level_result_format_config)
+
+        if runtime_config_type is str and expectation_config_type is str:
+            # just replace
+            runtime_configuration[
+                "result_format"
+            ] = expectation_level_result_format_config
+
+        elif runtime_config_type is dict and expectation_config_type is str:
+            runtime_configuration["result_format"][
+                "result_format"
+            ] = expectation_level_result_format_config
+
+        else:
+            if runtime_config_type is str and expectation_config_type is dict:
+                runtime_configuration["result_format"] = {}
+                runtime_configuration["result_format"][
+                    "runtime_config"
+                ] = runtime_level_result_format_config
+
+            # loop through and override
+            for key in expectation_level_result_format_config.keys():
+                runtime_configuration["result_format"][
+                    key
+                ] = expectation_level_result_format_config[key]
 
         return runtime_configuration
 
