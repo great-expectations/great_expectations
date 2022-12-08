@@ -381,6 +381,16 @@ def test_cloud_context_datasource_crud_e2e() -> None:
     datasource = Datasource(
         name=datasource_name,
         execution_engine={"class_name": "PandasExecutionEngine"},
+        data_connectors={
+            "my_sql_data_connector": {
+                "class_name": "ConfiguredAssetSqlDataConnector",
+                "assets": {
+                    "my_asset": {
+                        "table_name": "animal_names",
+                    },
+                },
+            },
+        },
     )
 
     context.save_datasource(datasource)
