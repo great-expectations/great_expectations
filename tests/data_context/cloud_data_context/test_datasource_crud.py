@@ -381,6 +381,12 @@ def test_cloud_context_datasource_crud_e2e() -> None:
     datasource = Datasource(
         name=datasource_name,
         execution_engine={"class_name": "PandasExecutionEngine"},
+        data_connectors={
+            "default_runtime_data_connector_name": {
+                "class_name": "RuntimeDataConnector",
+                "batch_identifiers": ["default_identifier_name"],
+            },
+        },
     )
 
     context.save_datasource(datasource)
