@@ -116,7 +116,7 @@ def validation_result_suite():
 def validation_result_suite_ge_cloud_identifier(validation_result_suite_ge_cloud_id):
     return GXCloudIdentifier(
         resource_type=GXCloudRESTResource.CHECKPOINT,
-        ge_cloud_id=validation_result_suite_ge_cloud_id,
+        cloud_id=validation_result_suite_ge_cloud_id,
     )
 
 

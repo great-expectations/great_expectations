@@ -513,6 +513,7 @@ def column_condition_partial(
                         unexpected_condition = column.isNotNull() & ~expected_condition
                     else:
                         unexpected_condition = ~expected_condition
+
                 return (
                     unexpected_condition,
                     compute_domain_kwargs,

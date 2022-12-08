@@ -179,7 +179,7 @@ class ExpectationsStore(Store):
         return self.store_backend.remove_key(key)
 
     def serialize(self, value):
-        if self.ge_cloud_mode:
+        if self.cloud_mode:
             # GXCloudStoreBackend expects a json str
             return self._expectationSuiteSchema.dump(value)
         return self._expectationSuiteSchema.dumps(value, indent=2, sort_keys=True)
@@ -214,7 +214,7 @@ class ExpectationsStore(Store):
         test_key_name = "test-key-" + "".join(
             [random.choice(list("0123456789ABCDEF")) for i in range(20)]
         )
-        if self.ge_cloud_mode:
+        if self.cloud_mode:
             test_key: GXCloudIdentifier = self.key_class(
                 resource_type=GXCloudRESTResource.CHECKPOINT,
                 ge_cloud_id=str(uuid.uuid4()),
