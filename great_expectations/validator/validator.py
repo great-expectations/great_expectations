@@ -1182,6 +1182,9 @@ class Validator:
             dict, str, None
         ] = expectation_configuration.kwargs.get("result_format")
 
+        if not expectation_level_result_format_config:
+            return
+
         runtime_level_result_format_config: Union[dict, str] = runtime_configuration[
             "result_format"
         ]
