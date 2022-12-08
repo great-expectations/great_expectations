@@ -171,6 +171,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         project_config: Union[DataContextConfig, Mapping],
         context_root_dir: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
+        cloud_mode: bool = False,
+        cloud_config: Optional[GXCloudConfig] = None,
+        # Deprecated as of 0.15.37
         ge_cloud_mode: bool = False,
         ge_cloud_config: Optional[GXCloudConfig] = None,
     ) -> None:
@@ -181,38 +184,44 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 based on conventions for project subdirectories.
             runtime_environment: a dictionary of config variables that
                 override both those set in config_variables.yml and the environment
-            ge_cloud_mode: boolean flag that describe whether DataContext is being instantiated by ge_cloud
-           ge_cloud_config: config for ge_cloud
+            cloud_mode: boolean flag that describe whether DataContext is being instantiated by Cloud
+            cloud_config: config for Cloud
         Returns:
             None
         """
+        # Chetan - 20221208 - not formally deprecating these values until a future date
+        if ge_cloud_mode or ge_cloud_config:
+            if not cloud_mode:
+                cloud_mode = ge_cloud_mode
+            if not cloud_config:
+                cloud_config = ge_cloud_config
 
         project_data_context_config: DataContextConfig = (
             BaseDataContext.get_or_create_data_context_config(project_config)
         )
 
-        self._ge_cloud_mode = ge_cloud_mode
-        self._ge_cloud_config = ge_cloud_config
+        self._cloud_mode = cloud_mode
+        self._cloud_config = cloud_config
         if context_root_dir is not None:
             context_root_dir = os.path.abspath(context_root_dir)
         self._context_root_directory = context_root_dir
         # initialize runtime_environment as empty dict if None
         runtime_environment = runtime_environment or {}
-        if self._ge_cloud_mode:
-            ge_cloud_base_url: Optional[str] = None
-            ge_cloud_access_token: Optional[str] = None
-            ge_cloud_organization_id: Optional[str] = None
-            if ge_cloud_config:
-                ge_cloud_base_url = ge_cloud_config.base_url
-                ge_cloud_access_token = ge_cloud_config.access_token
-                ge_cloud_organization_id = ge_cloud_config.organization_id
+        if self._cloud_mode:
+            cloud_base_url: Optional[str] = None
+            cloud_access_token: Optional[str] = None
+            cloud_organization_id: Optional[str] = None
+            if cloud_config:
+                cloud_base_url = cloud_config.base_url
+                cloud_access_token = cloud_config.access_token
+                cloud_organization_id = cloud_config.organization_id
             self._data_context = CloudDataContext(
                 project_config=project_data_context_config,
                 runtime_environment=runtime_environment,
                 context_root_dir=context_root_dir,
-                ge_cloud_base_url=ge_cloud_base_url,
-                ge_cloud_access_token=ge_cloud_access_token,
-                ge_cloud_organization_id=ge_cloud_organization_id,
+                cloud_base_url=cloud_base_url,
+                cloud_access_token=cloud_access_token,
+                cloud_organization_id=cloud_organization_id,
             )
         elif self._context_root_directory:
             self._data_context = FileDataContext(  # type: ignore[assignment]
@@ -256,11 +265,16 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     @property
     def ge_cloud_config(self) -> Optional[GXCloudConfig]:
-        return self._ge_cloud_config
+        return self._cloud_config
+
+    @property
+    def cloud_mode(self) -> bool:
+        return self._cloud_mode
 
     @property
     def ge_cloud_mode(self) -> bool:
-        return self._ge_cloud_mode
+        # Deprecated 0.15.37
+        return self.cloud_mode
 
     def _synchronize_self_with_underlying_data_context(self) -> None:
         """
