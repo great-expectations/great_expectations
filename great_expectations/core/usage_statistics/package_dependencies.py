@@ -71,6 +71,7 @@ class GXDependencies:
             "azure-storage-blob",
             "black",
             "boto3",
+            "docstring-parser",
             "feather-format",
             "flake8",
             "flask",
@@ -137,6 +138,7 @@ class GXDependencies:
         "mistune",
         "mock-alchemy",
         "moto",
+        "ipykernel",
         "nbconvert",
         "py",
         "pyfakefs",
@@ -204,6 +206,8 @@ class GXDependencies:
         "uszipcode",
         "yahoo_fin",
         "zipcodes",
+        # requirements-dev-api-docs-test.txt
+        "docstring-parser",
     ]
 
     GX_DEV_DEPENDENCIES: Set[str] = set(ALL_GX_DEV_DEPENDENCIES) - set(

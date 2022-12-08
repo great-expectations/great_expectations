@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -12,6 +12,10 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    ParamSchemaType,
+    RendererConfiguration,
+)
 from great_expectations.render.util import substitute_none_for_missing
 
 
@@ -70,7 +74,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
     args_keys = ("value",)
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -102,31 +106,15 @@ class ExpectTableRowCountToEqual(TableExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        renderer_configuration.add_param(
+            name="value", schema_type=ParamSchemaType.NUMBER
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            ["value"],
-        )
-        params_with_json_schema = {
-            "value": {
-                "schema": {"type": "number"},
-                "value": params.get("value"),
-            },
-        }
-        template_str = "Must have exactly $value rows."
-
-        return (template_str, params_with_json_schema, styling)
+        renderer_configuration.template_str = "Must have exactly $value rows."
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
@@ -136,15 +124,14 @@ class ExpectTableRowCountToEqual(TableExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+    ) -> List[RenderedStringTemplateContent]:
+        renderer_configuration = RendererConfiguration(
+            configuraiton=configuration,
+            result=result,
+            runtime_configuration=runtime_configuration,
         )
-        styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            renderer_configuration.kwargs,
             ["value"],
         )
         template_str = "Must have exactly $value rows."
@@ -156,7 +143,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
                     "string_template": {
                         "template": template_str,
                         "params": params,
-                        "styling": styling,
+                        "styling": renderer_configuration.styling,
                     },
                 }
             )

@@ -29,7 +29,9 @@ module.exports = {
       apiKey: '16dae2c1fabc515311cada8ace06060a',
 
       indexName: 'docs-greatexpectations',
-      searchPagePath: 'search'
+
+      searchPagePath: 'search',
+      schedule: 'every 1 day',
 
       // Optional: see doc section below
       // contextualSearch: true,
