@@ -174,7 +174,7 @@ class CheckpointStore(ConfigurationStore):
         checkpoint_config: CheckpointConfig = checkpoint.get_config()  # type: ignore[assignment]
         checkpoint_ref = self.set(key=key, value=checkpoint_config)  # type: ignore[func-returns-value]
         if isinstance(checkpoint_ref, GXCloudIDAwareRef):
-            ge_cloud_id = checkpoint_ref.ge_cloud_id
+            ge_cloud_id = checkpoint_ref.cloud_id
             checkpoint.ge_cloud_id = uuid.UUID(ge_cloud_id)  # type: ignore[misc]
 
     def create(self, checkpoint_config: CheckpointConfig) -> Optional[DataContextKey]:
