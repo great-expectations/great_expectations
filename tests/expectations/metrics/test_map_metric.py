@@ -1510,6 +1510,7 @@ def test_sql_single_unexpected_index_column_names_complete_result_format_non_exi
             context=in_memory_runtime_context,
         )
     )
+
     assert result.success is False
     assert result.exception_info
     assert (
@@ -1535,6 +1536,7 @@ def test_sql_multiple_unexpected_index_column_names_complete_result_format_non_e
             },
         },
     )
+
     result: ExpectationValidationResult = (
         _expecation_configuration_to_validation_result_sql(
             expectation_configuration=expectation_configuration,
