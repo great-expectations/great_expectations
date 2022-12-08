@@ -14,7 +14,6 @@ from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
-from great_expectations.exceptions.exceptions import MetricResolutionError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,

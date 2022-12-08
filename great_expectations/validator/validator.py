@@ -984,8 +984,6 @@ class Validator:
         Returns:
             A list of Validations, validating that all necessary metrics are available.
         """
-        # this is where we actually catch the eror
-
         if runtime_configuration is None:
             runtime_configuration = {}
 
@@ -1271,7 +1269,6 @@ class Validator:
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ]
-
         resolved_metrics, aborted_metrics_info = graph.resolve(
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=0,
@@ -2122,7 +2119,6 @@ class Validator:
         catch_exceptions: Optional[bool] = None,
         result_format: Optional[Union[dict, str]] = None,
     ) -> dict:
-
         runtime_configuration = copy.deepcopy(self.default_expectation_args)
 
         if catch_exceptions is not None:
