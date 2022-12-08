@@ -12,7 +12,6 @@ import re
 import sys
 import time
 import uuid
-import warnings
 from collections import OrderedDict
 from functools import wraps
 from gc import get_referrers
