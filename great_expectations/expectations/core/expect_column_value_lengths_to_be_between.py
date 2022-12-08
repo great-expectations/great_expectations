@@ -295,12 +295,16 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         if not params.min_value and not params.max_value:
             template_str = "values may have any length."
         else:
-            at_least_str: str = cls._get_strict_min_string(
-                renderer_configuration=renderer_configuration
-            )
-            at_most_str: str = cls._get_strict_max_string(
-                renderer_configuration=renderer_configuration
-            )
+            at_least_str = "greater than or equal to"
+            if params.strict_min:
+                at_least_str: str = cls._get_strict_min_string(
+                    renderer_configuration=renderer_configuration
+                )
+            at_most_str = "less than or equal to"
+            if params.strict_max:
+                at_most_str: str = cls._get_strict_max_string(
+                    renderer_configuration=renderer_configuration
+                )
 
             if params.mostly and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
