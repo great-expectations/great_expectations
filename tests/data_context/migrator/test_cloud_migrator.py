@@ -24,9 +24,9 @@ def migrator_factory(
     def _create_migrator(context: Any) -> CloudMigrator:
         return gx.CloudMigrator(
             context=context,
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_organization_id=ge_cloud_organization_id,
-            ge_cloud_access_token=ge_cloud_access_token,
+            cloud_base_url=ge_cloud_base_url,
+            cloud_organization_id=ge_cloud_organization_id,
+            cloud_access_token=ge_cloud_access_token,
         )
 
     return _create_migrator
@@ -67,9 +67,9 @@ def mock_successful_migration(
             CloudMigrator.migrate(
                 context=context,
                 test_migrate=test_migrate,
-                ge_cloud_base_url=ge_cloud_base_url,
-                ge_cloud_access_token=ge_cloud_access_token,
-                ge_cloud_organization_id=ge_cloud_organization_id,
+                cloud_base_url=ge_cloud_base_url,
+                cloud_access_token=ge_cloud_access_token,
+                cloud_organization_id=ge_cloud_organization_id,
             )
 
         return mock_send_usage_message
@@ -99,9 +99,9 @@ def mock_failed_migration(
                 CloudMigrator.migrate(
                     context=context,
                     test_migrate=test_migrate,
-                    ge_cloud_base_url=ge_cloud_base_url,
-                    ge_cloud_access_token=ge_cloud_access_token,
-                    ge_cloud_organization_id=ge_cloud_organization_id,
+                    cloud_base_url=ge_cloud_base_url,
+                    cloud_access_token=ge_cloud_access_token,
+                    cloud_organization_id=ge_cloud_organization_id,
                 )
 
         return mock_send_usage_message

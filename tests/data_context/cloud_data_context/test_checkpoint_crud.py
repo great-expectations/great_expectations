@@ -164,7 +164,7 @@ def test_cloud_backed_data_context_add_checkpoint(
 
     # Make sure the fixture has the right configuration
     assert isinstance(context, data_context_type)
-    assert context.ge_cloud_mode
+    assert context.cloud_mode
 
     validation_id_1, validation_id_2 = validation_ids
 
@@ -321,7 +321,7 @@ def test_cloud_backed_data_context_add_checkpoint_e2e(
     mock_save_project_config: mock.MagicMock,
     checkpoint_config: dict,
 ) -> None:
-    context = DataContext(ge_cloud_mode=True)
+    context = DataContext(cloud_mode=True)
 
     checkpoint = context.add_checkpoint(**checkpoint_config)
 
@@ -448,8 +448,8 @@ def test_list_checkpoints(
     context = BaseDataContext(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path_name,
-        ge_cloud_config=ge_cloud_config,
-        ge_cloud_mode=True,
+        cloud_config=ge_cloud_config,
+        cloud_mode=True,
     )
 
     checkpoint_1, checkpoint_2 = checkpoint_names_and_ids
@@ -465,12 +465,12 @@ def test_list_checkpoints(
     assert checkpoints == [
         GXCloudIdentifier(
             resource_type=GXCloudRESTResource.CHECKPOINT,
-            ge_cloud_id=checkpoint_id_1,
+            cloud_id=checkpoint_id_1,
             resource_name=checkpoint_name_1,
         ),
         GXCloudIdentifier(
             resource_type=GXCloudRESTResource.CHECKPOINT,
-            ge_cloud_id=checkpoint_id_2,
+            cloud_id=checkpoint_id_2,
             resource_name=checkpoint_name_2,
         ),
     ]

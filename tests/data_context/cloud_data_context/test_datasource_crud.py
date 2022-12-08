@@ -376,11 +376,17 @@ def test_cloud_data_context_add_datasource(
 @pytest.mark.e2e
 @pytest.mark.cloud
 def test_cloud_context_datasource_crud_e2e() -> None:
-    context = cast(CloudDataContext, gx.get_context(ge_cloud_mode=True))
+    context = cast(CloudDataContext, gx.get_context(cloud_mode=True))
     datasource_name = f"OSSTestDatasource_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
     datasource = Datasource(
         name=datasource_name,
         execution_engine={"class_name": "PandasExecutionEngine"},
+        data_connectors={
+            "default_runtime_data_connector_name": {
+                "class_name": "RuntimeDataConnector",
+                "batch_identifiers": ["default_identifier_name"],
+            },
+        },
     )
 
     context.save_datasource(datasource)

@@ -61,33 +61,33 @@ class CloudMigrator:
     def __init__(
         self,
         context: BaseDataContext,
-        ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_access_token: Optional[str] = None,
-        ge_cloud_organization_id: Optional[str] = None,
+        cloud_base_url: Optional[str] = None,
+        cloud_access_token: Optional[str] = None,
+        cloud_organization_id: Optional[str] = None,
     ) -> None:
         self._context = context
 
-        cloud_config = CloudDataContext.get_ge_cloud_config(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_access_token=ge_cloud_access_token,
-            ge_cloud_organization_id=ge_cloud_organization_id,
+        cloud_config = CloudDataContext.get_cloud_config(
+            cloud_base_url=cloud_base_url,
+            cloud_access_token=cloud_access_token,
+            cloud_organization_id=cloud_organization_id,
         )
 
-        ge_cloud_base_url = cloud_config.base_url
-        ge_cloud_access_token = cloud_config.access_token
-        ge_cloud_organization_id = cloud_config.organization_id
+        cloud_base_url = cloud_config.base_url
+        cloud_access_token = cloud_config.access_token
+        cloud_organization_id = cloud_config.organization_id
 
-        # Invariant due to `get_ge_cloud_config` raising an error if any config values are missing
-        if not ge_cloud_organization_id:
+        # Invariant due to `get_cloud_config` raising an error if any config values are missing
+        if not cloud_organization_id:
             raise ValueError(
                 "An organization id must be present when performing a migration"
             )
 
-        self._ge_cloud_base_url = ge_cloud_base_url
-        self._ge_cloud_access_token = ge_cloud_access_token
-        self._ge_cloud_organization_id = ge_cloud_organization_id
+        self._cloud_base_url = cloud_base_url
+        self._cloud_access_token = cloud_access_token
+        self._cloud_organization_id = cloud_organization_id
 
-        self._session = create_session(access_token=ge_cloud_access_token)
+        self._session = create_session(access_token=cloud_access_token)
 
         self._unsuccessful_validations: Dict[str, dict] = {}
 
@@ -96,9 +96,9 @@ class CloudMigrator:
         cls,
         context: BaseDataContext,
         test_migrate: bool,
-        ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_access_token: Optional[str] = None,
-        ge_cloud_organization_id: Optional[str] = None,
+        cloud_base_url: Optional[str] = None,
+        cloud_access_token: Optional[str] = None,
+        cloud_organization_id: Optional[str] = None,
     ) -> CloudMigrator:
         """Migrate your Data Context to GX Cloud.
 
@@ -106,24 +106,24 @@ class CloudMigrator:
             context: The Data Context you wish to migrate.
             test_migrate: True if this is a test, False if you want to perform
                 the migration.
-            ge_cloud_base_url: Optional, you may provide this alternatively via
-                environment variable GE_CLOUD_BASE_URL
-            ge_cloud_access_token: Optional, you may provide this alternatively
-                via environment variable GE_CLOUD_ACCESS_TOKEN
-            ge_cloud_organization_id: Optional, you may provide this alternatively
-                via environment variable GE_CLOUD_ORGANIZATION_ID
+            cloud_base_url: Optional, you may provide this alternatively via
+                environment variable GX_CLOUD_BASE_URL
+            cloud_access_token: Optional, you may provide this alternatively
+                via environment variable GX_CLOUD_ACCESS_TOKEN
+            cloud_organization_id: Optional, you may provide this alternatively
+                via environment variable GX_CLOUD_ORGANIZATION_ID
 
         Returns:
             CloudMigrator instance
         """
         event = UsageStatsEvents.CLOUD_MIGRATE
-        event_payload = {"organization_id": ge_cloud_organization_id}
+        event_payload = {"organization_id": cloud_organization_id}
         try:
             cloud_migrator: CloudMigrator = cls(
                 context=context,
-                ge_cloud_base_url=ge_cloud_base_url,
-                ge_cloud_access_token=ge_cloud_access_token,
-                ge_cloud_organization_id=ge_cloud_organization_id,
+                cloud_base_url=cloud_base_url,
+                cloud_access_token=cloud_access_token,
+                cloud_organization_id=cloud_organization_id,
             )
             cloud_migrator._migrate_to_cloud(test_migrate)
             if not test_migrate:  # Only send an event if this is not a test run.
@@ -354,13 +354,13 @@ class CloudMigrator:
         attributes_value: dict,
     ) -> MigrationResponse:
         url = construct_url(
-            base_url=self._ge_cloud_base_url,
-            organization_id=self._ge_cloud_organization_id,
+            base_url=self._cloud_base_url,
+            organization_id=self._cloud_organization_id,
             resource_name=resource_name,
         )
         data = construct_json_payload(
             resource_type=resource_type,
-            organization_id=self._ge_cloud_organization_id,
+            organization_id=self._cloud_organization_id,
             attributes_key=attributes_key,
             attributes_value=attributes_value,
         )

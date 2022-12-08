@@ -1490,6 +1490,35 @@ def test_sql_multiple_unexpected_index_column_names_basic_result_format(
     }
 
 
+def test_sql_single_unexpected_index_column_names_complete_result_format_non_existing_column(
+    sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
+):
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["i_dont_exist"],  # Single column
+            },
+        },
+    )
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration,
+            context=in_memory_runtime_context,
+        )
+    )
+
+    assert result.success is False
+    assert result.exception_info
+    assert (
+        result.exception_info["exception_message"]
+        == 'Error: The unexpected_index_column: "i_dont_exist" in does not exist in SQL Table. Please check your configuration and try again.'
+    )
+
+
 def test_sql_multiple_unexpected_index_column_names_complete_result_format_non_existing_column(
     sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):
