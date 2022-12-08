@@ -15,7 +15,18 @@ from collections import Counter, defaultdict
 from copy import deepcopy
 from inspect import isabstract
 from numbers import Number
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    Union,
+)
 
 import pandas as pd
 from dateutil.parser import parse
@@ -181,24 +192,33 @@ def param_method(param_name: str) -> Callable:
     Decorator that wraps helper methods dealing with dynamic attributes on RendererConfiguration.params. Ensures a given
     param_name exists and is not None before executing the helper method. Params are unknown as they are defined by the
     renderer, and if a given param is None, no value was set/found that can be used in the helper method.
+
+    If a helper method is decorated with @param_method(param_name="<param_name>") and the param attribute does not
+    exist, the method will return either the input RendererConfiguration or None depending on the declared return type.
     """
 
     def _param_method(param_func: Callable) -> Callable:
         @functools.wraps(param_func)
         def wrapper(
             renderer_configuration: RendererConfiguration,
-        ) -> RendererConfiguration:
+        ) -> Optional[Any]:
+            return_type: Type = param_func.__annotations__["return"]
             if hasattr(renderer_configuration.params, param_name):
                 if getattr(renderer_configuration.params, param_name, None):
-                    renderer_configuration = param_func(
+                    return_obj = param_func(
                         renderer_configuration=renderer_configuration
                     )
+                else:
+                    if return_type is RendererConfiguration:
+                        return_obj = renderer_configuration
+                    else:
+                        return_obj = None
             else:
                 raise AttributeError(
                     f"RendererConfiguration.param does not have a param called {param_name}. "
                     f'Use RendererConfiguration.add_param() with name="{param_name}" to add it.'
                 )
-            return renderer_configuration
+            return return_obj
 
         return wrapper
 
