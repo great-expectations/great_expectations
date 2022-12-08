@@ -407,7 +407,6 @@ class ExecutionEngine(ABC):
                 resolved_metrics[metric_to_resolve.id] = metric_fn(
                     **metric_provider_kwargs
                 )
-            # this is where we raise something that we catch below
             except Exception as e:
                 raise ge_exceptions.MetricResolutionError(
                     message=str(e),

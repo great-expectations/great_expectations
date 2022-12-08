@@ -13,10 +13,7 @@ import great_expectations as gx
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationSuiteValidationResult,
-)
+from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_validation_result import (

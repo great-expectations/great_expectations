@@ -966,7 +966,6 @@ class Validator:
             expectation for expectation in keys if expectation.startswith("expect_")
         ]
 
-    # marker
     def graph_validate(
         self,
         configurations: List[ExpectationConfiguration],
@@ -988,7 +987,7 @@ class Validator:
         # this is where we actually catch the eror
 
         if runtime_configuration is None:
-            runtime_configuration = self.default_expectation_args
+            runtime_configuration = {}
 
         if runtime_configuration.get("catch_exceptions", True):
             catch_exceptions = True
@@ -1012,11 +1011,10 @@ class Validator:
             catch_exceptions=catch_exceptions,
             runtime_configuration=runtime_configuration,
         )
-        # override
-        runtime_configuration = runtime_configuration
-        print(f"runtime_configuration: {runtime_configuration}")
+
+        # In case the flag has been overridden by expectation_configuration
         catch_exceptions = runtime_configuration.get("catch_exceptions", False)
-        print(f"catch exceptions!{catch_exceptions}")
+
         graph: ValidationGraph = (
             self._generate_suite_level_graph_from_expectation_level_sub_graphs(
                 expectation_validation_graphs=expectation_validation_graphs
@@ -1110,17 +1108,13 @@ class Validator:
 
             expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
 
-            print(f"expectation_conf: {configuration}")
-            print(f"runtime conf: {runtime_configuration}")
             runtime_configuration = self._override_runtime_configuration_with_config_in_expectation_configuration(
                 expectation_configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
-            # override
-            if runtime_configuration.get("catch_exceptions"):
-                catch_exceptions = runtime_configuration.get("catch_exceptions")
 
-            print(f"runtime conf overridden: {runtime_configuration}")
+            catch_exceptions = runtime_configuration.get("catch_exceptions", False)
+
             validation_dependencies: ValidationDependencies = (
                 expectation_impl().get_validation_dependencies(
                     configuration=evaluated_config,
@@ -1149,7 +1143,7 @@ class Validator:
                 expectation_validation_graphs.append(expectation_validation_graph)
                 processed_configurations.append(evaluated_config)
             except Exception as err:
-                # this is where we are
+
                 if catch_exceptions:
                     exception_traceback: str = traceback.format_exc()
                     exception_message: str = str(err)
@@ -1175,7 +1169,7 @@ class Validator:
     def _override_runtime_configuration_with_config_in_expectation_configuration(
         self,
         expectation_configuration: ExpectationConfiguration,
-        runtime_configuration: dict,
+        runtime_configuration: Union[dict, None],
     ) -> Union[dict, None]:
         """
         `runtime_configuration` can come from:
@@ -1192,6 +1186,9 @@ class Validator:
         Expectation-level to take precedence over the ones defined at higher levels.
         This functionality is enabled by the current function.
         """
+        if not runtime_configuration:
+            runtime_configuration = expectation_configuration
+            return runtime_configuration
 
         if expectation_configuration.kwargs.get("catch_exceptions"):
             runtime_configuration[
@@ -2125,8 +2122,6 @@ class Validator:
         catch_exceptions: Optional[bool] = None,
         result_format: Optional[Union[dict, str]] = None,
     ) -> dict:
-
-        # marker
 
         runtime_configuration = copy.deepcopy(self.default_expectation_args)
 
