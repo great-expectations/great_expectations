@@ -14,7 +14,7 @@ from great_expectations.core.usage_statistics.execution_environment import (
     InstallEnvironment,
 )
 
-SCHEMA: str = "http://json-schema.org/draft-04/schema#"
+SCHEMA: str = "https://json-schema.org/draft/2020-12/schema"
 
 anonymized_string_schema = {
     "$schema": SCHEMA,
