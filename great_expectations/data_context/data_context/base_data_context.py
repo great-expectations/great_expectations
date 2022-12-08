@@ -190,16 +190,12 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             None
         """
-        # If any deprecated args deviate from their defaults, we should flag the issue
-        if ge_cloud_mode is not False or ge_cloud_config is not None:
-            # deprecated-v0.15.37
-            warnings.warn(
-                "The ge_cloud_mode/ge_cloud_config arguments are deprecated as of v0.15.37 and will be removed in a future release."
-                " Please use the renamed cloud_mode/cloud_config moving forward.",
-                DeprecationWarning,
-            )
-            cloud_mode = ge_cloud_mode
-            cloud_config = ge_cloud_config
+        # Chetan - 20221208 - not formally deprecating these values until a future date
+        if ge_cloud_mode or ge_cloud_config:
+            if not cloud_mode:
+                cloud_mode = ge_cloud_mode
+            if not cloud_config:
+                cloud_config = ge_cloud_config
 
         project_data_context_config: DataContextConfig = (
             BaseDataContext.get_or_create_data_context_config(project_config)

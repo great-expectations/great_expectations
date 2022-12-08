@@ -236,20 +236,13 @@ class DataContext(BaseDataContext):
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
-        # If any deprecated args deviate from their defaults, we should flag the issue
+        # Chetan - 20221208 - not formally deprecating these values until a future date
         if (
             ge_cloud_mode
-            is not False  # Due to this being Optional[bool], we can't rely on a falsy check
             or ge_cloud_base_url
             or ge_cloud_access_token
             or ge_cloud_organization_id
         ):
-            # deprecated-v0.15.37
-            warnings.warn(
-                "The ge_cloud_mode/ge_cloud_base_url/ge_cloud_access_token/ge_cloud_organization_id arguments are deprecated as of v0.15.37 and will be removed in a future release."
-                " Please use the renamed cloud_mode/cloud_base_url/cloud_access_token/cloud_organization_id moving forward.",
-                DeprecationWarning,
-            )
             cloud_mode = ge_cloud_mode
             cloud_base_url = ge_cloud_base_url
             cloud_access_token = ge_cloud_access_token

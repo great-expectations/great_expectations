@@ -83,17 +83,14 @@ class CloudDataContext(AbstractDataContext):
         """
         self._cloud_mode = True  # property needed for backward compatibility
 
-        # If any deprecated args deviate from their defaults, we should flag the issue
+        # Chetan - 20221208 - not formally deprecating these values until a future date
         if ge_cloud_base_url or ge_cloud_access_token or ge_cloud_organization_id:
-            # deprecated-v0.15.37
-            warnings.warn(
-                "The ge_cloud_base_url/ge_cloud_access_token/ge_cloud_organization_id arguments are deprecated as of v0.15.37 and will be removed in a future release."
-                " Please use the renamed cloud_base_url/cloud_access_token/cloud_organization_id moving forward.",
-                DeprecationWarning,
-            )
-            cloud_base_url = ge_cloud_base_url
-            cloud_access_token = ge_cloud_access_token
-            cloud_organization_id = ge_cloud_organization_id
+            if not cloud_base_url:
+                cloud_base_url = ge_cloud_base_url
+            if not cloud_access_token:
+                cloud_access_token = ge_cloud_access_token
+            if not cloud_organization_id:
+                cloud_organization_id = ge_cloud_organization_id
 
         self._cloud_config = self.get_cloud_config(
             cloud_base_url=cloud_base_url,
@@ -280,7 +277,7 @@ class CloudDataContext(AbstractDataContext):
             cloud_base_url
             or cls._get_cloud_env_var(
                 primary_environment_variable=GXCloudEnvironmentVariable.BASE_URL,
-                deprecated_environment_variable=GXCloudEnvironmentVariable._BASE_URL,
+                deprecated_environment_variable=GXCloudEnvironmentVariable._OLD_BASE_URL,
                 conf_file_section="ge_cloud_config",
                 conf_file_option="base_url",
             )
@@ -288,13 +285,13 @@ class CloudDataContext(AbstractDataContext):
         )
         cloud_organization_id = cloud_organization_id or cls._get_cloud_env_var(
             primary_environment_variable=GXCloudEnvironmentVariable.ORGANIZATION_ID,
-            deprecated_environment_variable=GXCloudEnvironmentVariable._ORGANIZATION_ID,
+            deprecated_environment_variable=GXCloudEnvironmentVariable._OLD_ORGANIZATION_ID,
             conf_file_section="ge_cloud_config",
             conf_file_option="organization_id",
         )
         cloud_access_token = cloud_access_token or cls._get_cloud_env_var(
             primary_environment_variable=GXCloudEnvironmentVariable.ACCESS_TOKEN,
-            deprecated_environment_variable=GXCloudEnvironmentVariable._ACCESS_TOKEN,
+            deprecated_environment_variable=GXCloudEnvironmentVariable._OLD_ACCESS_TOKEN,
             conf_file_section="ge_cloud_config",
             conf_file_option="access_token",
         )

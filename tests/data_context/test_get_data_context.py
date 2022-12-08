@@ -12,13 +12,13 @@ from great_expectations.exceptions import ConfigNotFoundError
 from tests.test_utils import working_directory
 
 GX_CLOUD_PARAMS_ALL = {
-    "ge_cloud_base_url": "http://hello.com",
-    "ge_cloud_organization_id": "bd20fead-2c31-4392-bcd1-f1e87ad5a79c",
-    "ge_cloud_access_token": "i_am_a_token",
+    "cloud_base_url": "http://hello.com",
+    "cloud_organization_id": "bd20fead-2c31-4392-bcd1-f1e87ad5a79c",
+    "cloud_access_token": "i_am_a_token",
 }
 GX_CLOUD_PARAMS_REQUIRED = {
-    "ge_cloud_organization_id": "bd20fead-2c31-4392-bcd1-f1e87ad5a79c",
-    "ge_cloud_access_token": "i_am_a_token",
+    "cloud_organization_id": "bd20fead-2c31-4392-bcd1-f1e87ad5a79c",
+    "cloud_access_token": "i_am_a_token",
 }
 
 

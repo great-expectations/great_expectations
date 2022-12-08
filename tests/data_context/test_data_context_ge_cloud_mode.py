@@ -117,35 +117,3 @@ def test_data_context_in_cloud_mode_passes_base_url_to_store_backend(
         context._datasource_store.store_backend.config["ge_cloud_base_url"]
         == custom_base_url
     )
-
-
-@pytest.mark.cloud
-@pytest.mark.unit
-@pytest.mark.parametrize(
-    ("callable_", "constructor_args"),
-    [
-        (BaseDataContext, {"project_config": {}, "ge_cloud_mode": True}),
-        (BaseDataContext, {"project_config": {}, "ge_cloud_config": {}}),
-        (DataContext, {"ge_cloud_mode": True}),
-        (DataContext, {"ge_cloud_base_url": "a/b/c"}),
-        (DataContext, {"ge_cloud_access_token": "abc123"}),
-        (DataContext, {"ge_cloud_organization_id": "def456"}),
-        (CloudDataContext, {"ge_cloud_base_url": "a/b/c"}),
-        (CloudDataContext, {"ge_cloud_access_token": "abc123"}),
-        (CloudDataContext, {"ge_cloud_organization_id": "def456"}),
-        (get_context, {"ge_cloud_base_url": "a/b/c"}),
-        (get_context, {"ge_cloud_access_token": "abc123"}),
-        (get_context, {"ge_cloud_organization_id": "def456"}),
-    ],
-)
-def test_deprecated_cloud_constructor_args_raise_deprecation_warning(
-    callable_: Callable,
-    constructor_args: dict,
-):
-    with pytest.deprecated_call() as w:
-        try:
-            callable_(**constructor_args)
-        except:
-            pass  # Not concerned with constructor output (only evaluating the presence of DeprecationWarning)
-
-    assert "ge_cloud" in str(w.list[0].message)

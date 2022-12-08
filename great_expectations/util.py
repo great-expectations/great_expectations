@@ -1772,8 +1772,8 @@ def get_context(
     |  get_context params   |    Env Not Config'd |  Env Config'd |
     +-----------------------+---------------------+---------------+
     | ()                    | Local               | Cloud         |
-    | (cloud_mode=True)  | Exception!          | Cloud         |
-    | (cloud_mode=False) | Local               | Local         |
+    | (cloud_mode=True)     | Exception!          | Cloud         |
+    | (cloud_mode=False)    | Local               | Local         |
     +-----------------------+---------------------+---------------+
 
     TODO: This method will eventually return FileDataContext and EphemeralDataContext, rather than DataContext and Base
@@ -1802,23 +1802,21 @@ def get_context(
         DataContext,
     )
 
-    # If any deprecated args deviate from their defaults, we should flag the issue
+    # Chetan - 20221208 - not formally deprecating these values until a future date
     if (
         ge_cloud_base_url
         or ge_cloud_access_token
         or ge_cloud_organization_id
         or ge_cloud_mode
     ):
-        # deprecated-v0.15.37
-        warnings.warn(
-            "The ge_cloud_mode/ge_cloud_base_url/ge_cloud_access_token/ge_cloud_organization_id arguments are deprecated as of v0.15.37 and will be removed in a future release."
-            " Please use the renamed cloud_mode/cloud_base_url/cloud_access_token/cloud_organization_id moving forward.",
-            DeprecationWarning,
-        )
-        cloud_base_url = ge_cloud_base_url
-        cloud_access_token = ge_cloud_access_token
-        cloud_organization_id = ge_cloud_organization_id
-        cloud_mode = ge_cloud_mode
+        if not cloud_base_url:
+            cloud_base_url = ge_cloud_base_url
+        if not cloud_access_token:
+            cloud_access_token = ge_cloud_access_token
+        if not cloud_organization_id:
+            cloud_organization_id = ge_cloud_organization_id
+        if not cloud_mode:
+            cloud_mode = ge_cloud_mode
 
     # First, check for ge_cloud conditions
 
