@@ -1148,11 +1148,11 @@ class Validator:
                     metric_configuration
                 ) in validation_dependencies.get_metric_configurations():
                     # TODO: <Alex>ALEX</Alex>
-                    graph = ValidationGraph(execution_engine=self._execution_engine)
-                    graph.build_metric_dependency_graph(
-                        metric_configuration=metric_configuration,
-                        runtime_configuration=runtime_configuration,
-                    )
+                    # graph = ValidationGraph(execution_engine=self._execution_engine)
+                    # graph.build_metric_dependency_graph(
+                    #     metric_configuration=metric_configuration,
+                    #     runtime_configuration=runtime_configuration,
+                    # )
                     # TODO: <Alex>ALEX</Alex>
                     # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] SINGLE_BATCH_VALIDATION_GRAPH:\n{graph} ; TYPE: {str(type(graph))}")
                     # TODO: <Alex>ALEX</Alex>
@@ -1336,7 +1336,7 @@ class Validator:
 
         Args:
             metric_configuration: MetricConfiguration object, containing prototype metric name, domain, and value arguments.
-            param result_format: Directive controlling whether or not to return only unresolved "ValidationGraph".
+            result_format: Directive controlling whether or not to return only unresolved "ValidationGraph".
 
         Returns:
             Dictionaries of values for fully-qualified parameter names by Domain for metrics, from "RuleBasedpRofiler"
