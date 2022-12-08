@@ -1103,26 +1103,59 @@ def test_list_available_expectation_types(
     assert all(e.startswith("expect_") for e in available)
 
 
+@pytest.fixture
 @pytest.mark.unit
-def test_override_runtime_config_by_validator_default():
-    pass
+def test_override_runtime_config_by_validator_default(
+    validator_with_mock_execution_engine: Validator,
+):
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "animals",
+            "mostly": 0.9,
+            "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "BASIC",
+                "include_unexpected_rows": True,
+            },
+        },
+    )
+    runtime_configuration: dict = {
+        "include_config": True,
+        "catch_exceptions": False,
+        "result_format": "BOOLEAN",
+    }
+    overridden = validator_with_mock_execution_engine._override_runtime_configuration_with_config_in_expectation_configuration(
+        expectation_configuration=expectation_configuration,
+        runtime_configuration=runtime_configuration,
+    )
+    assert overridden == {
+        "catch_exceptions": False,
+        "include_config": True,
+        "result_format": {
+            "include_unexpected_rows": True,
+            "result_format": "BASIC",
+        },
+    }
 
 
-@pytest.mark.unit
-def test_override_runtime_config_by_validator_default():
-    pass
-
-
-@pytest.mark.unit
-def test_override_runtime_config_by_validator_default():
-    pass
-
-
-@pytest.mark.unit
-def test_override_runtime_config_by_validator_default():
-    pass
-
-
-@pytest.mark.unit
-def test_override_runtime_config_by_validator_default():
-    pass
+#
+#
+# @pytest.mark.unit
+# def test_override_runtime_config_by_validator_default():
+#     pass
+#
+#
+# @pytest.mark.unit
+# def test_override_runtime_config_by_validator_default():
+#     pass
+#
+#
+# @pytest.mark.unit
+# def test_override_runtime_config_by_validator_default():
+#     pass
+#
+#
+# @pytest.mark.unit
+# def test_override_runtime_config_by_validator_default():
+#     pass

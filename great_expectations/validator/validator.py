@@ -1171,13 +1171,6 @@ class Validator:
         Expectation-level to take precedence over the ones defined at higher levels.
         This functionality is enabled by the current function.
         """
-        """
-         DEFAULT_RUNTIME_CONFIGURATION = {
-        "include_config": True,
-        "catch_exceptions": False,
-        "result_format": "BASIC",
-        }
-        """
         expectation_level_result_format_config: Union[
             dict, str, None
         ] = expectation_configuration.kwargs.get("result_format")
@@ -1207,7 +1200,7 @@ class Validator:
             if runtime_config_type is str and expectation_config_type is dict:
                 runtime_configuration["result_format"] = {}
                 runtime_configuration["result_format"][
-                    "runtime_config"
+                    "result_format"
                 ] = runtime_level_result_format_config
 
             # loop through and override
