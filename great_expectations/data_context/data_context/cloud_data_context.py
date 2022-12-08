@@ -374,8 +374,13 @@ class CloudDataContext(AbstractDataContext):
         return self._cloud_config
 
     @property
-    def ge_cloud_mode(self) -> bool:
+    def cloud_mode(self) -> bool:
         return self._cloud_mode
+
+    @property
+    def ge_cloud_mode(self) -> bool:
+        # Deprecated 0.15.37
+        return self.cloud_mode
 
     def _init_variables(self) -> CloudDataContextVariables:
         ge_cloud_base_url: str = self._cloud_config.base_url
@@ -399,7 +404,7 @@ class CloudDataContext(AbstractDataContext):
             UUID to use as the data_context_id
         """
 
-        # if in ge_cloud_mode, use ge_cloud_organization_id
+        # if in cloud_mode, use ge_cloud_organization_id
         return self.ge_cloud_config.organization_id  # type: ignore[return-value,union-attr]
 
     def get_config_with_variables_substituted(
@@ -706,11 +711,11 @@ class CloudDataContext(AbstractDataContext):
         return checkpoint
 
     def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
-        return self.checkpoint_store.list_checkpoints(ge_cloud_mode=self.ge_cloud_mode)
+        return self.checkpoint_store.list_checkpoints(ge_cloud_mode=self.cloud_mode)
 
     def list_profilers(self) -> Union[List[str], List[ConfigurationIdentifier]]:
         return RuleBasedProfiler.list_profilers(
-            profiler_store=self.profiler_store, ge_cloud_mode=self.ge_cloud_mode
+            profiler_store=self.profiler_store, ge_cloud_mode=self.cloud_mode
         )
 
     def _init_site_builder_for_data_docs_site_creation(
@@ -729,7 +734,7 @@ class CloudDataContext(AbstractDataContext):
                 "data_context": self,
                 "root_directory": self.root_directory,
                 "site_name": site_name,
-                "ge_cloud_mode": self.ge_cloud_mode,
+                "cloud_mode": self.cloud_mode,
             },
             config_defaults={
                 "module_name": "great_expectations.render.renderer.site_builder"

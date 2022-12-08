@@ -322,7 +322,7 @@ class DataContext(BaseDataContext):
         return cloud_config
 
     def _init_context_root_directory(self, context_root_dir: Optional[str]) -> str:
-        if self.ge_cloud_mode and context_root_dir is None:
+        if self.cloud_mode and context_root_dir is None:
             context_root_dir = CloudDataContext.determine_context_root_directory(
                 context_root_dir
             )
@@ -407,7 +407,7 @@ class DataContext(BaseDataContext):
 
         :return: the configuration object read from the file or template
         """
-        if self.ge_cloud_mode:
+        if self.cloud_mode:
             cloud_config = self.ge_cloud_config
             assert cloud_config is not None
             config = CloudDataContext.retrieve_data_context_config_from_cloud(

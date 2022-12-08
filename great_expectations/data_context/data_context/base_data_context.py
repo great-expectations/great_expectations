@@ -268,8 +268,13 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         return self._cloud_config
 
     @property
-    def ge_cloud_mode(self) -> bool:
+    def cloud_mode(self) -> bool:
         return self._cloud_mode
+
+    @property
+    def ge_cloud_mode(self) -> bool:
+        # Deprecated 0.15.37
+        return self.cloud_mode
 
     def _synchronize_self_with_underlying_data_context(self) -> None:
         """

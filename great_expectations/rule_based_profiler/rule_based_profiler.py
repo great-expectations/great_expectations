@@ -1138,7 +1138,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         )
 
         key: Union[GXCloudIdentifier, ConfigurationIdentifier]
-        if data_context.ge_cloud_mode:
+        if data_context.cloud_mode:
             key = GXCloudIdentifier(resource_type=GXCloudRESTResource.PROFILER)
         else:
             key = ConfigurationIdentifier(

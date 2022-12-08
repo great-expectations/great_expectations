@@ -31,7 +31,7 @@ class ProfilerStore(ConfigurationStore):
         )
 
         test_key: Union[GXCloudIdentifier, ConfigurationIdentifier]
-        if self.ge_cloud_mode:
+        if self.cloud_mode:
             test_key = self.key_class(  # type: ignore[assignment,call-arg]
                 resource_type=GXCloudRESTResource.PROFILER,
                 ge_cloud_id=str(uuid.uuid4()),

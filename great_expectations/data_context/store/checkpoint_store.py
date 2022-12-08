@@ -60,7 +60,7 @@ class CheckpointStore(ConfigurationStore):
         test_checkpoint_configuration = CheckpointConfig(
             **{"name": test_checkpoint_name}  # type: ignore[arg-type]
         )
-        if self.ge_cloud_mode:
+        if self.cloud_mode:
             test_key: GXCloudIdentifier = self.key_class(  # type: ignore[call-arg,assignment]
                 resource_type=GXCloudRESTResource.CHECKPOINT,
                 ge_cloud_id=str(uuid.uuid4()),
