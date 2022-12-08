@@ -1147,7 +1147,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         response = profiler_store.set(key=key, value=config)
         if isinstance(response, GXCloudResourceRef):
-            new_profiler.ge_cloud_id = response.ge_cloud_id
+            new_profiler.ge_cloud_id = response.cloud_id
 
         return new_profiler
 

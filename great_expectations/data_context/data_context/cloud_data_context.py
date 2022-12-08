@@ -600,7 +600,7 @@ class CloudDataContext(AbstractDataContext):
 
         response = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
         if isinstance(response, GXCloudResourceRef):
-            expectation_suite.ge_cloud_id = response.ge_cloud_id
+            expectation_suite.ge_cloud_id = response.cloud_id
 
     def _validate_suite_unique_constaints_before_save(
         self, key: GXCloudIdentifier
