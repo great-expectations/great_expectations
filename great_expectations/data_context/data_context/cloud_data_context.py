@@ -322,19 +322,11 @@ class CloudDataContext(AbstractDataContext):
         )
         if val:
             return val
-
-        val = cls._get_global_config_value(
+        return cls._get_global_config_value(
             environment_variable=deprecated_environment_variable,
             conf_file_section=conf_file_section,
             conf_file_option=conf_file_option,
         )
-        if val:
-            # deprecated-v0.15.37
-            f"The '{deprecated_environment_variable}' environment variable is deprecated as of v0.15.37 and will be removed in a future release."
-            f"Please use the renamed '{primary_environment_variable}' environment variable.",
-            warnings.warn("", DeprecationWarning)
-
-        return val
 
     def _init_datasource_store(self) -> None:
         from great_expectations.data_context.store.datasource_store import (

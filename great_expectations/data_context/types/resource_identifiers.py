@@ -244,9 +244,9 @@ class GXCloudIdentifier(DataContextKey):
         # Only add resource name if it exists in the tuple_
         if len(tuple_) == 3:
             return cls(
-                resource_type=tuple_[0], ge_cloud_id=tuple_[1], resource_name=tuple_[2]
+                resource_type=tuple_[0], cloud_id=tuple_[1], resource_name=tuple_[2]
             )
-        return cls(resource_type=tuple_[0], ge_cloud_id=tuple_[1])
+        return cls(resource_type=tuple_[0], cloud_id=tuple_[1])
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
