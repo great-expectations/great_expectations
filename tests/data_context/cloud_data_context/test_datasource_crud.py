@@ -382,13 +382,9 @@ def test_cloud_context_datasource_crud_e2e() -> None:
         name=datasource_name,
         execution_engine={"class_name": "PandasExecutionEngine"},
         data_connectors={
-            "my_sql_data_connector": {
-                "class_name": "ConfiguredAssetSqlDataConnector",
-                "assets": {
-                    "my_asset": {
-                        "table_name": "animal_names",
-                    },
-                },
+            "default_runtime_data_connector_name": {
+                "class_name": "RuntimeDataConnector",
+                "batch_identifiers": ["default_identifier_name"],
             },
         },
     )
