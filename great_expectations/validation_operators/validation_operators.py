@@ -370,10 +370,10 @@ class ActionListValidationOperator(ValidationOperator):
 
             run_results = {}
             for batch, async_batch_validation_result in batch_and_async_result_tuples:
-                if self.data_context.ge_cloud_mode:
+                if self.data_context.cloud_mode:
                     expectation_suite_identifier = GXCloudIdentifier(
                         resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-                        ge_cloud_id=batch._expectation_suite.ge_cloud_id,
+                        cloud_id=batch._expectation_suite.ge_cloud_id,
                     )
                     validation_result_id = GXCloudIdentifier(
                         resource_type=GXCloudRESTResource.VALIDATION_RESULT
