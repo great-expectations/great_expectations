@@ -138,7 +138,14 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
 ):
     df: pd.DataFrame = titanic_df
 
-    validator: Validator = build_spark_validator_with_data(df, spark_session)
+    context: Optional[DataContext] = cast(
+        DataContext, build_in_memory_runtime_context()
+    )
+    validator = get_test_validator_with_data(
+        execution_engine="spark",
+        data=df,
+        context=context,
+    )
 
     result: ExpectationValidationResult = (
         validator.expect_queried_table_row_count_to_be(
