@@ -1144,6 +1144,15 @@ class Validator:
                         configuration=evaluated_config,
                     )
                 )
+                # TODO: <Alex>ALEX</Alex>
+                metrics_by_domain: Optional[
+                    Dict[Domain, Dict[str, ParameterNode]]
+                ] = self.compute_multi_batch_metrics(
+                    metric_configurations=validation_dependencies.get_metric_configurations(),
+                    result_format=MetricsComputationResultFormat.VALIDATION_GRAPH,
+                )
+                # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] METRICS_BY_DOMAIN:\n{metrics_by_domain} ; TYPE: {str(type(metrics_by_domain))}")
+                # TODO: <Alex>ALEX</Alex>
                 for (
                     metric_configuration
                 ) in validation_dependencies.get_metric_configurations():
@@ -1159,8 +1168,8 @@ class Validator:
                     # TODO: <Alex>ALEX</Alex>
                     metrics_by_domain: Optional[
                         Dict[Domain, Dict[str, ParameterNode]]
-                    ] = self.compute_multi_batch_metric_for_domain(
-                        metric_configuration=metric_configuration,
+                    ] = self.compute_multi_batch_metrics(
+                        metric_configurations=[metric_configuration],
                         result_format=MetricsComputationResultFormat.VALIDATION_GRAPH,
                     )
                     # TODO: <Alex>ALEX</Alex>
@@ -1325,9 +1334,9 @@ class Validator:
 
     # TODO: <Alex>ALEX</Alex>
     # TODO: <Alex>ALEX</Alex>
-    def compute_multi_batch_metric_for_domain(
+    def compute_multi_batch_metrics(
         self,
-        metric_configuration: MetricConfiguration,
+        metric_configurations: List[MetricConfiguration],
         result_format: MetricsComputationResultFormat,
     ) -> Dict[Domain, Dict[str, ParameterNode]]:
         """
@@ -1335,7 +1344,7 @@ class Validator:
         "ValidationGraph" or resolved multi-Batch metrics (corressponding to "result_format" directive).
 
         Args:
-            metric_configuration: MetricConfiguration object, containing prototype metric name, domain, and value arguments.
+            metric_configurations: List of "MetricConfiguration" objects, containing metric name/domain/value arguments.
             result_format: Directive controlling whether or not to return only unresolved "ValidationGraph".
 
         Returns:
@@ -1345,7 +1354,7 @@ class Validator:
         data_assistant: "DataAssistant" = MetricMultiBatchDataAssistant(  # noqa: F821
             name=data_assistant_name,
             validator=self,
-            metric_configuration=metric_configuration,
+            metric_configurations=metric_configurations,
             result_format=result_format,
         )
         data_assistant_result: DataAssistantResult = data_assistant.run()

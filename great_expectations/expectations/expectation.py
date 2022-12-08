@@ -980,8 +980,8 @@ class Expectation(metaclass=MetaExpectation):
         for metric_configuration in validation_dependencies.get_metric_configurations():
             metrics_by_domain: Optional[
                 Dict[Domain, Dict[str, ParameterNode]]
-            ] = validator.compute_multi_batch_metric_for_domain(
-                metric_configuration=metric_configuration,
+            ] = validator.compute_multi_batch_metrics(
+                metric_configurations=[metric_configuration],
                 result_format=MetricsComputationResultFormat.RESOLVED_METRICS,
             )
             # TODO: <Alex>ALEX</Alex>
@@ -1023,8 +1023,8 @@ class Expectation(metaclass=MetaExpectation):
         provided_metrics: Dict[str, MetricValue] = {
             metric_name: list(
                 list(
-                    validator.compute_multi_batch_metric_for_domain(
-                        metric_configuration=metric_configuration,
+                    validator.compute_multi_batch_metrics(
+                        metric_configurations=[metric_configuration],
                         result_format=MetricsComputationResultFormat.RESOLVED_METRICS,
                     ).values()
                 )[0][

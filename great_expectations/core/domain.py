@@ -117,6 +117,9 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
 """
                     )
 
+        self.domain_type = None
+        self.rule_name = None
+
         super().__init__(
             domain_type=domain_type,
             domain_kwargs=domain_kwargs_dot_dict,
@@ -172,6 +175,18 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
         return is_candidate_subset_of_target(
             candidate=this_json_dict, target=other_json_dict
         )
+
+    def get_domain_type(self) -> MetricDomainTypes:
+        """Returns "domain_type" field of this "Domain" object."""
+        return self.domain_type
+
+    def get_rule_name(self) -> Optional[str]:
+        """Returns (optional) "rule_name" of this "Domain" object."""
+        return self.rule_name
+
+    def set_rule_name(self, value: Optional[str] = None) -> None:
+        """Setter for (optional) "rule_name" for this "Domain" object."""
+        self.rule_name = value
 
     # Adding this property for convenience (also, in the future, arguments may not be all set to their default values).
     @property
