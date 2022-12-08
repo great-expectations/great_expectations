@@ -483,7 +483,7 @@ class CloudDataContext(AbstractDataContext):
 
         response: Union[bool, GXCloudResourceRef] = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
         if isinstance(response, GXCloudResourceRef):
-            expectation_suite.ge_cloud_id = response.ge_cloud_id
+            expectation_suite.ge_cloud_id = response.cloud_id
 
         return expectation_suite
 

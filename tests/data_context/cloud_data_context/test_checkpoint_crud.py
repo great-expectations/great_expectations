@@ -164,7 +164,7 @@ def test_cloud_backed_data_context_add_checkpoint(
 
     # Make sure the fixture has the right configuration
     assert isinstance(context, data_context_type)
-    assert context.ge_cloud_mode
+    assert context.cloud_mode
 
     validation_id_1, validation_id_2 = validation_ids
 

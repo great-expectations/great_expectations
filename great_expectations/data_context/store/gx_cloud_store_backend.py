@@ -364,7 +364,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             object_url = self.get_url_for_key((self.ge_cloud_resource_type, object_id))
             return GXCloudResourceRef(
                 resource_type=resource_type,
-                ge_cloud_id=object_id,
+                cloud_id=object_id,
                 url=object_url,
             )
         except requests.HTTPError as http_exc:

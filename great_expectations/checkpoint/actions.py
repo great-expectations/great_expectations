@@ -841,7 +841,7 @@ class StoreValidationResultAction(ValidationAction):
         )
         if self.data_context.cloud_mode:
             return_val: GXCloudResourceRef
-            new_ge_cloud_id = return_val.ge_cloud_id
+            new_ge_cloud_id = return_val.cloud_id
             validation_result_suite_identifier.cloud_id = new_ge_cloud_id
 
 
