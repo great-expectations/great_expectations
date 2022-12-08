@@ -1186,7 +1186,7 @@ class Validator:
         This functionality is enabled by the current function.
         """
         if not runtime_configuration:
-            runtime_configuration = expectation_configuration
+            runtime_configuration = expectation_configuration.kwargs
             return runtime_configuration
 
         if expectation_configuration.kwargs.get("catch_exceptions"):
