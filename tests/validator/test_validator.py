@@ -1103,7 +1103,6 @@ def test_list_available_expectation_types(
     assert all(e.startswith("expect_") for e in available)
 
 
-@pytest.fixture
 @pytest.mark.unit
 def test_override_runtime_config_by_validator_default(
     validator_with_mock_execution_engine: Validator,
