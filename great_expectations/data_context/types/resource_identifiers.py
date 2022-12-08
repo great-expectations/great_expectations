@@ -204,13 +204,13 @@ class GXCloudIdentifier(DataContextKey):
     def __init__(
         self,
         resource_type: GXCloudRESTResource,
-        ge_cloud_id: Optional[str] = None,
+        cloud_id: Optional[str] = None,
         resource_name: Optional[str] = None,
     ) -> None:
         super().__init__()
 
         self._resource_type = resource_type
-        self._ge_cloud_id = ge_cloud_id or ""
+        self._cloud_id = cloud_id or ""
         self._resource_name = resource_name or ""
 
     @property
@@ -222,19 +222,19 @@ class GXCloudIdentifier(DataContextKey):
         self._resource_type = value
 
     @property
-    def ge_cloud_id(self):
-        return self._ge_cloud_id
+    def cloud_id(self):
+        return self._cloud_id
 
-    @ge_cloud_id.setter
-    def ge_cloud_id(self, value) -> None:
-        self._ge_cloud_id = value
+    @cloud_id.setter
+    def cloud_id(self, value) -> None:
+        self._cloud_id = value
 
     @property
     def resource_name(self) -> str:
         return self._resource_name
 
     def to_tuple(self):
-        return (self.resource_type, self.ge_cloud_id, self.resource_name)
+        return (self.resource_type, self.cloud_id, self.resource_name)
 
     def to_fixed_length_tuple(self):
         return self.to_tuple()
@@ -253,7 +253,7 @@ class GXCloudIdentifier(DataContextKey):
         return cls.from_tuple(tuple_)
 
     def __repr__(self):
-        repr = f"{self.__class__.__name__}::{self.resource_type}::{self.ge_cloud_id}"
+        repr = f"{self.__class__.__name__}::{self.resource_type}::{self.cloud_id}"
         if self.resource_name:
             repr += f"::{self.resource_name}"
         return repr

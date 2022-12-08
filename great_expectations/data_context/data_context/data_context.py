@@ -243,10 +243,14 @@ class DataContext(BaseDataContext):
             or ge_cloud_access_token
             or ge_cloud_organization_id
         ):
-            cloud_mode = ge_cloud_mode
-            cloud_base_url = ge_cloud_base_url
-            cloud_access_token = ge_cloud_access_token
-            cloud_organization_id = ge_cloud_organization_id
+            if not cloud_mode:
+                cloud_mode = ge_cloud_mode
+            if not cloud_base_url:
+                cloud_base_url = ge_cloud_base_url
+            if not cloud_access_token:
+                cloud_access_token = ge_cloud_access_token
+            if not cloud_organization_id:
+                cloud_organization_id = ge_cloud_organization_id
 
         self._sources: _SourceFactories = _SourceFactories(self)
         self._cloud_mode = cloud_mode

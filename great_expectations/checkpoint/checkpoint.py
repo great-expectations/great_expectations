@@ -376,7 +376,7 @@ class BaseCheckpoint(ConfigPeer):
             if self.data_context.cloud_mode:
                 checkpoint_identifier = GXCloudIdentifier(
                     resource_type=GXCloudRESTResource.CHECKPOINT,
-                    ge_cloud_id=str(self.ge_cloud_id),
+                    cloud_id=str(self.ge_cloud_id),
                 )
 
             operator_run_kwargs = {}

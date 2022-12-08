@@ -315,7 +315,7 @@ def test_self_check(capsys) -> None:
             None,
             "abc123",
             GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.CHECKPOINT, ge_cloud_id="abc123"
+                resource_type=GXCloudRESTResource.CHECKPOINT, cloud_id="abc123"
             ),
             id="id",
         ),

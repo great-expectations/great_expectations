@@ -1191,7 +1191,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         key: Union[GXCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
             key = GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
+                resource_type=GXCloudRESTResource.PROFILER, cloud_id=ge_cloud_id
             )
         else:
             key = ConfigurationIdentifier(
@@ -1241,7 +1241,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         key: Union[GXCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
             key = GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
+                resource_type=GXCloudRESTResource.PROFILER, cloud_id=ge_cloud_id
             )
         else:
             key = ConfigurationIdentifier(configuration_key=name)

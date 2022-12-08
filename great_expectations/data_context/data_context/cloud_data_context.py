@@ -486,7 +486,7 @@ class CloudDataContext(AbstractDataContext):
 
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            ge_cloud_id=cloud_id,
+            cloud_id=cloud_id,
         )
 
         response: Union[bool, GXCloudResourceRef] = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
@@ -510,7 +510,7 @@ class CloudDataContext(AbstractDataContext):
         """
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            ge_cloud_id=ge_cloud_id,
+            cloud_id=ge_cloud_id,
         )
         if not self.expectations_store.has_key(key):  # noqa: W601
             raise ge_exceptions.DataContextError(
@@ -537,7 +537,7 @@ class CloudDataContext(AbstractDataContext):
         """
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            ge_cloud_id=ge_cloud_id,
+            cloud_id=ge_cloud_id,
         )
         if not self.expectations_store.has_key(key):  # noqa: W601
             raise ge_exceptions.DataContextError(
@@ -590,7 +590,7 @@ class CloudDataContext(AbstractDataContext):
         )
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            ge_cloud_id=id,
+            cloud_id=id,
             resource_name=expectation_suite.expectation_suite_name,
         )
 
@@ -613,7 +613,7 @@ class CloudDataContext(AbstractDataContext):
     def _validate_suite_unique_constaints_before_save(
         self, key: GXCloudIdentifier
     ) -> None:
-        ge_cloud_id = key.ge_cloud_id
+        ge_cloud_id = key.cloud_id
         if ge_cloud_id:
             if self.expectations_store.has_key(key):  # noqa: W601
                 raise ge_exceptions.DataContextError(
@@ -753,5 +753,5 @@ class CloudDataContext(AbstractDataContext):
         instead of the usual `ConfigurationIdentifier` for `Store` interaction.
         """
         return GXCloudIdentifier(
-            resource_type=GXCloudRESTResource.PROFILER, ge_cloud_id=id
+            resource_type=GXCloudRESTResource.PROFILER, cloud_id=id
         )

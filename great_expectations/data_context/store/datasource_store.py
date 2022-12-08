@@ -174,7 +174,7 @@ class DatasourceStore(Store):
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
         ref: Optional[Union[bool, GXCloudResourceRef]] = super().set(key, value)
         if ref and isinstance(ref, GXCloudResourceRef):
-            key.ge_cloud_id = ref.ge_cloud_id  # type: ignore[attr-defined]
+            key.cloud_id = ref.ge_cloud_id  # type: ignore[attr-defined]
 
         return_value: DatasourceConfig = self.get(key)  # type: ignore[assignment]
         if not return_value.name and isinstance(key, DataContextVariableKey):

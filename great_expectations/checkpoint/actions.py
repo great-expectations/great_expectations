@@ -842,7 +842,7 @@ class StoreValidationResultAction(ValidationAction):
         if self.data_context.cloud_mode:
             return_val: GXCloudResourceRef
             new_ge_cloud_id = return_val.ge_cloud_id
-            validation_result_suite_identifier.ge_cloud_id = new_ge_cloud_id
+            validation_result_suite_identifier.cloud_id = new_ge_cloud_id
 
 
 class StoreEvaluationParametersAction(ValidationAction):
@@ -1146,7 +1146,7 @@ class CloudNotificationAction(ValidationAction):
         ge_cloud_url = urljoin(
             self.data_context.ge_cloud_config.base_url,
             f"/organizations/{self.data_context.ge_cloud_config.organization_id}/checkpoints/"
-            f"{self.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_identifier.ge_cloud_id}/notification-actions",
+            f"{self.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_identifier.cloud_id}/notification-actions",
         )
         auth_headers = {
             "Content-Type": "application/vnd.api+json",

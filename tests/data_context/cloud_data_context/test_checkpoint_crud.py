@@ -465,12 +465,12 @@ def test_list_checkpoints(
     assert checkpoints == [
         GXCloudIdentifier(
             resource_type=GXCloudRESTResource.CHECKPOINT,
-            ge_cloud_id=checkpoint_id_1,
+            cloud_id=checkpoint_id_1,
             resource_name=checkpoint_name_1,
         ),
         GXCloudIdentifier(
             resource_type=GXCloudRESTResource.CHECKPOINT,
-            ge_cloud_id=checkpoint_id_2,
+            cloud_id=checkpoint_id_2,
             resource_name=checkpoint_name_2,
         ),
     ]

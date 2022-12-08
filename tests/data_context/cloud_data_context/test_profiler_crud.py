@@ -364,12 +364,12 @@ def test_list_profilers(
     assert profilers == [
         GXCloudIdentifier(
             resource_type=GXCloudRESTResource.PROFILER,
-            ge_cloud_id=profiler_id_1,
+            cloud_id=profiler_id_1,
             resource_name=profiler_name_1,
         ),
         GXCloudIdentifier(
             resource_type=GXCloudRESTResource.PROFILER,
-            ge_cloud_id=profiler_id_2,
+            cloud_id=profiler_id_2,
             resource_name=profiler_name_2,
         ),
     ]
