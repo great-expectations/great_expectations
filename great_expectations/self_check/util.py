@@ -50,10 +50,6 @@ from great_expectations.core.util import (
     get_or_create_spark_application,
     get_sql_dialect_floating_point_infinity_value,
 )
-
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.data_context.data_context import DataContext
-# TODO: <Alex>ALEX</Alex>
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
@@ -72,7 +68,10 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.profile import ColumnsExistProfiler
-from great_expectations.util import import_library_module
+from great_expectations.util import (
+    build_in_memory_runtime_context,
+    import_library_module,
+)
 from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
@@ -145,6 +144,7 @@ try:
     import sqlalchemy_bigquery as BigQueryDialect
 
     sqlalchemy.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
+    # noinspection PyTypeChecker
     bigquery_types_tuple = None
     BIGQUERY_TYPES = {
         "INTEGER": sqla_bigquery.INTEGER,
@@ -161,6 +161,7 @@ try:
         "DATETIME": sqla_bigquery.DATETIME,
     }
     try:
+        # noinspection PyUnresolvedReferences
         from sqlalchemy_bigquery import GEOGRAPHY
 
         BIGQUERY_TYPES["GEOGRAPHY"] = GEOGRAPHY
@@ -209,11 +210,13 @@ except ImportError:
             from collections import namedtuple
 
             BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))  # type: ignore[misc]
+            # noinspection PyTypeChecker
             bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
             BIGQUERY_TYPES = {}
 
     except (ImportError, AttributeError):
         sqla_bigquery = None
+        # noinspection PyTypeChecker
         bigquery_types_tuple = None
         BigQueryDialect = None
         pybigquery = None
@@ -279,6 +282,7 @@ try:
     except AttributeError:
         mssqltypes.INT = mssqltypes.INTEGER
 
+    # noinspection PyUnresolvedReferences
     MSSQL_TYPES = {
         "BIGINT": mssqltypes.BIGINT,
         "BINARY": mssqltypes.BINARY,
@@ -928,6 +932,7 @@ def get_dataset(  # noqa: C901 - 110
 
         engine = _create_snowflake_engine()
         sql_dtypes = {}
+        # noinspection PyTypeChecker
         if (
             schemas
             and "snowflake" in schemas
@@ -988,6 +993,7 @@ def get_dataset(  # noqa: C901 - 110
 
         engine = _create_redshift_engine()
         sql_dtypes = {}
+        # noinspection PyTypeChecker
         if (
             schemas
             and "redshift" in schemas
@@ -1419,6 +1425,10 @@ def build_pandas_validator_with_data(
     context: Optional[DataContext] = None,
 ) -> Validator:
     batch = Batch(data=df, batch_definition=batch_definition)
+
+    if context is None:
+        context = build_in_memory_runtime_context()  # type: ignore[assignment]
+
     return Validator(
         execution_engine=PandasExecutionEngine(),
         batches=[
@@ -1501,7 +1511,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         engine = connection_manager.get_engine(connection_string)
     elif sa_engine_name == "mysql":
         connection_string = f"mysql+pymysql://root@{db_hostname}/test_ci"
-        engine = create_engine(connection_string)
+        engine = connection_manager.get_engine(connection_string)
     elif sa_engine_name == "mssql":
         connection_string = f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true"
         engine = create_engine(
@@ -1537,6 +1547,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         df.columns = df.columns.str.replace(" ", "_")
 
     sql_dtypes = {}
+    # noinspection PyTypeHints
     if (
         schemas
         and sa_engine_name in schemas
@@ -1605,6 +1616,13 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
+    if context is None:
+        context = build_in_memory_runtime_context()  # type: ignore[assignment]
+
+    assert (
+        context is not None
+    ), 'Instance of any child of "AbstractDataContext" class is required.'
+
     context.datasources["my_test_datasource"] = Datasource(
         name="my_test_datasource",
         # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
@@ -1624,7 +1642,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         },
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    context.datasources["my_test_datasource"]._execution_engine = execution_engine
+    context.datasources["my_test_datasource"]._execution_engine = execution_engine  # type: ignore[union-attr]
     my_data_connector: ConfiguredAssetSqlDataConnector = (
         ConfiguredAssetSqlDataConnector(
             name="my_sql_data_connector",
@@ -1695,21 +1713,17 @@ def build_spark_validator_with_data(
             ],
             df.columns.tolist(),
         )
-    # TODO: <Alex>ALEX</Alex>
-    # batch_definition = None
-    # context = None
-    # TODO: <Alex>ALEX</Alex>
+
     batch = Batch(data=df, batch_definition=batch_definition)
     execution_engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark,
         df=df,
-        # TODO: <Alex>ALEX</Alex>
         batch_id=batch.id,
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # batch_definition=batch_definition,
-        # TODO: <Alex>ALEX</Alex>
     )
+
+    if context is None:
+        context = build_in_memory_runtime_context()  # type: ignore[assignment]
+
     return Validator(
         execution_engine=execution_engine,
         batches=[
@@ -1808,13 +1822,7 @@ def build_spark_engine(
         df = spark.createDataFrame(data=data, schema=schema)
 
     conf: Iterable[Tuple[str, str]] = spark.sparkContext.getConf().getAll()
-    # print(f'\n[ALEX_TEST] [SELF_CHECK/UTIL.BUILD_SPARK_ENGINE()] CONF:\n{conf} ; TYPE: {str(type(conf))}')
     spark_config: Dict[str, str] = dict(conf)
-    # print(f'\n[ALEX_TEST] [SELF_CHECK/UTIL.BUILD_SPARK_ENGINE()] SPARK_CONFIG:\n{spark_config} ; TYPE: {str(type(spark_config))}')
-    # TODO: <Alex>ALEX</Alex>
-    # execution_engine = SparkDFExecutionEngine(spark_config=spark_config)
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     execution_engine = SparkDFExecutionEngine(
         spark_config=spark_config,
         batch_data_dict={
@@ -1822,10 +1830,6 @@ def build_spark_engine(
         },
         force_reuse_spark_context=True,
     )
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    # execution_engine.load_batch_data(batch_id=batch_id, batch_data=df)
-    # TODO: <Alex>ALEX</Alex>
     return execution_engine
 
 
@@ -2314,7 +2318,7 @@ def generate_expectation_tests(  # noqa: C901 - 43
     ignore_only_for: bool = False,
     debug_logger: Optional[logging.Logger] = None,
     only_consider_these_backends: Optional[List[str]] = None,
-    context: Optional["DataContext"] = None,
+    context: Optional["DataContext"] = None,  # noqa: F821
 ):
     """Determine tests to run
 
@@ -2326,6 +2330,7 @@ def generate_expectation_tests(  # noqa: C901 - 43
     :param ignore_only_for: bool object that when True will ignore the only_for list on Expectation sample tests
     :param debug_logger: optional logging.Logger object to use for sending debug messages to
     :param only_consider_these_backends: optional list of backends to consider
+    :param context Instance of any child of "AbstractDataContext" class
     :return: list of parametrized tests with loaded validators and accessible backends
     """
     _debug = lambda x: x  # noqa: E731
@@ -2484,6 +2489,7 @@ def generate_expectation_tests(  # noqa: C901 - 43
 
             datasets = []
 
+            # noinspection PyBroadException,PyExceptClausesOrder
             try:
                 if isinstance(d["data"], list):
                     sqlite_db_path = generate_sqlite_db_path()
@@ -2526,6 +2532,7 @@ def generate_expectation_tests(  # noqa: C901 - 43
 
                 if "data_alt" in d and d["data_alt"] is not None:
                     # print("There is alternate data to try!!")
+                    # noinspection PyBroadException
                     try:
                         if isinstance(d["data_alt"], list):
                             sqlite_db_path = generate_sqlite_db_path()
@@ -3038,8 +3045,6 @@ def check_json_test_result(test, result, data_asset=None) -> None:  # noqa: C901
 
             elif key == "unexpected_list":
                 try:
-                    # print(f'\n[ALEX_TEST] [WOUTPUT] WOUTPUT-ACTUAL:\n{result["result"]["unexpected_list"]} ; TYPE: {str(type(result["result"]["unexpected_list"]))}')
-                    # print(f'\n[ALEX_TEST] [WOUTPUT] WOUTPUT-EXPECT:\n{value} ; TYPE: {str(type(value))}')
                     assert result["result"]["unexpected_list"] == value, (
                         "expected "
                         + str(value)
@@ -3047,7 +3052,6 @@ def check_json_test_result(test, result, data_asset=None) -> None:  # noqa: C901
                         + str(result["result"]["unexpected_list"])
                     )
                 except AssertionError:
-                    # print(f'\n[ALEX_TEST] [WOUTPUT] WOUTPUT-ACTUAL-EXCEPTIONS!!!!!!!!!:\n{result["result"]["unexpected_list"]} ; TYPE: {str(type(result["result"]["unexpected_list"]))}')
                     if result["result"]["unexpected_list"]:
                         if type(result["result"]["unexpected_list"][0]) == list:
                             unexpected_list_tup = [

@@ -22,10 +22,8 @@ from great_expectations.self_check.util import (
     sqliteDialect,
     trinoDialect,
 )
-from tests.conftest import (
-    build_in_memory_runtime_context,
-    build_test_backends_list_v3_api,
-)
+from great_expectations.util import build_in_memory_runtime_context
+from tests.conftest import build_test_backends_list_v3_api
 
 
 def pytest_generate_tests(metafunc):
@@ -41,52 +39,12 @@ def pytest_generate_tests(metafunc):
     backends = build_test_backends_list_v3_api(metafunc)
     validator_with_data = None
     for expectation_category in expectation_dirs:
-        # TODO: <Alex>ALEX</Alex>
-        # if expectation_category not in [
-        #     # "multicolumn_map_expectations",
-        #     # "column_pair_map_expectations",
-        #     "column_map_expectations",
-        #     # "column_aggregate_expectations",
-        # ]:
-        #     continue
-        # TODO: <Alex>ALEX</Alex>
 
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )
         for c in backends:
-            # TODO: <Alex>ALEX</Alex>
-            # if c not in ["pandas"]:
-            #     continue
-            # if c not in ["sqlite", "postgresql", "mysql", "mssql"]:
-            #     continue
-            # if c not in ["spark"]:
-            #     continue
-            # if c not in ["postgresql"]:
-            #     continue
-            # if c not in ["sqlite"]:
-            #     continue
-            # if c not in ["sqlite", "postgresql"]:
-            #     continue
-            # if c not in ["mssql"]:
-            #     continue
-            # TODO: <Alex>ALEX</Alex>
             for filename in test_configuration_files:
-                # TODO: <Alex>ALEX</Alex>
-                # if not (
-                #     # filename.find("expect_multicolumn_sum_to_equal") != (-1)  # or
-                #     filename.find("expect_column_values_to_match_json_schema")
-                #     != (-1)  # or
-                #     # filename.find("expect_compound_columns_to_be_unique")
-                #     # != (-1)  # or
-                #     # filename.find("expect_column_pair_values_to_be_equal") != (-1)  # or
-                #     # filename.find("expect_column_pair_values_A_to_be_greater_than_B") != (-1)  # or
-                #     # filename.find("expect_column_pair_values_to_be_in_set") != (-1) # or
-                #     # filename.find("expect_select_column_values_to_be_unique_within_record") != (-1) # or
-                #     # filename.find("expect_column_values_to_be_between") != (-1) # or
-                # ):
-                #     continue
-                # TODO: <Alex>ALEX</Alex>
                 file = open(filename)
                 test_configuration = json.load(file)
 
