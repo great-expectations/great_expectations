@@ -135,7 +135,7 @@ class ExpectColumnToExist(TableExpectation):
         else:
             renderer_configuration.add_param(
                 name="column_indexth",
-                schema_type=RendererSchemaType.NUMBER,
+                schema_type=RendererSchemaType.STRING,
                 value=ordinal(params.column_index.value),
             )
             if renderer_configuration.include_column_name:

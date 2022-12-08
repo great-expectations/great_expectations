@@ -284,6 +284,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
             ("max_value", RendererSchemaType.NUMBER),
             ("row_condition", RendererSchemaType.STRING),
             ("condition_parser", RendererSchemaType.STRING),
+            ("mostly", RendererSchemaType.NUMBER),
             ("strict_min", RendererSchemaType.BOOLEAN),
             ("strict_max", RendererSchemaType.BOOLEAN),
         )

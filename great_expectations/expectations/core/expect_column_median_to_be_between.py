@@ -229,7 +229,7 @@ class ExpectColumnMedianToBeBetween(ColumnExpectation):
         params: RendererParams = renderer_configuration.params
 
         if not params.min_value and not params.max_value:
-            template_str = "median value may have any numerical value."
+            template_str = "median may have any numerical value."
         else:
             at_least_str = "greater than or equal to"
             if params.strict_min:
@@ -243,11 +243,11 @@ class ExpectColumnMedianToBeBetween(ColumnExpectation):
                 )
 
             if params.min_value and params.max_value:
-                template_str = f"median value must be {at_least_str} $min_value and {at_most_str} $max_value."
+                template_str = f"median must be {at_least_str} $min_value and {at_most_str} $max_value."
             elif not params.min_value:
-                template_str = f"median value must be {at_most_str} $max_value."
+                template_str = f"median must be {at_most_str} $max_value."
             else:
-                template_str = f"median value must be {at_least_str} $min_value."
+                template_str = f"median must be {at_least_str} $min_value."
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
