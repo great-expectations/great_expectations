@@ -5,7 +5,10 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.render.renderer_configuration import RendererConfiguration
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererSchemaType,
+)
 
 
 def mock_expectation_validation_result_from_expectation_configuration(
@@ -96,3 +99,18 @@ def test_failed_renderer_configuration_instantiation():
             error_wrapper.exc for error_wrapper in e.value.raw_errors
         ]
     )
+
+
+def test_renderer_configuration_add_param_validation():
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_table_row_count_to_equal",
+        kwargs={"value": 3},
+    )
+    renderer_configuration = RendererConfiguration(
+        configuration=expectation_configuration
+    )
+    with pytest.raises(ValidationError) as e:
+        renderer_configuration.add_param(
+            name="value", schema_type=RendererSchemaType.BOOLEAN
+        )
+    assert e == "test"
