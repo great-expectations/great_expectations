@@ -391,7 +391,7 @@ class ActionListValidationOperator(ValidationOperator):
                 validation_result = async_batch_validation_result.result()
                 validation_result.meta["validation_id"] = validation_id
                 validation_result.meta["checkpoint_id"] = (
-                    checkpoint_identifier.ge_cloud_id if checkpoint_identifier else None
+                    checkpoint_identifier.cloud_id if checkpoint_identifier else None
                 )
 
                 batch_actions_results = self._run_actions(
