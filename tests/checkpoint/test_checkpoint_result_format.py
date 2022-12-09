@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.fixture()
-def checkpoint_dict_reference_for_unexpected_column_names():
+def reference_checkpoint_config_for_unexpected_column_names():
     checkpoint_dict: dict = {
         "name": "my_checkpoint",
         "config_version": 1.0,
@@ -58,9 +58,9 @@ def checkpoint_dict_reference_for_unexpected_column_names():
 
 @pytest.fixture()
 def checkpoint_dict_unexpected_index_column_names_defined(
-    checkpoint_dict_reference_for_unexpected_column_names,
+    reference_checkpoint_config_for_unexpected_column_names,
 ):
-    checkpoint_dict = checkpoint_dict_reference_for_unexpected_column_names
+    checkpoint_dict = reference_checkpoint_config_for_unexpected_column_names
     checkpoint_dict["runtime_configuration"] = {
         "result_format": {
             "result_format": "COMPLETE",
@@ -72,9 +72,9 @@ def checkpoint_dict_unexpected_index_column_names_defined(
 
 @pytest.fixture()
 def checkpoint_dict_unexpected_index_column_names_not_defined(
-    checkpoint_dict_reference_for_unexpected_column_names,
+    reference_checkpoint_config_for_unexpected_column_names,
 ):
-    checkpoint_dict = checkpoint_dict_reference_for_unexpected_column_names
+    checkpoint_dict = reference_checkpoint_config_for_unexpected_column_names
 
     checkpoint_dict["runtime_configuration"] = {
         "result_format": {
@@ -85,7 +85,7 @@ def checkpoint_dict_unexpected_index_column_names_not_defined(
 
 
 @pytest.fixture()
-def expectation_config_unexpected_index_column_names_defined():
+def expectation_config_unexpected_index_column_names_defined_two_columns():
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
@@ -93,7 +93,22 @@ def expectation_config_unexpected_index_column_names_defined():
             "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "COMPLETE",
-                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Single column
+                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Two columns
+            },
+        },
+    )
+
+
+@pytest.fixture()
+def expectation_config_unexpected_index_column_names_defined_single_column():
+    return ExpectationConfiguration(
+        expectation_type="expect_column_values_to_not_be_in_set",
+        kwargs={
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["pk_2"],  # Single column
             },
         },
     )
@@ -114,14 +129,14 @@ def expectation_config_unexpected_index_column_names_not_defined():
 
 
 def test_result_format_only_in_checkpoint(
-    data_context_with_one_expectation,
-    checkpoint_dict_unexpected_index_column_names_defined,
-    expectation_config_unexpected_index_column_names_not_defined,
+    data_context_with_connection_to_animal_names_db,
+    reference_checkpoint_config_for_unexpected_column_names,
+    expectation_config_unexpected_index_column_names_defined_two_columns,
 ):
-    context: DataContext = data_context_with_one_expectation
-    checkpoint_dict: dict = checkpoint_dict_unexpected_index_column_names_defined
+    context: DataContext = data_context_with_connection_to_animal_names_db
+    checkpoint_dict: dict = reference_checkpoint_config_for_unexpected_column_names
     expectation_configuration: ExpectationConfiguration = (
-        expectation_config_unexpected_index_column_names_not_defined
+        expectation_config_unexpected_index_column_names_defined_two_columns
     )
 
     context.create_expectation_suite(expectation_suite_name="animal_names_exp")
@@ -151,14 +166,14 @@ def test_result_format_only_in_checkpoint(
 
 
 def test_result_format_only_in_expectation(
-    data_context_with_one_expectation,
-    checkpoint_dict_unexpected_index_column_names_not_defined,
-    expectation_config_unexpected_index_column_names_defined,
+    data_context_with_connection_to_animal_names_db,
+    reference_checkpoint_config_for_unexpected_column_names,
+    expectation_config_unexpected_index_column_names_defined_two_columns,
 ):
-    context: DataContext = data_context_with_one_expectation
-    checkpoint_dict: dict = checkpoint_dict_unexpected_index_column_names_not_defined
+    context: DataContext = data_context_with_connection_to_animal_names_db
+    checkpoint_dict: dict = reference_checkpoint_config_for_unexpected_column_names
     expectation_configuration: ExpectationConfiguration = (
-        expectation_config_unexpected_index_column_names_defined
+        expectation_config_unexpected_index_column_names_defined_two_columns
     )
 
     context.create_expectation_suite(expectation_suite_name="animal_names_exp")
@@ -192,15 +207,15 @@ def test_result_format_only_in_expectation(
 
 
 def test_result_format_in_checkpoint_and_expectation_configuration_expectation_ovverides(
-    data_context_with_one_expectation,
-    checkpoint_dict_unexpected_index_column_names_defined,
-    expectation_config_unexpected_index_column_names_defined,
+    data_context_with_connection_to_animal_names_db,
+    reference_checkpoint_config_for_unexpected_column_names,
+    expectation_config_unexpected_index_column_names_defined_two_columns,
 ):
     # this one where the expectation configuration overrides the other one
-    context: DataContext = data_context_with_one_expectation
-    checkpoint_dict: dict = checkpoint_dict_unexpected_index_column_names_defined
+    context: DataContext = data_context_with_connection_to_animal_names_db
+    checkpoint_dict: dict = reference_checkpoint_config_for_unexpected_column_names
     expectation_configuration: ExpectationConfiguration = (
-        expectation_config_unexpected_index_column_names_defined
+        expectation_config_unexpected_index_column_names_defined_two_columns
     )
 
     context.create_expectation_suite(expectation_suite_name="animal_names_exp")
@@ -233,5 +248,43 @@ def test_result_format_in_checkpoint_and_expectation_configuration_expectation_o
     ]
 
 
-# what we want
-# TODO: add anothher Expectation, so that we are overridding something at the Expectation level
+def test_result_format_in_checkpoint_and_expectation_configuration_configuration_overrides_two_expectations(
+    data_context_with_connection_to_animal_names_db,
+    reference_checkpoint_config_for_unexpected_column_names,
+    expectation_config_unexpected_index_column_names_defined_two_columns,
+    expectation_config_unexpected_index_column_names_defined_single_column,
+):
+    # this one where the expectation configuration overrides the other one
+    context: DataContext = data_context_with_connection_to_animal_names_db
+    checkpoint_dict: dict = reference_checkpoint_config_for_unexpected_column_names
+
+    context.create_expectation_suite(expectation_suite_name="animal_names_exp")
+    animals_suite = context.get_expectation_suite(
+        expectation_suite_name="animal_names_exp"
+    )
+    animals_suite.add_expectation(
+        expectation_configuration=expectation_config_unexpected_index_column_names_defined_single_column
+    )
+    animals_suite.add_expectation(
+        expectation_configuration=expectation_config_unexpected_index_column_names_defined_two_columns
+    )
+    context.save_expectation_suite(
+        expectation_suite=animals_suite,
+        expectation_suite_name="animal_names_exp",
+        overwriting_existing=True,
+    )
+    checkpoint_config = CheckpointConfig(**checkpoint_dict)
+    context.add_checkpoint(
+        **filter_properties_dict(
+            properties=checkpoint_config.to_json_dict(),
+            clean_falsy=True,
+        ),
+    )
+    context._save_project_config()
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+    )
+    evrs = result.list_validation_results()
+    first_result = evrs[0]["results"][0]["result"]["unexpected_index_list"]
+    # breakpoint()
+    # assert first_result == [{'pk_1': 0, 'pk_2': 'zero'}, {'pk_1': 1, 'pk_2': 'one'}, {'pk_1': 2, 'pk_2': 'two'}]

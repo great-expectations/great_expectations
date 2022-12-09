@@ -781,7 +781,7 @@ def empty_data_context(
 
 
 @pytest.fixture(scope="function")
-def data_context_with_one_expectation(
+def data_context_with_connection_to_animal_names_db(
     tmp_path,
 ) -> DataContext:
     project_path = tmp_path / "test_configuration"

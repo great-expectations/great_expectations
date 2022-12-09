@@ -1013,6 +1013,7 @@ class Validator:
         # In case the flag has been overridden by expectation_configuration
         catch_exceptions = runtime_configuration.get("catch_exceptions", False)
 
+        # TODO: this is a problem. How do you make it so that we can respect Expectation-level configs?
         graph: ValidationGraph = (
             self._generate_suite_level_graph_from_expectation_level_sub_graphs(
                 expectation_validation_graphs=expectation_validation_graphs
@@ -1113,7 +1114,7 @@ class Validator:
             )
 
             catch_exceptions = runtime_configuration.get("catch_exceptions", False)
-
+            print(f"runtime_configuration: {runtime_configuration}")
             validation_dependencies: ValidationDependencies = (
                 expectation_impl().get_validation_dependencies(
                     configuration=evaluated_config,

@@ -199,6 +199,9 @@ class ValidationGraph:
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
             show_progress_bars=show_progress_bars,
         )
+        # resolved metrics is at the checkpoint level. not the Expectation level
+        # when we do the graph resolve ... we send in the runtime_configuration.
+        # which is the most "Recent" configuration
 
         return resolved_metrics, aborted_metrics_info
 
