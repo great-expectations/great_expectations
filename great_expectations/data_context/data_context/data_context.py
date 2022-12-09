@@ -237,20 +237,14 @@ class DataContext(BaseDataContext):
         ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
         # Chetan - 20221208 - not formally deprecating these values until a future date
-        if (
-            ge_cloud_mode
-            or ge_cloud_base_url
-            or ge_cloud_access_token
-            or ge_cloud_organization_id
-        ):
-            if not cloud_mode:
-                cloud_mode = ge_cloud_mode
-            if not cloud_base_url:
-                cloud_base_url = ge_cloud_base_url
-            if not cloud_access_token:
-                cloud_access_token = ge_cloud_access_token
-            if not cloud_organization_id:
-                cloud_organization_id = ge_cloud_organization_id
+        if cloud_base_url is not None or ge_cloud_base_url is not None:
+            cloud_base_url = cloud_base_url or ge_cloud_base_url
+        if cloud_access_token is not None or ge_cloud_access_token is not None:
+            cloud_access_token = cloud_access_token or ge_cloud_base_url
+        if cloud_organization_id is not None or ge_cloud_organization_id is not None:
+            cloud_organization_id = cloud_organization_id or ge_cloud_organization_id
+        if cloud_mode is not False or ge_cloud_mode is not False:
+            cloud_mode = cloud_mode or ge_cloud_mode
 
         self._sources: _SourceFactories = _SourceFactories(self)
         self._cloud_mode = cloud_mode
