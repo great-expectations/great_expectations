@@ -1019,7 +1019,7 @@ class Validator:
                 expectation_validation_graphs=expectation_validation_graphs
             )
         )
-        breakpoint()
+        # breakpoint()
         # by this point all of them are the most recent ones. Teh Expectation ones are ignored
         # go tit
 
@@ -1271,7 +1271,6 @@ class Validator:
     ) -> ValidationGraph:
         # Collect edges from all expectation-level sub-graphs and incorporate them under common suite-level graph.
         expectation_validation_graph: ExpectationValidationGraph
-        # i have decided
         edges: List[MetricEdge] = list(
             itertools.chain.from_iterable(
                 [
@@ -1304,6 +1303,8 @@ class Validator:
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ]
+
+        # TO CHECK : is there something that acn be done at the Expectation level here?
         resolved_metrics, aborted_metrics_info = graph.resolve(
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=0,

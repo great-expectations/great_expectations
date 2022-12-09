@@ -354,6 +354,7 @@ class ExecutionEngine(ABC):
             metric_class, metric_fn = get_metric_provider(
                 metric_name=metric_to_resolve.metric_name, execution_engine=self
             )
+            # marker: this is where we are eventually doing something. Can we do something at the Expectation level?
             metric_provider_kwargs = {
                 "cls": metric_class,
                 "execution_engine": self,

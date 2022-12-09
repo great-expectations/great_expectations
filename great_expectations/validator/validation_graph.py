@@ -215,6 +215,7 @@ class ValidationGraph:
         Tuple[str, str, str],
         Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
     ]:
+        breakpoint()
         if metrics is None:
             metrics = {}
 

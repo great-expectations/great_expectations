@@ -1109,6 +1109,10 @@ class Expectation(metaclass=MetaExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
+    # expect_column_to_be_something_something.validate(runtime_configuration)
+    # checkpoint.run(suite_with_two_expectations)
+    # - each of the expectations having a different runtime_configurfation
+
     def validate(
         self,
         validator: Validator,
