@@ -4,6 +4,21 @@
 Changelog
 #########
 
+0.15.38
+-----------------
+* [BUGFIX] Patch broken Cloud E2E test around `Datasource` CRUD (#6520)
+* [BUGFIX] Patch outdated `ge_cloud_id` attribute call in `ValidationOperator` (#6529)
+* [BUGFIX] Revert refactor to `Datasource` instantiation logic in `DataContext` (#6535)
+* [BUGFIX] Patch faulty GX Cloud arg resolution logic (#6542)
+* [DOCS] Fix line numbers in snippets (#6536)
+* [DOCS] Fix line numbers in snippets part 2 (#6537)
+* [DOCS] Convert nested snippets to named snippets (#6541)
+* [MAINTENANCE] Update Data Assistant plot images (#6521)
+* [MAINTENANCE] Clean up type hints and make test generation more elegant (#6523)
+* [MAINTENANCE] Clean up `Datasource` instantiation logic in `DataContext` (#6517)
+* [MAINTENANCE] Update `Domain` computation in MetricConfiguration (#6528)
+* [MAINTENANCE] v2 Docs link (#6534)
+
 0.15.37
 -----------------
 * [FEATURE] Support to include ID/PK in validation result for each row - SQL (#6448)
