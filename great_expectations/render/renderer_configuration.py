@@ -127,10 +127,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             values["styling"] = values["runtime_configuration"].get("styling")
         return values
 
-    @root_validator(pre=True)
-    def validate_for_params(cls, values):
+    def __init__(self, **values) -> None:
         values["params"] = _RendererParamsBase()
-        return values
+        super().__init__(**values)
 
     class _RendererParamBase(BaseModel):
         renderer_schema: Optional[RendererSchemaType] = Field(..., allow_mutation=False)
