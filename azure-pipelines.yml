@@ -437,7 +437,8 @@ stages:
             displayName: 'Pytest Usage Stats'
 
       - job: cloud_integration_tests
-        condition: or(eq(variables.isScheduled, true), eq(variables.isManual, true))
+        dependsOn: [make_suffix, build_push]
+        condition: succeeded()
         strategy:
           matrix:
             Python37:
