@@ -286,7 +286,7 @@ class ActionListValidationOperator(ValidationOperator):
         run_time=None,
         catch_exceptions=None,
         result_format=None,
-        checkpoint_identifier=None,
+        checkpoint_identifier: Optional[GXCloudIdentifier] = None,
         checkpoint_name: Optional[str] = None,
         validation_id: Optional[str] = None,
     ) -> ValidationOperatorResult:
