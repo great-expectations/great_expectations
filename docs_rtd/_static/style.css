@@ -125,7 +125,7 @@ a {
 
 .wy-menu-vertical a:hover {
   color: #333333;
-  background: #00bfa5;
+  background: #ff6310;
 }
 
 .wy-nav-side {
@@ -185,8 +185,8 @@ a {
 }
 
 #header-actions a:hover {
-  color: #00bfa5 !important;
-  border-bottom: 2px solid #00bfa5;
+  color: #ff6310 !important;
+  border-bottom: 2px solid #ff6310;
   transition: border-bottom 0.3s cubic-bezier(0.645, 0.045, 0.355, 1),
     background 0.3s cubic-bezier(0.645, 0.045, 0.355, 1),
     padding 0.15s cubic-bezier(0.645, 0.045, 0.355, 1);
