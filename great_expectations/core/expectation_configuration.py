@@ -969,7 +969,6 @@ class ExpectationConfiguration(SerializableDictDot):
             raise InvalidExpectationConfigurationError(
                 "expectation configuration kwargs must be a dict."
             )
-
         self._kwargs = kwargs
         self._raw_kwargs = None  # the kwargs before evaluation parameters are evaluated
         if meta is None:
