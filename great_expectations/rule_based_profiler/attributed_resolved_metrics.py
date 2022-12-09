@@ -11,6 +11,7 @@ from great_expectations.rule_based_profiler.metric_computation_result import (
 )
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.attributes import Attributes
+from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.computed_metric import MetricValue
 
 logger = logging.getLogger(__name__)
@@ -43,7 +44,15 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
         # Pandas "DataFrame" and "Series" are illegal as candidates for conversion into "numpy.ndarray" type.
         if isinstance(
             values,
-            (pd.DataFrame, pd.Series, sqlalchemy_engine_Row, pyspark_sql_Row, set),
+            deep_filter_properties_iterable(
+                properties=(
+                    pd.DataFrame,
+                    pd.Series,
+                    sqlalchemy_engine_Row,
+                    pyspark_sql_Row,
+                    set,
+                )
+            ),
         ):
             return True
 
@@ -57,12 +66,14 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
                 # Pandas "DataFrame" and "Series" are illegal as candidates for conversion into "numpy.ndarray" type.
                 if isinstance(
                     value,
-                    (
-                        pd.DataFrame,
-                        pd.Series,
-                        sqlalchemy_engine_Row,
-                        pyspark_sql_Row,
-                        set,
+                    deep_filter_properties_iterable(
+                        properties=(
+                            pd.DataFrame,
+                            pd.Series,
+                            sqlalchemy_engine_Row,
+                            pyspark_sql_Row,
+                            set,
+                        )
                     ),
                 ):
                     return True
