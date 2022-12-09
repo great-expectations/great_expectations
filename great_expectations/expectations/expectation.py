@@ -100,6 +100,7 @@ from great_expectations.render import (
     ValueListContent,
     renderedAtomicValueSchema,
 )
+from great_expectations.render.exceptions import RendererConfigurationError
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
@@ -202,7 +203,14 @@ def param_method(param_name: str) -> Callable:
         def wrapper(
             renderer_configuration: RendererConfiguration,
         ) -> Optional[Any]:
-            return_type: Type = param_func.__annotations__["return"]
+            try:
+                return_type: Type = param_func.__annotations__["return"]
+            except KeyError:
+                raise RendererConfigurationError(
+                    "Methods decorated with @param_method must have an annotated return "
+                    "type."
+                )
+
             if hasattr(renderer_configuration.params, param_name):
                 if getattr(renderer_configuration.params, param_name, None):
                     return_obj = param_func(
@@ -214,7 +222,7 @@ def param_method(param_name: str) -> Callable:
                     else:
                         return_obj = None
             else:
-                raise AttributeError(
+                raise RendererConfigurationError(
                     f"RendererConfiguration.param does not have a param called {param_name}. "
                     f'Use RendererConfiguration.add_param() with name="{param_name}" to add it.'
                 )
