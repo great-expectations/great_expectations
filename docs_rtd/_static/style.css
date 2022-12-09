@@ -175,24 +175,14 @@ a {
   display: inline-block;
   vertical-align: bottom;
   padding: 0 20px;
+  font-weight: 600;
   display: block;
   color: rgba(0, 0, 0, 0.65) !important;
   float: left;
   border-bottom: 2px solid transparent;
-  transition: border-bottom 0.3s cubic-bezier(0.645, 0.045, 0.355, 1),
-    background 0.3s cubic-bezier(0.645, 0.045, 0.355, 1),
-    padding 0.15s cubic-bezier(0.645, 0.045, 0.355, 1);
 }
 
-#header-actions a:hover {
-  color: #ff6310 !important;
-  border-bottom: 2px solid #ff6310;
-  transition: border-bottom 0.3s cubic-bezier(0.645, 0.045, 0.355, 1),
-    background 0.3s cubic-bezier(0.645, 0.045, 0.355, 1),
-    padding 0.15s cubic-bezier(0.645, 0.045, 0.355, 1);
-}
-
-#community-modal {
+.drop-modal {
   background: #fff;
   min-width: 172px;
   border-radius: 4px;
@@ -204,13 +194,13 @@ a {
   right: 30px;
 }
 
-#community-modal ul {
+.drop-modal ul {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-#community-modal li {
+.drop-modal li {
   margin-bottom: 8px;
   padding: 0 16px 0 28px;
   height: 40px;
@@ -222,7 +212,7 @@ a {
   text-overflow: ellipsis;
 }
 
-#community-modal a {
+.drop-modal a {
   border-bottom: none !important;
 }
 
