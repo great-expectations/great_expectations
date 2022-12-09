@@ -1,6 +1,5 @@
-from typing import Optional
-
 import pytest
+from pydantic.error_wrappers import ValidationError
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -51,8 +50,12 @@ def mock_expectation_validation_result_from_expectation_configuration(
         ),
     ],
 )
-def test_renderer_configuration_instantiation(
-    expectation_type, kwargs, runtime_configuration, fake_result, include_column_name
+def test_successful_renderer_configuration_instantiation(
+    expectation_type: str,
+    kwargs: dict,
+    runtime_configuration: dict,
+    fake_result: dict,
+    include_column_name: bool,
 ):
     expectation_configuration = ExpectationConfiguration(
         expectation_type=expectation_type,
@@ -79,3 +82,17 @@ def test_renderer_configuration_instantiation(
     assert renderer_configuration.expectation_type == expectation_type
     assert renderer_configuration.kwargs == kwargs
     assert renderer_configuration.include_column_name is include_column_name
+
+
+def test_failed_renderer_configuration_instantiation():
+    with pytest.raises(ValidationError) as e:
+        RendererConfiguration(
+            runtime_configuration={},
+        )
+    assert any(
+        str(error_wrapper_exc)
+        == "RendererConfiguration must be passed either configuration or result."
+        for error_wrapper_exc in [
+            error_wrapper.exc for error_wrapper in e.value.raw_errors
+        ]
+    )

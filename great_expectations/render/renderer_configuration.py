@@ -14,13 +14,14 @@ from typing import (
     cast,
 )
 
-from pydantic import BaseModel, Field, create_model
+from pydantic import BaseModel, Field, create_model, root_validator
 from pydantic.generics import GenericModel
 
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.render.exceptions import RendererConfigurationError
 
 if TYPE_CHECKING:
     from pydantic.typing import AbstractSetIntStr, DictStrAny, MappingIntStrAny
@@ -94,6 +95,14 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     class Config:
         validate_assignment = True
         arbitrary_types_allowed = True
+
+    @root_validator(pre=True)
+    def validate_configuration_or_result(cls, values):
+        if "configuration" not in values and "result" not in values:
+            raise RendererConfigurationError(
+                "RendererConfiguration must be passed either configuration or result."
+            )
+        return values
 
     def __init__(self, **kwargs) -> None:
         kwargs = RendererConfiguration._set_expectation_type_and_kwargs(kwargs=kwargs)
