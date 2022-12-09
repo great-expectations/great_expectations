@@ -1,3 +1,4 @@
+import logging
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, Iterator, List, Optional, Sized
 
@@ -12,6 +13,26 @@ from great_expectations.types import SerializableDictDot
 from great_expectations.types.attributes import Attributes
 from great_expectations.validator.computed_metric import MetricValue
 
+logger = logging.getLogger(__name__)
+
+try:
+    import sqlalchemy as sa
+except ImportError:
+    logger.debug("No SqlAlchemy module available.")
+    sa = None
+
+try:
+    from sqlalchemy.engine import Row as sqlalchemy_engine_Row
+except ImportError:
+    logger.debug("No SqlAlchemy.engine module available.")
+    sqlalchemy_engine_Row = None
+
+try:
+    from pyspark.sql import Row as pyspark_sql_Row
+except ImportError:
+    logger.debug("No spark SQLContext available.")
+    pyspark_sql_Row = None
+
 
 def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
     def _detect_illegal_array_type_or_shape(values: MetricValues) -> bool:
@@ -20,7 +41,10 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
             return True
 
         # Pandas "DataFrame" and "Series" are illegal as candidates for conversion into "numpy.ndarray" type.
-        if isinstance(values, (pd.DataFrame, pd.Series, set)):
+        if isinstance(
+            values,
+            (pd.DataFrame, pd.Series, sqlalchemy_engine_Row, pyspark_sql_Row, set),
+        ):
             return True
 
         if isinstance(values, (list, tuple)):
@@ -31,7 +55,16 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
                     return True
 
                 # Pandas "DataFrame" and "Series" are illegal as candidates for conversion into "numpy.ndarray" type.
-                if isinstance(value, (pd.DataFrame, pd.Series, set)):
+                if isinstance(
+                    value,
+                    (
+                        pd.DataFrame,
+                        pd.Series,
+                        sqlalchemy_engine_Row,
+                        pyspark_sql_Row,
+                        set,
+                    ),
+                ):
                     return True
 
                 # Components of different lengths cannot be packaged into "numpy.ndarray" type (due to undefined shape).
