@@ -187,7 +187,6 @@ module.exports = {
             {
               label: 'GX OSS',
               to: 'https://greatexpectations.io/gx-oss'
-            }
           ]
         },
         {
