@@ -274,7 +274,7 @@ Below is an example of a `CheckpointResult` object which itself contains `Valida
 
 #### Example CheckpointResult
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L101-L115
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L104-L118
 ```
 
 ### Example script

@@ -210,7 +210,7 @@ def test_cloud_backed_data_context_add_profiler_e2e(
     mock_save_project_config: mock.MagicMock,
     profiler_rules: dict,
 ) -> None:
-    context = DataContext(ge_cloud_mode=True)
+    context = DataContext(cloud_mode=True)
 
     name = "oss_test_profiler"
     config_version = 1.0
@@ -347,8 +347,8 @@ def test_list_profilers(
     context = BaseDataContext(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path_name,
-        ge_cloud_config=ge_cloud_config,
-        ge_cloud_mode=True,
+        cloud_config=ge_cloud_config,
+        cloud_mode=True,
     )
 
     profiler_1, profiler_2 = profiler_names_and_ids
@@ -364,12 +364,12 @@ def test_list_profilers(
     assert profilers == [
         GXCloudIdentifier(
             resource_type=GXCloudRESTResource.PROFILER,
-            ge_cloud_id=profiler_id_1,
+            cloud_id=profiler_id_1,
             resource_name=profiler_name_1,
         ),
         GXCloudIdentifier(
             resource_type=GXCloudRESTResource.PROFILER,
-            ge_cloud_id=profiler_id_2,
+            cloud_id=profiler_id_2,
             resource_name=profiler_name_2,
         ),
     ]

@@ -45,7 +45,7 @@ def test_cloud_backed_data_context_save_expectation_suite_include_rendered_conte
     ge_cloud_id = "d581305a-cdce-483b-84ba-5c673d2ce009"
     cloud_ref = GXCloudResourceRef(
         resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-        ge_cloud_id=ge_cloud_id,
+        cloud_id=ge_cloud_id,
         url="foo/bar/baz",
     )
 
