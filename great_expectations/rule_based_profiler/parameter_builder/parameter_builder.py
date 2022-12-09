@@ -184,11 +184,13 @@ class ParameterBuilder(ABC, Builder):
                     data=parameter_computation_result
                 ),
             }
+            # print(f"\n[ALEX_TEST] [PARAMETER_BUILDER.build_parameters()] PARAMETER_VALUES-0:\n{parameter_values} ; TYPE: {str(type(parameter_values))}")
 
             build_parameter_container(
                 parameter_container=parameters[domain.id],
                 parameter_values=parameter_values,
             )
+            # print(f"\n[ALEX_TEST] [PARAMETER_BUILDER.build_parameters()] PARAMETER_VALUES-1:\n{parameters[domain.id]} ; TYPE: {str(type(parameters[domain.id]))}")
 
     def resolve_evaluation_dependencies(
         self,

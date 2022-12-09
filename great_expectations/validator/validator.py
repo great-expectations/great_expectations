@@ -1151,7 +1151,7 @@ class Validator:
                     metric_configurations=validation_dependencies.get_metric_configurations(),
                     result_format=MetricsComputationResultFormat.VALIDATION_GRAPH,
                 )
-                # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] METRICS_BY_DOMAIN:\n{metrics_by_domain} ; TYPE: {str(type(metrics_by_domain))}")
+                # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] ALL_VALIDATION_GRAPH_METRICS_BY_DOMAIN:\n{metrics_by_domain} ; TYPE: {str(type(metrics_by_domain))}")
                 # TODO: <Alex>ALEX</Alex>
                 for (
                     metric_configuration

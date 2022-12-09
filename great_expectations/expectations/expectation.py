@@ -975,6 +975,15 @@ class Expectation(metaclass=MetaExpectation):
         )
         runtime_configuration["result_format"] = validation_dependencies.result_format
 
+        # TODO: <Alex>ALEX</Alex>
+        metrics_by_domain: Optional[
+            Dict[Domain, Dict[str, ParameterNode]]
+        ] = validator.compute_multi_batch_metrics(
+            metric_configurations=validation_dependencies.get_metric_configurations(),
+            result_format=MetricsComputationResultFormat.RESOLVED_METRICS,
+        )
+        # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] ALL_RESOLVED_METRICS_BY_DOMAIN:\n{metrics_by_domain} ; TYPE: {str(type(metrics_by_domain))}")
+        # TODO: <Alex>ALEX</Alex>
         metric_configuration: MetricConfiguration
         # TODO: <Alex>ALEX</Alex>
         for metric_configuration in validation_dependencies.get_metric_configurations():
@@ -985,7 +994,7 @@ class Expectation(metaclass=MetaExpectation):
                 result_format=MetricsComputationResultFormat.RESOLVED_METRICS,
             )
             # TODO: <Alex>ALEX</Alex>
-            # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] METRICS_BY_DOMAIN:\n{metrics_by_domain} ; TYPE: {str(type(metrics_by_domain))}")
+            # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] RESOLVED_METRICS_BY_DOMAIN:\n{metrics_by_domain} ; TYPE: {str(type(metrics_by_domain))}")
             # TODO: <Alex>ALEX</Alex>
             # TODO: <Alex>ALEX</Alex>
             a = len(metrics_by_domain.keys())
