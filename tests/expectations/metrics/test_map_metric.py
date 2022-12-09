@@ -157,19 +157,20 @@ def expected_evr_without_unexpected_rows():
     )
 
 
-def _expectation_configuration_to_validator_pandas(
+def _expecation_configuration_to_validation_result_pandas(
+    expectation_configuration: ExpectationConfiguration,
     dataframe: pd.DataFrame,
     context: AbstractDataContext,
-) -> Validator:
+) -> ExpectationValidationResult:
     """
-    Helper method used by pandas tests in this suite. Takes in a DataFrame and DataContext and returns a Validator
-    after building an ExecutionEngine, and DataConnector
+    Helper method used by pandas tests in this suite. Takes in a ExpectationConfiguration and returns an EVR
+    after building an ExecutionEngine, DataConnector and Validator.
 
     Args:
-        dataframe (pd.DataFrame): DF to load into batch
-        context (DataContext): DataContext to use
+        expectation_configuration (ExpectationConfiguration): configuration that is being tested
 
     """
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
     batch_definition = BatchDefinition(
         datasource_name="pandas_datasource",
         data_connector_name="runtime_data_connector",
@@ -189,20 +190,23 @@ def _expectation_configuration_to_validator_pandas(
             batch,
         ],
     )
-    return validator
+    result = expectation.validate(validator)
+    return result
 
 
-def _expectation_configuration_to_validator_sql(
+def _expecation_configuration_to_validation_result_sql(
+    expectation_configuration: ExpectationConfiguration,
     context: AbstractDataContext,
-) -> Validator:
+) -> ExpectationValidationResult:
     """
-    Helper method used by sql tests in this suite. Takes in a Datacontext and returns a Validator
+    Helper method used by sql tests in this suite. Takes in a ExpectationConfiguration and returns an EVR
     after building an ExecutionEngine, DataConnector and Validator.
 
     Args:
-        context (DataContext): DataContext to use
+        expectation_configuration (ExpectationConfiguration): configuration that is being tested
 
     """
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
     sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
     connection_string = f"sqlite:///{sqlite_path}"
     engine = SqlAlchemyExecutionEngine(
@@ -262,7 +266,8 @@ def _expectation_configuration_to_validator_sql(
             batch,
         ],
     )
-    return validator
+    result = expectation.validate(validator)
+    return result
 
 
 def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
@@ -405,16 +410,13 @@ def test_pandas_unexpected_rows_basic_result_format(
             },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
-    validator: Validator = _expectation_configuration_to_validator_pandas(
-        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(validator)
-
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -448,16 +450,13 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_explicitly
             },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
-
-    validator: Validator = _expectation_configuration_to_validator_pandas(
-        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        context=in_memory_runtime_context,
-    )
-    result: ExpectationValidationResult = expectation.validate(validator)
-
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -492,17 +491,13 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_including_
             },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
-
-    validator: Validator = _expectation_configuration_to_validator_pandas(
-        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(validator)
-
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -541,16 +536,13 @@ def test_pandas_unexpected_rows_complete_result_format(
             },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
-    validator: Validator = _expectation_configuration_to_validator_pandas(
-        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(validator)
-
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -590,17 +582,13 @@ def test_pandas_default_complete_result_format(
             },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
-
-    validator: Validator = _expectation_configuration_to_validator_pandas(
-        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(validator)
-
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -625,14 +613,6 @@ def test_pandas_single_unexpected_index_column_names_complete_result_format(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
-
-    runtime_configuration: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1"],
-        }
-    }
-
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
@@ -640,21 +620,17 @@ def test_pandas_single_unexpected_index_column_names_complete_result_format(
             "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["pk_1"],  # Single column
             },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
-    validator: Validator = _expectation_configuration_to_validator_pandas(
-        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(
-        validator=validator, runtime_configuration=runtime_configuration
-    )
-
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -687,13 +663,6 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
-    runtime_configuration: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1", "pk_2"],
-        }
-    }
-
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
@@ -701,19 +670,16 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format(
             "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
             },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
-    )
-    validator: Validator = _expectation_configuration_to_validator_pandas(
-        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(
-        validator=validator, runtime_configuration=runtime_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
@@ -747,31 +713,24 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format_li
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
-    runtime_configuration: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "partial_unexpected_count": 1,
-            "unexpected_index_column_names": ["pk_1", "pk_2"],
-        }
-    }
-
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
+                "partial_unexpected_count": 1,
+            },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
-    )
-    validator: Validator = _expectation_configuration_to_validator_pandas(
-        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(
-        validator=validator, runtime_configuration=runtime_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
@@ -797,31 +756,23 @@ def test_pandas_multiple_unexpected_index_column_names_summary_result_format(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
-    runtime_configuration: dict = {
-        "result_format": {
-            "result_format": "SUMMARY",
-            "unexpected_index_column_names": ["pk_1", "pk_2"],
-        }
-    }
-
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "SUMMARY",  # SUMMARY will include partial_unexpected* values only
+                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
+            },
         },
     )
-
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
-    )
-    validator: Validator = _expectation_configuration_to_validator_pandas(
-        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(
-        validator=validator, runtime_configuration=runtime_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
@@ -849,31 +800,24 @@ def test_pandas_multiple_unexpected_index_column_names_summary_result_format_lim
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
-    runtime_configuration: dict = {
-        "result_format": {
-            "result_format": "SUMMARY",
-            "partial_unexpected_count": 1,
-            "unexpected_index_column_names": ["pk_1", "pk_2"],
-        }
-    }
-
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "SUMMARY",  # SUMMARY will include partial_unexpected* values only
+                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
+                "partial_unexpected_count": 1,
+            },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
-    )
-    validator: Validator = _expectation_configuration_to_validator_pandas(
-        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(
-        validator=validator, runtime_configuration=runtime_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
@@ -895,30 +839,23 @@ def test_pandas_multiple_unexpected_index_column_names_basic_result_format(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
-    runtime_configuration: dict = {
-        "result_format": {
-            "result_format": "BASIC",
-            "unexpected_index_column_names": ["pk_1", "pk_2"],
-        }
-    }
-
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "BASIC",  # BASIC will not include index information
+                "unexpected_index_column_names": ["pk_1", "pk_2"],
+            },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
-    )
-    validator: Validator = _expectation_configuration_to_validator_pandas(
-        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(
-        validator=validator, runtime_configuration=runtime_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
@@ -936,32 +873,24 @@ def test_pandas_single_unexpected_index_column_names_complete_result_format_non_
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
-    runtime_configuration: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["i_dont_exist"],
-        }
-    }
-
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["i_dont_exist"],  # Single column
+            },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
-    validator: Validator = _expectation_configuration_to_validator_pandas(
-        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(
-        validator=validator, runtime_configuration=runtime_configuration
-    )
-
     assert result.success is False
     assert result.exception_info
     assert (
@@ -974,32 +903,27 @@ def test_pandas_multiple_unexpected_index_column_names_complete_result_format_no
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
-    runtime_configuration: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1", "i_dont_exist"],
-        }
-    }
-
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": [
+                    "pk_1",
+                    "i_dont_exist",
+                ],  # Only 1 column is valid
+            },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
-    validator: Validator = _expectation_configuration_to_validator_pandas(
-        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(
-        validator=validator, runtime_configuration=runtime_configuration
-    )
-
     assert result.success is False
     assert result.exception_info
     assert (
@@ -1023,16 +947,13 @@ def test_pandas_default_to_not_include_unexpected_rows(
             },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
-    validator: Validator = _expectation_configuration_to_validator_pandas(
-        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(validator=validator)
-
     assert result.result == expected_evr_without_unexpected_rows.result
 
 
@@ -1052,16 +973,13 @@ def test_pandas_specify_not_include_unexpected_rows(
             },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
+        )
     )
-    validator: Validator = _expectation_configuration_to_validator_pandas(
-        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(validator=validator)
-
     assert result.result == expected_evr_without_unexpected_rows.result
 
 
@@ -1225,15 +1143,12 @@ def test_sqlite_single_column_complete_result_format(
             },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration,
+            context=in_memory_runtime_context,
+        )
     )
-    validator: Validator = _expectation_configuration_to_validator_sql(
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(validator=validator)
-
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -1265,14 +1180,12 @@ def test_sqlite_single_column_summary_result_format(
             },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration,
+            context=in_memory_runtime_context,
+        )
     )
-    validator: Validator = _expectation_configuration_to_validator_sql(
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(validator=validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -1293,31 +1206,23 @@ def test_sqlite_single_column_summary_result_format(
 def test_sqlite_single_unexpected_index_column_names_complete_result_format(
     sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):
-    runtime_configuration: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1"],
-        }
-    }
-
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["pk_1"],
+            },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration,
+            context=in_memory_runtime_context,
+        )
     )
-    validator: Validator = _expectation_configuration_to_validator_sql(
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(
-        validator=validator, runtime_configuration=runtime_configuration
-    )
-
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -1345,31 +1250,23 @@ def test_sqlite_single_unexpected_index_column_names_complete_result_format(
 def test_sqlite_single_unexpected_index_column_names_summary_result_format(
     sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):
-    runtime_configuration: dict = {
-        "result_format": {
-            "result_format": "SUMMARY",
-            "unexpected_index_column_names": ["pk_1"],
-        }
-    }
-
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "SUMMARY",
+                "unexpected_index_column_names": ["pk_1"],  # Single column
+            },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration,
+            context=in_memory_runtime_context,
+        )
     )
-    validator: Validator = _expectation_configuration_to_validator_sql(
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(
-        validator=validator, runtime_configuration=runtime_configuration
-    )
-
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -1391,31 +1288,23 @@ def test_sqlite_single_unexpected_index_column_names_summary_result_format(
 def test_sqlite_multiple_unexpected_index_column_names_complete_result_format(
     sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):
-    runtime_configuration: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1", "pk_2"],
-        }
-    }
-
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
+            },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration,
+            context=in_memory_runtime_context,
+        )
     )
-    validator: Validator = _expectation_configuration_to_validator_sql(
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(
-        validator=validator, runtime_configuration=runtime_configuration
-    )
-
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -1451,31 +1340,23 @@ def test_sqlite_multiple_unexpected_index_column_names_complete_result_format(
 def test_sql_multiple_unexpected_index_column_names_complete_result_format_limit_1(
     sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):
-
-    runtime_configuration: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "partial_unexpected_count": 1,
-            "unexpected_index_column_names": ["pk_1", "pk_2"],
-        }
-    }
-
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
+                "partial_unexpected_count": 1,
+            },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
-    )
-    validator: Validator = _expectation_configuration_to_validator_sql(
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(
-        validator=validator, runtime_configuration=runtime_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration,
+            context=in_memory_runtime_context,
+        )
     )
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
@@ -1502,29 +1383,22 @@ def test_sql_multiple_unexpected_index_column_names_complete_result_format_limit
 def test_sql_multiple_unexpected_index_column_names_summary_result_format(
     sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):
-    runtime_configuration: dict = {
-        "result_format": {
-            "result_format": "SUMMARY",
-            "unexpected_index_column_names": ["pk_1", "pk_2"],
-        }
-    }
-
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "SUMMARY",  # SUMMARY will include partial_unexpected* values only
+                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
+            },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
-    )
-    validator: Validator = _expectation_configuration_to_validator_sql(
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(
-        validator=validator, runtime_configuration=runtime_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration,
+            context=in_memory_runtime_context,
+        )
     )
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
@@ -1551,30 +1425,24 @@ def test_sql_multiple_unexpected_index_column_names_summary_result_format(
 def test_sql_multiple_unexpected_index_column_names_summary_result_format_limit_1(
     sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):
-    runtime_configuration: dict = {
-        "result_format": {
-            "result_format": "SUMMARY",
-            "partial_unexpected_count": 1,
-            "unexpected_index_column_names": ["pk_1", "pk_2"],
-        }
-    }
 
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "SUMMARY",  # SUMMARY will include partial_unexpected* values only
+                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
+                "partial_unexpected_count": 1,
+            },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
-    )
-    validator: Validator = _expectation_configuration_to_validator_sql(
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(
-        validator=validator, runtime_configuration=runtime_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration,
+            context=in_memory_runtime_context,
+        )
     )
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
@@ -1593,30 +1461,22 @@ def test_sql_multiple_unexpected_index_column_names_summary_result_format_limit_
 def test_sql_multiple_unexpected_index_column_names_basic_result_format(
     sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):
-
-    runtime_configuration: dict = {
-        "result_format": {
-            "result_format": "BASIC",
-            "unexpected_index_column_names": ["pk_1", "pk_2"],
-        }
-    }
-
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "BASIC",  # SUMMARY will include partial_unexpected_list only, which means unexpected_index_column_names will have no effect
+                "unexpected_index_column_names": ["pk_1", "pk_2"],
+            },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
-    )
-    validator: Validator = _expectation_configuration_to_validator_sql(
-        context=in_memory_runtime_context,
-    )
-
-    result: ExpectationValidationResult = expectation.validate(
-        validator=validator, runtime_configuration=runtime_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration,
+            context=in_memory_runtime_context,
+        )
     )
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
@@ -1633,30 +1493,24 @@ def test_sql_multiple_unexpected_index_column_names_basic_result_format(
 def test_sql_single_unexpected_index_column_names_complete_result_format_non_existing_column(
     sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):
-    runtime_configuration: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["i_dont_exist"],
-        }
-    }
-
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["i_dont_exist"],  # Single column
+            },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
-    )
-    validator: Validator = _expectation_configuration_to_validator_sql(
-        context=in_memory_runtime_context,
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration,
+            context=in_memory_runtime_context,
+        )
     )
 
-    result: ExpectationValidationResult = expectation.validate(
-        validator=validator, runtime_configuration=runtime_configuration
-    )
     assert result.success is False
     assert result.exception_info
     assert (
@@ -1668,29 +1522,26 @@ def test_sql_single_unexpected_index_column_names_complete_result_format_non_exi
 def test_sql_multiple_unexpected_index_column_names_complete_result_format_non_existing_column(
     sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):
-    runtime_configuration: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["i_dont_exist", "pk_1"],
-        }
-    }
-
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": [
+                    "pk_1",
+                    "i_dont_exist",
+                ],  # Only 1 column is valid
+            },
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
-    )
-    validator: Validator = _expectation_configuration_to_validator_sql(
-        context=in_memory_runtime_context,
-    )
 
-    result: ExpectationValidationResult = expectation.validate(
-        validator=validator, runtime_configuration=runtime_configuration
+    result: ExpectationValidationResult = (
+        _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration,
+            context=in_memory_runtime_context,
+        )
     )
     assert result.success is False
     assert result.exception_info
