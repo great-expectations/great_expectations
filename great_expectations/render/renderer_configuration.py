@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from enum import Enum
+from numbers import Number
 from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
     Generic,
+    Iterable,
     List,
     Optional,
     Type,
@@ -138,12 +140,39 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         super().__init__(**values)
 
     class _RendererParamBase(BaseModel):
-        renderer_schema: Optional[RendererSchemaType] = Field(..., allow_mutation=False)
-        value: Optional[Any] = Field(..., allow_mutation=False)
+        renderer_schema: RendererSchemaType = Field(..., allow_mutation=False)
+        value: Any = Field(..., allow_mutation=False)
 
         class Config:
             validate_assignment = True
             arbitrary_types_allowed = True
+
+        @root_validator(pre=True)
+        def validate_schema_matches_value(cls, values: dict) -> dict:
+            schema_type: RendererSchemaType = values["schema"]["type"]
+            value: Any = values["value"]
+            if schema_type is RendererSchemaType.STRING:
+                try:
+                    str(value)
+                except Exception:
+                    raise RendererConfigurationError(
+                        "Value was unable to be represented as a string."
+                    )
+            else:
+                renderer_configuration_error = RendererConfigurationError(
+                    f"Param schema_type: <{schema_type}> does "
+                    f"not match value: <{value}>."
+                )
+                if schema_type is RendererSchemaType.NUMBER:
+                    if not isinstance(value, Number):
+                        raise renderer_configuration_error
+                elif schema_type is RendererSchemaType.BOOLEAN:
+                    if value is not True and value is not False:
+                        raise renderer_configuration_error
+                else:
+                    if not isinstance(value, Iterable):
+                        raise renderer_configuration_error
+            return values
 
         def __eq__(self, other: Any) -> bool:
             if isinstance(other, BaseModel):

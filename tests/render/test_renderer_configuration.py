@@ -1,3 +1,5 @@
+from typing import Union
+
 import pytest
 from pydantic.error_wrappers import ValidationError
 
@@ -101,16 +103,42 @@ def test_failed_renderer_configuration_instantiation():
     )
 
 
-def test_renderer_configuration_add_param_validation():
+class NotString:
+    def __str__(self):
+        raise Exception("I'm not a string")
+
+
+@pytest.mark.parametrize(
+    "schema_type,value",
+    [
+        (RendererSchemaType.STRING, NotString()),
+        (RendererSchemaType.NUMBER, "ABC"),
+        (RendererSchemaType.BOOLEAN, 3),
+        (RendererSchemaType.ARRAY, 3),
+    ],
+)
+def test_renderer_configuration_add_param_validation(
+    schema_type: RendererSchemaType, value: Union[NotString, str, int]
+):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_table_row_count_to_equal",
-        kwargs={"value": 3},
+        kwargs={"value": value},
     )
     renderer_configuration = RendererConfiguration(
         configuration=expectation_configuration
     )
     with pytest.raises(ValidationError) as e:
-        renderer_configuration.add_param(
-            name="value", schema_type=RendererSchemaType.BOOLEAN
+        renderer_configuration.add_param(name="value", schema_type=schema_type)
+
+    if schema_type is RendererSchemaType.STRING:
+        exception_message = "Value was unable to be represented as a string."
+    else:
+        exception_message = (
+            f"Param schema_type: <{schema_type}> does not match value: <{value}>."
         )
-    assert e == "test"
+    assert any(
+        str(error_wrapper_exc) == exception_message
+        for error_wrapper_exc in [
+            error_wrapper.exc for error_wrapper in e.value.raw_errors
+        ]
+    )
