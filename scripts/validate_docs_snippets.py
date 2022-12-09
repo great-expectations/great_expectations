@@ -4,6 +4,7 @@ Purpose: To ensure that no stray snippet opening/closing tags are present in our
 In short, this script creates a temporary Docusaurus build and utilizes grep to parse for stray tags.
 """
 
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -36,6 +37,8 @@ def run_grep(target_dir: str) -> List[str]:
 
 
 def main() -> None:
+    if not shutil.which("yarn"):
+        raise Exception(f"Must have `yarn` installed in PATH to run {__file__}")
     with tempfile.TemporaryDirectory() as tmp_dir:
         run_docusaurus_build(tmp_dir)
         grep_output = run_grep(tmp_dir)
