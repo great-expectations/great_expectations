@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain import (
+from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
     SemanticDomainTypes,
 )
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
@@ -25,6 +25,16 @@ class ColumnPairDomainBuilder(ColumnDomainBuilder):
     """
     This DomainBuilder uses relative tolerance of specified map metric to identify domains.
     """
+
+    exclude_field_names: Set[str] = ColumnDomainBuilder.exclude_field_names | {
+        "exclude_column_names",
+        "include_column_name_suffixes",
+        "exclude_column_name_suffixes",
+        "semantic_type_filter_module_name",
+        "semantic_type_filter_class_name",
+        "include_semantic_types",
+        "exclude_semantic_types",
+    }
 
     def __init__(
         self,

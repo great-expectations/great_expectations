@@ -92,7 +92,7 @@ class ConfigurationStore(Store):
         return self.store_backend.remove_key(key)
 
     def serialize(self, value):
-        if self.ge_cloud_mode:
+        if self.cloud_mode:
             # GXCloudStoreBackend expects a json str
             config_schema = value.get_schema_class()()
             return config_schema.dump(value)
@@ -161,7 +161,7 @@ class ConfigurationStore(Store):
         key: Union[GXCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
             key = GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.CHECKPOINT, ge_cloud_id=ge_cloud_id
+                resource_type=GXCloudRESTResource.CHECKPOINT, cloud_id=ge_cloud_id
             )
         else:
             key = ConfigurationIdentifier(configuration_key=name)  # type: ignore[arg-type]

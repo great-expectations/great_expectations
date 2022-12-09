@@ -1,10 +1,12 @@
 import glob
 import json
 import os
+from typing import cast
 
 import pandas as pd
 import pytest
 
+from great_expectations import DataContext
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
@@ -22,6 +24,7 @@ from great_expectations.self_check.util import (
     sqliteDialect,
     trinoDialect,
 )
+from great_expectations.util import build_in_memory_runtime_context
 from tests.conftest import build_test_backends_list_v3_api
 
 
@@ -79,13 +82,22 @@ def pytest_generate_tests(metafunc):
                                         dataset.get("schemas"),
                                         table_name=dataset.get("dataset_name"),
                                         sqlite_db_path=sqlite_db_path,
+                                        context=cast(
+                                            DataContext,
+                                            build_in_memory_runtime_context(),
+                                        ),
                                     )
                                 )
                             validator_with_data = datasets[0]
                         else:
                             schemas = d["schemas"] if "schemas" in d else None
                             validator_with_data = get_test_validator_with_data(
-                                c, d["data"], schemas=schemas
+                                c,
+                                d["data"],
+                                schemas=schemas,
+                                context=cast(
+                                    DataContext, build_in_memory_runtime_context()
+                                ),
                             )
 
                     for test in d["tests"]:

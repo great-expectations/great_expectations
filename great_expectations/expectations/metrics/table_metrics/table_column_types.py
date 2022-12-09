@@ -1,4 +1,4 @@
-from typing import Any, Dict, cast
+from typing import Any, Dict, Optional, cast
 
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import GreatExpectationsError
@@ -54,7 +54,7 @@ class ColumnTypes(TableMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ):
-        batch_id = metric_domain_kwargs.get("batch_id")
+        batch_id: Optional[str] = metric_domain_kwargs.get("batch_id")
         if batch_id is None:
             if execution_engine.batch_manager.active_batch_data_id is not None:
                 batch_id = execution_engine.batch_manager.active_batch_data_id
@@ -63,7 +63,8 @@ class ColumnTypes(TableMetricProvider):
                     "batch_id could not be determined from domain kwargs and no active_batch_data is loaded into the "
                     "execution engine"
                 )
-        batch_data = cast(
+
+        batch_data: SqlAlchemyBatchData = cast(
             SqlAlchemyBatchData,
             execution_engine.batch_manager.batch_data_cache.get(batch_id),
         )
@@ -71,6 +72,7 @@ class ColumnTypes(TableMetricProvider):
             raise GreatExpectationsError(
                 "the requested batch is not available; please load the batch into the execution engine."
             )
+
         return _get_sqlalchemy_column_metadata(execution_engine.engine, batch_data)
 
     @metric_value(engine=SparkDFExecutionEngine)
@@ -100,6 +102,7 @@ def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
             batch_data.source_table_name or batch_data.selectable.name
         )
         schema_name = batch_data.source_schema_name or batch_data.selectable.schema
+
     return get_sqlalchemy_column_metadata(
         engine=engine,
         table_selectable=table_selectable,

@@ -9,7 +9,7 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store.gx_cloud_store_backend import (
@@ -42,7 +42,7 @@ def data_context_without_config_variables_filepath_configured(tmp_path_factory):
         config_variables_fixture_filename=None,
     )
 
-    return ge.data_context.DataContext(context_path)
+    return gx.data_context.DataContext(context_path)
 
 
 @pytest.fixture()
@@ -61,7 +61,7 @@ def data_context_with_variables_in_config(tmp_path_factory, monkeypatch):
         config_variables_fixture_filename="config_variables.yml",
     )
 
-    return ge.data_context.DataContext(context_path)
+    return gx.data_context.DataContext(context_path)
 
 
 def create_data_context_files(

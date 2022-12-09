@@ -46,11 +46,11 @@ Use this notebook to configure a new Checkpoint and add it to your project:
     def _add_imports(self) -> None:
         self.add_code_cell(
             """from ruamel.yaml import YAML
-import great_expectations as ge
+import great_expectations as gx
 from pprint import pprint
 
 yaml = YAML()
-context = ge.get_context()
+context = gx.get_context()
 """,
             lint=True,
         )

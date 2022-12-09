@@ -211,17 +211,19 @@ def test_sanitize_metric_computation(metric_name: str, metric_values_by_batch_id
     replace_nan_with_zero: bool = True
     reduce_scalar_metric: bool = True
 
-    metric_multi_batch_parameter_builder = MetricMultiBatchParameterBuilder(
-        name="my_parameter_builder",
-        metric_name=metric_name,
-        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-        metric_value_kwargs=None,
-        single_batch_mode=False,
-        enforce_numeric_metric=enforce_numeric_metric,
-        replace_nan_with_zero=replace_nan_with_zero,
-        reduce_scalar_metric=reduce_scalar_metric,
-        evaluation_parameter_builder_configs=None,
-        data_context=None,
+    metric_multi_batch_parameter_builder: MetricMultiBatchParameterBuilder = (
+        MetricMultiBatchParameterBuilder(
+            name="my_parameter_builder",
+            metric_name=metric_name,
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            single_batch_mode=False,
+            enforce_numeric_metric=enforce_numeric_metric,
+            replace_nan_with_zero=replace_nan_with_zero,
+            reduce_scalar_metric=reduce_scalar_metric,
+            evaluation_parameter_builder_configs=None,
+            data_context=None,
+        )
     )
     if metric_name == "my_metric_6":
         with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:

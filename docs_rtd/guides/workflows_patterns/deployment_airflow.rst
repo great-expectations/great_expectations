@@ -20,7 +20,7 @@ There are three supported methods for running :ref:`validation<reference__core_c
 
 Check out this link for an example of Airflow pipelines with Great Expectations validations ensuring that downstream tasks are protected from upstream issues:
 
-- `Great Expectations Pipeline Tutorial <https://github.com/superconductive/ge_tutorials>`_
+- `Great Expectations Pipeline Tutorial <https://github.com/great-expectations/gx_tutorials>`_
 
 In the first link and the diagram below, you can see a common pattern of using validation tasks to ensure that the data flowing from one task to the next is correct, and alert the team if it is not. Another common pattern is to branch and change your DAG based on a validation (e.g. send data for more cleaning before moving to the next task, store it for a postmortem, etc.).
 
@@ -87,14 +87,14 @@ If the current version of the ``GreatExpectationsOperator`` does not support you
 
     from airflow import AirflowException
     from airflow.operators.python_operator import PythonOperator
-    import great_expectations as ge
+    import great_expectations as gx
 
     ...
 
     def validate_data(ds, **kwargs):
 
         # Retrieve your data context
-        context = ge.data_context.DataContext(<insert path to your great_expectations.yml>)
+        context = gx.data_context.DataContext(<insert path to your great_expectations.yml>)
 
         # Create your batch_kwargs
         batch_kwargs_file = {
@@ -144,7 +144,7 @@ Please see this how-to guide for :ref:`How to run a Checkpoint in Airflow <how_t
 Additional resources
 --------------------
 
-- `Great Expectations Pipeline Tutorial <https://github.com/superconductive/ge_tutorials>`_ showing Great Expectations implemented in an airflow pipeline.
+- `Great Expectations Pipeline Tutorial <https://github.com/great-expectations/gx_tutorials>`_ showing Great Expectations implemented in an airflow pipeline.
 
 Comments
 --------

@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset.util import build_categorical_partition_object
 
@@ -76,7 +76,7 @@ def test_build_categorical_partition(non_numeric_high_card_dataset):
 class TestUtilMethods(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.D = ge.read_csv(
+        self.D = gx.read_csv(
             file_relative_path(
                 __file__, "../test_sets/distributional_expectations_data_base.csv"
             )
@@ -89,21 +89,21 @@ class TestUtilMethods(unittest.TestCase):
 
     def test_continuous_partition_data_error(self):
         with self.assertRaises(ValueError):
-            test_partition = ge.dataset.util.continuous_partition_data(
+            test_partition = gx.dataset.util.continuous_partition_data(
                 self.D["norm_0_1"], bins=-1
             )
             self.assertFalse(
-                ge.dataset.util.is_valid_continuous_partition_object(test_partition)
+                gx.dataset.util.is_valid_continuous_partition_object(test_partition)
             )
-            test_partition = ge.dataset.util.continuous_partition_data(
+            test_partition = gx.dataset.util.continuous_partition_data(
                 self.D["norm_0_1"], n_bins=-1
             )
             self.assertFalse(
-                ge.dataset.util.is_valid_continuous_partition_object(test_partition)
+                gx.dataset.util.is_valid_continuous_partition_object(test_partition)
             )
 
     def test_partition_data_norm_0_1(self):
-        test_partition = ge.dataset.util.continuous_partition_data(self.D.norm_0_1)
+        test_partition = gx.dataset.util.continuous_partition_data(self.D.norm_0_1)
         for key, val in self.test_partitions["norm_0_1_auto"].items():
             self.assertEqual(len(val), len(test_partition[key]))
             self.assertTrue(np.allclose(test_partition[key], val))
@@ -112,7 +112,7 @@ class TestUtilMethods(unittest.TestCase):
         "ignore:Please use `gaussian_kde`*:DeprecationWarning:great_expectations.dataset.util"
     )
     def test_partition_data_bimodal(self):
-        test_partition = ge.dataset.util.continuous_partition_data(self.D.bimodal)
+        test_partition = gx.dataset.util.continuous_partition_data(self.D.bimodal)
         for key, val in self.test_partitions["bimodal_auto"].items():
             self.assertEqual(len(val), len(test_partition[key]))
             self.assertTrue(np.allclose(test_partition[key], val))
@@ -121,7 +121,7 @@ class TestUtilMethods(unittest.TestCase):
         "ignore:Please use `gaussian_kde`*:DeprecationWarning:great_expectations.dataset.util"
     )
     def test_kde_partition_data_norm_0_1(self):
-        test_partition = ge.dataset.util.kde_partition_data(self.D.norm_0_1)
+        test_partition = gx.dataset.util.kde_partition_data(self.D.norm_0_1)
         for key, val in self.test_partitions["norm_0_1_kde"].items():
             self.assertEqual(len(val), len(test_partition[key]))
             self.assertTrue(np.allclose(test_partition[key], val))
@@ -130,13 +130,13 @@ class TestUtilMethods(unittest.TestCase):
         "ignore:Please use `gaussian_kde`*:DeprecationWarning:great_expectations.dataset.util"
     )
     def test_kde_partition_data_bimodal(self):
-        test_partition = ge.dataset.util.kde_partition_data(self.D.bimodal)
+        test_partition = gx.dataset.util.kde_partition_data(self.D.bimodal)
         for key, val in self.test_partitions["bimodal_kde"].items():
             self.assertEqual(len(val), len(test_partition[key]))
             self.assertTrue(np.allclose(test_partition[key], val))
 
     def test_categorical_data_fixed(self):
-        test_partition = ge.dataset.util.categorical_partition_data(
+        test_partition = gx.dataset.util.categorical_partition_data(
             self.D.categorical_fixed
         )
         for k in self.test_partitions["categorical_fixed"]["values"]:
@@ -149,34 +149,34 @@ class TestUtilMethods(unittest.TestCase):
             )
 
     def test_categorical_data_na(self):
-        df = ge.dataset.PandasDataset({"my_column": ["A", "B", "A", "B", None]})
-        partition = ge.dataset.util.categorical_partition_data(df["my_column"])
+        df = gx.dataset.PandasDataset({"my_column": ["A", "B", "A", "B", None]})
+        partition = gx.dataset.util.categorical_partition_data(df["my_column"])
         self.assertTrue(
-            ge.dataset.util.is_valid_categorical_partition_object(partition)
+            gx.dataset.util.is_valid_categorical_partition_object(partition)
         )
         self.assertTrue(len(partition["values"]) == 2)
 
     def test_is_valid_partition_object_simple(self):
         self.assertTrue(
-            ge.dataset.util.is_valid_continuous_partition_object(
-                ge.dataset.util.continuous_partition_data(self.D["norm_0_1"])
+            gx.dataset.util.is_valid_continuous_partition_object(
+                gx.dataset.util.continuous_partition_data(self.D["norm_0_1"])
             )
         )
         self.assertTrue(
-            ge.dataset.util.is_valid_continuous_partition_object(
-                ge.dataset.util.continuous_partition_data(self.D["bimodal"])
+            gx.dataset.util.is_valid_continuous_partition_object(
+                gx.dataset.util.continuous_partition_data(self.D["bimodal"])
             )
         )
         self.assertTrue(
-            ge.dataset.util.is_valid_continuous_partition_object(
-                ge.dataset.util.continuous_partition_data(
+            gx.dataset.util.is_valid_continuous_partition_object(
+                gx.dataset.util.continuous_partition_data(
                     self.D["norm_0_1"], bins="auto"
                 )
             )
         )
         self.assertTrue(
-            ge.dataset.util.is_valid_continuous_partition_object(
-                ge.dataset.util.continuous_partition_data(
+            gx.dataset.util.is_valid_continuous_partition_object(
+                gx.dataset.util.continuous_partition_data(
                     self.D["norm_0_1"], bins="uniform", n_bins=10
                 )
             )
@@ -184,21 +184,21 @@ class TestUtilMethods(unittest.TestCase):
 
     def test_generated_partition_objects(self):
         for partition_name, partition_object in self.test_partitions.items():
-            result = ge.dataset.util.is_valid_partition_object(partition_object)
+            result = gx.dataset.util.is_valid_partition_object(partition_object)
             if not result:
                 print("Partition object " + partition_name + " is invalid.")
             self.assertTrue(result)
 
     def test_is_valid_partition_object_fails_length(self):
         self.assertFalse(
-            ge.dataset.util.is_valid_partition_object(
+            gx.dataset.util.is_valid_partition_object(
                 {"bins": [0, 1], "weights": [0, 1, 2]}
             )
         )
 
     def test_is_valid_partition_object_fails_weights(self):
         self.assertFalse(
-            ge.dataset.util.is_valid_partition_object(
+            gx.dataset.util.is_valid_partition_object(
                 {"bins": [0, 1, 2], "weights": [0.5, 0.6]}
             )
         )
@@ -209,7 +209,7 @@ class TestUtilMethods(unittest.TestCase):
             "tail_weights": [0.15, 0.15],
         }
         self.assertFalse(
-            ge.dataset.util.is_valid_continuous_partition_object(
+            gx.dataset.util.is_valid_continuous_partition_object(
                 continuous_partition_object
             )
         )
@@ -221,19 +221,19 @@ class TestUtilMethods(unittest.TestCase):
             "tail_weights": [0.15],
         }
         self.assertFalse(
-            ge.dataset.util.is_valid_continuous_partition_object(
+            gx.dataset.util.is_valid_continuous_partition_object(
                 continuous_partition_object
             )
         )
 
     def test_is_valid_partition_object_fails_structure(self):
         self.assertFalse(
-            ge.dataset.util.is_valid_partition_object({"weights": [0.5, 0.5]})
+            gx.dataset.util.is_valid_partition_object({"weights": [0.5, 0.5]})
         )
-        self.assertFalse(ge.dataset.util.is_valid_partition_object({"bins": [0, 1, 2]}))
+        self.assertFalse(gx.dataset.util.is_valid_partition_object({"bins": [0, 1, 2]}))
 
     def test_validate_distribution_parameters(self):
-        D = ge.read_csv(
+        D = gx.read_csv(
             file_relative_path(
                 __file__, "../test_sets/fixed_distributional_test_dataset.csv"
             )
@@ -500,17 +500,17 @@ class TestUtilMethods(unittest.TestCase):
             )
 
     def test_infer_distribution_parameters(self):
-        D = ge.read_csv(
+        D = gx.read_csv(
             file_relative_path(
                 __file__, "../test_sets/fixed_distributional_test_dataset.csv"
             )
         )
 
         with self.assertRaises(TypeError):
-            ge.dataset.util.infer_distribution_parameters(
+            gx.dataset.util.infer_distribution_parameters(
                 data=D.norm, distribution="norm", params=["wrong_param_format"]
             )
-        t = ge.dataset.util.infer_distribution_parameters(
+        t = gx.dataset.util.infer_distribution_parameters(
             data=D.norm_std, distribution="norm", params=None
         )
         self.assertEqual(t["mean"], D.norm_std.mean())
@@ -519,7 +519,7 @@ class TestUtilMethods(unittest.TestCase):
         self.assertEqual(t["scale"], 1)
 
         # beta
-        t = ge.dataset.util.infer_distribution_parameters(
+        t = gx.dataset.util.infer_distribution_parameters(
             data=D.beta, distribution="beta"
         )
         self.assertEqual(
@@ -533,13 +533,13 @@ class TestUtilMethods(unittest.TestCase):
         )
 
         # gamma
-        t = ge.dataset.util.infer_distribution_parameters(
+        t = gx.dataset.util.infer_distribution_parameters(
             data=D.gamma, distribution="gamma"
         )
         self.assertEqual(t["alpha"], D.gamma.mean())
 
         # uniform distributions
-        t = ge.dataset.util.infer_distribution_parameters(
+        t = gx.dataset.util.infer_distribution_parameters(
             data=D.uniform, distribution="uniform"
         )
         self.assertEqual(t["min"], min(D.uniform), "uniform, min infer")
@@ -549,7 +549,7 @@ class TestUtilMethods(unittest.TestCase):
 
         uni_loc = 5
         uni_scale = 10
-        t = ge.dataset.util.infer_distribution_parameters(
+        t = gx.dataset.util.infer_distribution_parameters(
             data=D.uniform,
             distribution="uniform",
             params={"loc": uni_loc, "scale": uni_scale},
@@ -559,18 +559,18 @@ class TestUtilMethods(unittest.TestCase):
 
         # expon distribution
         with self.assertRaises(AttributeError):
-            ge.dataset.util.infer_distribution_parameters(
+            gx.dataset.util.infer_distribution_parameters(
                 data=D.norm, distribution="fakedistribution"
             )
 
         # chi2
-        t = ge.dataset.util.infer_distribution_parameters(
+        t = gx.dataset.util.infer_distribution_parameters(
             data=D.chi2, distribution="chi2"
         )
         self.assertEqual(t["df"], D.chi2.mean())
 
     def test_create_multiple_expectations(self):
-        D = ge.dataset.PandasDataset(
+        D = gx.dataset.PandasDataset(
             {
                 "x": [1, 2, 3, 4, 5, 6],
                 "y": [0, 2, 4, 6, 8, 10],
@@ -580,7 +580,7 @@ class TestUtilMethods(unittest.TestCase):
         )
 
         # Test kwarg
-        results = ge.dataset.util.create_multiple_expectations(
+        results = gx.dataset.util.create_multiple_expectations(
             D,
             ["x", "y"],
             "expect_column_values_to_be_in_set",
@@ -590,20 +590,20 @@ class TestUtilMethods(unittest.TestCase):
         self.assertFalse(results[1].success)
 
         # Test positional argument
-        results = ge.dataset.util.create_multiple_expectations(
+        results = gx.dataset.util.create_multiple_expectations(
             D, ["x", "y"], "expect_column_values_to_be_in_set", [1, 2, 3, 4, 5, 6]
         )
         self.assertTrue(results[0].success)
         self.assertFalse(results[1].success)
 
-        results = ge.dataset.util.create_multiple_expectations(
+        results = gx.dataset.util.create_multiple_expectations(
             D, ["z", "zz"], "expect_column_values_to_match_regex", "h"
         )
         self.assertTrue(results[0].success)
         self.assertFalse(results[1].success)
 
         # Non-argumentative expectation
-        results = ge.dataset.util.create_multiple_expectations(
+        results = gx.dataset.util.create_multiple_expectations(
             D, ["z", "zz"], "expect_column_values_to_not_be_null"
         )
         self.assertTrue(results[0].success)
@@ -611,12 +611,12 @@ class TestUtilMethods(unittest.TestCase):
 
         # Key error when non-existent column is called
         with self.assertRaises(KeyError):
-            ge.dataset.util.create_multiple_expectations(
+            gx.dataset.util.create_multiple_expectations(
                 D, ["p"], "expect_column_values_to_be_in_set", ["hi"]
             )
         # Attribute error when non-existent expectation is called
         with self.assertRaises(AttributeError):
-            ge.dataset.util.create_multiple_expectations(
+            gx.dataset.util.create_multiple_expectations(
                 D, ["z"], "expect_column_values_to_be_fake_news"
             )
 

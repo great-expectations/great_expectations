@@ -20,8 +20,8 @@ Steps
 
     .. code-block:: python
 
-        import great_expectations as ge
-        context = ge.get_context()
+        import great_expectations as gx
+        context = gx.get_context()
 
 #. **Create or copy a yaml config**
 
@@ -53,7 +53,7 @@ Steps
         )
 
     When executed, ``test_yaml_config`` will instantiate the component and run through a ``self_check`` procedure to verify that the component works as expected.
-    
+
     In the case of a Datasource, this means
 
         1. confirming that the connection works,
@@ -161,7 +161,7 @@ Steps
 
     .. code-block:: python
 
-        context = ge.get_context()
+        context = gx.get_context()
 
         validator = context.get_validator(
             datasource_name="my_datasource",

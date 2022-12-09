@@ -403,7 +403,6 @@ class ExecutionEngine(ABC):
                 )
 
             try:
-                # NOTE: DH 20220328: This is where we can introduce the Batch Metrics Store (BMS)
                 resolved_metrics[metric_to_resolve.id] = metric_fn(
                     **metric_provider_kwargs
                 )

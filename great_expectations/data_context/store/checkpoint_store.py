@@ -39,8 +39,8 @@ class CheckpointStore(ConfigurationStore):
 
     def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
         """
-        This method takes full json response from GE cloud and outputs a dict appropriate for
-        deserialization into a GE object
+        This method takes full json response from GX cloud and outputs a dict appropriate for
+        deserialization into a GX object
         """
         ge_cloud_checkpoint_id = response_json["data"]["id"]
         checkpoint_config_dict = response_json["data"]["attributes"][
@@ -60,7 +60,7 @@ class CheckpointStore(ConfigurationStore):
         test_checkpoint_configuration = CheckpointConfig(
             **{"name": test_checkpoint_name}  # type: ignore[arg-type]
         )
-        if self.ge_cloud_mode:
+        if self.cloud_mode:
             test_key: GXCloudIdentifier = self.key_class(  # type: ignore[call-arg,assignment]
                 resource_type=GXCloudRESTResource.CHECKPOINT,
                 ge_cloud_id=str(uuid.uuid4()),
@@ -174,7 +174,7 @@ class CheckpointStore(ConfigurationStore):
         checkpoint_config: CheckpointConfig = checkpoint.get_config()  # type: ignore[assignment]
         checkpoint_ref = self.set(key=key, value=checkpoint_config)  # type: ignore[func-returns-value]
         if isinstance(checkpoint_ref, GXCloudIDAwareRef):
-            ge_cloud_id = checkpoint_ref.ge_cloud_id
+            ge_cloud_id = checkpoint_ref.cloud_id
             checkpoint.ge_cloud_id = uuid.UUID(ge_cloud_id)  # type: ignore[misc]
 
     def create(self, checkpoint_config: CheckpointConfig) -> Optional[DataContextKey]:
@@ -195,7 +195,7 @@ class CheckpointStore(ConfigurationStore):
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
         ref: Optional[Union[bool, GXCloudResourceRef]] = self.set(key, checkpoint_config)  # type: ignore[func-returns-value]
         if ref and isinstance(ref, GXCloudResourceRef):
-            key.ge_cloud_id = ref.ge_cloud_id  # type: ignore[attr-defined]
+            key.cloud_id = ref.cloud_id  # type: ignore[attr-defined]
 
         config = self.get(key=key)
 

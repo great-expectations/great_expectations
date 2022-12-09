@@ -67,8 +67,8 @@ class Store:
 
     def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
         """
-        This method takes full json response from GE cloud and outputs a dict appropriate for
-        deserialization into a GE object
+        This method takes full json response from GX cloud and outputs a dict appropriate for
+        deserialization into a GX object
         """
         return response_json
 
@@ -82,8 +82,13 @@ class Store:
             )
 
     @property
-    def ge_cloud_mode(self) -> bool:
+    def cloud_mode(self) -> bool:
         return isinstance(self._store_backend, GXCloudStoreBackend)
+
+    @property
+    def ge_cloud_mode(self) -> bool:
+        # Deprecated 0.15.37
+        return self.cloud_mode
 
     @property
     def store_backend(self) -> StoreBackend:
@@ -104,7 +109,7 @@ class Store:
 
     @property
     def key_class(self) -> Type[DataContextKey]:
-        if self.ge_cloud_mode:
+        if self.cloud_mode:
             return GXCloudIdentifier
         return self._key_class
 
@@ -146,7 +151,7 @@ class Store:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.get(key)
 
-        if self.ge_cloud_mode:
+        if self.cloud_mode:
             self._validate_key(key)
             value = self._store_backend.get(self.key_to_tuple(key))
             # TODO [Robby] MER-285: Handle non-200 http errors

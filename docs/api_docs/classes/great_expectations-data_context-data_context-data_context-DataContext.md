@@ -11,7 +11,7 @@ deployment, with configurations and methods for all supporting components.
 
 The DataContext is configured via a yml file stored in a directory called great_expectations; this configuration
 file as well as managed Expectation Suites should be stored in version control. There are other ways to create a
-Data Context that may be better suited for your particular deployment e.g. ephemerally or backed by GE Cloud
+Data Context that may be better suited for your particular deployment e.g. ephemerally or backed by GX Cloud
 (coming soon). Please refer to our documentation for more details.
 
 You can Validate data or generate Expectations using Execution Engines including:
@@ -35,8 +35,8 @@ configured. Take a look at our documentation for more configuration options.
 
 You can create or load a DataContext from disk via the following:
 ```
-import great_expectations as ge
-ge.get_context()
+import great_expectations as gx
+gx.get_context()
 ```
 
 

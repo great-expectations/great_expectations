@@ -161,9 +161,9 @@ def cloud_data_context(
 
     cloud_data_context = CloudDataContext(
         project_config=data_context_config,
-        ge_cloud_base_url=ge_cloud_config_e2e.base_url,
-        ge_cloud_access_token=ge_cloud_config_e2e.access_token,
-        ge_cloud_organization_id=ge_cloud_config_e2e.organization_id,
+        cloud_base_url=ge_cloud_config_e2e.base_url,
+        cloud_access_token=ge_cloud_config_e2e.access_token,
+        cloud_organization_id=ge_cloud_config_e2e.organization_id,
         context_root_dir=str(context_root_dir),
     )
     return cloud_data_context
@@ -446,7 +446,7 @@ def test_data_context_variables_save_config(
     ephemeral_data_context_variables: EphemeralDataContextVariables,
     file_data_context_variables: FileDataContextVariables,
     cloud_data_context_variables: CloudDataContextVariables,
-    # The below GE Cloud variables were used to instantiate the above CloudDataContextVariables
+    # The below GX Cloud variables were used to instantiate the above CloudDataContextVariables
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
     ge_cloud_access_token: str,
@@ -568,7 +568,7 @@ def test_file_data_context_variables_e2e(
 
     # Review great_expectations.yml where values were written and confirm changes
     config_filepath = pathlib.Path(file_data_context.root_directory).joinpath(
-        file_data_context.GE_YML
+        file_data_context.GX_YML
     )
 
     with open(config_filepath) as f:
@@ -635,7 +635,7 @@ def test_cloud_enabled_data_context_variables_e2e(
     new_site_name = f"docs_site_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
     updated_data_docs_sites[new_site_name] = {}
 
-    context = DataContext(ge_cloud_mode=True)
+    context = DataContext(cloud_mode=True)
 
     assert context.variables.plugins_directory != updated_plugins_dir
     assert context.variables.data_docs_sites != updated_data_docs_sites
@@ -648,7 +648,7 @@ def test_cloud_enabled_data_context_variables_e2e(
 
     context.variables.save_config()
 
-    context = DataContext(ge_cloud_mode=True)
+    context = DataContext(cloud_mode=True)
 
     assert context.variables.plugins_directory == updated_plugins_dir
     assert context.variables.data_docs_sites == updated_data_docs_sites

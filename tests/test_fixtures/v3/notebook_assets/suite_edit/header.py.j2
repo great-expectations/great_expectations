@@ -2,7 +2,7 @@ import datetime
 
 import pandas as pd
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 {%- if batch_request %}
 from great_expectations.core.batch import BatchRequest
@@ -13,7 +13,7 @@ from great_expectations.data_context.types.resource_identifiers import Expectati
 {% endif -%}
 from great_expectations.exceptions import DataContextError
 
-context = ge.data_context.DataContext()
+context = gx.data_context.DataContext()
 {% if batch_request %}
 batch_request = {{ batch_request }}
 {% endif %}

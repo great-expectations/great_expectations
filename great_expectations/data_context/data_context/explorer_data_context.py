@@ -13,7 +13,7 @@ yaml.default_flow_style = False
 class ExplorerDataContext(DataContext):
     def __init__(self, context_root_dir=None, expectation_explorer=True) -> None:
         """
-            expectation_explorer: If True, load the expectation explorer manager, which will modify GE return objects \
+            expectation_explorer: If True, load the expectation explorer manager, which will modify GX return objects \
             to include ipython notebook widgets.
         """
 

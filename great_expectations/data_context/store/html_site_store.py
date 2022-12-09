@@ -421,7 +421,7 @@ class HtmlSiteStore:
                     content_type, content_encoding = guess_type(item, strict=False)
 
                     if content_type is None:
-                        # Use GE-known content-type if possible
+                        # Use GX-known content-type if possible
                         if source_name.endswith(".otf"):
                             content_type = "font/opentype"
                         else:
