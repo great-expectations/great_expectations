@@ -1,102 +1,70 @@
 import ast
 import glob
+import importlib
+import inspect
 import pathlib
-from dataclasses import dataclass
-from typing import Tuple, List
+from typing import List, Set
 
 import astunparse
 
-from scripts.validate_docs_snippet_line_numbers import collect_references, Reference
+
+# Action: Swap the order of implementation. Start with generating the list of all methods classes etc from the files under test. Bump against list of what is decorated with @public_api. Set up linter for docstrings, focusing on public_api. Only filter with the snippet finder if the list is too messy.
 
 
-@dataclass
-class CodeSnippet:
-    reference: Reference
-    code: Tuple[str]
+# First pass - just get a set of all names. Don't worry about absolute paths yet.
 
 
-class PublicAPIDocSnippetRetriever:
+class DocExampleParser:
+    """Parse examples from docs to find classes, methods and functions used."""
 
     def __init__(self, repo_root: pathlib.Path) -> None:
         self.repo_root = repo_root
-
-    def generate_report(self, docs_code_references: List[Reference]):
-        code_snippets = self._create_code_snippets_from_references(docs_code_references=docs_code_references)
-        # print(code_snippets)
-        snippet_num = 3
-
-        print("".join(code_snippets[snippet_num].code))
-        print(code_snippets[snippet_num].reference)
-        parsed_example = self._parse_code_snippet_to_ast(code_snippet=code_snippets[snippet_num])
-
-        print(astunparse.dump(parsed_example))
-
-
-
-    def _create_code_snippets_from_references(self, docs_code_references: List[Reference]) -> List[CodeSnippet]:
-        """Load file to create CodeSnippet from code Reference.
-
-        Args:
-            docs_code_references: References to code snippets.
-
-        Returns:
-            List of CodeSnippets which each contain the actual code from the reference.
-        """
-        code_snippets: List[CodeSnippet] = []
-        for docs_code_reference in docs_code_references:
-            should_parse_reference: bool = (docs_code_reference.target_path.endswith(".py")) and docs_code_reference.target_lines
-
-            if should_parse_reference:
-                with open(self.repo_root / docs_code_reference.target_path) as f:
-                    file_lines: List[str] = f.readlines()
-
-                assert docs_code_reference.target_lines
-                start, end = docs_code_reference.target_lines
-                start -= 1  # Docusaurus snippets are 1 indexed
-                # lines = tuple(file_lines[start:end])
-                # TODO: Revert to snippet, not whole file
-                lines = tuple(file_lines)
-
-                code_snippets.append(CodeSnippet(reference=docs_code_reference, code=lines))
-
-        return code_snippets
-
-    def _parse_code_snippet_to_ast(self, code_snippet: CodeSnippet) -> ast.AST:
-        code_snippet_str = "\n".join(code_snippet.code)
-        tree = ast.parse(code_snippet_str)
-        return tree
-
-
-class PublicAPIDocParser:
-    """Parse examples from docs to find classes, methods and functions used."""
-
-    def __init__(self):
-        pass
 
     def retrieve_definitions(self):
         """Retrieve all definitions used (class, method + function)."""
-        pass
+        filename = "tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py"
+        # filename = "great_expectations/data_context/data_context/abstract_data_context.py"
+        filepath = self.repo_root / filename
 
 
-class PublicAPIChecker:
-    """Check if functions, methods and classes are marked part of the PublicAPI."""
-
-    def __init__(self, repo_root: pathlib.Path) -> None:
-        self.repo_root = repo_root
-
-
-    def get_all_public_api_functions(self):
-
-        filepath = self.repo_root / "great_expectations/data_context/data_context/abstract_data_context.py"
-        # print(self._list_public_functions_in_file(filepath=filepath))
-        class_defs = self._list_classes_in_file(filepath=filepath)
-
-        for class_def in class_defs:
-            print(astunparse.dump(class_def))
+        # self._get_and_print_ast(filepath=filepath)
+        # self._import_file_as_module(filepath=filepath)
+        tree = self._parse_file_to_ast_tree(filepath=filepath)
+        function_calls = self._list_all_function_calls(tree=tree)
+        function_names = self._get_function_names(calls=function_calls)
+        print(function_names)
 
 
 
-    def _list_classes_in_file(self, filepath: pathlib.Path):  # TODO: Return type
+    def _import_file_as_module(self, filepath: pathlib.Path) -> None:
+        loader = importlib.machinery.SourceFileLoader('mymodule', str(filepath))
+        spec = importlib.util.spec_from_loader('mymodule', loader)
+        mymodule = importlib.util.module_from_spec(spec)
+        dir(mymodule)
+
+    def _get_module_name(self, filepath: pathlib.Path) -> None:
+        print(inspect.getmodulename(str(filepath)))
+
+
+
+    def _get_and_print_ast(self, filepath: pathlib.Path) -> None:
+        with open(self.repo_root / filepath) as f:
+            file_contents: str = f.read()
+
+        tree = ast.parse(file_contents)
+        print(astunparse.dump(tree))
+
+
+    def _parse_file_to_ast_tree(self, filepath: pathlib.Path) -> ast.AST:
+        with open(self.repo_root / filepath) as f:
+            file_contents: str = f.read()
+
+        tree = ast.parse(file_contents)
+        return tree
+
+
+
+    def _list_classes_in_file(self, filepath: pathlib.Path) -> List[ast.ClassDef]:
         # TODO: Make this return with dotted path, not just str
         with open(self.repo_root / filepath) as f:
             file_contents: str = f.read()
@@ -110,6 +78,45 @@ class PublicAPIChecker:
                 class_defs.append(node)
 
         return class_defs
+
+    def _list_module_level_functions_in_file(self, filepath: pathlib.Path) -> List[ast.FunctionDef]:
+        pass
+
+    def _list_methods_in_class(self, class_definition: ast.ClassDef) -> List[ast.FunctionDef]:
+        pass
+
+    def _list_all_function_calls(self, tree: ast.AST) -> List[ast.Call]:
+        calls = []
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call):
+                calls.append(node)
+
+        return calls
+
+    def _get_function_names(self, calls: List[ast.Call]) -> Set[str]:
+        names = []
+        for call in calls:
+            if isinstance(call.func, ast.Attribute):
+                names.append(call.func.attr)
+            elif isinstance(call.func, ast.Name):
+                names.append(call.func.id)
+
+        return set(names)
+
+
+
+class PublicAPIChecker:
+    """Check if functions, methods and classes are marked part of the PublicAPI."""
+
+    def __init__(self, repo_root: pathlib.Path) -> None:
+        self.repo_root = repo_root
+
+
+    def get_all_public_api_functions(self):
+
+        filepath = self.repo_root / "great_expectations/data_context/data_context/abstract_data_context.py"
+        print(self._list_public_functions_in_file(filepath=filepath))
+
 
     def _list_public_functions_in_file(self, filepath: pathlib.Path) -> List[str]:
         # TODO: Make this return function with dotted path, not just str
@@ -152,7 +159,6 @@ def main():
     repo_root = pathlib.Path(__file__).parent.parent
     docs_dir = repo_root / "docs"
     files = glob.glob(f"{docs_dir}/**/*.md", recursive=True)
-    docs_code_references = collect_references(files)
 
     # report_generator = PublicAPIDocSnippetRetriever(repo_root=repo_root)
     # report_generator.generate_report(docs_code_references)
@@ -163,11 +169,13 @@ def main():
     # Generate set of module level functions, classes, and methods
     # Parse full great_expectations code, find everything decorated @public_api
 
-    public_api_checker = PublicAPIChecker(repo_root=repo_root)
-    public_api_checker.get_all_public_api_functions()
+    # public_api_checker = PublicAPIChecker(repo_root=repo_root)
+    # public_api_checker.get_all_public_api_functions()
     # Report of what is in the references and not marked @public_api
     # Report on which do not have corresponding sphinx source stub files (unless we end up autogenerating these)
 
+    doc_example_parser = DocExampleParser(repo_root=repo_root)
+    doc_example_parser.retrieve_definitions()
 
 
 
