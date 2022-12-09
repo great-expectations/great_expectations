@@ -230,13 +230,13 @@ class ParameterContainer(SerializableDictDot):
 def deep_convert_properties_iterable_to_parameter_node(
     source: Union[T, dict]
 ) -> Union[T, ParameterNode]:
-    if type(source) == dict:
+    if isinstance(source, dict):
         return _deep_convert_properties_iterable_to_parameter_node(
             source=ParameterNode(source)
         )
 
     # Must allow for non-dictionary source types, since their internal nested structures may contain dictionaries.
-    if type(source) in (list, set, tuple):
+    if isinstance(source, (list, set, tuple)):
         data_type: type = type(source)
 
         element: Any
@@ -254,11 +254,11 @@ def _deep_convert_properties_iterable_to_parameter_node(source: dict) -> Paramet
     key: str
     value: Any
     for key, value in source.items():
-        if type(value) == dict:
+        if isinstance(value, dict):
             source[key] = _deep_convert_properties_iterable_to_parameter_node(
                 source=value
             )
-        elif type(value) in (list, set, tuple):
+        elif isinstance(value, (list, set, tuple)):
             data_type: type = type(value)
 
             element: Any
@@ -507,11 +507,6 @@ def _get_parameter_value_from_parameter_container(
     parameter_name_part: Optional[str] = None
     attribute_value_reference: Optional[str] = None
     return_value: Optional[Union[Any, ParameterNode]] = parameter_node
-    # TODO: <Alex>ALEX</Alex>
-    # a = 'parameter.raw.column_pair_values_equal_unexpected_values'
-    # if fully_qualified_parameter_name == a:
-    #     print(f'\n[ALEX_TEST] [WOUTPUT-XXXXXXXXXXXXXXXXXXXXXX-0] PARAMETER_NODE:\n{parameter_node} ; TYPE: {str(type(parameter_node))}')
-    # TODO: <Alex>ALEX</Alex>
     parent_parameter_node: Optional[ParameterNode] = None
     try:
         for parameter_name_part in fully_qualified_parameter_name_as_list:
@@ -529,20 +524,12 @@ def _get_parameter_value_from_parameter_container(
 
             attribute_value_reference = parsed_attribute_name[0]
             return_value = return_value[attribute_value_reference]
-            # TODO: <Alex>ALEX</Alex>
-            # if fully_qualified_parameter_name == a:
-            #     print(f'\n[ALEX_TEST] [WOUTPUT-XXXXXXXXXXXXXXXXXXXXXX-1] RETURN_VALUE:\n{return_value} ; TYPE: {str(type(return_value))}')
-            # TODO: <Alex>ALEX</Alex>
 
             parsed_attribute_name = parsed_attribute_name[1:]
 
             attribute_value_accessor: Union[str, int]
             for attribute_value_accessor in parsed_attribute_name:
                 return_value = return_value[attribute_value_accessor]
-                # TODO: <Alex>ALEX</Alex>
-                # if fully_qualified_parameter_name == a:
-                #     print(f'\n[ALEX_TEST] [WOUTPUT-XXXXXXXXXXXXXXXXXXXXXX-2] RETURN_VALUE:\n{return_value} ; TYPE: {str(type(return_value))}')
-                # TODO: <Alex>ALEX</Alex>
     except KeyError:
         raise KeyError(
             f"""Unable to find value for parameter name "{fully_qualified_parameter_name}": Part \
@@ -557,9 +544,6 @@ def _get_parameter_value_from_parameter_container(
 """
         )
 
-    # TODO: <Alex>ALEX</Alex>
-    # if fully_qualified_parameter_name == a:
-    #     print(f'\n[ALEX_TEST] [WOUTPUT-XXXXXXXXXXXXXXXXXXXXXX-3] RETURN_VALUE:\n{return_value} ; TYPE: {str(type(return_value))}')
     return return_value
 
 
@@ -569,23 +553,6 @@ def get_parameter_values_for_fully_qualified_parameter_names(
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> Dict[str, Any]:
     fully_qualified_parameter_name: str
-    # TODO: <Alex></Alex>
-    # c = get_fully_qualified_parameter_names(
-    #     domain=domain,
-    #     variables=variables,
-    #     parameters=parameters,
-    # )
-    # a = '$parameter.raw.column_pair_values_equal_unexpected_values'
-    # if a in c:
-    #     b = get_parameter_value_by_fully_qualified_parameter_name(
-    #         fully_qualified_parameter_name=a,
-    #         domain=domain,
-    #         variables=variables,
-    #         parameters=parameters,
-    #     )
-    #     print(f'\n[ALEX_TEST] [WOUTPUT] AAAAAAAAAAAAAAAAAAAAAAAAA:\n{a} ; TYPE: {str(type(a))}')
-    #     print(f'\n[ALEX_TEST] [WOUTPUT] BBBBBBBBBBBBBBBBBBBBBBBBB:\n{b} ; TYPE: {str(type(b))}')
-    # TODO: <Alex></Alex>
     return {
         fully_qualified_parameter_name: get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=fully_qualified_parameter_name,

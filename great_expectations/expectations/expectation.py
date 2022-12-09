@@ -973,6 +973,7 @@ class Expectation(metaclass=MetaExpectation):
                 runtime_configuration=runtime_configuration,
             )
         )
+        # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] VALIDATION_DEPENDENCIES:\n{validation_dependencies} ; TYPE: {str(type(validation_dependencies))}")
         runtime_configuration["result_format"] = validation_dependencies.result_format
 
         # TODO: <Alex>ALEX</Alex>
@@ -983,42 +984,89 @@ class Expectation(metaclass=MetaExpectation):
             result_format=MetricsComputationResultFormat.RESOLVED_METRICS,
         )
         # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] ALL_RESOLVED_METRICS_BY_DOMAIN:\n{metrics_by_domain} ; TYPE: {str(type(metrics_by_domain))}")
+        # domain: Domain
+        # parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
+        # fully_qualified_parameter_name: str
+        # parameter_node: ParameterNode
+        # metric_name: str
+        # metric_value: MetricValue
+        # for domain, parameter_values_for_fully_qualified_parameter_names in metrics_by_domain.items():
+        #     print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] RESOLVED_METRICS:DOMAIN:\n{domain} ; TYPE: {str(type(domain))}")
+        #     # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] RESOLVED_METRICS:PARAMETER_VALUES_FOR_FULLY_QUALIFIED_PARAMETER_NAMES:\n{parameter_values_for_fully_qualified_parameter_names} ; TYPE: {str(type(parameter_values_for_fully_qualified_parameter_names))}")
+        #     for fully_qualified_parameter_name, parameter_node in parameter_values_for_fully_qualified_parameter_names.items():
+        #         # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] RESOLVED_METRICS:FULLY_QUALIFIED_PARAMETER_NAME:\n{fully_qualified_parameter_name} ; TYPE: {str(type(fully_qualified_parameter_name))}")
+        #         # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] RESOLVED_METRICS:PARAMETER_NODE:\n{parameter_node} ; TYPE: {str(type(parameter_node))}")
+        #         if fully_qualified_parameter_name.find(RAW_PARAMETER_KEY) != (-1):
+        #             print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] RESOLVED_METRICS:FULLY_QUALIFIED_RAW_PARAMETER_NAME:\n{fully_qualified_parameter_name} ; TYPE: {str(type(fully_qualified_parameter_name))}")
+        #             print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] RESOLVED_METRICS:RAW_PARAMETER_NODE:\n{parameter_node} ; TYPE: {str(type(parameter_node))}")
+        #             metric_value = parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY]
+        #             print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] RESOLVED_METRICS:ATTRIBUTED_METRIC_VALUE_MULTI_BATCH:\n{metric_value} ; TYPE: {str(type(metric_value))}")
+        #             active_batch_metric_value = list(metric_value.values())[-1][0]
+        #             print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] RESOLVED_METRICS:METRIC_VALUE_SINGLE_BATCH:\n{active_batch_metric_value} ; TYPE: {str(type(active_batch_metric_value))}")
+        # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
         metric_configuration: MetricConfiguration
+
+        # noinspection PyTypeChecker
+        provided_metrics: Dict[str, MetricValue] = {
+            metric_name: list(
+                list(
+                    dict(
+                        filter(
+                            lambda element: element[0].is_superset(
+                                metric_configuration.get_domain()
+                            ),
+                            metrics_by_domain.items(),
+                        )
+                    ).values()
+                )[0][
+                    f"{RAW_PARAMETER_KEY}{sanitize_parameter_name(name=metric_configuration.metric_name)}"
+                ][
+                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+                ].values()
+            )[-1][0]
+            for metric_name, metric_configuration in validation_dependencies.metric_configurations.items()
+        }
         # TODO: <Alex>ALEX</Alex>
-        for metric_configuration in validation_dependencies.get_metric_configurations():
-            metrics_by_domain: Optional[
-                Dict[Domain, Dict[str, ParameterNode]]
-            ] = validator.compute_multi_batch_metrics(
-                metric_configurations=[metric_configuration],
-                result_format=MetricsComputationResultFormat.RESOLVED_METRICS,
-            )
-            # TODO: <Alex>ALEX</Alex>
-            # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] RESOLVED_METRICS_BY_DOMAIN:\n{metrics_by_domain} ; TYPE: {str(type(metrics_by_domain))}")
-            # TODO: <Alex>ALEX</Alex>
-            # TODO: <Alex>ALEX</Alex>
-            a = len(metrics_by_domain.keys())
-            b = len(metrics_by_domain.values())
-            # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] METRICS_BY_DOMAIN.NUM_KEYS:\n{a} ; TYPE: {str(type(a))}")
-            # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] METRICS_BY_DOMAIN.NUM_VALUES:\n{b} ; TYPE: {str(type(b))}")
-            b = list(metrics_by_domain.values())[0]
-            # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] METRICS_BY_DOMAIN.VALUE:\n{b} ; TYPE: {str(type(b))}")
-            name: str = sanitize_parameter_name(name=metric_configuration.metric_name)
-            # TODO: <Alex>ALEX</Alex>
-            # TODO: <Alex>ALEX</Alex>
-            fully_qualified_parameter_name: str = f"{RAW_PARAMETER_KEY}{name}"
-            # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] METRICS_BY_DOMAIN.FULLY_QUALIFIED_PARAMETER_NAME:\n{fully_qualified_parameter_name} ; TYPE: {str(type(fully_qualified_parameter_name))}")
-            c = b[fully_qualified_parameter_name]
-            # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] METRICS_BY_DOMAIN.VALUE:\n{c} ; TYPE: {str(type(c))}")
-            m: MetricValue = b[fully_qualified_parameter_name][
-                FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-            ]
-            # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] METRICS_BY_DOMAIN.MULTI_BATCH_METRIC_VALUE:\n{m} ; TYPE: {str(type(m))}")
-            s = list(m.values())[-1][0]
-            # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] METRICS_BY_DOMAIN.ACTIVE_BATCH_METRIC_VALUE:\n{s} ; TYPE: {str(type(s))}")
-            j = convert_to_json_serializable(data=s)
-            # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] METRICS_BY_DOMAIN.ACTIVE_BATCH_METRIC_VALUE_JSON_SERIALIZED:\n{j} ; TYPE: {str(type(j))}")
-            # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # metric_configuration: MetricConfiguration
+        # TODO: <Alex>ALEX</Alex>
+        # for metric_configuration in validation_dependencies.get_metric_configurations():
+        #     metrics_by_domain: Optional[
+        #         Dict[Domain, Dict[str, ParameterNode]]
+        #     ] = validator.compute_multi_batch_metrics(
+        #         metric_configurations=[metric_configuration],
+        #         result_format=MetricsComputationResultFormat.RESOLVED_METRICS,
+        #     )
+        #     # TODO: <Alex>ALEX</Alex>
+        #     # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] RESOLVED_METRICS_BY_DOMAIN:\n{metrics_by_domain} ; TYPE: {str(type(metrics_by_domain))}")
+        #     # TODO: <Alex>ALEX</Alex>
+        #     # TODO: <Alex>ALEX</Alex>
+        #     a = len(metrics_by_domain.keys())
+        #     b = len(metrics_by_domain.values())
+        #     # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] METRICS_BY_DOMAIN.NUM_KEYS:\n{a} ; TYPE: {str(type(a))}")
+        #     # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] METRICS_BY_DOMAIN.NUM_VALUES:\n{b} ; TYPE: {str(type(b))}")
+        #     b = list(metrics_by_domain.values())[0]
+        #     # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] METRICS_BY_DOMAIN.VALUE:\n{b} ; TYPE: {str(type(b))}")
+        #     name: str = sanitize_parameter_name(name=metric_configuration.metric_name)
+        #     # TODO: <Alex>ALEX</Alex>
+        #     # TODO: <Alex>ALEX</Alex>
+        #     fully_qualified_parameter_name: str = f"{RAW_PARAMETER_KEY}{name}"
+        #     # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] METRICS_BY_DOMAIN.FULLY_QUALIFIED_PARAMETER_NAME:\n{fully_qualified_parameter_name} ; TYPE: {str(type(fully_qualified_parameter_name))}")
+        #     c = b[fully_qualified_parameter_name]
+        #     # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] METRICS_BY_DOMAIN.VALUE:\n{c} ; TYPE: {str(type(c))}")
+        #     m: MetricValue = b[fully_qualified_parameter_name][
+        #         FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+        #     ]
+        #     # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] METRICS_BY_DOMAIN.MULTI_BATCH_METRIC_VALUE:\n{m} ; TYPE: {str(type(m))}")
+        #     s = list(m.values())[-1][0]
+        #     # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] METRICS_BY_DOMAIN.ACTIVE_BATCH_METRIC_VALUE:\n{s} ; TYPE: {str(type(s))}")
+        #     j = convert_to_json_serializable(data=s)
+        #     # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] METRICS_BY_DOMAIN.ACTIVE_BATCH_METRIC_VALUE_JSON_SERIALIZED:\n{j} ; TYPE: {str(type(j))}")
+        #     # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
@@ -1029,21 +1077,21 @@ class Expectation(metaclass=MetaExpectation):
         # }
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
-        provided_metrics: Dict[str, MetricValue] = {
-            metric_name: list(
-                list(
-                    validator.compute_multi_batch_metrics(
-                        metric_configurations=[metric_configuration],
-                        result_format=MetricsComputationResultFormat.RESOLVED_METRICS,
-                    ).values()
-                )[0][
-                    f"{RAW_PARAMETER_KEY}{sanitize_parameter_name(name=metric_configuration.metric_name)}"
-                ][
-                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-                ].values()
-            )[-1][0]
-            for metric_name, metric_configuration in validation_dependencies.metric_configurations.items()
-        }
+        # provided_metrics: Dict[str, MetricValue] = {
+        #     metric_name: list(
+        #         list(
+        #             validator.compute_multi_batch_metrics(
+        #                 metric_configurations=[metric_configuration],
+        #                 result_format=MetricsComputationResultFormat.RESOLVED_METRICS,
+        #             ).values()
+        #         )[0][
+        #             f"{RAW_PARAMETER_KEY}{sanitize_parameter_name(name=metric_configuration.metric_name)}"
+        #         ][
+        #             FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+        #         ].values()
+        #     )[-1][0]
+        #     for metric_name, metric_configuration in validation_dependencies.metric_configurations.items()
+        # }
         # TODO: <Alex>ALEX</Alex>
         # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] PROVIDED_METRICS-0:\n{provided_metrics} ; TYPE: {str(type(provided_metrics))}")
         # TODO: <Alex>ALEX</Alex>
