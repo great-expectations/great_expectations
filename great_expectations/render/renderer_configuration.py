@@ -96,9 +96,11 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         validate_assignment = True
         arbitrary_types_allowed = True
 
-    @staticmethod
+    @root_validator(pre=True)
     def validate_configuration_or_result(values: dict) -> dict:
-        if "configuration" not in values and "result" not in values:
+        if ("configuration" not in values or values["configuration"] is None) and (
+            "result" not in values or values["result"] is None
+        ):
             raise RendererConfigurationError(
                 "RendererConfiguration must be passed either configuration or result."
             )
@@ -106,15 +108,18 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
     @root_validator(pre=True)
     def validate_for_expectation_type_and_kwargs(cls, values: dict) -> dict:
-        RendererConfiguration.validate_configuration_or_result(values=values)
-        if "configuration" in values and values["configuration"]:
-            values["expectation_type"] = values["configuration"].expectation_type
-            values["kwargs"] = values["configuration"].kwargs
-        else:
+        if (
+            "result" in values
+            and values["result"] is not None
+            and values["result"].expectation_config is not None
+        ):
             values["expectation_type"] = values[
                 "result"
             ].expectation_config.expectation_type
             values["kwargs"] = values["result"].expectation_config.kwargs
+        else:
+            values["expectation_type"] = values["configuration"].expectation_type
+            values["kwargs"] = values["configuration"].kwargs
         return values
 
     @root_validator(pre=True)
