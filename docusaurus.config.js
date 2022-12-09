@@ -75,6 +75,14 @@ module.exports = {
           position: 'right'
         },
         {
+          to: 'https://great-expectations.readthedocs.io/',
+          // Only one of "to" or "href" should be used
+          // href: 'https://www.facebook.com',
+          label: 'V2 DOCS',
+          target: '_blank',
+          position:'right'
+        },
+        {
           label: 'Product',
           position: 'right',
           items: [
