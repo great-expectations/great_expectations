@@ -3080,7 +3080,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 self._cached_datasources[config.name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 if save_changes:
-                    self._datasource_store.delete(config)
+                    self._datasource_store.delete(config)  # type: ignore[attr-defined]
                 raise e
 
         self.config.datasources[config.name] = config  # type: ignore[index,assignment]
