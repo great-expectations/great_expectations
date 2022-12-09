@@ -127,7 +127,7 @@ results = context.run_checkpoint(
 # </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert results["success"] == True
+assert results["success"] is True
 
 # YAML <snippet>
 checkpoint_yaml = """
@@ -192,4 +192,4 @@ results = context.run_checkpoint(
 # </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert results["success"] == True
+assert results["success"] is True

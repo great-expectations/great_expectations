@@ -300,7 +300,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     def _count_positive_and_negative_example_cases(
         examples: List[ExpectationTestDataCases],
     ) -> Tuple[int, int]:
-        """Scans examples and returns a 2-ple with the numbers of cases with success == True and success == False"""
+        """Scans examples and returns a 2-ple with the numbers of cases with success is True and success is False"""
 
         positive_cases: int = 0
         negative_cases: int = 0

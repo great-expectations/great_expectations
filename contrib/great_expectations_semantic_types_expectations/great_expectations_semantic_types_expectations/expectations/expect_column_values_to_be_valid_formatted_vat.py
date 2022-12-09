@@ -21,7 +21,7 @@ from great_expectations.expectations.metrics import (
 def is_valid_formatted_vat(vat_num: str) -> bool:
     try:
         res = pyvat.is_vat_number_format_valid(vat_num, None)
-        if res == True:
+        if res is True:
             return True
         else:
             return False

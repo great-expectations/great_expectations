@@ -661,7 +661,7 @@ def test__should_we_generate_this_test__obvious():
     )
     backend = "spark"
 
-    assert should_we_generate_this_test(backend, test_case) == True
+    assert should_we_generate_this_test(backend, test_case) is True
 
     test_case2 = ExpectationTestCase(
         title="",
@@ -674,7 +674,7 @@ def test__should_we_generate_this_test__obvious():
     )
     backend2 = "sqlite"
 
-    assert should_we_generate_this_test(backend2, test_case2) == False
+    assert should_we_generate_this_test(backend2, test_case2) is False
 
     test_case3 = ExpectationTestCase(
         title="",
@@ -687,7 +687,7 @@ def test__should_we_generate_this_test__obvious():
     )
     backend3 = "sqlite"
 
-    assert should_we_generate_this_test(backend3, test_case3) == True
+    assert should_we_generate_this_test(backend3, test_case3) is True
 
     test_case4 = ExpectationTestCase(
         title="",
@@ -700,7 +700,7 @@ def test__should_we_generate_this_test__obvious():
     )
     backend4 = "sqlite"
 
-    assert should_we_generate_this_test(backend4, test_case4) == False
+    assert should_we_generate_this_test(backend4, test_case4) is False
 
     test_case5 = ExpectationTestCase(
         title="",
@@ -713,7 +713,7 @@ def test__should_we_generate_this_test__obvious():
     )
     backend5 = "pandas"
 
-    assert should_we_generate_this_test(backend5, test_case5) == True
+    assert should_we_generate_this_test(backend5, test_case5) is True
 
 
 def test__should_we_generate_this_test__sqlalchemy():
@@ -728,7 +728,7 @@ def test__should_we_generate_this_test__sqlalchemy():
     )
     backend = "mysql"
 
-    assert should_we_generate_this_test(backend, test_case) == True
+    assert should_we_generate_this_test(backend, test_case) is True
 
     test_case2 = ExpectationTestCase(
         title="",
@@ -741,7 +741,7 @@ def test__should_we_generate_this_test__sqlalchemy():
     )
     backend2 = "postgresql"
 
-    assert should_we_generate_this_test(backend2, test_case2) == True
+    assert should_we_generate_this_test(backend2, test_case2) is True
 
     test_case3 = ExpectationTestCase(
         title="",
@@ -754,7 +754,7 @@ def test__should_we_generate_this_test__sqlalchemy():
     )
     backend3 = "mysql"
 
-    assert should_we_generate_this_test(backend3, test_case3) == False
+    assert should_we_generate_this_test(backend3, test_case3) is False
 
     test_case4 = ExpectationTestCase(
         title="",
@@ -767,7 +767,7 @@ def test__should_we_generate_this_test__sqlalchemy():
     )
     backend4 = "sqlite"
 
-    assert should_we_generate_this_test(backend4, test_case4) == False
+    assert should_we_generate_this_test(backend4, test_case4) is False
 
     test_case5 = ExpectationTestCase(
         title="",
@@ -780,7 +780,7 @@ def test__should_we_generate_this_test__sqlalchemy():
     )
     backend5 = "spark"
 
-    assert should_we_generate_this_test(backend5, test_case5) == True
+    assert should_we_generate_this_test(backend5, test_case5) is True
 
 
 def test__should_we_generate_this_test__pandas():
@@ -802,7 +802,7 @@ def test__should_we_generate_this_test__pandas():
     )
     backend = "pandas"
 
-    assert should_we_generate_this_test(backend, test_case) == True
+    assert should_we_generate_this_test(backend, test_case) is True
 
     test_case2 = ExpectationTestCase(
         title="",
@@ -815,7 +815,7 @@ def test__should_we_generate_this_test__pandas():
     )
     backend2 = "pandas"
 
-    assert should_we_generate_this_test(backend2, test_case2) == True
+    assert should_we_generate_this_test(backend2, test_case2) is True
 
     test_case3 = ExpectationTestCase(
         title="",
@@ -862,4 +862,4 @@ def test__should_we_generate_this_test__pandas():
     )
     backend5 = "pandas"
 
-    assert should_we_generate_this_test(backend5, test_case5) == False
+    assert should_we_generate_this_test(backend5, test_case5) is False

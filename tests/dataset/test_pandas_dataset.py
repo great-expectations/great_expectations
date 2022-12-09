@@ -871,7 +871,7 @@ def test_pandas_deepcopy():
     df["a"] = [2, 3, 4]
 
     # Our copied dataframe should not be affected
-    assert df2.expect_column_to_exist("a").success == True
+    assert df2.expect_column_to_exist("a").success is True
     assert list(df["a"]) == [2, 3, 4]
     assert list(df2["a"]) == [1, 2, 3]
 

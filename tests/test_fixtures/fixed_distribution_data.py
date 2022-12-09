@@ -2,7 +2,7 @@
 Use this code to create the reproducible data in ./tests/test_sets/fixed_distributional_test_data.csv
 
 The data should pass a kstest with the cdf parameter=distribution and a=0.05,
-e.g. kstest(data_column, "distribution name", p-value=0.05) == True
+e.g. kstest(data_column, "distribution name", p-value=0.05) is True
 
 """
 import numpy as np

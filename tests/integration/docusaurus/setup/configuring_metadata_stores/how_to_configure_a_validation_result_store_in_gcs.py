@@ -258,7 +258,7 @@ assert (
 # get the updated context and run a checkpoint to ensure validation store is updated
 context = gx.get_context()
 validation_result = context.run_checkpoint(checkpoint_name=checkpoint_name)
-assert validation_result["success"] == True
+assert validation_result["success"] is True
 list_validation_store_files = (
     f"gsutil ls gs://{configured_validations_store['stores']['validations_GCS_store']['store_backend']['bucket']}"
     + f"/{configured_validations_store['stores']['validations_GCS_store']['store_backend']['prefix']}"

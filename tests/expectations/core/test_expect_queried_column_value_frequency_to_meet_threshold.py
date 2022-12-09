@@ -313,7 +313,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite_multi_va
             )
         )
 
-    assert result["success"] == True and result["result"]["observed_value"] == [
+    assert result["success"] is True and result["result"]["observed_value"] == [
         0.6393939393939394,
         0.3606060606060606,
     ]

@@ -148,7 +148,7 @@ def _recursively_assert_actual_result_matches_expected_result_keys(
 
             >           assert expected == actual, description_for_error_reporting
             E           AssertionError: expect_table_columns_to_match_set result["exception_info"]["raised_exception"]
-            E           assert True == False
+            E           assert True is False
             E             +True
             E             -False
     """

@@ -15,7 +15,7 @@ from great_expectations.expectations.metrics import (
 
 def is_valid_state_or_territory(state: str, dc_statehood: bool):
     list_of_states_and_territories = [str(x) for x in us.states.STATES_AND_TERRITORIES]
-    if dc_statehood == True:
+    if dc_statehood is True:
         list_of_states_and_territories.append("District Of Columbia")
     else:
         pass

@@ -420,7 +420,7 @@ def test_suppress_store_backend_id_is_true_for_inactive_stores():
         project_config=in_code_data_context_project_config
     )
 
-    # Check here that suppress_store_backend_id == True for inactive stores
+    # Check here that suppress_store_backend_id is True for inactive stores
     # and False for active stores
     assert (
         in_code_data_context.stores.get(

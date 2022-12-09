@@ -1465,7 +1465,7 @@ def _pandas_column_map_condition_values(
 
     domain_values = df[column_name]
 
-    domain_values = domain_values[boolean_mapped_unexpected_values == True]
+    domain_values = domain_values[boolean_mapped_unexpected_values is True]
 
     result_format = metric_value_kwargs["result_format"]
 
@@ -1521,7 +1521,7 @@ def _pandas_column_pair_map_condition_values(
 
     domain_values = df[column_names]
 
-    domain_values = domain_values[boolean_mapped_unexpected_values == True]
+    domain_values = domain_values[boolean_mapped_unexpected_values is True]
 
     result_format = metric_value_kwargs["result_format"]
 
@@ -1612,7 +1612,7 @@ def _pandas_multicolumn_map_condition_values(
 
     domain_values = df[column_list]
 
-    domain_values = domain_values[boolean_mapped_unexpected_values == True]
+    domain_values = domain_values[boolean_mapped_unexpected_values is True]
 
     result_format = metric_value_kwargs["result_format"]
 
@@ -1710,8 +1710,8 @@ def _pandas_column_map_series_and_domain_values(
 
     domain_values = df[column_name]
 
-    domain_values = domain_values[boolean_mapped_unexpected_values == True]
-    map_series = map_series[boolean_mapped_unexpected_values == True]
+    domain_values = domain_values[boolean_mapped_unexpected_values is True]
+    map_series = map_series[boolean_mapped_unexpected_values is True]
 
     result_format = metric_value_kwargs["result_format"]
 
@@ -2547,7 +2547,7 @@ def _spark_map_condition_unexpected_count_value(
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+    filtered = data.filter(F.col("__unexpected") is True).drop(F.col("__unexpected"))
 
     return filtered.count()
 
@@ -2583,7 +2583,7 @@ def _spark_column_map_condition_values(
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+    filtered = data.filter(F.col("__unexpected") is True).drop(F.col("__unexpected"))
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] == "COMPLETE":
@@ -2631,7 +2631,7 @@ def _spark_column_map_condition_value_counts(
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+    filtered = data.filter(F.col("__unexpected") is True).drop(F.col("__unexpected"))
 
     result_format = metric_value_kwargs["result_format"]
 
@@ -2663,7 +2663,7 @@ def _spark_map_condition_rows(
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+    filtered = data.filter(F.col("__unexpected") is True).drop(F.col("__unexpected"))
 
     result_format = metric_value_kwargs["result_format"]
 
@@ -2712,7 +2712,7 @@ def _spark_column_pair_map_condition_values(
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+    filtered = data.filter(F.col("__unexpected") is True).drop(F.col("__unexpected"))
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] == "COMPLETE":
@@ -2806,7 +2806,7 @@ def _spark_multicolumn_map_condition_values(
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+    filtered = data.filter(F.col("__unexpected") is True).drop(F.col("__unexpected"))
 
     column_selector = [
         F.col(column_name).alias(column_name) for column_name in column_list

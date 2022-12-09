@@ -194,7 +194,7 @@ def test_spark_kwargs_are_passed_through(
         dataset_name
     ).config
     assert datasource_config["spark_config"] == {}
-    assert datasource_config["force_reuse_spark_context"] == True
+    assert datasource_config["force_reuse_spark_context"] is True
 
 
 def test_create_sparkdf_datasource(

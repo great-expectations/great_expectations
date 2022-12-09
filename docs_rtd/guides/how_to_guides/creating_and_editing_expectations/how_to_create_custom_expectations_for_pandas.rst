@@ -329,12 +329,12 @@ Here's a single code block containing all the notebook code in this article:
     gx.from_pandas(my_other_df, dataset_class=MyCustomPandasDataset)
 
     # Run Expectations in assertions so that they can be used as tests for this guide
-    assert my_df.expect_column_values_to_be_in_set("Sex", value_set=["Male", "Female"]).success == False
-    assert my_df.expect_column_values_to_be_even("Survived").success == False
-    assert my_df.expect_column_values_to_be_even("Survived", mostly=.6).success == True
-    assert my_df.expect_column_value_word_counts_to_be_between("Name", 3, 5).success == False
-    assert my_df.expect_column_value_word_counts_to_be_between("Name", 3, 5, mostly=.9).success == True
-    assert my_df.expect_column_values_to_be_valid_timezones("Name", mostly=.9).success == False
+    assert my_df.expect_column_values_to_be_in_set("Sex", value_set=["Male", "Female"]).success is False
+    assert my_df.expect_column_values_to_be_even("Survived").success is False
+    assert my_df.expect_column_values_to_be_even("Survived", mostly=.6).success is True
+    assert my_df.expect_column_value_word_counts_to_be_between("Name", 3, 5).success is False
+    assert my_df.expect_column_value_word_counts_to_be_between("Name", 3, 5, mostly=.9).success is True
+    assert my_df.expect_column_values_to_be_valid_timezones("Name", mostly=.9).success is False
 
 Comments
 --------

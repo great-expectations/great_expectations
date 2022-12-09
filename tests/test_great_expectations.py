@@ -72,7 +72,7 @@ class CustomPandasDataset(PandasDataset):
         not_null = self[column].notnull()
 
         result = self[column][not_null] == 1
-        unexpected_values = list(self[column][not_null][result == False])
+        unexpected_values = list(self[column][not_null][result is False])
 
         if mostly:
             # Prevent division-by-zero errors
@@ -90,7 +90,7 @@ class CustomPandasDataset(PandasDataset):
                 "success": percent_equaling_1 >= mostly,
                 "result": {
                     "unexpected_list": unexpected_values[:20],
-                    "unexpected_index_list": list(self.index[result == False])[:20],
+                    "unexpected_index_list": list(self.index[result is False])[:20],
                 },
             }
         else:
@@ -98,7 +98,7 @@ class CustomPandasDataset(PandasDataset):
                 "success": len(unexpected_values) == 0,
                 "result": {
                     "unexpected_list": unexpected_values[:20],
-                    "unexpected_index_list": list(self.index[result == False])[:20],
+                    "unexpected_index_list": list(self.index[result is False])[:20],
                 },
             }
 

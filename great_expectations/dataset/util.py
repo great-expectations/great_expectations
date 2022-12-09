@@ -102,7 +102,7 @@ def categorical_partition_data(data):
 
     # Compute weights using denominator only of nonnull values
     null_indexes = series.isnull()
-    nonnull_count = (null_indexes == False).sum()
+    nonnull_count = (null_indexes is False).sum()
 
     weights = value_counts.values / nonnull_count
     return {"values": value_counts.index.tolist(), "weights": weights}

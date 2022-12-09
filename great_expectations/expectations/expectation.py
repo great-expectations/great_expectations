@@ -1375,8 +1375,8 @@ class Expectation(metaclass=MetaExpectation):
             top_level_suppress_test_for = example.get("suppress_test_for")
             for test in example["tests"]:
                 if (
-                    test.get("include_in_gallery") == True
-                    or return_only_gallery_examples == False
+                    test.get("include_in_gallery") is True
+                    or return_only_gallery_examples is False
                 ):
                     copied_test = deepcopy(test)
                     if top_level_only_for:

@@ -22,7 +22,7 @@ from great_expectations.expectations.metrics import (
 def has_btc_address_positive_balance(addr: str) -> bool:
     try:
         res = coinaddrvalidator.validate("btc", addr).valid
-        if res == True:
+        if res is True:
             balance = blockcypher.get_total_balance(addr)
             if balance > 0:
                 return True

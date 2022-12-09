@@ -375,7 +375,7 @@ def test_to_raw_dict_works_recursively():
 
     # Make sure it's a dictionary, not a DictDot
     assert type(C_dict) == dict
-    assert isinstance(C_dict, DictDot) == False
+    assert isinstance(C_dict, DictDot) is False
     # Dictionaries don't support dot notation.
     with raises(AttributeError):
         C_dict.A_list

@@ -106,17 +106,17 @@ class MetaPandasDataset(Dataset):
             element_count = int(len(series))
 
             # FIXME rename nonnull to non_ignored?
-            nonnull_values = series[boolean_mapped_null_values == False]
-            nonnull_count = int((boolean_mapped_null_values == False).sum())
+            nonnull_values = series[boolean_mapped_null_values is False]
+            nonnull_count = int((boolean_mapped_null_values is False).sum())
 
             boolean_mapped_success_values = func(self, nonnull_values, *args, **kwargs)
             success_count = np.count_nonzero(boolean_mapped_success_values)
 
             unexpected_list = list(
-                nonnull_values[boolean_mapped_success_values == False]
+                nonnull_values[boolean_mapped_success_values is False]
             )
             unexpected_index_list = list(
-                nonnull_values[boolean_mapped_success_values == False].index
+                nonnull_values[boolean_mapped_success_values is False].index
             )
 
             if "output_strftime_format" in kwargs:
@@ -222,10 +222,10 @@ class MetaPandasDataset(Dataset):
 
             # This next bit only works if series_A and _B are the same length
             element_count = int(len(series_A))
-            nonnull_count = (boolean_mapped_null_values == False).sum()
+            nonnull_count = (boolean_mapped_null_values is False).sum()
 
-            nonnull_values_A = series_A[boolean_mapped_null_values == False]
-            nonnull_values_B = series_B[boolean_mapped_null_values == False]
+            nonnull_values_A = series_A[boolean_mapped_null_values is False]
+            nonnull_values_B = series_B[boolean_mapped_null_values is False]
             nonnull_values = [
                 value_pair
                 for value_pair in zip(list(nonnull_values_A), list(nonnull_values_B))
@@ -241,22 +241,22 @@ class MetaPandasDataset(Dataset):
                 for value_pair in zip(
                     list(
                         series_A[
-                            (boolean_mapped_success_values == False)
-                            & (boolean_mapped_null_values == False)
+                            (boolean_mapped_success_values is False)
+                            & (boolean_mapped_null_values is False)
                         ]
                     ),
                     list(
                         series_B[
-                            (boolean_mapped_success_values == False)
-                            & (boolean_mapped_null_values == False)
+                            (boolean_mapped_success_values is False)
+                            & (boolean_mapped_null_values is False)
                         ]
                     ),
                 )
             ]
             unexpected_index_list = list(
                 series_A[
-                    (boolean_mapped_success_values == False)
-                    & (boolean_mapped_null_values == False)
+                    (boolean_mapped_success_values is False)
+                    & (boolean_mapped_null_values is False)
                 ].index
             )
 
@@ -322,15 +322,15 @@ class MetaPandasDataset(Dataset):
             validate_mostly(mostly)
 
             boolean_mapped_success_values = func(
-                self, test_df[boolean_mapped_skip_values == False], *args, **kwargs
+                self, test_df[boolean_mapped_skip_values is False], *args, **kwargs
             )
             success_count = boolean_mapped_success_values.sum()
             nonnull_count = (~boolean_mapped_skip_values).sum()
             element_count = len(test_df)
 
             unexpected_list = test_df[
-                (boolean_mapped_skip_values == False)
-                & (boolean_mapped_success_values == False)
+                (boolean_mapped_skip_values is False)
+                & (boolean_mapped_success_values is False)
             ]
             unexpected_index_list = list(unexpected_list.index)
 
@@ -476,7 +476,7 @@ Notes:
     def get_column_nonnull_count(self, column):
         series = self[column]
         null_indexes = series.isnull()
-        nonnull_values = series[null_indexes == False]
+        nonnull_values = series[null_indexes is False]
         return len(nonnull_values)
 
     def get_column_value_counts(self, column, sort="value", collate=None):
@@ -1769,7 +1769,7 @@ Notes:
         meta=None,
     ):
         # FIXME
-        if allow_cross_type_comparisons == True:
+        if allow_cross_type_comparisons is True:
             raise NotImplementedError
 
         if parse_strings_as_datetimes:
@@ -1780,7 +1780,7 @@ Notes:
             temp_column_A = column_A
             temp_column_B = column_B
 
-        if or_equal == True:
+        if or_equal is True:
             return temp_column_A >= temp_column_B
         else:
             return temp_column_A > temp_column_B

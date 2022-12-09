@@ -102,7 +102,7 @@ class MetaFileDataAsset(DataAsset):
                         compress(lines, np.invert(boolean_mapped_null_lines))
                     )
                     nonnull_count = int(
-                        (boolean_mapped_null_lines == False).sum()  # noqa: E712
+                        (boolean_mapped_null_lines is False).sum()  # noqa: E712
                     )
                     boolean_mapped_success_lines = np.array(
                         func(self, _lines=nonnull_lines, *args, **kwargs)
