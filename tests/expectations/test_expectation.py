@@ -140,3 +140,34 @@ def test_multicolumn_expectation_validation_errors_with_bad_mostly(
 ):
     with pytest.raises(InvalidExpectationConfigurationError):
         fake_expectation = fake_expectation_cls(config)
+
+
+def test_unexpected_index_columns_passed_in_as_kwarg_gives_error():
+    with pytest.raises(InvalidExpectationConfigurationError):
+        expectation_configuration.ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "column": "animals",
+                "value_set": ["cat", "fish", "dog"],
+                "result_format": {
+                    "result_format": "COMPLETE",
+                    "unexpected_index_column_names": ["pk_1"],
+                },
+            },
+        )
+
+
+# partial_unexpected_count
+def test_partial_unexpected_count_passed_in_as_kwarg_gives_error():
+    with pytest.raises(InvalidExpectationConfigurationError):
+        expectation_configuration.ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "column": "animals",
+                "value_set": ["cat", "fish", "dog"],
+                "result_format": {
+                    "result_format": "COMPLETE",
+                    "partial_unexpected_count": 1,
+                },
+            },
+        )

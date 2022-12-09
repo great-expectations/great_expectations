@@ -969,6 +969,25 @@ class ExpectationConfiguration(SerializableDictDot):
             raise InvalidExpectationConfigurationError(
                 "expectation configuration kwargs must be a dict."
             )
+
+        if kwargs.get("result_format"):
+            if isinstance(kwargs["result_format"], dict) and kwargs[
+                "result_format"
+            ].get("unexpected_index_column_names"):
+                raise InvalidExpectationConfigurationError(
+                    """unexpected_index_column_names cannot be configured at the ExpectationConfiguration-level.
+                        Please configure runtime_configuration at the Validator or Checkpoint-level instead.
+                    """
+                )
+            if isinstance(kwargs["result_format"], dict) and kwargs[
+                "result_format"
+            ].get("partial_unexpected_count"):
+                raise InvalidExpectationConfigurationError(
+                    """partial_unexpected_count cannot be configured at the ExpectationConfiguration-level.
+                        Please configure runtime_configuration at the Validator or Checkpoint-level instead.
+                    """
+                )
+
         self._kwargs = kwargs
         self._raw_kwargs = None  # the kwargs before evaluation parameters are evaluated
         if meta is None:
