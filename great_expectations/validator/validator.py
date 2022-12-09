@@ -1225,35 +1225,30 @@ class Validator:
         Expectation-level to take precedence over the ones defined at higher levels.
         This functionality is enabled by the current function.
 
-        result_format can be string or
-
-        no runtime_configuration :
-            - replace with expectation_configuration
-
-        no expectation_configuration :
-            - just return runtime
-
         """
         if not runtime_configuration:
             runtime_configuration = expectation_configuration.kwargs
             return runtime_configuration
 
-        # these are the runtime kwargs that can exist
-        runtime_kwargs = ["include_config", "catch_exceptions", "result_format"]
+        runtime_kwargs: List[str] = [
+            "include_config",
+            "catch_exceptions",
+            "result_format",
+        ]
         # is this ever going to happen?
         # TODO: comment out and run the tests first
         if expectation_configuration.kwargs == {}:
             return runtime_configuration
 
-        for kwarg in runtime_kwargs:
-            if expectation_configuration.kwargs.get(kwarg):
-                runtime_configuration[kwarg] = expectation_configuration.kwargs[kwarg]
-
-            if kwarg == "result_format":
+        for arg in runtime_kwargs:
+            if arg == "result_format":
                 runtime_configuration = self._resolve_result_format(
                     runtime_configuration=runtime_configuration,
                     expectation_configuration=expectation_configuration,
                 )
+            # catch_exceptions and include_config
+            elif expectation_configuration.kwargs.get(arg):
+                runtime_configuration[arg] = expectation_configuration.kwargs[arg]
 
         return runtime_configuration
 
