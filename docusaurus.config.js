@@ -113,7 +113,7 @@ module.exports = {
               to: 'https://github.com/great-expectations/great_expectations'
             },
             {
-              label: 'NEWSLETTER',
+              label: 'JOIN THE EMAIL LIST',
               to: 'https://greatexpectations.io/newsletter'
             }
           ]
@@ -159,7 +159,7 @@ module.exports = {
           ]
         },
         {
-          to: 'https://greatexpectations.io/cloud',
+          to: 'https://greatexpectations.io/gx-cloud',
           label: 'Cloud early access',
           position: 'right',
           className: 'header-cloud-link',
