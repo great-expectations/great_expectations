@@ -41,6 +41,7 @@ from great_expectations.core.batch import (
     IDDict,
     get_batch_request_from_acceptable_arguments,
 )
+from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.config_provider import (
     _ConfigurationProvider,
     _ConfigurationVariablesConfigurationProvider,
@@ -69,7 +70,7 @@ from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.store.validations_store import ValidationsStore
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
-    CURRENT_GX_CONFIG_VERSION,
+    CURRENT_GE_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     ConcurrencyConfig,
@@ -161,7 +162,7 @@ yaml = YAMLHandler()
 T = TypeVar("T", dict, list, str)
 
 
-class AbstractDataContext(ABC):
+class AbstractDataContext(ConfigPeer, ABC):
     """
     Base class for all DataContexts that contain all context-agnostic data context operations.
 
@@ -184,6 +185,9 @@ class AbstractDataContext(ABC):
     PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND = 4
     PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND = 5
 
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT___INIT__,
+    )
     def __init__(self, runtime_environment: Optional[dict] = None) -> None:
         """
         Constructor for AbstractDataContext. Will handle instantiation logic that is common to all DataContext objects
@@ -431,7 +435,7 @@ class AbstractDataContext(ABC):
                     f"with no `checkpoints` directory.\n "
                     f"Please create the following directory: {checkpoint_store_directory}.\n "
                     f"To use the new 'Checkpoint Store' feature, please update your configuration "
-                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)}.\n  "
+                    f"to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} "
                     f"to learn more about the upgrade process."
                 )
@@ -441,7 +445,7 @@ class AbstractDataContext(ABC):
                     f"with no `checkpoints` directory.\n  "
                     f"Please create a `checkpoints` directory in your Great Expectations directory."
                     f"To use the new 'Checkpoint Store' feature, please update your configuration "
-                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)}.\n  "
+                    f"to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} "
                     f"to learn more about the upgrade process."
                 )
@@ -464,7 +468,7 @@ class AbstractDataContext(ABC):
                 logger.warning(
                     f"Checkpoint store named '{checkpoint_store_name}' is not a configured store, "
                     f"so will try to use default Checkpoint store.\n  Please update your configuration "
-                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)} in order to use the new "
+                    f"to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "
                     f"'Checkpoint Store' feature.\n  Visit {AbstractDataContext.MIGRATION_WEBSITE} "
                     f"to learn more about the upgrade process."
                 )
@@ -497,7 +501,7 @@ class AbstractDataContext(ABC):
                     f"with no `profilers` directory.\n  "
                     f"Please create the following directory: {checkpoint_store_directory}\n"
                     f"To use the new 'Profiler Store' feature, please update your configuration "
-                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)}.\n  "
+                    f"to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} to learn more about the "
                     f"upgrade process."
                 )
@@ -508,7 +512,7 @@ class AbstractDataContext(ABC):
                     f"Please create a `profilers` directory in your Great Expectations project "
                     f"directory.\n  "
                     f"To use the new 'Profiler Store' feature, please update your configuration "
-                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)}.\n  "
+                    f"to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} to learn more about the "
                     f"upgrade process."
                 )
@@ -527,7 +531,7 @@ class AbstractDataContext(ABC):
                 logger.warning(
                     f"Profiler store named '{profiler_store_name}' is not a configured store, so will try to use "
                     f"default Profiler store.\n  Please update your configuration to the new version number "
-                    f"{float(CURRENT_GX_CONFIG_VERSION)} in order to use the new 'Profiler Store' feature.\n  "
+                    f"{float(CURRENT_GE_CONFIG_VERSION)} in order to use the new 'Profiler Store' feature.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} to learn more about the upgrade process."
                 )
                 built_store: Optional[Store] = self._build_store_from_config(
@@ -615,7 +619,7 @@ class AbstractDataContext(ABC):
             name: the name for the new datasource to add
             initialize: if False, add the datasource to the config, but do not
                 initialize it, for example if a user needs to debug database connectivity.
-            save_changes (bool): should GX save the Datasource config?
+            save_changes (bool): should GE save the Datasource config?
             kwargs (keyword arguments): the configuration for the new datasource
 
         Returns:
@@ -686,9 +690,9 @@ class AbstractDataContext(ABC):
     ) -> DataContextConfig:
         """
         Substitute vars in config of form ${var} or $(var) with values found in the following places,
-        in order of precedence: ge_cloud_config (for Data Contexts in GX Cloud mode), runtime_environment,
+        in order of precedence: ge_cloud_config (for Data Contexts in GE Cloud mode), runtime_environment,
         environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
-        be optional in GX Cloud mode).
+        be optional in GE Cloud mode).
         """
         if not config:
             config = self._project_config
@@ -1037,7 +1041,7 @@ class AbstractDataContext(ABC):
 
         response = self.profiler_store.set(key=key, value=profiler.config)  # type: ignore[func-returns-value]
         if isinstance(response, GXCloudResourceRef):
-            ge_cloud_id = response.cloud_id
+            ge_cloud_id = response.ge_cloud_id
 
         # If an id is present, we want to prioritize that as our key for object retrieval
         if ge_cloud_id:
@@ -1731,12 +1735,12 @@ class AbstractDataContext(ABC):
         include_rendered_content: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> ExpectationSuite:
-        """Get an Expectation Suite by name or GX Cloud ID
+        """Get an Expectation Suite by name or GE Cloud ID
         Args:
             expectation_suite_name (str): The name of the Expectation Suite
             include_rendered_content (bool): Whether or not to re-populate rendered_content for each
                 ExpectationConfiguration.
-            ge_cloud_id (str): The GX Cloud ID for the Expectation Suite.
+            ge_cloud_id (str): The GE Cloud ID for the Expectation Suite.
 
         Returns:
             An existing ExpectationSuite
@@ -1837,7 +1841,7 @@ class AbstractDataContext(ABC):
             batch_list: Explicit list of Batch objects to supply data at runtime
             batch_request: Explicit batch_request used to supply data at runtime
             name: Identifier used to retrieve the profiler from a store.
-            ge_cloud_id: Identifier used to retrieve the profiler from a store (GX Cloud specific).
+            ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
             variables: Attribute name/value pairs (overrides)
             rules: Key-value pairs of name/configuration-dictionary (overrides)
 
@@ -1875,7 +1879,7 @@ class AbstractDataContext(ABC):
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
             name: Identifier used to retrieve the profiler from a store.
-            ge_cloud_id: Identifier used to retrieve the profiler from a store (GX Cloud specific).
+            ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
 
         Returns:
             Set of rule evaluation results in the form of an RuleBasedProfilerResult
@@ -2942,7 +2946,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 self._cached_datasources[datasource_name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
-                # this error will happen if our configuration contains datasources that GX can no longer connect to.
+                # this error will happen if our configuration contains datasources that GE can no longer connect to.
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch() step. So we just pass here.
                 pass
@@ -3063,19 +3067,27 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Raises:
             DatasourceInitializationError
         """
-        substituted_config = self._perform_substitutions_on_datasource_config(config)
-
-        datasource: Optional[Datasource] = None
-        if initialize:
-            datasource = self._instantiate_datasource_from_config(
-                raw_config=config, substituted_config=substituted_config
-            )
-            self._cached_datasources[config.name] = datasource
-
         if save_changes:
             config = self._datasource_store.set(key=None, value=config)  # type: ignore[attr-defined]
 
         self.config.datasources[config.name] = config  # type: ignore[index,assignment]
+
+        substituted_config = self._perform_substitutions_on_datasource_config(config)
+
+        datasource: Optional[Datasource] = None
+        if initialize:
+            try:
+                datasource = self._instantiate_datasource_from_config(
+                    raw_config=config, substituted_config=substituted_config
+                )
+                self._cached_datasources[config.name] = datasource
+            except ge_exceptions.DatasourceInitializationError as e:
+                # Do not keep configuration that could not be instantiated.
+                if save_changes:
+                    self._datasource_store.delete(config)  # type: ignore[attr-defined]
+                # If the DatasourceStore uses an InlineStoreBackend, the config may already be updated
+                self.config.datasources.pop(config.name, None)  # type: ignore[union-attr,arg-type]
+                raise e
 
         return datasource
 
