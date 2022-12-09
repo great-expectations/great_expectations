@@ -1165,41 +1165,13 @@ class Validator:
             runtime_configuration,
         )
 
-    def _override_runtime_configuration_with_config_in_expectation_configuration(
-        self,
-        expectation_configuration: ExpectationConfiguration,
-        runtime_configuration: Union[dict, None],
-    ) -> Union[dict, None]:
-        """
-        `runtime_configuration` can come from:
-            1. The Checkpoint.run() function at runtime
-            2. Validator's default_expectation_args property (can be overriden by set_default_expectation_argument())
-            3. ExpectationConfiguration
-
-        This method allows for the configuration at the Expectation-level (lower) to override
-        the configuration at the Checkpoint-level (higher).  This is particularly important
-        for unexpected_index_list, which depends on primary key columns defined by the
-        `unexpected_index_columns` parameter in the result_format runtime configuration.
-
-        In the case of `unexpected_index_columns`, we want the columns defined at the
-        Expectation-level to take precedence over the ones defined at higher levels.
-        This functionality is enabled by the current function.
-        """
-        if not runtime_configuration:
-            runtime_configuration = expectation_configuration.kwargs
-            return runtime_configuration
-
-        if expectation_configuration.kwargs.get("catch_exceptions"):
-            runtime_configuration[
-                "catch_exceptions"
-            ] = expectation_configuration.kwargs["catch_exceptions"]
+    def _resolve_result_format(
+        runtime_configuration: dict, expectation_configuration: ExpectationConfiguration
+    ) -> dict:
 
         expectation_level_result_format_config: Union[
-            dict, str
+            dict, str, None
         ] = expectation_configuration.kwargs.get("result_format")
-
-        if not expectation_level_result_format_config:
-            return runtime_configuration
 
         runtime_level_result_format_config: Union[dict, str] = runtime_configuration[
             "result_format"
@@ -1209,7 +1181,6 @@ class Validator:
         expectation_config_type = type(expectation_level_result_format_config)
 
         if runtime_config_type is str and expectation_config_type is str:
-            # just replace
             runtime_configuration[
                 "result_format"
             ] = expectation_level_result_format_config
@@ -1230,7 +1201,60 @@ class Validator:
             for key in expectation_level_result_format_config.keys():
                 runtime_configuration["result_format"][
                     key
-                ] = expectation_level_result_format_config[key]
+                ] = expectation_level_result_format_config.get(key)
+
+        return runtime_configuration
+
+    def _override_runtime_configuration_with_config_in_expectation_configuration(
+        self,
+        expectation_configuration: ExpectationConfiguration,
+        runtime_configuration: Union[dict, None],
+    ) -> Union[dict, None]:
+        """
+        `runtime_configuration` can come from:
+            1. The Checkpoint.run() function at runtime
+            2. Validator's default_expectation_args property (can be overriden by set_default_expectation_argument())
+            3. ExpectationConfiguration
+
+        This method allows for the configuration at the Expectation-level (lower) to override
+        the configuration at the Checkpoint-level (higher).  This is particularly important
+        for unexpected_index_list, which depends on primary key columns defined by the
+        `unexpected_index_columns` parameter in the result_format runtime configuration.
+
+        In the case of `unexpected_index_columns`, we want the columns defined at the
+        Expectation-level to take precedence over the ones defined at higher levels.
+        This functionality is enabled by the current function.
+
+        result_format can be string or
+
+        no runtime_configuration :
+            - replace with expectation_configuration
+
+        no expectation_configuration :
+            - just return runtime
+
+        """
+        if not runtime_configuration:
+            runtime_configuration = expectation_configuration.kwargs
+            return runtime_configuration
+
+        # these are the runtime kwargs that can exist
+        runtime_kwargs = ["include_config", "catch_exceptions", "result_format"]
+        # is this ever going to happen?
+        # TODO: comment out and run the tests first
+        if expectation_configuration.kwargs == {}:
+            return runtime_configuration
+
+        for kwarg in runtime_kwargs:
+            if expectation_configuration.kwargs.get(kwarg):
+                runtime_configuration[kwarg] = expectation_configuration.kwargs[kwarg]
+
+            if kwarg == "result_format":
+                runtime_configuration = self._resolve_result_format(
+                    runtime_configuration=runtime_configuration,
+                    expectation_configuration=expectation_configuration,
+                )
+
         return runtime_configuration
 
     def _generate_suite_level_graph_from_expectation_level_sub_graphs(
