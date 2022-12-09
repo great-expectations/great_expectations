@@ -2,6 +2,12 @@
 title: Changelog
 ---
 
+### 0.15.39
+* [BUGFIX] Patch faulty GX Cloud arg resolution logic (#6542)
+* [DOCS] Fix line numbers in snippets part 2 (#6537)
+* [DOCS] Convert nested snippets to named snippets (#6541)
+* [MAINTENANCE] v2 Docs link (#6534)
+
 ### 0.15.38
 * [BUGFIX] Patch broken Cloud E2E test around `Datasource` CRUD (#6520)
 * [BUGFIX] Patch outdated `ge_cloud_id` attribute call in `ValidationOperator` (#6529)
