@@ -206,9 +206,10 @@ def param_method(param_name: str) -> Callable:
             try:
                 return_type: Type = param_func.__annotations__["return"]
             except KeyError:
+                method_name: str = getattr(param_func, "__name__", repr(param_func))
                 raise RendererConfigurationError(
                     "Methods decorated with @param_method must have an annotated return "
-                    "type."
+                    f"type, but method {method_name} does not."
                 )
 
             if hasattr(renderer_configuration.params, param_name):
