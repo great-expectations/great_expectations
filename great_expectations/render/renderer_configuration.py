@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 
 class RendererSchemaType(str, Enum):
-    """Type used in used in renderer json schema dictionary."""
+    """Type used in renderer json schema dictionary."""
 
     STRING = "string"
     NUMBER = "number"
