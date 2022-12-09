@@ -70,7 +70,7 @@ from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.store.validations_store import ValidationsStore
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
-    CURRENT_GE_CONFIG_VERSION,
+    CURRENT_GX_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     ConcurrencyConfig,
@@ -435,7 +435,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                     f"with no `checkpoints` directory.\n "
                     f"Please create the following directory: {checkpoint_store_directory}.\n "
                     f"To use the new 'Checkpoint Store' feature, please update your configuration "
-                    f"to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  "
+                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)}.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} "
                     f"to learn more about the upgrade process."
                 )
@@ -445,7 +445,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                     f"with no `checkpoints` directory.\n  "
                     f"Please create a `checkpoints` directory in your Great Expectations directory."
                     f"To use the new 'Checkpoint Store' feature, please update your configuration "
-                    f"to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  "
+                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)}.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} "
                     f"to learn more about the upgrade process."
                 )
@@ -468,7 +468,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 logger.warning(
                     f"Checkpoint store named '{checkpoint_store_name}' is not a configured store, "
                     f"so will try to use default Checkpoint store.\n  Please update your configuration "
-                    f"to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "
+                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)} in order to use the new "
                     f"'Checkpoint Store' feature.\n  Visit {AbstractDataContext.MIGRATION_WEBSITE} "
                     f"to learn more about the upgrade process."
                 )
@@ -501,7 +501,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                     f"with no `profilers` directory.\n  "
                     f"Please create the following directory: {checkpoint_store_directory}\n"
                     f"To use the new 'Profiler Store' feature, please update your configuration "
-                    f"to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  "
+                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)}.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} to learn more about the "
                     f"upgrade process."
                 )
@@ -512,7 +512,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                     f"Please create a `profilers` directory in your Great Expectations project "
                     f"directory.\n  "
                     f"To use the new 'Profiler Store' feature, please update your configuration "
-                    f"to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  "
+                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)}.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} to learn more about the "
                     f"upgrade process."
                 )
@@ -531,7 +531,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 logger.warning(
                     f"Profiler store named '{profiler_store_name}' is not a configured store, so will try to use "
                     f"default Profiler store.\n  Please update your configuration to the new version number "
-                    f"{float(CURRENT_GE_CONFIG_VERSION)} in order to use the new 'Profiler Store' feature.\n  "
+                    f"{float(CURRENT_GX_CONFIG_VERSION)} in order to use the new 'Profiler Store' feature.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} to learn more about the upgrade process."
                 )
                 built_store: Optional[Store] = self._build_store_from_config(
