@@ -3063,17 +3063,22 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Raises:
             DatasourceInitializationError
         """
+        if save_changes:
+            config = self._datasource_store.set(key=None, value=config)  # type: ignore[attr-defined]
+
         substituted_config = self._perform_substitutions_on_datasource_config(config)
 
         datasource: Optional[Datasource] = None
         if initialize:
-            datasource = self._instantiate_datasource_from_config(
-                raw_config=config, substituted_config=substituted_config
-            )
-            self._cached_datasources[config.name] = datasource
-
-        if save_changes:
-            config = self._datasource_store.set(key=None, value=config)  # type: ignore[attr-defined]
+            try:
+                datasource = self._instantiate_datasource_from_config(
+                    raw_config=config, substituted_config=substituted_config
+                )
+                self._cached_datasources[config.name] = datasource
+            except ge_exceptions.DatasourceInitializationError as e:
+                if save_changes:
+                    self._datasource_store.delete(config)
+                raise e
 
         self.config.datasources[config.name] = config  # type: ignore[index,assignment]
 
