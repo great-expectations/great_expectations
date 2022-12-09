@@ -1166,12 +1166,17 @@ class Validator:
         )
 
     def _resolve_result_format(
-        runtime_configuration: dict, expectation_configuration: ExpectationConfiguration
+        self,
+        runtime_configuration: dict,
+        expectation_configuration: ExpectationConfiguration,
     ) -> dict:
 
         expectation_level_result_format_config: Union[
             dict, str, None
         ] = expectation_configuration.kwargs.get("result_format")
+
+        if not expectation_level_result_format_config:
+            return runtime_configuration
 
         runtime_level_result_format_config: Union[dict, str] = runtime_configuration[
             "result_format"
