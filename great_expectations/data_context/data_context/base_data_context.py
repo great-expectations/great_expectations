@@ -22,9 +22,19 @@ def BaseDataContext(
     project_config: Union[DataContextConfig, Mapping],
     context_root_dir: Optional[str] = None,
     runtime_environment: Optional[dict] = None,
+    cloud_mode: bool = False,
+    cloud_config: Optional[GXCloudConfig] = None,
+    # Deprecated as of 0.15.37
     ge_cloud_mode: bool = False,
     ge_cloud_config: Optional[GXCloudConfig] = None,
 ) -> AbstractDataContext:
+    # Chetan - 20221208 - not formally deprecating these values until a future date
+    if ge_cloud_mode or ge_cloud_config:
+        if not cloud_mode:
+            cloud_mode = ge_cloud_mode
+        if not cloud_config:
+            cloud_config = ge_cloud_config
+
     project_data_context_config: DataContextConfig = (
         AbstractDataContext.get_or_create_data_context_config(project_config)
     )
@@ -46,9 +56,9 @@ def BaseDataContext(
             project_config=project_data_context_config,
             runtime_environment=runtime_environment,
             context_root_dir=context_root_dir,
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_access_token=ge_cloud_access_token,
-            ge_cloud_organization_id=ge_cloud_organization_id,
+            cloud_base_url=ge_cloud_base_url,
+            cloud_access_token=ge_cloud_access_token,
+            cloud_organization_id=ge_cloud_organization_id,
         )
     elif context_root_dir:
         return FileDataContext(  # type: ignore[assignment]
