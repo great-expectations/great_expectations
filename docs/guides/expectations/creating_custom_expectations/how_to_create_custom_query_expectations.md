@@ -135,7 +135,7 @@ You'll also need to change the class name at the bottom of the file, by replacin
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L161
+```python name="expect_queried_table_row_count_to_be.py print_diagnostic_checklist"
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -172,7 +172,7 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L88-L148
+```python name="expect_queried_table_row_count_to_be.py examples"
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -281,7 +281,7 @@ In this step, we simply need to validate that the results of our Metrics meet ou
 
 The validate method is implemented as `_validate(...)`:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L68-L74
+```python name="expect_queried_table_row_count_to_be.py _validate function signature"
 ```
 
 This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies,
@@ -290,7 +290,7 @@ and performs a simple validation against your success keys (i.e. important thres
 To do so, we'll be accessing our success keys, as well as the result of our previously-calculated Metrics.
 For example, here is the definition of a `_validate(...)` method to validate the results of our `query.table` Metric against our success keys:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L68-L85
+```python name="expect_queried_table_row_count_to_be.py _validate function"
 ```
 
 Running your diagnostic checklist at this point should return something like this:
