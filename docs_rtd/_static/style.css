@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
+
 h1,
 h2,
 h3,
@@ -7,7 +10,7 @@ h6,
 p,
 body,
 a {
-  font-family: HKGroteskPro, serif !important;
+  font-family: Montserrat, serif !important;
 }
 
 h1,
@@ -27,31 +30,31 @@ a {
 }
 
 @font-face {
-  font-family: HKGroteskPro;
+  font-family: Montserrat;
   font-weight: 400;
-  src: url(hk-grotesk-pro/HKGroteskPro-Regular.woff2) format("woff2"),
-    url(hk-grotesk-pro/HKGroteskPro-Regular.woff) format("woff");
+  src: url(hk-grotesk-pro/Montserrat-Regular.woff2) format("woff2"),
+    url(hk-grotesk-pro/Montserrat-Regular.woff) format("woff");
 }
 
 @font-face {
-  font-family: HKGroteskPro;
+  font-family: Montserrat;
   font-weight: 600;
-  src: url(hk-grotesk-pro/HKGroteskPro-Medium.woff2) format("woff2"),
-    url(hk-grotesk-pro/HKGroteskPro-Medium.woff) format("woff");
+  src: url(hk-grotesk-pro/Montserrat-Medium.woff2) format("woff2"),
+    url(hk-grotesk-pro/Montserrat-Medium.woff) format("woff");
 }
 
 @font-face {
-  font-family: HKGroteskPro;
+  font-family: Montserrat;
   font-weight: 700;
-  src: url(hk-grotesk-pro/HKGroteskPro-SemiBold.woff2) format("woff2"),
-    url(hk-grotesk-pro/HKGroteskPro-SemiBold.woff) format("woff");
+  src: url(hk-grotesk-pro/Montserrat-SemiBold.woff2) format("woff2"),
+    url(hk-grotesk-pro/Montserrat-SemiBold.woff) format("woff");
 }
 
 @font-face {
-  font-family: HKGroteskPro;
+  font-family: Montserrat;
   font-weight: 800;
-  src: url(hk-grotesk-pro/HKGroteskPro-Bold.woff2) format("woff2"),
-    url(hk-grotesk-pro/HKGroteskPro-Bold.woff) format("woff");
+  src: url(hk-grotesk-pro/Montserrat-Bold.woff2) format("woff2"),
+    url(hk-grotesk-pro/Montserrat-Bold.woff) format("woff");
 }
 
 @media print {
@@ -285,7 +288,7 @@ a {
 /*** Make the API Reference breadcrumbs look kind of normal ***/
 ul.wy-breadcrumbs li code span.pre {
   font-size: 16px;
-  font-family: HKGroteskPro, serif;
+  font-family: Montserrat, serif;
   font-weight: 400;
   color: rgb(155, 89, 182);
 }
