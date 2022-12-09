@@ -2942,6 +2942,8 @@ def check_json_test_result(test, result, data_asset=None) -> None:  # noqa: C901
 
     # Check results
     if test["exact_match_out"] is True:
+        # print(f"\n[ALEX_TEST] ACTUAL_RESULT_EXACT_MATCH_OUT:\n{result} ; TYPE: {str(type(result))}")
+        # print(f'\n[ALEX_TEST] DESIRED_TESTR_EXACT_MATCH_OUT:\n{expectationValidationResultSchema.load(test["out"])} ; TYPE: {str(type(expectationValidationResultSchema.load(test["out"])))}')
         if "result" in result and "observed_value" in result["result"]:
             if isinstance(result["result"]["observed_value"], (np.floating, float)):
                 assert np.allclose(
@@ -2961,6 +2963,8 @@ def check_json_test_result(test, result, data_asset=None) -> None:  # noqa: C901
                 test["output"]
             ), f"{result} != {expectationValidationResultSchema.load(test['output'])}"
     else:
+        # print(f"\n[ALEX_TEST] ACTUAL_RESULT_LOOSE_MATCH_OUT:\n{result} ; TYPE: {str(type(result))}")
+        # print(f'\n[ALEX_TEST] DESIRED_TESTR_LOOSE_MATCH_OUT:\n{test["out"]} ; TYPE: {str(type(test["out"]))}')
         # Convert result to json since our tests are reading from json so cannot easily contain richer types (e.g. NaN)
         # NOTE - 20191031 - JPC - we may eventually want to change these tests as we update our view on how
         # representations, serializations, and objects should interact and how much of that is shown to the user.
