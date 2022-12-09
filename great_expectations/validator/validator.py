@@ -1019,6 +1019,9 @@ class Validator:
                 expectation_validation_graphs=expectation_validation_graphs
             )
         )
+        breakpoint()
+        # by this point all of them are the most recent ones. Teh Expectation ones are ignored
+        # go tit
 
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
 
@@ -1159,6 +1162,10 @@ class Validator:
                     evrs.append(result)
                 else:
                     raise err
+        # breakpoint()
+        expectation_validation_graphs
+        # expectation_validation_graphs have it
+        # runtime_configuration is the most recent one
         return (
             expectation_validation_graphs,
             evrs,
@@ -1264,6 +1271,7 @@ class Validator:
     ) -> ValidationGraph:
         # Collect edges from all expectation-level sub-graphs and incorporate them under common suite-level graph.
         expectation_validation_graph: ExpectationValidationGraph
+        # i have decided
         edges: List[MetricEdge] = list(
             itertools.chain.from_iterable(
                 [
