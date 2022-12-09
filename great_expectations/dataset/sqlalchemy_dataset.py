@@ -1899,6 +1899,8 @@ WHERE
             # If no rows, then zero percent are unexpected.
             unexpected_percent = 0
 
+        # if mostly is passed in the kwargs it should first be checked if the unexpected_ratio is below mostly value
+        # If it is above, the expectation will return false
         if mostly:
             return {
                 "success": unexpected_count / total_count < 1 - mostly,
