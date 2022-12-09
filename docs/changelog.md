@@ -1,4 +1,3 @@
-This is a test change!
 ---
 title: Changelog
 ---
