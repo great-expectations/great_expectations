@@ -619,7 +619,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             name: the name for the new datasource to add
             initialize: if False, add the datasource to the config, but do not
                 initialize it, for example if a user needs to debug database connectivity.
-            save_changes (bool): should GE save the Datasource config?
+            save_changes (bool): should GX save the Datasource config?
             kwargs (keyword arguments): the configuration for the new datasource
 
         Returns:
@@ -690,9 +690,9 @@ class AbstractDataContext(ConfigPeer, ABC):
     ) -> DataContextConfig:
         """
         Substitute vars in config of form ${var} or $(var) with values found in the following places,
-        in order of precedence: ge_cloud_config (for Data Contexts in GE Cloud mode), runtime_environment,
+        in order of precedence: ge_cloud_config (for Data Contexts in GX Cloud mode), runtime_environment,
         environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
-        be optional in GE Cloud mode).
+        be optional in GX Cloud mode).
         """
         if not config:
             config = self._project_config
@@ -1041,7 +1041,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         response = self.profiler_store.set(key=key, value=profiler.config)  # type: ignore[func-returns-value]
         if isinstance(response, GXCloudResourceRef):
-            ge_cloud_id = response.ge_cloud_id
+            ge_cloud_id = response.cloud_id
 
         # If an id is present, we want to prioritize that as our key for object retrieval
         if ge_cloud_id:
@@ -1735,12 +1735,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         include_rendered_content: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> ExpectationSuite:
-        """Get an Expectation Suite by name or GE Cloud ID
+        """Get an Expectation Suite by name or GX Cloud ID
         Args:
             expectation_suite_name (str): The name of the Expectation Suite
             include_rendered_content (bool): Whether or not to re-populate rendered_content for each
                 ExpectationConfiguration.
-            ge_cloud_id (str): The GE Cloud ID for the Expectation Suite.
+            ge_cloud_id (str): The GX Cloud ID for the Expectation Suite.
 
         Returns:
             An existing ExpectationSuite
@@ -1841,7 +1841,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             batch_list: Explicit list of Batch objects to supply data at runtime
             batch_request: Explicit batch_request used to supply data at runtime
             name: Identifier used to retrieve the profiler from a store.
-            ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
+            ge_cloud_id: Identifier used to retrieve the profiler from a store (GX Cloud specific).
             variables: Attribute name/value pairs (overrides)
             rules: Key-value pairs of name/configuration-dictionary (overrides)
 
@@ -1879,7 +1879,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
             name: Identifier used to retrieve the profiler from a store.
-            ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
+            ge_cloud_id: Identifier used to retrieve the profiler from a store (GX Cloud specific).
 
         Returns:
             Set of rule evaluation results in the form of an RuleBasedProfilerResult
@@ -2946,7 +2946,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 self._cached_datasources[datasource_name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
-                # this error will happen if our configuration contains datasources that GE can no longer connect to.
+                # this error will happen if our configuration contains datasources that GX can no longer connect to.
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch() step. So we just pass here.
                 pass
@@ -3067,27 +3067,19 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Raises:
             DatasourceInitializationError
         """
-        if save_changes:
-            config = self._datasource_store.set(key=None, value=config)  # type: ignore[attr-defined]
-
-        self.config.datasources[config.name] = config  # type: ignore[index,assignment]
-
         substituted_config = self._perform_substitutions_on_datasource_config(config)
 
         datasource: Optional[Datasource] = None
         if initialize:
-            try:
-                datasource = self._instantiate_datasource_from_config(
-                    raw_config=config, substituted_config=substituted_config
-                )
-                self._cached_datasources[config.name] = datasource
-            except ge_exceptions.DatasourceInitializationError as e:
-                # Do not keep configuration that could not be instantiated.
-                if save_changes:
-                    self._datasource_store.delete(config)  # type: ignore[attr-defined]
-                # If the DatasourceStore uses an InlineStoreBackend, the config may already be updated
-                self.config.datasources.pop(config.name, None)  # type: ignore[union-attr,arg-type]
-                raise e
+            datasource = self._instantiate_datasource_from_config(
+                raw_config=config, substituted_config=substituted_config
+            )
+            self._cached_datasources[config.name] = datasource
+
+        if save_changes:
+            config = self._datasource_store.set(key=None, value=config)  # type: ignore[attr-defined]
+
+        self.config.datasources[config.name] = config  # type: ignore[index,assignment]
 
         return datasource
 
