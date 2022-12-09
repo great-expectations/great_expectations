@@ -3067,13 +3067,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         datasource: Optional[Datasource] = None
         if initialize:
-            try:
-                datasource = self._instantiate_datasource_from_config(
-                    raw_config=config, substituted_config=substituted_config
-                )
-                self._cached_datasources[config.name] = datasource
-            except ge_exceptions.DatasourceInitializationError as e:
-                raise e
+            datasource = self._instantiate_datasource_from_config(
+                raw_config=config, substituted_config=substituted_config
+            )
+            self._cached_datasources[config.name] = datasource
 
         if save_changes:
             config = self._datasource_store.set(key=None, value=config)  # type: ignore[attr-defined]
