@@ -3063,27 +3063,27 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Raises:
             DatasourceInitializationError
         """
+        # Note that the call to `DatasourcStore.set` may alter the config object's state
+        # As such, we invoke it at the top of our function so any changes are reflected downstream
         if save_changes:
             config = self._datasource_store.set(key=None, value=config)  # type: ignore[attr-defined]
-
-        self.config.datasources[config.name] = config  # type: ignore[index,assignment]
-
-        substituted_config = self._perform_substitutions_on_datasource_config(config)
 
         datasource: Optional[Datasource] = None
         if initialize:
             try:
+                substituted_config = self._perform_substitutions_on_datasource_config(
+                    config
+                )
                 datasource = self._instantiate_datasource_from_config(
                     raw_config=config, substituted_config=substituted_config
                 )
                 self._cached_datasources[config.name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
-                # Do not keep configuration that could not be instantiated.
                 if save_changes:
                     self._datasource_store.delete(config)  # type: ignore[attr-defined]
-                # If the DatasourceStore uses an InlineStoreBackend, the config may already be updated
-                self.config.datasources.pop(config.name, None)  # type: ignore[union-attr,arg-type]
                 raise e
+
+        self.config.datasources[config.name] = config  # type: ignore[index,assignment]
 
         return datasource
 
