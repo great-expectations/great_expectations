@@ -331,7 +331,7 @@ class TableAsset(DataAsset):
                 batch_spec=batch_spec
             )
 
-            # batch_definition (along iwht batch_spec and markers) is only here to satisfy a
+            # batch_definition (along with batch_spec and markers) is only here to satisfy a
             # legacy constraint when computing usage statistics in a validator. We hope to remove
             # it in the future.
             # imports are done inline to prevent a circular dependency with core/batch.py
