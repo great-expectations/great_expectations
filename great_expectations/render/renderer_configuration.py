@@ -97,7 +97,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         arbitrary_types_allowed = True
 
     @root_validator(pre=True)
-    def validate_configuration_or_result(values: dict) -> dict:
+    def validate_configuration_or_result(cls, values: dict) -> dict:
         if ("configuration" not in values or values["configuration"] is None) and (
             "result" not in values or values["result"] is None
         ):
