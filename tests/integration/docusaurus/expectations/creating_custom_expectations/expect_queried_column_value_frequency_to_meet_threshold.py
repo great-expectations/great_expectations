@@ -78,7 +78,8 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
-    # <snippet>
+    # <snippet name="expect_queried_column_value_frequency_to_meet_threshold.py _validate function">
+    # <snippet name="expect_queried_column_value_frequency_to_meet_threshold.py _validate function signature">
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -114,7 +115,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         }
         # </snippet>
 
-    # <snippet>
+    # <snippet name="expect_queried_column_value_frequency_to_meet_threshold.py examples">
     examples = [
         {
             "data": [
@@ -199,7 +200,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         },
     ]
     # </snippet>
-    # <snippet>
+    # <snippet name="expect_queried_column_value_frequency_to_meet_threshold.py library_metadata">
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "tags": ["query-based"],
@@ -209,7 +210,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet>
+    # <snippet name="expect_queried_column_value_frequency_to_meet_threshold.py print_diagnostic_checklist()">
     ExpectQueriedColumnValueFrequencyToMeetThreshold().print_diagnostic_checklist()
     # </snippet>
 
