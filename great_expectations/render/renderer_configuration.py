@@ -97,47 +97,40 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         arbitrary_types_allowed = True
 
     @root_validator(pre=True)
-    def validate_configuration_or_result(cls, values):
+    def validate_configuration_or_result(cls, values: dict) -> dict:
         if "configuration" not in values and "result" not in values:
             raise RendererConfigurationError(
                 "RendererConfiguration must be passed either configuration or result."
             )
         return values
 
-    def __init__(self, **kwargs) -> None:
-        kwargs = RendererConfiguration._set_expectation_type_and_kwargs(kwargs=kwargs)
-        kwargs = RendererConfiguration._set_include_column_name_and_styling(
-            kwargs=kwargs
-        )
-        kwargs["params"] = _RendererParamsBase()
-        super().__init__(**kwargs)
-
-    @staticmethod
-    def _set_expectation_type_and_kwargs(kwargs: dict) -> dict:
-        if "configuration" in kwargs and kwargs["configuration"]:
-            kwargs["expectation_type"] = kwargs["configuration"].expectation_type
-            kwargs["kwargs"] = kwargs["configuration"].kwargs
-        elif (
-            "result" in kwargs
-            and kwargs["result"]
-            and kwargs["result"].expectation_config
-        ):
-            kwargs["expectation_type"] = kwargs[
+    @root_validator(pre=True)
+    def validate_for_expectation_type_and_kwargs(cls, values: dict) -> dict:
+        if "configuration" in values and values["configuration"]:
+            values["expectation_type"] = values["configuration"].expectation_type
+            values["kwargs"] = values["configuration"].kwargs
+        else:
+            values["expectation_type"] = values[
                 "result"
             ].expectation_config.expectation_type
-            kwargs["kwargs"] = kwargs["result"].expectation_config.kwargs
-        return kwargs
+            values["kwargs"] = values["result"].expectation_config.kwargs
+        return values
 
-    @staticmethod
-    def _set_include_column_name_and_styling(kwargs: dict) -> dict:
-        if "runtime_configuration" in kwargs and kwargs["runtime_configuration"]:
-            kwargs["include_column_name"] = (
+    @root_validator(pre=True)
+    def validate_for_include_column_name_and_styling(cls, values: dict) -> dict:
+        if "runtime_configuration" in values and values["runtime_configuration"]:
+            values["include_column_name"] = (
                 False
-                if kwargs["runtime_configuration"].get("include_column_name") is False
+                if values["runtime_configuration"].get("include_column_name") is False
                 else True
             )
-            kwargs["styling"] = kwargs["runtime_configuration"].get("styling")
-        return kwargs
+            values["styling"] = values["runtime_configuration"].get("styling")
+        return values
+
+    @root_validator(pre=True)
+    def validate_for_params(cls, values):
+        values["params"] = _RendererParamsBase()
+        return values
 
     class _RendererParamBase(BaseModel):
         renderer_schema: Optional[RendererSchemaType] = Field(..., allow_mutation=False)
