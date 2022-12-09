@@ -35,7 +35,10 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import BaseDataContext, CloudDataContext
-from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.cloud_constants import (
+    GXCloudEnvironmentVariable,
+    GXCloudRESTResource,
+)
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
@@ -78,7 +81,7 @@ from great_expectations.self_check.util import (
     expectationSuiteValidationResultSchema,
     get_dataset,
 )
-from great_expectations.util import is_library_loadable
+from great_expectations.util import build_in_memory_runtime_context, is_library_loadable
 from tests.rule_based_profiler.parameter_builder.conftest import (
     RANDOM_SEED,
     RANDOM_STATE,
@@ -2517,15 +2520,26 @@ def ge_cloud_config_e2e() -> GXCloudConfig:
     """
     Uses live credentials stored in the Great Expectations Cloud backend.
     """
-    base_url = os.environ["GE_CLOUD_BASE_URL"]
-    organization_id = os.environ["GE_CLOUD_ORGANIZATION_ID"]
-    access_token = os.environ["GE_CLOUD_ACCESS_TOKEN"]
-    ge_cloud_config = GXCloudConfig(
+    env_vars = os.environ
+
+    base_url = env_vars.get(
+        GXCloudEnvironmentVariable.BASE_URL,
+        env_vars.get(GXCloudEnvironmentVariable._OLD_BASE_URL),
+    )
+    organization_id = env_vars.get(
+        GXCloudEnvironmentVariable.ORGANIZATION_ID,
+        env_vars.get(GXCloudEnvironmentVariable._OLD_ORGANIZATION_ID),
+    )
+    access_token = env_vars.get(
+        GXCloudEnvironmentVariable.ACCESS_TOKEN,
+        env_vars.get(GXCloudEnvironmentVariable._OLD_ACCESS_TOKEN),
+    )
+    cloud_config = GXCloudConfig(
         base_url=base_url,
         organization_id=organization_id,
         access_token=access_token,
     )
-    return ge_cloud_config
+    return cloud_config
 
 
 @pytest.fixture
@@ -2546,8 +2560,8 @@ def empty_base_data_context_in_cloud_mode(
     context = gx.data_context.BaseDataContext(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path,
-        ge_cloud_mode=True,
-        ge_cloud_config=ge_cloud_config,
+        cloud_mode=True,
+        cloud_config=ge_cloud_config,
     )
     assert context.list_datasources() == []
     return context
@@ -2567,22 +2581,22 @@ def empty_data_context_in_cloud_mode(
     def mocked_config(*args, **kwargs) -> DataContextConfig:
         return empty_ge_cloud_data_context_config
 
-    def mocked_get_ge_cloud_config(*args, **kwargs) -> GXCloudConfig:
+    def mocked_get_cloud_config(*args, **kwargs) -> GXCloudConfig:
         return ge_cloud_config
 
     with mock.patch(
         "great_expectations.data_context.DataContext._save_project_config"
     ), mock.patch(
-        "great_expectations.data_context.data_context.CloudDataContext.retrieve_data_context_config_from_ge_cloud",
+        "great_expectations.data_context.data_context.CloudDataContext.retrieve_data_context_config_from_cloud",
         autospec=True,
         side_effect=mocked_config,
     ), mock.patch(
-        "great_expectations.data_context.data_context.CloudDataContext.get_ge_cloud_config",
+        "great_expectations.data_context.data_context.CloudDataContext.get_cloud_config",
         autospec=True,
-        side_effect=mocked_get_ge_cloud_config,
+        side_effect=mocked_get_cloud_config,
     ):
         context = DataContext(
-            ge_cloud_mode=True,
+            cloud_mode=True,
             context_root_dir=project_path_name,
         )
         return context
@@ -2630,8 +2644,8 @@ def empty_base_data_context_in_cloud_mode_custom_base_url(
     context = gx.data_context.BaseDataContext(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path,
-        ge_cloud_mode=True,
-        ge_cloud_config=custom_ge_cloud_config,
+        cloud_mode=True,
+        cloud_config=custom_ge_cloud_config,
     )
     assert context.list_datasources() == []
     assert context.ge_cloud_config.base_url != ge_cloud_config.base_url
@@ -7022,56 +7036,6 @@ data_connectors:
             "name": "generic_csv_generator",
         }
     ]
-    return context
-
-
-def build_in_memory_runtime_context():
-    data_context_config: DataContextConfig = DataContextConfig(
-        datasources={
-            "pandas_datasource": {
-                "execution_engine": {
-                    "class_name": "PandasExecutionEngine",
-                    "module_name": "great_expectations.execution_engine",
-                },
-                "class_name": "Datasource",
-                "module_name": "great_expectations.datasource",
-                "data_connectors": {
-                    "runtime_data_connector": {
-                        "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": [
-                            "id_key_0",
-                            "id_key_1",
-                        ],
-                    }
-                },
-            },
-            "spark_datasource": {
-                "execution_engine": {
-                    "class_name": "SparkDFExecutionEngine",
-                    "module_name": "great_expectations.execution_engine",
-                },
-                "class_name": "Datasource",
-                "module_name": "great_expectations.datasource",
-                "data_connectors": {
-                    "runtime_data_connector": {
-                        "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": [
-                            "id_key_0",
-                            "id_key_1",
-                        ],
-                    }
-                },
-            },
-        },
-        expectations_store_name="expectations_store",
-        validations_store_name="validations_store",
-        evaluation_parameter_store_name="evaluation_parameter_store",
-        checkpoint_store_name="checkpoint_store",
-        store_backend_defaults=InMemoryStoreBackendDefaults(),
-    )
-
-    context: BaseDataContext = BaseDataContext(project_config=data_context_config)
-
     return context
 
 

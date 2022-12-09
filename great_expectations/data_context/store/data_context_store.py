@@ -17,7 +17,7 @@ class DataContextStore(ConfigurationStore):
 
     _configuration_class = DataContextConfig
 
-    ge_cloud_exclude_field_names: Set[DataContextVariableSchema] = {
+    cloud_exclude_field_names: Set[DataContextVariableSchema] = {
         DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
         DataContextVariableSchema.CHECKPOINT_STORE_NAME,
         DataContextVariableSchema.DATASOURCES,
@@ -44,9 +44,9 @@ class DataContextStore(ConfigurationStore):
         payload: Union[str, dict] = super().serialize(value=value)
 
         # Cloud requires a subset of the DataContextConfig
-        if self.ge_cloud_mode:
+        if self.cloud_mode:
             assert isinstance(payload, dict)
-            for attr in self.ge_cloud_exclude_field_names:
+            for attr in self.cloud_exclude_field_names:
                 if attr in payload:
                     payload.pop(attr)
                     logger.debug(

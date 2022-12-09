@@ -138,6 +138,7 @@ class GXDependencies:
         "mistune",
         "mock-alchemy",
         "moto",
+        "ipykernel",
         "nbconvert",
         "py",
         "pyfakefs",
