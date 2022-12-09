@@ -425,8 +425,14 @@ def test_expect_compound_columns_to_be_unique_mostly(sa):
     data.to_sql(name="test_sql_data", con=engine, index=False)
     dataset = SqlAlchemyDataset("test_sql_data", engine=engine)
 
-    assert dataset.expect_compound_columns_to_be_unique(["col1", "col2", "col3"], mostly=0.8).success
-    assert not dataset.expect_compound_columns_to_be_unique(["col1", "col2", "col3"], mostly=0.99).success
+    assert dataset.expect_compound_columns_to_be_unique(
+        ["col1", "col2", "col3"],
+        mostly=0.8,
+    ).success
+    assert not dataset.expect_compound_columns_to_be_unique(
+        ["col1", "col2", "col3"],
+        mostly=0.99,
+    ).success
     assert not dataset.expect_compound_columns_to_be_unique(["col1", "col2", "col3"]).success
 
 
