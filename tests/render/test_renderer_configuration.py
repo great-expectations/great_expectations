@@ -31,6 +31,13 @@ def mock_expectation_validation_result_from_expectation_configuration(
         (
             "expect_table_row_count_to_equal",
             {"value": 3},
+            None,
+            {"observed_value": 3},
+            True,
+        ),
+        (
+            "expect_table_row_count_to_equal",
+            {"value": 3},
             {},
             {"observed_value": 3},
             True,
