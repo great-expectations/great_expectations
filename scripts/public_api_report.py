@@ -15,7 +15,7 @@ class CodeSnippet:
     code: Tuple[str]
 
 
-class PublicAPIReportGenerator:
+class PublicAPIDocSnippetRetriever:
 
     def __init__(self, repo_root: pathlib.Path) -> None:
         self.repo_root = repo_root
@@ -67,6 +67,17 @@ class PublicAPIReportGenerator:
         return tree
 
 
+class PublicAPIDocParser:
+    """Parse examples from docs to find classes, methods and functions used."""
+
+    def __init__(self):
+        pass
+
+    def retrieve_definitions(self):
+        """Retrieve all definitions used (class, method + function)."""
+        pass
+
+
 class PublicAPIChecker:
     """Check if functions, methods and classes are marked part of the PublicAPI."""
 
@@ -77,7 +88,28 @@ class PublicAPIChecker:
     def get_all_public_api_functions(self):
 
         filepath = self.repo_root / "great_expectations/data_context/data_context/abstract_data_context.py"
-        print(self._list_public_functions_in_file(filepath=filepath))
+        # print(self._list_public_functions_in_file(filepath=filepath))
+        class_defs = self._list_classes_in_file(filepath=filepath)
+
+        for class_def in class_defs:
+            print(astunparse.dump(class_def))
+
+
+
+    def _list_classes_in_file(self, filepath: pathlib.Path):  # TODO: Return type
+        # TODO: Make this return with dotted path, not just str
+        with open(self.repo_root / filepath) as f:
+            file_contents: str = f.read()
+
+        tree = ast.parse(file_contents)
+
+        class_defs = []
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ClassDef):
+                class_defs.append(node)
+
+        return class_defs
 
     def _list_public_functions_in_file(self, filepath: pathlib.Path) -> List[str]:
         # TODO: Make this return function with dotted path, not just str
@@ -122,7 +154,7 @@ def main():
     files = glob.glob(f"{docs_dir}/**/*.md", recursive=True)
     docs_code_references = collect_references(files)
 
-    # report_generator = PublicAPIReportGenerator(repo_root=repo_root)
+    # report_generator = PublicAPIDocSnippetRetriever(repo_root=repo_root)
     # report_generator.generate_report(docs_code_references)
 
 
