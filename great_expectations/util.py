@@ -1805,7 +1805,7 @@ def get_context(
     if cloud_base_url is not None or ge_cloud_base_url is not None:
         cloud_base_url = cloud_base_url or ge_cloud_base_url
     if cloud_access_token is not None or ge_cloud_access_token is not None:
-        cloud_access_token = cloud_access_token or ge_cloud_base_url
+        cloud_access_token = cloud_access_token or ge_cloud_access_token
     if cloud_organization_id is not None or ge_cloud_organization_id is not None:
         cloud_organization_id = cloud_organization_id or ge_cloud_organization_id
     if cloud_mode is not None or ge_cloud_mode is not None:
