@@ -190,7 +190,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             None
         """
         # Chetan - 20221208 - not formally deprecating these values until a future date
-        cloud_config = cloud_config or ge_cloud_config
+        cloud_config = cloud_config if cloud_config is not None else ge_cloud_config
         cloud_mode = True if cloud_mode or ge_cloud_mode else False
 
         project_data_context_config: DataContextConfig = (
