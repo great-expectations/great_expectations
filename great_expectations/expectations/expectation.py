@@ -452,10 +452,14 @@ class Expectation(metaclass=MetaExpectation):
         renderer_configuration = cls._prescriptive_template(
             renderer_configuration=renderer_configuration,
         )
+        if runtime_configuration:
+            styling = runtime_configuration.get("styling", {})
+        else:
+            styling = {}
         return (
             renderer_configuration.template_str,
             renderer_configuration.params.dict(),
-            runtime_configuration.get("styling"),
+            styling,
         )
 
     @classmethod
