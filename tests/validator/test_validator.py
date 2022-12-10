@@ -1121,7 +1121,6 @@ def _context_to_validator_and_expectation_sql(
 
     Args:
         context (DataContext): DataContext to use
-
     """
 
     expectation_configuration = ExpectationConfiguration(
@@ -1178,35 +1177,6 @@ def test_validator_sql_complete_two_column_names_from_validator(
         {"pk_1": 3, "pk_2": "three"},
         {"pk_1": 4, "pk_2": "four"},
         {"pk_1": 5, "pk_2": "five"},
-    ]
-
-    result: ExpectationValidationResult = validator.expect_column_values_to_be_in_set(
-        column="animals",
-        value_set=["cat", "fish", "dog"],
-        result_format=runtime_configuration,
-    )
-    assert result.success is False
-    assert result.result["partial_unexpected_index_list"] == [
-        {
-            "pk_1": 3,
-        },
-        {
-            "pk_1": 4,
-        },
-        {
-            "pk_1": 5,
-        },
-    ]
-    assert result.result["unexpected_index_list"] == [
-        {
-            "pk_1": 3,
-        },
-        {
-            "pk_1": 4,
-        },
-        {
-            "pk_1": 5,
-        },
     ]
 
 
