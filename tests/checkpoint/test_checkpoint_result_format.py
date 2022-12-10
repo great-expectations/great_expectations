@@ -1,4 +1,5 @@
 import logging
+from typing import List
 
 import pytest
 
@@ -16,6 +17,20 @@ logger = logging.getLogger(__name__)
 
 @pytest.fixture()
 def reference_checkpoint_config_for_unexpected_column_names() -> dict:
+    """
+    This is a reference checkpoint dict. It is not used by the tests on its own but subsequent functions will add
+    runtime_configurations that will then be tested.
+
+    checkpoint_dict_unexpected_index_column_names_defined_one_column()
+        - adds runtime_configuration where "unexpected_index_column_names": ["pk_1"],
+    checkpoint_dict_unexpected_index_column_names_defined_two_columns()
+        - adds runtime_configuration where "unexpected_index_column_names": ["pk_1", "pk_2"],
+    checkpoint_dict_unexpected_index_column_names_not_defined()
+        - adds runtime_configuration where "unexpected_index_column_names" are defined
+
+    For more information, look at the docstring for data_context_with_connection_to_animal_names_db() fixture
+
+    """
     checkpoint_dict: dict = {
         "name": "my_checkpoint",
         "config_version": 1.0,
@@ -57,7 +72,7 @@ def reference_checkpoint_config_for_unexpected_column_names() -> dict:
 
 
 @pytest.fixture()
-def checkpoint_dict_unexpected_index_column_names_defined_one_column(
+def checkpoint_dict_unexpected_index_column_names_defined_complete(
     reference_checkpoint_config_for_unexpected_column_names,
 ) -> dict:
     checkpoint_dict = reference_checkpoint_config_for_unexpected_column_names
@@ -71,14 +86,28 @@ def checkpoint_dict_unexpected_index_column_names_defined_one_column(
 
 
 @pytest.fixture()
-def checkpoint_dict_unexpected_index_column_names_defined_two_columns(
+def checkpoint_dict_unexpected_index_column_names_defined_summary(
     reference_checkpoint_config_for_unexpected_column_names,
 ) -> dict:
     checkpoint_dict = reference_checkpoint_config_for_unexpected_column_names
     checkpoint_dict["runtime_configuration"] = {
         "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1", "pk_2"],
+            "result_format": "SUMMARY",
+            "unexpected_index_column_names": ["pk_1"],
+        }
+    }
+    return checkpoint_dict
+
+
+@pytest.fixture()
+def checkpoint_dict_unexpected_index_column_names_defined_basic(
+    reference_checkpoint_config_for_unexpected_column_names,
+) -> dict:
+    checkpoint_dict = reference_checkpoint_config_for_unexpected_column_names
+    checkpoint_dict["runtime_configuration"] = {
+        "result_format": {
+            "result_format": "BASIC",
+            "unexpected_index_column_names": ["pk_1"],
         }
     }
     return checkpoint_dict
@@ -89,13 +118,23 @@ def checkpoint_dict_unexpected_index_column_names_not_defined(
     reference_checkpoint_config_for_unexpected_column_names,
 ) -> dict:
     checkpoint_dict = reference_checkpoint_config_for_unexpected_column_names
-
     checkpoint_dict["runtime_configuration"] = {
         "result_format": {
             "result_format": "COMPLETE",
         }
     }
     return checkpoint_dict
+
+
+@pytest.fixture()
+def expectation_config_expect_column_values_to_be_in_set() -> ExpectationConfiguration:
+    return ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
+        },
+    )
 
 
 @pytest.fixture()
@@ -110,39 +149,52 @@ def expectation_config_expect_column_values_to_not_be_in_set() -> ExpectationCon
 
 
 @pytest.fixture()
-def expectation_config_expect_column_values_to_be_in_set() -> ExpectationConfiguration:
+def expectation_config_expect_column_values_to_not_be_in_set_two_columns_defined() -> ExpectationConfiguration:
+    return ExpectationConfiguration(
+        expectation_type="expect_column_values_to_not_be_in_set",
+        kwargs={
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "unexpected_index_column_names": ["pk_1", "pk_2"],
+            },
+        },
+    )
+
+
+@pytest.fixture()
+def expectation_config_expect_column_values_to_be_in_set_one_column_defined() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "unexpected_index_column_names": ["pk_2"],
+            },
         },
     )
 
 
-@pytest.mark.unit
-def test_result_format_in_checkpoint_one_column_one_expectation(
-    data_context_with_connection_to_animal_names_db,
-    checkpoint_dict_unexpected_index_column_names_defined_one_column,
-    expectation_config_expect_column_values_to_be_in_set,
-):
-    context: DataContext = data_context_with_connection_to_animal_names_db
-    checkpoint_dict: dict = (
-        checkpoint_dict_unexpected_index_column_names_defined_one_column
-    )
+def _add_expectations_and_checkpoint(
+    data_context: DataContext,
+    checkpoint_config: dict,
+    expectations_list: List[ExpectationConfiguration],
+) -> DataContext:
+
+    context: DataContext = data_context
     context.create_expectation_suite(expectation_suite_name="animal_names_exp")
     animals_suite = context.get_expectation_suite(
         expectation_suite_name="animal_names_exp"
     )
-    animals_suite.add_expectation(
-        expectation_configuration=expectation_config_expect_column_values_to_be_in_set
-    )
+    for expectation in expectations_list:
+        animals_suite.add_expectation(expectation_configuration=expectation)
     context.save_expectation_suite(
         expectation_suite=animals_suite,
         expectation_suite_name="animal_names_exp",
         overwriting_existing=True,
     )
-    checkpoint_config = CheckpointConfig(**checkpoint_dict)
+    checkpoint_config = CheckpointConfig(**checkpoint_config)
     context.add_checkpoint(
         **filter_properties_dict(
             properties=checkpoint_config.to_json_dict(),
@@ -150,48 +202,253 @@ def test_result_format_in_checkpoint_one_column_one_expectation(
         ),
     )
     context._save_project_config()
-    result: CheckpointResult = context.run_checkpoint(
-        checkpoint_name="my_checkpoint",
-    )
-    evrs = result.list_validation_results()
-    first_result = evrs[0]["results"][0]["result"]["unexpected_index_list"]
-    assert first_result == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    return context
 
 
-@pytest.mark.unit
-def test_result_format_in_checkpoint_two_columns_one_expectation(
+def test_result_format_in_checkpoint_pk_defined_one_expectation_complete_output(
     data_context_with_connection_to_animal_names_db,
-    checkpoint_dict_unexpected_index_column_names_defined_two_columns,
+    checkpoint_dict_unexpected_index_column_names_defined_complete,
     expectation_config_expect_column_values_to_be_in_set,
 ):
-    context: DataContext = data_context_with_connection_to_animal_names_db
-    checkpoint_dict: dict = (
-        checkpoint_dict_unexpected_index_column_names_defined_two_columns
+    """
+    What does this test?
+        - unexpected_index_column defined in Checkpoint only.  1 column defined
+        - one Expectation added to suite
+    """
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=data_context_with_connection_to_animal_names_db,
+        checkpoint_config=checkpoint_dict_unexpected_index_column_names_defined_complete,
+        expectations_list=[expectation_config_expect_column_values_to_be_in_set],
     )
-    context.create_expectation_suite(expectation_suite_name="animal_names_exp")
-    animals_suite = context.get_expectation_suite(
-        expectation_suite_name="animal_names_exp"
-    )
-    animals_suite.add_expectation(
-        expectation_configuration=expectation_config_expect_column_values_to_be_in_set
-    )
-    context.save_expectation_suite(
-        expectation_suite=animals_suite,
-        expectation_suite_name="animal_names_exp",
-        overwriting_existing=True,
-    )
-    checkpoint_config = CheckpointConfig(**checkpoint_dict)
-    context.add_checkpoint(
-        **filter_properties_dict(
-            properties=checkpoint_config.to_json_dict(),
-            clean_falsy=True,
-        ),
-    )
-    context._save_project_config()
+
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
     )
     evrs = result.list_validation_results()
+    first_result_full_list = evrs[0]["results"][0]["result"]["unexpected_index_list"]
+    assert first_result_full_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    first_result_partial_list = evrs[0]["results"][0]["result"][
+        "partial_unexpected_index_list"
+    ]
+    assert first_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+
+
+def test_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(
+    data_context_with_connection_to_animal_names_db,
+    checkpoint_dict_unexpected_index_column_names_defined_complete,
+    expectation_config_expect_column_values_to_be_in_set,
+    expectation_config_expect_column_values_to_not_be_in_set,
+):
+    """
+    What does this test?
+        - unexpected_index_column defined in Checkpoint only.  1 column defined
+        - two Expectations added to suite
+    """
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=data_context_with_connection_to_animal_names_db,
+        checkpoint_config=checkpoint_dict_unexpected_index_column_names_defined_complete,
+        expectations_list=[
+            expectation_config_expect_column_values_to_be_in_set,
+            expectation_config_expect_column_values_to_not_be_in_set,
+        ],
+    )
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+    )
+    evrs = result.list_validation_results()
+
+    # first and second expectations have "opposite" results since one is "expect_to_be" and the other is "expect_to_not_be"
+    first_result_full_list = evrs[0]["results"][0]["result"]["unexpected_index_list"]
+    assert first_result_full_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    first_result_partial_list = evrs[0]["results"][0]["result"][
+        "partial_unexpected_index_list"
+    ]
+    assert first_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+
+    second_result_full_list = evrs[0]["results"][1]["result"]["unexpected_index_list"]
+    assert second_result_full_list == [{"pk_1": 0}, {"pk_1": 1}, {"pk_1": 2}]
+    second_result_partial_list = evrs[0]["results"][1]["result"][
+        "partial_unexpected_index_list"
+    ]
+    assert second_result_partial_list == [{"pk_1": 0}, {"pk_1": 1}, {"pk_1": 2}]
+
+
+def test_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
+    data_context_with_connection_to_animal_names_db,
+    checkpoint_dict_unexpected_index_column_names_defined_summary,
+    expectation_config_expect_column_values_to_be_in_set,
+):
+    """
+    What does this test?
+        - unexpected_index_column defined in Checkpoint only.  1 column defined
+        - one Expectation added to suite
+    """
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=data_context_with_connection_to_animal_names_db,
+        checkpoint_config=checkpoint_dict_unexpected_index_column_names_defined_summary,
+        expectations_list=[expectation_config_expect_column_values_to_be_in_set],
+    )
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+    )
+    evrs = result.list_validation_results()
+    first_result_full_list = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_list"
+    )
+    assert not first_result_full_list
+    first_result_partial_list = evrs[0]["results"][0]["result"][
+        "partial_unexpected_index_list"
+    ]
+    assert first_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+
+
+def test_result_format_in_checkpoint_pk_defined_two_expectation_summary_output(
+    data_context_with_connection_to_animal_names_db,
+    checkpoint_dict_unexpected_index_column_names_defined_summary,
+    expectation_config_expect_column_values_to_be_in_set,
+    expectation_config_expect_column_values_to_not_be_in_set,
+):
+    """
+    What does this test?
+        - unexpected_index_column defined in Checkpoint only.  1 column defined
+        - two Expectations added to suite
+    """
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=data_context_with_connection_to_animal_names_db,
+        checkpoint_config=checkpoint_dict_unexpected_index_column_names_defined_summary,
+        expectations_list=[
+            expectation_config_expect_column_values_to_be_in_set,
+            expectation_config_expect_column_values_to_not_be_in_set,
+        ],
+    )
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+    )
+    evrs = result.list_validation_results()
+
+    # first and second expectations have "opposite" results since one is "expect_to_be" and the other is "expect_to_not_be"
+    first_result_full_list = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_list"
+    )
+    assert not first_result_full_list
+    first_result_partial_list = evrs[0]["results"][0]["result"][
+        "partial_unexpected_index_list"
+    ]
+    assert first_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+
+    second_result_full_list = evrs[0]["results"][1]["result"].get(
+        "unexpected_index_list"
+    )
+    assert not second_result_full_list
+    second_result_partial_list = evrs[0]["results"][1]["result"][
+        "partial_unexpected_index_list"
+    ]
+    assert second_result_partial_list == [{"pk_1": 0}, {"pk_1": 1}, {"pk_1": 2}]
+
+
+def test_result_format_in_checkpoint_pk_defined_one_expectation_basic_output(
+    data_context_with_connection_to_animal_names_db,
+    checkpoint_dict_unexpected_index_column_names_defined_basic,
+    expectation_config_expect_column_values_to_be_in_set,
+):
+    """
+    What does this test?
+        - unexpected_index_column defined in Checkpoint only.  1 column defined
+        - one Expectation added to suite
+    """
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=data_context_with_connection_to_animal_names_db,
+        checkpoint_config=checkpoint_dict_unexpected_index_column_names_defined_basic,
+        expectations_list=[expectation_config_expect_column_values_to_be_in_set],
+    )
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+    )
+    evrs = result.list_validation_results()
+    first_result_full_list = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_list"
+    )
+    assert not first_result_full_list
+    first_result_partial_list = evrs[0]["results"][0]["result"].get(
+        "partial_unexpected_index_list"
+    )
+    assert not first_result_partial_list
+
+
+def test_result_format_in_checkpoint_pk_defined_two_expectation_basic_output(
+    data_context_with_connection_to_animal_names_db,
+    checkpoint_dict_unexpected_index_column_names_defined_basic,
+    expectation_config_expect_column_values_to_be_in_set,
+    expectation_config_expect_column_values_to_not_be_in_set,
+):
+    """
+    What does this test?
+        - unexpected_index_column defined in Checkpoint only.  1 column defined
+        - two Expectations added to suite
+    """
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=data_context_with_connection_to_animal_names_db,
+        checkpoint_config=checkpoint_dict_unexpected_index_column_names_defined_basic,
+        expectations_list=[
+            expectation_config_expect_column_values_to_be_in_set,
+            expectation_config_expect_column_values_to_not_be_in_set,
+        ],
+    )
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+    )
+    evrs = result.list_validation_results()
+
+    # first and second expectations have "opposite" results since one is "expect_to_be" and the other is "expect_to_not_be"
+    first_result_full_list = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_list"
+    )
+    assert not first_result_full_list
+    first_result_partial_list = evrs[0]["results"][0]["result"].get(
+        "partial_unexpected_index_list"
+    )
+    assert not first_result_partial_list
+
+    second_result_full_list = evrs[0]["results"][1]["result"].get(
+        "unexpected_index_list"
+    )
+    assert not second_result_full_list
+    second_result_partial_list = evrs[0]["results"][1]["result"].get(
+        "partial_unexpected_index_list"
+    )
+    assert not second_result_partial_list
+
+
+@pytest.mark.xfail
+@pytest.mark.unit
+def test_result_format_in_checkpoint_one_expectation_overrides(
+    data_context_with_connection_to_animal_names_db,
+    checkpoint_dict_unexpected_index_column_names_defined_complete,
+    expectation_config_expect_column_values_to_not_be_in_set_two_columns_defined,
+):
+    """
+    What does this test and why?
+
+    Why is it X-fail?
+        -
+    """
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=data_context_with_connection_to_animal_names_db,
+        checkpoint_config=checkpoint_dict_unexpected_index_column_names_defined_complete,
+        expectations_list=[
+            expectation_config_expect_column_values_to_not_be_in_set_two_columns_defined
+        ],
+    )
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+    )
+    evrs = result.list_validation_results()
+
     first_result = evrs[0]["results"][0]["result"]["unexpected_index_list"]
     assert first_result == [
         {"pk_1": 3, "pk_2": "three"},
@@ -200,84 +457,30 @@ def test_result_format_in_checkpoint_two_columns_one_expectation(
     ]
 
 
-@pytest.mark.unit
-def test_result_format_in_checkpoint_one_column_two_expectations(
-    data_context_with_connection_to_animal_names_db,
-    checkpoint_dict_unexpected_index_column_names_defined_one_column,
-    expectation_config_expect_column_values_to_be_in_set,
-    expectation_config_expect_column_values_to_not_be_in_set,
-):
-    context: DataContext = data_context_with_connection_to_animal_names_db
-    checkpoint_dict: dict = (
-        checkpoint_dict_unexpected_index_column_names_defined_one_column
-    )
-    context.create_expectation_suite(expectation_suite_name="animal_names_exp")
-    animals_suite = context.get_expectation_suite(
-        expectation_suite_name="animal_names_exp"
-    )
-    animals_suite.add_expectation(
-        expectation_configuration=expectation_config_expect_column_values_to_be_in_set
-    )
-    animals_suite.add_expectation(
-        expectation_configuration=expectation_config_expect_column_values_to_not_be_in_set
-    )
-    context.save_expectation_suite(
-        expectation_suite=animals_suite,
-        expectation_suite_name="animal_names_exp",
-        overwriting_existing=True,
-    )
-    checkpoint_config = CheckpointConfig(**checkpoint_dict)
-    context.add_checkpoint(
-        **filter_properties_dict(
-            properties=checkpoint_config.to_json_dict(),
-            clean_falsy=True,
-        ),
-    )
-    context._save_project_config()
-    result: CheckpointResult = context.run_checkpoint(
-        checkpoint_name="my_checkpoint",
-    )
-    evrs = result.list_validation_results()
-    first_result = evrs[0]["results"][0]["result"]["unexpected_index_list"]
-    assert first_result == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
-    second_result = evrs[0]["results"][1]["result"]["unexpected_index_list"]
-    assert second_result == [{"pk_1": 0}, {"pk_1": 1}, {"pk_1": 2}]
-
-
+@pytest.mark.xfail
 @pytest.mark.unit
 def test_result_format_in_checkpoint_two_columns_two_expectation(
     data_context_with_connection_to_animal_names_db,
-    checkpoint_dict_unexpected_index_column_names_defined_two_columns,
-    expectation_config_expect_column_values_to_be_in_set,
-    expectation_config_expect_column_values_to_not_be_in_set,
+    checkpoint_dict_unexpected_index_column_names_not_defined,
+    expectation_config_expect_column_values_to_not_be_in_set_two_columns_defined,
+    expectation_config_expect_column_values_to_be_in_set_one_column_defined,
 ):
-    context: DataContext = data_context_with_connection_to_animal_names_db
-    checkpoint_dict: dict = (
-        checkpoint_dict_unexpected_index_column_names_defined_two_columns
+    """
+    What does this test and why?
+
+    Why is it X-fail?
+        -
+    """
+
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=data_context_with_connection_to_animal_names_db,
+        checkpoint_config=checkpoint_dict_unexpected_index_column_names_not_defined,
+        expectations_list=[
+            expectation_config_expect_column_values_to_not_be_in_set_two_columns_defined,
+            expectation_config_expect_column_values_to_be_in_set_one_column_defined,
+        ],
     )
-    context.create_expectation_suite(expectation_suite_name="animal_names_exp")
-    animals_suite = context.get_expectation_suite(
-        expectation_suite_name="animal_names_exp"
-    )
-    animals_suite.add_expectation(
-        expectation_configuration=expectation_config_expect_column_values_to_be_in_set
-    )
-    animals_suite.add_expectation(
-        expectation_configuration=expectation_config_expect_column_values_to_not_be_in_set
-    )
-    context.save_expectation_suite(
-        expectation_suite=animals_suite,
-        expectation_suite_name="animal_names_exp",
-        overwriting_existing=True,
-    )
-    checkpoint_config = CheckpointConfig(**checkpoint_dict)
-    context.add_checkpoint(
-        **filter_properties_dict(
-            properties=checkpoint_config.to_json_dict(),
-            clean_falsy=True,
-        ),
-    )
-    context._save_project_config()
+
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
     )
@@ -292,7 +495,7 @@ def test_result_format_in_checkpoint_two_columns_two_expectation(
 
     second_result = evrs[0]["results"][1]["result"]["unexpected_index_list"]
     assert second_result == [
-        {"pk_1": 0, "pk_2": "zero"},
-        {"pk_1": 1, "pk_2": "one"},
-        {"pk_1": 2, "pk_2": "two"},
+        {"pk_2": "three"},
+        {"pk_2": "four"},
+        {"pk_2": "five"},
     ]

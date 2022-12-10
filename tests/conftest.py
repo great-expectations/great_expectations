@@ -784,6 +784,25 @@ def empty_data_context(
 def data_context_with_connection_to_animal_names_db(
     tmp_path,
 ) -> DataContext:
+    """
+    Returns DataContext that has a single datasource that connects to a sqlite database.
+
+    The sqlite database (metrics_test.db) contains one table `animal_names` that contains the following data
+
+        "pk_1": [0, 1, 2, 3, 4, 5],
+        "pk_2": ["zero", "one", "two", "three", "four", "five"],
+        "animals": [
+            "cat",
+            "fish",
+            "dog",
+            "giraffe",
+            "lion",
+            "zebra",
+        ],
+
+    It is used by tests for unexpected_index_list (ID/Primary Key).
+    """
+
     project_path = tmp_path / "test_configuration"
     project_path.mkdir()
     project_path = str(project_path)
@@ -809,11 +828,9 @@ def data_context_with_connection_to_animal_names_db(
                         class_name: Asset
     """
 
-    # noinspection PyUnusedLocal
     datasource: Datasource = context.test_yaml_config(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
-    # noinspection PyProtectedMember
     context._save_project_config()
     return context
 
