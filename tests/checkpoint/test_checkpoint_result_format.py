@@ -4,7 +4,10 @@ from typing import List
 import pytest
 
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationSuiteValidationResult,
+)
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import CheckpointConfig
@@ -143,7 +146,7 @@ def expectation_config_expect_column_values_to_not_be_in_set() -> ExpectationCon
         expectation_type="expect_column_values_to_not_be_in_set",
         kwargs={
             "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
+            "value_set": ["giraffe", "lion", "zebra"],
         },
     )
 
@@ -181,6 +184,17 @@ def _add_expectations_and_checkpoint(
     checkpoint_config: dict,
     expectations_list: List[ExpectationConfiguration],
 ) -> DataContext:
+    """
+    Helper method for adding Checkpoint and Expectations to DataContext.
+
+    Args:
+        data_context (DataContext): data_context_with_connection_to_animal_names_db
+        checkpoint_config : Checkpoint to add
+        expectations_list : Expectations to add
+
+    Returns:
+        DataContext with updated config
+    """
 
     context: DataContext = data_context
     context.create_expectation_suite(expectation_suite_name="animal_names_exp")
@@ -201,6 +215,7 @@ def _add_expectations_and_checkpoint(
             clean_falsy=True,
         ),
     )
+    # noinspection PyProtectedMember
     context._save_project_config()
     return context
 
@@ -212,8 +227,9 @@ def test_result_format_in_checkpoint_pk_defined_one_expectation_complete_output(
 ):
     """
     What does this test?
-        - unexpected_index_column defined in Checkpoint only.  1 column defined
-        - one Expectation added to suite
+        - unexpected_index_column defined in Checkpoint only.
+        - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
+        - 1 Expectations added to suite
     """
     context: DataContext = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_animal_names_db,
@@ -224,7 +240,7 @@ def test_result_format_in_checkpoint_pk_defined_one_expectation_complete_output(
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
     )
-    evrs = result.list_validation_results()
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
     first_result_full_list = evrs[0]["results"][0]["result"]["unexpected_index_list"]
     assert first_result_full_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
     first_result_partial_list = evrs[0]["results"][0]["result"][
@@ -241,8 +257,9 @@ def test_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(
 ):
     """
     What does this test?
-        - unexpected_index_column defined in Checkpoint only.  1 column defined
-        - two Expectations added to suite
+        - unexpected_index_column defined in Checkpoint only.
+        - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
+        - 2 Expectations added to suite
     """
     context: DataContext = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_animal_names_db,
@@ -256,9 +273,10 @@ def test_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
     )
-    evrs = result.list_validation_results()
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
 
-    # first and second expectations have "opposite" results since one is "expect_to_be" and the other is "expect_to_not_be"
+    # first and second expectations have same results. Although one is "expect_to_be"
+    # and the other is "expect_to_not_be", they have opposite value_sets
     first_result_full_list = evrs[0]["results"][0]["result"]["unexpected_index_list"]
     assert first_result_full_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
     first_result_partial_list = evrs[0]["results"][0]["result"][
@@ -267,11 +285,11 @@ def test_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(
     assert first_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
 
     second_result_full_list = evrs[0]["results"][1]["result"]["unexpected_index_list"]
-    assert second_result_full_list == [{"pk_1": 0}, {"pk_1": 1}, {"pk_1": 2}]
+    assert second_result_full_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
     second_result_partial_list = evrs[0]["results"][1]["result"][
         "partial_unexpected_index_list"
     ]
-    assert second_result_partial_list == [{"pk_1": 0}, {"pk_1": 1}, {"pk_1": 2}]
+    assert second_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
 
 
 def test_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
@@ -281,8 +299,9 @@ def test_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
 ):
     """
     What does this test?
-        - unexpected_index_column defined in Checkpoint only.  1 column defined
-        - one Expectation added to suite
+        - unexpected_index_column defined in Checkpoint only.
+        - SUMMARY output, which means we have `partial_unexpected_index_list` only
+        - 1 Expectations added to suite
     """
     context: DataContext = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_animal_names_db,
@@ -293,7 +312,7 @@ def test_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
     )
-    evrs = result.list_validation_results()
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
     first_result_full_list = evrs[0]["results"][0]["result"].get(
         "unexpected_index_list"
     )
@@ -312,8 +331,9 @@ def test_result_format_in_checkpoint_pk_defined_two_expectation_summary_output(
 ):
     """
     What does this test?
-        - unexpected_index_column defined in Checkpoint only.  1 column defined
-        - two Expectations added to suite
+        - unexpected_index_column defined in Checkpoint only.
+        - SUMMARY output, which means we have `partial_unexpected_index_list` only
+        - 2 Expectations added to suite
     """
     context: DataContext = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_animal_names_db,
@@ -327,9 +347,10 @@ def test_result_format_in_checkpoint_pk_defined_two_expectation_summary_output(
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
     )
-    evrs = result.list_validation_results()
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
 
-    # first and second expectations have "opposite" results since one is "expect_to_be" and the other is "expect_to_not_be"
+    # first and second expectations have same results. Although one is "expect_to_be"
+    # and the other is "expect_to_not_be", they have opposite value_sets
     first_result_full_list = evrs[0]["results"][0]["result"].get(
         "unexpected_index_list"
     )
@@ -346,7 +367,7 @@ def test_result_format_in_checkpoint_pk_defined_two_expectation_summary_output(
     second_result_partial_list = evrs[0]["results"][1]["result"][
         "partial_unexpected_index_list"
     ]
-    assert second_result_partial_list == [{"pk_1": 0}, {"pk_1": 1}, {"pk_1": 2}]
+    assert second_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
 
 
 def test_result_format_in_checkpoint_pk_defined_one_expectation_basic_output(
@@ -356,8 +377,9 @@ def test_result_format_in_checkpoint_pk_defined_one_expectation_basic_output(
 ):
     """
     What does this test?
-        - unexpected_index_column defined in Checkpoint only.  1 column defined
-        - one Expectation added to suite
+        - unexpected_index_column defined in Checkpoint only.
+        - BASIC output, which means we have no unexpected_index_list output
+        - 1 Expectations added to suite
     """
     context: DataContext = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_animal_names_db,
@@ -368,7 +390,7 @@ def test_result_format_in_checkpoint_pk_defined_one_expectation_basic_output(
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
     )
-    evrs = result.list_validation_results()
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
     first_result_full_list = evrs[0]["results"][0]["result"].get(
         "unexpected_index_list"
     )
@@ -387,8 +409,9 @@ def test_result_format_in_checkpoint_pk_defined_two_expectation_basic_output(
 ):
     """
     What does this test?
-        - unexpected_index_column defined in Checkpoint only.  1 column defined
-        - two Expectations added to suite
+        - unexpected_index_column defined in Checkpoint only.
+        - BASIC output, which means we have no unexpected_index_list output
+        - 2 Expectations added to suite
     """
     context: DataContext = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_animal_names_db,
@@ -402,9 +425,10 @@ def test_result_format_in_checkpoint_pk_defined_two_expectation_basic_output(
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
     )
-    evrs = result.list_validation_results()
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
 
-    # first and second expectations have "opposite" results since one is "expect_to_be" and the other is "expect_to_not_be"
+    # first and second expectations have "opposite" results since one is
+    # "expect_to_be" and the other is "expect_to_not_be"
     first_result_full_list = evrs[0]["results"][0]["result"].get(
         "unexpected_index_list"
     )
@@ -432,10 +456,17 @@ def test_result_format_in_checkpoint_one_expectation_overrides(
     expectation_config_expect_column_values_to_not_be_in_set_two_columns_defined,
 ):
     """
-    What does this test and why?
+    What does this test?
+        - unexpected_index_column defined in Checkpoint AND one expectation.
+        - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
 
-    Why is it X-fail?
-        -
+        - Checkpoint defines 1 column
+        - Expectation defines 2 column
+
+        - output contains 2 columns  (Expectation overrides Checkpoint config)
+
+    When can xfail be removed?
+        - When the logic for Expectation config overriding Checkpoint config is complete, xfail can be removed
     """
     context: DataContext = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_animal_names_db,
@@ -447,7 +478,7 @@ def test_result_format_in_checkpoint_one_expectation_overrides(
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
     )
-    evrs = result.list_validation_results()
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
 
     first_result = evrs[0]["results"][0]["result"]["unexpected_index_list"]
     assert first_result == [
@@ -466,10 +497,18 @@ def test_result_format_in_checkpoint_two_columns_two_expectation(
     expectation_config_expect_column_values_to_be_in_set_one_column_defined,
 ):
     """
-    What does this test and why?
+    What does this test?
+        - unexpected_index_column defined in 2 Expectations only.
+        - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
 
-    Why is it X-fail?
-        -
+        - 1 Expectation defines 1 column
+        - 1 Expectation defines 2 columns
+
+        - output contains 1 column for 1 Expectation, and 2 columns for 1 Expectation.
+            (Individual Expectation-level configurations are respected)
+
+    When can xfail be removed?
+        - When the logic for Expectation config overriding Checkpoint config is complete, xfail can be removed
     """
 
     context: DataContext = _add_expectations_and_checkpoint(
@@ -484,7 +523,7 @@ def test_result_format_in_checkpoint_two_columns_two_expectation(
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
     )
-    evrs = result.list_validation_results()
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
 
     first_result = evrs[0]["results"][0]["result"]["unexpected_index_list"]
     assert first_result == [

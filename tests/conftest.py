@@ -827,10 +827,11 @@ def data_context_with_connection_to_animal_names_db(
                         table_name: animal_names
                         class_name: Asset
     """
-
+    # noinspection PyUnusedLocal
     datasource: Datasource = context.test_yaml_config(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
+    # noinspection PyProtectedMember
     context._save_project_config()
     return context
 
