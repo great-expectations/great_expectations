@@ -87,7 +87,6 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     expectation_type: str = Field("", allow_mutation=False)
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
-    styling: Optional[dict] = Field(None, allow_mutation=False)
     params: RendererParams = Field(..., allow_mutation=True)
     template_str: str = Field("", allow_mutation=True)
     header_row: List[Dict[str, Optional[Any]]] = Field([], allow_mutation=True)
@@ -125,14 +124,13 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         return values
 
     @root_validator(pre=True)
-    def validate_for_include_column_name_and_styling(cls, values: dict) -> dict:
+    def validate_for_include_column_name(cls, values: dict) -> dict:
         if "runtime_configuration" in values and values["runtime_configuration"]:
             values["include_column_name"] = (
                 False
                 if values["runtime_configuration"].get("include_column_name") is False
                 else True
             )
-            values["styling"] = values["runtime_configuration"].get("styling")
         return values
 
     def __init__(self, **values) -> None:
