@@ -621,6 +621,7 @@ class RenderedAtomicValue(DictDot):
     def __init__(
         self,
         schema: Optional[dict] = None,
+        header: Optional[RenderedAtomicValue] = None,
         template: Optional[str] = None,
         params: Optional[dict] = None,
         header_row: Optional[List[RenderedAtomicValue]] = None,
@@ -628,6 +629,7 @@ class RenderedAtomicValue(DictDot):
         graph: Optional[dict] = None,
     ) -> None:
         self.schema: Optional[dict] = schema
+        self.header: Optional[RenderedAtomicValue] = header
 
         # StringValueType
         self.template: Optional[str] = template
@@ -681,6 +683,7 @@ class RenderedAtomicValueSchema(Schema):
         unknown = INCLUDE
 
     schema = fields.Dict(required=False, allow_none=True)
+    header = fields.Dict(required=False, allow_none=True)
 
     # for StringValueType
     template = fields.String(required=False, allow_none=True)
@@ -698,6 +701,7 @@ class RenderedAtomicValueSchema(Schema):
         return RenderedAtomicValue(**data)
 
     REMOVE_KEYS_IF_NONE = [
+        "header",
         "template",
         "table",
         "params",

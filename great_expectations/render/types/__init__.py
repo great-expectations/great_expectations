@@ -122,6 +122,7 @@ class RenderedAtomicValue(RenderedAtomicValueRender):
     def __init__(
         self,
         schema: Optional[dict] = None,
+        header: Optional[RenderedAtomicValueRender] = None,
         template: Optional[str] = None,
         params: Optional[dict] = None,
         header_row: Optional[List[RenderedAtomicValueRender]] = None,
@@ -134,6 +135,7 @@ class RenderedAtomicValue(RenderedAtomicValueRender):
         )
         super().__init__(
             schema=schema,
+            header=header,
             template=template,
             params=params,
             header_row=header_row,
