@@ -1811,7 +1811,7 @@ def get_context(
         if cloud_organization_id is not None
         else ge_cloud_organization_id
     )
-    cloud_mode = True if cloud_mode or ge_cloud_mode else False
+    cloud_mode = cloud_mode if cloud_mode is not None else ge_cloud_mode
 
     # First, check for ge_cloud conditions
 
