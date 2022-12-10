@@ -102,7 +102,7 @@ You can also go ahead and write a new one-line docstring, replacing
 ```
 
 with something like:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L15
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L16
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
