@@ -292,6 +292,86 @@ def test_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(
     assert second_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
 
 
+def test_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(
+    data_context_with_connection_to_animal_names_db,
+    reference_checkpoint_config_for_unexpected_column_names,
+    expectation_config_expect_column_values_to_be_in_set,
+):
+    """
+    What does this test?
+        - unexpected_index_column not defined in Checkpoint config, but passed in at run_checkpoint.
+        - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
+        - 1 Expectations added to suite
+    """
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=data_context_with_connection_to_animal_names_db,
+        checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
+        expectations_list=[expectation_config_expect_column_values_to_be_in_set],
+    )
+
+    result_format: dict = {
+        "result_format": "COMPLETE",
+        "unexpected_index_column_names": ["pk_1"],
+    }
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint", result_format=result_format
+    )
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+    first_result_full_list = evrs[0]["results"][0]["result"]["unexpected_index_list"]
+    assert first_result_full_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    first_result_partial_list = evrs[0]["results"][0]["result"][
+        "partial_unexpected_index_list"
+    ]
+    assert first_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+
+
+def test_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(
+    data_context_with_connection_to_animal_names_db,
+    reference_checkpoint_config_for_unexpected_column_names,
+    expectation_config_expect_column_values_to_be_in_set,
+    expectation_config_expect_column_values_to_not_be_in_set,
+):
+    """
+    What does this test?
+        - unexpected_index_column not defined in Checkpoint config, but passed in at run_checkpoint.
+        - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
+        - 2 Expectations added to suite
+    """
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=data_context_with_connection_to_animal_names_db,
+        checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
+        expectations_list=[
+            expectation_config_expect_column_values_to_be_in_set,
+            expectation_config_expect_column_values_to_not_be_in_set,
+        ],
+    )
+    result_format: dict = {
+        "result_format": "COMPLETE",
+        "unexpected_index_column_names": ["pk_1"],
+    }
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint", result_format=result_format
+    )
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+
+    # first and second expectations have same results. Although one is "expect_to_be"
+    # and the other is "expect_to_not_be", they have opposite value_sets
+    first_result_full_list = evrs[0]["results"][0]["result"]["unexpected_index_list"]
+    assert first_result_full_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    first_result_partial_list = evrs[0]["results"][0]["result"][
+        "partial_unexpected_index_list"
+    ]
+    assert first_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+
+    second_result_full_list = evrs[0]["results"][1]["result"]["unexpected_index_list"]
+    assert second_result_full_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    second_result_partial_list = evrs[0]["results"][1]["result"][
+        "partial_unexpected_index_list"
+    ]
+    assert second_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+
+
 def test_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
     data_context_with_connection_to_animal_names_db,
     checkpoint_dict_unexpected_index_column_names_defined_summary,
