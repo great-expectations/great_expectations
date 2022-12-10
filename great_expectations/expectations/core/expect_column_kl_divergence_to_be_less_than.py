@@ -10,6 +10,10 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.core.util import convert_to_json_serializable
+# TODO: <Alex>ALEX</Alex>
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.util import (
     is_valid_categorical_partition_object,
@@ -227,6 +231,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                 # Note: 20201116 - JPC - the execution engine doesn't provide capability to evaluate
                 # validation_dependencies, so we use a validator
                 #
+                # TODO: <Alex>ALEX</Alex>
                 graph: ValidationGraph = ValidationGraph(
                     execution_engine=execution_engine
                 )
@@ -248,6 +253,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                     logger.warning(
                         f"Exceptions\n{str(aborted_metrics_info)}\noccurred while resolving metrics."
                     )
+                # TODO: <Alex>ALEX</Alex>
 
                 bins = resolved_metrics[partition_metric_configuration.id]
                 hist_metric_configuration = MetricConfiguration(
@@ -375,15 +381,24 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        # TODO: <Alex>ALEX</Alex>
+        # print(f'\n[ALEX_TEST] [ExpectColumnKlDivergenceToBeLessThan._VALIDATE()] PROVIDED_METRICS-0:\n{metrics} ; TYPE: {str(type(metrics))}')
+        # TODO: <Alex>ALEX</Alex>
+        # metrics = convert_to_json_serializable(data=metrics)
+        # TODO: <Alex>ALEX</Alex>
+        # print(f'\n[ALEX_TEST] [ExpectColumnKlDivergenceToBeLessThan._VALIDATE()] PROVIDED_METRICS-1:\n{metrics} ; TYPE: {str(type(metrics))}')
+        # TODO: <Alex>ALEX</Alex>
         bucketize_data = configuration.kwargs.get(
             "bucketize_data", self.default_kwarg_values["bucketize_data"]
         )
         partition_object = configuration.kwargs.get(
             "partition_object", self.default_kwarg_values["partition_object"]
         )
+        # print(f'\n[ALEX_TEST] [ExpectColumnKlDivergenceToBeLessThan._VALIDATE()] SPECIFIED-PARTITION_OBJECT:\n{partition_object} ; TYPE: {str(type(partition_object))}')
         threshold = configuration.kwargs.get(
             "threshold", self.default_kwarg_values["threshold"]
         )
+        # print(f'\n[ALEX_TEST] [ExpectColumnKlDivergenceToBeLessThan._VALIDATE()] SPECIFIED-THRESHOLD:\n{threshold} ; TYPE: {str(type(threshold))}')
         tail_weight_holdout = configuration.kwargs.get(
             "tail_weight_holdout", self.default_kwarg_values["tail_weight_holdout"]
         )
@@ -413,6 +428,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                         / metrics["column_values.nonnull.count"]
                     ),
                 }
+                # print(f'\n[ALEX_TEST] [ExpectColumnKlDivergenceToBeLessThan._VALIDATE()] RECOMPUTED-PARTITION_OBJECT:\n{partition_object} ; TYPE: {str(type(partition_object))}')
 
         if not is_valid_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
@@ -461,8 +477,8 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             )
             # Sort not available before pandas 0.23.0
             # test_df = pd.concat([expected_weights, observed_weights], axis=1, sort=True)
-            # print(f'\n[ALEX_TEST] [ExpectColumnKlDivergenceToBeLessThan._VALIDATE()] EXPECTED_WEIGHTS:\n{expected_weights} ; TYPE: {str(type(expected_weights))}')
-            # print(f'\n[ALEX_TEST] [ExpectColumnKlDivergenceToBeLessThan._VALIDATE()] OBSERVED_WEIGHTS:\n{observed_weights} ; TYPE: {str(type(observed_weights))}')
+            # print(f'\n[ALEX_TEST] [ExpectColumnKlDivergenceToBeLessThan._VALIDATE()] VALID_CATEGORICAL_PARTITION_OBJECT:EXPECTED_WEIGHTS:\n{expected_weights} ; TYPE: {str(type(expected_weights))}')
+            # print(f'\n[ALEX_TEST] [ExpectColumnKlDivergenceToBeLessThan._VALIDATE()] VALID_CATEGORICAL_PARTITION_OBJECT:OBSERVED_WEIGHTS:\n{observed_weights} ; TYPE: {str(type(observed_weights))}')
             test_df = pd.concat([expected_weights, observed_weights], axis=1)
 
             na_counts = test_df.isnull().sum()
@@ -537,6 +553,8 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             expected_weights = np.array(partition_object["weights"]) * (
                 1 - tail_weight_holdout - internal_weight_holdout
             )
+            # print(f'\n[ALEX_TEST] [ExpectColumnKlDivergenceToBeLessThan._VALIDATE()] NON_VALID_CATEGORICAL_PARTITION_OBJECT:EXPECTED_WEIGHTS:\n{expected_weights} ; TYPE: {str(type(expected_weights))}')
+            # print(f'\n[ALEX_TEST] [ExpectColumnKlDivergenceToBeLessThan._VALIDATE()] NON_VALID_CATEGORICAL_PARTITION_OBJECT:OBSERVED_WEIGHTS:\n{observed_weights} ; TYPE: {str(type(observed_weights))}')
 
             # Assign internal weight holdout values if applicable
             if internal_weight_holdout > 0:
@@ -697,6 +715,8 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             # comb_observed_weights = np.array(comb_observed_weights).astype(float)
 
             kl_divergence = stats.entropy(comb_observed_weights, comb_expected_weights)
+            # print(f'\n[ALEX_TEST] [ExpectColumnKlDivergenceToBeLessThan._VALIDATE()] KL_DIVERGENCE:\n{kl_divergence} ; TYPE: {str(type(kl_divergence))}')
+            # print(f'\n[ALEX_TEST] [ExpectColumnKlDivergenceToBeLessThan._VALIDATE()] THRESHOLD:\n{threshold} ; TYPE: {str(type(threshold))}')
 
             if np.isinf(kl_divergence) or np.isnan(kl_divergence):
                 observed_value = None
@@ -707,6 +727,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                 success = True
             else:
                 success = kl_divergence <= threshold
+            # print(f'\n[ALEX_TEST] [ExpectColumnKlDivergenceToBeLessThan._VALIDATE()] SUCCESS:\n{success} ; TYPE: {str(type(success))}')
 
             return_obj = {
                 "success": success,

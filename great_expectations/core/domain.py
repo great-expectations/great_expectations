@@ -172,9 +172,19 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
         this_json_dict: dict = self.to_json_dict()
         other_json_dict: dict = other.to_json_dict()
 
+        # TODO: <Alex>ALEX</Alex>
+        # this_domain_kwargs: Optional[dict] = this_json_dict.get("domain_kwargs", {})
+        # other_domain_kwargs: Optional[dict] = other_json_dict.get("domain_kwargs", {})
+        #
+        # return this_domain_kwargs == other_domain_kwargs and is_candidate_subset_of_target(
+        #     candidate=this_json_dict, target=other_json_dict
+        # )
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
         return is_candidate_subset_of_target(
             candidate=this_json_dict, target=other_json_dict
         )
+        # TODO: <Alex>ALEX</Alex>
 
     def get_domain_type(self) -> MetricDomainTypes:
         """Returns "domain_type" field of this "Domain" object."""

@@ -404,8 +404,8 @@ def test_column_pair_domain_builder_correct_sorted_column_names(
             "rule_name": "my_rule",
             "domain_type": "column_pair",
             "domain_kwargs": {
-                "column_A": "event_type",
-                "column_B": "user_id",
+                "column_A": "user_id",
+                "column_B": "event_type",
             },
             "details": {
                 INFERRED_SEMANTIC_TYPE_KEY: {
@@ -420,8 +420,8 @@ def test_column_pair_domain_builder_correct_sorted_column_names(
 
     # Also test that the dot notation is supported properly throughout the dictionary fields of the Domain object.
     assert domain.domain_type.value == "column_pair"
-    assert domain.domain_kwargs.column_A == "event_type"
-    assert domain.domain_kwargs.column_B == "user_id"
+    assert domain.domain_kwargs.column_A == "user_id"
+    assert domain.domain_kwargs.column_B == "event_type"
 
 
 @pytest.mark.integration

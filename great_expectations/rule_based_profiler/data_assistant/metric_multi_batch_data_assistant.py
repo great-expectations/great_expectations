@@ -129,9 +129,12 @@ class MetricMultiBatchDataAssistant(DataAssistant):
 
         # Step-3: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
 
+        variables: dict = {
+            "table": domain.domain_kwargs.get("table"),
+        }
         rule = Rule(
             name=f"metric_multi_batch_rule_{domain.id}",
-            variables=None,
+            variables=variables,
             domain_builder=domain_builder,
             parameter_builders=parameter_builders,
             expectation_configuration_builders=None,
@@ -215,6 +218,7 @@ class MetricMultiBatchDataAssistant(DataAssistant):
         return [
             DataAssistant.CommonlyUsedParameterBuilders.build_metric_multi_batch_validation_graph_parameter_builder(
                 metric_name=metric_configuration.metric_name,
+                suffix=metric_configuration.metric_value_kwargs_id,
                 metric_domain_kwargs=metric_configuration.metric_domain_kwargs,
                 metric_value_kwargs=metric_configuration.metric_value_kwargs,
             )
@@ -232,6 +236,7 @@ class MetricMultiBatchDataAssistant(DataAssistant):
         return [
             DataAssistant.CommonlyUsedParameterBuilders.build_metric_multi_batch_parameter_builder(
                 metric_name=metric_configuration.metric_name,
+                suffix=metric_configuration.metric_value_kwargs_id,
                 metric_domain_kwargs=metric_configuration.metric_domain_kwargs,
                 metric_value_kwargs=metric_configuration.metric_value_kwargs,
             )

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import datetime
+import hashlib
 import itertools
 import logging
 import re
@@ -1054,8 +1055,15 @@ def get_or_create_expectation_suite(
     return expectation_suite
 
 
-def sanitize_parameter_name(name: str) -> str:
+def sanitize_parameter_name(
+    name: str,
+    suffix: Optional[str] = None,
+) -> str:
     """
     This method provides display-friendly version of "name" argument.
     """
+    if suffix:
+        suffix = hashlib.md5(suffix.encode("utf-8")).hexdigest()
+        name = f"{name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{suffix}"
+
     return name.replace(FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER, "_")
