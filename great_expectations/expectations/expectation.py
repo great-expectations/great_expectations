@@ -455,7 +455,7 @@ class Expectation(metaclass=MetaExpectation):
         return (
             renderer_configuration.template_str,
             renderer_configuration.params.dict(),
-            renderer_configuration.styling,
+            runtime_configuration.get("styling"),
         )
 
     @classmethod
