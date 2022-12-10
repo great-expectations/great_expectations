@@ -99,7 +99,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
     @root_validator(pre=True)
     def validate_configuration_or_result(cls, values: dict) -> dict:
-        if ("configuration" not in values or values["configuration"] is None) or (
+        if ("configuration" not in values or values["configuration"] is None) and (
             "result" not in values or values["result"] is None
         ):
             raise RendererConfigurationError(
