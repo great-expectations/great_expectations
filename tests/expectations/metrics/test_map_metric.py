@@ -222,7 +222,7 @@ def _expecation_configuration_to_validation_result_sql(
             execution_engine=execution_engine,
             assets={
                 "my_asset": {
-                    "table_name": "animals_table",
+                    "table_name": "animals_names",
                 },
             },
         )
@@ -1295,7 +1295,7 @@ def test_sqlite_single_unexpected_index_column_names_complete_result_format(
         "unexpected_count": 3,
         "unexpected_index_list": [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}],
         "unexpected_index_query": "SELECT animals, pk_1 \n"
-        "FROM animals_table \n"
+        "FROM animals_names \n"
         "WHERE animals IS NOT NULL AND (animals NOT IN "
         "('cat', 'fish', 'dog'))",
         "unexpected_list": ["giraffe", "lion", "zebra"],
@@ -1385,7 +1385,7 @@ def test_sqlite_multiple_unexpected_index_column_names_complete_result_format(
             {"pk_1": 5, "pk_2": "five"},
         ],
         "unexpected_index_query": "SELECT animals, pk_1, pk_2 \n"
-        "FROM animals_table \n"
+        "FROM animals_names \n"
         "WHERE animals IS NOT NULL AND (animals NOT IN "
         "('cat', 'fish', 'dog'))",
         "unexpected_list": ["giraffe", "lion", "zebra"],
@@ -1428,7 +1428,7 @@ def test_sql_multiple_unexpected_index_column_names_complete_result_format_limit
             {"pk_1": 3, "pk_2": "three"},
         ],
         "unexpected_index_query": "SELECT animals, pk_1, pk_2 \n"
-        "FROM animals_table \n"
+        "FROM animals_names \n"
         "WHERE animals IS NOT NULL AND (animals NOT IN "
         "('cat', 'fish', 'dog'))",
         "unexpected_list": ["giraffe", "lion", "zebra"],
