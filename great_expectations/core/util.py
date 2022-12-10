@@ -228,6 +228,10 @@ def convert_to_json_serializable(data) -> dict:  # noqa: C901 - complexity 28
     if isinstance(data, (datetime.datetime, datetime.date)):
         return data.isoformat()
 
+    if isinstance(data, (np.datetime64)):
+        data = np.datetime_as_string(data)
+        return data
+
     if isinstance(data, uuid.UUID):
         return str(data)
 
