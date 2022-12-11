@@ -1056,7 +1056,7 @@ def sanitize_parameter_name(
     suffix: Optional[str] = None,
 ) -> str:
     """
-    This method provides display-friendly version of "name" argument.
+    This method provides display-friendly version of "name" argument (with optional "suffix" argument).
     """
     if suffix:
         suffix = hashlib.md5(suffix.encode("utf-8")).hexdigest()
