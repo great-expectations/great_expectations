@@ -117,8 +117,10 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
 """
                     )
 
-        self.domain_type = None
-        self.rule_name = None
+        # TODO: <Alex>ALEX</Alex>
+        # self.domain_type = None
+        # self.rule_name = None
+        # TODO: <Alex>ALEX</Alex>
 
         super().__init__(
             domain_type=domain_type,
@@ -186,17 +188,19 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
         )
         # TODO: <Alex>ALEX</Alex>
 
-    def get_domain_type(self) -> MetricDomainTypes:
-        """Returns "domain_type" field of this "Domain" object."""
-        return self.domain_type
-
-    def get_rule_name(self) -> Optional[str]:
-        """Returns (optional) "rule_name" of this "Domain" object."""
-        return self.rule_name
-
-    def set_rule_name(self, value: Optional[str] = None) -> None:
-        """Setter for (optional) "rule_name" for this "Domain" object."""
-        self.rule_name = value
+    # TODO: <Alex>ALEX</Alex>
+    # def get_domain_type(self) -> MetricDomainTypes:
+    #     """Returns "domain_type" field of this "Domain" object."""
+    #     return self.domain_type
+    #
+    # def get_rule_name(self) -> Optional[str]:
+    #     """Returns (optional) "rule_name" of this "Domain" object."""
+    #     return self.rule_name
+    #
+    # def set_rule_name(self, value: Optional[str] = None) -> None:
+    #     """Setter for (optional) "rule_name" for this "Domain" object."""
+    #     self.rule_name = value
+    # TODO: <Alex>ALEX</Alex>
 
     # Adding this property for convenience (also, in the future, arguments may not be all set to their default values).
     @property
