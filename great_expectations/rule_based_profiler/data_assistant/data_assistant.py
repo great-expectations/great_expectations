@@ -753,8 +753,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
         if batches is None:
             batches = {}
         # TODO: <Alex>ALEX</Alex>
-        batch_id: str
-        batch: Batch
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
         # for batch_id, batch in batches.items():
