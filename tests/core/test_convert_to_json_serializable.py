@@ -48,6 +48,7 @@ def test_serialization_of_bytes():
     data = b"\xC0\xA8\x00\x01"
     assert convert_to_json_serializable(data) == "b'\\xc0\\xa8\\x00\\x01'"
 
+
 def test_serialization_numpy_datetime():
     datetime_to_test = '2022-12-08T12:56:23.423'
     data = np.datetime64(datetime_to_test)
