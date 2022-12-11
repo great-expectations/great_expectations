@@ -50,6 +50,6 @@ def test_serialization_of_bytes():
 
 
 def test_serialization_numpy_datetime():
-    datetime_to_test = '2022-12-08T12:56:23.423'
+    datetime_to_test = "2022-12-08T12:56:23.423"
     data = np.datetime64(datetime_to_test)
     assert convert_to_json_serializable(data) == datetime_to_test
