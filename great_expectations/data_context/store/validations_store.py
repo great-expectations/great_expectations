@@ -165,7 +165,7 @@ class ValidationsStore(Store):
         return suite_validation_result_dict
 
     def serialize(self, value):
-        if self.ge_cloud_mode:
+        if self.cloud_mode:
             return value.to_json_dict()
         return self._expectationSuiteValidationResultSchema.dumps(
             value, indent=2, sort_keys=True
@@ -202,7 +202,7 @@ class ValidationsStore(Store):
             [random.choice(list("0123456789ABCDEF")) for i in range(20)]
         )
 
-        if self.ge_cloud_mode:
+        if self.cloud_mode:
             test_key: GXCloudIdentifier = self.key_class(
                 resource_type=GXCloudRESTResource.CHECKPOINT,
                 ge_cloud_id=str(uuid.uuid4()),

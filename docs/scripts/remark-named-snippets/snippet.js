@@ -124,16 +124,16 @@ function sanitizeText (text) {
   }
 
   // Calculate indentation to remove
-  let indent = "";
+  let indent = ''
   for (let i = 0; i < text.length; i++) {
-    if (text[i] === " ") {
-      indent += " ";
+    if (text[i] === ' ') {
+      indent += ' '
     } else {
-      break;
+      break
     }
   }
 
-  function unindent(line) {
+  function unindent (line) {
     if (line.startsWith(indent)) {
       line = line.substring(indent.length, text.length)
     }
@@ -143,7 +143,7 @@ function sanitizeText (text) {
   // Apply unindent and misc cleanup
   return text
     .split('\n')
-    .filter((l) => !(l.trim() === "#")) // Remove any nested snippet remnants
+    .filter((l) => !(l.trim() === '#')) // Remove any nested snippet remnants
     .map(unindent)
     .join('\n')
     .trim()
@@ -156,11 +156,11 @@ function sanitizeText (text) {
  * Note that this is what is run if this file is invoked by Node.
  * An alias `yarn snippet-check` is defined in `package.json` for convenience.
  */
-function main() {
-  const snippets = parseDirectory(".")
+function main () {
+  const snippets = parseDirectory('.')
   const targetFiles = process.argv.slice(2)
 
-  let out = {}
+  const out = {}
   for (const snippet of snippets) {
     // If no explicit args are provided, default to all snippets
     // Else, ensure that the snippet's source file was requested by the user
@@ -177,10 +177,8 @@ function main() {
   console.log(out)
 }
 
-
 if (require.main === module) {
-  main();
+  main()
 }
-
 
 module.exports = constructSnippetMap

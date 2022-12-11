@@ -161,9 +161,9 @@ def cloud_data_context(
 
     cloud_data_context = CloudDataContext(
         project_config=data_context_config,
-        ge_cloud_base_url=ge_cloud_config_e2e.base_url,
-        ge_cloud_access_token=ge_cloud_config_e2e.access_token,
-        ge_cloud_organization_id=ge_cloud_config_e2e.organization_id,
+        cloud_base_url=ge_cloud_config_e2e.base_url,
+        cloud_access_token=ge_cloud_config_e2e.access_token,
+        cloud_organization_id=ge_cloud_config_e2e.organization_id,
         context_root_dir=str(context_root_dir),
     )
     return cloud_data_context
@@ -635,7 +635,7 @@ def test_cloud_enabled_data_context_variables_e2e(
     new_site_name = f"docs_site_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
     updated_data_docs_sites[new_site_name] = {}
 
-    context = DataContext(ge_cloud_mode=True)
+    context = DataContext(cloud_mode=True)
 
     assert context.variables.plugins_directory != updated_plugins_dir
     assert context.variables.data_docs_sites != updated_data_docs_sites
@@ -648,7 +648,7 @@ def test_cloud_enabled_data_context_variables_e2e(
 
     context.variables.save_config()
 
-    context = DataContext(ge_cloud_mode=True)
+    context = DataContext(cloud_mode=True)
 
     assert context.variables.plugins_directory == updated_plugins_dir
     assert context.variables.data_docs_sites == updated_data_docs_sites
