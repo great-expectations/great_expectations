@@ -91,8 +91,9 @@ from great_expectations.util import camel_to_snake, measure_execution_time
 #     from great_expectations.validator.validator import Validator
 # TODO: <Alex>ALEX</Alex>
 
-
 # noinspection PyMethodParameters
+
+
 class MetaDataAssistant(ABCMeta):
     """
     MetaDataAssistant registers every DataAssistant class as it is defined, it them to the DataAssistant registry.
@@ -763,6 +764,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
         #     print(f'\n[ALEX_TEST] [DATA_ASSISTANT._BATCH_ID_TO_BATCH_IDENTIFIER_DISPLAY_NAME_MAP()] BATCH.BATCH_DEFINITION:\n{batch.batch_definition} ; TYPE: {str(type(batch.batch_definition))}')
         # TODO: <Alex>ALEX</Alex>
 
+        batch_id: str
+        batch: Batch
         return {
             batch_id: set(
                 deep_convert_properties_iterable_to_id_dict(
