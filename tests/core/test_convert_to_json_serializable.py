@@ -1,5 +1,5 @@
-import pytest
 import numpy as np
+import pytest
 
 from great_expectations.core.util import convert_to_json_serializable
 
