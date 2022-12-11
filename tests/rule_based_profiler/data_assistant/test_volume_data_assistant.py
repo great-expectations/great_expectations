@@ -1539,7 +1539,7 @@ def _assert_quentin_expected_metrics_by_domain_serialized(
     """
     # TODO: <Alex>TODO: 12/5/2022</Alex>
     Comparison with raw "numpy.ndarray" objects requires tedius inspections of structures and sub-structures of result.
-    For now, remove raw values from test (they are non-serialized version of values access through "PARAMETER_KEY" key.
+    For now, remove raw values from test (they are non-serialized version of values access through "PARAMETER_KEY" key).
     """
     domain: Domain
     parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
