@@ -1057,6 +1057,19 @@ def sanitize_parameter_name(
 ) -> str:
     """
     This method provides display-friendly version of "name" argument (with optional "suffix" argument).
+
+    In most situations, "suffix" is not needed.  However, in certain use cases, "name" argument is same among different
+    calling structures, whereby "name" can be disambiguated by addition of distinguishing "suffix" argument.  Using
+    list of "MetricConfiguration" objects as example, "metric_name" and "metric_domain_kwargs" are commoonly same among
+    them, while "metric_value_kwargs" are different (i.e., calculating values of same metric with different parameters).
+    In this case, supplying "MetricConfiguration.metric_domain_kwargs_id" as "suffix" makes sanitized names unique.
+
+    Args:
+        name: string-valued "name" argument to be sanitized
+        suffix: additional component (i.e., "suffix") argument to be appended to "name" and sanitized together
+
+    Returns:
+        string-valued sanitized concatenation of "name" and MD5-digest of "suffix" arguments.
     """
     if suffix:
         suffix = hashlib.md5(suffix.encode("utf-8")).hexdigest()
