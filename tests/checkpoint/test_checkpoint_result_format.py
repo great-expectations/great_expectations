@@ -29,7 +29,7 @@ def reference_checkpoint_config_for_unexpected_column_names() -> dict:
     checkpoint_dict_unexpected_index_column_names_defined_two_columns()
         - adds runtime_configuration where "unexpected_index_column_names": ["pk_1", "pk_2"],
     checkpoint_dict_unexpected_index_column_names_not_defined()
-        - adds runtime_configuration where "unexpected_index_column_names" are defined
+        - adds runtime_configuration where "unexpected_index_column_names" are not defined
 
     For more information, look at the docstring for data_context_with_connection_to_animal_names_db() fixture
 
@@ -220,6 +220,7 @@ def _add_expectations_and_checkpoint(
     return context
 
 
+@pytest.mark.integration
 def test_result_format_in_checkpoint_pk_defined_one_expectation_complete_output(
     data_context_with_connection_to_animal_names_db,
     checkpoint_dict_unexpected_index_column_names_defined_complete,
@@ -249,6 +250,7 @@ def test_result_format_in_checkpoint_pk_defined_one_expectation_complete_output(
     assert first_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
 
 
+@pytest.mark.integration
 def test_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(
     data_context_with_connection_to_animal_names_db,
     checkpoint_dict_unexpected_index_column_names_defined_complete,
@@ -292,6 +294,7 @@ def test_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(
     assert second_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
 
 
+@pytest.mark.integration
 def test_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(
     data_context_with_connection_to_animal_names_db,
     reference_checkpoint_config_for_unexpected_column_names,
@@ -325,6 +328,7 @@ def test_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectat
     assert first_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
 
 
+@pytest.mark.integration
 def test_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(
     data_context_with_connection_to_animal_names_db,
     reference_checkpoint_config_for_unexpected_column_names,
@@ -372,6 +376,7 @@ def test_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(
     assert second_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
 
 
+@pytest.mark.integration
 def test_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
     data_context_with_connection_to_animal_names_db,
     checkpoint_dict_unexpected_index_column_names_defined_summary,
@@ -403,6 +408,7 @@ def test_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
     assert first_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
 
 
+@pytest.mark.integration
 def test_result_format_in_checkpoint_pk_defined_two_expectation_summary_output(
     data_context_with_connection_to_animal_names_db,
     checkpoint_dict_unexpected_index_column_names_defined_summary,
@@ -450,6 +456,7 @@ def test_result_format_in_checkpoint_pk_defined_two_expectation_summary_output(
     assert second_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
 
 
+@pytest.mark.integration
 def test_result_format_in_checkpoint_pk_defined_one_expectation_basic_output(
     data_context_with_connection_to_animal_names_db,
     checkpoint_dict_unexpected_index_column_names_defined_basic,
@@ -481,6 +488,7 @@ def test_result_format_in_checkpoint_pk_defined_one_expectation_basic_output(
     assert not first_result_partial_list
 
 
+@pytest.mark.integration
 def test_result_format_in_checkpoint_pk_defined_two_expectation_basic_output(
     data_context_with_connection_to_animal_names_db,
     checkpoint_dict_unexpected_index_column_names_defined_basic,
@@ -526,95 +534,3 @@ def test_result_format_in_checkpoint_pk_defined_two_expectation_basic_output(
         "partial_unexpected_index_list"
     )
     assert not second_result_partial_list
-
-
-@pytest.mark.xfail
-@pytest.mark.unit
-def test_result_format_in_checkpoint_one_expectation_overrides(
-    data_context_with_connection_to_animal_names_db,
-    checkpoint_dict_unexpected_index_column_names_defined_complete,
-    expectation_config_expect_column_values_to_not_be_in_set_two_columns_defined,
-):
-    """
-    What does this test?
-        - unexpected_index_column defined in Checkpoint AND one expectation.
-        - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
-
-        - Checkpoint defines 1 column
-        - Expectation defines 2 column
-
-        - output contains 2 columns  (Expectation overrides Checkpoint config)
-
-    When can xfail be removed?
-        - When the logic for Expectation config overriding Checkpoint config is complete, xfail can be removed
-    """
-    context: DataContext = _add_expectations_and_checkpoint(
-        data_context=data_context_with_connection_to_animal_names_db,
-        checkpoint_config=checkpoint_dict_unexpected_index_column_names_defined_complete,
-        expectations_list=[
-            expectation_config_expect_column_values_to_not_be_in_set_two_columns_defined
-        ],
-    )
-    result: CheckpointResult = context.run_checkpoint(
-        checkpoint_name="my_checkpoint",
-    )
-    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
-
-    first_result = evrs[0]["results"][0]["result"]["unexpected_index_list"]
-    assert first_result == [
-        {"pk_1": 3, "pk_2": "three"},
-        {"pk_1": 4, "pk_2": "four"},
-        {"pk_1": 5, "pk_2": "five"},
-    ]
-
-
-@pytest.mark.xfail
-@pytest.mark.unit
-def test_result_format_in_checkpoint_two_columns_two_expectation(
-    data_context_with_connection_to_animal_names_db,
-    checkpoint_dict_unexpected_index_column_names_not_defined,
-    expectation_config_expect_column_values_to_not_be_in_set_two_columns_defined,
-    expectation_config_expect_column_values_to_be_in_set_one_column_defined,
-):
-    """
-    What does this test?
-        - unexpected_index_column defined in 2 Expectations only.
-        - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
-
-        - 1 Expectation defines 1 column
-        - 1 Expectation defines 2 columns
-
-        - output contains 1 column for 1 Expectation, and 2 columns for 1 Expectation.
-            (Individual Expectation-level configurations are respected)
-
-    When can xfail be removed?
-        - When the logic for Expectation config overriding Checkpoint config is complete, xfail can be removed
-    """
-
-    context: DataContext = _add_expectations_and_checkpoint(
-        data_context=data_context_with_connection_to_animal_names_db,
-        checkpoint_config=checkpoint_dict_unexpected_index_column_names_not_defined,
-        expectations_list=[
-            expectation_config_expect_column_values_to_not_be_in_set_two_columns_defined,
-            expectation_config_expect_column_values_to_be_in_set_one_column_defined,
-        ],
-    )
-
-    result: CheckpointResult = context.run_checkpoint(
-        checkpoint_name="my_checkpoint",
-    )
-    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
-
-    first_result = evrs[0]["results"][0]["result"]["unexpected_index_list"]
-    assert first_result == [
-        {"pk_1": 3, "pk_2": "three"},
-        {"pk_1": 4, "pk_2": "four"},
-        {"pk_1": 5, "pk_2": "five"},
-    ]
-
-    second_result = evrs[0]["results"][1]["result"]["unexpected_index_list"]
-    assert second_result == [
-        {"pk_2": "three"},
-        {"pk_2": "four"},
-        {"pk_2": "five"},
-    ]
