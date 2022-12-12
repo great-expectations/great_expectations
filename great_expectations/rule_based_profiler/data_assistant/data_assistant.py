@@ -271,7 +271,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 metric_value_kwargs=None,
             )
 
-        # TODO: <Alex>ALEX</Alex>
         @staticmethod
         def build_metric_multi_batch_validation_graph_parameter_builder(
             metric_name: str,
@@ -294,9 +293,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 data_context=None,
             )
 
-        # TODO: <Alex>ALEX</Alex>
-
-        # TODO: <Alex>ALEX</Alex>
         @staticmethod
         def build_metric_multi_batch_parameter_builder(
             metric_name: str,
@@ -323,9 +319,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 data_context=None,
             )
 
-        # TODO: <Alex>ALEX</Alex>
-
-        # TODO: <Alex>ALEX</Alex>
         @staticmethod
         def build_metric_single_batch_parameter_builder(
             metric_name: str,
@@ -350,8 +343,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 evaluation_parameter_builder_configs=None,
                 data_context=None,
             )
-
-        # TODO: <Alex>ALEX</Alex>
 
         @staticmethod
         def build_numeric_metric_multi_batch_parameter_builder(
@@ -379,7 +370,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 data_context=None,
             )
 
-        # TODO: <Alex>ALEX</Alex>
         @staticmethod
         def build_numeric_metric_single_batch_parameter_builder(
             metric_name: str,
@@ -404,8 +394,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 evaluation_parameter_builder_configs=None,
                 data_context=None,
             )
-
-        # TODO: <Alex>ALEX</Alex>
 
         @staticmethod
         def build_numeric_metric_range_multi_batch_parameter_builder(
