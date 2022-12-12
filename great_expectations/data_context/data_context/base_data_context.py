@@ -150,17 +150,17 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     """
 
     UNCOMMITTED_DIRECTORIES = ["data_docs", "validations"]
-    GE_UNCOMMITTED_DIR = "uncommitted"
+    GX_UNCOMMITTED_DIR = "uncommitted"
     BASE_DIRECTORIES = [
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.EXPECTATIONS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.PLUGINS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.PROFILERS_BASE_DIRECTORY.value,
-        GE_UNCOMMITTED_DIR,
+        GX_UNCOMMITTED_DIR,
     ]
-    GE_DIR = "great_expectations"
-    GE_YML = "great_expectations.yml"  # TODO: migrate this to FileDataContext. Still needed by DataContext
-    GE_EDIT_NOTEBOOK_DIR = GE_UNCOMMITTED_DIR
+    GX_DIR = "great_expectations"
+    GX_YML = "great_expectations.yml"  # TODO: migrate this to FileDataContext. Still needed by DataContext
+    GX_EDIT_NOTEBOOK_DIR = GX_UNCOMMITTED_DIR
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
 
     @usage_statistics_enabled_method(
@@ -171,6 +171,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         project_config: Union[DataContextConfig, Mapping],
         context_root_dir: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
+        cloud_mode: bool = False,
+        cloud_config: Optional[GXCloudConfig] = None,
+        # Deprecated as of 0.15.37
         ge_cloud_mode: bool = False,
         ge_cloud_config: Optional[GXCloudConfig] = None,
     ) -> None:
@@ -181,38 +184,41 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 based on conventions for project subdirectories.
             runtime_environment: a dictionary of config variables that
                 override both those set in config_variables.yml and the environment
-            ge_cloud_mode: boolean flag that describe whether DataContext is being instantiated by ge_cloud
-           ge_cloud_config: config for ge_cloud
+            cloud_mode: boolean flag that describe whether DataContext is being instantiated by Cloud
+            cloud_config: config for Cloud
         Returns:
             None
         """
+        # Chetan - 20221208 - not formally deprecating these values until a future date
+        cloud_config = cloud_config if cloud_config is not None else ge_cloud_config
+        cloud_mode = True if cloud_mode or ge_cloud_mode else False
 
         project_data_context_config: DataContextConfig = (
             BaseDataContext.get_or_create_data_context_config(project_config)
         )
 
-        self._ge_cloud_mode = ge_cloud_mode
-        self._ge_cloud_config = ge_cloud_config
+        self._cloud_mode = cloud_mode
+        self._cloud_config = cloud_config
         if context_root_dir is not None:
             context_root_dir = os.path.abspath(context_root_dir)
         self._context_root_directory = context_root_dir
         # initialize runtime_environment as empty dict if None
         runtime_environment = runtime_environment or {}
-        if self._ge_cloud_mode:
-            ge_cloud_base_url: Optional[str] = None
-            ge_cloud_access_token: Optional[str] = None
-            ge_cloud_organization_id: Optional[str] = None
-            if ge_cloud_config:
-                ge_cloud_base_url = ge_cloud_config.base_url
-                ge_cloud_access_token = ge_cloud_config.access_token
-                ge_cloud_organization_id = ge_cloud_config.organization_id
+        if self._cloud_mode:
+            cloud_base_url: Optional[str] = None
+            cloud_access_token: Optional[str] = None
+            cloud_organization_id: Optional[str] = None
+            if cloud_config:
+                cloud_base_url = cloud_config.base_url
+                cloud_access_token = cloud_config.access_token
+                cloud_organization_id = cloud_config.organization_id
             self._data_context = CloudDataContext(
                 project_config=project_data_context_config,
                 runtime_environment=runtime_environment,
                 context_root_dir=context_root_dir,
-                ge_cloud_base_url=ge_cloud_base_url,
-                ge_cloud_access_token=ge_cloud_access_token,
-                ge_cloud_organization_id=ge_cloud_organization_id,
+                cloud_base_url=cloud_base_url,
+                cloud_access_token=cloud_access_token,
+                cloud_organization_id=cloud_organization_id,
             )
         elif self._context_root_directory:
             self._data_context = FileDataContext(  # type: ignore[assignment]
@@ -256,11 +262,16 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     @property
     def ge_cloud_config(self) -> Optional[GXCloudConfig]:
-        return self._ge_cloud_config
+        return self._cloud_config
+
+    @property
+    def cloud_mode(self) -> bool:
+        return self._cloud_mode
 
     @property
     def ge_cloud_mode(self) -> bool:
-        return self._ge_cloud_mode
+        # Deprecated 0.15.37
+        return self.cloud_mode
 
     def _synchronize_self_with_underlying_data_context(self) -> None:
         """
@@ -328,9 +339,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         Args:
             name (str): Name of Datasource
-            initialize (bool): Should GE add and initialize the Datasource? If true then current
+            initialize (bool): Should GX add and initialize the Datasource? If true then current
                 method will return initialized Datasource
-            save_changes (Optional[bool]): should GE save the Datasource config?
+            save_changes (Optional[bool]): should GX save the Datasource config?
             **kwargs Optional[dict]: Additional kwargs that define Datasource initialization kwargs
 
         Returns:
@@ -371,7 +382,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             expectation_suite_name (str): The name of the Expectation Suite
             include_rendered_content (bool): Whether or not to re-populate rendered_content for each
                 ExpectationConfiguration.
-            ge_cloud_id (str): The GE Cloud ID for the Expectation Suite.
+            ge_cloud_id (str): The GX Cloud ID for the Expectation Suite.
 
         Returns:
             An existing ExpectationSuite

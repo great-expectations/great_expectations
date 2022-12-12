@@ -675,9 +675,9 @@ def test_golden_path_sql_datasource_configuration(
     with set_directory(context.root_directory):
 
         # Everything below this line (except for asserts) is what we expect users to run as part of the golden path.
-        import great_expectations as ge
+        import great_expectations as gx
 
-        context = ge.get_context()
+        context = gx.get_context()
 
         db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
         yaml_config = f"""
@@ -818,9 +818,9 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
     context: DataContext = empty_data_context_stats_enabled
 
     with set_directory(context.root_directory):
-        import great_expectations as ge
+        import great_expectations as gx
 
-        context = ge.get_context()
+        context = gx.get_context()
         mock_emit.reset_mock()  # Remove data_context.__init__ call
 
         yaml_config = f"""
@@ -1012,9 +1012,9 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
     context: DataContext = empty_data_context_stats_enabled
 
     with set_directory(context.root_directory):
-        import great_expectations as ge
+        import great_expectations as gx
 
-        context = ge.get_context()
+        context = gx.get_context()
         mock_emit.reset_mock()  # Remove data_context.__init__ call
 
         yaml_config = f"""
@@ -1196,7 +1196,7 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
     """
     Tests output of test_yaml_config() for a Datacontext configured with a Datasource with
     RuntimeDataConnector. Even though the test directory contains multiple files that can be read-in
-    by GE, the RuntimeDataConnector will output 0 data_assets, and return a "note" to the user.
+    by GX, the RuntimeDataConnector will output 0 data_assets, and return a "note" to the user.
 
     This is because the RuntimeDataConnector is not aware of data_assets until they are passed in
     through the RuntimeBatchRequest.
@@ -1220,9 +1220,9 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
     context: DataContext = empty_data_context_stats_enabled
 
     with set_directory(context.root_directory):
-        import great_expectations as ge
+        import great_expectations as gx
 
-        context = ge.get_context()
+        context = gx.get_context()
         mock_emit.reset_mock()  # Remove data_context.__init__ call
 
         yaml_config = """
@@ -1321,9 +1321,9 @@ def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_d
     context: DataContext = empty_data_context_stats_enabled
 
     with set_directory(context.root_directory):
-        import great_expectations as ge
+        import great_expectations as gx
 
-        context = ge.get_context()
+        context = gx.get_context()
         mock_emit.reset_mock()  # Remove data_context.__init__ call
 
         yaml_config = f"""

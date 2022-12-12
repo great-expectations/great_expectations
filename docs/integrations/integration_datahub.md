@@ -25,9 +25,9 @@ There is a custom Action named `DataHubValidationAction` which allows you to vie
 
 `DataHubValidationAction` pushes Expectations metadata to DataHub. This includes
 
-- **Expectation Details**: Details of assertions (i.e. Expectation) set on a Dataset (Table). Expectation set on a dataset in GE aligns with `AssertionInfo` aspect in DataHub. `AssertionInfo` captures the dataset and dataset fields on which assertion is applied, along with its scope, type and parameters. 
+- **Expectation Details**: Details of assertions (i.e. Expectation) set on a Dataset (Table). Expectation set on a dataset in GX aligns with `AssertionInfo` aspect in DataHub. `AssertionInfo` captures the dataset and dataset fields on which assertion is applied, along with its scope, type and parameters. 
 - **Expectation Results**: Evaluation results for an assertion tracked over time. 
-Validation Result for an Expectation in GE align with `AssertionRunEvent` aspect in DataHub. `AssertionRunEvent` captures the time at which Validation was run, Batch(subset) of dataset on which it was run, the success status along with other result fields.
+Validation Result for an Expectation in GX align with `AssertionRunEvent` aspect in DataHub. `AssertionRunEvent` captures the time at which Validation was run, Batch(subset) of dataset on which it was run, the success status along with other result fields.
 
 
 ### Dev loops unlocked by integration
@@ -49,7 +49,7 @@ Stand up and take a breath
 :::
 
 ####  1. Ingest the metadata from source data platform into DataHub
-For example, if you have GE Checkpoint that runs Expectations on a BigQuery dataset, then first
+For example, if you have GX Checkpoint that runs Expectations on a BigQuery dataset, then first
 ingest the respective dataset into DataHub using [BigQuery](https://datahubproject.io/docs/generated/ingestion/sources/bigquery#module-bigquery) metadata ingestion source recipe. 
 
 ```bash
@@ -57,8 +57,8 @@ datahub ingest -c recipe.yaml
 ```
 You should be able to see the dataset in DataHub UI.
 
-#### 2. Update GE Checkpoint Configurations
-Add `DataHubValidationAction` in `action_list` of your Great Expectations Checkpoint. For more details on setting action_list, see [the configuration section of the GE Actions reference entry](https://docs.greatexpectations.io/docs/terms/action#configuration) 
+#### 2. Update GX Checkpoint Configurations
+Add `DataHubValidationAction` in `action_list` of your Great Expectations Checkpoint. For more details on setting action_list, see [the configuration section of the GX Actions reference entry](https://docs.greatexpectations.io/docs/terms/action#configuration) 
 ```yml
 action_list:
   - name: datahub_action
@@ -71,7 +71,7 @@ action_list:
 **Configuration options:**
 - `server_url` (required): URL of DataHub GMS endpoint
 - `env` (optional, defaults to "PROD"): Environment to use in namespace when constructing dataset URNs.
-- `platform_instance_map` (optional): Platform instance mapping to use when constructing dataset URNs. Maps the GE 'data source' name to a platform instance on DataHub. e.g. `platform_instance_map: { "datasource_name": "warehouse" }`
+- `platform_instance_map` (optional): Platform instance mapping to use when constructing dataset URNs. Maps the GX 'data source' name to a platform instance on DataHub. e.g. `platform_instance_map: { "datasource_name": "warehouse" }`
 - `graceful_exceptions` (defaults to true): If set to true, most runtime errors in the lineage backend will be suppressed and will not cause the overall Checkpoint to fail. Note that configuration issues will still throw exceptions.
 - `token` (optional): Bearer token used for authentication.
 - `timeout_sec` (optional): Per-HTTP request timeout.
@@ -80,7 +80,7 @@ action_list:
 - `extra_headers` (optional): Extra headers which will be added to the datahub request.
 - `parse_table_names_from_sql` (defaults to false): The integration can use an SQL parser to try to parse the datasets being asserted. This parsing is disabled by default, but can be enabled by setting `parse_table_names_from_sql: True`.  The parser is based on the [`sqllineage`](https://pypi.org/project/sqllineage/) package.
 
-#### 3. Run the GE checkpoint
+#### 3. Run the GX checkpoint
 
 ```bash
 great_expectations checkpoint run my_checkpoint #replace my_checkpoint with your checkpoint name

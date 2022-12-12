@@ -1,10 +1,10 @@
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
-context = ge.get_context()
+context = gx.get_context()
 
 # Please note the naming of this datasource is only to provide good UX for docs and tests.
 datasource_yaml = rf"""
@@ -167,7 +167,7 @@ assert (
     == "12"
 )
 
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert "insert_your_datasource_name_here" in [
     ds["name"] for ds in context.list_datasources()
 ]

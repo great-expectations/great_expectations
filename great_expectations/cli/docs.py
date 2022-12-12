@@ -17,13 +17,18 @@ def docs(ctx: click.Context) -> None:
     """Data Docs operations"""
     ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
 
+    invoked_subcommand = ctx.invoked_subcommand
+    assert (
+        invoked_subcommand
+    ), "Proper registration of subcommand has not occurred; please review parent Click context"
+
     cli_event_noun: str = "docs"
     (
         begin_event_name,
         end_event_name,
     ) = UsageStatsEvents.get_cli_begin_and_end_event_names(
         noun=cli_event_noun,
-        verb=ctx.invoked_subcommand,
+        verb=invoked_subcommand,
     )
     send_usage_message(
         data_context=ctx.obj.data_context,

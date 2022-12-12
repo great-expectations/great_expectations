@@ -2,7 +2,7 @@
 import pandas as pd
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import RuntimeBatchRequest
@@ -11,7 +11,7 @@ from great_expectations.validator.validator import Validator
 # </snippet>
 
 # <snippet>
-context: DataContext = ge.get_context()
+context: DataContext = gx.get_context()
 # </snippet>
 
 # create and load Expectation Suite

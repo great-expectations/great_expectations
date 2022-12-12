@@ -48,135 +48,108 @@ logging.captureWarnings(True)
 
 
 class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
-    """Expect the Kulback-Leibler (KL) divergence (relative entropy) of the specified column with respect to the \
-            partition object to be lower than the provided threshold.
+    """Expect the Kulback-Leibler (KL) divergence (relative entropy) of the specified column with respect to the partition object to be lower than the provided threshold.
 
-            KL divergence compares two distributions. The higher the divergence value (relative entropy), the larger
-            the \
-            difference between the two distributions. A relative entropy of zero indicates that the data are \
-            distributed identically, `when binned according to the provided partition`.
+    KL divergence compares two distributions. The higher the divergence value (relative entropy), the larger \
+    the difference between the two distributions. A relative entropy of zero indicates that the data are \
+    distributed identically, when binned according to the provided partition.
 
-            In many practical contexts, choosing a value between 0.5 and 1 will provide a useful test.
+    In many practical contexts, choosing a value between 0.5 and 1 will provide a useful test.
 
-            This expectation works on both categorical and continuous partitions. See notes below for details.
+    This expectation works on both categorical and continuous partitions. See notes below for details.
 
-            ``expect_column_kl_divergence_to_be_less_than`` is a \
-            :func:`column_aggregate_expectation <great_expectations.dataset.MetaDataset.column_aggregate_expectation>`.
+    expect_column_kl_divergence_to_be_less_than is a \
+    [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
-            Args:
-                column (str): \
-                    The column name.
-                partition_object (dict): \
-                    The expected partition object (see :ref:`partition_object`).
-                threshold (float): \
-                    The maximum KL divergence to for which to return `success=True`. If KL divergence is larger than
-                    the\
-                    provided threshold, the test will return `success=False`.
+    Args:
+        column (str): \
+            The column name.
+        partition_object (dict): \
+            The expected partition object (see [partition_object](https://docs.greatexpectations.io/docs/reference/expectations/distributional_expectations/#partition-objects)).
+        threshold (float): \
+            The maximum KL divergence to for which to return success=True. If KL divergence is larger than the \
+            provided threshold, the test will return success=False.
 
-            Keyword Args:
-                internal_weight_holdout (float between 0 and 1 or None): \
-                    The amount of weight to split uniformly among zero-weighted partition bins.
-                    internal_weight_holdout \
-                    provides a mechanisms to make the test less strict by assigning positive weights to values
-                    observed in \
-                    the data for which the partition explicitly expected zero weight. With no internal_weight_holdout, \
-                    any value observed in such a region will cause KL divergence to rise to +Infinity.\
-                    Defaults to 0.
-                tail_weight_holdout (float between 0 and 1 or None): \
-                    The amount of weight to add to the tails of the histogram. Tail weight holdout is split evenly
-                    between\
-                    (-Infinity, min(partition_object['bins'])) and (max(partition_object['bins']), +Infinity). \
-                    tail_weight_holdout provides a mechanism to make the test less strict by assigning positive
-                    weights to \
-                    values observed in the data that are not present in the partition. With no tail_weight_holdout, \
-                    any value observed outside the provided partition_object will cause KL divergence to rise to
-                    +Infinity.\
-                    Defaults to 0.
-                bucketize_data (boolean): If True, then continuous data will be bucketized before evaluation. Setting
-                    this parameter to false allows evaluation of KL divergence with a None partition object for
-                    profiling
-                    against discrete data.
+    Keyword Args:
+        internal_weight_holdout (float between 0 and 1 or None): \
+            The amount of weight to split uniformly among zero-weighted partition bins. internal_weight_holdout \
+            provides a mechanisms to make the test less strict by assigning positive weights to values \
+            observed in \
+            the data for which the partition explicitly expected zero weight. With no internal_weight_holdout, \
+            any value observed in such a region will cause KL divergence to rise to +Infinity. Defaults to 0.
+        tail_weight_holdout (float between 0 and 1 or None): \
+            The amount of weight to add to the tails of the histogram. Tail weight holdout is split evenly \
+            between (-Infinity, min(partition_object['bins'])) and (max(partition_object['bins']), +Infinity). \
+            tail_weight_holdout provides a mechanism to make the test less strict by assigning positive \
+            weights to \
+            values observed in the data that are not present in the partition. With no tail_weight_holdout, \
+            any value observed outside the provided partition_object will cause KL divergence to rise to +Infinity. \
+            Defaults to 0.
+        bucketize_data (boolean): If True, then continuous data will be bucketized before evaluation. Setting \
+            this parameter to false allows evaluation of KL divergence with a None partition object for \
+            profiling against discrete data.
 
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
-            Other Parameters:
-                result_format (str or None): \
-                    Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                    For more detail, see :ref:`result_format <result_format>`.
-                include_config (boolean): \
-                    If True, then include the expectation config as part of the result object. \
-                    For more detail, see :ref:`include_config`.
-                catch_exceptions (boolean or None): \
-                    If True, then catch exceptions and include them as part of the result object. \
-                    For more detail, see :ref:`catch_exceptions`.
-                meta (dict or None): \
-                    A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-                    modification. For more detail, see :ref:`meta`.
+    Returns:
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-            Returns:
-                An ExpectationSuiteValidationResult
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
 
-                Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-                :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+    Notes:
+        * observed_value field in the result object is customized for this expectation to be a float \
+          representing the true KL divergence (relative entropy) or None if the value is calculated \
+          as infinity, -infinity, or NaN
+        * details.observed_partition in the result object is customized for this expectation to be a \
+          dict representing the partition observed in the data
+        * details.expected_partition in the result object is customized for this expectation to be a \
+          dict representing the partition against which the data were compared, after applying \
+          specified weight holdouts
 
-            Notes:
-                These fields in the result object are customized for this expectation:
-                ::
+        If the partition_object is categorical, this expectation will expect the values in column to also be \
+        categorical.
 
-                    {
-                      "observed_value": (float) The true KL divergence (relative entropy) or None if the value is \
-                      calculated as infinity, -infinity, or NaN
-                      "details": {
-                        "observed_partition": (dict) The partition observed in the data
-                        "expected_partition": (dict) The partition against which the data were compared,
-                                                after applying specified weight holdouts.
-                      }
-                    }
+        * If the column includes values that are not present in the partition, the tail_weight_holdout \
+          will be equally split among those values, providing a mechanism to weaken the strictness of the \
+          expectation (otherwise, relative entropy would immediately go to infinity).
+        * If the partition includes values that are not present in the column, the test will simply include \
+          zero weight for that value.
 
-                If the partition_object is categorical, this expectation will expect the values in column to also be \
-                categorical.
+        If the partition_object is continuous, this expectation will discretize the values in the column according \
+        to the bins specified in the partition_object, and apply the test to the resulting distribution.
 
-                    * If the column includes values that are not present in the partition, the tail_weight_holdout
-                    will be \
-                    equally split among those values, providing a mechanism to weaken the strictness of the
-                    expectation \
-                    (otherwise, relative entropy would immediately go to infinity).
-                    * If the partition includes values that are not present in the column, the test will simply
-                    include \
-                    zero weight for that value.
+        * The internal_weight_holdout and tail_weight_holdout parameters provide a mechanism to weaken the \
+          expectation, since an expected weight of zero would drive relative entropy to be infinite if any data \
+          are observed in that interval.
+        * If internal_weight_holdout is specified, that value will be distributed equally among any intervals \
+          with weight zero in the partition_object.
+        * If tail_weight_holdout is specified, that value will be appended to the tails of the bins \
+          ((-Infinity, min(bins)) and (max(bins), Infinity).
 
-                If the partition_object is continuous, this expectation will discretize the values in the column
-                according \
-                to the bins specified in the partition_object, and apply the test to the resulting distribution.
-
-                    * The internal_weight_holdout and tail_weight_holdout parameters provide a mechanism to weaken the \
-                    expectation, since an expected weight of zero would drive relative entropy to be infinite if any
-                    data \
-                    are observed in that interval.
-                    * If internal_weight_holdout is specified, that value will be distributed equally among any
-                    intervals \
-                    with weight zero in the partition_object.
-                    * If tail_weight_holdout is specified, that value will be appended to the tails of the bins \
-                    ((-Infinity, min(bins)) and (max(bins), Infinity).
-
-              If relative entropy/kl divergence goes to infinity for any of the reasons mentioned above, the observed
-              value\
-              will be set to None. This is because inf, -inf, Nan, are not json serializable and cause some json
-              parsers to\
-              crash when encountered. The python None token will be serialized to null in json.
-
-            See also:
-                :func:`expect_column_chisquare_test_p_value_to_be_greater_than \
-                <great_expectations.dataset.dataset.Dataset.expect_column_unique_value_count_to_be_between>`
-
-                :func:`expect_column_bootstrapped_ks_test_p_value_to_be_greater_than \
-                <great_expectations.dataset.dataset.Dataset.expect_column_unique_value_count_to_be_between>`
-
-            """
+        If relative entropy/kl divergence goes to infinity for any of the reasons mentioned above, the observed \
+        value will be set to None. This is because inf, -inf, Nan, are not json serializable and cause some json \
+        parsers to crash when encountered. The python None token will be serialized to null in json.
+    """
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "tags": ["core expectation", "column aggregate expectation"],
+        "tags": [
+            "core expectation",
+            "column aggregate expectation",
+            "distributional expectation",
+        ],
         "contributors": ["@great_expectations"],
         "requirements": [],
         "has_full_test_suite": True,
@@ -1156,9 +1129,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
-        """
-        Rendering function that is utilized by GE Cloud Front-end
-        """
         (
             header_template_str,
             header_params_with_json_schema,

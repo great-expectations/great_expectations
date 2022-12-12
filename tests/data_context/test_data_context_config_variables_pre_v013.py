@@ -2,7 +2,7 @@ import os
 
 from ruamel.yaml import YAML
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigSchema,
@@ -46,10 +46,10 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     expected_config_commented_map.pop("anonymous_usage_statistics")
 
     # instantiate data_context twice to go through cycle of loading config from file then saving
-    context = ge.data_context.DataContext(context_path)
+    context = gx.data_context.DataContext(context_path)
     context._save_project_config()
     context_config_commented_map = dataContextConfigSchema.dump(
-        ge.data_context.DataContext(context_path)._project_config
+        gx.data_context.DataContext(context_path)._project_config
     )
     context_config_commented_map.pop("anonymous_usage_statistics")
 

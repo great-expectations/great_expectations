@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 from freezegun import freeze_time
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -105,7 +105,7 @@ class CustomPandasDataset(PandasDataset):
 
 def test_custom_class():
     script_path = os.path.dirname(os.path.realpath(__file__))
-    df = ge.read_csv(
+    df = gx.read_csv(
         script_path + "/test_sets/Titanic.csv", dataset_class=CustomPandasDataset
     )
     df.set_default_expectation_argument("result_format", "COMPLETE")
@@ -193,7 +193,7 @@ def test_validate(empty_data_context):
 
     with mock.patch("uuid.uuid1") as uuid:
         uuid.return_value = "1234"
-        my_df = ge.read_csv(
+        my_df = gx.read_csv(
             file_relative_path(__file__, "./test_sets/Titanic.csv"),
             expectation_suite=my_expectation_suite,
         )
@@ -281,7 +281,7 @@ def test_validate_with_invalid_result_catch_exceptions_false(empty_data_context)
 
     with mock.patch("uuid.uuid1") as uuid:
         uuid.return_value = "1234"
-        my_df = ge.read_csv(
+        my_df = gx.read_csv(
             file_relative_path(__file__, "./test_sets/Titanic.csv"),
             expectation_suite=my_expectation_suite,
         )
@@ -309,7 +309,7 @@ def test_validate_with_invalid_result(empty_data_context):
 
     with mock.patch("uuid.uuid1") as uuid:
         uuid.return_value = "1234"
-        my_df = ge.read_csv(
+        my_df = gx.read_csv(
             file_relative_path(__file__, "./test_sets/Titanic.csv"),
             expectation_suite=my_expectation_suite,
         )
@@ -336,11 +336,11 @@ def test_validate_with_invalid_result(empty_data_context):
 
 def test_validate_catch_non_existent_expectation(empty_data_context):
     context: DataContext = empty_data_context
-    df = ge.dataset.PandasDataset({"x": [1, 2, 3, 4, 5]})
+    df = gx.dataset.PandasDataset({"x": [1, 2, 3, 4, 5]})
 
     validation_config_non_existent_expectation = ExpectationSuite(
         expectation_suite_name="default",
-        meta={"great_expectations_version": ge.__version__},
+        meta={"great_expectations_version": gx.__version__},
         expectations=[
             ExpectationConfiguration(
                 expectation_type="non_existent_expectation", kwargs={"column": "x"}
@@ -359,11 +359,11 @@ def test_validate_catch_non_existent_expectation(empty_data_context):
 
 def test_validate_catch_invalid_parameter(empty_data_context):
     context: DataContext = empty_data_context
-    df = ge.dataset.PandasDataset({"x": [1, 2, 3, 4, 5]})
+    df = gx.dataset.PandasDataset({"x": [1, 2, 3, 4, 5]})
 
     validation_config_invalid_parameter = ExpectationSuite(
         expectation_suite_name="default",
-        meta={"great_expectations_version": ge.__version__},
+        meta={"great_expectations_version": gx.__version__},
         expectations=[
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_between",
@@ -440,20 +440,20 @@ def test_stats_mixed_expectations():
 class TestIO(unittest.TestCase):
     def test_read_csv(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_csv(
+        df = gx.read_csv(
             script_path + "/test_sets/Titanic.csv",
         )
 
     def test_read_json(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_json(
+        df = gx.read_json(
             script_path + "/test_sets/test_json_data_file.json",
         )
         assert df["x"][0] == "i"
         assert isinstance(df, PandasDataset)
         assert sorted(list(df.keys())) == ["x", "y", "z"]
 
-        df = ge.read_json(
+        df = gx.read_json(
             script_path + "/test_sets/nested_test_json_data_file.json",
             accessor_func=lambda x: x["data"],
         )
@@ -463,11 +463,11 @@ class TestIO(unittest.TestCase):
 
     @pytest.mark.skipif(
         not is_library_loadable(library_name="openpyxl"),
-        reason="GE uses pandas to read excel files, which requires openpyxl",
+        reason="GX uses pandas to read excel files, which requires openpyxl",
     )
     def test_read_excel(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_excel(
+        df = gx.read_excel(
             script_path + "/test_sets/Titanic_multi_sheet.xlsx", engine="openpyxl"
         )
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
@@ -477,14 +477,14 @@ class TestIO(unittest.TestCase):
         # We will test with both options to ensure that the versions are correct.
         pandas_version = pd.__version__
         if re.match(r"0\.2[012]\.", pandas_version) is not None:
-            dfs_dict = ge.read_excel(
+            dfs_dict = gx.read_excel(
                 script_path + "/test_sets/Titanic_multi_sheet.xlsx",
                 sheetname=None,
                 engine="openpyxl",
             )
 
         else:
-            dfs_dict = ge.read_excel(
+            dfs_dict = gx.read_excel(
                 script_path + "/test_sets/Titanic_multi_sheet.xlsx",
                 sheet_name=None,
                 engine="openpyxl",
@@ -496,7 +496,7 @@ class TestIO(unittest.TestCase):
 
     def test_read_table(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_table(script_path + "/test_sets/Titanic.csv", sep=",")
+        df = gx.read_table(script_path + "/test_sets/Titanic.csv", sep=",")
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
@@ -515,7 +515,7 @@ class TestIO(unittest.TestCase):
                 pytest.skip("Skipping because of old pandas version.")
 
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_feather(script_path + "/test_sets/Titanic.feather")
+        df = gx.read_feather(script_path + "/test_sets/Titanic.feather")
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
@@ -547,13 +547,13 @@ class TestIO(unittest.TestCase):
                 pytest.skip("Pandas version < 23 is no longer compatible with pyarrow")
 
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_parquet(script_path + "/test_sets/Titanic.parquet")
+        df = gx.read_parquet(script_path + "/test_sets/Titanic.parquet")
         assert df["Name"][1] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
     def test_read_pickle(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_pickle(
+        df = gx.read_pickle(
             script_path + "/test_sets/Titanic.pkl",
         )
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
@@ -561,7 +561,7 @@ class TestIO(unittest.TestCase):
 
     def test_read_sas(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_sas(
+        df = gx.read_sas(
             script_path + "/test_sets/Titanic.sas7bdat",
             encoding="latin-1",
         )

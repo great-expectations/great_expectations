@@ -85,7 +85,7 @@ def test_parse_evaluation_parameter():
         == 9
     )
 
-    # Non GE URN syntax fails
+    # Non GX URN syntax fails
     with pytest.raises(EvaluationParameterError) as err:
         parse_evaluation_parameter("urn:ieee:not_ge * 10", {"urn:ieee:not_ge": 1})
     assert "Parse Failure" in str(err.value)

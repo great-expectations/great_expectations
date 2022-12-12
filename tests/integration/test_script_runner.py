@@ -1853,7 +1853,7 @@ def _execute_integration_test(
     try:
         base_dir = file_relative_path(__file__, "../../")
         os.chdir(base_dir)
-        # Ensure GE is installed in our environment
+        # Ensure GX is installed in our environment
         installed_packages = [pkg.key for pkg in pkg_resources.working_set]
         if "great-expectations" not in installed_packages:
             execute_shell_command("pip install .")

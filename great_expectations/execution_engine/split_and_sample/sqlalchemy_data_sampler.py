@@ -5,7 +5,7 @@ from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine.split_and_sample.data_sampler import (
     DataSampler,
 )
-from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
 try:
     import sqlalchemy as sa
@@ -51,7 +51,7 @@ class SqlAlchemyDataSampler(DataSampler):
 
         # Split clause should be permissive of all values if not supplied.
         if where_clause is None:
-            if execution_engine.dialect_name == GESqlDialect.SQLITE:
+            if execution_engine.dialect_name == GXSqlDialect.SQLITE:
                 where_clause = sa.text("1 = 1")
             else:
                 where_clause = sa.true()
@@ -61,7 +61,7 @@ class SqlAlchemyDataSampler(DataSampler):
         # SQLalchemy's semantics for LIMIT are different than normal WHERE clauses,
         # so the business logic for building the query needs to be different.
         dialect_name: str = execution_engine.dialect_name
-        if dialect_name == GESqlDialect.ORACLE:
+        if dialect_name == GXSqlDialect.ORACLE:
             # TODO: AJB 20220429 WARNING THIS oracle dialect METHOD IS NOT COVERED BY TESTS
             # limit doesn't compile properly for oracle so we will append rownum to query string later
             raw_query: Selectable = (
@@ -79,7 +79,7 @@ class SqlAlchemyDataSampler(DataSampler):
             )
             query += "\nAND ROWNUM <= %d" % batch_spec["sampling_kwargs"]["n"]
             return query
-        elif dialect_name == GESqlDialect.MSSQL:
+        elif dialect_name == GXSqlDialect.MSSQL:
             # Note that this code path exists because the limit parameter is not getting rendered
             # successfully in the resulting mssql query.
             selectable_query: Selectable = (

@@ -48,7 +48,7 @@ function codeImport () {
         meta
       )
       if (!nameMeta) {
-          continue
+        continue
       }
 
       let name = nameMeta.groups.snippetName

@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from typing import Callable, Dict, Tuple
 
 import pytest
@@ -12,6 +13,8 @@ from great_expectations.experimental.datasources.metadatasource import MetaDatas
 
 LOGGER = logging.getLogger(__name__)
 
+from contextlib import contextmanager
+
 from great_expectations.core.batch import BatchData
 from great_expectations.core.batch_spec import (
     BatchMarkers,
@@ -19,13 +22,50 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.experimental.datasources.sources import _SourceFactories
 
+# This is the default min/max time that we are using in our mocks.
+# They are made global so our tests can reference them directly.
+DEFAULT_MIN_DT = datetime(2021, 1, 1, 0, 0, 0)
+DEFAULT_MAX_DT = datetime(2022, 12, 31, 0, 0, 0)
+
+
+class _MockConnection:
+    def execute(self, query):
+        """Execute a query over a sqlalchemy engine connection.
+
+        Currently this mock assumes the query is always of the form:
+        "select min(col), max(col) from table"
+        where col is a datetime column since that's all that's necessary.
+        This can be generalized if needed.
+
+        Args:
+            query: The SQL query to execute.
+        """
+        return [(DEFAULT_MIN_DT, DEFAULT_MAX_DT)]
+
+
+class _MockSaEngine:
+    @contextmanager
+    def connect(self):
+        """A contextmanager that yields a _MockConnection"""
+        yield _MockConnection()
+
 
 def sqlachemy_execution_engine_mock_cls(
     validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None]
 ):
+    """Creates a mock gx sql alchemy engine class
+
+    Args:
+        validate_batch_spec: A hook that can be used to validate the generated the batch spec
+            passed into get_batch_data_and_markers
+    """
+
     class MockSqlAlchemyExecutionEngine(SqlAlchemyExecutionEngine):
         def __init__(self, *args, **kwargs):
-            pass
+            # We should likely let the user pass in an engine. In a SqlAlchemyExecutionEngine used in
+            # non-mocked code the engine property is of the type:
+            # from sqlalchemy.engine import Engine as SaEngine
+            self.engine = _MockSaEngine()
 
         def get_batch_data_and_markers(  # type: ignore[override]
             self, batch_spec: SqlAlchemyDatasourceBatchSpec
