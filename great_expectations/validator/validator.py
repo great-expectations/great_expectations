@@ -1346,13 +1346,18 @@ class Validator:
         return self.default_expectation_args
 
     @property
-    def ge_cloud_mode(self) -> bool:
+    def cloud_mode(self) -> bool:
         """
-        Wrapper around ge_cloud_mode property of associated Data Context
+        Wrapper around cloud_mode property of associated Data Context
         """
         if self._data_context:
-            return self._data_context.ge_cloud_mode
+            return self._data_context.cloud_mode
         return False
+
+    @property
+    def ge_cloud_mode(self) -> bool:
+        # Deprecated 0.15.37
+        return self.cloud_mode
 
     @property
     def default_expectation_args(self) -> dict:
@@ -1549,7 +1554,7 @@ class Validator:
         )
         if filepath is None and self._data_context is not None:
             self._data_context.save_expectation_suite(expectation_suite)
-            if self.ge_cloud_mode:
+            if self.cloud_mode:
                 updated_suite = self._data_context.get_expectation_suite(
                     ge_cloud_id=str(expectation_suite.ge_cloud_id)
                 )

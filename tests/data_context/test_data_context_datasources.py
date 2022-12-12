@@ -63,8 +63,8 @@ def test_data_context_instantiates_ge_cloud_store_backend_with_cloud_config(
     context = BaseDataContext(
         project_config=data_context_config_with_datasources,
         context_root_dir=str(project_path),
-        ge_cloud_mode=True,
-        ge_cloud_config=ge_cloud_config,
+        cloud_mode=True,
+        cloud_config=ge_cloud_config,
     )
 
     assert isinstance(context._datasource_store.store_backend, GXCloudStoreBackend)
@@ -84,7 +84,7 @@ def test_data_context_instantiates_inline_store_backend_with_filesystem_config(
     context = BaseDataContext(
         project_config=data_context_config_with_datasources,
         context_root_dir=str(project_path),
-        ge_cloud_mode=False,
+        cloud_mode=False,
     )
 
     assert isinstance(context._datasource_store.store_backend, InlineStoreBackend)

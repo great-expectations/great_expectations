@@ -87,7 +87,7 @@ module.exports = {
           position: 'right',
           items: [
             {
-              label: 'GX ClOUD',
+              label: 'GX CLOUD',
               to: 'https://greatexpectations.io/gx-cloud'
             },
             {
