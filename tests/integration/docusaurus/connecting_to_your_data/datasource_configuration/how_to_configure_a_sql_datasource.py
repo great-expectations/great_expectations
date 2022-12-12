@@ -57,12 +57,12 @@ def validate_universal_config_elements():
 
 def section_5_add_the_sqlalchemy_execution_engine_to_your_datasource_configuration():
     datasource_config: dict = {
+        # <snippet name="sql datasource define execution_engine class_name and module_name">
         "execution_engine": {
-            # <snippet name="sql datasource define execution_engine class_name and module_name>"
             "class_name": "SqlAlchemyExecutionEngine",
             "module_name": "great_expectations.execution_engine",
-            # </snippet>
         },
+        # </snippet>
     }
     for full_config in (
         get_full_config_sql_configured_datasource(),
@@ -80,7 +80,7 @@ def section_5_add_the_sqlalchemy_execution_engine_to_your_datasource_configurati
         "execution_engine": {
             "class_name": "SqlAlchemyExecutionEngine",
             "module_name": "great_expectations.execution_engine",
-            # <snippet name="sql datasource define CONNECTION_STRING>"
+            # <snippet name="sql datasource define CONNECTION_STRING">
             "connection_string": CONNECTION_STRING,
             # </snippet>
         },
@@ -300,7 +300,7 @@ def section_8_configure_your_data_connectors_data_assets__configured():
                         "schema_name": "main",
                     },
                     # </snippet>
-                    # </snippet name="configured sql data asset multi-batch">
+                    # <snippet name="configured sql data asset multi batch">
                     "yellow_tripdata_sample_2020_by_year_and_month": {
                         "table_name": "yellow_tripdata_sample_2020",
                         "schema_name": "main",
@@ -309,6 +309,7 @@ def section_8_configure_your_data_connectors_data_assets__configured():
                             "column_name": "pickup_datetime",
                         },
                     },
+                    # </snippet>
                 },
             },
         },
