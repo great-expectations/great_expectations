@@ -367,9 +367,14 @@ class ExpectationValidationGraph:
         self,
         execution_engine: ExecutionEngine,
         configuration: ExpectationConfiguration,
+        graph: Optional[ValidationGraph] = None,
     ) -> None:
         self._configuration = configuration
-        self._graph = ValidationGraph(execution_engine=execution_engine)
+
+        if graph is None:
+            graph = ValidationGraph(execution_engine=execution_engine)
+
+        self._graph = graph
 
     @property
     def configuration(self) -> ExpectationConfiguration:

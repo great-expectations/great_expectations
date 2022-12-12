@@ -74,6 +74,7 @@ def expect_column_values_to_be_unique_expectation_validation_graph(
     return ExpectationValidationGraph(
         execution_engine=execution_engine,
         configuration=expect_column_values_to_be_unique_expectation_config,
+        graph=None,
     )
 
 
