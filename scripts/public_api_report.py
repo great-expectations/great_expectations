@@ -36,82 +36,23 @@ class DocExampleParser:
         self.repo_root = repo_root
         self.paths = paths
 
-    def retrieve_classes_methods_and_functions_imported(self):
-        """Retrieve all class, method + functions imported in test examples."""
 
-        # For each path, import and get classes, methods and functions.
-        for path in self.paths:
-            logger.debug(f"Retrieving imports from path: {path}")
-            imported_module = self._import_file_as_module(filepath=path)
-            classes = self._list_classes_imported_in_module(module=imported_module)
-            methods = self._list_methods_imported_in_module(module=imported_module)
-            functions = self._list_functions_imported_in_module(module=imported_module)
-
-            print("Classes:", classes)
-            print("Methods:", methods)
-            print("Functions:", functions)
-
-
-
-
-
-    def retrieve_definitions(self):
+    def retrieve_all_usages_in_file(self, filepath: pathlib.Path):
         """Retrieve all class, method + functions used in test examples."""
-        filename = "tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py"
-        # filename = "great_expectations/data_context/data_context/abstract_data_context.py"
-        filepath = self.repo_root / filename
 
-
-        # self._get_and_print_ast(filepath=filepath)
-        # self._import_file_as_module(filepath=filepath)
         tree = self._parse_file_to_ast_tree(filepath=filepath)
         function_calls = self._list_all_function_calls(tree=tree)
         function_names = self._get_function_names(calls=function_calls)
         print(function_names)
 
-
-    def list_all_class_imports(self):
-        raise NotImplementedError
-        # filename = pathlib.Path("tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py")
-        # filepath = self.repo_root / filename
-        # tree = self._parse_file_to_ast_tree(filepath=filepath)
-        # print(astunparse.dump(tree))
-        #
-        # imports = []
-        #
-        # for node in ast.walk(tree):
-        #     if isinstance(node, ast.ImportFrom):
-        #         pass
-        #     elif isinstance(node, ast.Import):
-        #         imports.append(node)
-        #
-        # return imports
-
-
-    def _import_file_as_module(self, filepath: pathlib.Path) -> ModuleType:
-
-        # TODO: Clean up and only include necessary steps below:
-        loader = importlib.machinery.SourceFileLoader('mymodule', str(filepath))
-        spec = importlib.util.spec_from_loader('mymodule', loader)
-        module = importlib.util.module_from_spec(spec)
-        sys.modules["mymodule"] = module
-        spec.loader.exec_module(module)
-        members = inspect.getmembers(module)
-        return module
+        gx_imports = self._list_all_gx_imports(tree=tree)
+        import_names = self._get_gx_import_names(imports=gx_imports)
+        print(import_names)
 
 
 
-
-    def _get_module_name(self, filepath: pathlib.Path) -> None:
-        print(inspect.getmodulename(str(filepath)))
-
-
-
-    def _get_and_print_ast(self, filepath: pathlib.Path) -> None:
-        with open(self.repo_root / filepath) as f:
-            file_contents: str = f.read()
-
-        tree = ast.parse(file_contents)
+    def _print_ast(self, tree: ast.AST) -> None:
+        """Pretty print an AST tree."""
         print(astunparse.dump(tree))
 
 
@@ -124,51 +65,8 @@ class DocExampleParser:
 
 
 
-    def _list_classes_defined_in_file(self, filepath: pathlib.Path) -> List[ast.ClassDef]:
-        # TODO: Make this return with dotted path, not just str
-        with open(self.repo_root / filepath) as f:
-            file_contents: str = f.read()
-
-        tree = ast.parse(file_contents)
-
-        class_defs = []
-
-        for node in ast.walk(tree):
-            if isinstance(node, ast.ClassDef):
-                class_defs.append(node)
-
-        return class_defs
-
-
-    def _list_classes_imported_in_module(self, module: ModuleType) -> str: # TODO: Placeholder type
-        # TODO: Docstring
-        return inspect.getmembers(module, inspect.isclass)
-
-
-    def _list_methods_imported_in_module(self, module: ModuleType) -> str: # TODO: Placeholder type
-        # TODO: Docstring
-        return inspect.getmembers(module, inspect.ismethod)
-
-
-    def _list_functions_imported_in_module(self, module: ModuleType) -> str: # TODO: Placeholder type
-        # TODO: Docstring
-        return inspect.getmembers(module, inspect.isfunction)
-
-
-
-    def _list_classes_imported_in_file(self, filepath: pathlib.Path) -> List[ast.ClassDef]:
-        # TODO: Make this return with dotted path, not just str
-        module = self._import_file_as_module(filepath=filepath)
-        classes = inspect.getmembers(module, inspect.isclass)
-        return classes
-
-
-
-    def _list_all_gx_imports_in_file(self, filepath: pathlib.Path) -> List[Union[ast.Import, ast.ImportFrom]]:
+    def _list_all_gx_imports(self, tree: ast.AST) -> List[Union[ast.Import, ast.ImportFrom]]:
         """Get all of the GX related imports in a file."""
-
-        tree = self._parse_file_to_ast_tree(filepath=filepath)
-
 
         imports = []
 
@@ -183,11 +81,22 @@ class DocExampleParser:
         return imports
 
 
-    def _list_module_level_functions_in_file(self, filepath: pathlib.Path) -> List[ast.FunctionDef]:
-        pass
+    def _get_gx_import_names(self, imports: List[Union[ast.Import, ast.ImportFrom]]) -> Set[str]:
 
-    def _list_methods_in_class(self, class_definition: ast.ClassDef) -> List[ast.FunctionDef]:
-        pass
+        names = []
+        for import_ in imports:
+            if not isinstance(import_, (ast.Import, ast.ImportFrom)):
+                raise TypeError(f"`imports` should only contain ast.Import, ast.ImportFrom types, you provided {type(import_)}")
+
+            # Generally there is only 1 alias,
+            # but we add all names if there are multiple aliases to be safe.
+            names.extend([n.name for n in import_.names])
+
+        return set(names)
+
+
+
+
 
     def _list_all_function_calls(self, tree: ast.AST) -> List[ast.Call]:
         calls = []
@@ -207,6 +116,31 @@ class DocExampleParser:
 
         return set(names)
 
+
+
+class GXCodeParser:
+    def __init__(self, repo_root: pathlib.Path, paths: List[pathlib.Path]) -> None:
+        self.repo_root = repo_root
+        self.paths = paths
+
+    def _list_class_definitions(self, tree: ast.AST) -> List[ast.ClassDef]:
+        # TODO: Make this return with dotted path, not just str
+
+        class_defs = []
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ClassDef):
+                class_defs.append(node)
+
+        return class_defs
+
+    def _list_function_definitions(self, tree: ast.AST) -> List[Union[ast.FunctionDef, ast.AsyncFunctionDef]]:
+        function_definitions = []
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef) or isinstance(node, ast.AsyncFunctionDef):
+                function_definitions.append(node)
+
+        return function_definitions
 
 
 class PublicAPIChecker:
@@ -305,18 +239,20 @@ def main():
     # filename = pathlib.Path(
     #     "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py")
     # filepath = repo_root / filename
-    # print(doc_example_parser._list_all_gx_imports_in_file(filepath=filepath))
+    # print(doc_example_parser._list_all_gx_imports(filepath=filepath))
 
-    # filename = pathlib.Path(
-    #     "scripts/sample_test_script.py")
-    # filepath = _repo_root() / filename
+    filename = pathlib.Path(
+        "scripts/sample_test_script.py")
+    filepath = _repo_root() / filename
     # print(doc_example_parser._import_file_as_module(filepath=filepath))
     # print(doc_example_parser._list_classes_imported_in_file(filepath=filepath))
 
     doc_example_parser = DocExampleParser(repo_root=_repo_root(), paths=_default_paths())
-    doc_example_parser.retrieve_classes_methods_and_functions_imported()
+    doc_example_parser.retrieve_all_usages_in_file(filepath=filepath)
 
-
+        # filename = "tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py"
+        # # filename = "great_expectations/data_context/data_context/abstract_data_context.py"
+        # filepath = self.repo_root / filename
 
 if __name__ == "__main__":
     main()
