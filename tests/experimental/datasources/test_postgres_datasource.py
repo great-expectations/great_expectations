@@ -496,7 +496,7 @@ def test_sort_batch_list_by_unknown_key(create_source):
 @pytest.mark.unit
 def test_data_source_json_has_properties(create_source):
     with create_source(lambda _: None) as source:
-        assert type(TableAsset.order_by) == property, (
+        assert isinstance(TableAsset.order_by, property), (
             "This test assumes TableAsset.order_by is a property. If it is not we "
             "should update this test",
         )
@@ -511,7 +511,7 @@ def test_data_source_json_has_properties(create_source):
 @pytest.mark.unit
 def test_data_source_str_has_properties(create_source):
     with create_source(lambda _: None) as source:
-        assert type(TableAsset.order_by) == property, (
+        assert isinstance(TableAsset.order_by, property), (
             "This test assumes TableAsset.order_by is a property. If it is not we "
             "should update this test",
         )
@@ -526,7 +526,7 @@ def test_data_source_str_has_properties(create_source):
 @pytest.mark.unit
 def test_datasource_dict_has_properties(create_source):
     with create_source(lambda _: None) as source:
-        assert type(TableAsset.order_by) == property, (
+        assert isinstance(TableAsset.order_by, property), (
             "This test assumes TableAsset.order_by is a property. If it is not we "
             "should update this test",
         )
@@ -535,4 +535,4 @@ def test_datasource_dict_has_properties(create_source):
             ["year", "month"]
         )
         source_dict = source.dict()
-        assert type(source_dict["assets"]["my_asset"]["order_by"]) == list
+        assert isinstance(source_dict["assets"]["my_asset"]["order_by"], list)

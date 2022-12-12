@@ -7,6 +7,14 @@ from great_expectations.data_context.util import file_relative_path
 
 @pytest.mark.integration
 def test_run_checkpoint_and_data_doc(empty_data_context):
+    """An integration test for running checkpoints on sqlalchemy datasources.
+
+    This test does the following:
+    1. Creates a brand new datasource using a sqlalchemy backend.
+    2. Creates an expectation suite associated with this datasource.
+    3. Runs the checkpoint and validates that it ran correctly.
+    4. Creates datadocs from the checkpoint run and checks that no errors occurred.
+    """
     db_file = file_relative_path(
         __file__,
         "../../test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db",
@@ -67,9 +75,10 @@ def test_run_checkpoint_and_data_doc(empty_data_context):
 
     # Verify checkpoint runs successfully
     assert checkpoint_result._success, "Running expectation suite failed"
+    number_of_runs = len(checkpoint_result.run_results)
     assert (
-        len(checkpoint_result.run_results) == 1
-    ), "More than 1 run was done when we only expected 1"
+        number_of_runs == 1
+    ), f"{number_of_runs} runs were done when we only expected 1"
 
     # Grab the validation result and verify it is correct
     result = checkpoint_result["run_results"][

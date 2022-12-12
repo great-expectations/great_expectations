@@ -232,13 +232,13 @@ class Batch:
         return self.datasource.execution_engine
 
     @property
-    def batch_markers(self):
+    def batch_markers(self) -> BatchMarkers:
         return self._legacy_batch_markers
 
     @property
-    def batch_spec(self):
+    def batch_spec(self) -> BatchSpec:
         return self._legacy_batch_spec
 
     @property
-    def batch_definition(self):
+    def batch_definition(self) -> BatchDefinition:
         return self._legacy_batch_definition
