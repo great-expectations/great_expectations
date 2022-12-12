@@ -66,7 +66,7 @@ class CloudDataContext(AbstractDataContext):
         cloud_base_url: Optional[str] = None,
         cloud_access_token: Optional[str] = None,
         cloud_organization_id: Optional[str] = None,
-        # Deprecated as of 0.15.37
+        # <GX_RENAME> Deprecated as of 0.15.37
         ge_cloud_base_url: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
@@ -376,7 +376,7 @@ class CloudDataContext(AbstractDataContext):
 
     @property
     def ge_cloud_mode(self) -> bool:
-        # Deprecated 0.15.37
+        # <GX_RENAME> Deprecated 0.15.37
         return self.cloud_mode
 
     def _init_variables(self) -> CloudDataContextVariables:

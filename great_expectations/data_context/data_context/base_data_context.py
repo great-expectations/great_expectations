@@ -173,7 +173,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         runtime_environment: Optional[dict] = None,
         cloud_mode: bool = False,
         cloud_config: Optional[GXCloudConfig] = None,
-        # Deprecated as of 0.15.37
+        # <GX_RENAME> Deprecated as of 0.15.37
         ge_cloud_mode: bool = False,
         ge_cloud_config: Optional[GXCloudConfig] = None,
     ) -> None:
@@ -270,7 +270,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     @property
     def ge_cloud_mode(self) -> bool:
-        # Deprecated 0.15.37
+        # <GX_RENAME> Deprecated 0.15.37
         return self.cloud_mode
 
     def _synchronize_self_with_underlying_data_context(self) -> None:

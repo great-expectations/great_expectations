@@ -230,7 +230,7 @@ class DataContext(BaseDataContext):
         cloud_base_url: Optional[str] = None,
         cloud_access_token: Optional[str] = None,
         cloud_organization_id: Optional[str] = None,
-        # Deprecated as of 0.15.37
+        # <GX_RENAME> Deprecated as of 0.15.37
         ge_cloud_mode: bool = False,
         ge_cloud_base_url: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,

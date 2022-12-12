@@ -230,16 +230,6 @@ class GXCloudIdentifier(DataContextKey):
         self._cloud_id = value
 
     @property
-    def ge_cloud_id(self):
-        # Deprecated 0.15.40
-        return self.cloud_id
-
-    @ge_cloud_id.setter
-    def ge_cloud_id(self, value) -> None:
-        # Deprecated 0.15.40
-        self.cloud_id = value
-
-    @property
     def resource_name(self) -> str:
         return self._resource_name
 
