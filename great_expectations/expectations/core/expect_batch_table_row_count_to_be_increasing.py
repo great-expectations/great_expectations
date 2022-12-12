@@ -167,15 +167,21 @@ class ExpectBatchTableRowCountToBeIncreasing(TableExpectation):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        # print(f'\n[ALEX_TEST] [ExpectBatchTableRowCountToBeIncreasing._validate()] PROVIDED_METRICS:\n{metrics} ; TYPE: {str(type(metrics))}')
+        print(
+            f"\n[ALEX_TEST] [ExpectBatchTableRowCountToBeIncreasing._validate()] PROVIDED_METRICS:\n{metrics} ; TYPE: {str(type(metrics))}"
+        )
         actual_table_row_count = metrics.get("table.row_count")
         # print(f'\n[ALEX_TEST] [ExpectBatchTableRowCountToBeIncreasing._validate()] ACTUAL_TABLE_ROW_COUNT:\n{actual_table_row_count} ; TYPE: {str(type(actual_table_row_count))}')
         # TODO: <Alex>ALEX</Alex>
         multi_batch_actual_table_row_count_values = [
             element[0] for element in actual_table_row_count.values()
         ]
-        # print(f'\n[ALEX_TEST] [ExpectBatchTableRowCountToBeIncreasing._validate()] MULTI_BATCH_ACTUAL_TABLE_ROW_COUNT_VALUES:\n{multi_batch_actual_table_row_count_values} ; TYPE: {str(type(multi_batch_actual_table_row_count_values))}')
-        # print(f'\n[ALEX_TEST] [ExpectBatchTableRowCountToBeIncreasing._validate()] NUM_MULTI_BATCH_ACTUAL_TABLE_ROW_COUNT_VALUES:\n{len(multi_batch_actual_table_row_count_values)} ; TYPE: {str(type(len(multi_batch_actual_table_row_count_values)))}')
+        print(
+            f"\n[ALEX_TEST] [ExpectBatchTableRowCountToBeIncreasing._validate()] MULTI_BATCH_ACTUAL_TABLE_ROW_COUNT_VALUES:\n{multi_batch_actual_table_row_count_values} ; TYPE: {str(type(multi_batch_actual_table_row_count_values))}"
+        )
+        print(
+            f"\n[ALEX_TEST] [ExpectBatchTableRowCountToBeIncreasing._validate()] NUM_MULTI_BATCH_ACTUAL_TABLE_ROW_COUNT_VALUES:\n{len(multi_batch_actual_table_row_count_values)} ; TYPE: {str(type(len(multi_batch_actual_table_row_count_values)))}"
+        )
         success = np.all(np.diff(multi_batch_actual_table_row_count_values) > 0)
         # TODO: <Alex>ALEX</Alex>
 
