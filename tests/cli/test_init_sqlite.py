@@ -8,6 +8,9 @@ from freezegun import freeze_time
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.test_cli import yaml
@@ -368,7 +371,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     assert "Great Expectations connected to your database" in stdout
     assert "This looks like an existing project that" not in stdout
 
-    config = _load_config_file(os.path.join(ge_dir, DataContext.GX_YML))
+    config = _load_config_file(os.path.join(ge_dir, FileDataContext.GX_YML))
     assert "sqlite" in config["datasources"].keys()
 
     context = DataContext(ge_dir)
@@ -391,7 +394,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
 
 
 def _remove_all_datasources(ge_dir):
-    config_path = os.path.join(ge_dir, DataContext.GX_YML)
+    config_path = os.path.join(ge_dir, FileDataContext.GX_YML)
 
     config = _load_config_file(config_path)
     config["datasources"] = {}
