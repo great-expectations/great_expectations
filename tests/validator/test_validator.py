@@ -1,6 +1,6 @@
 import os
 import shutil
-from typing import Any, Dict, List, Set, Union
+from typing import Any, Dict, List, Set, Tuple, Union
 from unittest import mock
 from uuid import UUID
 
@@ -26,6 +26,7 @@ from great_expectations.datasource.data_connector.batch_filter import (
     build_batch_filter,
 )
 from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
 from great_expectations.render import RenderedAtomicContent
 from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import Validator
@@ -1101,3 +1102,81 @@ def test_list_available_expectation_types(
 
     available = validator.list_available_expectation_types()
     assert all(e.startswith("expect_") for e in available)
+
+
+# if we are doing somethign at the Validator.level
+# filter warnings.
+def _context_to_validator_and_expectation_sql(
+    context: DataContext,
+) -> Tuple[Validator, ExpectColumnValuesToBeInSet]:
+    """
+    Helper method used by sql tests in this suite. Takes in a Datacontext and returns a tuble of Validator and
+    Expectation after building a BatchRequest and creating ExpectationSuite.
+    Args:
+        context (DataContext): DataContext to use
+    """
+
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
+        },
+    )
+    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
+        expectation_configuration
+    )
+
+    batch_request = BatchRequest(
+        datasource_name="my_datasource",
+        data_connector_name="my_sql_data_connector",
+        data_asset_name="my_asset",  # this is the name of the table you want to retrieve
+    )
+    context.create_expectation_suite(
+        expectation_suite_name="test_suite", overwrite_existing=True
+    )
+    validator = context.get_validator(
+        batch_request=batch_request, expectation_suite_name="test_suite"
+    )
+    return validator, expectation
+
+
+@pytest.mark.integration
+def test_validator_sql_complete_one_column_name_from_validator(
+    data_context_with_connection_to_animal_names_db,
+):
+    result_format_config: dict = {
+        "result_format": "COMPLETE",
+        "unexpected_index_column_names": ["pk_1"],
+    }
+    (validator, _) = _context_to_validator_and_expectation_sql(
+        context=data_context_with_connection_to_animal_names_db,
+    )
+
+    with pytest.raises(ge_exceptions.InvalidExpectationConfigurationError):
+        result: ExpectationValidationResult = (
+            validator.expect_column_values_to_be_in_set(
+                column="animals",
+                value_set=["cat", "fish", "dog"],
+                result_format=result_format_config,
+            )
+        )
+
+
+@pytest.mark.integration
+def test_validator_id_pk_sql_complete_one_column_name_from_expectation(
+    data_context_with_connection_to_animal_names_db,
+):
+    runtime_configuration: dict = {
+        "result_format": {
+            "result_format": "COMPLETE",
+            "unexpected_index_column_names": ["pk_1"],
+        }
+    }
+    (validator, expectation) = _context_to_validator_and_expectation_sql(
+        context=data_context_with_connection_to_animal_names_db,
+    )
+    with pytest.raises(ge_exceptions.InvalidExpectationConfigurationError):
+        result: ExpectationValidationResult = expectation.validate(
+            validator=validator, runtime_configuration=runtime_configuration
+        )

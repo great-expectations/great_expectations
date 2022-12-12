@@ -19,62 +19,6 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.fixture()
-def reference_checkpoint_config_for_unexpected_column_names() -> dict:
-    """
-    This is a reference checkpoint dict. It is not used by the tests on its own but subsequent functions will add
-    runtime_configurations that will then be tested.
-
-    checkpoint_dict_unexpected_index_column_names_defined_one_column()
-        - adds runtime_configuration where "unexpected_index_column_names": ["pk_1"],
-    checkpoint_dict_unexpected_index_column_names_defined_two_columns()
-        - adds runtime_configuration where "unexpected_index_column_names": ["pk_1", "pk_2"],
-    checkpoint_dict_unexpected_index_column_names_not_defined()
-        - adds runtime_configuration where "unexpected_index_column_names" are not defined
-
-    For more information, look at the docstring for data_context_with_connection_to_animal_names_db() fixture
-
-    """
-    checkpoint_dict: dict = {
-        "name": "my_checkpoint",
-        "config_version": 1.0,
-        "class_name": "Checkpoint",
-        "module_name": "great_expectations.checkpoint",
-        "template_name": None,
-        "run_name_template": "%Y-%M-foo-bar-template-test",
-        "expectation_suite_name": None,
-        "batch_request": None,
-        "action_list": [],
-        "profilers": [],
-        "action_list": [
-            {
-                "name": "store_validation_result",
-                "action": {"class_name": "StoreValidationResultAction"},
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {"class_name": "StoreEvaluationParametersAction"},
-            },
-            {
-                "name": "update_data_docs",
-                "action": {"class_name": "UpdateDataDocsAction"},
-            },
-        ],
-        "validations": [
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_sql_data_connector",
-                    "data_asset_name": "my_asset",
-                },
-                "expectation_suite_name": "animal_names_exp",
-            }
-        ],
-        "runtime_configuration": {},
-    }
-    return checkpoint_dict
-
-
-@pytest.fixture()
 def checkpoint_dict_unexpected_index_column_names_defined_complete(
     reference_checkpoint_config_for_unexpected_column_names,
 ) -> dict:

@@ -1123,6 +1123,32 @@ class Expectation(metaclass=MetaExpectation):
         if not configuration:
             configuration = deepcopy(self.configuration)
 
+        # turn into helper function
+        # check here:
+        if runtime_configuration:
+            runtime_configuration_level_config: Union[
+                dict, str, None
+            ] = runtime_configuration.get("result_format")
+            if isinstance(runtime_configuration_level_config, dict):
+                if runtime_configuration_level_config.get(
+                    "unexpected_index_column_names"
+                ):
+                    raise InvalidExpectationConfigurationError(
+                        "ID/PK cannot be configured at this level. Pleaes configure at Checkpoint level"
+                    )
+
+        # if configuration has stuff
+        expectation_level_result_format_config: Union[
+            dict, str, None
+        ] = configuration.kwargs.get("result_format")
+        if isinstance(expectation_level_result_format_config, dict):
+            if expectation_level_result_format_config.get(
+                "unexpected_index_column_names"
+            ):
+                raise InvalidExpectationConfigurationError(
+                    "ID/PK cannot be configured at this level. Pleaes configure at Checkpoint level"
+                )
+
         configuration.process_evaluation_parameters(
             evaluation_parameters, interactive_evaluation, data_context
         )
