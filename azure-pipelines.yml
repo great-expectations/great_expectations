@@ -462,6 +462,9 @@ stages:
               GX_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
               GX_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
               GX_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'Cloud integration Tests'
 
 
