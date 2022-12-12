@@ -274,7 +274,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
     yellow_trip_pandas_data_context,
 ) -> Validator:
     context: DataContext = yellow_trip_pandas_data_context
-    context._ge_cloud_mode = True
+    context._cloud_mode = True
 
     suite = ExpectationSuite(
         expectation_suite_name="validating_taxi_data",
