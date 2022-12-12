@@ -23,10 +23,6 @@ from great_expectations.rule_based_profiler.helpers.util import (
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.util import deep_filter_properties_iterable
 
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.validator.validator import Validator
-# TODO: <Alex>ALEX</Alex>
-
 from great_expectations.rule_based_profiler.helpers.runtime_environment import (  # isort:skip
     RuntimeEnvironmentVariablesDirectives,
     RuntimeEnvironmentDomainTypeDirectives,
@@ -200,11 +196,9 @@ class DataAssistantRunner:
             self._get_method_signature_parameters_for_variables_directives()
         )
 
-        # TODO: <Alex>ALEX</Alex>
-        func_sig: Signature = Signature(
+        func_sig = Signature(
             parameters=parameters, return_annotation=DataAssistantResult
         )
-        # TODO: <Alex>ALEX</Alex>
         # override the runner docstring with the docstring defined in the implemented DataAssistant child-class
         run.__doc__ = self._data_assistant_cls.__doc__
         gen_func: Callable = create_function(func_signature=func_sig, func_impl=run)

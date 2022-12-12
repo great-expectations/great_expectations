@@ -2,30 +2,20 @@ from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
 from inspect import isabstract
-
-# TODO: <Alex>ALEX</Alex>
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.id_dict import deep_convert_properties_iterable_to_id_dict
-
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.core.metric_domain_types import MetricDomainTypes
-# TODO: <Alex>ALEX</Alex>
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
-
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.rule_based_profiler.altair import AltairDataTypes
-# TODO: <Alex>ALEX</Alex>
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
-from great_expectations.rule_based_profiler.domain_builder import (  # TODO: <Alex>ALEX</Alex>; ColumnDomainBuilder,; ColumnPairDomainBuilder,; DomainBuilder,; MultiColumnDomainBuilder,; TableDomainBuilder,
+from great_expectations.rule_based_profiler.domain_builder import (
     MapMetricColumnDomainBuilder,
 )
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
@@ -49,12 +39,6 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     NumericMetricRangeMultiBatchParameterBuilder,
     ParameterBuilder,
 )
-
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
-#     MetricsComputationResultFormat,
-# )
-# TODO: <Alex>ALEX</Alex>
 from great_expectations.rule_based_profiler.parameter_builder.regex_pattern_string_parameter_builder import (
     RegexPatternStringParameterBuilder,
 )
@@ -72,26 +56,6 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
     RuleBasedProfiler,
 )
 from great_expectations.util import camel_to_snake, measure_execution_time
-
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.validator.metric_configuration import MetricConfiguration
-# TODO: <Alex>ALEX</Alex>
-
-# TODO: <Alex>ALEX</Alex>
-# TODO: <Alex>ALEX</Alex>
-# from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, Union
-# TODO: <Alex>ALEX</Alex>
-
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.validator.validator import Validator
-# TODO: <Alex>ALEX</Alex>
-
-# TODO: <Alex>ALEX</Alex>
-# if TYPE_CHECKING:
-#     from great_expectations.validator.validator import Validator
-# TODO: <Alex>ALEX</Alex>
-
-# noinspection PyMethodParameters
 
 
 class MetaDataAssistant(ABCMeta):
@@ -354,15 +318,12 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 single_batch_mode=False,
                 enforce_numeric_metric=False,
                 replace_nan_with_zero=False,
-                # TODO: <Alex>ALEX</Alex>
                 reduce_scalar_metric=True,
-                # TODO:True <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX</Alex>
-                # reduce_scalar_metric=False,
-                # TODO: <Alex>ALEX</Alex>
                 evaluation_parameter_builder_configs=None,
                 data_context=None,
             )
+
+        # TODO: <Alex>ALEX</Alex>
 
         # TODO: <Alex>ALEX</Alex>
         @staticmethod
@@ -391,6 +352,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             )
 
         # TODO: <Alex>ALEX</Alex>
+
         @staticmethod
         def build_numeric_metric_multi_batch_parameter_builder(
             metric_name: str,
@@ -444,6 +406,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             )
 
         # TODO: <Alex>ALEX</Alex>
+
         @staticmethod
         def build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name: Optional[str] = None,
@@ -749,18 +712,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
         This method uses loaded "Batch" objects to return the mapping between unique "batch_id" and "batch_identifiers".
         """
         batches: Dict[str, Batch] = self._batches
-        # print(f'\n[ALEX_TEST] [DATA_ASSISTANT._BATCH_ID_TO_BATCH_IDENTIFIER_DISPLAY_NAME_MAP()] BATCHES:\n{batches} ; TYPE: {str(type(batches))}')
         if batches is None:
             batches = {}
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # for batch_id, batch in batches.items():
-        #     print(f'\n[ALEX_TEST] [DATA_ASSISTANT._BATCH_ID_TO_BATCH_IDENTIFIER_DISPLAY_NAME_MAP()] BATCH_ID:\n{batch_id} ; TYPE: {str(type(batch_id))}')
-        #     # print(f'\n[ALEX_TEST] [DATA_ASSISTANT._BATCH_ID_TO_BATCH_IDENTIFIER_DISPLAY_NAME_MAP()] BATCH:\n{batch} ; TYPE: {str(type(batch))}')
-        #     print(f'\n[ALEX_TEST] [DATA_ASSISTANT._BATCH_ID_TO_BATCH_IDENTIFIER_DISPLAY_NAME_MAP()] BATCH ; TYPE: {str(type(batch))}')
-        #     print(f'\n[ALEX_TEST] [DATA_ASSISTANT._BATCH_ID_TO_BATCH_IDENTIFIER_DISPLAY_NAME_MAP()] BATCH.BATCH_DEFINITION:\n{batch.batch_definition} ; TYPE: {str(type(batch.batch_definition))}')
-        # TODO: <Alex>ALEX</Alex>
 
         batch_id: str
         batch: Batch

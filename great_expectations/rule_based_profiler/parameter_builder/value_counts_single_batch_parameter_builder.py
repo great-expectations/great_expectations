@@ -165,15 +165,11 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
         weights: np.ndarray = np.asarray(
             column_value_counts_parameter_node[
                 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-            ][
-                0
-            ]  # <ALEX>
+            ][0]
         ) / (
             column_values_nonnull_count_parameter_node[
                 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-            ][
-                0
-            ]  # <ALEX>
+            ][0]
             + NP_EPSILON
         )
 

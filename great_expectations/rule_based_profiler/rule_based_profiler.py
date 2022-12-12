@@ -270,9 +270,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             "RuleBasedProfilerResult" dataclass object, containing essential outputs of profiling.
         """
         # Check to see if the user has disabled progress bars
-        # TODO: <Alex>ALEX</Alex>
-        # disable = False
-        # TODO: <Alex>ALEX</Alex>
+        disable = False
         if self._data_context:
             progress_bars = self._data_context.progress_bars
             # If progress_bars are not present, assume we want them enabled
@@ -283,9 +281,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 if "rule_based_profiler" in progress_bars:
                     disable = not progress_bars["rule_based_profiler"]
 
-        # TODO: <Alex>ALEX</Alex>
-        disable = True
-        # TODO: <Alex>ALEX</Alex>
         effective_variables: Optional[
             ParameterContainer
         ] = self.reconcile_profiler_variables(
@@ -320,7 +315,12 @@ class BaseRuleBasedProfiler(ConfigPeer):
         for rule in pbar_method(
             effective_rules,
             desc="Generating Expectations:",
-            disable=disable,
+            # TODO: <Alex>ALEX</Alex>
+            # disable=disable,
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            disable=True,
+            # TODO: <Alex>ALEX</Alex>
             position=0,
             leave=True,
             bar_format="{desc:25}{percentage:3.0f}%|{bar}{r_bar}",
@@ -438,7 +438,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 rule_output.get_parameter_values_for_fully_qualified_parameter_names_by_domain()
             )
 
-        # print(f'\n[ALEX_TEST] [BaseRuleBasedProfiler.get_parameter_values_for_fully_qualified_parameter_names_by_domain()] VALUES_FOR_FULLY_QUALIFIED_PARAMETER_NAMES_BY_DOMAIN:\n{values_for_fully_qualified_parameter_names_by_domain} ; TYPE: {str(type(values_for_fully_qualified_parameter_names_by_domain))}')
         return values_for_fully_qualified_parameter_names_by_domain
 
     def get_parameter_values_for_fully_qualified_parameter_names_for_domain_id(

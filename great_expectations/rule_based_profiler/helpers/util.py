@@ -159,9 +159,6 @@ def get_batch_ids(
 
     num_batch_ids: int = len(batch_ids)
 
-    # print(f"\n[ALEX_TEST] [RULE_BASED_PROFILER.HELPERS.UTIL.GET_BATCH_IDS()] BATCH_IDS:\n{batch_ids} ; TYPE: {str(type(batch_ids))}")
-    # print(f"\n[ALEX_TEST] [RULE_BASED_PROFILER.HELPERS.UTIL.GET_BATCH_IDS()] NUM_BATCH_IDS:\n{num_batch_ids} ; TYPE: {str(type(num_batch_ids))}")
-    # print(f"\n[ALEX_TEST] [RULE_BASED_PROFILER.HELPERS.UTIL.GET_BATCH_IDS()] LIMIT:\n{limit} ; TYPE: {str(type(limit))}")
     if limit is not None:
         # No need to verify that type of "limit" is "integer", because static type checking already ascertains this.
         if not (0 <= limit <= num_batch_ids):
@@ -171,7 +168,6 @@ def get_batch_ids(
 """
             )
         batch_ids = batch_ids[-limit:]
-    # TODO: <Alex>ALEX</Alex>
 
     if num_batch_ids == 0:
         raise ge_exceptions.ProfilerExecutionError(

@@ -5,11 +5,6 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-
-# TODO: <Alex>ALEX</Alex>
-from great_expectations.core.util import convert_to_json_serializable
-
-# TODO: <Alex>ALEX</Alex>
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     TableExpectation,
@@ -89,11 +84,6 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        # TODO: <Alex>ALEX</Alex>
-        # include_column_name = (
-        #     False if runtime_configuration.get("include_column_name") is False else True
-        # )
-        # TODO: <Alex>ALEX</Alex>
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(configuration.kwargs, ["other_table_name"])
         template_str = "Row count must equal the row count of table $other_table_name."
@@ -219,7 +209,6 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         # print(f'\n[ALEX_TEST] [ExpectTableRowCountToEqualOtherTable._VALIDATE()] PROVIDED_METRICS-0:\n{metrics} ; TYPE: {str(type(metrics))}')
         # TODO: <Alex>ALEX</Alex>
         # metrics = convert_to_json_serializable(data=metrics)
-        # TODO: <Alex>ALEX</Alex>
         # print(f'\n[ALEX_TEST] [ExpectTableRowCountToEqualOtherTable._VALIDATE()] PROVIDED_METRICS-1:\n{metrics} ; TYPE: {str(type(metrics))}')
         # TODO: <Alex>ALEX</Alex>
         table_row_count_self = metrics["table.row_count.self"]

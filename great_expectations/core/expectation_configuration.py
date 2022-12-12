@@ -1388,18 +1388,11 @@ class ExpectationConfiguration(SerializableDictDot):
         runtime_configuration=None,
     ):
         expectation_impl: Expectation = self._get_expectation_impl()
-        # TODO: <Alex>ALEX</Alex>
+        # noinspection PyCallingNonCallable
         return expectation_impl(self).validate(
             validator=validator,
             runtime_configuration=runtime_configuration,
         )
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # return expectation_impl.validate(
-        #     validator=validator,
-        #     runtime_configuration=runtime_configuration,
-        # )
-        # TODO: <Alex>ALEX</Alex>
 
     def metrics_validate(
         self,
@@ -1412,6 +1405,7 @@ class ExpectationConfiguration(SerializableDictDot):
         **kwargs: dict,
     ):
         expectation_impl: Expectation = self._get_expectation_impl()
+        # noinspection PyCallingNonCallable
         # TODO: <Alex>ALEX</Alex>
         return expectation_impl(self).metrics_validate(
             metrics=metrics,

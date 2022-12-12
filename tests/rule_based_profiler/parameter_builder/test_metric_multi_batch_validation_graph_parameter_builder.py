@@ -96,11 +96,6 @@ def test_metric_multi_batch_validation_graph_parameter_builder_bobby(
     )
 
     expected_parameter_node_as_dict: dict = {
-        # TODO: <Alex>ALEX</Alex>
-        # "graph": None,
-        # TODO: <Alex>ALEX</Alex>
-        # "value": None,
-        # "attributed_value": None,
         "details": {
             "metric_configuration": {
                 "domain_kwargs": {},
@@ -108,9 +103,7 @@ def test_metric_multi_batch_validation_graph_parameter_builder_bobby(
                 "metric_value_kwargs": None,
             },
             "num_batches": 3,
-            # TODO: <Alex>ALEX</Alex>
             "graph": graph,
-            # TODO: <Alex>ALEX</Alex>
         },
     }
 
@@ -119,16 +112,5 @@ def test_metric_multi_batch_validation_graph_parameter_builder_bobby(
         domain=domain,
         parameters=parameters,
     )
-    print(
-        f"\n[ALEX_TEST] [TEST_METRIC_MULTI_BATCH_VALIDATION_GRAPH_PARAMETER_BUILDER_BOBBY] PARAMETER_NODE:\n{parameter_node} ; TYPE: {str(type(parameter_node))}"
-    )
-    print(
-        f"\n[ALEX_TEST] [TEST_METRIC_MULTI_BATCH_VALIDATION_GRAPH_PARAMETER_BUILDER_BOBBY] PARAMETER_NODE.DETAILS:\n{parameter_node.details} ; TYPE: {str(type(parameter_node.details))}"
-    )
-
-    # TODO: <Alex>ALEX</Alex>
-    # parameter_node["value"] = None
-    # parameter_node["attributed_value"] = None
-    # TODO: <Alex>ALEX</Alex>
 
     assert parameter_node == expected_parameter_node_as_dict

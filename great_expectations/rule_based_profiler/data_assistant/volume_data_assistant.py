@@ -27,10 +27,6 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.rule_based_profiler.rule import Rule
 
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.validator.validator import Validator
-# TODO: <Alex>ALEX</Alex>
-
 if TYPE_CHECKING:
     from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 

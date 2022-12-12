@@ -7,13 +7,6 @@ MetricValues = Union[
     MetricValue, List[MetricValue], Set[MetricValue], Tuple[MetricValue, ...]
 ]
 MetricComputationDetails = Dict[str, Any]
-# TODO: <Alex>ALEX</Alex>
-# MetricComputationResult = make_dataclass(
-#     "MetricComputationResult", ["graph", "attributed_resolved_metrics", "details"]
-# )
-# TODO: <Alex>ALEX</Alex>
-# TODO: <Alex>ALEX</Alex>
 MetricComputationResult = make_dataclass(
     "MetricComputationResult", ["attributed_resolved_metrics", "details"]
 )
-# TODO: <Alex>ALEX</Alex>

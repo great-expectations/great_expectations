@@ -209,16 +209,16 @@ elements.
             parameters=parameters,
         )
 
+        # TODO: <Alex>ALEX</Alex>
         weights: np.ndarray = np.asarray(
-            parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY][0]  # <ALEX>
+            parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY][0]
         ) / (
             column_values_nonnull_count_parameter_node[
                 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-            ][
-                0
-            ]  # <ALEX>
+            ][0]
             + NP_EPSILON
         )
+        # TODO: <Alex>ALEX</Alex>
         tail_weights: float = (1.0 - sum(weights)) / 2.0
 
         partition_object: dict = {

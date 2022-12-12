@@ -570,7 +570,6 @@ class Batch(SerializableDictDot):
             )
 
         self._batch_markers = batch_markers
-        # TODO: <Alex>ALEX</Alex>
 
         # The remaining parameters are for backward compatibility.
         self._data_context = data_context

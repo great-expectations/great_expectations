@@ -16,9 +16,6 @@ from ruamel.yaml.comments import CommentedMap
 # To support python 3.7 we must import Protocol from typing_extensions instead of typing
 from typing_extensions import Protocol
 
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.core.usage_statistics.events import UsageStatsEvents
-# TODO: <Alex>ALEX</Alex>
 from great_expectations import DataContext
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -275,18 +272,6 @@ def test_alice_profiler_user_workflow_single_batch(
                 "estimation_histogram", None
             )
 
-    # print(f'\n[ALEX_TEST] [WOUTPUT] RESULT.EXPECTATION_CONFIGURATIONS:\n{result.expectation_configurations} ; TYPE: {str(type(result.expectation_configurations))}')
-    # print(f'\n[ALEX_TEST] [WOUTPUT] NUM_RESULT.EXPECTATION_CONFIGURATIONS:\n{len(result.expectation_configurations)} ; TYPE: {str(type(len(result.expectation_configurations)))}')
-    # print(f'\n[ALEX_TEST] [WOUTPUT] ALICE_COLUMNAR_TABLE_SINGLE_BATCH.EXPECTED_EXPECTATION_CONFIGURATIONS:\n{alice_columnar_table_single_batch["expected_expectation_suite"].expectations} ; TYPE: {str(type(alice_columnar_table_single_batch["expected_expectation_suite"].expectations))}')
-    # print(f'\n[ALEX_TEST] [WOUTPUT] NUM_ALICE_COLUMNAR_TABLE_SINGLE_BATCH.EXPECTED_EXPECTATION_CONFIGURATIONS:\n{len(alice_columnar_table_single_batch["expected_expectation_suite"].expectations)} ; TYPE: {str(type(len(alice_columnar_table_single_batch["expected_expectation_suite"].expectations)))}')
-    # # TODO: <Alex>ALEX</Alex>
-    # for i, a in enumerate(result.expectation_configurations):
-    #     b = alice_columnar_table_single_batch["expected_expectation_suite"].expectations[i]
-    #     if a!=b:
-    #         print(f'\n[ALEX_TEST] [WOUTPUT] NUM_ALICE_COLUMNAR_TABLE_SINGLE_BATCH.PROBLEM_AT[{i}]-RESULT:\n{a} ; TYPE: {str(type(a))}')
-    #         print(f'\n[ALEX_TEST] [WOUTPUT] NUM_ALICE_COLUMNAR_TABLE_SINGLE_BATCH.PROBLEM_AT[{i}]-EXPECT:\n{b} ; TYPE: {str(type(b))}')
-    #     # assert a == b, f"PROBLEM AT: {i}"
-    # # TODO: <Alex>ALEX</Alex>
     assert (
         result.expectation_configurations
         == alice_columnar_table_single_batch["expected_expectation_suite"].expectations
@@ -419,16 +404,10 @@ def test_alice_profiler_user_workflow_single_batch(
                 "rule_count": 3,
                 "variable_count": 5,
             },
-            # TODO: <Alex>ALEX</Alex>
             "event": "profiler.run",
-            # TODO: <Alex"profiler.run">ALEX</Alex>
-            # TODO: <Alex>ALEX</Alex>
-            # "event": UsageStatsEvents.RULE_BASED_PROFILER_RUN,
-            # TODO: <Alex>ALEX</Alex>
             "success": True,
         }
     )
-    # print(f'\n[ALEX_TEST] [WOUTPUT] MOCK_EMIT.CALL_ARGS_LIST[-1]:\n{mock_emit.call_args_list[-1]} ; TYPE: {str(type(mock_emit.call_args_list[-1]))}')
     assert mock_emit.call_args_list[-1] == expected_profiler_run_event
 
     # Confirm that logs do not contain any exceptions or invalid messages

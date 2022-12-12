@@ -54,7 +54,7 @@ def pandas_animals_dataframe_for_unexpected_rows_and_index():
 @pytest.fixture
 def spark_dataframe_for_unexpected_rows_with_index(
     spark_session,
-) -> "pyspark.sql.dataframe.DataFrame":
+) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821
     df: pandas.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -69,14 +69,16 @@ def spark_dataframe_for_unexpected_rows_with_index(
             ],
         }
     )
-    test_df: "pyspark.sql.dataframe.DataFrame" = spark_session.createDataFrame(data=df)
+    test_df: "pyspark.sql.dataframe.DataFrame" = spark_session.createDataFrame(
+        data=df
+    )  # noqa: F821
     return test_df
 
 
 @pytest.fixture
 def sqlite_table_for_unexpected_rows_with_index(
     test_backends,
-) -> "sqlalchemy.engine.Engine":
+) -> "sqlalchemy.engine.Engine":  # noqa: F821
     if "sqlite" in test_backends:
         try:
             import sqlalchemy as sa
@@ -206,7 +208,6 @@ def _expecation_configuration_to_validation_result_sql(
         expectation_configuration (ExpectationConfiguration): configuration that is being tested
 
     """
-    # TODO: <Alex>ALEX</Alex>
     expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
     sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
     connection_string = f"sqlite:///{sqlite_path}"
@@ -253,20 +254,12 @@ def _expecation_configuration_to_validation_result_sql(
         )
     )
     assert len(batch_definition_list) == 1
-    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] BATCH_DEFINITION:\n{batch_definition_list[0]} ; TYPE: {str(type(batch_definition_list[0]))}')
     batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
         batch_definition=batch_definition_list[0]
     )
-    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] BATCH_SPEC:\n{batch_spec} ; TYPE: {str(type(batch_spec))}')
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=batch_spec
     )
-    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] BATCH_DATA:\n{batch_data} ; TYPE: {str(type(batch_data))}')
-    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] BATCH_DATA.SELECTABLE:\n{batch_data.selectable} ; TYPE: {str(type(batch_data.selectable))}')
-    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] BATCH_DATA.DIALECT:\n{batch_data.dialect} ; TYPE: {str(type(batch_data.dialect))}')
-    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] BATCH_DATA.SQL_ENGINE_DIALECT:\n{batch_data.sql_engine_dialect} ; TYPE: {str(type(batch_data.sql_engine_dialect))}')
-    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] BATCH_DATA.SOURCE_SCHEMA_NAME:\n{batch_data.source_schema_name} ; TYPE: {str(type(batch_data.source_schema_name))}')
-    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] BATCH_DATA.SOURCE_TABLE_NAME:\n{batch_data.source_table_name} ; TYPE: {str(type(batch_data.source_table_name))}')
     batch = Batch(data=batch_data, batch_definition=batch_definition_list[0])
     validator = Validator(
         execution_engine=engine,
@@ -277,46 +270,6 @@ def _expecation_configuration_to_validation_result_sql(
     )
     result = expectation.validate(validator)
     return result
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    # expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    # sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
-    # connection_string = f"sqlite:///{sqlite_path}"
-    # engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-    # execution_engine = engine
-    # my_data_connector: ConfiguredAssetSqlDataConnector = (
-    #     ConfiguredAssetSqlDataConnector(
-    #         name="my_sql_data_connector",
-    #         datasource_name="my_test_datasource",
-    #         execution_engine=execution_engine,
-    #         assets={
-    #             "my_asset": {
-    #                 "table_name": "animal_names",
-    #             },
-    #         },
-    #     )
-    # )
-    # batch_definition_list = (
-    #     my_data_connector.get_batch_definition_list_from_batch_request(
-    #         batch_request=BatchRequest(
-    #             datasource_name="my_test_datasource",
-    #             data_connector_name="my_sql_data_connector",
-    #             data_asset_name="my_asset",
-    #         )
-    #     )
-    # )
-    # assert len(batch_definition_list) == 1
-    # batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
-    #     batch_definition=batch_definition_list[0]
-    # )
-    # batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-    #     batch_spec=batch_spec
-    # )
-    # batch = Batch(data=batch_data)
-    # validator = Validator(execution_engine, batches=[batch])
-    # result = expectation.validate(validator)
-    # return result
-    # TODO: <Alex>ALEX</Alex>
 
 
 def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
@@ -996,9 +949,6 @@ def test_pandas_default_to_not_include_unexpected_rows(
             },
         },
     )
-    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_pandas_default_to_not_include_unexpected_rows()] RESULT:\n{result} ; TYPE: {str(type(result))}')
-    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_pandas_default_to_not_include_unexpected_rows()] RESULT.RESULT:\n{result.result} ; TYPE: {str(type(result.result))}')
-    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_pandas_default_to_not_include_unexpected_rows()] EXPECTED_EVR_WITHOUT_UNEXPECTED_ROWS.RESULT:\n{expected_evr_without_unexpected_rows.result} ; TYPE: {str(type(expected_evr_without_unexpected_rows.result))}')
     result: ExpectationValidationResult = (
         _expecation_configuration_to_validation_result_pandas(
             expectation_configuration=expectation_configuration,
@@ -1195,12 +1145,6 @@ def test_sqlite_single_column_complete_result_format(
             },
         },
     )
-    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] BATCH_DATA:\n{batch_data} ; TYPE: {str(type(batch_data))}')
-    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] BATCH_DATA.SELECTABLE:\n{batch_data.selectable} ; TYPE: {str(type(batch_data.selectable))}')
-    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] BATCH_DATA.DIALECT:\n{batch_data.dialect} ; TYPE: {str(type(batch_data.dialect))}')
-    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] BATCH_DATA.SQL_ENGINE_DIALECT:\n{batch_data.sql_engine_dialect} ; TYPE: {str(type(batch_data.sql_engine_dialect))}')
-    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] BATCH_DATA.SOURCE_SCHEMA_NAME:\n{batch_data.source_schema_name} ; TYPE: {str(type(batch_data.source_schema_name))}')
-    # print(f'\n[ALEX_TEST] [TEST_MAP_METRIC.test_sqlite_single_column_complete_result_format()] BATCH_DATA.SOURCE_TABLE_NAME:\n{batch_data.source_table_name} ; TYPE: {str(type(batch_data.source_table_name))}')
     result: ExpectationValidationResult = (
         _expecation_configuration_to_validation_result_sql(
             expectation_configuration=expectation_configuration,

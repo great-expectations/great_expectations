@@ -135,7 +135,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
             # set(one_batch_table_columns_names_value)
             # TODO: <Alex>ALEX</Alex>
             # TODO: <Alex>ALEX</Alex>
-            set(one_batch_table_columns_names_value[0])  # <ALEX>
+            set(one_batch_table_columns_names_value[0])
             # TODO: <Alex>ALEX</Alex>
             for one_batch_table_columns_names_value in table_columns_names_multi_batch_value
         ]
