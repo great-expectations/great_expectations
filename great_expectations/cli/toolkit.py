@@ -21,6 +21,9 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.data_context import DataContext
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.types.base import CURRENT_GX_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
