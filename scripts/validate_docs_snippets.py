@@ -7,6 +7,7 @@ In short, this script creates a temporary Docusaurus build and utilizes grep to 
 import shutil
 import subprocess
 import sys
+import tempfile
 from typing import List
 
 
@@ -16,43 +17,46 @@ def check_dependencies(*deps: str) -> None:
             raise Exception(f"Must have `{dep}` installed in PATH to run {__file__}")
 
 
-def run_docusaurus_build() -> None:
+def run_docusaurus_build(target_dir: str) -> None:
     subprocess.call(
         [
             "yarn",
             "build",
+            "--out-dir",
+            target_dir,
         ],
     )
 
 
 def run_grep(target_dir: str) -> List[str]:
     try:
-        out = subprocess.check_output(
+        res = subprocess.run(
             [
                 "grep",
-                "-r",
-                "snippet>",
+                "-Enr",
+                r"<\/?snippet>",
                 target_dir,
             ],
+            capture_output=True,
             universal_newlines=True,
-            stderr=subprocess.STDOUT,
         )
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
             f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}"
         )
-    return out.splitlines()
+    return res.stdout.splitlines()
 
 
 def main() -> None:
     check_dependencies("yarn", "grep")
-    run_docusaurus_build()
-    grep_output = run_grep("build")
-    if grep_output:
-        print("[ERROR] Found snippets in the docs build:")
-        for line in grep_output:
-            print(line)
-        sys.exit(1)
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        run_docusaurus_build(tmp_dir)
+        grep_output = run_grep(tmp_dir)
+        if grep_output:
+            print("[ERROR] Found snippets in the docs build:")
+            for line in grep_output:
+                print(line)
+            sys.exit(1)
 
 
 if __name__ == "__main__":
