@@ -162,7 +162,8 @@ def section_7_configure_your_individual_data_connectors__inferred():
     )
 
 
-def section_8_configure_your_data_connectors_data_assets__inferred():
+def section_7_configure_your_individual_data_connectors__configured():
+    # <snippet name="sql datasource configuration with empty configured sql data_connector">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -173,9 +174,94 @@ def section_8_configure_your_data_connectors_data_assets__inferred():
             "connection_string": CONNECTION_STRING,
         },
         "data_connectors": {
+            "name_of_my_configured_data_connector": {},
+        },
+    }
+    # </snippet>
+    is_subset(datasource_config, get_full_config_sql_configured_datasource())
+
+    # <snippet name="configured sql datasource configuration with data_connector class_name defined">
+    datasource_config: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SqlAlchemyExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+            "connection_string": CONNECTION_STRING,
+        },
+        "data_connectors": {
+            "name_of_my_configured_data_connector": {
+                # <snippet name="define data_connector class_name for configured sql datasource">
+                "class_name": "ConfiguredAssetSqlDataConnector",
+                # </snippet>
+                "assets": {},
+            },
+        },
+    }
+    # </snippet>
+    is_subset(datasource_config, get_full_config_sql_configured_datasource())
+
+
+def section_7_configure_your_individual_data_connectors__runtime():
+    # <snippet name="sql datasource configuration with empty runtime sql data_connector">
+    datasource_config: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SqlAlchemyExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+            "connection_string": CONNECTION_STRING,
+        },
+        "data_connectors": {
+            "name_of_my_runtime_data_connector": {},
+        },
+    }
+    # </snippet>
+    is_subset(datasource_config, get_full_config_sql_runtime_datasource())
+
+    # <snippet name="runtime sql datasource configuration with data_connector class_name defined">
+    datasource_config: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SqlAlchemyExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+            "connection_string": CONNECTION_STRING,
+        },
+        "data_connectors": {
+            "name_of_my_runtime_data_connector": {
+                # <snippet name="define data_connector class_name for runtime sql datasource">
+                "class_name": "RuntimeDataConnector",
+                # </snippet>
+                "batch_identifiers": {},
+            },
+        },
+    }
+    # </snippet>
+    is_subset(datasource_config, get_full_config_sql_runtime_datasource())
+
+
+def section_8_configure_your_data_connectors_data_assets__inferred():
+    # <snippet name="full configuration for sql inferred Datasource">
+    datasource_config: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SqlAlchemyExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+            "connection_string": CONNECTION_STRING,
+        },
+        "data_connectors": {
+            # <snippet name="inferred sql data asset single batch">
             "inferred_data_connector_single_batch_asset": {
                 "class_name": "InferredAssetSqlDataConnector",
             },
+            # </snippet>
+            # <snippet name="inferred sql data asset multi batch">
             "inferred_data_connector_multi_batch_asset_split_on_date_time": {
                 "class_name": "InferredAssetSqlDataConnector",
                 "splitter_method": "split_on_year_and_month",
@@ -183,11 +269,81 @@ def section_8_configure_your_data_connectors_data_assets__inferred():
                     "column_name": "pickup_datetime",
                 },
             },
+            # </snippet>
         },
     }
+    # </snippet>
     is_subset(
         datasource_config,
         get_full_config_sql_inferred_datasource__single_and_multi_batch(),
+    )
+
+
+def section_8_configure_your_data_connectors_data_assets__configured():
+    # <snippet name="full configuration for sql configured Datasource">
+    datasource_config: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SqlAlchemyExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+            "connection_string": CONNECTION_STRING,
+        },
+        "data_connectors": {
+            "name_of_my_configured_data_connector": {
+                "class_name": "ConfiguredAssetSqlDataConnector",
+                "assets": {
+                    # <snippet name="configured sql data asset single batch">
+                    "yellow_tripdata_sample_2020_full": {
+                        "table_name": "yellow_tripdata_sample_2020",
+                        "schema_name": "main",
+                    },
+                    # </snippet>
+                    # </snippet name="configured sql data asset multi-batch">
+                    "yellow_tripdata_sample_2020_by_year_and_month": {
+                        "table_name": "yellow_tripdata_sample_2020",
+                        "schema_name": "main",
+                        "splitter_method": "split_on_year_and_month",
+                        "splitter_kwargs": {
+                            "column_name": "pickup_datetime",
+                        },
+                    },
+                },
+            },
+        },
+    }
+    # </snippet>
+    is_subset(
+        datasource_config,
+        get_full_config_sql_configured_datasource(),
+    )
+
+
+def section_8_configure_your_data_connectors_data_assets__runtime():
+    # <snippet name="full configuration for sql runtime Datasource">
+    datasource_config: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SqlAlchemyExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+            "connection_string": CONNECTION_STRING,
+        },
+        "data_connectors": {
+            "name_of_my_runtime_data_connector": {
+                "class_name": "RuntimeDataConnector",
+                # <snippet name="runtime sql data asset define batch_identifiers">
+                "batch_identifiers": ["batch_timestamp"],
+                # </snippet>
+            },
+        },
+    }
+    # </snippet>
+    is_subset(
+        datasource_config,
+        get_full_config_sql_runtime_datasource(),
     )
 
 
@@ -209,14 +365,14 @@ def section_9_test_your_configuration__inferred_and_configured():
         ),
         (
             get_full_config_sql_configured_datasource(),
-            "configured_sql_data_connector",
+            "name_of_my_configured_data_connector",
             2,
             "yellow_tripdata_sample_2020_full",
             1,
         ),
         (
             get_full_config_sql_configured_datasource(),
-            "configured_sql_data_connector",
+            "name_of_my_configured_data_connector",
             2,
             "yellow_tripdata_sample_2020_by_year_and_month",
             12,
@@ -255,21 +411,29 @@ def section_9_test_your_configuration__runtime():
     ), f"{connector_name} {asset_count} != {datasource_check['data_connectors'][connector_name]['data_asset_count']}"
 
 
-# Test to verify that the universal config elements are consistent in each of the SQL config examples.
-validate_universal_config_elements()
+def run_tests():
+    # Test to verify that the universal config elements are consistent in each of the SQL config examples.
+    validate_universal_config_elements()
 
-# Test to verify that the sql specific config examples are consistent in each of the SQL config examples.
-section_5_add_the_sqlalchemy_execution_engine_to_your_datasource_configuration()
-section_6_add_a_dictionary_as_the_value_of_the_data_connectors_key()
+    # Test to verify that the sql specific config examples are consistent in each of the SQL config examples.
+    section_5_add_the_sqlalchemy_execution_engine_to_your_datasource_configuration()
+    section_6_add_a_dictionary_as_the_value_of_the_data_connectors_key()
 
-# Test to verify that the inferred config examples are consistent with each other.
-section_7_configure_your_individual_data_connectors__inferred()
-section_8_configure_your_data_connectors_data_assets__inferred()
+    # Test to verify that the inferred config examples are consistent with each other.
+    section_7_configure_your_individual_data_connectors__inferred()
+    section_8_configure_your_data_connectors_data_assets__inferred()
 
-# Test to verify that the configured config examples are consistent with each other.
+    # Test to verify that the configured config examples are consistent with each other.
+    section_7_configure_your_individual_data_connectors__configured()
+    section_8_configure_your_data_connectors_data_assets__configured()
 
-# Test to verify that the runtime config examples are consistent with each other.
+    # Test to verify that the runtime config examples are consistent with each other.
+    section_7_configure_your_individual_data_connectors__runtime()
+    section_8_configure_your_data_connectors_data_assets__runtime()
 
-# Test to verify that the full configuration examples are functional.
-section_9_test_your_configuration__inferred_and_configured()
-section_9_test_your_configuration__runtime()
+    # Test to verify that the full configuration examples are functional.
+    section_9_test_your_configuration__inferred_and_configured()
+    section_9_test_your_configuration__runtime()
+
+
+run_tests()

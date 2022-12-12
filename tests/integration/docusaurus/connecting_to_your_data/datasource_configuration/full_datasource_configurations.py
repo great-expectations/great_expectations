@@ -281,7 +281,7 @@ def get_full_config_sql_configured_datasource() -> dict:
             "connection_string": CONNECTION_STRING,
         },
         "data_connectors": {
-            "configured_sql_data_connector": {
+            "name_of_my_configured_data_connector": {
                 "class_name": "ConfiguredAssetSqlDataConnector",
                 "assets": {
                     "yellow_tripdata_sample_2020_full": {
