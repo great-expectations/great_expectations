@@ -34,11 +34,12 @@ def run_grep(target_dir: str) -> List[str]:
         out = subprocess.check_output(
             [
                 "grep",
-                "-Enr",
-                r"<\/?snippet>",
+                "-r",
+                "snippet>",
                 target_dir,
             ],
             universal_newlines=True,
+            stderr=subprocess.STDOUT,
         )
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
