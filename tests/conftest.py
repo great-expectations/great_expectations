@@ -781,6 +781,62 @@ def empty_data_context(
     return context
 
 
+@pytest.fixture(scope="function")
+def data_context_with_connection_to_animal_names_db(
+    tmp_path,
+) -> DataContext:
+    """
+    Returns DataContext that has a single datasource that connects to a sqlite database.
+
+    The sqlite database (metrics_test.db) contains one table `animal_names` that contains the following data
+
+        "pk_1": [0, 1, 2, 3, 4, 5],
+        "pk_2": ["zero", "one", "two", "three", "four", "five"],
+        "animals": [
+            "cat",
+            "fish",
+            "dog",
+            "giraffe",
+            "lion",
+            "zebra",
+        ],
+
+    It is used by tests for unexpected_index_list (ID/Primary Key).
+    """
+
+    project_path = tmp_path / "test_configuration"
+    project_path.mkdir()
+    project_path = str(project_path)
+    context = gx.data_context.DataContext.create(project_path)
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    os.makedirs(asset_config_path, exist_ok=True)
+    assert context.list_datasources() == []
+    sqlite_path = file_relative_path(__file__, "test_sets/metrics_test.db")
+    datasource_config: str = f"""
+        class_name: Datasource
+        execution_engine:
+            module_name: great_expectations.execution_engine
+            class_name: SqlAlchemyExecutionEngine
+            connection_string: sqlite:///{sqlite_path}
+        data_connectors:
+            my_sql_data_connector:
+                module_name: great_expectations.datasource.data_connector
+                class_name: ConfiguredAssetSqlDataConnector
+                assets:
+                    my_asset:
+                        table_name: animal_names
+                        class_name: Asset
+    """
+    # noinspection PyUnusedLocal
+    datasource: Datasource = context.test_yaml_config(
+        name="my_datasource", yaml_config=datasource_config, pretty_print=False
+    )
+    # noinspection PyProtectedMember
+    context._save_project_config()
+    return context
+
+
 @pytest.fixture
 def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled(
     tmp_path_factory,
