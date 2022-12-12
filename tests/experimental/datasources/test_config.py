@@ -40,10 +40,7 @@ PG_COMPLEX_CONFIG_DICT = {
                         "column_name": "my_column",
                         "method_name": "foobar_it",
                         "name": "my_splitter",
-                        "param_defaults": {
-                            "alpha": ["fizz", "bizz"],
-                            "bravo": ["foo", "bar"],
-                        },
+                        "param_names": ["alpha", "bravo"],
                     },
                     "name": "with_splitters",
                     "table_name": "another_table",

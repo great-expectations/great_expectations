@@ -53,7 +53,11 @@ class MetricEdge:
     def id(self):
         if self.right:
             return self.left.id, self.right.id
+
         return self.left.id, None
+
+    def __repr__(self):
+        return f"<{self._left.__repr__()}|{self._right.__repr__()}>"
 
 
 class ValidationGraph:
@@ -352,6 +356,10 @@ class ValidationGraph:
                 and default_kwarg_values[key] is not None
             ):
                 metric_kwargs[key] = default_kwarg_values[key]
+
+    def __repr__(self):
+        edge: MetricEdge
+        return ", ".join([edge.__repr__() for edge in self._edges])
 
 
 class ExpectationValidationGraph:

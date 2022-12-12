@@ -184,7 +184,7 @@ Most guides are code-heavy. When writing a guide that could go either way, pleas
 
 ####  Using tabs to differentiate guides for different APIs.
 
-During the process of writing documentation for Great Expectations 0.13, there arose a need to differentiate between documentation for GE up to 0.12.x, and GE 0.13 and beyond.
+During the process of writing documentation for Great Expectations 0.13, there arose a need to differentiate between documentation for GX up to 0.12.x, and GX 0.13 and beyond.
 
 The use of content-tabs allows for both documentation to co-exist in the same how-to-doc.
 

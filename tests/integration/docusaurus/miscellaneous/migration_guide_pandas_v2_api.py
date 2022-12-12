@@ -2,9 +2,9 @@ import os
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 
-context = ge.get_context()
+context = gx.get_context()
 
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = os.path.join(

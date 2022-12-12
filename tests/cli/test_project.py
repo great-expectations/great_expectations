@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 from click.testing import CliRunner
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.cli import cli
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.util import file_relative_path
@@ -38,7 +38,7 @@ def titanic_data_context_clean_usage_stats_enabled(
     shutil.copy(
         titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
     )
-    return ge.data_context.DataContext(context_path)
+    return gx.data_context.DataContext(context_path)
 
 
 @pytest.fixture
@@ -65,7 +65,7 @@ def titanic_data_context_v2_datasources_and_validation_operators_usage_stats_ena
     shutil.copy(
         titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
     )
-    return ge.data_context.DataContext(context_path)
+    return gx.data_context.DataContext(context_path)
 
 
 def test_project_check_on_missing_ge_dir_guides_user_to_fix(

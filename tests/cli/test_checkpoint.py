@@ -3455,7 +3455,7 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
     assert context.list_checkpoints() == ["my_v1_checkpoint"]
 
     script_path: str = os.path.join(
-        context.root_directory, context.GE_UNCOMMITTED_DIR, "run_my_v1_checkpoint.py"
+        context.root_directory, context.GX_UNCOMMITTED_DIR, "run_my_v1_checkpoint.py"
     )
     with open(script_path, "w") as f:
         f.write("script here")
@@ -3563,7 +3563,7 @@ def test_checkpoint_script_happy_path_generates_script_pandas(
         ),
     ]
     expected_script: str = os.path.join(
-        context.root_directory, context.GE_UNCOMMITTED_DIR, "run_my_v1_checkpoint.py"
+        context.root_directory, context.GX_UNCOMMITTED_DIR, "run_my_v1_checkpoint.py"
     )
     assert os.path.isfile(expected_script)
 
@@ -3662,7 +3662,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
     script_path: str = os.path.abspath(
         os.path.join(
             context.root_directory,
-            context.GE_UNCOMMITTED_DIR,
+            context.GX_UNCOMMITTED_DIR,
             "run_my_fancy_checkpoint.py",
         )
     )
@@ -3787,7 +3787,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
     script_path: str = os.path.abspath(
         os.path.join(
             context.root_directory,
-            context.GE_UNCOMMITTED_DIR,
+            context.GX_UNCOMMITTED_DIR,
             "run_my_fancy_checkpoint.py",
         )
     )
@@ -3910,7 +3910,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     script_path: str = os.path.abspath(
         os.path.join(
             context.root_directory,
-            context.GE_UNCOMMITTED_DIR,
+            context.GX_UNCOMMITTED_DIR,
             "run_my_fancy_checkpoint.py",
         )
     )

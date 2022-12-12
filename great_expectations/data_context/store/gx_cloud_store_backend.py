@@ -222,21 +222,21 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             return cast(ResponsePayload, response.json())
         except json.JSONDecodeError as jsonError:
             logger.debug(
-                "Failed to parse GE Cloud Response into JSON",
+                "Failed to parse GX Cloud Response into JSON",
                 str(response.text),
                 str(jsonError),
             )
             raise StoreBackendError(
-                f"Unable to get object in GE Cloud Store Backend: {jsonError}"
+                f"Unable to get object in GX Cloud Store Backend: {jsonError}"
             )
         except requests.HTTPError as http_err:
             raise StoreBackendError(
-                f"Unable to get object in GE Cloud Store Backend: {get_user_friendly_error_message(http_err)}"
+                f"Unable to get object in GX Cloud Store Backend: {get_user_friendly_error_message(http_err)}"
             )
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
             raise StoreBackendError(
-                "Unable to get object in GE Cloud Store Backend: This is likely a transient error. Please try again."
+                "Unable to get object in GX Cloud Store Backend: This is likely a transient error. Please try again."
             )
 
     def _move(self) -> None:  # type: ignore[override]
@@ -284,17 +284,17 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         except requests.HTTPError as http_exc:
             raise StoreBackendError(
-                f"Unable to update object in GE Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
+                f"Unable to update object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
             )
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
             raise StoreBackendError(
-                "Unable to update object in GE Cloud Store Backend: This is likely a transient error. Please try again."
+                "Unable to update object in GX Cloud Store Backend: This is likely a transient error. Please try again."
             )
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(
-                f"Unable to update object in GE Cloud Store Backend: {e}"
+                f"Unable to update object in GX Cloud Store Backend: {e}"
             )
 
     @property
@@ -364,22 +364,22 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             object_url = self.get_url_for_key((self.ge_cloud_resource_type, object_id))
             return GXCloudResourceRef(
                 resource_type=resource_type,
-                ge_cloud_id=object_id,
+                cloud_id=object_id,
                 url=object_url,
             )
         except requests.HTTPError as http_exc:
             raise StoreBackendError(
-                f"Unable to set object in GE Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
+                f"Unable to set object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
             )
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
             raise StoreBackendError(
-                "Unable to set object in GE Cloud Store Backend: This is likely a transient error. Please try again."
+                "Unable to set object in GX Cloud Store Backend: This is likely a transient error. Please try again."
             )
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(
-                f"Unable to set object in GE Cloud Store Backend: {e}"
+                f"Unable to set object in GX Cloud Store Backend: {e}"
             )
 
     @property
@@ -437,7 +437,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(
-                f"Unable to list keys in GE Cloud Store Backend: {e}"
+                f"Unable to list keys in GX Cloud Store Backend: {e}"
             )
 
     def get_url_for_key(  # type: ignore[override]
@@ -482,18 +482,18 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         except requests.HTTPError as http_exc:
             # TODO: GG 20220819 should we raise an error here instead of returning False
             logger.warning(
-                f"Unable to delete object in GE Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
+                f"Unable to delete object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
             )
             return False
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
             raise StoreBackendError(
-                "Unable to delete object in GE Cloud Store Backend: This is likely a transient error. Please try again."
+                "Unable to delete object in GX Cloud Store Backend: This is likely a transient error. Please try again."
             )
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(
-                f"Unable to delete object in GE Cloud Store Backend: {e}"
+                f"Unable to delete object in GX Cloud Store Backend: {e}"
             )
 
     def _has_key(self, key: Tuple[str, ...]) -> bool:
@@ -521,6 +521,6 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         """Get the store backend specific implementation of the key. ignore resource_type since it is defined when initializing the cloud store backend."""
         return GXCloudIdentifier(
             resource_type=self.ge_cloud_resource_type,
-            ge_cloud_id=id,
+            cloud_id=id,
             resource_name=name,
         )

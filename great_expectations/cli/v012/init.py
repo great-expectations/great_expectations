@@ -219,4 +219,4 @@ def _slack_setup(context):
 
 
 def _get_full_path_to_ge_dir(target_directory):
-    return os.path.abspath(os.path.join(target_directory, DataContext.GE_DIR))
+    return os.path.abspath(os.path.join(target_directory, DataContext.GX_DIR))

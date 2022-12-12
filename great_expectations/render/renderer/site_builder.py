@@ -119,6 +119,8 @@ class SiteBuilder:
         show_how_to_buttons=True,
         site_section_builders=None,
         runtime_environment=None,
+        cloud_mode=False,
+        # Deprecated 0.15.37
         ge_cloud_mode=False,
         **kwargs,
     ) -> None:
@@ -126,7 +128,10 @@ class SiteBuilder:
         self.data_context = data_context
         self.store_backend = store_backend
         self.show_how_to_buttons = show_how_to_buttons
-        self.ge_cloud_mode = ge_cloud_mode
+        if ge_cloud_mode:
+            cloud_mode = ge_cloud_mode
+        self.cloud_mode = cloud_mode
+        self.ge_cloud_mode = cloud_mode
 
         usage_statistics_config = data_context.anonymous_usage_statistics
         data_context_id = None
@@ -165,7 +170,7 @@ class SiteBuilder:
         # three types of backends using the base
         # type of the configuration defined in the store_backend section
 
-        if ge_cloud_mode:
+        if cloud_mode:
             self.target_store = JsonSiteStore(
                 store_backend=store_backend, runtime_environment=runtime_environment
             )
@@ -233,7 +238,7 @@ class SiteBuilder:
                     "custom_views_directory": custom_views_directory,
                     "data_context_id": self.data_context_id,
                     "show_how_to_buttons": self.show_how_to_buttons,
-                    "ge_cloud_mode": self.ge_cloud_mode,
+                    "cloud_mode": self.cloud_mode,
                 },
                 config_defaults={"name": site_section_name, "module_name": module_name},
             )
@@ -265,7 +270,7 @@ class SiteBuilder:
                     if section_config not in FALSEY_YAML_STRINGS
                 },
                 "site_section_builders_config": site_section_builders,
-                "ge_cloud_mode": self.ge_cloud_mode,
+                "cloud_mode": self.cloud_mode,
             },
             config_defaults={
                 "name": "site_index_builder",
@@ -304,9 +309,9 @@ class SiteBuilder:
         for site_section_builder in self.site_section_builders.values():
             site_section_builder.build(resource_identifiers=resource_identifiers)
 
-        # GE Cloud supports JSON Site Data Docs
+        # GX Cloud supports JSON Site Data Docs
         # Skip static assets, indexing
-        if self.ge_cloud_mode:
+        if self.cloud_mode:
             return
 
         self.target_store.copy_static_assets()
@@ -349,6 +354,8 @@ class DefaultSiteSectionBuilder:
         renderer=None,
         view=None,
         data_context_id=None,
+        cloud_mode=False,
+        # Deprecated 0.15.37
         ge_cloud_mode=False,
         **kwargs,
     ) -> None:
@@ -360,7 +367,10 @@ class DefaultSiteSectionBuilder:
         self.validation_results_limit = validation_results_limit
         self.data_context_id = data_context_id
         self.show_how_to_buttons = show_how_to_buttons
-        self.ge_cloud_mode = ge_cloud_mode
+        if ge_cloud_mode:
+            cloud_mode = ge_cloud_mode
+        self.cloud_mode = cloud_mode
+        self.ge_cloud_mode = cloud_mode
         if renderer is None:
             raise exceptions.InvalidConfigError(
                 "SiteSectionBuilder requires a renderer configuration "
@@ -461,14 +471,14 @@ class DefaultSiteSectionBuilder:
             try:
                 rendered_content = self.renderer_class.render(resource)
 
-                if self.ge_cloud_mode:
+                if self.cloud_mode:
                     self.target_store.set(
                         GXCloudIdentifier(
                             resource_type=GXCloudRESTResource.RENDERED_DATA_DOC
                         ),
                         rendered_content,
                         source_type=resource_key.resource_type,
-                        source_id=resource_key.ge_cloud_id,
+                        source_id=resource_key.cloud_id,
                     )
                 else:
                     viewable_content = self.view_class.render(

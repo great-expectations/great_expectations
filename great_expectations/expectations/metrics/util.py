@@ -12,7 +12,7 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.util import check_sql_engine_dialect
 from great_expectations.util import get_sqlalchemy_inspector
 
@@ -29,8 +29,9 @@ except ImportError:
 
 try:
     import sqlalchemy as sa
+    from sqlalchemy import Table
     from sqlalchemy.dialects import registry
-    from sqlalchemy.engine import Engine, reflection
+    from sqlalchemy.engine import Connection, Engine, reflection
     from sqlalchemy.engine.interfaces import Dialect
     from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Insert, Select, TableClause
@@ -47,6 +48,7 @@ except ImportError:
     sa = None
     registry = None
     Engine = None
+    Connection = None
     reflection = None
     Dialect = None
     Insert = None
@@ -597,7 +599,7 @@ def column_reflection_fallback(
             query: TextClause = selectable
         else:
             # noinspection PyUnresolvedReferences
-            if dialect.name.lower() == GESqlDialect.REDSHIFT:
+            if dialect.name.lower() == GXSqlDialect.REDSHIFT:
                 # Redshift needs temp tables to be declared as text
                 query: Select = (
                     sa.select([sa.text("*")]).select_from(sa.text(selectable)).limit(1)
@@ -643,7 +645,7 @@ def get_dbms_compatible_column_names(
         error_message_template=error_message_template,
     )
 
-    column_names_list: Union[List[str], str]
+    column_names_list: List[str]
     is_list: bool
     if isinstance(column_names, list):
         column_names_list = column_names
@@ -652,9 +654,7 @@ def get_dbms_compatible_column_names(
         column_names_list = [column_names]
         is_list = False
 
-    typed_column_names_list: Union[
-        List[Union[str, quoted_name]], Union[str, quoted_name]
-    ]
+    typed_column_names_list: List[Union[str, quoted_name]]
     if isinstance(execution_engine, SqlAlchemyExecutionEngine):
         column_name: str
         batch_columns_dict: Dict[str, Union[str, quoted_name]] = {
@@ -685,7 +685,7 @@ def verify_column_names_exist(
         batch_columns_list: Properly typed column names (output of "table.columns" metric)
         error_message_template: String template to output error message if any column cannot be found in "Batch" object.
     """
-    column_names_list: Union[List[str], str]
+    column_names_list: List[str]
     if isinstance(column_names, list):
         column_names_list = column_names
     else:
@@ -920,7 +920,7 @@ def validate_distribution_parameters(distribution, params):
 
     else:
         raise ValueError(
-            "params must be a dict or list, or use ge.dataset.util.infer_distribution_parameters(data, distribution)"
+            "params must be a dict or list, or use great_expectations.dataset.util.infer_distribution_parameters(data, distribution)"
         )
 
     return
@@ -994,3 +994,65 @@ def is_valid_continuous_partition_object(partition_object):
         and np.all(np.diff(partition_object["bins"]) > 0)
         and np.allclose(np.sum(comb_weights), 1.0)
     )
+
+
+def sql_statement_with_post_compile_to_string(
+    engine: SqlAlchemyExecutionEngine, select_statement: "sqlalchemy.sql.Select"
+) -> str:
+    """
+    Util method to compile SQL select statement with post-compile parameters into a string. Logic lifted directly
+    from sqlalchemy documentation.
+
+    https://docs.sqlalchemy.org/en/14/faq/sqlexpressions.html#rendering-postcompile-parameters-as-bound-parameters
+
+    Used by _sqlalchemy_map_condition_index() in map_metric_provider to build query that will allow you to
+    return unexpected_index_values.
+
+    Args:
+        engine (sqlalchemy.engine.Engine): Sqlalchemy engine used to do the compilation.
+        select_statement (sqlalchemy.sql.Select): Select statement to compile into string.
+    Returns:
+        String representation of select_statement
+
+    """
+    sqlalchemy_connection: "sa.engine.base.Connection" = engine.engine
+    compiled = select_statement.compile(
+        sqlalchemy_connection,
+        compile_kwargs={"render_postcompile": True},
+        dialect=engine.dialect,
+    )
+    dialect_name: str = engine.dialect_name
+
+    if dialect_name in ["sqlite", "trino", "mssql"]:
+        params = (repr(compiled.params[name]) for name in compiled.positiontup)
+        query_as_string = re.sub(r"\?", lambda m: next(params), str(compiled))
+
+    else:
+        params = (repr(compiled.params[name]) for name in list(compiled.params.keys()))
+        query_as_string = re.sub(r"%\(.*?\)s", lambda m: next(params), str(compiled))
+
+    return query_as_string
+
+
+def get_sqlalchemy_source_table_and_schema(
+    engine: SqlAlchemyExecutionEngine,
+) -> "Table":
+    """
+    Util method to return table name that is associated with current batch.
+
+    This is used by `_sqlalchemy_map_condition_query()` which returns a query that allows users to return
+    unexpected_index_values.
+
+    Args:
+        engine (SqlAlchemyExecutionEngine): Engine that is currently being used to calculate the Metrics
+    Returns:
+        SqlAlchemy Table that is the source table and schema.
+    """
+    schema_name = engine.batch_manager.active_batch_data.source_schema_name
+    table_name = engine.batch_manager.active_batch_data.source_table_name
+    selectable = sa.Table(
+        table_name,
+        sa.MetaData(),
+        schema=schema_name,
+    )
+    return selectable

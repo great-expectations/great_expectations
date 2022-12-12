@@ -3,11 +3,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
-from great_expectations.rule_based_profiler.domain import (
+from great_expectations.core.domain import (
     InferredSemanticDomainType,
     SemanticDomainTypes,
 )
+from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.rule_based_profiler.semantic_type_filter import (
     SemanticTypeFilter,
 )
@@ -55,12 +55,12 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
             return [
                 SemanticDomainTypes(semantic_type) for semantic_type in [semantic_types]
             ]
+
         if isinstance(semantic_types, SemanticDomainTypes):
             return [semantic_type for semantic_type in [semantic_types]]
-        elif isinstance(semantic_types, list):
-            if all(
-                [isinstance(semantic_type, str) for semantic_type in semantic_types]
-            ):
+
+        if isinstance(semantic_types, list):
+            if all(isinstance(semantic_type, str) for semantic_type in semantic_types):
                 semantic_types = [
                     semantic_type.lower() for semantic_type in semantic_types
                 ]
@@ -68,19 +68,18 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
                     SemanticDomainTypes(semantic_type)
                     for semantic_type in semantic_types
                 ]
-            elif all(
-                [
-                    isinstance(semantic_type, SemanticDomainTypes)
-                    for semantic_type in semantic_types
-                ]
+
+            if all(
+                isinstance(semantic_type, SemanticDomainTypes)
+                for semantic_type in semantic_types
             ):
                 return [semantic_type for semantic_type in semantic_types]
-            else:
-                raise ValueError(
-                    "All elements in semantic_types list must be either of str or SemanticDomainTypes type."
-                )
-        else:
-            raise ValueError("Unrecognized semantic_types directive.")
+
+            raise ValueError(
+                "All elements in semantic_types list must be either of str or SemanticDomainTypes type."
+            )
+
+        raise ValueError("Unrecognized semantic_types directive.")
 
     def _build_table_column_name_to_inferred_semantic_domain_type_map(
         self,

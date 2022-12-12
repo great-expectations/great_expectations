@@ -17,9 +17,14 @@ import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.domain import (
+    INFERRED_SEMANTIC_TYPE_KEY,
+    Domain,
+    SemanticDomainTypes,
+)
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -30,7 +35,10 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import BaseDataContext, CloudDataContext
-from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.cloud_constants import (
+    GXCloudEnvironmentVariable,
+    GXCloudRESTResource,
+)
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
@@ -62,11 +70,6 @@ from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfi
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
-from great_expectations.rule_based_profiler.domain import (
-    INFERRED_SEMANTIC_TYPE_KEY,
-    Domain,
-    SemanticDomainTypes,
-)
 from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
     NumericMetricRangeMultiBatchParameterBuilder,
 )
@@ -78,7 +81,7 @@ from great_expectations.self_check.util import (
     expectationSuiteValidationResultSchema,
     get_dataset,
 )
-from great_expectations.util import is_library_loadable
+from great_expectations.util import build_in_memory_runtime_context, is_library_loadable
 from tests.rule_based_profiler.parameter_builder.conftest import (
     RANDOM_SEED,
     RANDOM_STATE,
@@ -769,7 +772,7 @@ def empty_data_context(
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path = str(project_path)
-    context = ge.data_context.DataContext.create(project_path)
+    context = gx.data_context.DataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
@@ -1032,7 +1035,7 @@ def deterministic_asset_dataconnector_context(
         file_relative_path(__file__, "./test_sets/Titanic.csv"),
         str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
     )
-    context = ge.data_context.DataContext(context_path)
+    context = gx.data_context.DataContext(context_path)
     assert context.root_directory == context_path
 
     datasource_config = f"""
@@ -1366,7 +1369,7 @@ def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS", raising=False)
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
-    context = ge.data_context.DataContext.create(project_path)
+    context = gx.data_context.DataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
@@ -1391,7 +1394,7 @@ def titanic_data_context(tmp_path_factory) -> DataContext:
     shutil.copy(
         titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
     )
-    return ge.data_context.DataContext(context_path)
+    return gx.data_context.DataContext(context_path)
 
 
 @pytest.fixture
@@ -1412,7 +1415,7 @@ def titanic_data_context_no_data_docs_no_checkpoint_store(tmp_path_factory):
     shutil.copy(
         titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
     )
-    return ge.data_context.DataContext(context_path)
+    return gx.data_context.DataContext(context_path)
 
 
 @pytest.fixture
@@ -1433,7 +1436,7 @@ def titanic_data_context_no_data_docs(tmp_path_factory):
     shutil.copy(
         titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
     )
-    return ge.data_context.DataContext(context_path)
+    return gx.data_context.DataContext(context_path)
 
 
 @pytest.fixture
@@ -1456,7 +1459,7 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     shutil.copy(
         titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
     )
-    return ge.data_context.DataContext(context_path)
+    return gx.data_context.DataContext(context_path)
 
 
 @pytest.fixture
@@ -1479,7 +1482,7 @@ def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkey
     shutil.copy(
         titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
     )
-    return ge.data_context.DataContext(context_path)
+    return gx.data_context.DataContext(context_path)
 
 
 @pytest.fixture
@@ -1502,7 +1505,7 @@ def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkey
     shutil.copy(
         titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
     )
-    return ge.data_context.DataContext(context_path)
+    return gx.data_context.DataContext(context_path)
 
 
 @pytest.fixture(scope="module")
@@ -1635,14 +1638,14 @@ def site_builder_data_context_with_html_store_titanic_random(
         os.path.join(filesystem_csv_3, "f2.csv"),
         str(os.path.join(project_dir, "data", "random", "f2.csv")),
     )
-    ge.data_context.DataContext.create(project_dir)
+    gx.data_context.DataContext.create(project_dir)
     shutil.copy(
         file_relative_path(
             __file__, "./test_fixtures/great_expectations_site_builder.yml"
         ),
         str(os.path.join(project_dir, "great_expectations", "great_expectations.yml")),
     )
-    context = ge.data_context.DataContext(
+    context = gx.data_context.DataContext(
         context_root_dir=os.path.join(project_dir, "great_expectations")
     )
 
@@ -1706,14 +1709,14 @@ def site_builder_data_context_v013_with_html_store_titanic_random(
         os.path.join(filesystem_csv_3, "f2.csv"),
         str(os.path.join(project_dir, "data", "random", "f2.csv")),
     )
-    ge.data_context.DataContext.create(project_dir)
+    gx.data_context.DataContext.create(project_dir)
     shutil.copy(
         file_relative_path(
             __file__, "./test_fixtures/great_expectations_v013_site_builder.yml"
         ),
         str(os.path.join(project_dir, "great_expectations", "great_expectations.yml")),
     )
-    context = ge.data_context.DataContext(
+    context = gx.data_context.DataContext(
         context_root_dir=os.path.join(project_dir, "great_expectations")
     )
 
@@ -1753,7 +1756,7 @@ def site_builder_data_context_v013_with_html_store_titanic_random(
 @pytest.fixture
 def v20_project_directory(tmp_path_factory):
     """
-    GE config_version: 2 project for testing upgrade helper
+    GX config_version: 2 project for testing upgrade helper
     """
     project_path = str(tmp_path_factory.mktemp("v20_project"))
     context_root_dir = os.path.join(project_path, "great_expectations")
@@ -1810,7 +1813,7 @@ def data_context_parameterized_expectation_suite_no_checkpoint_store(tmp_path_fa
         os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
         str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
     )
-    return ge.data_context.DataContext(context_path)
+    return gx.data_context.DataContext(context_path)
 
 
 @pytest.fixture
@@ -1851,7 +1854,7 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
         os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
         str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
     )
-    return ge.data_context.DataContext(context_path)
+    return gx.data_context.DataContext(context_path)
 
 
 @pytest.fixture
@@ -1892,7 +1895,7 @@ def data_context_simple_expectation_suite(tmp_path_factory):
         os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
         str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
     )
-    return ge.data_context.DataContext(context_path)
+    return gx.data_context.DataContext(context_path)
 
 
 @pytest.fixture()
@@ -2232,10 +2235,6 @@ introspection:
 
 @pytest.fixture
 def basic_datasource(tmp_path_factory):
-    base_directory: str = str(
-        tmp_path_factory.mktemp("basic_datasource_runtime_data_connector")
-    )
-
     basic_datasource: Datasource = instantiate_class_from_config(
         config=yaml.load(
             """
@@ -2437,7 +2436,7 @@ def request_headers(ge_cloud_access_token: str) -> Dict[str, str]:
     return {
         "Content-Type": "application/vnd.api+json",
         "Authorization": f"Bearer {ge_cloud_access_token}",
-        "Gx-Version": ge.__version__,
+        "Gx-Version": gx.__version__,
     }
 
 
@@ -2521,15 +2520,26 @@ def ge_cloud_config_e2e() -> GXCloudConfig:
     """
     Uses live credentials stored in the Great Expectations Cloud backend.
     """
-    base_url = os.environ["GE_CLOUD_BASE_URL"]
-    organization_id = os.environ["GE_CLOUD_ORGANIZATION_ID"]
-    access_token = os.environ["GE_CLOUD_ACCESS_TOKEN"]
-    ge_cloud_config = GXCloudConfig(
+    env_vars = os.environ
+
+    base_url = env_vars.get(
+        GXCloudEnvironmentVariable.BASE_URL,
+        env_vars.get(GXCloudEnvironmentVariable._OLD_BASE_URL),
+    )
+    organization_id = env_vars.get(
+        GXCloudEnvironmentVariable.ORGANIZATION_ID,
+        env_vars.get(GXCloudEnvironmentVariable._OLD_ORGANIZATION_ID),
+    )
+    access_token = env_vars.get(
+        GXCloudEnvironmentVariable.ACCESS_TOKEN,
+        env_vars.get(GXCloudEnvironmentVariable._OLD_ACCESS_TOKEN),
+    )
+    cloud_config = GXCloudConfig(
         base_url=base_url,
         organization_id=organization_id,
         access_token=access_token,
     )
-    return ge_cloud_config
+    return cloud_config
 
 
 @pytest.fixture
@@ -2547,11 +2557,11 @@ def empty_base_data_context_in_cloud_mode(
     project_path.mkdir()
     project_path = str(project_path)
 
-    context = ge.data_context.BaseDataContext(
+    context = gx.data_context.BaseDataContext(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path,
-        ge_cloud_mode=True,
-        ge_cloud_config=ge_cloud_config,
+        cloud_mode=True,
+        cloud_config=ge_cloud_config,
     )
     assert context.list_datasources() == []
     return context
@@ -2571,22 +2581,22 @@ def empty_data_context_in_cloud_mode(
     def mocked_config(*args, **kwargs) -> DataContextConfig:
         return empty_ge_cloud_data_context_config
 
-    def mocked_get_ge_cloud_config(*args, **kwargs) -> GXCloudConfig:
+    def mocked_get_cloud_config(*args, **kwargs) -> GXCloudConfig:
         return ge_cloud_config
 
     with mock.patch(
         "great_expectations.data_context.DataContext._save_project_config"
     ), mock.patch(
-        "great_expectations.data_context.data_context.CloudDataContext.retrieve_data_context_config_from_ge_cloud",
+        "great_expectations.data_context.data_context.CloudDataContext.retrieve_data_context_config_from_cloud",
         autospec=True,
         side_effect=mocked_config,
     ), mock.patch(
-        "great_expectations.data_context.data_context.CloudDataContext.get_ge_cloud_config",
+        "great_expectations.data_context.data_context.CloudDataContext.get_cloud_config",
         autospec=True,
-        side_effect=mocked_get_ge_cloud_config,
+        side_effect=mocked_get_cloud_config,
     ):
         context = DataContext(
-            ge_cloud_mode=True,
+            cloud_mode=True,
             context_root_dir=project_path_name,
         )
         return context
@@ -2631,11 +2641,11 @@ def empty_base_data_context_in_cloud_mode_custom_base_url(
     custom_ge_cloud_config = copy.deepcopy(ge_cloud_config)
     custom_ge_cloud_config.base_url = custom_base_url
 
-    context = ge.data_context.BaseDataContext(
+    context = gx.data_context.BaseDataContext(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path,
-        ge_cloud_mode=True,
-        ge_cloud_config=custom_ge_cloud_config,
+        cloud_mode=True,
+        cloud_config=custom_ge_cloud_config,
     )
     assert context.list_datasources() == []
     assert context.ge_cloud_config.base_url != ge_cloud_config.base_url
@@ -7026,56 +7036,6 @@ data_connectors:
             "name": "generic_csv_generator",
         }
     ]
-    return context
-
-
-def build_in_memory_runtime_context():
-    data_context_config: DataContextConfig = DataContextConfig(
-        datasources={
-            "pandas_datasource": {
-                "execution_engine": {
-                    "class_name": "PandasExecutionEngine",
-                    "module_name": "great_expectations.execution_engine",
-                },
-                "class_name": "Datasource",
-                "module_name": "great_expectations.datasource",
-                "data_connectors": {
-                    "runtime_data_connector": {
-                        "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": [
-                            "id_key_0",
-                            "id_key_1",
-                        ],
-                    }
-                },
-            },
-            "spark_datasource": {
-                "execution_engine": {
-                    "class_name": "SparkDFExecutionEngine",
-                    "module_name": "great_expectations.execution_engine",
-                },
-                "class_name": "Datasource",
-                "module_name": "great_expectations.datasource",
-                "data_connectors": {
-                    "runtime_data_connector": {
-                        "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": [
-                            "id_key_0",
-                            "id_key_1",
-                        ],
-                    }
-                },
-            },
-        },
-        expectations_store_name="expectations_store",
-        validations_store_name="validations_store",
-        evaluation_parameter_store_name="evaluation_parameter_store",
-        checkpoint_store_name="checkpoint_store",
-        store_backend_defaults=InMemoryStoreBackendDefaults(),
-    )
-
-    context: BaseDataContext = BaseDataContext(project_config=data_context_config)
-
     return context
 
 

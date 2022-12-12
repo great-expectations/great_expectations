@@ -6,12 +6,12 @@ from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
-from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain import (
+from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
     SemanticDomainTypes,
 )
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import (
     ColumnDomainBuilder,
     ColumnPairDomainBuilder,

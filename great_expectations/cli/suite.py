@@ -978,6 +978,6 @@ def suite_list(ctx: click.Context) -> None:
 def _get_notebook_path(context: DataContext, notebook_name: str) -> str:
     return os.path.abspath(
         os.path.join(
-            context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name
+            context.root_directory, context.GX_EDIT_NOTEBOOK_DIR, notebook_name
         )
     )

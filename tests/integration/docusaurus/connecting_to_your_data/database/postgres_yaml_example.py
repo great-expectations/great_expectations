@@ -1,6 +1,6 @@
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
 CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
@@ -14,7 +14,7 @@ load_data_into_test_database(
     connection_string=CONNECTION_STRING,
 )
 
-context = ge.get_context()
+context = gx.get_context()
 
 datasource_yaml = r"""
 name: my_postgres_datasource
@@ -60,7 +60,7 @@ validator = context.get_validator(
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 
 # Here is a BatchRequest naming a table
 batch_request = BatchRequest(
@@ -77,7 +77,7 @@ validator = context.get_validator(
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_postgres_datasource"]
 assert "public.taxi_data" in set(
     context.get_available_data_asset_names()["my_postgres_datasource"][

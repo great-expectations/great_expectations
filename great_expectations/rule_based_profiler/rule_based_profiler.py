@@ -14,6 +14,7 @@ from great_expectations.core.batch import (
     batch_request_contains_batch_data,
 )
 from great_expectations.core.config_peer import ConfigPeer
+from great_expectations.core.domain import Domain
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
@@ -43,7 +44,6 @@ from great_expectations.rule_based_profiler.config.base import (
     expectationConfigurationBuilderConfigSchema,
     parameterBuilderConfigSchema,
 )
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
 )
@@ -1138,7 +1138,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         )
 
         key: Union[GXCloudIdentifier, ConfigurationIdentifier]
-        if data_context.ge_cloud_mode:
+        if data_context.cloud_mode:
             key = GXCloudIdentifier(resource_type=GXCloudRESTResource.PROFILER)
         else:
             key = ConfigurationIdentifier(
@@ -1147,7 +1147,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         response = profiler_store.set(key=key, value=config)
         if isinstance(response, GXCloudResourceRef):
-            new_profiler.ge_cloud_id = response.ge_cloud_id
+            new_profiler.ge_cloud_id = response.cloud_id
 
         return new_profiler
 
@@ -1191,7 +1191,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         key: Union[GXCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
             key = GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
+                resource_type=GXCloudRESTResource.PROFILER, cloud_id=ge_cloud_id
             )
         else:
             key = ConfigurationIdentifier(
@@ -1241,7 +1241,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         key: Union[GXCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
             key = GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
+                resource_type=GXCloudRESTResource.PROFILER, cloud_id=ge_cloud_id
             )
         else:
             key = ConfigurationIdentifier(configuration_key=name)
