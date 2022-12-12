@@ -1327,7 +1327,7 @@ class Validator:
             result_format: Directive controlling whether or not to return only unresolved "ValidationGraph".
 
         Returns:
-            Dictionaries of values for fully-qualified parameter names by Domain for metrics, from "RuleBasedpRofiler"
+            Dictionaries of values for fully-qualified parameter names by Domain for metrics, from "RuleBasedProfiler"
         """
         data_assistant_name: str = MetricMultiBatchDataAssistant.data_assistant_type
         data_assistant: "DataAssistant" = MetricMultiBatchDataAssistant(  # noqa: F821
