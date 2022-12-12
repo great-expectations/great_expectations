@@ -10,7 +10,7 @@ import requests
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
@@ -71,7 +71,7 @@ class SerializableDataContext(AbstractDataContext):
         """
         logger.debug("Starting DataContext._save_project_config")
 
-        config_filepath = os.path.join(self.root_directory, self.GE_YML)  # type: ignore[arg-type]
+        config_filepath = os.path.join(self.root_directory, self.GX_YML)  # type: ignore[arg-type]
 
         try:
             with open(config_filepath, "w") as outfile:
@@ -169,23 +169,23 @@ class SerializableDataContext(AbstractDataContext):
         """
 
         if not os.path.isdir(project_root_dir):  # type: ignore[arg-type]
-            raise ge_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(
                 "The project_root_dir must be an existing directory in which "
                 "to initialize a new DataContext"
             )
 
-        ge_dir = os.path.join(project_root_dir, cls.GE_DIR)  # type: ignore[arg-type]
-        os.makedirs(ge_dir, exist_ok=True)
-        cls.scaffold_directories(ge_dir)
+        gx_dir = os.path.join(project_root_dir, cls.GX_DIR)  # type: ignore[arg-type]
+        os.makedirs(gx_dir, exist_ok=True)
+        cls.scaffold_directories(gx_dir)
 
-        if os.path.isfile(os.path.join(ge_dir, cls.GE_YML)):
-            message = f"""Warning. An existing `{cls.GE_YML}` was found here: {ge_dir}.
+        if os.path.isfile(os.path.join(gx_dir, cls.GX_YML)):
+            message = f"""Warning. An existing `{cls.GX_YML}` was found here: {gx_dir}.
     - No action was taken."""
             warnings.warn(message)
         else:
-            cls.write_project_template_to_disk(ge_dir, usage_statistics_enabled)
+            cls.write_project_template_to_disk(gx_dir, usage_statistics_enabled)
 
-        uncommitted_dir = os.path.join(ge_dir, cls.GE_UNCOMMITTED_DIR)
+        uncommitted_dir = os.path.join(gx_dir, cls.GX_UNCOMMITTED_DIR)
         if os.path.isfile(os.path.join(uncommitted_dir, "config_variables.yml")):
             message = """Warning. An existing `config_variables.yml` was found here: {}.
     - No action was taken.""".format(
@@ -195,14 +195,14 @@ class SerializableDataContext(AbstractDataContext):
         else:
             cls.write_config_variables_template_to_disk(uncommitted_dir)
 
-        return cls(context_root_dir=ge_dir, runtime_environment=runtime_environment)
+        return cls(context_root_dir=gx_dir, runtime_environment=runtime_environment)
 
     @classmethod
     def _load_project_config(
         cls,
         context_root_directory: Optional[str],
-        ge_cloud_mode: bool,
-        ge_cloud_config: Optional[GXCloudConfig],
+        cloud_mode: bool,
+        cloud_config: Optional[GXCloudConfig],
     ):
         """
         Reads the project configuration from the project configuration file.
@@ -210,80 +210,80 @@ class SerializableDataContext(AbstractDataContext):
         for how these are substituted.
 
         For Data Contexts in GE Cloud mode, a user-specific template is retrieved from the Cloud API
-        - see CloudDataContext.retrieve_data_context_config_from_ge_cloud for more details.
+        - see CloudDataContext.retrieve_data_context_config_from_cloud for more details.
 
         :return: the configuration object read from the file or template
         """
-        if ge_cloud_mode:
-            assert ge_cloud_config is not None
-            config = cls.retrieve_data_context_config_from_ge_cloud(
-                ge_cloud_config=ge_cloud_config
+        if cloud_mode:
+            assert cloud_config is not None
+            config = cls.retrieve_data_context_config_from_cloud(
+                cloud_config=cloud_config
             )
             return config
 
-        path_to_yml = os.path.join(context_root_directory, cls.GE_YML)
+        path_to_yml = os.path.join(context_root_directory, cls.GX_YML)
         try:
             with open(path_to_yml) as data:
                 config_commented_map_from_yaml = yaml.load(data)
 
         except DuplicateKeyError:
-            raise ge_exceptions.InvalidConfigurationYamlError(
+            raise gx_exceptions.InvalidConfigurationYamlError(
                 "Error: duplicate key found in project YAML file."
             )
         except YAMLError as err:
-            raise ge_exceptions.InvalidConfigurationYamlError(
+            raise gx_exceptions.InvalidConfigurationYamlError(
                 "Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{}".format(
                     err
                 )
             )
         except OSError:
-            raise ge_exceptions.ConfigNotFoundError()
+            raise gx_exceptions.ConfigNotFoundError()
 
         try:
             return DataContextConfig.from_commented_map(
                 commented_map=config_commented_map_from_yaml
             )
-        except ge_exceptions.InvalidDataContextConfigError:
+        except gx_exceptions.InvalidDataContextConfigError:
             # Just to be explicit about what we intended to catch
             raise
 
     @classmethod
-    def retrieve_data_context_config_from_ge_cloud(
-        cls, ge_cloud_config: GXCloudConfig
+    def retrieve_data_context_config_from_cloud(
+        cls, cloud_config: GXCloudConfig
     ) -> DataContextConfig:
         """
-        Utilizes the GeCloudConfig instantiated in the constructor to create a request to the Cloud API.
+        Utilizes the GXCloudConfig instantiated in the constructor to create a request to the Cloud API.
         Given proper authorization, the request retrieves a data context config that is pre-populated with
         GE objects specific to the user's Cloud environment (datasources, data connectors, etc).
 
-        Please note that substitution for ${VAR} variables is performed in GE Cloud before being sent
+        Please note that substitution for ${VAR} variables is performed in GX Cloud before being sent
         over the wire.
 
         :return: the configuration object retrieved from the Cloud API
         """
-        base_url = ge_cloud_config.base_url
-        organization_id = ge_cloud_config.organization_id
+        base_url = cloud_config.base_url
+        organization_id = cloud_config.organization_id
         ge_cloud_url = (
             f"{base_url}/organizations/{organization_id}/data-context-configuration"
         )
         headers = {
             "Content-Type": "application/vnd.api+json",
-            "Authorization": f"Bearer {ge_cloud_config.access_token}",
+            "Authorization": f"Bearer {cloud_config.access_token}",
             "Gx-Version": __version__,
         }
 
         response = requests.get(ge_cloud_url, headers=headers)
         if response.status_code != 200:
-            raise ge_exceptions.GXCloudError(
-                f"Bad request made to GE Cloud; {response.text}"
+            raise gx_exceptions.GXCloudError(
+                f"Bad request made to GX Cloud; {response.text}"
             )
         config = response.json()
         return DataContextConfig(**config)
 
     @classmethod
-    def all_uncommitted_directories_exist(cls, ge_dir: str) -> bool:
+    def all_uncommitted_directories_exist(cls, gx_dir: str) -> bool:
         """Check if all uncommitted directories exist."""
-        uncommitted_dir = os.path.join(ge_dir, cls.GE_UNCOMMITTED_DIR)
+        uncommitted_dir = os.path.join(gx_dir, cls.GX_UNCOMMITTED_DIR)
         for directory in cls.UNCOMMITTED_DIRECTORIES:
             if not os.path.isdir(os.path.join(uncommitted_dir, directory)):
                 return False
@@ -291,15 +291,15 @@ class SerializableDataContext(AbstractDataContext):
         return True
 
     @classmethod
-    def config_variables_yml_exist(cls, ge_dir: str) -> bool:
+    def config_variables_yml_exist(cls, gx_dir: str) -> bool:
         """Check if all config_variables.yml exists."""
-        path_to_yml = os.path.join(ge_dir, cls.GE_YML)
+        path_to_yml = os.path.join(gx_dir, cls.GX_YML)
 
         # TODO this is so brittle and gross
         with open(path_to_yml) as f:
             config = yaml.load(f)
         config_var_path = config.get("config_variables_file_path")
-        config_var_path = os.path.join(ge_dir, config_var_path)
+        config_var_path = os.path.join(gx_dir, config_var_path)
         return os.path.isfile(config_var_path)
 
     @classmethod
@@ -311,9 +311,9 @@ class SerializableDataContext(AbstractDataContext):
 
     @classmethod
     def write_project_template_to_disk(
-        cls, ge_dir: str, usage_statistics_enabled: bool = True
+        cls, gx_dir: str, usage_statistics_enabled: bool = True
     ) -> None:
-        file_path = os.path.join(ge_dir, cls.GE_YML)
+        file_path = os.path.join(gx_dir, cls.GX_YML)
         with open(file_path, "w") as template:
             if usage_statistics_enabled:
                 template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED)
@@ -350,7 +350,7 @@ class SerializableDataContext(AbstractDataContext):
             else:
                 os.makedirs(os.path.join(base_dir, directory), exist_ok=True)
 
-        uncommitted_dir = os.path.join(base_dir, cls.GE_UNCOMMITTED_DIR)
+        uncommitted_dir = os.path.join(base_dir, cls.GX_UNCOMMITTED_DIR)
 
         for new_directory in cls.UNCOMMITTED_DIRECTORIES:
             new_directory_path = os.path.join(uncommitted_dir, new_directory)
@@ -372,26 +372,26 @@ class SerializableDataContext(AbstractDataContext):
     def find_context_root_dir(cls) -> str:
         result = None
         yml_path = None
-        ge_home_environment = os.getenv("GE_HOME")
-        if ge_home_environment:
-            ge_home_environment = os.path.expanduser(ge_home_environment)
-            if os.path.isdir(ge_home_environment) and os.path.isfile(
-                os.path.join(ge_home_environment, "great_expectations.yml")
+        gx_home_environment = os.getenv("GX_HOME")
+        if gx_home_environment:
+            gx_home_environment = os.path.expanduser(gx_home_environment)
+            if os.path.isdir(gx_home_environment) and os.path.isfile(
+                os.path.join(gx_home_environment, "great_expectations.yml")
             ):
-                result = ge_home_environment
+                result = gx_home_environment
         else:
             yml_path = cls.find_context_yml_file()
             if yml_path:
                 result = os.path.dirname(yml_path)
 
         if result is None:
-            raise ge_exceptions.ConfigNotFoundError()
+            raise gx_exceptions.ConfigNotFoundError()
 
         logger.debug(f"Using project config: {yml_path}")
         return result
 
     @classmethod
-    def get_ge_config_version(
+    def get_gx_config_version(
         cls, context_root_dir: Optional[str] = None
     ) -> Optional[float]:
         yml_path = cls.find_context_yml_file(search_start_dir=context_root_dir)
@@ -405,26 +405,26 @@ class SerializableDataContext(AbstractDataContext):
         return float(config_version) if config_version else None
 
     @classmethod
-    def set_ge_config_version(
+    def set_gx_config_version(
         cls,
         config_version: Union[int, float],
         context_root_dir: Optional[str] = None,
         validate_config_version: bool = True,
     ) -> bool:
         if not isinstance(config_version, (int, float)):
-            raise ge_exceptions.UnsupportedConfigVersionError(
+            raise gx_exceptions.UnsupportedConfigVersionError(
                 "The argument `config_version` must be a number.",
             )
 
         if validate_config_version:
             if config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
-                raise ge_exceptions.UnsupportedConfigVersionError(
+                raise gx_exceptions.UnsupportedConfigVersionError(
                     "Invalid config version ({}).\n    The version number must be at least {}. ".format(
                         config_version, MINIMUM_SUPPORTED_CONFIG_VERSION
                     ),
                 )
             elif config_version > CURRENT_GX_CONFIG_VERSION:
-                raise ge_exceptions.UnsupportedConfigVersionError(
+                raise gx_exceptions.UnsupportedConfigVersionError(
                     "Invalid config version ({}).\n    The maximum valid version is {}.".format(
                         config_version, CURRENT_GX_CONFIG_VERSION
                     ),
@@ -457,10 +457,10 @@ class SerializableDataContext(AbstractDataContext):
                 f"Searching for config file {search_start_dir} ({i} layer deep)"
             )
 
-            potential_ge_dir = os.path.join(search_start_dir, cls.GE_DIR)
+            potential_ge_dir = os.path.join(search_start_dir, cls.GX_DIR)
 
             if os.path.isdir(potential_ge_dir):
-                potential_yml = os.path.join(potential_ge_dir, cls.GE_YML)
+                potential_yml = os.path.join(potential_ge_dir, cls.GX_YML)
                 if os.path.isfile(potential_yml):
                     yml_path = potential_yml
                     logger.debug(f"Found config file at {str(yml_path)}")
@@ -473,7 +473,7 @@ class SerializableDataContext(AbstractDataContext):
     @classmethod
     def does_config_exist_on_disk(cls, context_root_dir: str) -> bool:
         """Return True if the great_expectations.yml exists on disk."""
-        return os.path.isfile(os.path.join(context_root_dir, cls.GE_YML))
+        return os.path.isfile(os.path.join(context_root_dir, cls.GX_YML))
 
     @classmethod
     def is_project_initialized(cls, ge_dir: str) -> bool:
@@ -523,8 +523,8 @@ class SerializableDataContext(AbstractDataContext):
             context = cls(ge_dir)
             return context
         except (
-            ge_exceptions.DataContextError,
-            ge_exceptions.InvalidDataContextConfigError,
+            gx_exceptions.DataContextError,
+            gx_exceptions.InvalidDataContextConfigError,
         ) as e:
             logger.debug(e)
         return None

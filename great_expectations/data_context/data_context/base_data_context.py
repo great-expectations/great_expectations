@@ -29,11 +29,8 @@ def BaseDataContext(
     ge_cloud_config: Optional[GXCloudConfig] = None,
 ) -> AbstractDataContext:
     # Chetan - 20221208 - not formally deprecating these values until a future date
-    if ge_cloud_mode or ge_cloud_config:
-        if not cloud_mode:
-            cloud_mode = ge_cloud_mode
-        if not cloud_config:
-            cloud_config = ge_cloud_config
+    cloud_config = cloud_config if cloud_config is not None else ge_cloud_config
+    cloud_mode = True if cloud_mode or ge_cloud_mode else False
 
     project_data_context_config: DataContextConfig = (
         AbstractDataContext.get_or_create_data_context_config(project_config)
@@ -45,20 +42,20 @@ def BaseDataContext(
     runtime_environment = runtime_environment or {}
 
     if ge_cloud_mode:
-        ge_cloud_base_url: Optional[str] = None
-        ge_cloud_access_token: Optional[str] = None
-        ge_cloud_organization_id: Optional[str] = None
-        if ge_cloud_config:
-            ge_cloud_base_url = ge_cloud_config.base_url
-            ge_cloud_access_token = ge_cloud_config.access_token
-            ge_cloud_organization_id = ge_cloud_config.organization_id
+        cloud_base_url: Optional[str] = None
+        cloud_access_token: Optional[str] = None
+        cloud_organization_id: Optional[str] = None
+        if cloud_config:
+            cloud_base_url = cloud_config.base_url
+            cloud_access_token = cloud_config.access_token
+            cloud_organization_id = cloud_config.organization_id
         return CloudDataContext(
             project_config=project_data_context_config,
             runtime_environment=runtime_environment,
             context_root_dir=context_root_dir,
-            cloud_base_url=ge_cloud_base_url,
-            cloud_access_token=ge_cloud_access_token,
-            cloud_organization_id=ge_cloud_organization_id,
+            cloud_base_url=cloud_base_url,
+            cloud_access_token=cloud_access_token,
+            cloud_organization_id=cloud_organization_id,
         )
     elif context_root_dir:
         return FileDataContext(  # type: ignore[assignment]
