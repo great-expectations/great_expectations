@@ -127,7 +127,7 @@ def mocked_get_response(
 @pytest.mark.cloud
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "data_context_fixture_name,data_context_type",
+    "data_context_fixture_name",
     [
         # In order to leverage existing fixtures in parametrization, we provide
         # their string names and dynamically retrieve them using pytest's built-in
@@ -135,18 +135,14 @@ def mocked_get_response(
         # Source: https://stackoverflow.com/a/64348247
         pytest.param(
             "empty_base_data_context_in_cloud_mode",
-            BaseDataContext,
             id="BaseDataContext",
         ),
-        pytest.param("empty_data_context_in_cloud_mode", DataContext, id="DataContext"),
-        pytest.param(
-            "empty_cloud_data_context", CloudDataContext, id="CloudDataContext"
-        ),
+        pytest.param("empty_data_context_in_cloud_mode", id="DataContext"),
+        pytest.param("empty_cloud_data_context", id="CloudDataContext"),
     ],
 )
 def test_cloud_backed_data_context_add_checkpoint(
     data_context_fixture_name: str,
-    data_context_type: Type[AbstractDataContext],
     checkpoint_id: str,
     validation_ids: Tuple[str, str],
     checkpoint_config: dict,
@@ -163,7 +159,7 @@ def test_cloud_backed_data_context_add_checkpoint(
     context = request.getfixturevalue(data_context_fixture_name)
 
     # Make sure the fixture has the right configuration
-    assert isinstance(context, data_context_type)
+    assert isinstance(context, CloudDataContext)
     assert context.cloud_mode
 
     validation_id_1, validation_id_2 = validation_ids
@@ -213,7 +209,7 @@ def test_cloud_backed_data_context_add_checkpoint(
 @pytest.mark.cloud
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "data_context_fixture_name,data_context_type",
+    "data_context_fixture_name",
     [
         # In order to leverage existing fixtures in parametrization, we provide
         # their string names and dynamically retrieve them using pytest's built-in
@@ -221,18 +217,14 @@ def test_cloud_backed_data_context_add_checkpoint(
         # Source: https://stackoverflow.com/a/64348247
         pytest.param(
             "empty_base_data_context_in_cloud_mode",
-            BaseDataContext,
             id="BaseDataContext",
         ),
-        pytest.param("empty_data_context_in_cloud_mode", DataContext, id="DataContext"),
-        pytest.param(
-            "empty_cloud_data_context", CloudDataContext, id="CloudDataContext"
-        ),
+        pytest.param("empty_data_context_in_cloud_mode", id="DataContext"),
+        pytest.param("empty_cloud_data_context", id="CloudDataContext"),
     ],
 )
 def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
     data_context_fixture_name: str,
-    data_context_type: Type[AbstractDataContext],
     checkpoint_config: dict,
     checkpoint_id: str,
     mocked_post_response: Callable[[], MockResponse],
@@ -245,7 +237,7 @@ def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
     context = request.getfixturevalue(data_context_fixture_name)
 
     # Make sure the fixture has the right configuration
-    assert isinstance(context, data_context_type)
+    assert isinstance(context, CloudDataContext)
     assert context.ge_cloud_mode
 
     with mock.patch(
