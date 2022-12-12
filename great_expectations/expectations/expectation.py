@@ -1036,21 +1036,19 @@ class Expectation(metaclass=MetaExpectation):
         # noinspection PyTypeChecker
         provided_metrics: Dict[str, MetricValue] = {
             metric_name: list(
-                list(
-                    dict(
-                        filter(
-                            lambda element: element[0].is_superset(
-                                other=metric_configuration.get_domain()
-                            ),
-                            metrics_by_domain.items(),
-                        )
-                    ).values()
-                )[0][
-                    f"{RAW_PARAMETER_KEY}{sanitize_parameter_name(name=metric_configuration.metric_name, suffix=metric_configuration.metric_value_kwargs_id)}"
-                ][
-                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-                ]
-            )[-1][0]
+                dict(
+                    filter(
+                        lambda element: element[0].is_superset(
+                            other=metric_configuration.get_domain()
+                        ),
+                        metrics_by_domain.items(),
+                    )
+                ).values()
+            )[0][
+                f"{RAW_PARAMETER_KEY}{sanitize_parameter_name(name=metric_configuration.metric_name, suffix=metric_configuration.metric_value_kwargs_id)}"
+            ][
+                FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+            ]
             for metric_name, metric_configuration in validation_dependencies.metric_configurations.items()
         }
         # TODO: <Alex>ALEX</Alex>
@@ -1079,7 +1077,12 @@ class Expectation(metaclass=MetaExpectation):
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
         # metric_configuration: MetricConfiguration
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
@@ -1089,14 +1092,10 @@ class Expectation(metaclass=MetaExpectation):
         # }
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
         # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] PROVIDED_METRICS-0:\n{provided_metrics} ; TYPE: {str(type(provided_metrics))}")
         # TODO: <Alex>ALEX</Alex>
         # provided_metrics = convert_to_json_serializable(data=provided_metrics)
-        # TODO: <Alex>ALEX</Alex>
         # print(f"\n[ALEX_TEST] [EXPECTATION.metrics_validate()] PROVIDED_METRICS-1:\n{provided_metrics} ; TYPE: {str(type(provided_metrics))}")
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
 
         expectation_validation_result: Union[
