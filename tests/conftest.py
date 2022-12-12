@@ -2585,9 +2585,9 @@ def empty_data_context_in_cloud_mode(
         return ge_cloud_config
 
     with mock.patch(
-        "great_expectations.data_context.DataContext._save_project_config"
+        "great_expectations.data_context.data_context.serializable_data_context.SerializableDataContext._save_project_config"
     ), mock.patch(
-        "great_expectations.data_context.data_context.CloudDataContext.retrieve_data_context_config_from_cloud",
+        "great_expectations.data_context.data_context.serializable_data_context.SerializableDataContext.retrieve_data_context_config_from_cloud",
         autospec=True,
         side_effect=mocked_config,
     ), mock.patch(

@@ -41,7 +41,7 @@ def BaseDataContext(
     # initialize runtime_environment as empty dict if None
     runtime_environment = runtime_environment or {}
 
-    if ge_cloud_mode:
+    if cloud_mode:
         cloud_base_url: Optional[str] = None
         cloud_access_token: Optional[str] = None
         cloud_organization_id: Optional[str] = None

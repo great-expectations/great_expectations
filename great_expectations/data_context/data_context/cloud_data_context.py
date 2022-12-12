@@ -120,6 +120,7 @@ class CloudDataContext(SerializableDataContext):
             config=project_data_context_config
         )
         super().__init__(
+            context_root_dir=self._context_root_directory,
             runtime_environment=runtime_environment,
         )
 

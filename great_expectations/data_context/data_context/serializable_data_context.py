@@ -54,7 +54,7 @@ class SerializableDataContext(AbstractDataContext):
     def __init__(
         self, context_root_dir: str, runtime_environment: Optional[dict] = None
     ) -> None:
-        self.context_root_dir = context_root_dir
+        self._context_root_directory = context_root_dir
         super().__init__(runtime_environment=runtime_environment)
 
     def _init_datasource_store(self):
