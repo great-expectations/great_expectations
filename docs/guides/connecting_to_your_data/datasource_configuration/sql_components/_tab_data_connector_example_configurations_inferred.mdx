@@ -10,20 +10,7 @@ import NoteOptionalDataConnectorKeys from './_note_optional_data_connector_keys.
 
 At this point, your configuration should look like:
 
-```python
-datasource_config: dict = {
-    "name": "my_datasource_name",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "class_name": "SparkDFExecutionEngine",
-        "module_name": "great_expectations.execution_engine",
-    },
-    "data_connectors": {
-        "name_of_my_inferred_data_connector": {}
-        }
-    }
-}
+```python name="sql datasource configuration with empty inferred sql data_connector"
 ```
 
 #### Required Data Connector configuration keys
@@ -32,29 +19,14 @@ datasource_config: dict = {
 
 For this example, you will be using the `InferredAssetSqlDataConnector` as your `class_name`.  This is a subclass of the `InferredAssetDataConnector` that is specialized to support SQL Execution Engines, such as the `SqlAlchemyExecutionEngine`.  This key/value entry will therefore look like:
 
-```python
-        "class_name": "InferredAssetSqlDataConnector",
+```python name="define data_connector class_name for inferred sql datasource"
 ```
 
 <TipCustomDataConnectorModuleName />
 
 With this value added your full configuration should now look like:
 
-```python
-datasource_config: dict = {
-    "name": "my_datasource_name",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "class_name": "SparkDFExecutionEngine",
-        "module_name": "great_expectations.execution_engine",
-    },
-    "data_connectors": {
-        "name_of_my_inferred_data_connector": {
-            "class_name": "InferredAssetSqlDataConnector",
-        }
-    }
-}
+```python name="inferred sql datasource configuration with data_connector class_name defined"
 ```
 
 #### Optional Data Connector configuration key for defining introspection behaviour
