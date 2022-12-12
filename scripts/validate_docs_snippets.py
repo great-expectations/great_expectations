@@ -11,6 +11,12 @@ import tempfile
 from typing import List
 
 
+def check_dependencies(*deps: str) -> None:
+    for dep in deps:
+        if not shutil.which(dep):
+            raise Exception(f"Must have `{dep}` installed in PATH to run {__file__}")
+
+
 def run_docusaurus_build(tmp_dir_name: str) -> None:
     # https://docusaurus.io/docs/cli#docusaurus-build-sitedir
     subprocess.call(
@@ -24,21 +30,25 @@ def run_docusaurus_build(tmp_dir_name: str) -> None:
 
 
 def run_grep(target_dir: str) -> List[str]:
-    out = subprocess.check_output(
-        [
-            "grep",
-            "-Enr",
-            r"<\/?snippet>",
-            target_dir,
-        ],
-        universal_newlines=True,
-    )
+    try:
+        out = subprocess.check_output(
+            [
+                "grep",
+                "-Enr",
+                r"<\/?snippet>",
+                target_dir,
+            ],
+            universal_newlines=True,
+        )
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(
+            f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}"
+        )
     return out.splitlines()
 
 
 def main() -> None:
-    if not shutil.which("yarn"):
-        raise Exception(f"Must have `yarn` installed in PATH to run {__file__}")
+    check_dependencies("yarn", "grep")
     with tempfile.TemporaryDirectory() as tmp_dir:
         run_docusaurus_build(tmp_dir)
         grep_output = run_grep(tmp_dir)
