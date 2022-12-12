@@ -5,6 +5,9 @@ import pytest
 
 from great_expectations import DataContext
 from great_expectations.data_context import BaseDataContext
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.exceptions import DataContextError
 
 
@@ -224,7 +227,7 @@ def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasource
     datasource is not configured, and docs are not built.
     """
     empty_directory = str(tmp_path_factory.mktemp("another_empty_project"))
-    DataContext.create(empty_directory)
+    FileDataContext.create(empty_directory)
     context = DataContext(os.path.join(empty_directory, DataContext.GX_DIR))
 
     obs = context.get_docs_sites_urls(only_if_exists=False)
@@ -238,7 +241,7 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
     tmp_path_factory,
 ):
     empty_directory = str(tmp_path_factory.mktemp("yo_yo"))
-    DataContext.create(empty_directory)
+    FileDataContext.create(empty_directory)
     ge_dir = os.path.join(empty_directory, DataContext.GX_DIR)
     context = DataContext(ge_dir)
 
@@ -271,7 +274,7 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
     tmp_path_factory,
 ):
     empty_directory = str(tmp_path_factory.mktemp("yo_yo_ma"))
-    DataContext.create(empty_directory)
+    FileDataContext.create(empty_directory)
     ge_dir = os.path.join(empty_directory, DataContext.GX_DIR)
     context = DataContext(ge_dir)
 
@@ -320,7 +323,7 @@ def test_build_data_docs_skipping_index_does_not_build_index(
 ):
     # TODO What's the latest and greatest way to use configs rather than my hackery?
     empty_directory = str(tmp_path_factory.mktemp("empty"))
-    DataContext.create(empty_directory)
+    FileDataContext.create(empty_directory)
     ge_dir = os.path.join(empty_directory, DataContext.GX_DIR)
     context = DataContext(ge_dir)
     config = context.get_config()

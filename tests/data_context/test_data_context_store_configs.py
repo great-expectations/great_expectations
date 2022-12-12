@@ -51,9 +51,9 @@ def totally_empty_data_context(tmp_path_factory):
 
 def test_create(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("path_001"))
-    context = gx.data_context.DataContext.create(project_path)
+    context = gx.data_context.FileDataContext.create(project_path)
 
-    assert isinstance(context, gx.data_context.DataContext)
+    assert isinstance(context, gx.data_context.FileDataContext)
 
 
 def test_add_store(totally_empty_data_context):
@@ -72,7 +72,7 @@ def test_add_store(totally_empty_data_context):
 
 def test_default_config_yml_stores(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("totally_empty_data_context"))
-    context = gx.data_context.DataContext.create(project_path)
+    context = gx.data_context.FileDataContext.create(project_path)
 
     assert set(context.stores.keys()) == {
         "expectations_store",

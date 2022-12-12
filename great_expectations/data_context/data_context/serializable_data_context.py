@@ -391,7 +391,7 @@ class SerializableDataContext(AbstractDataContext):
         return result
 
     @classmethod
-    def get_gx_config_version(
+    def get_ge_config_version(
         cls, context_root_dir: Optional[str] = None
     ) -> Optional[float]:
         yml_path = cls.find_context_yml_file(search_start_dir=context_root_dir)
@@ -405,7 +405,7 @@ class SerializableDataContext(AbstractDataContext):
         return float(config_version) if config_version else None
 
     @classmethod
-    def set_gx_config_version(
+    def set_ge_config_version(
         cls,
         config_version: Union[int, float],
         context_root_dir: Optional[str] = None,

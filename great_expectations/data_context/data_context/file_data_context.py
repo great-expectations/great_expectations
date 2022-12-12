@@ -46,8 +46,8 @@ class FileDataContext(SerializableDataContext):
         if not project_config:
             project_config = self._load_project_config(
                 context_root_directory=context_root_dir,
-                ge_cloud_mode=False,
-                ge_cloud_config=None,
+                cloud_mode=False,
+                cloud_config=None,
             )
         self._project_config = self._apply_global_config_overrides(
             config=project_config
