@@ -4,6 +4,16 @@
 Changelog
 #########
 
+0.15.39
+-----------------
+* [BUGFIX] Patch faulty GX Cloud arg resolution logic (#6542)
+* [BUGFIX] Fix resolution of cloud variables. (#6546)
+* [DOCS] Fix line numbers in snippets part 2 (#6537)
+* [DOCS] Convert nested snippets to named snippets (#6541)
+* [DOCS] Simplify snippet checker logic to catch stray tags in CI (#6538)
+* [MAINTENANCE] v2 Docs link (#6534)
+* [MAINTENANCE] Fix logic around cloud_mode and ge_cloud_mode. (#6550)
+
 0.15.38
 -----------------
 * [BUGFIX] Patch broken Cloud E2E test around `Datasource` CRUD (#6520)
