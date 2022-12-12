@@ -1036,27 +1036,51 @@ class Expectation(metaclass=MetaExpectation):
         #
         # TODO: <Alex>ALEX</Alex>
 
+        # TODO: <Alex>ALEX-MULTI_BATCH</Alex>
         # TODO: <Alex>ALEX</Alex>
         # noinspection PyTypeChecker
         provided_metrics: Dict[str, MetricValue] = {
             metric_name: list(
-                list(
-                    dict(
-                        filter(
-                            lambda element: element[0].is_superset(
-                                other=metric_configuration.get_domain()
-                            ),
-                            metrics_by_domain.items(),
-                        )
-                    ).values()
-                )[0][
-                    f"{RAW_PARAMETER_KEY}{sanitize_parameter_name(name=metric_configuration.metric_name, suffix=metric_configuration.metric_value_kwargs_id)}"
-                ][
-                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-                ].values()
-            )[-1][0]
+                # list(
+                dict(
+                    filter(
+                        lambda element: element[0].is_superset(
+                            other=metric_configuration.get_domain()
+                        ),
+                        metrics_by_domain.items(),
+                    )
+                ).values()
+            )[0][
+                f"{RAW_PARAMETER_KEY}{sanitize_parameter_name(name=metric_configuration.metric_name, suffix=metric_configuration.metric_value_kwargs_id)}"
+            ][
+                FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+            ]  # .values()#<ALEX-GET_SINGLE_FILTERED_DOMAIN_VALUE_BY_BATCH_ID>
+            # )[-1][0]#<ALEX-GET_EVERY_BATCH_NOT_JUST_ACTIVE_BATCH>
             for metric_name, metric_configuration in validation_dependencies.metric_configurations.items()
         }
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX-SINGLE_BATCH</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # # noinspection PyTypeChecker
+        # provided_metrics: Dict[str, MetricValue] = {
+        #     metric_name: list(
+        #         list(
+        #             dict(
+        #                 filter(
+        #                     lambda element: element[0].is_superset(
+        #                         other=metric_configuration.get_domain()
+        #                     ),
+        #                     metrics_by_domain.items(),
+        #                 )
+        #             ).values()
+        #         )[0][
+        #             f"{RAW_PARAMETER_KEY}{sanitize_parameter_name(name=metric_configuration.metric_name, suffix=metric_configuration.metric_value_kwargs_id)}"
+        #         ][
+        #             FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+        #         ].values()
+        #     )[-1][0]
+        #     for metric_name, metric_configuration in validation_dependencies.metric_configurations.items()
+        # }
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>

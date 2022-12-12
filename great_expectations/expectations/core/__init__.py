@@ -1,3 +1,7 @@
+# TODO: <Alex>ALEX</Alex>
+from .expect_batch_table_row_count_to_be_increasing import (
+    ExpectBatchTableRowCountToBeIncreasing,
+)
 from .expect_column_distinct_values_to_be_in_set import (
     ExpectColumnDistinctValuesToBeInSet,
 )
@@ -98,6 +102,8 @@ from .expect_table_columns_to_match_ordered_list import (
 from .expect_table_columns_to_match_set import ExpectTableColumnsToMatchSet
 from .expect_table_row_count_to_be_between import ExpectTableRowCountToBeBetween
 from .expect_table_row_count_to_equal import ExpectTableRowCountToEqual
+
+# TODO: <Alex>ALEX</Alex>
 from .expect_table_row_count_to_equal_other_table import (
     ExpectTableRowCountToEqualOtherTable,
 )
