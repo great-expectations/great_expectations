@@ -24,10 +24,8 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder im
 from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
     CardinalityLimitMode,
 )
-from great_expectations.rule_based_profiler.helpers.util import sanitize_parameter_name
 from great_expectations.rule_based_profiler.parameter_builder import (
     MeanTableColumnsSetMatchMultiBatchParameterBuilder,
-    MetricMultiBatchParameterBuilder,
     ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
@@ -583,24 +581,6 @@ class GrowthNumericDataAssistant(DataAssistant):
 
         column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
             DataAssistant.commonly_used_parameter_builders.get_column_distinct_values_count_metric_multi_batch_parameter_builder()
-        )
-        metric_name: str = "column.value_counts"
-        name: str = sanitize_parameter_name(name=metric_name)
-        column_value_counts_metric_multi_batch_parameter_builder_for_metrics = (
-            MetricMultiBatchParameterBuilder(
-                name=name,
-                metric_name=metric_name,
-                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-                metric_value_kwargs={
-                    "sort": "value",
-                },
-                single_batch_mode=False,
-                enforce_numeric_metric=False,
-                replace_nan_with_zero=False,
-                reduce_scalar_metric=True,
-                evaluation_parameter_builder_configs=None,
-                data_context=None,
-            )
         )
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
