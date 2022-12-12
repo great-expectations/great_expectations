@@ -82,6 +82,7 @@ from great_expectations.self_check.util import (
     get_dataset,
 )
 from great_expectations.util import build_in_memory_runtime_context, is_library_loadable
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.rule_based_profiler.parameter_builder.conftest import (
     RANDOM_SEED,
     RANDOM_STATE,
@@ -7042,6 +7043,51 @@ data_connectors:
 @pytest.fixture
 def in_memory_runtime_context():
     return build_in_memory_runtime_context()
+
+
+@pytest.fixture
+def table_row_count_metric_config() -> MetricConfiguration:
+    return MetricConfiguration(
+        metric_name="table.row_count",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
+
+
+@pytest.fixture
+def table_row_count_aggregate_fn_metric_config() -> MetricConfiguration:
+    return MetricConfiguration(
+        metric_name="table.row_count.aggregate_fn",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
+
+
+@pytest.fixture
+def table_head_metric_config() -> MetricConfiguration:
+    return MetricConfiguration(
+        metric_name="table.head",
+        metric_domain_kwargs={
+            "batch_id": "abc123",
+        },
+        metric_value_kwargs={
+            "n_rows": 5,
+        },
+    )
+
+
+@pytest.fixture
+def column_histogram_metric_config() -> MetricConfiguration:
+    return MetricConfiguration(
+        metric_name="column.histogram",
+        metric_domain_kwargs={
+            "column": "my_column",
+            "batch_id": "def456",
+        },
+        metric_value_kwargs={
+            "bins": 5,
+        },
+    )
 
 
 @pytest.fixture
