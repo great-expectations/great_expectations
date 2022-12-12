@@ -228,7 +228,7 @@ def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasource
     """
     empty_directory = str(tmp_path_factory.mktemp("another_empty_project"))
     FileDataContext.create(empty_directory)
-    context = DataContext(os.path.join(empty_directory, DataContext.GX_DIR))
+    context = DataContext(os.path.join(empty_directory, FileDataContext.GX_DIR))
 
     obs = context.get_docs_sites_urls(only_if_exists=False)
     assert len(obs) == 1
@@ -242,7 +242,7 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
 ):
     empty_directory = str(tmp_path_factory.mktemp("yo_yo"))
     FileDataContext.create(empty_directory)
-    ge_dir = os.path.join(empty_directory, DataContext.GX_DIR)
+    ge_dir = os.path.join(empty_directory, FileDataContext.GX_DIR)
     context = DataContext(ge_dir)
 
     context._project_config["data_docs_sites"] = {
@@ -275,7 +275,7 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
 ):
     empty_directory = str(tmp_path_factory.mktemp("yo_yo_ma"))
     FileDataContext.create(empty_directory)
-    ge_dir = os.path.join(empty_directory, DataContext.GX_DIR)
+    ge_dir = os.path.join(empty_directory, FileDataContext.GX_DIR)
     context = DataContext(ge_dir)
 
     context._project_config["data_docs_sites"] = {
@@ -324,7 +324,7 @@ def test_build_data_docs_skipping_index_does_not_build_index(
     # TODO What's the latest and greatest way to use configs rather than my hackery?
     empty_directory = str(tmp_path_factory.mktemp("empty"))
     FileDataContext.create(empty_directory)
-    ge_dir = os.path.join(empty_directory, DataContext.GX_DIR)
+    ge_dir = os.path.join(empty_directory, FileDataContext.GX_DIR)
     context = DataContext(ge_dir)
     config = context.get_config()
     config.data_docs_sites = {
