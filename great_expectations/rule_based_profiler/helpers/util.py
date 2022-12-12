@@ -1060,7 +1060,7 @@ def sanitize_parameter_name(
 
     In most situations, "suffix" is not needed.  However, in certain use cases, "name" argument is same among different
     calling structures, whereby "name" can be disambiguated by addition of distinguishing "suffix" argument.  Using
-    list of "MetricConfiguration" objects as example, "metric_name" and "metric_domain_kwargs" are commoonly same among
+    list of "MetricConfiguration" objects as example, "metric_name" and "metric_domain_kwargs" are commonly same among
     them, while "metric_value_kwargs" are different (i.e., calculating values of same metric with different parameters).
     In this case, supplying "MetricConfiguration.metric_domain_kwargs_id" as "suffix" makes sanitized names unique.
 
