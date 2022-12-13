@@ -31,6 +31,16 @@ def metric_edge(
 
 
 @pytest.fixture
+def validation_graph_with_no_edges() -> ValidationGraph:
+    class DummyExecutionEngine:
+        pass
+
+    execution_engine = cast(ExecutionEngine, DummyExecutionEngine)
+
+    return ValidationGraph(execution_engine=execution_engine, edges=None)
+
+
+@pytest.fixture
 def validation_graph_with_single_edge(metric_edge: MetricEdge) -> ValidationGraph:
     class DummyExecutionEngine:
         pass
@@ -65,15 +75,11 @@ def expect_column_value_z_scores_to_be_less_than_expectation_config() -> Expecta
 @pytest.fixture
 def expect_column_values_to_be_unique_expectation_validation_graph(
     expect_column_values_to_be_unique_expectation_config: ExpectationConfiguration,
+    validation_graph_with_no_edges: ValidationGraph,
 ) -> ExpectationValidationGraph:
-    class DummyExecutionEngine:
-        pass
-
-    execution_engine = cast(ExecutionEngine, DummyExecutionEngine)
-
     return ExpectationValidationGraph(
-        execution_engine=execution_engine,
         configuration=expect_column_values_to_be_unique_expectation_config,
+        graph=validation_graph_with_no_edges,
     )
 
 
@@ -112,6 +118,7 @@ def expect_column_value_z_scores_to_be_less_than_expectation_validation_graph():
     return graph
 
 
+# noinspection PyPep8Naming
 @pytest.mark.unit
 def test_ValidationGraph_init_no_input_edges() -> None:
     class DummyExecutionEngine:
@@ -159,10 +166,43 @@ def test_ValidationGraph_add(metric_edge: MetricEdge) -> None:
     assert metric_edge.id in graph.edge_ids
 
 
+def test_ExpectationValidationGraph_constructor(
+    expect_column_values_to_be_unique_expectation_config: ExpectationConfiguration,
+    validation_graph_with_no_edges: ValidationGraph,
+):
+    with pytest.raises(ValueError) as ve:
+        # noinspection PyUnusedLocal,PyTypeChecker
+        expectation_validation_graph = ExpectationValidationGraph(
+            configuration=None,
+            graph=None,
+        )
+
+    assert ve.value.args == (
+        'Instantiation of "ExpectationValidationGraph" requires valid "ExpectationConfiguration" object.',
+    )
+
+    with pytest.raises(ValueError) as ve:
+        # noinspection PyUnusedLocal,PyTypeChecker
+        expectation_validation_graph = ExpectationValidationGraph(
+            configuration=expect_column_values_to_be_unique_expectation_config,
+            graph=None,
+        )
+
+    assert ve.value.args == (
+        'Instantiation of "ExpectationValidationGraph" requires valid "ValidationGraph" object.',
+    )
+
+    expectation_validation_graph = ExpectationValidationGraph(
+        configuration=expect_column_values_to_be_unique_expectation_config,
+        graph=validation_graph_with_no_edges,
+    )
+    assert len(expectation_validation_graph.graph.edges) == 0
+
+
 @pytest.mark.unit
 def test_ExpectationValidationGraph_update(
-    expect_column_values_to_be_unique_expectation_validation_graph: ExpectationValidationGraph,
     validation_graph_with_single_edge: ValidationGraph,
+    expect_column_values_to_be_unique_expectation_validation_graph: ExpectationValidationGraph,
 ) -> None:
     assert (
         len(expect_column_values_to_be_unique_expectation_validation_graph.graph.edges)
