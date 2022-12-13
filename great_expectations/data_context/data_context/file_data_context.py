@@ -8,6 +8,7 @@ from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
     FileDataContextVariables,
 )
+from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     datasourceConfigSchema,
@@ -102,3 +103,12 @@ class FileDataContext(SerializableDataContext):
             data_context=self,  # type: ignore[arg-type]
         )
         return variables
+
+    def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
+        """
+        See parent `AbstractDataContext.add_store()` for more information.
+
+        """
+        store = super().add_store(store_name=store_name, store_config=store_config)
+        self._save_project_config()
+        return store
