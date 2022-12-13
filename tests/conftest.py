@@ -821,16 +821,7 @@ def reference_checkpoint_config_for_unexpected_column_names() -> dict:
                 "action": {"class_name": "UpdateDataDocsAction"},
             },
         ],
-        "validations": [
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_sql_data_connector",
-                    "data_asset_name": "my_asset",
-                },
-                "expectation_suite_name": "animal_names_exp",
-            }
-        ],
+        "validations": [],
         "runtime_configuration": {},
     }
     return checkpoint_dict
