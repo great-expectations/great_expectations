@@ -350,10 +350,8 @@ def test_cloud_data_context_run_checkpoint_e2e():
 
     For reference, the following scripts were run to:
 
-
-
-    Set up the prerequisite Datasource:
-    ```python
+    === Set up the prerequisite Datasource ===
+    ```
     datasource_yaml = '''
     name: nathan_test_pandas_datasource
     class_name: Datasource
@@ -369,8 +367,8 @@ def test_cloud_data_context_run_checkpoint_e2e():
     datasource = context.save_datasource(datasource)
     ```
 
-    Set up the prerequisite Checkpoint:
-    ```python
+    === Set up the prerequisite Checkpoint ===
+    ```
     batch_request = {
         "datasource_name": "oss_test_pandas_datasource",
         "data_connector_name": "runtime_data_connector",
