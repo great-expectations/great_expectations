@@ -452,8 +452,12 @@ stages:
         steps:
           - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
-              PYTEST="docker run -e GX_CLOUD_ORGANIZATION_ID=$(GE_CLOUD_ORGANIZATION_ID) "
-              PYTEST+="-e GX_CLOUD_ACCESS_TOKEN=$(GE_CLOUD_ACCESS_TOKEN) -e GX_CLOUD_BASE_URL=$(GE_CLOUD_BASE_URL) "
+              # We set both GX_* and GE_* in the docker container until we are able to update the config in our
+              # cloud CI account.
+              PYTEST="docker run -e GX_CLOUD_ORGANIZATION_ID=${GX_CLOUD_ORGANIZATION_ID} "
+              PYTEST+="-e GX_CLOUD_ACCESS_TOKEN=${GX_CLOUD_ACCESS_TOKEN} -e GX_CLOUD_BASE_URL=${GX_CLOUD_BASE_URL} "
+              PYTEST+="-e GE_CLOUD_ORGANIZATION_ID=${GX_CLOUD_ORGANIZATION_ID} "
+              PYTEST+="-e GE_CLOUD_ACCESS_TOKEN=$GX_CLOUD_ACCESS_TOKEN} -e GX_CLOUD_BASE_URL=${GX_CLOUD_BASE_URL} "
               PYTEST+="greatexpectations/test:${DOCKER_TAG} "
               PYTEST+="pytest --random-order --cloud -m \"cloud and e2e\""
               echo ${PYTEST}
@@ -462,9 +466,6 @@ stages:
               GX_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
               GX_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
               GX_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'Cloud integration Tests'
 
 
