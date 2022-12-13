@@ -3,6 +3,7 @@ import glob
 import importlib
 import inspect
 import logging
+import operator
 import pathlib
 import sys
 from dataclasses import dataclass
@@ -13,8 +14,7 @@ import astunparse
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
-# TODO: Change log level to Info
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 
 # DONE  - AST walk through test scripts to find all imports of classes and methods that are GX related (can get the import location)
@@ -156,10 +156,10 @@ class DocExampleParser:
         return set(names)
 
 
-@dataclass
+@dataclass(frozen=True)
 class Definition:
     name: str
-    filepath: str
+    filepath: pathlib.Path
     ast_definition: Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]
 
 class GXCodeParser:
@@ -208,13 +208,13 @@ class GXCodeParser:
 
         return set([definition.name for definition in definitions])
 
-    def get_all_class_method_and_function_definitions_from_files(self) -> Set[
-        Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]]:
-        all_usages: Set[Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]] = set()
+    def get_all_class_method_and_function_definitions_from_files(self) -> Set[Definition]:
+        all_usages: Set[Definition] = set()
         for filepath in self.paths:
             file_usages = self.get_all_class_method_and_function_definitions_from_file(
                 filepath=filepath)
-            all_usages |= file_usages
+            file_usages_definitions: Set[Definition] = set([Definition(name=usage.name, filepath=filepath.relative_to(self.repo_root), ast_definition=usage) for usage in file_usages])
+            all_usages |= file_usages_definitions
         return all_usages
 
     def get_all_class_method_and_function_definitions_from_file(self, filepath: pathlib.Path) -> Set[Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]]:
@@ -269,12 +269,33 @@ class PublicAPIChecker:
         self.gx_code_parser = gx_code_parser
 
 
-    def gx_code_definitions_appearing_in_docs_examples_and_not_marked_public_api(self) -> Set[Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]]:
+    def print_definitions(self, definitions: Set[Definition]) -> None:
+        """
+
+        Args:
+            definitions:
+
+        Returns:
+
+        """
+        sorted_definitions_list = sorted(list(definitions), key=operator.attrgetter("filepath"))
+        sorted_definitions_strings: List[str] = []
+        for definition in sorted_definitions_list:
+            sorted_definitions_strings.append(f"File: {str(definition.filepath)} Name: {definition.name}")
+
+        seen = set()
+        sorted_definitions_strings_no_dupes = [d for d in sorted_definitions_strings if not (d in seen or seen.add(d))]
+
+        for sorted_definition in sorted_definitions_strings_no_dupes:
+            logger.info(sorted_definition)
+
+
+    def gx_code_definitions_appearing_in_docs_examples_and_not_marked_public_api(self) -> Set[Definition]:
         gx_code_definitions_appearing_in_docs_examples = self.gx_code_definitions_appearing_in_docs_examples()
-        return set([d for d in gx_code_definitions_appearing_in_docs_examples if not self._is_definition_marked_public_api(d)])
+        return set([d for d in gx_code_definitions_appearing_in_docs_examples if not self._is_definition_marked_public_api(d.ast_definition)])
 
 
-    def gx_code_definitions_appearing_in_docs_examples(self) -> Set[Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]]:
+    def gx_code_definitions_appearing_in_docs_examples(self) -> Set[Definition]:
         """Filter out all GX classes and methods except for those used in docs examples.
 
         Returns:
@@ -441,7 +462,8 @@ def main():
         gx_code_parser=gx_code_parser
     )
     logger.debug("Printing GX usages in test scripts")
-    print(public_api_checker.gx_code_definitions_appearing_in_docs_examples())
+    gx_code_definitions_appearing_in_docs_examples = public_api_checker.gx_code_definitions_appearing_in_docs_examples()
+    public_api_checker.print_definitions(definitions=gx_code_definitions_appearing_in_docs_examples)
 
         # filename = "tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py"
         # # filename = "great_expectations/data_context/data_context/abstract_data_context.py"
