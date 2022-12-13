@@ -23,7 +23,7 @@ def complex_flat_schema():
     """This includes some descriptions."""
     return {
         "$id": "https://example.com/address.schema.json",
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$schema": "http://json-schema.org/draft-07/schema#",
         "description": "An address",
         "type": "object",
         "properties": {

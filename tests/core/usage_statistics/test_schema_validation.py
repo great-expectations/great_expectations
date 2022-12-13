@@ -359,7 +359,7 @@ def test_anonymized_rule_based_profiler_validation():
     ).validate(message)
 
 
-def test_uuid_format_validation():
+def test_uuid_format_validation_success():
     message = {
         "event_payload": {
             "anonymized_operator_name": "50daa62a8739db21009f452f7e36153b",
@@ -372,11 +372,16 @@ def test_uuid_format_validation():
         "data_context_instance_id": "4f6deb55-8fbd-4131-9f97-b42b0902eae5",
         "ge_version": "0.9.7+203.ge3a97f44.dirty",
     }
-    jsonschema.validators.Draft202012Validator(
-        schema=anonymized_usage_statistics_record_schema,
-        format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
-    ).validate(message)
+    try:
+        jsonschema.validators.Draft202012Validator(
+            schema=anonymized_usage_statistics_record_schema,
+            format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+        ).validate(message)
+    except jsonschema.ValidationError as e:
+        assert False, e.message
 
+
+def test_uuid_format_validation_failure():
     message = {
         "event_payload": {
             "anonymized_operator_name": "50daa62a8739db21009f452f7e36153b",
@@ -389,12 +394,12 @@ def test_uuid_format_validation():
         "data_context_instance_id": "4f6deb55-8fbd-4131-9f97-b42b0902eae5 other_invalid_text",
         "ge_version": "0.9.7+203.ge3a97f44.dirty",
     }
-    with pytest.raises(jsonschema.exceptions.ValidationError) as e:
+    with pytest.raises(jsonschema.ValidationError) as e:
         jsonschema.validators.Draft202012Validator(
             schema=anonymized_usage_statistics_record_schema,
             format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
         ).validate(message)
     assert (
         "'4f6deb55-8fbd-4131-9f97-b42b0902eae5 other_invalid_text' is not a 'uuid'"
-        in str(e.value)
+        in e.value.message
     )
