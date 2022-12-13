@@ -1,9 +1,11 @@
 import copy
-from typing import Callable, Tuple, Type
+from typing import Callable, Optional, Tuple, Type
 from unittest import mock
 
+import pandas as pd
 import pytest
 
+from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
@@ -339,7 +341,36 @@ def test_cloud_backed_data_context_add_checkpoint_e2e(
 @pytest.mark.e2e
 @pytest.mark.cloud
 def test_cloud_data_context_run_checkpoint_e2e():
-    pass
+    context = DataContext(cloud_mode=True)
+
+    checkpoint_name = "OSS_run_checkpoint_E2E"
+
+    cloud_id: Optional[str] = None
+    checkpoint_identifiers = context.list_checkpoints()
+    for identifier in checkpoint_identifiers:
+        if identifier.resource_name == checkpoint_name:
+            cloud_id = identifier.cloud_id
+            break
+
+    assert cloud_id, f"Could not find checkpoint '{checkpoint_name}' in Cloud"
+
+    test_df = pd.DataFrame(
+        {
+            "a": [1, 2, 3],
+            "b": [4, 5, 6],
+        }
+    )
+    batch_request = RuntimeBatchRequest(
+        datasource_name="nathan_test_pandas_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="test_df",
+        runtime_parameters={"batch_data": test_df},
+        batch_identifiers={"test_identifier": "my_id"},
+    )
+
+    result = context.run_checkpoint(ge_cloud_id=cloud_id, batch_request=batch_request)
+
+    assert result.success
 
 
 @pytest.fixture
