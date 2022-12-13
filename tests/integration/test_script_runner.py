@@ -172,6 +172,14 @@ local_tests = [
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/samples_2020",
     ),
     IntegrationTestFixture(
+        name="how_to_configure_a_sql_datasource",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
+        util_script="tests/test_utils.py",
+        extra_backend_dependencies=BackendDependencies.SQLALCHEMY,
+    ),
+    IntegrationTestFixture(
         name="how_to_configure_a_runtimedataconnector",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",

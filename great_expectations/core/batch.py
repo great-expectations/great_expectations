@@ -1,3 +1,4 @@
+import dataclasses
 import datetime
 import json
 import logging
@@ -687,7 +688,11 @@ def materialize_batch_request(
         return None
 
     batch_request_class: type
-    if batch_request_contains_runtime_parameters(batch_request=effective_batch_request):
+    if "options" in effective_batch_request:
+        batch_request_class = XBatchRequest
+    elif batch_request_contains_runtime_parameters(
+        batch_request=effective_batch_request
+    ):
         batch_request_class = RuntimeBatchRequest
     else:
         batch_request_class = BatchRequest
@@ -715,13 +720,16 @@ def batch_request_contains_runtime_parameters(
 
 
 def get_batch_request_as_dict(
-    batch_request: Optional[Union[BatchRequestBase, dict]] = None
+    batch_request: Optional[Union[BatchRequestBase, XBatchRequest, dict]] = None
 ) -> Optional[dict]:
     if batch_request is None:
         return None
 
     if isinstance(batch_request, (BatchRequest, RuntimeBatchRequest)):
         batch_request = batch_request.to_dict()
+
+    if isinstance(batch_request, XBatchRequest):
+        batch_request = dataclasses.asdict(batch_request)
 
     return batch_request
 

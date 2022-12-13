@@ -54,7 +54,7 @@ def pandas_animals_dataframe_for_unexpected_rows_and_index():
 @pytest.fixture
 def spark_dataframe_for_unexpected_rows_with_index(
     spark_session,
-) -> "pyspark.sql.dataframe.DataFrame":
+) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821
     df: pandas.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -69,14 +69,16 @@ def spark_dataframe_for_unexpected_rows_with_index(
             ],
         }
     )
-    test_df: "pyspark.sql.dataframe.DataFrame" = spark_session.createDataFrame(data=df)
+    test_df: "pyspark.sql.dataframe.DataFrame" = spark_session.createDataFrame(
+        data=df
+    )  # noqa: F821
     return test_df
 
 
 @pytest.fixture
 def sqlite_table_for_unexpected_rows_with_index(
     test_backends,
-) -> "sqlalchemy.engine.Engine":
+) -> "sqlalchemy.engine.Engine":  # noqa: F821
     if "sqlite" in test_backends:
         try:
             import sqlalchemy as sa
