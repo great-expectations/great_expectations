@@ -1157,8 +1157,8 @@ class Validator:
         )
         return validation_graph
 
-    @staticmethod
     def _resolve_suite_level_graph_and_process_metric_evaluation_errors(
+        self,
         graph: ValidationGraph,
         runtime_configuration: dict,
         expectation_validation_graphs: List[ExpectationValidationGraph],
@@ -1176,7 +1176,11 @@ class Validator:
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ]
-        resolved_metrics, aborted_metrics_info = graph.resolve(
+        (
+            resolved_metrics,
+            aborted_metrics_info,
+        ) = self.metrics_calculator.resolve_validation_graph(
+            graph=graph,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=0,
             show_progress_bars=show_progress_bars,
