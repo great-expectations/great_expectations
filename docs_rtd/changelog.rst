@@ -4,6 +4,26 @@
 Changelog
 #########
 
+0.15.40
+-----------------
+* [FEATURE] F/great 1397/zep checkpoints (#6525)
+* [FEATURE] Add integration test for zep sqlalchemy datasource with renderering. (#6564)
+* [BUGFIX] Patch additional deprecated call to `GXCloudIdentifier.ge_cloud_id` attr (#6555)
+* [BUGFIX] Patch `packaging_and_installation` Azure pipeline test failures (#6559)
+* [BUGFIX] Fix dependency issues to reenable RTD builds (#6560)
+* [BUGFIX] Add missing `raise` statement in `RuntimeDataConnector` logic (#6569)
+* [DOCS] doc 383: bring sql datasource configuration examples under test (#6466)
+* [MAINTENANCE] Add error handling to docs snippet checker (#6556)
+* [MAINTENANCE] ID/PK tests at `Checkpoint`-level (#6539)
+* [MAINTENANCE] Improve DataAssistant Parameter Builder Naming/Sanitization Mechanism and Enhance TableDomainBuilder (#6554)
+* [MAINTENANCE] Simplify computational graph assembly from metric configurations (#6563)
+* [MAINTENANCE] RTD Mobile header brand adjustment (#6557)
+* [MAINTENANCE] Use MetricsCalculator methods for ValidationGraph construction and resolution operations in Validator (#6566)
+* [MAINTENANCE] Cast type in `execution_environment.py` to bypass flaky `mypy` warnings (#6572)
+* [MAINTENANCE] Additional patch for `mypy` issue in `execution_environment.py` (#6574)
+* [MAINTENANCE] Clean up GX rename artifacts (#6561)
+* [CONTRIB] fix observed value in custom expectation (#6515) (thanks @itaise)
+
 0.15.39
 -----------------
 * [BUGFIX] Patch faulty GX Cloud arg resolution logic (#6542)
