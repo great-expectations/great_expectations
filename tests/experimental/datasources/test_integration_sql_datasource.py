@@ -3,6 +3,10 @@ import pytest
 from great_expectations import DataContext
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.render import (
+    AtomicDiagnosticRendererType,
+    AtomicPrescriptiveRendererType,
+)
 
 
 @pytest.mark.integration
@@ -121,7 +125,7 @@ def test_run_checkpoint_and_data_doc(empty_data_context, include_rendered_conten
                 num_prescriptive_renderer == 1
             ), f"Expected exactly 1 rendered content, found {num_prescriptive_renderer}"
             rendered_content = r.expectation_config.rendered_content[0]
-            assert rendered_content.name == "atomic.prescriptive.summary"
+            assert rendered_content.name == AtomicPrescriptiveRendererType.SUMMARY
             assert (
                 rendered_content.value.template
                 == expected_metric_values[r.expectation_config.expectation_type][
@@ -135,7 +139,9 @@ def test_run_checkpoint_and_data_doc(empty_data_context, include_rendered_conten
                 num_diagnostic_render == 1
             ), f"Expected 1 diagnostic renderer, found {num_diagnostic_render}"
             diagnostic_renderer = r.rendered_content[0]
-            assert diagnostic_renderer.name == "atomic.diagnostic.observed_value"
+            assert (
+                diagnostic_renderer.name == AtomicDiagnosticRendererType.OBSERVED_VALUE
+            )
             assert (
                 diagnostic_renderer.value.schema["type"]
                 == "com.superconductive.rendered.string"
