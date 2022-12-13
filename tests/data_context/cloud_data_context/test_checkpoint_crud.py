@@ -336,15 +336,6 @@ def test_cloud_backed_data_context_add_checkpoint_e2e(
     )
 
 
-@pytest.mark.e2e
-@pytest.mark.cloud
-@mock.patch("great_expectations.data_context.DataContext._save_project_config")
-def test_cloud_backed_data_context_run_checkpoint_e2e():
-    context = DataContext(cloud_mode=True)
-
-    context.run_checkpoint()
-
-
 @pytest.fixture
 def checkpoint_names_and_ids() -> Tuple[Tuple[str, str], Tuple[str, str]]:
     checkpoint_name_1 = "Test Checkpoint 1"
