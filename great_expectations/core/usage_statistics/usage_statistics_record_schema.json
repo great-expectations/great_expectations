@@ -976,7 +976,8 @@
       "properties": {
         "version": {
           "enum": [
-            "1.0.0"
+            "1.0.0",
+            "1.0.1"
           ]
         },
         "platform.system": {
@@ -5193,7 +5194,8 @@
   "properties": {
     "version": {
       "enum": [
-        "1.0.0"
+        "1.0.0",
+        "1.0.1"
       ]
     },
     "ge_version": {
