@@ -1104,6 +1104,12 @@ class Validator:
         configuration: ExpectationConfiguration
         evaluated_config: ExpectationConfiguration
         metric_configuration: MetricConfiguration
+        expectation_validation_graph: ExpectationValidationGraph
+        metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]]
+        domain: Domain
+        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
+        fully_qualified_parameter_name: str
+        parameter_node: ParameterNode
         graph: ValidationGraph
         for configuration in expectation_configurations:
             # Validating
@@ -1129,27 +1135,16 @@ class Validator:
 
             try:
                 # TODO: <Alex>ALEX</Alex>
-                expectation_validation_graph: ExpectationValidationGraph = (
-                    ExpectationValidationGraph(
-                        configuration=evaluated_config,
-                        graph=ValidationGraph(execution_engine=self._execution_engine),
-                    )
+                expectation_validation_graph = ExpectationValidationGraph(
+                    configuration=evaluated_config,
+                    graph=ValidationGraph(execution_engine=self._execution_engine),
                 )
                 # TODO: <Alex>ALEX</Alex>
-                metrics_by_domain: Optional[
-                    Dict[Domain, Dict[str, ParameterNode]]
-                ] = self.compute_multi_batch_metrics(
+                metrics_by_domain = self.compute_multi_batch_metrics(
                     metric_configurations=validation_dependencies.get_metric_configurations(),
                     result_format=MetricsComputationResultFormat.VALIDATION_GRAPH,
                 )
                 # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] ALL_VALIDATION_GRAPH_METRICS_BY_DOMAIN:\n{metrics_by_domain} ; TYPE: {str(type(metrics_by_domain))}")
-                domain: Domain
-                parameter_values_for_fully_qualified_parameter_names: Dict[
-                    str, ParameterNode
-                ]
-                fully_qualified_parameter_name: str
-                parameter_node: ParameterNode
-                graph: ValidationGraph
                 for (
                     domain,
                     parameter_values_for_fully_qualified_parameter_names,
