@@ -1168,7 +1168,7 @@ class Validator:
 
                 # TODO: <Alex>ALEX</Alex>
                 # TODO: <Alex>ALEX</Alex>
-                # expectation_validation_graph: ExpectationValidationGraph = ExpectationValidationGraph(
+                # expectation_validation_graph = ExpectationValidationGraph(
                 #     configuration=evaluated_config,
                 #     graph=self.metrics_calculator.build_metric_dependency_graph(
                 #         metric_configurations=validation_dependencies.get_metric_configurations(),
