@@ -17,7 +17,12 @@ from great_expectations.experimental.datasources.sources import _SourceFactories
 LOGGER = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDataType
+    from great_expectations.core.batch import (
+        BatchDataType,
+        BatchDefinition,
+        BatchMarkers,
+        BatchSpec,
+    )
     from great_expectations.execution_engine import ExecutionEngine
 
 # BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
@@ -157,6 +162,12 @@ class Batch:
     # to a batch so developers may want to namespace any custom metadata they add.
     metadata: Dict[str, Any]
 
+    # TODO: These legacy fields are currently required. They are only used in usage stats so we
+    #       should figure out a better way to anonymize and delete them.
+    _legacy_batch_markers: BatchMarkers
+    _legacy_batch_spec: BatchSpec
+    _legacy_batch_definition: BatchDefinition
+
     def __init__(
         self,
         datasource: Datasource,
@@ -165,6 +176,11 @@ class Batch:
         # BatchDataType is Union[core.batch.BatchData, pd.DataFrame, SparkDataFrame].  core.batch.Batchdata is the
         # implicit interface that Datasource implementers can use. We can make this explicit if needed.
         data: BatchDataType,
+        # Legacy values that should be removed in the future.
+        legacy_batch_markers: BatchMarkers,
+        legacy_batch_spec: BatchSpec,
+        legacy_batch_definition: BatchDefinition,
+        # Optional arguments
         metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         """This represents a batch of data.
@@ -179,9 +195,17 @@ class Batch:
         self._data: BatchDataType = data
         self.metadata = metadata or {}
 
+        self._legacy_batch_markers = legacy_batch_markers
+        self._legacy_batch_spec = legacy_batch_spec
+        self._legacy_batch_definition = legacy_batch_definition
+
         # computed property
         # We need to unique identifier. This will likely change as I get more input
-        self._id: str = "-".join([datasource.name, data_asset.name, str(batch_request)])
+        options_list = []
+        for k, v in batch_request.options.items():
+            options_list.append(f"{k}_{v}")
+
+        self._id: str = "-".join([datasource.name, data_asset.name, *options_list])
 
     @property
     def datasource(self) -> Datasource:
@@ -206,3 +230,15 @@ class Batch:
     @property
     def execution_engine(self) -> ExecutionEngine:
         return self.datasource.execution_engine
+
+    @property
+    def batch_markers(self) -> BatchMarkers:
+        return self._legacy_batch_markers
+
+    @property
+    def batch_spec(self) -> BatchSpec:
+        return self._legacy_batch_spec
+
+    @property
+    def batch_definition(self) -> BatchDefinition:
+        return self._legacy_batch_definition

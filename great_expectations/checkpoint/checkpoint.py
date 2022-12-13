@@ -418,7 +418,7 @@ class BaseCheckpoint(ConfigPeer):
         ) as e:
             raise ge_exceptions.CheckpointError(
                 f"Exception occurred while running validation[{idx}] of Checkpoint '{self.name}': {e.message}."
-            )
+            ) from e
 
     def self_check(self, pretty_print=True) -> dict:
         # Provide visibility into parameters that Checkpoint was instantiated with.

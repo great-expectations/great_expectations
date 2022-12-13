@@ -498,6 +498,9 @@ def _get_parameter_value_from_parameter_container(
     fully_qualified_parameter_name_as_list: List[str],
     parameter_container: ParameterContainer,
 ) -> Optional[Union[Any, ParameterNode]]:
+    if parameter_container is None:
+        return None
+
     parameter_node: Optional[ParameterNode] = parameter_container.get_parameter_node(
         parameter_name_root=fully_qualified_parameter_name_as_list[0]
     )
