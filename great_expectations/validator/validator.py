@@ -1110,22 +1110,13 @@ class Validator:
             )
 
             try:
-                expectation_validation_graph: ExpectationValidationGraph = (
-                    ExpectationValidationGraph(
-                        execution_engine=self._execution_engine,
-                        configuration=evaluated_config,
-                    )
-                )
-                for (
-                    metric_configuration
-                ) in validation_dependencies.get_metric_configurations():
-                    graph = ValidationGraph(execution_engine=self._execution_engine)
-                    graph.build_metric_dependency_graph(
-                        metric_configuration=metric_configuration,
+                expectation_validation_graph: ExpectationValidationGraph = ExpectationValidationGraph(
+                    configuration=evaluated_config,
+                    graph=self.metrics_calculator.build_metric_dependency_graph(
+                        metric_configurations=validation_dependencies.get_metric_configurations(),
                         runtime_configuration=runtime_configuration,
-                    )
-                    expectation_validation_graph.update(graph=graph)
-
+                    ),
+                )
                 expectation_validation_graphs.append(expectation_validation_graph)
                 processed_configurations.append(evaluated_config)
             except Exception as err:
