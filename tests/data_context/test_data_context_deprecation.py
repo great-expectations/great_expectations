@@ -8,6 +8,7 @@ from great_expectations.data_context.data_context.cloud_data_context import (
 )
 from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import GXCloudConfig
+from great_expectations.util import _resolve_cloud_args
 
 # Globally scoped so we can reuse across test parameterization
 cloud_base_url = "my_cloud_url"
@@ -151,4 +152,85 @@ def test_CloudDataContext_resolve_cloud_args(
     cloud_args: dict, expected_resolved_args: tuple
 ):
     actual_resolved_args = CloudDataContext._resolve_cloud_args(**cloud_args)
+    assert actual_resolved_args == expected_resolved_args
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+@pytest.mark.parametrize(
+    "cloud_args,expected_resolved_args",
+    [
+        pytest.param(
+            {
+                "cloud_mode": True,
+                "cloud_base_url": cloud_base_url,
+                "cloud_access_token": cloud_access_token,
+                "cloud_organization_id": cloud_organization_id,
+            },
+            (cloud_base_url, cloud_access_token, cloud_organization_id, True),
+            id="new_style_args",
+        ),
+        pytest.param(
+            {
+                "ge_cloud_mode": True,
+                "ge_cloud_base_url": ge_cloud_base_url,
+                "ge_cloud_access_token": ge_cloud_access_token,
+                "ge_cloud_organization_id": ge_cloud_organization_id,
+            },
+            (ge_cloud_base_url, ge_cloud_access_token, ge_cloud_organization_id, True),
+            id="deprecated_args",
+        ),
+        pytest.param(
+            {
+                "cloud_mode": True,
+                "cloud_base_url": cloud_base_url,
+                "cloud_access_token": cloud_access_token,
+                "cloud_organization_id": cloud_organization_id,
+                "ge_cloud_mode": True,
+                "ge_cloud_base_url": ge_cloud_base_url,
+                "ge_cloud_access_token": ge_cloud_access_token,
+                "ge_cloud_organization_id": ge_cloud_organization_id,
+            },
+            (cloud_base_url, cloud_access_token, cloud_organization_id, True),
+            id="conflicting_args",
+        ),
+        # The interaction between cloud_mode and ge_cloud_mode is very particular so we take extra care testing here:
+        pytest.param(
+            {
+                "cloud_mode": True,
+                "ge_cloud_mode": False,
+            },
+            (None, None, None, True),
+            id="cloud_mode_conflict_1",
+        ),
+        pytest.param(
+            {
+                "cloud_mode": None,
+                "ge_cloud_mode": False,
+            },
+            (None, None, None, False),
+            id="cloud_mode_conflict_2",
+        ),
+        pytest.param(
+            {
+                "cloud_mode": None,
+                "ge_cloud_mode": True,
+            },
+            (None, None, None, True),
+            id="cloud_mode_conflict_3",
+        ),
+        pytest.param(
+            {
+                "cloud_mode": False,
+                "ge_cloud_mode": True,
+            },
+            (None, None, None, False),
+            id="cloud_mode_conflict_4",
+        ),
+    ],
+)
+def test_get_context_resolve_cloud_args(
+    cloud_args: dict, expected_resolved_args: tuple
+):
+    actual_resolved_args = _resolve_cloud_args(**cloud_args)
     assert actual_resolved_args == expected_resolved_args

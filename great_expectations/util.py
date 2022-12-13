@@ -1807,7 +1807,7 @@ def get_context(
         cloud_access_token,
         cloud_organization_id,
         cloud_mode,
-    ) = DataContext._resolve_cloud_args(
+    ) = _resolve_cloud_args(
         cloud_mode=cloud_mode,
         cloud_base_url=cloud_base_url,
         cloud_access_token=cloud_access_token,
@@ -1855,6 +1855,30 @@ def get_context(
         context_root_dir=context_root_dir,
         runtime_environment=runtime_environment,
     )
+
+
+def _resolve_cloud_args(
+    cloud_base_url: Optional[str] = None,
+    cloud_access_token: Optional[str] = None,
+    cloud_organization_id: Optional[str] = None,
+    cloud_mode: Optional[bool] = None,
+    # <GX_RENAME> Deprecated as of 0.15.37
+    ge_cloud_base_url: Optional[str] = None,
+    ge_cloud_access_token: Optional[str] = None,
+    ge_cloud_organization_id: Optional[str] = None,
+    ge_cloud_mode: Optional[bool] = None,
+) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[bool]]:
+    cloud_base_url = cloud_base_url if cloud_base_url is not None else ge_cloud_base_url
+    cloud_access_token = (
+        cloud_access_token if cloud_access_token is not None else ge_cloud_access_token
+    )
+    cloud_organization_id = (
+        cloud_organization_id
+        if cloud_organization_id is not None
+        else ge_cloud_organization_id
+    )
+    cloud_mode = cloud_mode if cloud_mode is not None else ge_cloud_mode
+    return cloud_base_url, cloud_access_token, cloud_organization_id, cloud_mode
 
 
 def is_sane_slack_webhook(url: str) -> bool:
