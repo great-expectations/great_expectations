@@ -13,7 +13,7 @@ access to features of new package versions.
 import enum
 import sys
 from dataclasses import dataclass
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, cast
 
 from marshmallow import Schema, fields
 from packaging import version
@@ -129,7 +129,13 @@ class GXExecutionEnvironment:
             installed: bool
             if dependency_name in self._get_all_installed_packages():
                 installed = True
-                package_version = version.parse(metadata.version(dependency_name))
+                # Chetan - 20221213 - Due to mypy inconsistencies, we need to follow this pattern to ensure
+                # we end up with a version.Version obj. Casting the parse result sometimes leads to redundant
+                # cast errors
+                parsed_version = version.parse(metadata.version(dependency_name))
+                if not isinstance(parsed_version, version.Version):
+                    parsed_version = cast(version.Version, parsed_version)
+                package_version = parsed_version
             else:
                 installed = False
                 package_version = None
