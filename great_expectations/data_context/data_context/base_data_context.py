@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import List, Mapping, Optional, Union
+from typing import List, Mapping, Optional, Tuple, Union
 
 from ruamel.yaml import YAML
 
@@ -190,8 +190,12 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             None
         """
         # Chetan - 20221208 - not formally deprecating these values until a future date
-        cloud_config = cloud_config if cloud_config is not None else ge_cloud_config
-        cloud_mode = True if cloud_mode or ge_cloud_mode else False
+        cloud_mode, cloud_config = self._resolve_cloud_args(
+            cloud_config=cloud_config,
+            cloud_mode=cloud_mode,
+            ge_cloud_config=ge_cloud_config,
+            ge_cloud_mode=ge_cloud_mode,
+        )
 
         project_data_context_config: DataContextConfig = (
             BaseDataContext.get_or_create_data_context_config(project_config)
@@ -259,6 +263,18 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     validation_operator_name,
                     validation_operator_config,
                 )
+
+    @staticmethod
+    def _resolve_cloud_args(
+        cloud_mode: bool = False,
+        cloud_config: Optional[GXCloudConfig] = None,
+        # <GX_RENAME> Deprecated as of 0.15.37
+        ge_cloud_mode: bool = False,
+        ge_cloud_config: Optional[GXCloudConfig] = None,
+    ) -> Tuple[bool, Optional[GXCloudConfig]]:
+        cloud_mode = True if cloud_mode or ge_cloud_mode else False
+        cloud_config = cloud_config if cloud_config is not None else ge_cloud_config
+        return cloud_mode, cloud_config
 
     @property
     def ge_cloud_config(self) -> Optional[GXCloudConfig]:

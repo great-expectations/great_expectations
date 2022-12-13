@@ -1802,16 +1802,21 @@ def get_context(
     )
 
     # Chetan - 20221208 - not formally deprecating these values until a future date
-    cloud_base_url = cloud_base_url if cloud_base_url is not None else ge_cloud_base_url
-    cloud_access_token = (
-        cloud_access_token if cloud_access_token is not None else ge_cloud_access_token
+    (
+        cloud_base_url,
+        cloud_access_token,
+        cloud_organization_id,
+        cloud_mode,
+    ) = DataContext._resolve_cloud_args(
+        cloud_mode=cloud_mode,
+        cloud_base_url=cloud_base_url,
+        cloud_access_token=cloud_access_token,
+        cloud_organization_id=cloud_organization_id,
+        ge_cloud_mode=ge_cloud_mode,
+        ge_cloud_base_url=ge_cloud_base_url,
+        ge_cloud_access_token=ge_cloud_access_token,
+        ge_cloud_organization_id=ge_cloud_organization_id,
     )
-    cloud_organization_id = (
-        cloud_organization_id
-        if cloud_organization_id is not None
-        else ge_cloud_organization_id
-    )
-    cloud_mode = cloud_mode if cloud_mode is not None else ge_cloud_mode
 
     # First, check for ge_cloud conditions
 
