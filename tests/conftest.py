@@ -807,7 +807,7 @@ def data_context_with_connection_to_animal_names_db(
     project_path = tmp_path / "test_configuration"
     project_path.mkdir()
     project_path = str(project_path)
-    context = gx.data_context.DataContext.create(project_path)
+    context = gx.data_context.FileDataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
