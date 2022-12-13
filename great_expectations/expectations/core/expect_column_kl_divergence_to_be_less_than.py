@@ -40,6 +40,7 @@ from great_expectations.render.util import (
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.metrics_calculator import MetricsCalculator
 from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import ValidationDependencies
 
@@ -238,16 +239,15 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                     Tuple[str, str, str],
                     Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
                 ]
-                resolved_metrics, aborted_metrics_info = graph.resolve(
+                (
+                    resolved_metrics,
+                    aborted_metrics_info,
+                ) = MetricsCalculator.resolve_validation_graph_and_handle_aborted_metrics_info(
+                    graph=graph,
                     runtime_configuration=None,
                     min_graph_edges_pbar_enable=0,
                     show_progress_bars=True,
                 )
-
-                if aborted_metrics_info:
-                    logger.warning(
-                        f"Exceptions\n{str(aborted_metrics_info)}\noccurred while resolving metrics."
-                    )
 
                 bins = resolved_metrics[partition_metric_configuration.id]
                 hist_metric_configuration = MetricConfiguration(
