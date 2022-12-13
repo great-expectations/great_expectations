@@ -72,9 +72,17 @@ class MetricConfiguration:
         domain_type: MetricDomainTypes = self.get_domain_type()
 
         if domain_type == MetricDomainTypes.TABLE:
+            other_table_name: Optional[str] = self._metric_domain_kwargs.get("table")
+            if other_table_name:
+                return Domain(
+                    domain_type=domain_type,
+                    domain_kwargs={
+                        "table": other_table_name,
+                    },
+                )
+
             return Domain(
                 domain_type=domain_type,
-                domain_kwargs={},
             )
 
         if domain_type == MetricDomainTypes.COLUMN:
