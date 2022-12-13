@@ -129,7 +129,7 @@ class GXExecutionEnvironment:
             installed: bool
             if dependency_name in self._get_all_installed_packages():
                 installed = True
-                package_version = version.parse(metadata.version(dependency_name))  # type: ignore[assignment]
+                package_version = version.parse(metadata.version(dependency_name))
             else:
                 installed = False
                 package_version = None
