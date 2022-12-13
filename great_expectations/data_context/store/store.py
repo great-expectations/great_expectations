@@ -87,7 +87,7 @@ class Store:
 
     @property
     def ge_cloud_mode(self) -> bool:
-        # Deprecated 0.15.37
+        # <GX_RENAME> Deprecated 0.15.37
         return self.cloud_mode
 
     @property
