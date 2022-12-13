@@ -281,7 +281,7 @@ def test_column_value_lengths_min_metric_sa(sa):
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
-        metric_name=f"column_values.length.min.{MetricPartialFunctionTypes.AGGREGATE_FN.value}aggregate_fn",
+        metric_name=f"column_values.length.min.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
         metric_domain_kwargs={
             "column": "names",
         },
