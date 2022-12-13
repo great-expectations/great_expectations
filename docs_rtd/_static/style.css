@@ -189,9 +189,8 @@ a {
   height: 0px;
   transition: all 0.3s ease-in-out;
   overflow: hidden;
-  position: relative;
-  width: 180px;
-  right: 30px;
+  position: absolute;
+  margin-left: -30px;
 }
 
 .drop-modal ul {
