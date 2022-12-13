@@ -1104,13 +1104,11 @@ def test_list_available_expectation_types(
     assert all(e.startswith("expect_") for e in available)
 
 
-# if we are doing somethign at the Validator.level
-# filter warnings.
 def _context_to_validator_and_expectation_sql(
     context: DataContext,
 ) -> Tuple[Validator, ExpectColumnValuesToBeInSet]:
     """
-    Helper method used by sql tests in this suite. Takes in a Datacontext and returns a tuble of Validator and
+    Helper method used by sql tests in this suite. Takes in a Datacontext and returns a tuple of Validator and
     Expectation after building a BatchRequest and creating ExpectationSuite.
     Args:
         context (DataContext): DataContext to use

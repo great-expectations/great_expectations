@@ -34,24 +34,6 @@ from great_expectations.validator.validator import Validator
 
 
 @pytest.fixture
-def pandas_animals_dataframe_for_unexpected_rows_and_index():
-    return pd.DataFrame(
-        {
-            "pk_1": [0, 1, 2, 3, 4, 5],
-            "pk_2": ["zero", "one", "two", "three", "four", "five"],
-            "animals": [
-                "cat",
-                "fish",
-                "dog",
-                "giraffe",
-                "lion",
-                "zebra",
-            ],
-        }
-    )
-
-
-@pytest.fixture
 def spark_dataframe_for_unexpected_rows_with_index(
     spark_session,
 ) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821
