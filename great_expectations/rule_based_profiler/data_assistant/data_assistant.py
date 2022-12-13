@@ -55,8 +55,9 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
 from great_expectations.util import camel_to_snake, measure_execution_time
 from great_expectations.validator.validator import Validator
 
-
 # noinspection PyMethodParameters
+
+
 class MetaDataAssistant(ABCMeta):
     """
     MetaDataAssistant registers every DataAssistant class as it is defined, it them to the DataAssistant registry.
@@ -130,6 +131,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             metric_name: str = "table.columns"
             return self.build_metric_multi_batch_parameter_builder(
                 metric_name=metric_name,
+                suffix=None,
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
                 metric_value_kwargs=None,
             )
@@ -272,6 +274,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         @staticmethod
         def build_metric_multi_batch_parameter_builder(
             metric_name: str,
+            suffix: Optional[str] = None,
             metric_domain_kwargs: Optional[
                 Union[str, dict]
             ] = DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
@@ -280,7 +283,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates "MetricMultiBatchParameterBuilder" with specific arguments for given purpose.
             """
-            name: str = sanitize_parameter_name(name=metric_name)
+            name: str = sanitize_parameter_name(name=metric_name, suffix=suffix)
             return MetricMultiBatchParameterBuilder(
                 name=name,
                 metric_name=metric_name,
@@ -297,6 +300,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         @staticmethod
         def build_metric_single_batch_parameter_builder(
             metric_name: str,
+            suffix: Optional[str] = None,
             metric_domain_kwargs: Optional[
                 Union[str, dict]
             ] = DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
@@ -305,7 +309,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates "MetricSingleBatchParameterBuilder" class with arguments for specific purpose.
             """
-            name: str = sanitize_parameter_name(name=metric_name)
+            name: str = sanitize_parameter_name(name=metric_name, suffix=suffix)
             return MetricSingleBatchParameterBuilder(
                 name=name,
                 metric_name=metric_name,
@@ -321,6 +325,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         @staticmethod
         def build_numeric_metric_multi_batch_parameter_builder(
             metric_name: str,
+            suffix: Optional[str] = None,
             metric_domain_kwargs: Optional[
                 Union[str, dict]
             ] = DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
@@ -329,7 +334,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates "MetricMultiBatchParameterBuilder" class with specific arguments for given purpose.
             """
-            name: str = sanitize_parameter_name(name=metric_name)
+            name: str = sanitize_parameter_name(name=metric_name, suffix=suffix)
             return MetricMultiBatchParameterBuilder(
                 name=name,
                 metric_name=metric_name,
@@ -346,6 +351,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         @staticmethod
         def build_numeric_metric_single_batch_parameter_builder(
             metric_name: str,
+            suffix: Optional[str] = None,
             metric_domain_kwargs: Optional[
                 Union[str, dict]
             ] = DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
@@ -354,7 +360,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates "MetricSingleBatchParameterBuilder" class with arguments for specific purpose.
             """
-            name: str = sanitize_parameter_name(name=metric_name)
+            name: str = sanitize_parameter_name(name=metric_name, suffix=suffix)
             return MetricSingleBatchParameterBuilder(
                 name=name,
                 metric_name=metric_name,
@@ -370,6 +376,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         @staticmethod
         def build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name: Optional[str] = None,
+            suffix: Optional[str] = None,
             metric_value_kwargs: Optional[Union[str, dict]] = None,
             evaluation_parameter_builder_configs: Optional[
                 List[ParameterBuilderConfig]
@@ -385,7 +392,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
                     evaluation_parameter_builder_configs[0].name
                 )
 
-            name: str = sanitize_parameter_name(name=f"{metric_name}.range")
+            name: str = f"{metric_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}range"
+            name = sanitize_parameter_name(name=name, suffix=suffix)
             return NumericMetricRangeMultiBatchParameterBuilder(
                 name=name,
                 metric_name=metric_name,
@@ -416,7 +424,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates "RegexPatternStringParameterBuilder" class with specific arguments for given purpose.
             """
-            name: str = sanitize_parameter_name(name=f"{name}")
+            name: str = sanitize_parameter_name(name=name, suffix=None)
             return RegexPatternStringParameterBuilder(
                 name=name,
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
@@ -434,7 +442,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates "HistogramSingleBatchParameterBuilder" class with specific arguments for given purpose.
             """
-            name: str = sanitize_parameter_name(name=f"{name}")
+            name: str = sanitize_parameter_name(name=name, suffix=None)
             return HistogramSingleBatchParameterBuilder(
                 name=name,
                 evaluation_parameter_builder_configs=None,
@@ -637,6 +645,10 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 parameter_builder.json_serialized_fully_qualified_parameter_name
                 for parameter_builder in parameter_builders
             ]
+            + [
+                parameter_builder.raw_fully_qualified_parameter_name
+                for parameter_builder in parameter_builders
+            ]
             for domain, parameter_builders in self._metrics_parameter_builders_by_domain.items()
         }
 
@@ -654,7 +666,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             )
             for domain_key, fully_qualified_metrics_parameter_names in fully_qualified_metrics_parameter_names_by_domain.items()
             for domain, parameter_values_for_fully_qualified_parameter_names in parameter_values_for_fully_qualified_parameter_names_by_domain.items()
-            if domain.is_superset(domain_key)
+            if domain.is_superset(other=domain_key)
         }
 
         return parameter_values_for_fully_qualified_parameter_names_by_domain
@@ -669,6 +681,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
         if batches is None:
             batches = {}
 
+        batch_id: str
+        batch: Batch
         return {
             batch_id: set(
                 deep_convert_properties_iterable_to_id_dict(
