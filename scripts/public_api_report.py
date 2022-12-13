@@ -1,13 +1,21 @@
+"""Report of which methods and classes are used in our public documentation.
+
+This module contains utilities that scan our documentation examples and compare
+with our codebase to determine which methods are used in examples and thus
+should be considered part of our public API.
+
+Typical usage example:
+
+  main() method provided with typical usage.
+  These utilities can also be used in tests to determine if there has been a
+  change to our public API.
+"""
 import ast
 import glob
-import importlib
-import inspect
 import logging
 import operator
 import pathlib
-import sys
 from dataclasses import dataclass
-from types import ModuleType
 from typing import List, Set, Union
 
 import astunparse
@@ -26,8 +34,8 @@ logger.setLevel(logging.INFO)
 #   - Capture relative filepath and name instead of ast.FunctionDef, ast.ClassDef or ast.AsyncFunctionDef (eg. with Definition class)
 #   - Clean up, change "test script" to "docs examples"?
 
-class AstParser:
 
+class AstParser:
     def __init__(self, repo_root: pathlib.Path) -> None:
         self.repo_root = repo_root
 
@@ -38,7 +46,6 @@ class AstParser:
     def _print_ast(self, tree: ast.AST) -> None:
         """Pretty print an AST tree."""
         print(astunparse.dump(tree))
-
 
     def _parse_file_to_ast_tree(self, filepath: pathlib.Path) -> ast.AST:
         with open(self.repo_root / filepath) as f:
@@ -55,7 +62,6 @@ class DocExampleParser:
         self.repo_root = repo_root
         self.paths = paths
 
-
     def retrieve_all_usages_in_files(self) -> Set[str]:
         """
 
@@ -66,7 +72,7 @@ class DocExampleParser:
 
         """
         all_usages = set()
-        for filepath in  self.paths:
+        for filepath in self.paths:
             file_usages = self.retrieve_all_usages_in_file(filepath=filepath)
             all_usages |= file_usages
         return all_usages
@@ -85,12 +91,9 @@ class DocExampleParser:
 
         return function_names | import_names
 
-
-
     def _print_ast(self, tree: ast.AST) -> None:
         """Pretty print an AST tree."""
         print(astunparse.dump(tree))
-
 
     def _parse_file_to_ast_tree(self, filepath: pathlib.Path) -> ast.AST:
         with open(self.repo_root / filepath) as f:
@@ -99,16 +102,20 @@ class DocExampleParser:
         tree = ast.parse(file_contents)
         return tree
 
-
-
-    def _list_all_gx_imports(self, tree: ast.AST) -> List[Union[ast.Import, ast.ImportFrom]]:
+    def _list_all_gx_imports(
+        self, tree: ast.AST
+    ) -> List[Union[ast.Import, ast.ImportFrom]]:
         """Get all of the GX related imports in a file."""
 
         imports = []
 
         for node in ast.walk(tree):
-            node_is_imported_from_gx = isinstance(node, ast.ImportFrom) and node.module.startswith("great_expectations")
-            node_is_gx_import = isinstance(node, ast.Import) and any(n.name.startswith("great_expectations") for n in node.names)
+            node_is_imported_from_gx = isinstance(
+                node, ast.ImportFrom
+            ) and node.module.startswith("great_expectations")
+            node_is_gx_import = isinstance(node, ast.Import) and any(
+                n.name.startswith("great_expectations") for n in node.names
+            )
             if node_is_imported_from_gx:
                 imports.append(node)
             elif node_is_gx_import:
@@ -116,23 +123,22 @@ class DocExampleParser:
 
         return imports
 
-
-    def _get_non_private_gx_import_names(self, imports: List[Union[ast.Import, ast.ImportFrom]]) -> Set[str]:
+    def _get_non_private_gx_import_names(
+        self, imports: List[Union[ast.Import, ast.ImportFrom]]
+    ) -> Set[str]:
 
         names = []
         for import_ in imports:
             if not isinstance(import_, (ast.Import, ast.ImportFrom)):
-                raise TypeError(f"`imports` should only contain ast.Import, ast.ImportFrom types, you provided {type(import_)}")
+                raise TypeError(
+                    f"`imports` should only contain ast.Import, ast.ImportFrom types, you provided {type(import_)}"
+                )
 
             # Generally there is only 1 alias,
             # but we add all names if there are multiple aliases to be safe.
             names.extend([n.name for n in import_.names if not n.name.startswith("_")])
 
         return set(names)
-
-
-
-
 
     def _list_all_function_calls(self, tree: ast.AST) -> List[ast.Call]:
         calls = []
@@ -162,8 +168,10 @@ class Definition:
     filepath: pathlib.Path
     ast_definition: Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]
 
+
 class GXCodeParser:
     """"""
+
     def __init__(self, repo_root: pathlib.Path, paths: Set[pathlib.Path]) -> None:
         """
 
@@ -174,15 +182,20 @@ class GXCodeParser:
         self.repo_root = repo_root
         self.paths = paths
 
-
-    def get_all_non_private_class_method_and_function_names_from_definitions_in_files(self) -> Set[str]:
+    def get_all_non_private_class_method_and_function_names_from_definitions_in_files(
+        self,
+    ) -> Set[str]:
         all_usages = set()
         for filepath in self.paths:
-            file_usages = self.get_all_non_private_class_method_and_function_names_from_definitions_in_file(filepath=filepath)
+            file_usages = self.get_all_non_private_class_method_and_function_names_from_definitions_in_file(
+                filepath=filepath
+            )
             all_usages |= file_usages
         return all_usages
 
-    def get_all_non_private_class_method_and_function_names_from_definitions_in_file(self, filepath: pathlib.Path) -> Set[str]:
+    def get_all_non_private_class_method_and_function_names_from_definitions_in_file(
+        self, filepath: pathlib.Path
+    ) -> Set[str]:
         """
 
         Args:
@@ -191,11 +204,14 @@ class GXCodeParser:
         Returns:
 
         """
-        names = self.get_all_class_method_and_function_names_from_definitions_in_file(filepath=filepath)
+        names = self.get_all_class_method_and_function_names_from_definitions_in_file(
+            filepath=filepath
+        )
         return set([name for name in names if not name.startswith("_")])
 
-
-    def get_all_class_method_and_function_names_from_definitions_in_file(self, filepath: pathlib.Path) -> Set[str]:
+    def get_all_class_method_and_function_names_from_definitions_in_file(
+        self, filepath: pathlib.Path
+    ) -> Set[str]:
         """
 
         Args:
@@ -204,20 +220,40 @@ class GXCodeParser:
         Returns:
 
         """
-        definitions: Set[Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]] = self.get_all_class_method_and_function_definitions_from_file(filepath=filepath)
+        definitions: Set[
+            Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]
+        ] = self.get_all_class_method_and_function_definitions_from_file(
+            filepath=filepath
+        )
 
         return set([definition.name for definition in definitions])
 
-    def get_all_class_method_and_function_definitions_from_files(self) -> Set[Definition]:
+    def get_all_class_method_and_function_definitions_from_files(
+        self,
+    ) -> Set[Definition]:
         all_usages: Set[Definition] = set()
         for filepath in self.paths:
             file_usages = self.get_all_class_method_and_function_definitions_from_file(
-                filepath=filepath)
-            file_usages_definitions: Set[Definition] = set([Definition(name=usage.name, filepath=filepath.relative_to(self.repo_root), ast_definition=usage) for usage in file_usages])
+                filepath=filepath
+            )
+            file_usages_definitions: Set[Definition] = set(
+                [
+                    Definition(
+                        name=usage.name,
+                        filepath=filepath.relative_to(
+                            self.repo_root / "great_expectations"
+                        ),
+                        ast_definition=usage,
+                    )
+                    for usage in file_usages
+                ]
+            )
             all_usages |= file_usages_definitions
         return all_usages
 
-    def get_all_class_method_and_function_definitions_from_file(self, filepath: pathlib.Path) -> Set[Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]]:
+    def get_all_class_method_and_function_definitions_from_file(
+        self, filepath: pathlib.Path
+    ) -> Set[Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]]:
         """
 
         Args:
@@ -232,7 +268,6 @@ class GXCodeParser:
         all_defs.extend(self._list_function_definitions(tree=tree))
 
         return set(all_defs)
-
 
     def _parse_file_to_ast_tree(self, filepath: pathlib.Path) -> ast.AST:
         with open(self.repo_root / filepath) as f:
@@ -251,10 +286,14 @@ class GXCodeParser:
 
         return class_defs
 
-    def _list_function_definitions(self, tree: ast.AST) -> List[Union[ast.FunctionDef, ast.AsyncFunctionDef]]:
+    def _list_function_definitions(
+        self, tree: ast.AST
+    ) -> List[Union[ast.FunctionDef, ast.AsyncFunctionDef]]:
         function_definitions = []
         for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef) or isinstance(node, ast.AsyncFunctionDef):
+            if isinstance(node, ast.FunctionDef) or isinstance(
+                node, ast.AsyncFunctionDef
+            ):
                 function_definitions.append(node)
 
         return function_definitions
@@ -263,13 +302,34 @@ class GXCodeParser:
 class PublicAPIChecker:
     """Check if functions, methods and classes are marked part of the PublicAPI."""
 
-    def __init__(self, repo_root: pathlib.Path, doc_example_parser: DocExampleParser, gx_code_parser: GXCodeParser) -> None:
+    def __init__(
+        self,
+        repo_root: pathlib.Path,
+        doc_example_parser: DocExampleParser,
+        gx_code_parser: GXCodeParser,
+    ) -> None:
         self.repo_root = repo_root
         self.doc_example_parser = doc_example_parser
         self.gx_code_parser = gx_code_parser
 
+    def write_printable_definitions_to_file(
+        self, filepath: pathlib.Path, definitions: Set[Definition]
+    ) -> None:
+        """
 
-    def print_definitions(self, definitions: Set[Definition]) -> None:
+        Args:
+            filepath:
+            definitions:
+
+        Returns:
+
+        """
+
+        printable_definitions = self.printable_definitions(definitions=definitions)
+        with open(filepath, "w") as f:
+            f.write("\n".join(printable_definitions))
+
+    def printable_definitions(self, definitions: Set[Definition]) -> List[str]:
         """
 
         Args:
@@ -278,22 +338,35 @@ class PublicAPIChecker:
         Returns:
 
         """
-        sorted_definitions_list = sorted(list(definitions), key=operator.attrgetter("filepath"))
+        sorted_definitions_list = sorted(
+            list(definitions), key=operator.attrgetter("filepath")
+        )
         sorted_definitions_strings: List[str] = []
         for definition in sorted_definitions_list:
-            sorted_definitions_strings.append(f"File: {str(definition.filepath)} Name: {definition.name}")
+            sorted_definitions_strings.append(
+                f"File: {str(definition.filepath)} Name: {definition.name}"
+            )
 
         seen = set()
-        sorted_definitions_strings_no_dupes = [d for d in sorted_definitions_strings if not (d in seen or seen.add(d))]
+        sorted_definitions_strings_no_dupes = [
+            d for d in sorted_definitions_strings if not (d in seen or seen.add(d))
+        ]
 
-        for sorted_definition in sorted_definitions_strings_no_dupes:
-            logger.info(sorted_definition)
+        return sorted_definitions_strings_no_dupes
 
-
-    def gx_code_definitions_appearing_in_docs_examples_and_not_marked_public_api(self) -> Set[Definition]:
-        gx_code_definitions_appearing_in_docs_examples = self.gx_code_definitions_appearing_in_docs_examples()
-        return set([d for d in gx_code_definitions_appearing_in_docs_examples if not self._is_definition_marked_public_api(d.ast_definition)])
-
+    def gx_code_definitions_appearing_in_docs_examples_and_not_marked_public_api(
+        self,
+    ) -> Set[Definition]:
+        gx_code_definitions_appearing_in_docs_examples = (
+            self.gx_code_definitions_appearing_in_docs_examples()
+        )
+        return set(
+            [
+                d
+                for d in gx_code_definitions_appearing_in_docs_examples
+                if not self._is_definition_marked_public_api(d.ast_definition)
+            ]
+        )
 
     def gx_code_definitions_appearing_in_docs_examples(self) -> Set[Definition]:
         """Filter out all GX classes and methods except for those used in docs examples.
@@ -302,11 +375,13 @@ class PublicAPIChecker:
 
         """
         gx_usages_in_docs_examples = self.filter_test_script_classes_and_methods()
-        gx_code_definitions = self.gx_code_parser.get_all_class_method_and_function_definitions_from_files()
-        gx_code_definitions_appearing_in_docs_examples = set([d for d in gx_code_definitions if d.name in gx_usages_in_docs_examples])
+        gx_code_definitions = (
+            self.gx_code_parser.get_all_class_method_and_function_definitions_from_files()
+        )
+        gx_code_definitions_appearing_in_docs_examples = set(
+            [d for d in gx_code_definitions if d.name in gx_usages_in_docs_examples]
+        )
         return gx_code_definitions_appearing_in_docs_examples
-
-
 
     def filter_test_script_classes_and_methods(self) -> Set[str]:
         """Filter out non-GX usages from test scripts.
@@ -315,13 +390,18 @@ class PublicAPIChecker:
 
         """
         doc_example_usages = self.doc_example_parser.retrieve_all_usages_in_files()
-        gx_code_definitions = self.gx_code_parser.get_all_non_private_class_method_and_function_names_from_definitions_in_files()
+        gx_code_definitions = (
+            self.gx_code_parser.get_all_non_private_class_method_and_function_names_from_definitions_in_files()
+        )
 
-        doc_example_usages_of_gx_code = doc_example_usages.intersection(gx_code_definitions)
+        doc_example_usages_of_gx_code = doc_example_usages.intersection(
+            gx_code_definitions
+        )
         return doc_example_usages_of_gx_code
 
-
-    def _is_definition_marked_public_api(self, definition: Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]) -> bool:
+    def _is_definition_marked_public_api(
+        self, definition: Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]
+    ) -> bool:
 
         result = False
         found_decorators = self._get_decorator_names(definition=definition)
@@ -331,12 +411,12 @@ class PublicAPIChecker:
 
         return result
 
-    def _get_decorator_names(self, definition: Union[
-        ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]) -> Set[str]:
-
+    def _get_decorator_names(
+        self, definition: Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]
+    ) -> Set[str]:
         def flatten_attr(node):
             if isinstance(node, ast.Attribute):
-                return str(flatten_attr(node.value)) + '.' + node.attr
+                return str(flatten_attr(node.value)) + "." + node.attr
             elif isinstance(node, ast.Name):
                 return str(node.id)
             else:
@@ -351,12 +431,13 @@ class PublicAPIChecker:
 
         return set(found_decorators)
 
-
     def get_all_public_api_functions(self):
 
-        filepath = self.repo_root / "great_expectations/data_context/data_context/abstract_data_context.py"
+        filepath = (
+            self.repo_root
+            / "great_expectations/data_context/data_context/abstract_data_context.py"
+        )
         print(self._list_public_functions_in_file(filepath=filepath))
-
 
     def _list_public_functions_in_file(self, filepath: pathlib.Path) -> List[str]:
         # TODO: Make this return function with dotted path, not just str
@@ -367,7 +448,7 @@ class PublicAPIChecker:
 
         def flatten_attr(node):
             if isinstance(node, ast.Attribute):
-                return str(flatten_attr(node.value)) + '.' + node.attr
+                return str(flatten_attr(node.value)) + "." + node.attr
             elif isinstance(node, ast.Name):
                 return str(node.id)
             else:
@@ -390,15 +471,16 @@ class PublicAPIChecker:
         return public_functions
 
 
-
 def _repo_root() -> pathlib.Path:
     return pathlib.Path(__file__).parent.parent
+
 
 def _default_doc_example_paths() -> Set[pathlib.Path]:
     """Get all paths of doc examples (test scripts)."""
     base_directory = _repo_root() / "tests" / "integration" / "docusaurus"
     paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
     return set([pathlib.Path(p) for p in paths])
+
 
 def _default_gx_code_paths() -> Set[pathlib.Path]:
     """All gx modules related to the main library."""
@@ -409,65 +491,35 @@ def _default_gx_code_paths() -> Set[pathlib.Path]:
 
 def main():
 
-    # Get code references in docs
-    # repo_root = pathlib.Path(__file__).parent.parent
-    # docs_dir = repo_root / "docs"
-    # files = glob.glob(f"{docs_dir}/**/*.md", recursive=True)
+    doc_example_parser = DocExampleParser(
+        repo_root=_repo_root(), paths=_default_doc_example_paths()
+    )
 
-    # report_generator = PublicAPIDocSnippetRetriever(repo_root=repo_root)
-    # report_generator.generate_report(docs_code_references)
-
-
-
-    # Parse references
-    # Generate set of module level functions, classes, and methods
-    # Parse full great_expectations code, find everything decorated @public_api
-
-    # public_api_checker = PublicAPIChecker(repo_root=repo_root)
-    # public_api_checker.get_all_public_api_functions()
-    # Report of what is in the references and not marked @public_api
-    # Report on which do not have corresponding sphinx source stub files (unless we end up autogenerating these)
-
-    # doc_example_parser = DocExampleParser(repo_root=_repo_root(), paths=_default_doc_example_paths())
-    # doc_example_parser.retrieve_definitions()
-    # doc_example_parser.list_all_class_imports()
-
-    # filename = pathlib.Path(
-    #     "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py")
-    # filepath = repo_root / filename
-    # print(doc_example_parser._list_all_gx_imports(filepath=filepath))
-
-    filename = pathlib.Path(
-        "scripts/sample_test_script.py")
-    filepath = _repo_root() / filename
-    # print(doc_example_parser._import_file_as_module(filepath=filepath))
-    # print(doc_example_parser._list_classes_imported_in_file(filepath=filepath))
-
-    doc_example_parser = DocExampleParser(repo_root=_repo_root(), paths=_default_doc_example_paths())
-    # print(doc_example_parser.retrieve_all_usages_in_file(filepath=filepath))
-
-    filename = pathlib.Path(
-        "great_expectations/data_context/data_context/abstract_data_context.py")
-    filepath = _repo_root() / filename
-    gx_code_parser = GXCodeParser(repo_root=_repo_root(), paths=_default_gx_code_paths())
-    # print(gx_code_parser.get_all_class_method_and_function_definitions_from_file(filepath=filepath))
-    # print(gx_code_parser.get_all_non_private_class_method_and_function_names_from_definitions_in_file(filepath=filepath))
-
-    ast_parser = AstParser(repo_root=_repo_root())
-    # ast_parser.print_tree(filepath=filepath)
+    gx_code_parser = GXCodeParser(
+        repo_root=_repo_root(), paths=_default_gx_code_paths()
+    )
 
     public_api_checker = PublicAPIChecker(
         repo_root=_repo_root(),
         doc_example_parser=doc_example_parser,
-        gx_code_parser=gx_code_parser
+        gx_code_parser=gx_code_parser,
     )
-    logger.debug("Printing GX usages in test scripts")
-    gx_code_definitions_appearing_in_docs_examples = public_api_checker.gx_code_definitions_appearing_in_docs_examples()
-    public_api_checker.print_definitions(definitions=gx_code_definitions_appearing_in_docs_examples)
 
-        # filename = "tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py"
-        # # filename = "great_expectations/data_context/data_context/abstract_data_context.py"
-        # filepath = self.repo_root / filename
+    logger.debug("Printing GX usages in test scripts")
+    gx_code_definitions_appearing_in_docs_examples = (
+        public_api_checker.gx_code_definitions_appearing_in_docs_examples()
+    )
+    printable_definitions = public_api_checker.printable_definitions(
+        definitions=gx_code_definitions_appearing_in_docs_examples
+    )
+    for printable_definition in printable_definitions:
+        logger.info(printable_definition)
+
+    public_api_checker.write_printable_definitions_to_file(
+        filepath=_repo_root() / "public_api_report.txt",
+        definitions=gx_code_definitions_appearing_in_docs_examples,
+    )
+
 
 if __name__ == "__main__":
     main()
