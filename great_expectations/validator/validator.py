@@ -1244,7 +1244,6 @@ class Validator:
             graph=graph,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=0,
-            show_progress_bars=show_progress_bars,
         )
 
         # Trace MetricResolutionError occurrences to expectations relying on corresponding malfunctioning metrics.

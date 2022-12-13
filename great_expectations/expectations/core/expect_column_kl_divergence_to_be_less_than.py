@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Optional, Set, Tuple, Union
+from typing import Dict, Optional, Tuple
 
 import altair as alt
 import numpy as np
@@ -228,25 +228,16 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                 # Note: 20201116 - JPC - the execution engine doesn't provide capability to evaluate
                 # validation_dependencies, so we use a validator
                 #
-                graph: ValidationGraph = ValidationGraph(
-                    execution_engine=execution_engine
+                metrics_calculator = MetricsCalculator(
+                    execution_engine=execution_engine,
+                    show_progress_bars=True,
                 )
-                graph.build_metric_dependency_graph(
-                    metric_configuration=partition_metric_configuration,
-                )
-                resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
-                aborted_metrics_info: Dict[
-                    Tuple[str, str, str],
-                    Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-                ]
-                (
-                    resolved_metrics,
-                    aborted_metrics_info,
-                ) = MetricsCalculator.resolve_validation_graph_and_handle_aborted_metrics_info(
-                    graph=graph,
+                resolved_metrics: Dict[
+                    Tuple[str, str, str], MetricValue
+                ] = metrics_calculator.compute_metrics(
+                    metric_configurations=[partition_metric_configuration],
                     runtime_configuration=None,
                     min_graph_edges_pbar_enable=0,
-                    show_progress_bars=True,
                 )
 
                 bins = resolved_metrics[partition_metric_configuration.id]
