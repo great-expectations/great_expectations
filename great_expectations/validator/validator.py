@@ -1128,10 +1128,11 @@ class Validator:
             # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] VALIDATION_DEPENDENCIES:\n{validation_dependencies} ; TYPE: {str(type(validation_dependencies))}")
 
             try:
+                # TODO: <Alex>ALEX</Alex>
                 expectation_validation_graph: ExpectationValidationGraph = (
                     ExpectationValidationGraph(
-                        execution_engine=self._execution_engine,
                         configuration=evaluated_config,
+                        graph=ValidationGraph(execution_engine=self._execution_engine),
                     )
                 )
                 # TODO: <Alex>ALEX</Alex>
@@ -1148,6 +1149,7 @@ class Validator:
                 ]
                 fully_qualified_parameter_name: str
                 parameter_node: ParameterNode
+                graph: ValidationGraph
                 for (
                     domain,
                     parameter_values_for_fully_qualified_parameter_names,
@@ -1168,19 +1170,17 @@ class Validator:
                                 FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
                             ]["graph"]
                             expectation_validation_graph.update(graph=graph)
-                # TODO: <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX</Alex>
-                # for (
-                #     metric_configuration
-                # ) in validation_dependencies.get_metric_configurations():
-                #     # graph = ValidationGraph(execution_engine=self._execution_engine)
-                #     # graph.build_metric_dependency_graph(
-                #     #     metric_configuration=metric_configuration,
-                #     #     runtime_configuration=runtime_configuration,
-                #     # )
-                #     expectation_validation_graph.update(graph=graph)
-                # TODO: <Alex>ALEX</Alex>
 
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                # expectation_validation_graph: ExpectationValidationGraph = ExpectationValidationGraph(
+                #     configuration=evaluated_config,
+                #     graph=self.metrics_calculator.build_metric_dependency_graph(
+                #         metric_configurations=validation_dependencies.get_metric_configurations(),
+                #         runtime_configuration=runtime_configuration,
+                #     ),
+                # )
+                # TODO: <Alex>ALEX</Alex>
                 expectation_validation_graphs.append(expectation_validation_graph)
                 processed_configurations.append(evaluated_config)
             except Exception as err:
