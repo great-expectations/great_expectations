@@ -16,7 +16,7 @@ from great_expectations.expectations.metrics.metric_provider import metric_value
 
 
 class ColumnDistinctDates(ColumnAggregateMetricProvider):
-    """Metric that get all unique dates from date column"""
+    """Metric that get all unique dates from date column."""
 
     metric_name = "column.distinct_dates"
 
@@ -52,7 +52,7 @@ class ColumnDistinctDates(ColumnAggregateMetricProvider):
 
 
 class ExpectColumnToHaveNoDaysMissing(ColumnExpectation):
-    """Expect No missing days in date column"""
+    """Expect No missing days in date column."""
 
     from datetime import datetime, timedelta
 

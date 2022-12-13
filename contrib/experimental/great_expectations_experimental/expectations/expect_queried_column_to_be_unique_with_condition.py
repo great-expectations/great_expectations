@@ -10,11 +10,12 @@ from great_expectations.expectations.expectation import (
 
 class ExpectQueriedColumnToBeUniqueWithCondition(QueryExpectation):
     """Expect column values to be unique, with an filter.
+
     Args:
-    *****
-    template_dict: dict with the following keys:
-    column_to_check - column to check uniqueness on. can be multiple column names separated by comma
-    condition - the filter - for boolean column, you can provide just the column name (evaluated to True)"""
+        template_dict: dict with the following keys: \
+            column_to_check (column to check uniqueness on. can be multiple column names separated by comma), \
+            condition (the filter for boolean column, you can provide just the column name evaluated to True)
+    """
 
     metric_dependencies = ("query.template_values",)
 

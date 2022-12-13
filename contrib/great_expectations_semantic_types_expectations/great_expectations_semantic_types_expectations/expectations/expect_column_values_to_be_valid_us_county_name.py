@@ -53,6 +53,7 @@ class ColumnValuesToBeValidUSCountyName(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidUSCountyName(ColumnMapExpectation):
     """Expect values in this column to be valid us county names.
+
     See https://github.com/yaph/geonamescache for more information.
     """
 

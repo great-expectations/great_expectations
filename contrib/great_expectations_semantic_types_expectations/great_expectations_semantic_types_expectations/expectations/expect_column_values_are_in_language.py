@@ -67,23 +67,23 @@ class ColumnValuesAreInLanguage(ColumnMapMetricProvider):
 class ExpectColumnValuesAreInLanguage(ColumnMapExpectation):
     """Expect the column to be in a specified language.
 
-        Args:
-            column (str): \
-                The column name
-            language (str): \
-                One of 97 ISO 639-1 language codes, e.g. af, am, an, ar, as, az, be, bg, bn, br, bs, ca, cs, cy, da, \
-                de, dz, el, en, eo, es, et, eu, fa, fi, fo, fr, ga, gl, gu, he, hi, hr, ht, hu, hy, id, is, it, ja, \
-                jv, ka, kk, km, kn, ko, ku, ky, la, lb, lo, lt, lv, mg, mk, ml, mn, mr, ms, mt, nb, ne, nl, nn, no, \
-                oc, or, pa, pl, ps, pt, qu, ro, ru, rw, se, si, sk, sl, sq, sr, sv, sw, ta, te, th, tl, tr, ug, uk, \
-                ur, vi, vo, wa, xh, zh, zu
+    Args:
+        column (str): \
+            The column name
+        language (str): \
+            One of 97 ISO 639-1 language codes, e.g. af, am, an, ar, as, az, be, bg, bn, br, bs, ca, cs, cy, da, \
+            de, dz, el, en, eo, es, et, eu, fa, fi, fo, fr, ga, gl, gu, he, hi, hr, ht, hu, hy, id, is, it, ja, \
+            jv, ka, kk, km, kn, ko, ku, ky, la, lb, lo, lt, lv, mg, mk, ml, mn, mr, ms, mt, nb, ne, nl, nn, no, \
+            oc, or, pa, pl, ps, pt, qu, ro, ru, rw, se, si, sk, sl, sq, sr, sv, sw, ta, te, th, tl, tr, ug, uk, \
+            ur, vi, vo, wa, xh, zh, zu
 
-        Notes:
-            * Language identification uses the [`langid` package](https://github.com/saffsd/langid.py).
-            * `langid` uses a custom, permissive [LICENSE](https://github.com/saffsd/langid.py/blob/master/LICENSE),
-              suitable for commercial purposes.
-            * Results may be inaccurate for strings shorter than 50 characters.
-            * No confidence threshold has been set, so language with the highest confidence will be selected, even if
-              confidence is low.
+    Notes:
+        * Language identification uses the [langid package](https://github.com/saffsd/langid.py).
+        * langid uses a custom, permissive [LICENSE](https://github.com/saffsd/langid.py/blob/master/LICENSE), \
+          suitable for commercial purposes.
+        * Results may be inaccurate for strings shorter than 50 characters.
+        * No confidence threshold has been set, so language with the highest confidence will be selected, even if \
+          confidence is low.
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation

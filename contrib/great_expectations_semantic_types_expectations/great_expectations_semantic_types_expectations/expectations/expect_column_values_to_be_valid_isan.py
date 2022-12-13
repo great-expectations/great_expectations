@@ -51,7 +51,7 @@ class ColumnValuesToBeValidIsan(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidIsan(ColumnMapExpectation):
-    """Expect column values to be valid ISAN (International Standard Audiovisual Number)"""
+    """Expect column values to be valid ISAN (International Standard Audiovisual Number)."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
