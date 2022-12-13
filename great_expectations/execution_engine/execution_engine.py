@@ -336,16 +336,18 @@ class ExecutionEngine(ABC):
         accessor_domain_kwargs: dict
         metric_provider_kwargs: dict
         metric_to_resolve: MetricConfiguration
-        resolved_metrics_by_metric_name: Dict[str, Any]
+        resolved_metric_dependencies_by_metric_name: Dict[str, Any]
         k: str
         v: MetricConfiguration
         for metric_to_resolve in metrics_to_resolve:
-            resolved_metrics_by_metric_name = {}
+            resolved_metric_dependencies_by_metric_name = {}
             for k, v in metric_to_resolve.metric_dependencies.items():
                 if v.id in metrics:
-                    resolved_metrics_by_metric_name[k] = metrics[v.id]
+                    resolved_metric_dependencies_by_metric_name[k] = metrics[v.id]
                 elif self._caching and v.id in self._metric_cache:  # type: ignore[operator] # TODO: update NoOpDict
-                    resolved_metrics_by_metric_name[k] = self._metric_cache[v.id]
+                    resolved_metric_dependencies_by_metric_name[k] = self._metric_cache[
+                        v.id
+                    ]
                 else:
                     raise ge_exceptions.MetricError(
                         message=f'Missing metric dependency: {str(k)} for metric "{metric_to_resolve.metric_name}".'
@@ -359,7 +361,7 @@ class ExecutionEngine(ABC):
                 "execution_engine": self,
                 "metric_domain_kwargs": metric_to_resolve.metric_domain_kwargs,
                 "metric_value_kwargs": metric_to_resolve.metric_value_kwargs,
-                "metrics": resolved_metrics_by_metric_name,
+                "metrics": resolved_metric_dependencies_by_metric_name,
                 "runtime_configuration": runtime_configuration,
             }
             if metric_fn is None:
@@ -368,7 +370,9 @@ class ExecutionEngine(ABC):
                         metric_fn,
                         compute_domain_kwargs,
                         accessor_domain_kwargs,
-                    ) = resolved_metrics_by_metric_name.pop("metric_partial_fn")
+                    ) = resolved_metric_dependencies_by_metric_name.pop(
+                        "metric_partial_fn"
+                    )
                 except KeyError as e:
                     raise ge_exceptions.MetricError(
                         message=f'Missing metric dependency: {str(e)} for metric "{metric_to_resolve.metric_name}".'

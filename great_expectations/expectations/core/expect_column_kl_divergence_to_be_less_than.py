@@ -44,6 +44,7 @@ from great_expectations.render.util import (
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.metrics_calculator import MetricsCalculator
 from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import ValidationDependencies
 
@@ -234,27 +235,17 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                 # Note: 20201116 - JPC - the execution engine doesn't provide capability to evaluate
                 # validation_dependencies, so we use a validator
                 #
-                graph: ValidationGraph = ValidationGraph(
-                    execution_engine=execution_engine
-                )
-                graph.build_metric_dependency_graph(
-                    metric_configuration=partition_metric_configuration,
-                )
-                resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
-                aborted_metrics_info: Dict[
-                    Tuple[str, str, str],
-                    Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-                ]
-                resolved_metrics, aborted_metrics_info = graph.resolve(
-                    runtime_configuration=None,
-                    min_graph_edges_pbar_enable=0,
+                metrics_calculator = MetricsCalculator(
+                    execution_engine=execution_engine,
                     show_progress_bars=True,
                 )
-
-                if aborted_metrics_info:
-                    logger.warning(
-                        f"Exceptions\n{str(aborted_metrics_info)}\noccurred while resolving metrics."
-                    )
+                resolved_metrics: Dict[
+                    Tuple[str, str, str], MetricValue
+                ] = metrics_calculator.compute_metrics(
+                    metric_configurations=[partition_metric_configuration],
+                    runtime_configuration=None,
+                    min_graph_edges_pbar_enable=0,
+                )
 
                 bins = resolved_metrics[partition_metric_configuration.id]
                 hist_metric_configuration = MetricConfiguration(
