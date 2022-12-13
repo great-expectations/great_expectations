@@ -9,21 +9,7 @@ import TipCustomDataConnectorModuleName from '../components/_tip_custom_data_con
 
 At this point, your configuration should look like:
 
-```python
-datasource_config: dict = {
-    "name": "my_datasource_name",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "class_name": "SqlAlchemyExecutionEngine",
-        "module_name": "great_expectations.execution_engine",
-        "connection_string": CONNECTION_STRING,
-    },
-    "data_connectors": {
-        "name_of_my_runtime_data_connector": {}
-        }
-    }
-}
+```python name="sql datasource configuration with empty runtime sql data_connector"
 ```
 
 #### Required Data Connector configuration keys
@@ -33,29 +19,12 @@ datasource_config: dict = {
 
 For this example, you will be using the `RuntimeDataConnector` as your `class_name`.  This key/value entry will therefore look like:
 
-```python
-    "class_name": "RuntimeDataConnector",
+```python name="define data_connector class_name for runtime sql datasource"
 ```
 
 After including an empty list for your `batch_identifiers` your full configuration should now look like:
 
-```python
-datasource_config: dict = {
-    "name": "my_datasource_name",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "class_name": "SqlAlchemyExecutionEngine",
-        "module_name": "great_expectations.execution_engine",
-        "connection_string": CONNECTION_STRING,
-    },
-    "data_connectors": {
-        "name_of_my_runtime_data_connector": {
-            "class_name": "RuntimeDataConnector",
-            "batch_identifiers": [],
-        }
-    }
-}
+```python name="runtime sql datasource configuration with data_connector class_name defined"
 ```
 
 <TipCustomDataConnectorModuleName />

@@ -1,5 +1,7 @@
 ### Universal datasource configuration elements:
 
+CONNECTION_STRING = "sqlite:///data/yellow_tripdata_sample_2020_all_months_combined.db"
+
 
 def get_partial_config_universal_datasource_config_elements() -> dict:
     """Creates a dictionary containing the keys and values that are universally defined in
@@ -196,6 +198,130 @@ def get_full_config_spark_runtime_datasource() -> dict:
                         "inferSchema": True,
                     },
                 },
+                "batch_identifiers": ["batch_timestamp"],
+            }
+        },
+    }
+    return datasource_config
+
+
+def get_full_config_sql_inferred_datasource__single_batch_only() -> dict:
+    """Creates a dictionary configuration for a SQL Datasource using a
+     configured data connector that can only return a single batch.
+
+    Returns:
+         a dictionary containing a full configuration for a SQL Datasource
+    """
+    datasource_config: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SqlAlchemyExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+            "connection_string": CONNECTION_STRING,
+        },
+        "data_connectors": {
+            "name_of_my_inferred_data_connector": {
+                "class_name": "InferredAssetSqlDataConnector",
+            },
+        },
+    }
+    return datasource_config
+
+
+def get_full_config_sql_inferred_datasource__single_and_multi_batch() -> dict:
+    """Creates a dictionary configuration for a SQL Datasource using a
+     configured data connector that can return multiple item batches and
+     a configured data connector that can only return a single batch.
+
+    Returns:
+         a dictionary containing a full configuration for a SQL Datasource
+    """
+    datasource_config: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SqlAlchemyExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+            "connection_string": CONNECTION_STRING,
+        },
+        "data_connectors": {
+            "inferred_data_connector_single_batch_asset": {
+                "class_name": "InferredAssetSqlDataConnector",
+            },
+            "inferred_data_connector_multi_batch_asset_split_on_date_time": {
+                "class_name": "InferredAssetSqlDataConnector",
+                "splitter_method": "split_on_year_and_month",
+                "splitter_kwargs": {
+                    "column_name": "pickup_datetime",
+                },
+            },
+        },
+    }
+    return datasource_config
+
+
+def get_full_config_sql_configured_datasource() -> dict:
+    """Creates a dictionary configuration for a SQL Datasource using a
+     inferred data connector that can return multiple item batches and
+     a configured data connector that can only return a single batch.
+
+    Returns:
+         a dictionary containing a full configuration for a SQL Datasource
+    """
+    datasource_config: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SqlAlchemyExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+            "connection_string": CONNECTION_STRING,
+        },
+        "data_connectors": {
+            "name_of_my_configured_data_connector": {
+                "class_name": "ConfiguredAssetSqlDataConnector",
+                "assets": {
+                    "yellow_tripdata_sample_2020_full": {
+                        "table_name": "yellow_tripdata_sample_2020",
+                        "schema_name": "main",
+                    },
+                    "yellow_tripdata_sample_2020_by_year_and_month": {
+                        "table_name": "yellow_tripdata_sample_2020",
+                        "schema_name": "main",
+                        "splitter_method": "split_on_year_and_month",
+                        "splitter_kwargs": {
+                            "column_name": "pickup_datetime",
+                        },
+                    },
+                },
+            },
+        },
+    }
+    return datasource_config
+
+
+def get_full_config_sql_runtime_datasource() -> dict:
+    """Creates a dictionary configuration for a SQL Datasource using a
+     runtime data connector.
+
+    Returns:
+         a dictionary containing a full configuration for a SQL Datasource
+    """
+    datasource_config: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SqlAlchemyExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+            "connection_string": CONNECTION_STRING,
+        },
+        "data_connectors": {
+            "name_of_my_runtime_data_connector": {
+                "class_name": "RuntimeDataConnector",
                 "batch_identifiers": ["batch_timestamp"],
             }
         },
