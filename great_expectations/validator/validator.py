@@ -1111,7 +1111,6 @@ class Validator:
 
             try:
                 expectation_validation_graph: ExpectationValidationGraph = ExpectationValidationGraph(
-                    execution_engine=self._execution_engine,
                     configuration=evaluated_config,
                     graph=self.metrics_calculator.build_metric_dependency_graph(
                         metric_configurations=validation_dependencies.get_metric_configurations(),
