@@ -173,7 +173,7 @@ class UsageStatisticsHandler:
         return serialized_dependencies
 
     def build_envelope(self, message: dict) -> dict:
-        message["version"] = "1.0.0"
+        message["version"] = "1.0.1"
         message["ge_version"] = self._ge_version
 
         message["data_context_id"] = self._data_context_id
