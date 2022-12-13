@@ -5,7 +5,11 @@ from typing import TYPE_CHECKING, List, Optional
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_parameter_value_and_validate_return_type,
+)
 from great_expectations.rule_based_profiler.parameter_container import (
+    VARIABLES_KEY,
     ParameterContainer,
 )
 
@@ -42,11 +46,36 @@ class TableDomainBuilder(DomainBuilder):
         rule_name: str,
         variables: Optional[ParameterContainer] = None,
     ) -> List[Domain]:
-        domains: List[Domain] = [
-            Domain(
-                domain_type=self.domain_type,
-                rule_name=rule_name,
-            ),
-        ]
+        other_table_name: Optional[str]
+        try:
+            # Obtain table from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+            other_table_name = get_parameter_value_and_validate_return_type(
+                domain=None,
+                parameter_reference=f"{VARIABLES_KEY}table",
+                expected_return_type=None,
+                variables=variables,
+                parameters=None,
+            )
+        except KeyError:
+            other_table_name = None
+
+        domains: List[Domain]
+        if other_table_name:
+            domains = [
+                Domain(
+                    domain_type=self.domain_type,
+                    domain_kwargs={
+                        "table": other_table_name,
+                    },
+                    rule_name=rule_name,
+                ),
+            ]
+        else:
+            domains = [
+                Domain(
+                    domain_type=self.domain_type,
+                    rule_name=rule_name,
+                ),
+            ]
 
         return domains
