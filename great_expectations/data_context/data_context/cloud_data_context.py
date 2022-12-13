@@ -87,7 +87,7 @@ class CloudDataContext(AbstractDataContext):
             cloud_base_url,
             cloud_access_token,
             cloud_organization_id,
-        ) = self._resolve_cloud_args(
+        ) = self._resolve_CloudDataContext_cloud_args(
             cloud_base_url=cloud_base_url,
             cloud_access_token=cloud_access_token,
             cloud_organization_id=cloud_organization_id,
@@ -123,7 +123,7 @@ class CloudDataContext(AbstractDataContext):
         )
 
     @staticmethod
-    def _resolve_cloud_args(
+    def _resolve_CloudDataContext_cloud_args(
         cloud_base_url: Optional[str] = None,
         cloud_access_token: Optional[str] = None,
         cloud_organization_id: Optional[str] = None,

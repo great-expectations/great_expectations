@@ -190,11 +190,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             None
         """
         # Chetan - 20221208 - not formally deprecating these values until a future date
-        cloud_mode, cloud_config = self._resolve_cloud_args(
-            cloud_config=cloud_config,
+        cloud_mode, cloud_config = self._resolve_BaseDataContext_cloud_args(
             cloud_mode=cloud_mode,
-            ge_cloud_config=ge_cloud_config,
+            cloud_config=cloud_config,
             ge_cloud_mode=ge_cloud_mode,
+            ge_cloud_config=ge_cloud_config,
         )
 
         project_data_context_config: DataContextConfig = (
@@ -265,7 +265,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 )
 
     @staticmethod
-    def _resolve_cloud_args(
+    def _resolve_BaseDataContext_cloud_args(
         cloud_mode: bool = False,
         cloud_config: Optional[GXCloudConfig] = None,
         # <GX_RENAME> Deprecated as of 0.15.37

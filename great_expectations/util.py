@@ -1807,7 +1807,7 @@ def get_context(
         cloud_access_token,
         cloud_organization_id,
         cloud_mode,
-    ) = DataContext._resolve_cloud_args(
+    ) = DataContext._resolve_DataContext_cloud_args(
         cloud_mode=cloud_mode,
         cloud_base_url=cloud_base_url,
         cloud_access_token=cloud_access_token,
