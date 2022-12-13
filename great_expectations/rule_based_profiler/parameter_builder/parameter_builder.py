@@ -47,6 +47,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 from great_expectations.types.attributes import Attributes
 from great_expectations.util import is_parseable_date
 from great_expectations.validator.computed_metric import MetricValue
+from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validation_graph import ValidationGraph
 
@@ -459,13 +460,18 @@ specified (empty "metric_name" value detected)."""
             )
         )
 
-        resolved_metrics: Dict[
-            Tuple[str, str, str], MetricValue
-        ] = validator.metrics_calculator.resolve_validation_graph_and_handle_aborted_metrics_info(
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
+        aborted_metrics_info: Dict[
+            Tuple[str, str, str],
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ]
+        (
+            resolved_metrics,
+            aborted_metrics_info,
+        ) = validator.metrics_calculator.resolve_validation_graph_and_handle_aborted_metrics_info(
             graph=graph,
             runtime_configuration=None,
             min_graph_edges_pbar_enable=0,
-            show_progress_bars=True,
         )
 
         # Step-5: Map resolved metrics to their attributes for identification and recovery by receiver.
