@@ -241,7 +241,10 @@ class MetricsCalculator:
                 f"Exceptions\n{str(aborted_metrics_info)}\noccurred while resolving metrics."
             )
 
-        return resolved_metrics, aborted_metrics_info
+        return (
+            resolved_metrics,
+            aborted_metrics_info,
+        )
 
     def resolve_validation_graph(
         self,
