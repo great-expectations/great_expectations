@@ -370,12 +370,12 @@ class ExpectationValidationGraph:
     ) -> None:
         if configuration is None:
             raise ValueError(
-                f"""Instantiation of "ExpectationValidationGraph" requires valid "ExpectationConfiguration" object."""
+                """Instantiation of "ExpectationValidationGraph" requires valid "ExpectationConfiguration" object."""
             )
 
         if graph is None:
             raise ValueError(
-                f"""Instantiation of "ExpectationValidationGraph" requires valid "ValidationGraph" object."""
+                """Instantiation of "ExpectationValidationGraph" requires valid "ValidationGraph" object."""
             )
 
         self._configuration = configuration
