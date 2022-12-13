@@ -300,19 +300,63 @@ def test_deduplicate_evaluation_parameter_dependencies():
 
 
 @pytest.mark.integration
+@pytest.mark.parametrize(
+    "dataframe,expectation_kwargs,expected_expectation_validation_result",
+    [
+        (
+            pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]}),
+            {
+                "min_value": {
+                    "$PARAMETER": "my_min",
+                    "$PARAMETER.upstream_row_count": 10,
+                },
+                "max_value": {
+                    "$PARAMETER": "my_max",
+                    "$PARAMETER.upstream_row_count": 50,
+                },
+            },
+            ExpectationValidationResult(
+                **{
+                    "expectation_config": {
+                        "meta": {
+                            "substituted_parameters": {"min_value": 1, "max_value": 5}
+                        },
+                        "kwargs": {
+                            "min_value": 1,
+                            "max_value": 5,
+                            "batch_id": "15fe04adb6ff20b9fc6eda486b7a36b7",
+                        },
+                        "expectation_type": "expect_table_row_count_to_be_between",
+                        "ge_cloud_id": None,
+                    },
+                    "meta": {},
+                    "exception_info": {
+                        "raised_exception": False,
+                        "exception_traceback": None,
+                        "exception_message": None,
+                    },
+                    "success": True,
+                    "result": {"observed_value": 3},
+                }
+            ),
+        ),
+    ],
+)
 def test_evaluation_parameters_for_between_expectations_parse_correctly(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    dataframe,
+    expectation_kwargs,
+    expected_expectation_validation_result,
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     # Note that if you modify this batch request, you may save the new version as a .json file
     #  to pass in later via the --batch-request option
-    df = pandas.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
     batch_request = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_runtime_data_connector",
         "data_asset_name": "foo",
-        "runtime_parameters": {"batch_data": df},
+        "runtime_parameters": {"batch_data": dataframe},
         "batch_identifiers": {
             "pipeline_stage_name": "kickoff",
             "airflow_run_id": "1234",
@@ -347,38 +391,22 @@ def test_evaluation_parameters_for_between_expectations_parse_correctly(
     validator.set_evaluation_parameter("my_min", 1)
     validator.set_evaluation_parameter("my_max", 5)
 
-    result = validator.expect_table_row_count_to_be_between(
-        min_value={"$PARAMETER": "my_min", "$PARAMETER.upstream_row_count": 10},
-        max_value={"$PARAMETER": "my_max", "$PARAMETER.upstream_row_count": 50},
+    # actual_expectation_validation_result = validator.expect_table_row_count_to_be_between(
+    #     min_value={"$PARAMETER": "my_min", "$PARAMETER.upstream_row_count": 10},
+    #     max_value={"$PARAMETER": "my_max", "$PARAMETER.upstream_row_count": 50},
+    # )
+
+    actual_expectation_validation_result = (
+        validator.expect_table_row_count_to_be_between(**expectation_kwargs)
     )
 
-    assert result == ExpectationValidationResult(
-        **{
-            "expectation_config": {
-                "meta": {"substituted_parameters": {"min_value": 1, "max_value": 5}},
-                "kwargs": {
-                    "min_value": 1,
-                    "max_value": 5,
-                    "batch_id": "15fe04adb6ff20b9fc6eda486b7a36b7",
-                },
-                "expectation_type": "expect_table_row_count_to_be_between",
-                "ge_cloud_id": None,
-            },
-            "meta": {},
-            "exception_info": {
-                "raised_exception": False,
-                "exception_traceback": None,
-                "exception_message": None,
-            },
-            "success": True,
-            "result": {"observed_value": 3},
-        }
+    assert (
+        actual_expectation_validation_result == expected_expectation_validation_result
     )
 
 
 @pytest.mark.integration
-@freeze_time("2022-12-13 03:21:34")
-def test_evaluation_parameters_for_between_expectations_parse_correctly(
+def test_evaluation_parameters_for_between_expectations_parse_datetime_correctly(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
@@ -433,28 +461,28 @@ def test_evaluation_parameters_for_between_expectations_parse_correctly(
 
     validator.set_evaluation_parameter("my_min_date", datetime(2016, 12, 10))
     validator.set_evaluation_parameter(
-        "my_max_date", datetime.now() - pd.Timedelta(weeks=1)
+        "my_max_date", datetime(2022, 12, 13) - pd.Timedelta(weeks=1)
     )
 
-    result = validator.expect_column_values_to_be_between(
+    actual_result = validator.expect_column_values_to_be_between(
         column="my_date",
         min_value={"$PARAMETER": "my_min_date"},
         max_value={"$PARAMETER": "my_max_date"},
     )
 
-    assert result == ExpectationValidationResult(
+    expected_result = ExpectationValidationResult(
         **{
             "expectation_config": {
                 "meta": {
                     "substituted_parameters": {
                         "min_value": "2016-12-10T00:00:00",
-                        "max_value": "2022-12-06T03:21:34",
+                        "max_value": "2022-12-06T00:00:00",
                     }
                 },
                 "kwargs": {
                     "column": "my_date",
                     "min_value": "2016-12-10T00:00:00",
-                    "max_value": "2022-12-06T03:21:34",
+                    "max_value": "2022-12-06T00:00:00",
                     "batch_id": "15fe04adb6ff20b9fc6eda486b7a36b7",
                 },
                 "expectation_type": "expect_column_values_to_be_between",
@@ -479,6 +507,8 @@ def test_evaluation_parameters_for_between_expectations_parse_correctly(
             },
         }
     )
+
+    assert actual_result == expected_result
 
 
 @pytest.mark.unit
