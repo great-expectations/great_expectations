@@ -9,7 +9,7 @@ from great_expectations.profile.json_schema_profiler import JsonSchemaProfiler
 def simple_schema():
     return {
         "$id": "https://example.com/address.schema.json",
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
         "properties": {
             "first_name": {"type": "string"},
@@ -46,7 +46,7 @@ def complex_flat_schema():
 def boolean_types_schema():
     return {
         "$id": "https://example.com/address.schema.json",
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
         "properties": {
             "active": {"type": "boolean"},
@@ -68,7 +68,7 @@ def boolean_types_schema():
 def enum_types_schema():
     return {
         "$id": "https://example.com/address.schema.json",
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
         "properties": {
             "shirt-size": {"enum": ["XS", "S", "M", "XL", "XXL"]},
@@ -99,7 +99,7 @@ def string_lengths_schema():
     """
     return {
         "$id": "https://example.com/address.schema.json",
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
         "properties": {
             "comments-no-constraints": {"type": "string"},
@@ -134,7 +134,7 @@ def integer_ranges_schema():
     """
     return {
         "$id": "https://example.com/address.schema.json",
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$schema": "http://json-schema.org/draft-07/schema#",
         "description": "An address similar to http://microformats.org/wiki/h-card",
         "type": "object",
         "properties": {
@@ -173,7 +173,7 @@ def number_ranges_schema():
     """
     return {
         "$id": "https://example.com/address.schema.json",
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$schema": "http://json-schema.org/draft-07/schema#",
         "description": "An address similar to http://microformats.org/wiki/h-card",
         "type": "object",
         "properties": {
@@ -212,7 +212,7 @@ def null_fields_schema():
     """
     return {
         "$id": "https://example.com/null.schema.json",
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
         "properties": {
             "null": {"type": "null"},
