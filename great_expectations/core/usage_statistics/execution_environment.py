@@ -13,7 +13,7 @@ access to features of new package versions.
 import enum
 import sys
 from dataclasses import dataclass
-from typing import Iterable, List, Optional, cast
+from typing import Iterable, List, Optional, Union
 
 from marshmallow import Schema, fields
 from packaging import version
@@ -39,7 +39,7 @@ class PackageInfo:
     package_name: str
     installed: bool
     install_environment: InstallEnvironment
-    version: Optional[version.Version]
+    version: Optional[Union[version.Version, version.LegacyVersion]]
 
 
 class PackageInfoSchema(Schema):
@@ -125,13 +125,11 @@ class GXExecutionEnvironment:
         dependencies: List[PackageInfo] = []
         for dependency_name in dependency_names:
 
-            package_version: Optional[version.Version]
+            package_version: Optional[Union[version.Version, version.LegacyVersion]]
             installed: bool
             if dependency_name in self._get_all_installed_packages():
                 installed = True
-                package_version = cast(
-                    version.Version, version.parse(metadata.version(dependency_name))
-                )
+                package_version = version.parse(metadata.version(dependency_name))
             else:
                 installed = False
                 package_version = None
