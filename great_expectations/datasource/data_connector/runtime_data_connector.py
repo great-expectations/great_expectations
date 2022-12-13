@@ -244,7 +244,7 @@ class RuntimeDataConnector(DataConnector):
             batch_identifiers = batch_request.batch_identifiers
 
         if not batch_identifiers:
-            ge_exceptions.DataConnectorError(
+            raise ge_exceptions.DataConnectorError(
                 "Passed in a RuntimeBatchRequest with no batch_identifiers"
             )
 
