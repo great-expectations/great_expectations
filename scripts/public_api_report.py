@@ -4,6 +4,24 @@ This module contains utilities that scan our documentation examples and compare
 with our codebase to determine which methods are used in examples and thus
 should be considered part of our public API.
 
+The utilities are generally used as follows:
+
+1. AST walk through docs examples to find all imports of classes and methods
+    that are GX related (by checking the import location).
+2. AST walk through docs examples to find all method calls (currently we only
+    retrieve the names, not the location of the method definition). These are
+    not filtered to be only GX related, we filter in step 4.
+3. AST walk through full GX codebase to find all classes and method names from
+    their definitions, and capture the definition file location.
+4. Filter list of classes & methods from docs examples to only those found in
+    the GX codebase (e.g. filter out print() or other python or 3rd party
+    classes/methods).
+5. Use this filtered list against the list of class and method definitions in
+    the GX codebase to generate the full list with definition locations in the
+    GX codebase.
+6. Optionally filter list of classes & methods to those not already
+    marked `public_api`.
+
 Typical usage example:
 
   main() method provided with typical usage.
@@ -23,16 +41,6 @@ import astunparse
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
-
-
-# DONE  - AST walk through test scripts to find all imports of classes and methods that are GX related (can get the import location)
-# DONE	- AST walk through test scripts to find all method calls (just get the names, not the location - can't import to do this since scripts have side effects)
-# DONE	- AST walk through full codebase to find all classes and method names, this gets the definition location
-# DONE	- Filter list of classes & methods from test scripts to only those found in the GX codebase (e.g. filter out print() or other python or 3rd party classes/methods)
-# DONE  - Filter list of classes in the GX codebase to those found in the test scripts (after filtering out non GX related in test scripts)
-# DONE	- Filter list of classes & methods to only those not already marked `public_api`
-#   - Capture relative filepath and name instead of ast.FunctionDef, ast.ClassDef or ast.AsyncFunctionDef (eg. with Definition class)
-#   - Clean up, change "test script" to "docs examples"?
 
 
 class AstParser:
@@ -384,7 +392,7 @@ class PublicAPIChecker:
         return gx_code_definitions_appearing_in_docs_examples
 
     def filter_test_script_classes_and_methods(self) -> Set[str]:
-        """Filter out non-GX usages from test scripts.
+        """Filter out non-GX usages from docs examples.
 
         Returns:
 
@@ -476,7 +484,7 @@ def _repo_root() -> pathlib.Path:
 
 
 def _default_doc_example_paths() -> Set[pathlib.Path]:
-    """Get all paths of doc examples (test scripts)."""
+    """Get all paths of doc examples (docs examples)."""
     base_directory = _repo_root() / "tests" / "integration" / "docusaurus"
     paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
     return set([pathlib.Path(p) for p in paths])
@@ -505,7 +513,7 @@ def main():
         gx_code_parser=gx_code_parser,
     )
 
-    logger.debug("Printing GX usages in test scripts")
+    logger.debug("Printing GX usages in docs examples")
     gx_code_definitions_appearing_in_docs_examples = (
         public_api_checker.gx_code_definitions_appearing_in_docs_examples()
     )
