@@ -201,23 +201,7 @@ def test_CloudDataContext_resolve_cloud_args(
                 "ge_cloud_mode": False,
             },
             (None, None, None, True),
-            id="cloud_mode_conflict_1",
-        ),
-        pytest.param(
-            {
-                "cloud_mode": None,
-                "ge_cloud_mode": False,
-            },
-            (None, None, None, False),
-            id="cloud_mode_conflict_2",
-        ),
-        pytest.param(
-            {
-                "cloud_mode": None,
-                "ge_cloud_mode": True,
-            },
-            (None, None, None, True),
-            id="cloud_mode_conflict_3",
+            id="cloud_mode=True_overrides_ge_cloud_mode",
         ),
         pytest.param(
             {
@@ -225,7 +209,23 @@ def test_CloudDataContext_resolve_cloud_args(
                 "ge_cloud_mode": True,
             },
             (None, None, None, False),
-            id="cloud_mode_conflict_4",
+            id="cloud_mode=False_overrides_ge_cloud_mode",
+        ),
+        pytest.param(
+            {
+                "cloud_mode": None,
+                "ge_cloud_mode": False,
+            },
+            (None, None, None, False),
+            id="ge_cloud_mode=False_overrides_cloud_mode=None",
+        ),
+        pytest.param(
+            {
+                "cloud_mode": None,
+                "ge_cloud_mode": True,
+            },
+            (None, None, None, True),
+            id="ge_cloud_mode=True_overrides_cloud_mode=None",
         ),
     ],
 )

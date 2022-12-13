@@ -355,7 +355,7 @@ class DefaultSiteSectionBuilder:
         view=None,
         data_context_id=None,
         cloud_mode=False,
-        # <GX_RENAM> Deprecated 0.15.37
+        # <GX_RENAME> Deprecated 0.15.37
         ge_cloud_mode=False,
         **kwargs,
     ) -> None:
