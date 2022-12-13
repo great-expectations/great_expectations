@@ -5,6 +5,7 @@ import inspect
 import logging
 import pathlib
 import sys
+from dataclasses import dataclass
 from types import ModuleType
 from typing import List, Set, Union
 
@@ -22,7 +23,7 @@ logger.setLevel(logging.DEBUG)
 # DONE	- Filter list of classes & methods from test scripts to only those found in the GX codebase (e.g. filter out print() or other python or 3rd party classes/methods)
 # DONE  - Filter list of classes in the GX codebase to those found in the test scripts (after filtering out non GX related in test scripts)
 # DONE	- Filter list of classes & methods to only those not already marked `public_api`
-#   - Capture relative filepath and name instead of ast.FunctionDef, ast.ClassDef or ast.AsyncFunctionDef
+#   - Capture relative filepath and name instead of ast.FunctionDef, ast.ClassDef or ast.AsyncFunctionDef (eg. with Definition class)
 #   - Clean up, change "test script" to "docs examples"?
 
 class AstParser:
@@ -155,6 +156,11 @@ class DocExampleParser:
         return set(names)
 
 
+@dataclass
+class Definition:
+    name: str
+    filepath: str
+    ast_definition: Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]
 
 class GXCodeParser:
     """"""
