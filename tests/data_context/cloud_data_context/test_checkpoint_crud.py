@@ -343,7 +343,7 @@ def test_cloud_backed_data_context_add_checkpoint_e2e(
 def test_cloud_data_context_run_checkpoint_e2e():
     context = DataContext(cloud_mode=True)
 
-    checkpoint_name = "OSS_run_checkpoint_E2E"
+    checkpoint_name = "OSS_E2E_run_checkpoint"
 
     cloud_id: Optional[str] = None
     checkpoint_identifiers = context.list_checkpoints()
@@ -360,8 +360,9 @@ def test_cloud_data_context_run_checkpoint_e2e():
             "b": [4, 5, 6],
         }
     )
+    # The datasource/data_connector/data_asset are all preconfigured in Cloud
     batch_request = RuntimeBatchRequest(
-        datasource_name="nathan_test_pandas_datasource",
+        datasource_name="oss_test_pandas_datasource",
         data_connector_name="runtime_data_connector",
         data_asset_name="test_df",
         runtime_parameters={"batch_data": test_df},
@@ -369,7 +370,6 @@ def test_cloud_data_context_run_checkpoint_e2e():
     )
 
     result = context.run_checkpoint(ge_cloud_id=cloud_id, batch_request=batch_request)
-
     assert result.success
 
 
