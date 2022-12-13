@@ -37,6 +37,7 @@ class MetricsCalculator:
 
         Args:
             execution_engine: ExecutionEngine to perform metrics computation.
+            show_progress_bars: Directive for whether or not to show progress bars.
         """
         self._execution_engine: ExecutionEngine = execution_engine
         self._show_progress_bars: bool = show_progress_bars
@@ -132,7 +133,6 @@ class MetricsCalculator:
             metric_configurations=list(metrics.values()),
             runtime_configuration=None,
             min_graph_edges_pbar_enable=0,
-            show_progress_bars=True,
         )
         return {
             metric_configuration.metric_name: resolved_metrics[metric_configuration.id]
@@ -145,14 +145,12 @@ class MetricsCalculator:
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
-        show_progress_bars: bool = True,
     ) -> Dict[Tuple[str, str, str], MetricValue]:
         """
         Args:
             metric_configurations: List of desired MetricConfiguration objects to be resolved.
             runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
             min_graph_edges_pbar_enable: Minumum number of graph edges to warrant showing progress bars.
-            show_progress_bars: Directive for whether or not to show progress bars.
 
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
@@ -161,13 +159,18 @@ class MetricsCalculator:
             metric_configurations=metric_configurations,
             runtime_configuration=runtime_configuration,
         )
-        resolved_metrics: Dict[
-            Tuple[str, str, str], MetricValue
-        ] = self.resolve_validation_graph_and_handle_aborted_metrics_info(
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
+        aborted_metrics_info: Dict[
+            Tuple[str, str, str],
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ]
+        (
+            resolved_metrics,
+            aborted_metrics_info,
+        ) = self.resolve_validation_graph_and_handle_aborted_metrics_info(
             graph=graph,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
-            show_progress_bars=show_progress_bars,
         )
         return resolved_metrics
 
@@ -200,20 +203,24 @@ class MetricsCalculator:
 
         return graph
 
-    @staticmethod
     def resolve_validation_graph_and_handle_aborted_metrics_info(
+        self,
         graph: ValidationGraph,
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
-        show_progress_bars: bool = True,
-    ) -> Dict[Tuple[str, str, str], MetricValue]:
+    ) -> Tuple[
+        Dict[Tuple[str, str, str], MetricValue],
+        Dict[
+            Tuple[str, str, str],
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ],
+    ]:
         """
         Args:
             graph: "ValidationGraph" object, containing "metric_edge" structures with "MetricConfiguration" objects.
             runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
             min_graph_edges_pbar_enable: Minumum number of graph edges to warrant showing progress bars.
-            show_progress_bars: Directive for whether or not to show progress bars.
 
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
@@ -223,14 +230,10 @@ class MetricsCalculator:
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ]
-        (
-            resolved_metrics,
-            aborted_metrics_info,
-        ) = MetricsCalculator.resolve_validation_graph(
+        (resolved_metrics, aborted_metrics_info,) = self.resolve_validation_graph(
             graph=graph,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
-            show_progress_bars=show_progress_bars,
         )
 
         if aborted_metrics_info:
@@ -238,15 +241,14 @@ class MetricsCalculator:
                 f"Exceptions\n{str(aborted_metrics_info)}\noccurred while resolving metrics."
             )
 
-        return resolved_metrics
+        return resolved_metrics, aborted_metrics_info
 
-    @staticmethod
     def resolve_validation_graph(
+        self,
         graph: ValidationGraph,
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
-        show_progress_bars: bool = True,
     ) -> Tuple[
         Dict[Tuple[str, str, str], MetricValue],
         Dict[
@@ -261,7 +263,6 @@ class MetricsCalculator:
             graph: "ValidationGraph" object, containing "metric_edge" structures with "MetricConfiguration" objects.
             runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
             min_graph_edges_pbar_enable: Minumum number of graph edges to warrant showing progress bars.
-            show_progress_bars: Directive for whether or not to show progress bars.
 
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
@@ -275,6 +276,6 @@ class MetricsCalculator:
         resolved_metrics, aborted_metrics_info = graph.resolve(
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
-            show_progress_bars=show_progress_bars,
+            show_progress_bars=self._show_progress_bars,
         )
         return resolved_metrics, aborted_metrics_info
