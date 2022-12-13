@@ -242,7 +242,7 @@ class DataContext(BaseDataContext):
             cloud_access_token,
             cloud_organization_id,
             cloud_mode,
-        ) = self._resolve_DataContext_cloud_args(
+        ) = DataContext._resolve_cloud_args(
             cloud_mode=cloud_mode,
             cloud_base_url=cloud_base_url,
             cloud_access_token=cloud_access_token,
@@ -281,7 +281,7 @@ class DataContext(BaseDataContext):
             self._save_project_config()
 
     @staticmethod
-    def _resolve_DataContext_cloud_args(
+    def _resolve_cloud_args(
         cloud_mode: Optional[bool] = False,
         cloud_base_url: Optional[str] = None,
         cloud_access_token: Optional[str] = None,

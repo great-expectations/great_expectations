@@ -58,9 +58,7 @@ ge_cloud_config = GXCloudConfig(
 def test_BaseDataContext_resolve_cloud_args(
     cloud_args: dict, expected_resolved_args: tuple
 ):
-    actual_resolved_args = BaseDataContext._resolve_BaseDataContext_cloud_args(
-        **cloud_args
-    )
+    actual_resolved_args = BaseDataContext._resolve_cloud_args(**cloud_args)
     assert actual_resolved_args == expected_resolved_args
 
 
@@ -108,7 +106,7 @@ def test_BaseDataContext_resolve_cloud_args(
 def test_DataContext_resolve_cloud_args(
     cloud_args: dict, expected_resolved_args: tuple
 ):
-    actual_resolved_args = DataContext._resolve_DataContext_cloud_args(**cloud_args)
+    actual_resolved_args = DataContext._resolve_cloud_args(**cloud_args)
     assert actual_resolved_args == expected_resolved_args
 
 
@@ -152,7 +150,5 @@ def test_DataContext_resolve_cloud_args(
 def test_CloudDataContext_resolve_cloud_args(
     cloud_args: dict, expected_resolved_args: tuple
 ):
-    actual_resolved_args = CloudDataContext._resolve_CloudDataContext_cloud_args(
-        **cloud_args
-    )
+    actual_resolved_args = CloudDataContext._resolve_cloud_args(**cloud_args)
     assert actual_resolved_args == expected_resolved_args
