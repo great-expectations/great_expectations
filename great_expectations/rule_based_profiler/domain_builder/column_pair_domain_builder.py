@@ -93,8 +93,6 @@ class ColumnPairDomainBuilder(ColumnDomainBuilder):
 """
             )
 
-        effective_column_names = sorted(effective_column_names)
-
         domain_kwargs: Dict[str, str] = dict(
             zip(
                 [

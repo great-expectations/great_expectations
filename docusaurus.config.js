@@ -75,7 +75,7 @@ module.exports = {
           position: 'right'
         },
         {
-          to: 'https://great-expectations.readthedocs.io/',
+          to: 'https://legacy.docs.greatexpectations.io/',
           // Only one of "to" or "href" should be used
           // href: 'https://www.facebook.com',
           label: 'V2 DOCS',
