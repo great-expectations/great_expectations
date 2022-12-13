@@ -241,6 +241,18 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         self.validation_operators: dict = {}
+        if (
+            "validation_operators" in self.get_config().commented_map  # type: ignore[union-attr]
+            and self.config.validation_operators
+        ):
+            for (
+                validation_operator_name,
+                validation_operator_config,
+            ) in self.config.validation_operators.items():
+                self.add_validation_operator(
+                    validation_operator_name,
+                    validation_operator_config,
+                )
 
     def _init_config_provider(self) -> _ConfigurationProvider:
         config_provider = _ConfigurationProvider()
