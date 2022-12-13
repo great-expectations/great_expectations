@@ -120,7 +120,7 @@ stages:
     - job: static_type_check
       steps:
       - script: |
-          pip install --requirement requirements.txt --requirement reqs/requirements-dev-contrib.txt
+          pip install --requirement reqs/requirements-dev-contrib.txt
           invoke type-check --install-types --warn-unused-ignores --pretty
         name: StaticTypeCheck
 
