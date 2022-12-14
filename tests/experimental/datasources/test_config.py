@@ -181,6 +181,9 @@ def test_yaml_file_config_round_trip(
     assert from_yaml_gx_config == re_loaded
 
 
+# TDD Tests for future work
+
+
 @pytest.mark.xfail(reason="Key Ordering needs to be implemented")
 def test_yaml_config_round_trip_ordering(
     inject_engine_lookup_double, from_yaml_gx_config: GxConfig
@@ -188,3 +191,16 @@ def test_yaml_config_round_trip_ordering(
     dumped: str = from_yaml_gx_config.yaml()
 
     assert PG_CONFIG_YAML_STR == dumped
+
+
+@pytest.mark.xfail(
+    reason="Custom BatchSorter serialization logic needs to be implemented"
+)
+def test_custom_sorter_serialization(
+    inject_engine_lookup_double, from_json_gx_config: GxConfig
+):
+    dumped: str = from_json_gx_config.json(indent=2)
+    print(f"  Dumped JSON ->\n\n{dumped}\n")
+
+    assert "year" in dumped
+    assert "-month" in dumped
