@@ -4,7 +4,7 @@ import logging
 import os
 import shutil
 import warnings
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
@@ -230,27 +230,28 @@ class DataContext(BaseDataContext):
         cloud_base_url: Optional[str] = None,
         cloud_access_token: Optional[str] = None,
         cloud_organization_id: Optional[str] = None,
-        # Deprecated as of 0.15.37
+        # <GX_RENAME> Deprecated as of 0.15.37
         ge_cloud_mode: bool = False,
         ge_cloud_base_url: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
         # Chetan - 20221208 - not formally deprecating these values until a future date
-        cloud_base_url = (
-            cloud_base_url if cloud_base_url is not None else ge_cloud_base_url
+        (
+            cloud_base_url,
+            cloud_access_token,
+            cloud_organization_id,
+            cloud_mode,
+        ) = DataContext._resolve_cloud_args(
+            cloud_mode=cloud_mode,
+            cloud_base_url=cloud_base_url,
+            cloud_access_token=cloud_access_token,
+            cloud_organization_id=cloud_organization_id,
+            ge_cloud_mode=ge_cloud_mode,
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_organization_id=ge_cloud_organization_id,
         )
-        cloud_access_token = (
-            cloud_access_token
-            if cloud_access_token is not None
-            else ge_cloud_access_token
-        )
-        cloud_organization_id = (
-            cloud_organization_id
-            if cloud_organization_id is not None
-            else ge_cloud_organization_id
-        )
-        cloud_mode = True if cloud_mode or ge_cloud_mode else False
 
         self._sources: _SourceFactories = _SourceFactories(self)
         self._cloud_mode = cloud_mode
@@ -278,6 +279,34 @@ class DataContext(BaseDataContext):
         # Save project config if data_context_id auto-generated
         if self._check_for_usage_stats_sync(project_config):
             self._save_project_config()
+
+    @staticmethod
+    def _resolve_cloud_args(  # type: ignore[override]
+        cloud_mode: bool = False,
+        cloud_base_url: Optional[str] = None,
+        cloud_access_token: Optional[str] = None,
+        cloud_organization_id: Optional[str] = None,
+        # <GX_RENAME> Deprecated as of 0.15.37
+        ge_cloud_mode: bool = False,
+        ge_cloud_base_url: Optional[str] = None,
+        ge_cloud_access_token: Optional[str] = None,
+        ge_cloud_organization_id: Optional[str] = None,
+    ) -> Tuple[Optional[str], Optional[str], Optional[str], bool]:
+        cloud_base_url = (
+            cloud_base_url if cloud_base_url is not None else ge_cloud_base_url
+        )
+        cloud_access_token = (
+            cloud_access_token
+            if cloud_access_token is not None
+            else ge_cloud_access_token
+        )
+        cloud_organization_id = (
+            cloud_organization_id
+            if cloud_organization_id is not None
+            else ge_cloud_organization_id
+        )
+        cloud_mode = True if cloud_mode or ge_cloud_mode else False
+        return cloud_base_url, cloud_access_token, cloud_organization_id, cloud_mode
 
     def _save_project_config(self) -> None:
         """
