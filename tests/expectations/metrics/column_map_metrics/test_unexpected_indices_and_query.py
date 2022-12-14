@@ -100,6 +100,7 @@ def _build_table_columns_and_unexpected(
     return table_columns_metric, unexpected_condition_metric, metrics
 
 
+@pytest.mark.unit
 def test_pd_unexpected_index_list_metric_without_id_pk(animal_table_df):
     df: pd.DataFrame = animal_table_df
     # pandas will return default unexpected_index_list without id_pk
@@ -135,6 +136,7 @@ def test_pd_unexpected_index_list_metric_without_id_pk(animal_table_df):
         assert val == [3, 4, 5]
 
 
+@pytest.mark.unit
 def test_pd_unexpected_index_list_metric_with_id_pk(
     metric_value_kwargs_complete, animal_table_df
 ):
@@ -164,6 +166,7 @@ def test_pd_unexpected_index_list_metric_with_id_pk(
         assert val == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
 
 
+@pytest.mark.unit
 def test_sa_unexpected_index_list_metric_with_id_pk(
     sa, animal_table_df, metric_value_kwargs_complete
 ):
@@ -193,6 +196,7 @@ def test_sa_unexpected_index_list_metric_with_id_pk(
         assert val == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
 
 
+@pytest.mark.unit
 def test_sa_unexpected_index_list_metric_without_id_pk(sa, animal_table_df):
     df: pd.DataFrame = animal_table_df
     metric_value_kwargs: dict = {
@@ -227,6 +231,7 @@ def test_sa_unexpected_index_list_metric_without_id_pk(sa, animal_table_df):
         )
 
 
+@pytest.mark.unit
 def test_sa_unexpected_index_query_metric_with_id_pk(
     sa, animal_table_df, metric_value_kwargs_complete
 ):
@@ -258,6 +263,7 @@ def test_sa_unexpected_index_query_metric_with_id_pk(
         )
 
 
+@pytest.mark.unit
 def test_sa_unexpected_index_query_metric_without_id_pk(sa, animal_table_df):
     df: pd.DataFrame = animal_table_df
     metric_value_kwargs: dict = {
