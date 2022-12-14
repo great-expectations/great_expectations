@@ -399,7 +399,11 @@ class PostgresDatasource(Datasource):
         Returns:
             The TableAsset that is added to the datasource.
         """
-        asset = TableAsset(name=name, table_name=table_name, order_by=order_by or [])
+        asset = TableAsset(
+            name=name,
+            table_name=table_name,
+            order_by=order_by or [],  # type: ignore[arg-type]  # empty list is allowed
+        )
         # TODO (kilo59): custom init for `DataAsset` to accept datasource in constructor?
         # Will most DataAssets require a `Datasource` attribute?
         asset._datasource = self
