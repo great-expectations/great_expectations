@@ -90,7 +90,7 @@ class Rule(SerializableDictDot):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         recompute_existing_parameter_values: bool = False,
-        reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
+        reconciliation_directives: Optional[ReconciliationDirectives] = None,
         rule_state: Optional[RuleState] = None,
     ) -> RuleState:
         """
@@ -108,6 +108,9 @@ class Rule(SerializableDictDot):
         Returns:
             RuleState representing effect of executing Rule
         """
+        if not reconciliation_directives:
+            reconciliation_directives = DEFAULT_RECONCILATION_DIRECTIVES
+
         variables = build_parameter_container_for_variables(
             variables_configs=reconcile_rule_variables(
                 variables=self.variables,
