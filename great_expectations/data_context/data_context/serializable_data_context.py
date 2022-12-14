@@ -33,6 +33,10 @@ yaml.default_flow_style = False
 
 
 class SerializableDataContext(AbstractDataContext):
+    """
+    TODO - write docstring!
+    """
+
     UNCOMMITTED_DIRECTORIES = ["data_docs", "validations"]
     GX_UNCOMMITTED_DIR = "uncommitted"
     BASE_DIRECTORIES = [
@@ -43,7 +47,7 @@ class SerializableDataContext(AbstractDataContext):
         GX_UNCOMMITTED_DIR,
     ]
     GX_DIR = "great_expectations"
-    GX_YML = "great_expectations.yml"  # TODO: migrate this to FileDataContext. Still needed by DataContext
+    GX_YML = "great_expectations.yml"
     GX_EDIT_NOTEBOOK_DIR = GX_UNCOMMITTED_DIR
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
 
