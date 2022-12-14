@@ -511,7 +511,9 @@ class ExecutionEngine(ABC):
         metric_fn_direct_configurations: List[MetricComputationConfiguration] = []
         metric_fn_bundle_configurations: List[MetricComputationConfiguration] = []
 
-        resolved_metric_dependencies_by_metric_name: Dict[str, MetricValue]
+        resolved_metric_dependencies_by_metric_name: Dict[
+            str, Union[MetricValue, tuple]
+        ]
         metric_class: MetricProvider
         metric_fn: Any
         metric_provider_kwargs: dict
@@ -592,8 +594,8 @@ class ExecutionEngine(ABC):
         self,
         metric_to_resolve: MetricConfiguration,
         metrics: Dict[Tuple[str, str, str], MetricValue],
-    ) -> Dict[str, MetricValue]:
-        metric_dependencies_by_metric_name: Dict[str, MetricValue] = {}
+    ) -> Dict[str, Union[MetricValue, tuple]]:
+        metric_dependencies_by_metric_name: Dict[str, Union[MetricValue, tuple]] = {}
 
         metric_name: str
         metric_configuration: MetricConfiguration
