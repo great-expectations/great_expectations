@@ -56,6 +56,7 @@ class ColumnValuesToBeValidIdahoZip(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidIdahoZip(ColumnMapExpectation):
     """Expect values in this column to be valid Idaho zipcodes.
+
     See https://pypi.org/project/zipcodes/ for more information.
     """
 

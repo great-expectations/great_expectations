@@ -54,8 +54,6 @@ class ExpectColumnValuesLatLonToBeLandOrOcean(ColumnMapExpectation):
         land_or_ocean (str): \
             Either 'land' or 'ocean'. \
             represents whether to check if each point is on land or in an ocean.
-
-
     """
 
     # These examples will be shown in the public gallery.

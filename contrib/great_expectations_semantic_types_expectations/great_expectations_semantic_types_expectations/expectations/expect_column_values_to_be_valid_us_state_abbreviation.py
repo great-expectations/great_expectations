@@ -54,8 +54,9 @@ class ColumnValuesToBeValidUSStateAbbreviation(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidUSStateAbbreviation(ColumnMapExpectation):
     """Expect values in this column to be valid state abbreviations.
-    See https://pypi.org/project/us/ for more information.
-    DC statehood is a perennial issue in data science, and the owners of the us repo addressed it differently than we have: https://github.com/unitedstates/python-us/issues/50
+
+    See https://pypi.org/project/us/ for more information. \
+    DC statehood is a perennial issue in data science, and the owners of the us repo addressed it differently than we have: https://github.com/unitedstates/python-us/issues/50. \
     dc_statehood defaults to True, though can be overriden by end users
     """
 

@@ -50,7 +50,7 @@ class ColumnValuesToBeValidSquareFreeNumber(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidSquareFreeNumber(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid square-free number."""
+    """Expect column values to be valid square-free numbers."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

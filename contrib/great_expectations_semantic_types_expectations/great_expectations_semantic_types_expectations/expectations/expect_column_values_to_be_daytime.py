@@ -70,7 +70,7 @@ class ColumnValuesToBeDaytime(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeDaytime(ColumnMapExpectation):
-    """Expect the provided timestamp is daytime at the given GPS coordinate (latitude, longitude)"""
+    """Expect the provided timestamp is daytime at the given GPS coordinate (latitude, longitude)."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

@@ -89,45 +89,40 @@ class ColumnValuesGeometryNearShape(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesGeometryToBeNearShape(ColumnMapExpectation):
-    """
-    Expect that column values as geometries are near (within a given distance) of a given reference shape in the units of the provided geometries.
+    """Expect that column values as geometries are near (within a given distance) of a given reference shape in the units of the provided geometries.
 
-    expect_column_values_geometry_to_be_near_shape is a :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
+    expect_column_values_geometry_to_be_near_shape is a \
+    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
     Args:
         column (str): \
-            The column name.
-            Column values must be provided in WKT or WKB format, which are commom formats for GIS Database formats.
+            The column name. \
+            Column values must be provided in WKT or WKB format, which are commom formats for GIS Database formats. \
             WKT can be accessed thhrough the ST_AsText() or ST_AsBinary() functions in queries for PostGIS and MSSQL.
 
     Keyword Args:
-        shape: str or list(str)
+        shape (str or list of str): \
             The reference geometry
-
-        shape_format: str
-            Geometry format for 'shape' string(s). Can be provided as 'Well Known Text' (WKT), 'Well Known Binary' (WKB), or as GeoJSON.
-            Must be one of: [wkt, wkb, geojson]
-            Default: wkt
-
-        column_shape_format: str
-            Geometry format for 'column'. Column values must be provided in WKT or WKB format, which are commom formats for GIS Database formats.
+        shape_format (str): \
+            Geometry format for 'shape' string(s). Can be provided as 'Well Known Text' (WKT), 'Well Known Binary' (WKB), or as GeoJSON. \
+            Must be one of: [wkt, wkb, geojson]. Default: wkt
+        column_shape_format (str): \
+            Geometry format for 'column'. Column values must be provided in WKT or WKB format, which are commom formats for GIS Database formats. \
             WKT can be accessed thhrough the ST_AsText() or ST_AsBinary() functions in queries for PostGIS and MSSQL.
-
-        distance_tol: float
-            Distance tolerance for the column value geometries to the reference shape. Note that 0 evaluates to expect_column_values_to_be_within_shape.
-            Distance values are always positive. Negative tolerances will always evaluate to False.
-            Default: 0
+        distance_tol (float): \
+            Distance tolerance for the column value geometries to the reference shape. Note that 0 evaluates to expect_column_values_to_be_within_shape. \
+            Distance values are always positive. Negative tolerances will always evaluate to False. Default: 0
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
     Notes:
-        The distance returned and specified is based on the coordinate system of the points, not Latitude and Longitude.
-        The user is responsible for the projection method and units (e.g. UTM in m).
-        The distance calculation is based on a cartesian coordinate system.
-        Convention is (X Y Z) for points, which would map to (Longitude Latitude Elevation) for geospatial cases.
-        Any convention can be followed as long as the test and reference shapes are consistent.
-        The reference shape allows for an array, but will union (merge) all the shapes into 1 and check the contains condition.
+        * The distance returned and specified is based on the coordinate system of the points, not Latitude and Longitude.
+        * The user is responsible for the projection method and units (e.g. UTM in m).
+        * The distance calculation is based on a cartesian coordinate system.
+        * Convention is (X Y Z) for points, which would map to (Longitude Latitude Elevation) for geospatial cases.
+        * Any convention can be followed as long as the test and reference shapes are consistent.
+        * The reference shape allows for an array, but will union (merge) all the shapes into 1 and check the contains condition.
     """
 
     # These examples will be shown in the public gallery.
