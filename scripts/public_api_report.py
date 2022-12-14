@@ -73,19 +73,16 @@ class DocExampleParser:
     def retrieve_all_usages_in_files(self) -> Set[str]:
         """
 
-        Args:
-            filepaths:
-
         Returns:
 
         """
         all_usages = set()
         for filepath in self.paths:
-            file_usages = self.retrieve_all_usages_in_file(filepath=filepath)
+            file_usages = self._retrieve_all_usages_in_file(filepath=filepath)
             all_usages |= file_usages
         return all_usages
 
-    def retrieve_all_usages_in_file(self, filepath: pathlib.Path) -> Set[str]:
+    def _retrieve_all_usages_in_file(self, filepath: pathlib.Path) -> Set[str]:
         """Retrieve all class, method + functions used in test examples."""
 
         tree = self._parse_file_to_ast_tree(filepath=filepath)
