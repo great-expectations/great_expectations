@@ -328,7 +328,6 @@ def test_deduplicate_evaluation_parameter_dependencies():
                     kwargs={
                         "min_value": 1,
                         "max_value": 5,
-                        "batch_id": "15fe04adb6ff20b9fc6eda486b7a36b7",
                     },
                     meta={"substituted_parameters": {"min_value": 1, "max_value": 5}},
                     ge_cloud_id=None,
@@ -369,14 +368,14 @@ def test_deduplicate_evaluation_parameter_dependencies():
                     expectation_type="expect_column_values_to_be_between",
                     kwargs={
                         "column": "my_date",
-                        "min_value": "2016-12-10T00:00:00",
-                        "max_value": "2022-12-06T00:00:00",
+                        "min_value": datetime(2016, 12, 10),
+                        "max_value": datetime(2022, 12, 6),
                         "batch_id": "15fe04adb6ff20b9fc6eda486b7a36b7",
                     },
                     meta={
                         "substituted_parameters": {
-                            "min_value": "2016-12-10T00:00:00",
-                            "max_value": "2022-12-06T00:00:00",
+                            "min_value": datetime(2016, 12, 10),
+                            "max_value": datetime(2022, 12, 6),
                         }
                     },
                     ge_cloud_id=None,
@@ -415,17 +414,19 @@ def test_evaluation_parameters_for_between_expectations_parse_correctly(
     expectation_suite_name = "test_suite"
     context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
 
+    batch_request = RuntimeBatchRequest(
+        datasource_name="my_datasource",
+        data_connector_name="my_runtime_data_connector",
+        data_asset_name="foo",
+        runtime_parameters={"batch_data": dataframe},
+        batch_identifiers={
+            "pipeline_stage_name": "kickoff",
+            "airflow_run_id": "1234",
+        },
+    )
+
     validator = context.get_validator(
-        batch_request=RuntimeBatchRequest(
-            datasource_name="my_datasource",
-            data_connector_name="my_runtime_data_connector",
-            data_asset_name="foo",
-            runtime_parameters={"batch_data": dataframe},
-            batch_identifiers={
-                "pipeline_stage_name": "kickoff",
-                "airflow_run_id": "1234",
-            },
-        ),
+        batch_request=batch_request,
         expectation_suite_name=expectation_suite_name,
     )
 
