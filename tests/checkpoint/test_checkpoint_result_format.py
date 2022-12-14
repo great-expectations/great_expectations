@@ -194,11 +194,19 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
     first_result_full_list = evrs[0]["results"][0]["result"]["unexpected_index_list"]
-    assert first_result_full_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    assert first_result_full_list == [
+        {"pk_1": 3, "animals": "giraffe"},
+        {"pk_1": 4, "animals": "lion"},
+        {"pk_1": 5, "animals": "zebra"},
+    ]
     first_result_partial_list = evrs[0]["results"][0]["result"][
         "partial_unexpected_index_list"
     ]
-    assert first_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    assert first_result_partial_list == [
+        {"pk_1": 3, "animals": "giraffe"},
+        {"pk_1": 4, "animals": "lion"},
+        {"pk_1": 5, "animals": "zebra"},
+    ]
 
 
 @pytest.mark.integration
@@ -230,11 +238,19 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
     first_result_full_list = evrs[0]["results"][0]["result"]["unexpected_index_list"]
-    assert first_result_full_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    assert first_result_full_list == [
+        {"animals": "giraffe", "pk_1": 3},
+        {"animals": "lion", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+    ]
     first_result_partial_list = evrs[0]["results"][0]["result"][
         "partial_unexpected_index_list"
     ]
-    assert first_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    assert first_result_partial_list == [
+        {"animals": "giraffe", "pk_1": 3},
+        {"animals": "lion", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+    ]
 
 
 @pytest.mark.integration
@@ -266,7 +282,7 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
     first_result_partial_list = evrs[0]["results"][0]["result"][
         "partial_unexpected_index_list"
     ]
-    assert first_result_partial_list == [{"pk_1": 3}]
+    assert first_result_partial_list == [{"animals": "giraffe", "pk_1": 3}]
 
 
 @pytest.mark.integration
@@ -338,18 +354,34 @@ def test_sql_result_format_in_checkpoint_pk_defined_two_expectation_complete_out
     # first and second expectations have same results. Although one is "expect_to_be"
     # and the other is "expect_to_not_be", they have opposite value_sets
     first_result_full_list = evrs[0]["results"][0]["result"]["unexpected_index_list"]
-    assert first_result_full_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    assert first_result_full_list == [
+        {"animals": "giraffe", "pk_1": 3},
+        {"animals": "lion", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+    ]
     first_result_partial_list = evrs[0]["results"][0]["result"][
         "partial_unexpected_index_list"
     ]
-    assert first_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    assert first_result_partial_list == [
+        {"animals": "giraffe", "pk_1": 3},
+        {"animals": "lion", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+    ]
 
     second_result_full_list = evrs[0]["results"][1]["result"]["unexpected_index_list"]
-    assert second_result_full_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    assert second_result_full_list == [
+        {"animals": "giraffe", "pk_1": 3},
+        {"animals": "lion", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+    ]
     second_result_partial_list = evrs[0]["results"][1]["result"][
         "partial_unexpected_index_list"
     ]
-    assert second_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    assert second_result_partial_list == [
+        {"animals": "giraffe", "pk_1": 3},
+        {"animals": "lion", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+    ]
 
 
 @pytest.mark.integration
@@ -388,7 +420,11 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_outp
     first_result_partial_list = evrs[0]["results"][0]["result"][
         "partial_unexpected_index_list"
     ]
-    assert first_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    assert first_result_partial_list == [
+        {"animals": "giraffe", "pk_1": 3},
+        {"animals": "lion", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+    ]
 
 
 @pytest.mark.integration
@@ -459,11 +495,19 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
     first_result_full_list = evrs[0]["results"][0]["result"]["unexpected_index_list"]
-    assert first_result_full_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    assert first_result_full_list == [
+        {"pk_1": 3, "animals": "giraffe"},
+        {"pk_1": 4, "animals": "lion"},
+        {"pk_1": 5, "animals": "zebra"},
+    ]
     first_result_partial_list = evrs[0]["results"][0]["result"][
         "partial_unexpected_index_list"
     ]
-    assert first_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    assert first_result_partial_list == [
+        {"pk_1": 3, "animals": "giraffe"},
+        {"pk_1": 4, "animals": "lion"},
+        {"pk_1": 5, "animals": "zebra"},
+    ]
 
 
 @pytest.mark.integration
@@ -490,11 +534,19 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
     first_result_full_list = evrs[0]["results"][0]["result"]["unexpected_index_list"]
-    assert first_result_full_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    assert first_result_full_list == [
+        {"animals": "giraffe", "pk_1": 3},
+        {"animals": "lion", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+    ]
     first_result_partial_list = evrs[0]["results"][0]["result"][
         "partial_unexpected_index_list"
     ]
-    assert first_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    assert first_result_partial_list == [
+        {"animals": "giraffe", "pk_1": 3},
+        {"animals": "lion", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+    ]
 
 
 @pytest.mark.integration
@@ -524,7 +576,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
     first_result_partial_list = evrs[0]["results"][0]["result"][
         "partial_unexpected_index_list"
     ]
-    assert first_result_partial_list == [{"pk_1": 3}]
+    assert first_result_partial_list == [{"animals": "giraffe", "pk_1": 3}]
 
 
 @pytest.mark.integration
@@ -593,18 +645,34 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
     # first and second expectations have same results. Although one is "expect_to_be"
     # and the other is "expect_to_not_be", they have opposite value_sets
     first_result_full_list = evrs[0]["results"][0]["result"]["unexpected_index_list"]
-    assert first_result_full_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    assert first_result_full_list == [
+        {"animals": "giraffe", "pk_1": 3},
+        {"animals": "lion", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+    ]
     first_result_partial_list = evrs[0]["results"][0]["result"][
         "partial_unexpected_index_list"
     ]
-    assert first_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    assert first_result_partial_list == [
+        {"animals": "giraffe", "pk_1": 3},
+        {"animals": "lion", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+    ]
 
     second_result_full_list = evrs[0]["results"][1]["result"]["unexpected_index_list"]
-    assert second_result_full_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    assert second_result_full_list == [
+        {"animals": "giraffe", "pk_1": 3},
+        {"animals": "lion", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+    ]
     second_result_partial_list = evrs[0]["results"][1]["result"][
         "partial_unexpected_index_list"
     ]
-    assert second_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    assert second_result_partial_list == [
+        {"animals": "giraffe", "pk_1": 3},
+        {"animals": "lion", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+    ]
 
 
 @pytest.mark.integration
@@ -640,7 +708,11 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
     first_result_partial_list = evrs[0]["results"][0]["result"][
         "partial_unexpected_index_list"
     ]
-    assert first_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    assert first_result_partial_list == [
+        {"animals": "giraffe", "pk_1": 3},
+        {"animals": "lion", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+    ]
 
 
 @pytest.mark.integration
