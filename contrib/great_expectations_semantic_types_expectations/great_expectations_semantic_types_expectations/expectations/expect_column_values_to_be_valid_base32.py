@@ -45,7 +45,7 @@ class ColumnValuesToBeValidBase32(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidBase32(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid base32 code."""
+    """Expect column values to be valid base32 codes."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

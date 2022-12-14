@@ -51,7 +51,7 @@ class ColumnValuesToBeValidIsmn(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidIsmn(ColumnMapExpectation):
-    """Expect column values to be valid ISMN (International Standard Music Number)"""
+    """Expect column values to be valid ISMN (International Standard Music Number)."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

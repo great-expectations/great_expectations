@@ -59,7 +59,7 @@ class ColumnValuesToBePrivateIpv4Class(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBePrivateIpv4Class(ColumnMapExpectation):
-    """Expect the provided private IP v4 address in the IP class (A, B, C) which passed in the parameters"""
+    """Expect column values to be private IPv4 addresses in the given IP class (A, B, C)."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
