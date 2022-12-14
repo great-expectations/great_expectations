@@ -101,7 +101,7 @@ class DocExampleParser:
         print(astunparse.dump(tree))
 
     def _parse_file_to_ast_tree(self, filepath: pathlib.Path) -> ast.AST:
-        with open(self.repo_root / filepath) as f:
+        with open(filepath) as f:
             file_contents: str = f.read()
 
         tree = ast.parse(file_contents)
@@ -212,6 +212,7 @@ class PublicAPIReport:
         Returns:
 
         """
+        # TODO: Strip leading /greatexpectations here
         sorted_definitions_list = sorted(
             list(self.definitions), key=operator.attrgetter("filepath")
         )
@@ -236,8 +237,7 @@ class IncludeExcludeDefinition:
     Args:
         reason: Reason for include or exclude.
         name: name of class, method or function.
-        filepath: Relative to repo_root/great_expectations. E.g.
-            core/expectation_suite.py NOT
+        filepath: Relative to repo_root. E.g.
             great_expectations/core/expectation_suite.py
             Required if providing `name`.
     """
@@ -251,14 +251,14 @@ class GXCodeParser:
 
     DEFAULT_INCLUDES: List[IncludeExcludeDefinition] = [
         IncludeExcludeDefinition(
-            reason="Referenced via legacy docs, will likely need to be included in the public API. Added here as an example include.", name="remove_expectation", filepath=pathlib.Path("core/expectation_suite.py"))
+            reason="Referenced via legacy docs, will likely need to be included in the public API. Added here as an example include.", name="remove_expectation", filepath=pathlib.Path("great_expectations/core/expectation_suite.py"))
     ]
     DEFAULT_EXCLUDES: List[IncludeExcludeDefinition] = [
         IncludeExcludeDefinition(
-            reason="Experimental is not part of the public API", filepath=pathlib.Path("experimental/datasources/interfaces.py")),
-        IncludeExcludeDefinition(reason="Experimental is not part of the public API", filepath=pathlib.Path("experimental/context.py")),
-        IncludeExcludeDefinition(reason="Marshmallow dump methods are not part of the public API", name="dump", filepath=pathlib.Path("data_context/types/base.py")),
-        IncludeExcludeDefinition(reason="Exclude code from __init__.py", filepath=pathlib.Path("types/__init__.py"))
+            reason="Experimental is not part of the public API", filepath=pathlib.Path("great_expectations/experimental/datasources/interfaces.py")),
+        IncludeExcludeDefinition(reason="Experimental is not part of the public API", filepath=pathlib.Path("great_expectations/experimental/context.py")),
+        IncludeExcludeDefinition(reason="Marshmallow dump methods are not part of the public API", name="dump", filepath=pathlib.Path("great_expectations/data_context/types/base.py")),
+        IncludeExcludeDefinition(reason="Exclude code from __init__.py", filepath=pathlib.Path("great_expectations/types/__init__.py"))
     ]
 
     def __init__(
@@ -275,7 +275,6 @@ class GXCodeParser:
             paths:
         """
         self.repo_root = repo_root
-        self.great_expectations_path = self.repo_root / "great_expectations"
         self.paths = paths
 
         if not excludes:
@@ -389,7 +388,9 @@ class GXCodeParser:
 
 
     def get_filtered_and_included_class_method_and_function_definitions_from_files(self) -> Set[Definition]:
-        return self._get_filtered_class_method_and_function_definitions_from_files().union(self._get_included_class_method_and_function_definitions_from_files())
+        filtered = self._get_filtered_class_method_and_function_definitions_from_files()
+        included = self._get_included_class_method_and_function_definitions_from_files()
+        return filtered.union(included)
 
 
     def _get_filtered_class_method_and_function_definitions_from_files(
@@ -412,9 +413,7 @@ class GXCodeParser:
         for usage in file_usages:
             candidate_definition = Definition(
                     name=usage.name,
-                    filepath=filepath.relative_to(
-                        self.great_expectations_path
-                    ),
+                    filepath=filepath,
                     ast_definition=usage,
                 )
             file_usages_definitions.append(candidate_definition)
@@ -427,9 +426,7 @@ class GXCodeParser:
         for usage in file_usages:
             candidate_definition = Definition(
                     name=usage.name,
-                    filepath=filepath.relative_to(
-                        self.great_expectations_path
-                    ),
+                    filepath=filepath,
                     ast_definition=usage,
                 )
             if not self._is_definition_excluded(definition=candidate_definition):
@@ -457,7 +454,7 @@ class GXCodeParser:
         return set(all_defs)
 
     def _parse_file_to_ast_tree(self, filepath: pathlib.Path) -> ast.AST:
-        with open(self.repo_root / filepath) as f:
+        with open(filepath) as f:
             file_contents: str = f.read()
 
         tree = ast.parse(file_contents)
@@ -624,14 +621,14 @@ def _default_doc_example_paths() -> Set[pathlib.Path]:
     """Get all paths of doc examples (docs examples)."""
     base_directory = _repo_root() / "tests" / "integration" / "docusaurus"
     paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
-    return set([pathlib.Path(p) for p in paths])
+    return set([pathlib.Path(p).relative_to(_repo_root()) for p in paths])
 
 
 def _default_gx_code_paths() -> Set[pathlib.Path]:
     """All gx modules related to the main library."""
     base_directory = _repo_root() / "great_expectations"
     paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
-    return set([pathlib.Path(p) for p in paths])
+    return set([pathlib.Path(p).relative_to(_repo_root()) for p in paths])
 
 
 def main():

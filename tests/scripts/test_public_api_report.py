@@ -1,8 +1,14 @@
 import pathlib
+from typing import Set
 
 import pytest
 
-from scripts.public_api_report import DocExampleParser
+from scripts.public_api_report import (
+    DocExampleParser,
+    GXCodeParser,
+    IncludeExcludeDefinition,
+    Definition, _repo_root,
+)
 
 
 @pytest.fixture
@@ -57,21 +63,21 @@ def example_module_level_function():
 
 @pytest.fixture
 def repo_root() -> pathlib.Path:
-    return pathlib.Path("/great_expectations/")
+    return pathlib.Path("/repo_root/")
 
 
 @pytest.fixture
 def sample_docs_example_python_file_string_filepath(
     repo_root: pathlib.Path,
 ) -> pathlib.Path:
-    return repo_root / pathlib.Path("sample_docs_example_python_file_string.py")
+    return (repo_root / pathlib.Path("tests/integration/docusaurus/sample_docs_example_python_file_string.py")).relative_to(repo_root)
 
 
 @pytest.fixture
 def sample_with_definitions_python_file_string_filepath(
     repo_root: pathlib.Path,
 ) -> pathlib.Path:
-    return repo_root / pathlib.Path("sample_with_definitions_python_file_string.py")
+    return (repo_root / pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py")).relative_to(repo_root)
 
 
 @pytest.fixture
@@ -101,10 +107,10 @@ def test_fixtures_are_accessible(
 ):
 
     assert sample_docs_example_python_file_string_filepath == pathlib.Path(
-        "/great_expectations/sample_docs_example_python_file_string.py"
+        "tests/integration/docusaurus/sample_docs_example_python_file_string.py"
     )
     assert sample_with_definitions_python_file_string_filepath == pathlib.Path(
-        "/great_expectations/sample_with_definitions_python_file_string.py"
+        "great_expectations/sample_with_definitions_python_file_string.py"
     )
 
     with open(sample_docs_example_python_file_string_filepath) as f:
@@ -119,8 +125,11 @@ def test_fixtures_are_accessible(
 
 
 class TestDocExampleParser:
-
-    def test_instantiate(self, repo_root: pathlib.Path, sample_docs_example_python_file_string_filepath: pathlib.Path):
+    def test_instantiate(
+        self,
+        repo_root: pathlib.Path,
+        sample_docs_example_python_file_string_filepath: pathlib.Path,
+    ):
         doc_example_parser = DocExampleParser(
             repo_root=repo_root, paths={sample_docs_example_python_file_string_filepath}
         )
@@ -146,10 +155,140 @@ class TestDocExampleParser:
         }
 
 
+class TestGXCodeParser:
+    def test_instantiate_with_default_include_exclude(
+        self,
+        repo_root: pathlib.Path,
+        sample_with_definitions_python_file_string_filepath: pathlib.Path,
+    ):
+        gx_code_parser = GXCodeParser(
+            repo_root=repo_root,
+            paths={sample_with_definitions_python_file_string_filepath},
+        )
+        assert isinstance(gx_code_parser, GXCodeParser)
+        assert gx_code_parser.excludes
+        assert gx_code_parser.includes
+
+    def test_instantiate_with_non_default_include_exclude(
+        self,
+        repo_root: pathlib.Path,
+        sample_with_definitions_python_file_string_filepath: pathlib.Path,
+    ):
+        gx_code_parser = GXCodeParser(
+            repo_root=repo_root,
+            paths={sample_with_definitions_python_file_string_filepath},
+            includes=[
+                IncludeExcludeDefinition(
+                    reason="test", name="test_name", filepath=pathlib.Path("test_path")
+                )
+            ],
+            excludes=[
+                IncludeExcludeDefinition(
+                    reason="test", name="test_name", filepath=pathlib.Path("test_path")
+                )
+            ],
+        )
+        assert isinstance(gx_code_parser, GXCodeParser)
+        assert gx_code_parser.excludes
+        assert gx_code_parser.includes
+        assert len(gx_code_parser.excludes) == 1
+        assert len(gx_code_parser.includes) == 1
+
+    def test_get_filtered_and_included_class_method_and_function_definitions_from_files_no_include_exclude(
+        self,
+        filesystem_with_samples,
+        repo_root: pathlib.Path,
+        sample_with_definitions_python_file_string_filepath: pathlib.Path,
+    ):
+        gx_code_parser = GXCodeParser(
+            repo_root=repo_root,
+            paths={
+                sample_with_definitions_python_file_string_filepath,
+            },
+            includes=[],
+            excludes=[],
+        )
+        observed = (
+            gx_code_parser.get_filtered_and_included_class_method_and_function_definitions_from_files()
+        )
+        assert len(observed) == 7
+        assert set([d.name for d in observed]) == {
+            "ExampleClass",
+            "__init__",
+            "example_classmethod",
+            "example_method",
+            "example_method_with_args",
+            "example_module_level_function",
+            "example_staticmethod",
+        }
+        assert set([d.filepath for d in observed]) == {
+            pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py")
+        }
+
+    def test_get_filtered_and_included_class_method_and_function_definitions_from_files_exclude_by_file(
+        self,
+        filesystem_with_samples,
+        repo_root: pathlib.Path,
+        sample_with_definitions_python_file_string_filepath: pathlib.Path,
+    ):
+        gx_code_parser = GXCodeParser(
+            repo_root=repo_root,
+            paths={
+                sample_with_definitions_python_file_string_filepath,
+            },
+            includes=[],
+            excludes=[
+                IncludeExcludeDefinition(
+                    reason="test",
+                    filepath=pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py"),
+                )
+            ],
+        )
+        observed = (
+            gx_code_parser.get_filtered_and_included_class_method_and_function_definitions_from_files()
+        )
+        assert len(observed) == 0
+        assert set([d.name for d in observed]) == set()
+        assert set([d.filepath for d in observed]) == set()
 
 
-
-#
-# def test_parse_method_names(sample_docs_example_python_file_string):
-#     """Ensure method names are retrieved from test file."""
-#     print(sample_docs_example_python_file_string)
+    def test_get_filtered_and_included_class_method_and_function_definitions_from_files_exclude_by_file_and_name(
+        self,
+        filesystem_with_samples,
+        repo_root: pathlib.Path,
+        sample_docs_example_python_file_string_filepath: pathlib.Path,
+        sample_with_definitions_python_file_string_filepath: pathlib.Path,
+    ):
+        gx_code_parser = GXCodeParser(
+            repo_root=repo_root,
+            paths={
+                sample_with_definitions_python_file_string_filepath,
+            },
+            includes=[],
+            excludes=[
+                IncludeExcludeDefinition(
+                    reason="test",
+                    name="example_method",
+                    filepath=pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py"),
+                ),
+                IncludeExcludeDefinition(
+                    reason="test",
+                    name="example_module_level_function",
+                    filepath=pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py"),
+                )
+            ],
+        )
+        observed = (
+            gx_code_parser.get_filtered_and_included_class_method_and_function_definitions_from_files()
+        )
+        assert len(observed) == 5
+        assert set([d.name for d in observed]) == {
+            "ExampleClass",
+            "__init__",
+            "example_classmethod",
+            "example_method_with_args",
+            "example_staticmethod",
+        }
+        assert set([d.filepath for d in observed]) == {
+            pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py")
+        }
