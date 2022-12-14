@@ -1170,7 +1170,7 @@ class Validator:
                 # TODO: <Alex>ALEX</Alex>
                 # expectation_validation_graph = ExpectationValidationGraph(
                 #     configuration=evaluated_config,
-                #     graph=self.metrics_calculator.build_metric_dependency_graph(
+                #     graph=self._metrics_calculator.build_metric_dependency_graph(
                 #         metric_configurations=validation_dependencies.get_metric_configurations(),
                 #         runtime_configuration=runtime_configuration,
                 #     ),
@@ -1240,7 +1240,7 @@ class Validator:
         (
             resolved_metrics,
             aborted_metrics_info,
-        ) = self.metrics_calculator.resolve_validation_graph(
+        ) = self._metrics_calculator.resolve_validation_graph(
             graph=graph,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=0,
@@ -1443,7 +1443,7 @@ class Validator:
 
     @property
     def ge_cloud_mode(self) -> bool:
-        # Deprecated 0.15.37
+        # <GE_RENAME> Deprecated 0.15.37
         return self.cloud_mode
 
     @property

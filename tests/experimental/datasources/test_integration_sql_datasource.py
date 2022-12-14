@@ -3,10 +3,15 @@ import pytest
 from great_expectations import DataContext
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.render import (
+    AtomicDiagnosticRendererType,
+    AtomicPrescriptiveRendererType,
+)
 
 
 @pytest.mark.integration
-def test_run_checkpoint_and_data_doc(empty_data_context):
+@pytest.mark.parametrize("include_rendered_content", [False, True])
+def test_run_checkpoint_and_data_doc(empty_data_context, include_rendered_content):
     """An integration test for running checkpoints on sqlalchemy datasources.
 
     This test does the following:
@@ -20,6 +25,9 @@ def test_run_checkpoint_and_data_doc(empty_data_context):
         "../../test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db",
     )
     context: DataContext = empty_data_context
+
+    if include_rendered_content:
+        context.variables.include_rendered_content.globally = True
 
     # Add sqlalchemy datasource.
     # The current method is called `add_postgres` it really should be `add_sql`.
@@ -88,9 +96,18 @@ def test_run_checkpoint_and_data_doc(empty_data_context):
     assert validation_result.success
 
     expected_metric_values = {
-        "expect_table_row_count_to_be_between": 10000,
-        "expect_column_max_to_be_between": 6,
-        "expect_column_median_to_be_between": 1,
+        "expect_table_row_count_to_be_between": {
+            "value": 10000,
+            "rendered_template": "Must have greater than or equal to $min_value and less than or equal to $max_value rows.",
+        },
+        "expect_column_max_to_be_between": {
+            "value": 6,
+            "rendered_template": "$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.",
+        },
+        "expect_column_median_to_be_between": {
+            "value": 1,
+            "rendered_template": "$column median must be greater than or equal to $min_value and less than or equal to $max_value.",
+        },
     }
     assert len(validation_result.results) == 3
 
@@ -98,8 +115,40 @@ def test_run_checkpoint_and_data_doc(empty_data_context):
         assert r.success
         assert (
             r.result["observed_value"]
-            == expected_metric_values[r.expectation_config.expectation_type]
+            == expected_metric_values[r.expectation_config.expectation_type]["value"]
         )
+
+        if include_rendered_content:
+            # There is a prescriptive atomic renderer on r.expectation_config
+            num_prescriptive_renderer = len(r.expectation_config.rendered_content)
+            assert (
+                num_prescriptive_renderer == 1
+            ), f"Expected exactly 1 rendered content, found {num_prescriptive_renderer}"
+            rendered_content = r.expectation_config.rendered_content[0]
+            assert rendered_content.name == AtomicPrescriptiveRendererType.SUMMARY
+            assert (
+                rendered_content.value.template
+                == expected_metric_values[r.expectation_config.expectation_type][
+                    "rendered_template"
+                ]
+            )
+
+            # There is a diagnostic atomic renderer on r, a validation result result.
+            num_diagnostic_render = len(r.rendered_content)
+            assert (
+                num_diagnostic_render == 1
+            ), f"Expected 1 diagnostic renderer, found {num_diagnostic_render}"
+            diagnostic_renderer = r.rendered_content[0]
+            assert (
+                diagnostic_renderer.name == AtomicDiagnosticRendererType.OBSERVED_VALUE
+            )
+            assert (
+                diagnostic_renderer.value.schema["type"]
+                == "com.superconductive.rendered.string"
+            )
+        else:
+            assert r.rendered_content is None
+            assert r.expectation_config.rendered_content is None
 
     # Rudimentary test for data doc generation
     docs_dict = context.build_data_docs()
