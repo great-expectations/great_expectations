@@ -244,7 +244,7 @@ class RuntimeDataConnector(DataConnector):
             batch_identifiers = batch_request.batch_identifiers
 
         if not batch_identifiers:
-            ge_exceptions.DataConnectorError(
+            raise ge_exceptions.DataConnectorError(
                 "Passed in a RuntimeBatchRequest with no batch_identifiers"
             )
 
@@ -253,14 +253,14 @@ class RuntimeDataConnector(DataConnector):
             datasource_name=self.datasource_name,
             data_connector_name=self.name,
             data_asset_name=batch_request.data_asset_name,
-            batch_identifiers=IDDict(batch_identifiers),  # type: ignore[arg-type]
+            batch_identifiers=IDDict(batch_identifiers),
             batch_spec_passthrough=batch_request.batch_spec_passthrough,
         )
         batch_definition_list = [batch_definition]
         self._update_data_references_cache(
             batch_request.data_asset_name,
             batch_definition_list,
-            IDDict(batch_identifiers),  # type: ignore[arg-type]
+            IDDict(batch_identifiers),
         )
         return batch_definition_list
 

@@ -3062,7 +3062,7 @@ class MapMetricProvider(MetricProvider):
                         if domain_type == MetricDomainTypes.COLUMN:
                             register_metric(
                                 metric_name=metric_name
-                                + ".unexpected_count.aggregate_fn",
+                                + f".unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
                                 metric_domain_keys=metric_domain_keys,
                                 metric_value_keys=metric_value_keys,
                                 execution_engine=engine,
@@ -3181,7 +3181,7 @@ class MapMetricProvider(MetricProvider):
                         if domain_type == MetricDomainTypes.COLUMN:
                             register_metric(
                                 metric_name=metric_name
-                                + ".unexpected_count.aggregate_fn",
+                                + f".unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
                                 metric_domain_keys=metric_domain_keys,
                                 metric_value_keys=metric_value_keys,
                                 execution_engine=engine,
@@ -3318,13 +3318,16 @@ class MapMetricProvider(MetricProvider):
         metric_suffix = ".unexpected_count"
         if metric_name.endswith(metric_suffix):
             try:
-                _ = get_metric_provider(f"{metric_name}.aggregate_fn", execution_engine)
+                _ = get_metric_provider(
+                    f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+                    execution_engine,
+                )
                 has_aggregate_fn = True
             except ge_exceptions.MetricProviderError:
                 has_aggregate_fn = False
             if has_aggregate_fn:
                 dependencies["metric_partial_fn"] = MetricConfiguration(
-                    metric_name=f"{metric_name}.aggregate_fn",
+                    metric_name=f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
                     metric_domain_kwargs=metric.metric_domain_kwargs,
                     metric_value_kwargs=base_metric_value_kwargs,
                 )
@@ -3337,7 +3340,7 @@ class MapMetricProvider(MetricProvider):
 
         # MapMetric uses "condition" metric to build "unexpected_count.aggregate_fn" and other listed metrics as well.
         for metric_suffix in [
-            ".unexpected_count.aggregate_fn",
+            f".unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
             ".unexpected_value_counts",
             ".unexpected_index_query",
             ".unexpected_index_list",

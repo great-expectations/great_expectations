@@ -19,6 +19,9 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.execution_engine.execution_engine import (
+    MetricPartialFunctionTypes,
+)
 from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
 from great_expectations.expectations.metrics import (
     ColumnMax,
@@ -262,7 +265,10 @@ def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
     dependencies = mp.get_evaluation_dependencies(
         metric, execution_engine=SqlAlchemyExecutionEngine(engine=empty_sqlite_db)
     )
-    assert dependencies["metric_partial_fn"].id[0] == "column.max.aggregate_fn"
+    assert (
+        dependencies["metric_partial_fn"].id[0]
+        == f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}"
+    )
 
     mp = ColumnMax()
     metric = MetricConfiguration(
@@ -311,11 +317,11 @@ def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_
     )
     assert (
         dependencies["metric_partial_fn"].id[0]
-        == "column_values.nonnull.unexpected_count.aggregate_fn"
+        == f"column_values.nonnull.unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}"
     )
 
     metric = MetricConfiguration(
-        metric_name="column_values.nonnull.unexpected_count.aggregate_fn",
+        metric_name=f"column_values.nonnull.unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )

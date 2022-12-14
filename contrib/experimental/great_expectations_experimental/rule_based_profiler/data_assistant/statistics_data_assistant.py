@@ -127,6 +127,7 @@ class StatisticsDataAssistant(DataAssistant):
         ]
         table_row_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -339,6 +340,7 @@ class StatisticsDataAssistant(DataAssistant):
         ]
         column_min_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -350,6 +352,7 @@ class StatisticsDataAssistant(DataAssistant):
         ]
         column_max_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -361,6 +364,7 @@ class StatisticsDataAssistant(DataAssistant):
         ]
         column_quantile_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs={
                 "quantiles": f"{VARIABLES_KEY}quantiles",
                 "allow_relative_error": f"{VARIABLES_KEY}allow_relative_error",
@@ -375,6 +379,7 @@ class StatisticsDataAssistant(DataAssistant):
         ]
         column_median_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -386,6 +391,7 @@ class StatisticsDataAssistant(DataAssistant):
         ]
         column_mean_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -397,6 +403,7 @@ class StatisticsDataAssistant(DataAssistant):
         ]
         column_standard_deviation_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -489,6 +496,7 @@ class StatisticsDataAssistant(DataAssistant):
         ]
         column_min_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -500,6 +508,7 @@ class StatisticsDataAssistant(DataAssistant):
         ]
         column_max_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -580,6 +589,7 @@ class StatisticsDataAssistant(DataAssistant):
         ]
         column_min_length_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -591,6 +601,7 @@ class StatisticsDataAssistant(DataAssistant):
         ]
         column_max_length_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -665,6 +676,7 @@ class StatisticsDataAssistant(DataAssistant):
 
         column_unique_proportion_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name="column.unique_proportion",
+            suffix=None,
             metric_value_kwargs=None,
         )
 

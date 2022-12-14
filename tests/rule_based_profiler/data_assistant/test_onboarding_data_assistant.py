@@ -276,10 +276,10 @@ def test_onboarding_data_assistant_metrics_count(
         domain,
         parameter_values_for_fully_qualified_parameter_names,
     ) in bobby_onboarding_data_assistant_result.metrics_by_domain.items():
-        if domain.is_superset(domain_key):
+        if domain.is_superset(other=domain_key):
             num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
 
-    assert num_metrics == 2
+    assert num_metrics == 4
 
     num_metrics = 0
     for (
@@ -288,7 +288,7 @@ def test_onboarding_data_assistant_metrics_count(
     ) in bobby_onboarding_data_assistant_result.metrics_by_domain.items():
         num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
 
-    assert num_metrics == 150
+    assert num_metrics == 300
 
 
 @pytest.mark.integration
@@ -879,7 +879,7 @@ def test_onboarding_data_assistant_plot_metrics_stdout(
         bobby_onboarding_data_assistant_result
     )
 
-    metrics_calculated = 150
+    metrics_calculated = 300
     metrics_plots_implemented = 102
 
     f = io.StringIO()
