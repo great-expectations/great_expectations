@@ -154,7 +154,7 @@ module.exports = {
             },
             {
               label: 'CAREERS',
-              to: 'https://greatexpectations.io/case-studies'
+              to: 'https://jobs.greatexpectations.io/'
             }
           ]
         },
