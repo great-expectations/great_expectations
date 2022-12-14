@@ -347,9 +347,6 @@ class ExecutionEngine(ABC):
         Returns:
             resolved_metrics (Dict): a dictionary with the values for the metrics that have just been resolved.
         """
-        if metrics is None:
-            metrics = {}
-
         metric_fn_direct_configurations: List[MetricComputationConfiguration]
         metric_fn_bundle_configurations: List[MetricComputationConfiguration]
         (
@@ -464,7 +461,7 @@ class ExecutionEngine(ABC):
     def _build_direct_and_bundled_metric_computation_configurationsd(
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Dict[Tuple[str, str, str], MetricValue],
+        metrics: Optional[Dict[Tuple[str, str, str], MetricValue]] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> Tuple[
         List[MetricComputationConfiguration], List[MetricComputationConfiguration]
@@ -482,6 +479,9 @@ class ExecutionEngine(ABC):
         Returns:
             Tuple with two elements: directly-computable and bundled "MetricComputationConfiguration" objects
         """
+        if metrics is None:
+            metrics = {}
+
         metric_fn_direct_configurations: List[MetricComputationConfiguration] = []
         metric_fn_bundle_configurations: List[MetricComputationConfiguration] = []
 
