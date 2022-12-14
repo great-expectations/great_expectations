@@ -1848,11 +1848,12 @@ WHERE
     ###
 
     @DocInherit
-    @MetaSqlAlchemyDataset.expectation(["column_list", "ignore_row_if"])
+    @MetaSqlAlchemyDataset.expectation(["column_list", "ignore_row_if", "mostly"])
     def expect_compound_columns_to_be_unique(
         self,
         column_list,
         ignore_row_if="all_values_are_missing",
+        mostly=None,
         result_format=None,
         row_condition=None,
         condition_parser=None,
@@ -1897,6 +1898,14 @@ WHERE
         else:
             # If no rows, then zero percent are unexpected.
             unexpected_percent = 0
+
+        # if mostly is passed in the kwargs it should first be checked if the unexpected_ratio is below mostly value
+        # If it is above, the expectation will return false
+        if mostly:
+            return {
+                "success": unexpected_count / total_count < 1 - mostly,
+                "result": {"unexpected_percent": unexpected_percent},
+            }
 
         return {
             "success": unexpected_count == 0,
