@@ -51,7 +51,7 @@ class ColumnValuesToBeValidImsi(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidImsi(ColumnMapExpectation):
-    """Expect column values to be valid IMSI (International Mobile Subscriber Identity)"""
+    """Expect column values to be valid IMSI (International Mobile Subscriber Identity)."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

@@ -50,7 +50,7 @@ class ColumnValuesToBeSlug(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeSlug(ColumnMapExpectation):
-    """Expect value to be valid slug"""
+    """Expect value to be valid slug."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
