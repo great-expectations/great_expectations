@@ -1110,22 +1110,13 @@ class Validator:
             )
 
             try:
-                expectation_validation_graph: ExpectationValidationGraph = (
-                    ExpectationValidationGraph(
-                        execution_engine=self._execution_engine,
-                        configuration=evaluated_config,
-                    )
-                )
-                for (
-                    metric_configuration
-                ) in validation_dependencies.get_metric_configurations():
-                    graph = ValidationGraph(execution_engine=self._execution_engine)
-                    graph.build_metric_dependency_graph(
-                        metric_configuration=metric_configuration,
+                expectation_validation_graph: ExpectationValidationGraph = ExpectationValidationGraph(
+                    configuration=evaluated_config,
+                    graph=self._metrics_calculator.build_metric_dependency_graph(
+                        metric_configurations=validation_dependencies.get_metric_configurations(),
                         runtime_configuration=runtime_configuration,
-                    )
-                    expectation_validation_graph.update(graph=graph)
-
+                    ),
+                )
                 expectation_validation_graphs.append(expectation_validation_graph)
                 processed_configurations.append(evaluated_config)
             except Exception as err:
@@ -1166,8 +1157,8 @@ class Validator:
         )
         return validation_graph
 
-    @staticmethod
     def _resolve_suite_level_graph_and_process_metric_evaluation_errors(
+        self,
         graph: ValidationGraph,
         runtime_configuration: dict,
         expectation_validation_graphs: List[ExpectationValidationGraph],
@@ -1185,10 +1176,13 @@ class Validator:
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ]
-        resolved_metrics, aborted_metrics_info = graph.resolve(
+        (
+            resolved_metrics,
+            aborted_metrics_info,
+        ) = self._metrics_calculator.resolve_validation_graph(
+            graph=graph,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=0,
-            show_progress_bars=show_progress_bars,
         )
 
         # Trace MetricResolutionError occurrences to expectations relying on corresponding malfunctioning metrics.
@@ -1356,7 +1350,7 @@ class Validator:
 
     @property
     def ge_cloud_mode(self) -> bool:
-        # Deprecated 0.15.37
+        # <GE_RENAME> Deprecated 0.15.37
         return self.cloud_mode
 
     @property

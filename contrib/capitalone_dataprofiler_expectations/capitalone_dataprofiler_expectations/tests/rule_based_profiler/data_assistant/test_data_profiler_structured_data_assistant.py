@@ -181,7 +181,7 @@ def test_profile_data_profiler_structured_data_assistant_metrics_count(
     ) in (
         bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain.items()
     ):
-        if domain.is_superset(domain_key):
+        if domain.is_superset(other=domain_key):
             num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
 
     assert num_metrics == 0
