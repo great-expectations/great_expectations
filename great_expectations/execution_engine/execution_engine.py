@@ -511,6 +511,7 @@ class ExecutionEngine(ABC):
         metric_fn_direct_configurations: List[MetricComputationConfiguration] = []
         metric_fn_bundle_configurations: List[MetricComputationConfiguration] = []
 
+        resolved_metric_dependencies_by_metric_name: Dict[str, MetricValue]
         metric_class: MetricProvider
         metric_fn: Any
         metric_provider_kwargs: dict
@@ -575,7 +576,7 @@ class ExecutionEngine(ABC):
                     MetricFunctionTypes.VALUE,
                 ]:
                     logger.warning(
-                        f'Unrecognized metric function type while trying to resolve "{str(self.metric_configuration.id)}".'
+                        f'Unrecognized metric function type while trying to resolve "{metric_to_resolve.id}".'
                     )
                 metric_fn_direct_configurations.append(
                     MetricComputationConfiguration(

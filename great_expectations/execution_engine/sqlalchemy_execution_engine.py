@@ -959,7 +959,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
             metric_fn: Any = bundled_metric_configuration.metric_fn
             compute_domain_kwargs: dict = (
-                bundled_metric_configuration.compute_domain_kwargs
+                bundled_metric_configuration.compute_domain_kwargs or {}
             )
             if not isinstance(compute_domain_kwargs, IDDict):
                 compute_domain_kwargs = IDDict(compute_domain_kwargs)
