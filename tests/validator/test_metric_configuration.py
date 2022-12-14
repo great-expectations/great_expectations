@@ -55,14 +55,11 @@ def test_metric_configuration_get_domain(
 ) -> None:
     assert table_head_metric_config.get_domain() == Domain(
         domain_type=MetricDomainTypes.TABLE,
-        domain_kwargs={
-            "batch_id": "abc123",
-        },
+        domain_kwargs={},
     )
     assert column_histogram_metric_config.get_domain() == Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs={
             "column": "my_column",
-            "batch_id": "def456",
         },
     )

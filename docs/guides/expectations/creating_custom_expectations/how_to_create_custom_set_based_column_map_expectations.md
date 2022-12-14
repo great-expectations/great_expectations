@@ -101,7 +101,7 @@ You can also go ahead and write a new one-line docstring, replacing
 ```
 
 with something like:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L8
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L9
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
