@@ -106,6 +106,10 @@ from great_expectations.datasource.datasource_serializer import (
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.experimental.datasources.interfaces import (
+    Datasource as XDatasource,
+)
+from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfig,
@@ -238,6 +242,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._evaluation_parameter_dependencies: dict = {}
 
         self._assistants = DataAssistantDispatcher(data_context=self)
+
+        self._sources: _SourceFactories = _SourceFactories(self)
 
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         self.validation_operators: dict = {}
@@ -563,6 +569,19 @@ class AbstractDataContext(ConfigPeer, ABC):
     @property
     def assistants(self) -> DataAssistantDispatcher:
         return self._assistants
+
+    @property
+    def sources(self) -> _SourceFactories:
+        return self._sources
+
+    def _attach_datasource_to_context(self, datasource: XDatasource):
+        # We currently don't allow one to overwrite a datasource with this internal method
+        if datasource.name in self.datasources:
+            raise ge_exceptions.DataContextError(
+                f"Can not write the experimental datasource {datasource.name} because a datasource of that "
+                "name already exists in the data context."
+            )
+        self.datasources[datasource.name] = datasource
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
