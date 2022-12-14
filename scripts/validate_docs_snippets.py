@@ -35,7 +35,9 @@ def run_grep(target_dir: str) -> List[str]:
         res = subprocess.run(
             [
                 "grep",
-                "-Er",
+                "-C",  # Add surrounding context
+                "3",
+                "-Er",  # Enable regex and directory search
                 r"<\/?snippet>",
                 target_dir,
             ],
