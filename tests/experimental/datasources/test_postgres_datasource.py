@@ -503,7 +503,8 @@ def test_sort_batch_list_by_unknown_key(create_source):
         [{"metadata_key": "year"}, {"metadata_key": "month", "reverse": True}],
     ],
 )
-def test_table_asset_sorter_deserialization(order_by: list):
+def test_table_asset_sorter_parsing(order_by: list):
+    """Ensure that arguments to `order_by` are parsed correctly regardless if they are lists of dicts or a list of strings"""
     expected_sorters = [
         BatchSorter(metadata_key="year"),
         BatchSorter(metadata_key="month", reverse=True),
@@ -513,7 +514,7 @@ def test_table_asset_sorter_deserialization(order_by: list):
         name="SorterTest", table_name="SORTER_TEST", order_by=order_by
     )
     print(table_asset)
-    print(f"\n{table_asset.json(indent=2)}")
+    pprint(f"\n{table_asset.dict()}")
 
     assert table_asset.order_by == expected_sorters
 
