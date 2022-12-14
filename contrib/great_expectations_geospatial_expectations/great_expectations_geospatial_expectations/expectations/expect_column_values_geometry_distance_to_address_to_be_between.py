@@ -160,41 +160,39 @@ class ColumnValuesGeometryDistanceToAddress(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesGeometryDistanceToAddressToBeBetween(ColumnMapExpectation):
-    """
-    Expect that column values as geometry points to be between a certain distance from a geocoded object.
+    """Expect that column values as geometry points to be between a certain distance from a geocoded object.
 
-    expect_column_values_geometry_distance_to_address_to_be_between is a :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
+    expect_column_values_geometry_distance_to_address_to_be_between is a \
+    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
     Args:
         column (str): \
-            The column name.
-            Column values must be provided in lon-lat or lat-long tuples/lists, WKT or WKB format, which are commom formats for GIS Database formats.
-            WKT can be accessed thhrough the ST_AsText() or ST_AsBinary() functions in queries for PostGIS and MSSQL.
+            The column name. \
+            Column values must be provided in lon-lat or lat-long tuples/lists, WKT or WKB format, which are commom formats for GIS Database formats. \
+            WKT can be accessed thhrough the ST_AsText() or ST_AsBinary() functions in queries for PostGIS and MSSQL. \
             Values must be in longitude - latitude coordinates for this method to work with geocoding.
 
     Keyword Args:
-        place: str
-            The country, place, address, etc. to query. Expect to return a point from geocoder (Default: OpenStreetMaps (Nominatim)).
+        place (str): \
+            The country, place, address, etc. to query. Expect to return a point from geocoder (Default: OpenStreetMaps (Nominatim)). \
             Note that this method uses the Latitude - Longitude Point returned by the geocoder, and not the shape(geometry)
-        column_shape_format: str
-            Geometry format for 'column' (wkt, wkb, lonlat, latlon). Column values can be provided in WKT or WKB format, which are commom formats for GIS Database formats.
-            latlon or lonlat also supports tuple pairs or list pairs in either Longtitude or Latitude first formats.
+        column_shape_format (str): \
+            Geometry format for 'column' (wkt, wkb, lonlat, latlon). Column values can be provided in WKT or WKB format, which are commom formats for GIS Database formats. \
+            latlon or lonlat also supports tuple pairs or list pairs in either Longtitude or Latitude first formats. \
             WKT can be accessed thhrough the ST_AsText() or ST_AsBinary() functions in queries for PostGIS and MSSQL.
-
-        geocoder: str
+        geocoder (str): \
             Geocoder from GeoPy to use to return the shape. While this is generic, the api is required to be available from GeoPy and must return a geometry.
-
-        geocoder_config: dict(str)
+        geocoder_config (dict str): \
             arguments to initialize the GeoPy geocoder. e.g. for paid services, an API_key is usually required. See GeoPy for reference.
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
     Notes:
-        The user is responsible to transform the column to a WKT or WKB format that is in the WGS84 coordianate system for earth.
-        Any geometry can be provided in the column value, but if it is not a POINT, the centroid will be evaluated.
-        Invalid geometries import as None and fail the test.
-        Other Coordinate Reference Systems are not yet supported.
+        * The user is responsible to transform the column to a WKT or WKB format that is in the WGS84 coordianate system for earth.
+        * Any geometry can be provided in the column value, but if it is not a POINT, the centroid will be evaluated.
+        * Invalid geometries import as None and fail the test.
+        * Other Coordinate Reference Systems are not yet supported.
     """
 
     # These examples will be shown in the public gallery.

@@ -65,15 +65,16 @@ class MulticolumnValuesSumValuesEqualToSingleColumn(MulticolumnMapMetricProvider
 class ExpectMulticolumnSumValuesToBeEqualToSingleColumn(MulticolumnMapExpectation):
     # </snippet>
     # <snippet>
-    """
-    Expect a sum of columns to be equal to other column (in a row perspective)
+    """Expect a sum of columns to be equal to other column (in a row perspective).
+
     This means that for each row, we expect col_a + col_b + ... + col_n-1 == col_n
+
     Args:
-        column_list: A list of n columns, in which we expect the sum of the first n-1th columns to be equal to the nth column.
-                     This means that if one wants to compare between the sum of n-1 columns and the nth column, it needs to put the nth column at the end of the list.
-    Constraints:
-        This list should contain at least 2 columns.
-        This list should include only integer columns.
+        column_list (list of str): \
+            A list of 2 or more integer columns, in which we expect the sum of the first n-1th \
+            columns to be equal to the nth column. This means that if one wants to compare \
+            between the sum of n-1 columns and the nth column, it needs to put the nth column \
+            at the end of the list.
     """
     # </snippet>
 
