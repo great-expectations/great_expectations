@@ -80,11 +80,13 @@ def DataContext(
         cloud_config=cloud_config,
     )
 
-    return context
-
     # # Save project config if data_context_id auto-generated
-    # if context._check_for_usage_stats_sync(project_config):
-    #     context._save_project_config()
+    if isinstance(
+        context, SerializableDataContext
+    ) and context._check_for_usage_stats_sync(project_config):
+        context._save_project_config()
+
+    return context
 
 
 def _resolve_cloud_args(  # type: ignore[override]
