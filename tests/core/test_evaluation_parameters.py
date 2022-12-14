@@ -342,6 +342,63 @@ def test_deduplicate_evaluation_parameter_dependencies():
                 result={"observed_value": 3},
             ),
         ),
+        (
+            pandas.DataFrame(
+                {
+                    "my_date": [
+                        datetime(year=2017, month=1, day=1),
+                        datetime(year=2018, month=1, day=1),
+                        datetime(year=2019, month=1, day=1),
+                        datetime(year=2020, month=1, day=1),
+                    ]
+                }
+            ),
+            (
+                ("my_min_date", datetime(2016, 12, 10)),
+                ("my_max_date", datetime(2022, 12, 13) - pd.Timedelta(weeks=1)),
+            ),
+            "expect_column_values_to_be_between",
+            {
+                "column": "my_date",
+                "min_value": {"$PARAMETER": "my_min_date"},
+                "max_value": {"$PARAMETER": "my_max_date"},
+            },
+            ExpectationValidationResult(
+                expectation_config={
+                    "meta": {
+                        "substituted_parameters": {
+                            "min_value": "2016-12-10T00:00:00",
+                            "max_value": "2022-12-06T00:00:00",
+                        }
+                    },
+                    "kwargs": {
+                        "column": "my_date",
+                        "min_value": "2016-12-10T00:00:00",
+                        "max_value": "2022-12-06T00:00:00",
+                        "batch_id": "15fe04adb6ff20b9fc6eda486b7a36b7",
+                    },
+                    "expectation_type": "expect_column_values_to_be_between",
+                    "ge_cloud_id": None,
+                },
+                meta={},
+                exception_info={
+                    "raised_exception": False,
+                    "exception_traceback": None,
+                    "exception_message": None,
+                },
+                success=True,
+                result={
+                    "element_count": 4,
+                    "unexpected_count": 0,
+                    "unexpected_percent": 0.0,
+                    "partial_unexpected_list": [],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 0.0,
+                    "unexpected_percent_nonmissing": 0.0,
+                },
+            ),
+        ),
     ],
 )
 def test_evaluation_parameters_for_between_expectations_parse_correctly(
@@ -381,112 +438,6 @@ def test_evaluation_parameters_for_between_expectations_parse_correctly(
     assert (
         actual_expectation_validation_result == expected_expectation_validation_result
     )
-
-
-@pytest.mark.integration
-def test_evaluation_parameters_for_between_expectations_parse_datetime_correctly(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-
-    # Note that if you modify this batch request, you may save the new version as a .json file
-    #  to pass in later via the --batch-request option
-    df = pandas.DataFrame(
-        {
-            "my_date": [
-                datetime(year=2017, month=1, day=1),
-                datetime(year=2018, month=1, day=1),
-                datetime(year=2019, month=1, day=1),
-                datetime(year=2020, month=1, day=1),
-            ]
-        }
-    )
-    batch_request = {
-        "datasource_name": "my_datasource",
-        "data_connector_name": "my_runtime_data_connector",
-        "data_asset_name": "foo",
-        "runtime_parameters": {"batch_data": df},
-        "batch_identifiers": {
-            "pipeline_stage_name": "kickoff",
-            "airflow_run_id": "1234",
-        },
-    }
-
-    # Feel free to change the name of your suite here. Renaming this will not remove the other one.
-    expectation_suite_name = "abcde"
-    try:
-        suite = context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(
-            f'Loaded ExpectationSuite "{suite.expectation_suite_name}" containing {len(suite.expectations)} '
-            f"expectations."
-        )
-    except DataContextError:
-        suite = context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
-
-    validator = context.get_validator(
-        batch_request=RuntimeBatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
-    )
-    column_names = [
-        f'"{column_name}"' for column_name in validator.metrics_calculator.columns()
-    ]
-    print(f"Columns: {', '.join(column_names)}.")
-
-    validator.set_evaluation_parameter("my_min_date", datetime(2016, 12, 10))
-    validator.set_evaluation_parameter(
-        "my_max_date", datetime(2022, 12, 13) - pd.Timedelta(weeks=1)
-    )
-
-    actual_result = validator.expect_column_values_to_be_between(
-        column="my_date",
-        min_value={"$PARAMETER": "my_min_date"},
-        max_value={"$PARAMETER": "my_max_date"},
-    )
-
-    expected_result = ExpectationValidationResult(
-        **{
-            "expectation_config": {
-                "meta": {
-                    "substituted_parameters": {
-                        "min_value": "2016-12-10T00:00:00",
-                        "max_value": "2022-12-06T00:00:00",
-                    }
-                },
-                "kwargs": {
-                    "column": "my_date",
-                    "min_value": "2016-12-10T00:00:00",
-                    "max_value": "2022-12-06T00:00:00",
-                    "batch_id": "15fe04adb6ff20b9fc6eda486b7a36b7",
-                },
-                "expectation_type": "expect_column_values_to_be_between",
-                "ge_cloud_id": None,
-            },
-            "meta": {},
-            "exception_info": {
-                "raised_exception": False,
-                "exception_traceback": None,
-                "exception_message": None,
-            },
-            "success": True,
-            "result": {
-                "element_count": 4,
-                "unexpected_count": 0,
-                "unexpected_percent": 0.0,
-                "partial_unexpected_list": [],
-                "missing_count": 0,
-                "missing_percent": 0.0,
-                "unexpected_percent_total": 0.0,
-                "unexpected_percent_nonmissing": 0.0,
-            },
-        }
-    )
-
-    assert actual_result == expected_result
 
 
 @pytest.mark.unit
