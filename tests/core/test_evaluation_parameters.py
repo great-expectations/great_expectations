@@ -7,14 +7,17 @@ import pandas
 import pandas as pd
 import pytest
 
-from great_expectations.core import ExpectationValidationResult
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
     find_evaluation_parameter_dependencies,
     parse_evaluation_parameter,
 )
-from great_expectations.exceptions import DataContextError, EvaluationParameterError
+from great_expectations.exceptions import EvaluationParameterError
 
 
 @pytest.mark.unit
@@ -320,18 +323,16 @@ def test_deduplicate_evaluation_parameter_dependencies():
                 },
             },
             ExpectationValidationResult(
-                expectation_config={
-                    "meta": {
-                        "substituted_parameters": {"min_value": 1, "max_value": 5}
-                    },
-                    "kwargs": {
+                expectation_config=ExpectationConfiguration(
+                    expectation_type="expect_table_row_count_to_be_between",
+                    kwargs={
                         "min_value": 1,
                         "max_value": 5,
                         "batch_id": "15fe04adb6ff20b9fc6eda486b7a36b7",
                     },
-                    "expectation_type": "expect_table_row_count_to_be_between",
-                    "ge_cloud_id": None,
-                },
+                    meta={"substituted_parameters": {"min_value": 1, "max_value": 5}},
+                    ge_cloud_id=None,
+                ),
                 meta={},
                 exception_info={
                     "raised_exception": False,
@@ -364,22 +365,22 @@ def test_deduplicate_evaluation_parameter_dependencies():
                 "max_value": {"$PARAMETER": "my_max_date"},
             },
             ExpectationValidationResult(
-                expectation_config={
-                    "meta": {
-                        "substituted_parameters": {
-                            "min_value": "2016-12-10T00:00:00",
-                            "max_value": "2022-12-06T00:00:00",
-                        }
-                    },
-                    "kwargs": {
+                expectation_config=ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_be_between",
+                    kwargs={
                         "column": "my_date",
                         "min_value": "2016-12-10T00:00:00",
                         "max_value": "2022-12-06T00:00:00",
                         "batch_id": "15fe04adb6ff20b9fc6eda486b7a36b7",
                     },
-                    "expectation_type": "expect_column_values_to_be_between",
-                    "ge_cloud_id": None,
-                },
+                    meta={
+                        "substituted_parameters": {
+                            "min_value": "2016-12-10T00:00:00",
+                            "max_value": "2022-12-06T00:00:00",
+                        }
+                    },
+                    ge_cloud_id=None,
+                ),
                 meta={},
                 exception_info={
                     "raised_exception": False,
