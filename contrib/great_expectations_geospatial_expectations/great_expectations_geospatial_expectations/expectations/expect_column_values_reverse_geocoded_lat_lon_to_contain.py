@@ -62,17 +62,14 @@ class ExpectColumnValuesReverseGeocodedLatLonToContain(ColumnMapExpectation):
         column (str): \
             The column name.
 
-
     Keyword Args:
         word (str) : \
-            The word to check if it's contained in the reverse geocoded string.
+            The word to check if it's contained in the reverse geocoded string. \
             Must be a lowercase string.
 
         provider (str or geopy.geocoder): \
-            The reverse geocoding service provider.
-            Default: photon
+            The reverse geocoding service provider. Default: photon. \
             More info here: https://geopandas.org/en/stable/docs/reference/api/geopandas.tools.reverse_geocode.html
-
     """
 
     def validate_configuration(

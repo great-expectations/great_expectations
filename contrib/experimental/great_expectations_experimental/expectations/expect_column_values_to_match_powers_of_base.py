@@ -41,7 +41,7 @@ class ColumnValuesMatchPowersOfBase(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToMatchPowersOfBase(ColumnMapExpectation):
-    """Expect column values to match powers of Base (Base ** power == column value)"""
+    """Expect column values to match powers of Base (Base ** power == column value)."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

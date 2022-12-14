@@ -45,7 +45,7 @@ class ColumnValuesToBeValidBase64(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidBase64(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid base64 code."""
+    """Expect column values to be valid base64 codes."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
