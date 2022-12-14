@@ -1152,7 +1152,7 @@ def test_validator_result_format_config_from_validator(
         context=data_context_with_connection_to_animal_names_db,
     )
 
-    with pytest.warns(UserWarning):
+    with pytest.warns(UserWarning) as config_warning:
         result: ExpectationValidationResult = (
             validator.expect_column_values_to_be_in_set(
                 column="animals",
@@ -1160,6 +1160,11 @@ def test_validator_result_format_config_from_validator(
                 result_format=result_format_config,
             )
         )
+
+    assert (
+        "`result_format` configured at the Validator-level will not be persisted."
+        in str(config_warning.list[0].message)
+    )
 
 
 @pytest.mark.integration
@@ -1175,7 +1180,12 @@ def test_validator_result_format_config_from_expectation(
     (validator, expectation) = _context_to_validator_and_expectation_sql(
         context=data_context_with_connection_to_animal_names_db,
     )
-    with pytest.warns(UserWarning):
+    with pytest.warns(UserWarning) as config_warning:
         result: ExpectationValidationResult = expectation.validate(
             validator=validator, runtime_configuration=runtime_configuration
         )
+
+    assert (
+        "`result_format` configured at the Validator-level will not be persisted."
+        in str(config_warning.list[0].message)
+    )

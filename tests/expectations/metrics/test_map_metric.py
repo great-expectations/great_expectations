@@ -611,7 +611,7 @@ def test_expectation_configuration_has_result_format(
             },
         },
     )
-    with pytest.warns(UserWarning):
+    with pytest.warns(UserWarning) as config_warning:
         result: ExpectationValidationResult = (
             _expecation_configuration_to_validation_result_pandas(
                 expectation_configuration=expectation_configuration,
@@ -619,6 +619,11 @@ def test_expectation_configuration_has_result_format(
                 context=in_memory_runtime_context,
             )
         )
+
+    assert (
+        "`result_format` configured at the Expectation-level will not be persisted."
+        in str(config_warning.list[0].message)
+    )
 
 
 def test_pandas_default_complete_result_format(
