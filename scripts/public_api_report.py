@@ -237,12 +237,14 @@ class IncludeExcludeDefinition:
     """Name and/or relative filepath of definition to exclude or include.
 
     Args:
+        reason: Reason for include or exclude.
         name: name of class, method or function.
         filepath: Relative to repo_root/great_expectations. E.g.
             core/expectation_suite.py NOT
             great_expectations/core/expectation_suite.py
             Required if providing `name`.
     """
+    reason: str
     name: Optional[str] = None
     filepath: Optional[pathlib.Path] = None
 
@@ -250,18 +252,25 @@ class IncludeExcludeDefinition:
 class GXCodeParser:
     """"""
 
-    # TODO: Add include and exclude to get methods
-
-    INCLUDE: List[IncludeExcludeDefinition] = [
-        IncludeExcludeDefinition(name="remove_expectation", filepath=pathlib.Path("core/expectation_suite.py"))
+    DEFAULT_INCLUDES: List[IncludeExcludeDefinition] = [
+        IncludeExcludeDefinition(
+            reason="Referenced via legacy docs, will likely need to be included in the public API. Added here as an example include.", name="remove_expectation", filepath=pathlib.Path("core/expectation_suite.py"))
     ]
-    EXCLUDE: List[IncludeExcludeDefinition] = [
-        IncludeExcludeDefinition(filepath=pathlib.Path("experimental/datasources/interfaces.py")),
-        IncludeExcludeDefinition(filepath=pathlib.Path("experimental/context.py")),
-        IncludeExcludeDefinition(name="dump", filepath=pathlib.Path("data_context/types/base.py"))
+    DEFAULT_EXCLUDES: List[IncludeExcludeDefinition] = [
+        IncludeExcludeDefinition(
+            reason="Experimental is not part of the public API", filepath=pathlib.Path("experimental/datasources/interfaces.py")),
+        IncludeExcludeDefinition(reason="Experimental is not part of the public API", filepath=pathlib.Path("experimental/context.py")),
+        IncludeExcludeDefinition(reason="Marshmallow dump methods are not part of the public API", name="dump", filepath=pathlib.Path("data_context/types/base.py")),
+        IncludeExcludeDefinition(reason="Exclude code from __init__.py", filepath=pathlib.Path("types/__init__.py"))
     ]
 
-    def __init__(self, repo_root: pathlib.Path, paths: Set[pathlib.Path]) -> None:
+    def __init__(
+            self,
+            repo_root: pathlib.Path,
+            paths: Set[pathlib.Path],
+            excludes: Union[List[IncludeExcludeDefinition], None] = None,
+            includes: Union[List[IncludeExcludeDefinition], None] = None,
+    ) -> None:
         """
 
         Args:
@@ -272,19 +281,43 @@ class GXCodeParser:
         self.great_expectations_path = self.repo_root / "great_expectations"
         self.paths = paths
 
+        if not excludes:
+            self.excludes = self.DEFAULT_EXCLUDES
+        else:
+            self.excludes = excludes
+
+        if not includes:
+            self.includes = self.DEFAULT_INCLUDES
+        else:
+            self.includes = includes
 
     def _is_filepath_excluded(self, filepath: pathlib.Path) -> bool:
         """Check whether an entire filepath is excluded."""
-        full_filepaths_excluded = [p.filepath for p in self.EXCLUDE if not p.name]
-        return filepath.relative_to(self.great_expectations_path) in full_filepaths_excluded
+        full_filepaths_excluded = [p.filepath for p in self.excludes if not p.name]
+        return filepath in full_filepaths_excluded
 
     def _is_definition_excluded(self, definition: Definition) -> bool:
         """Check whether a definition (filepath / name combo) is excluded."""
-        definitions_excluded = [d for d in self.EXCLUDE if d.name and d.filepath]
+        definitions_excluded = [d for d in self.excludes if d.name and d.filepath]
         for definition_excluded in definitions_excluded:
             filepath_excluded = definition.filepath == definition_excluded.filepath
             name_excluded = definition.name == definition_excluded.name
             if filepath_excluded and name_excluded:
+                return True
+        return False
+
+    def _is_filepath_included(self, filepath: pathlib.Path) -> bool:
+        """Check whether an entire filepath is included."""
+        full_filepaths_included = [p.filepath for p in self.includes if not p.name]
+        return filepath in full_filepaths_included
+
+    def _is_definition_included(self, definition: Definition) -> bool:
+        """Check whether a definition (filepath / name combo) is included."""
+        definitions_included = [d for d in self.includes if d.name and d.filepath]
+        for definition_included in definitions_included:
+            filepath_included = definition.filepath == definition_included.filepath
+            name_included = definition.name == definition_included.name
+            if filepath_included and name_included:
                 return True
         return False
 
@@ -335,7 +368,34 @@ class GXCodeParser:
 
         return set([definition.name for definition in definitions])
 
-    def get_all_class_method_and_function_definitions_from_files(
+
+    def _get_all_class_method_and_function_definitions_from_files(
+        self,
+    ) -> Set[Definition]:
+        # TODO: add docstring
+        all_usages: Set[Definition] = set()
+        for filepath in self.paths:
+            file_usages = self.get_all_class_method_and_function_definitions_from_file(
+                filepath=filepath
+            )
+            all_usages |= self._build_file_usage_definitions(filepath=filepath, file_usages=file_usages)
+        return all_usages
+
+    def _get_included_class_method_and_function_definitions_from_files(self) -> Set[Definition]:
+        # TODO: Implementation
+        all_defs = self._get_all_class_method_and_function_definitions_from_files()
+        included_defs: List[Definition] = []
+        for definition in all_defs:
+            if self._is_filepath_included(filepath=definition.filepath) or self._is_definition_included(definition=definition):
+                included_defs.append(definition)
+        return set(included_defs)
+
+
+    def get_filtered_and_included_class_method_and_function_definitions_from_files(self) -> Set[Definition]:
+        return self._get_filtered_class_method_and_function_definitions_from_files().union(self._get_included_class_method_and_function_definitions_from_files())
+
+
+    def _get_filtered_class_method_and_function_definitions_from_files(
         self,
     ) -> Set[Definition]:
         # TODO: add docstring
@@ -345,10 +405,26 @@ class GXCodeParser:
                 file_usages = self.get_all_class_method_and_function_definitions_from_file(
                     filepath=filepath
                 )
-                all_usages |= self._build_file_usage_definitions(filepath=filepath, file_usages=file_usages)
+                all_usages |= self._build_filtered_file_usage_definitions(filepath=filepath, file_usages=file_usages)
         return all_usages
 
+
     def _build_file_usage_definitions(self, filepath: pathlib.Path, file_usages) -> Set[Definition]:
+        # TODO: Add type info and docstring
+        file_usages_definitions: List[Definition] = []
+        for usage in file_usages:
+            candidate_definition = Definition(
+                    name=usage.name,
+                    filepath=filepath.relative_to(
+                        self.great_expectations_path
+                    ),
+                    ast_definition=usage,
+                )
+            file_usages_definitions.append(candidate_definition)
+
+        return set(file_usages_definitions)
+
+    def _build_filtered_file_usage_definitions(self, filepath: pathlib.Path, file_usages) -> Set[Definition]:
         # TODO: Add type info and docstring
         file_usages_definitions: List[Definition] = []
         for usage in file_usages:
@@ -448,7 +524,7 @@ class PublicAPIChecker:
         """
         gx_usages_in_docs_examples = self.filter_test_script_classes_and_methods()
         gx_code_definitions = (
-            self.gx_code_parser.get_all_class_method_and_function_definitions_from_files()
+            self.gx_code_parser.get_filtered_and_included_class_method_and_function_definitions_from_files()
         )
         gx_code_definitions_appearing_in_docs_examples = set(
             [d for d in gx_code_definitions if d.name in gx_usages_in_docs_examples]
