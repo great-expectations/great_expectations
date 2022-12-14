@@ -19,3 +19,7 @@ datasources:
               param_names:
                 - alpha
                 - bravo
+        order_by:
+          - metadata_key: year
+            reverse: true
+          - metadata_key: month
