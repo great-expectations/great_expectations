@@ -232,9 +232,9 @@ class ColumnDistributionMatchesBenfordsLaw(ColumnMetricProvider):
 
 
 class ExpectColumnDistributionToMatchBenfordsLaw(ColumnExpectation):
-    """
-    Tests whether data matches Benford's Law Fraud Detection Algorithm.
-    Uses a Chi-Square Goodness of Fit test with an 80@ p-value
+    """Expect column distribution to match Benford's Law.
+
+    Tests whether data matches Benford's Law Fraud Detection Algorithm. Uses a Chi-Square Goodness of Fit test with an 80@ p-value.
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation

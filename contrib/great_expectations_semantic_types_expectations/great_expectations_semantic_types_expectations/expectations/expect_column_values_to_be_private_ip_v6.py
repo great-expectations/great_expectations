@@ -49,7 +49,7 @@ class ColumnValuesToBePrivateIpV6(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBePrivateIpV6(ColumnMapExpectation):
-    """Expect value to be private IP v6 address"""
+    """Expect column values to be private IP v6 addresses."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

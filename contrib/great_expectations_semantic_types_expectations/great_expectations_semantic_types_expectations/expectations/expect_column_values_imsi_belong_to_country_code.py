@@ -57,7 +57,7 @@ class ColumnValuesImsiBelongToCountryCode(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesImsiBelongToCountryCode(ColumnMapExpectation):
-    """Expect the provided IMSI belong to country which code passed in the parameters"""
+    """Expect the provided IMSI belong to country which code passed in the parameters."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

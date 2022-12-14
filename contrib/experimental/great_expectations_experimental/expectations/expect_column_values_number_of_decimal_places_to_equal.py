@@ -71,7 +71,8 @@ class ColumnValuesDecimalPlacesEquals(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesNumberOfDecimalPlacesToEqual(ColumnMapExpectation):
-    """
+    """Expect all values in a numeric column to have the same number of specified decimal places.
+
     This expectation tests if all the values in a column has the same number of decimal places as the
     inputted number of decimal places. In the case where the decimal places are all 0s (an integer),
     the value automatically passes. Currently have not figured out how to preserve 0s in decimal to string conversion.
