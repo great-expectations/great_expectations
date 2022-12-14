@@ -124,13 +124,10 @@ class TableAsset(DataAsset):
     def parse_orderby_sorter(
         cls, v: Union[str, BatchSorter]
     ) -> Union[BatchSorter, dict]:
-        print(f"validator - {type(v)} {v}")
         if isinstance(v, str):
-            try:
-                return _batch_sorter_from_str(v)
-            except KeyError as err:
-                # TODO: before merge - raise a helpful validation error here
-                raise err
+            if not v:
+                raise ValueError("empty string")
+            return _batch_sorter_from_str(v)
         return v
 
     def get_batch_request(
