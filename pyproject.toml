@@ -154,9 +154,7 @@ exclude = [
     'rule_based_profiler/parameter_builder/value_counts_single_batch_parameter_builder\.py',  # 3
     'rule_based_profiler/parameter_builder/value_set_multi_batch_parameter_builder\.py',  # 2
     'rule_based_profiler/parameter_container\.py',  # 7
-    'rule_based_profiler/rule_based_profiler_result\.py',  # 1
     'rule_based_profiler/rule_based_profiler\.py',  # 40
-    'rule_based_profiler/rule/rule.py',  # 5
     'tasks\.py',  # Excluded from type checking the rest of the library, may be added in a separate step.
     'validation_operators/types/validation_operator_result\.py', # 35
     'validation_operators/validation_operators\.py',  # 16
