@@ -1112,7 +1112,7 @@ class Validator:
             try:
                 expectation_validation_graph: ExpectationValidationGraph = ExpectationValidationGraph(
                     configuration=evaluated_config,
-                    graph=self.metrics_calculator.build_metric_dependency_graph(
+                    graph=self._metrics_calculator.build_metric_dependency_graph(
                         metric_configurations=validation_dependencies.get_metric_configurations(),
                         runtime_configuration=runtime_configuration,
                     ),
@@ -1179,7 +1179,7 @@ class Validator:
         (
             resolved_metrics,
             aborted_metrics_info,
-        ) = self.metrics_calculator.resolve_validation_graph(
+        ) = self._metrics_calculator.resolve_validation_graph(
             graph=graph,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=0,
