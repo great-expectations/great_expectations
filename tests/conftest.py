@@ -66,6 +66,9 @@ from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
+from great_expectations.execution_engine.execution_engine import (
+    MetricPartialFunctionTypes,
+)
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
@@ -82,6 +85,7 @@ from great_expectations.self_check.util import (
     get_dataset,
 )
 from great_expectations.util import build_in_memory_runtime_context, is_library_loadable
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.rule_based_profiler.parameter_builder.conftest import (
     RANDOM_SEED,
     RANDOM_STATE,
@@ -777,6 +781,62 @@ def empty_data_context(
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
     assert context.list_datasources() == []
+    return context
+
+
+@pytest.fixture(scope="function")
+def data_context_with_connection_to_animal_names_db(
+    tmp_path,
+) -> DataContext:
+    """
+    Returns DataContext that has a single datasource that connects to a sqlite database.
+
+    The sqlite database (metrics_test.db) contains one table `animal_names` that contains the following data
+
+        "pk_1": [0, 1, 2, 3, 4, 5],
+        "pk_2": ["zero", "one", "two", "three", "four", "five"],
+        "animals": [
+            "cat",
+            "fish",
+            "dog",
+            "giraffe",
+            "lion",
+            "zebra",
+        ],
+
+    It is used by tests for unexpected_index_list (ID/Primary Key).
+    """
+
+    project_path = tmp_path / "test_configuration"
+    project_path.mkdir()
+    project_path = str(project_path)
+    context = gx.data_context.DataContext.create(project_path)
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    os.makedirs(asset_config_path, exist_ok=True)
+    assert context.list_datasources() == []
+    sqlite_path = file_relative_path(__file__, "test_sets/metrics_test.db")
+    datasource_config: str = f"""
+        class_name: Datasource
+        execution_engine:
+            module_name: great_expectations.execution_engine
+            class_name: SqlAlchemyExecutionEngine
+            connection_string: sqlite:///{sqlite_path}
+        data_connectors:
+            my_sql_data_connector:
+                module_name: great_expectations.datasource.data_connector
+                class_name: ConfiguredAssetSqlDataConnector
+                assets:
+                    my_asset:
+                        table_name: animal_names
+                        class_name: Asset
+    """
+    # noinspection PyUnusedLocal
+    datasource: Datasource = context.test_yaml_config(
+        name="my_datasource", yaml_config=datasource_config, pretty_print=False
+    )
+    # noinspection PyProtectedMember
+    context._save_project_config()
     return context
 
 
@@ -7042,6 +7102,51 @@ data_connectors:
 @pytest.fixture
 def in_memory_runtime_context():
     return build_in_memory_runtime_context()
+
+
+@pytest.fixture
+def table_row_count_metric_config() -> MetricConfiguration:
+    return MetricConfiguration(
+        metric_name="table.row_count",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
+
+
+@pytest.fixture
+def table_row_count_aggregate_fn_metric_config() -> MetricConfiguration:
+    return MetricConfiguration(
+        metric_name=f"table.row_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
+
+
+@pytest.fixture
+def table_head_metric_config() -> MetricConfiguration:
+    return MetricConfiguration(
+        metric_name="table.head",
+        metric_domain_kwargs={
+            "batch_id": "abc123",
+        },
+        metric_value_kwargs={
+            "n_rows": 5,
+        },
+    )
+
+
+@pytest.fixture
+def column_histogram_metric_config() -> MetricConfiguration:
+    return MetricConfiguration(
+        metric_name="column.histogram",
+        metric_domain_kwargs={
+            "column": "my_column",
+            "batch_id": "def456",
+        },
+        metric_value_kwargs={
+            "bins": 5,
+        },
+    )
 
 
 @pytest.fixture

@@ -365,11 +365,21 @@ class ValidationGraph:
 class ExpectationValidationGraph:
     def __init__(
         self,
-        execution_engine: ExecutionEngine,
         configuration: ExpectationConfiguration,
+        graph: ValidationGraph,
     ) -> None:
+        if configuration is None:
+            raise ValueError(
+                """Instantiation of "ExpectationValidationGraph" requires valid "ExpectationConfiguration" object."""
+            )
+
+        if graph is None:
+            raise ValueError(
+                """Instantiation of "ExpectationValidationGraph" requires valid "ValidationGraph" object."""
+            )
+
         self._configuration = configuration
-        self._graph = ValidationGraph(execution_engine=execution_engine)
+        self._graph = graph
 
     @property
     def configuration(self) -> ExpectationConfiguration:

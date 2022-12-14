@@ -110,7 +110,7 @@ def test_statistics_data_assistant_metrics_count(
         domain,
         parameter_values_for_fully_qualified_parameter_names,
     ) in bobby_statistics_data_assistant_result.metrics_by_domain.items():
-        if domain.is_superset(domain_key):
+        if domain.is_superset(other=domain_key):
             num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
 
     assert num_metrics == 0

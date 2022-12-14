@@ -406,6 +406,7 @@ def test_validator_with_bad_batchrequest(
         data_connector_query={"batch_filter_parameters": {"year": "2019"}},
     )
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
+        # noinspection PyUnusedLocal
         validator_multi_batch: Validator = context.get_validator(
             batch_request=multi_batch_request, expectation_suite=suite
         )
