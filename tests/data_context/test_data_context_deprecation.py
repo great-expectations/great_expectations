@@ -7,10 +7,7 @@ from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
 from great_expectations.data_context.data_context.data_context import (
-    DataContext as data_context_resolver,
-)
-from great_expectations.data_context.data_context.data_context import (
-    _resolve_cloud_args,
+    _resolve_cloud_args as data_context_resolver,
 )
 from great_expectations.data_context.types.base import GXCloudConfig
 from great_expectations.util import _resolve_cloud_args as get_context_resolver
