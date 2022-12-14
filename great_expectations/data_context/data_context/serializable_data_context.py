@@ -6,10 +6,9 @@ import shutil
 import warnings
 from typing import Optional, Union
 
-from ruamel.yaml import YAML, YAMLError
+from ruamel.yaml import YAML
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations import __version__
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
