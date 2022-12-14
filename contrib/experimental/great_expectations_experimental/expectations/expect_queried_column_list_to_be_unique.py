@@ -9,11 +9,11 @@ from great_expectations.expectations.expectation import (
 
 
 class ExpectQueriedColumnListToBeUnique(QueryExpectation):
-    """Expect multiple columns (such as a compound key) to be unique
+    """Expect multiple columns (such as a compound key) to be unique.
+
     Args:
-    *****
-    template_dict: dict with the following keys:
-        column_list - columns to check uniqueness on - separated by comma
+        template_dict: dict with the following keys: \
+            column_list (columns to check uniqueness on separated by comma)
     """
 
     metric_dependencies = ("query.template_values",)

@@ -50,7 +50,10 @@ class ColumnValuesToBeValidBarcode(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidBarcode(ColumnMapExpectation):
-    """Expect the provided barcodes are valid (barcode type passed in parameter). Barcode types: code39, ean, ean8, ean13, gtin, gtin14, gs1_datamatrix, isbn, isbn10, isbn13, upc"""
+    """Expect the provided barcodes are valid (barcode type passed in parameter).
+
+    Barcode types: code39, ean, ean8, ean13, gtin, gtin14, gs1_datamatrix, isbn, isbn10, isbn13, upc
+    """
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
