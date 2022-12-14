@@ -6,6 +6,7 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.execution_engine.execution_engine import (
     MetricDomainTypes,
+    MetricFunctionTypes,
     MetricPartialFunctionTypes,
 )
 from great_expectations.execution_engine.sparkdf_execution_engine import (
@@ -33,8 +34,8 @@ logger = logging.getLogger(__name__)
 
 def column_aggregate_value(
     engine: Type[ExecutionEngine],
-    metric_fn_type="value",
-    domain_type="column",
+    metric_fn_type=MetricFunctionTypes.VALUE,
+    domain_type=MetricDomainTypes.COLUMN,
     **kwargs,
 ):
     """Return the column aggregate metric decorator for the specified engine.
