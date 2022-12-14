@@ -34,7 +34,7 @@ import logging
 import operator
 import pathlib
 from dataclasses import dataclass
-from typing import List, Set, Union
+from typing import List, Set, Union, Optional
 
 import astunparse
 
@@ -172,6 +172,15 @@ class DocExampleParser:
 
 @dataclass(frozen=True)
 class Definition:
+    """Class, method or function definition information from AST parsing.
+
+    Args:
+        name: name of class, method or function.
+        filepath: Relative to repo_root/great_expectations. E.g.
+            core/expectation_suite.py NOT
+            great_expectations/core/expectation_suite.py
+        ast_definition: Full AST tree of the class, method or function definition.
+    """
     name: str
     filepath: pathlib.Path
     ast_definition: Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]
@@ -223,12 +232,34 @@ class PublicAPIReport:
         return sorted_definitions_strings_no_dupes
 
 
+@dataclass(frozen=True)
+class IncludeExcludeDefinition:
+    """Name and/or relative filepath of definition to exclude or include.
+
+    Args:
+        name: name of class, method or function.
+        filepath: Relative to repo_root/great_expectations. E.g.
+            core/expectation_suite.py NOT
+            great_expectations/core/expectation_suite.py
+            Required if providing `name`.
+    """
+    name: Optional[str] = None
+    filepath: Optional[pathlib.Path] = None
 
 
 class GXCodeParser:
     """"""
 
     # TODO: Add include and exclude to get methods
+
+    INCLUDE: List[IncludeExcludeDefinition] = [
+        IncludeExcludeDefinition(name="remove_expectation", filepath=pathlib.Path("core/expectation_suite.py"))
+    ]
+    EXCLUDE: List[IncludeExcludeDefinition] = [
+        IncludeExcludeDefinition(filepath=pathlib.Path("experimental/datasources/interfaces.py")),
+        IncludeExcludeDefinition(filepath=pathlib.Path("experimental/context.py")),
+        IncludeExcludeDefinition(name="dump", filepath=pathlib.Path("data_context/types/base.py"))
+    ]
 
     def __init__(self, repo_root: pathlib.Path, paths: Set[pathlib.Path]) -> None:
         """
@@ -238,7 +269,25 @@ class GXCodeParser:
             paths:
         """
         self.repo_root = repo_root
+        self.great_expectations_path = self.repo_root / "great_expectations"
         self.paths = paths
+
+
+    def _is_filepath_excluded(self, filepath: pathlib.Path) -> bool:
+        """Check whether an entire filepath is excluded."""
+        full_filepaths_excluded = [p.filepath for p in self.EXCLUDE if not p.name]
+        return filepath.relative_to(self.great_expectations_path) in full_filepaths_excluded
+
+    def _is_definition_excluded(self, definition: Definition) -> bool:
+        """Check whether a definition (filepath / name combo) is excluded."""
+        definitions_excluded = [d for d in self.EXCLUDE if d.name and d.filepath]
+        for definition_excluded in definitions_excluded:
+            filepath_excluded = definition.filepath == definition_excluded.filepath
+            name_excluded = definition.name == definition_excluded.name
+            if filepath_excluded and name_excluded:
+                return True
+        return False
+
 
     def get_all_non_private_class_method_and_function_names_from_definitions_in_files(
         self,
@@ -289,25 +338,32 @@ class GXCodeParser:
     def get_all_class_method_and_function_definitions_from_files(
         self,
     ) -> Set[Definition]:
+        # TODO: add docstring
         all_usages: Set[Definition] = set()
         for filepath in self.paths:
-            file_usages = self.get_all_class_method_and_function_definitions_from_file(
-                filepath=filepath
-            )
-            file_usages_definitions: Set[Definition] = set(
-                [
-                    Definition(
-                        name=usage.name,
-                        filepath=filepath.relative_to(
-                            self.repo_root / "great_expectations"
-                        ),
-                        ast_definition=usage,
-                    )
-                    for usage in file_usages
-                ]
-            )
-            all_usages |= file_usages_definitions
+            if not self._is_filepath_excluded(filepath=filepath):
+                file_usages = self.get_all_class_method_and_function_definitions_from_file(
+                    filepath=filepath
+                )
+                all_usages |= self._build_file_usage_definitions(filepath=filepath, file_usages=file_usages)
         return all_usages
+
+    def _build_file_usage_definitions(self, filepath: pathlib.Path, file_usages) -> Set[Definition]:
+        # TODO: Add type info and docstring
+        file_usages_definitions: List[Definition] = []
+        for usage in file_usages:
+            candidate_definition = Definition(
+                    name=usage.name,
+                    filepath=filepath.relative_to(
+                        self.great_expectations_path
+                    ),
+                    ast_definition=usage,
+                )
+            if not self._is_definition_excluded(definition=candidate_definition):
+                file_usages_definitions.append(candidate_definition)
+
+        return set(file_usages_definitions)
+
 
     def get_all_class_method_and_function_definitions_from_file(
         self, filepath: pathlib.Path
