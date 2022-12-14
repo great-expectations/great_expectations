@@ -1123,10 +1123,14 @@ class Expectation(metaclass=MetaExpectation):
         if not configuration:
             configuration = deepcopy(self.configuration)
 
-        self._check_runtime_configuration_and_expectation_result_format(
-            configuration=configuration,
+        # issue warnings if necesary
+        self._warn_if_result_format_config_in_runtime_configuration(
             runtime_configuration=runtime_configuration,
         )
+        self._warn_if_result_format_config_in_expectation_configuration(
+            configuration=configuration
+        )
+
         configuration.process_evaluation_parameters(
             evaluation_parameters, interactive_evaluation, data_context
         )
@@ -1314,38 +1318,30 @@ class Expectation(metaclass=MetaExpectation):
             coverage_score=coverage_score,
         )
 
-    def _check_runtime_configuration_and_expectation_result_format(
-        self,
-        configuration: ExpectationConfiguration,
-        runtime_configuration: Union[dict, None] = None,
+    def _warn_if_result_format_config_in_runtime_configuration(
+        self, runtime_configuration: Union[dict, None] = None
     ) -> None:
         """
-        Checks that ExpectationConfiguration and runtime_configuration for Validator do not contain
-        unexpected_index_column_names key, which define primary key (pk) columns, which can only be configured
-        at the Checkpoint-level. Raises error with informative messaging
+        Issues warning if result_format is in runtime_configuration for Validator
         """
-        if runtime_configuration:
-            runtime_configuration_result_format_config: Union[
-                dict, str, None
-            ] = runtime_configuration.get("result_format")
+        if runtime_configuration and runtime_configuration.get("result_format"):
+            warnings.warn(
+                "`result_format` configured at the Validator-level will not be persisted. Please add the configuration to your Checkpoint config or checkpoint_run() method instead.",
+                UserWarning,
+            )
 
-            if isinstance(runtime_configuration_result_format_config, dict):
-                if runtime_configuration_result_format_config.get(
-                    "unexpected_index_column_names"
-                ):
-                    raise InvalidExpectationConfigurationError(
-                        "'unexpected_index_column_names' cannot be configured at the Expectation-level. Please add the configuration to your Checkpoint config or checkpoint_run() method."
-                    )
-        expectation_level_result_format_config: Union[
-            dict, str, None
-        ] = configuration.kwargs.get("result_format")
-        if isinstance(expectation_level_result_format_config, dict):
-            if expectation_level_result_format_config.get(
-                "unexpected_index_column_names"
-            ):
-                raise InvalidExpectationConfigurationError(
-                    "'unexpected_index_column_names' cannot be configured at the Expectation-level. Please add the configuration to your Checkpoint config or checkpoint_run() method."
-                )
+    def _warn_if_result_format_config_in_expectation_configuration(
+        self, configuration: ExpectationConfiguration
+    ) -> None:
+        """
+        Issues warning if result_format is in ExpectationConfiguration
+        """
+
+        if configuration.kwargs.get("result_format"):
+            warnings.warn(
+                "`result_format` configured at the Expectation-level will not be persisted. Please add the configuration to your Checkpoint config or checkpoint_run() method instead.",
+                UserWarning,
+            )
 
     def print_diagnostic_checklist(
         self,

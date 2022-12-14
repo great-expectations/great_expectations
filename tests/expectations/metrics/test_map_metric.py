@@ -597,7 +597,7 @@ def test_pandas_unexpected_rows_complete_result_format(
     }
 
 
-def test_expectation_configuration_has_unexpected_index_column_names(
+def test_expectation_configuration_has_result_format(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
@@ -608,12 +608,10 @@ def test_expectation_configuration_has_unexpected_index_column_names(
             "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "COMPLETE",
-                # this should raise an error
-                "unexpected_index_column_names": ["pk_1"],
             },
         },
     )
-    with pytest.raises(InvalidExpectationConfigurationError) as e:
+    with pytest.warns(UserWarning):
         result: ExpectationValidationResult = (
             _expecation_configuration_to_validation_result_pandas(
                 expectation_configuration=expectation_configuration,
@@ -621,11 +619,6 @@ def test_expectation_configuration_has_unexpected_index_column_names(
                 context=in_memory_runtime_context,
             )
         )
-    assert e.value.message == (
-        "'unexpected_index_column_names' cannot be configured at the "
-        "Expectation-level. Please add the configuration to your Checkpoint config or "
-        "checkpoint_run() method."
-    )
 
 
 def test_pandas_default_complete_result_format(
