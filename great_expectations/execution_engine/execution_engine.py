@@ -330,7 +330,7 @@ class ExecutionEngine(ABC):
     def get_batch_data_and_markers(self, batch_spec) -> Tuple[BatchData, BatchMarkers]:
         raise NotImplementedError
 
-    def resolve_metrics(  # noqa: C901 - 16
+    def resolve_metrics(
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
         metrics: Optional[Dict[Tuple[str, str, str], MetricValue]] = None,
@@ -352,54 +352,20 @@ class ExecutionEngine(ABC):
 
         metric_fn_direct_configurations: List[MetricComputationConfiguration]
         metric_fn_bundle_configurations: List[MetricComputationConfiguration]
-
         (
             metric_fn_direct_configurations,
             metric_fn_bundle_configurations,
-        ) = self._get_metric_computation_configurations(
+        ) = self._build_direct_and_bundled_metric_computation_configurationsd(
             metrics_to_resolve=metrics_to_resolve,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
         )
-
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
-
-        metric_computation_configuration: MetricComputationConfiguration
-        for metric_computation_configuration in metric_fn_direct_configurations:
-            try:
-                resolved_metrics[
-                    metric_computation_configuration.metric_configuration.id
-                ] = metric_computation_configuration.metric_fn(
-                    **metric_computation_configuration.metric_provider_kwargs
-                )
-            except Exception as e:
-                raise ge_exceptions.MetricResolutionError(
-                    message=str(e),
-                    failed_metrics=(
-                        metric_computation_configuration.metric_configuration,
-                    ),
-                ) from e
-
-        if len(metric_fn_bundle_configurations) > 0:
-            try:
-                # an engine-specific way of computing metrics together
-                resolved_metric_bundle: Dict[
-                    Tuple[str, str, str], MetricValue
-                ] = self.resolve_metric_bundle(
-                    metric_fn_bundle=metric_fn_bundle_configurations
-                )
-                resolved_metrics.update(resolved_metric_bundle)
-            except Exception as e:
-                raise ge_exceptions.MetricResolutionError(
-                    message=str(e),
-                    failed_metrics=[
-                        x.metric_configuration for x in metric_fn_bundle_configurations
-                    ],
-                ) from e
-
-        if self._caching:
-            self._metric_cache.update(resolved_metrics)
-
+        resolved_metrics: Dict[
+            Tuple[str, str, str], MetricValue
+        ] = self._process_direct_and_bundled_metric_computation_configurations(
+            metric_fn_direct_configurations=metric_fn_direct_configurations,
+            metric_fn_bundle_configurations=metric_fn_bundle_configurations,
+        )
         return resolved_metrics
 
     def resolve_metric_bundle(
@@ -495,7 +461,7 @@ class ExecutionEngine(ABC):
             template_arguments=template_arguments,
         )
 
-    def _get_metric_computation_configurations(
+    def _build_direct_and_bundled_metric_computation_configurationsd(
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
         metrics: Dict[Tuple[str, str, str], MetricValue],
@@ -507,6 +473,14 @@ class ExecutionEngine(ABC):
         This method organizes "metrics_to_resolve" ("MetricConfiguration" objects) into two lists: direct and bundled.
         Directly-computable "MetricConfiguration" must have non-NULL metric function ("metric_fn").  Aggregate metrics
         have NULL metric function, but non-NULL partial metric function ("metric_partial_fn"); aggregates are bundled.
+
+        Args:
+            metrics_to_resolve: the metrics to evaluate
+            metrics: already-computed metrics currently available to the engine
+            runtime_configuration: runtime configuration information
+
+        Returns:
+            Tuple with two elements: directly-computable and bundled "MetricComputationConfiguration" objects
         """
         metric_fn_direct_configurations: List[MetricComputationConfiguration] = []
         metric_fn_bundle_configurations: List[MetricComputationConfiguration] = []
@@ -522,7 +496,7 @@ class ExecutionEngine(ABC):
         metric_to_resolve: MetricConfiguration
         for metric_to_resolve in metrics_to_resolve:
             resolved_metric_dependencies_by_metric_name = (
-                self._get_resolved_metric_dependencies_by_metric_name(
+                self._get_computed_metric_evaluation_dependencies_by_metric_name(
                     metric_to_resolve=metric_to_resolve,
                     metrics=metrics,
                 )
@@ -590,11 +564,22 @@ class ExecutionEngine(ABC):
 
         return metric_fn_direct_configurations, metric_fn_bundle_configurations
 
-    def _get_resolved_metric_dependencies_by_metric_name(
+    def _get_computed_metric_evaluation_dependencies_by_metric_name(
         self,
         metric_to_resolve: MetricConfiguration,
         metrics: Dict[Tuple[str, str, str], MetricValue],
     ) -> Dict[str, Union[MetricValue, Tuple[Any, dict, dict]]]:
+        """
+        Gathers resolved (already computed) evaluation dependencies of metric-to-resolve (not yet computed)
+        "MetricConfiguration" object by "metric_name" property of resolved "MetricConfiguration" objects.
+
+        Args:
+            metric_to_resolve: dependent (not yet resolved) "MetricConfiguration" object
+            metrics: resolved (already computed) "MetricConfiguration" objects keyd by ID of that object
+
+        Returns:
+            Dictionary keyed by "metric_name" with values as computed metric or partial bundling information tuple
+        """
         metric_dependencies_by_metric_name: Dict[
             str, Union[MetricValue, Tuple[Any, dict, dict]]
         ] = {}
@@ -619,6 +604,61 @@ class ExecutionEngine(ABC):
                 )
 
         return metric_dependencies_by_metric_name
+
+    def _process_direct_and_bundled_metric_computation_configurations(
+        self,
+        metric_fn_direct_configurations: List[MetricComputationConfiguration],
+        metric_fn_bundle_configurations: List[MetricComputationConfiguration],
+    ) -> Dict[Tuple[str, str, str], MetricValue]:
+        """
+        This method processes directly-computable and bundled "MetricComputationConfiguration" objects.
+
+        Args:
+            metric_fn_direct_configurations: directly-computable "MetricComputationConfiguration" objects
+            metric_fn_bundle_configurations: bundled "MetricComputationConfiguration" objects (column aggregates)
+
+        Returns:
+            resolved_metrics (Dict): a dictionary with the values for the metrics that have just been resolved.
+        """
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+
+        metric_computation_configuration: MetricComputationConfiguration
+        for metric_computation_configuration in metric_fn_direct_configurations:
+            try:
+                resolved_metrics[
+                    metric_computation_configuration.metric_configuration.id
+                ] = metric_computation_configuration.metric_fn(
+                    **metric_computation_configuration.metric_provider_kwargs
+                )
+            except Exception as e:
+                raise ge_exceptions.MetricResolutionError(
+                    message=str(e),
+                    failed_metrics=(
+                        metric_computation_configuration.metric_configuration,
+                    ),
+                ) from e
+
+        if len(metric_fn_bundle_configurations) > 0:
+            try:
+                # an engine-specific way of computing metrics together
+                resolved_metric_bundle: Dict[
+                    Tuple[str, str, str], MetricValue
+                ] = self.resolve_metric_bundle(
+                    metric_fn_bundle=metric_fn_bundle_configurations
+                )
+                resolved_metrics.update(resolved_metric_bundle)
+            except Exception as e:
+                raise ge_exceptions.MetricResolutionError(
+                    message=str(e),
+                    failed_metrics=[
+                        x.metric_configuration for x in metric_fn_bundle_configurations
+                    ],
+                ) from e
+
+        if self._caching:
+            self._metric_cache.update(resolved_metrics)
+
+        return resolved_metrics
 
     def _split_domain_kwargs(
         self,
