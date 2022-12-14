@@ -527,6 +527,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
     assert first_result_partial_list == [{"pk_1": 3}]
 
 
+@pytest.mark.integration
 def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(
     in_memory_runtime_context,
     batch_request_for_pandas_unexpected_rows_and_index,
@@ -559,6 +560,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
     )
 
 
+@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(
     in_memory_runtime_context,
     batch_request_for_pandas_unexpected_rows_and_index,
@@ -605,6 +607,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
     assert second_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
 
 
+@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
     in_memory_runtime_context,
     batch_request_for_pandas_unexpected_rows_and_index,
@@ -640,6 +643,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
     assert first_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
 
 
+@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_basic_output(
     in_memory_runtime_context,
     batch_request_for_pandas_unexpected_rows_and_index,
