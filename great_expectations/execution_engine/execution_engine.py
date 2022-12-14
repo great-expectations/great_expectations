@@ -119,11 +119,11 @@ class MetricComputationConfiguration(DictDot):
     accessor_domain_kwargs: Optional[dict] = None
 
     def to_dict(self) -> dict:
-        """Returns: this BundledMetricConfiguration as a dictionary"""
+        """Returns: this MetricComputationConfiguration as a dictionary"""
         return asdict(self)
 
     def to_json_dict(self) -> dict:
-        """Returns: this BundledMetricConfiguration as a JSON dictionary"""
+        """Returns: this MetricComputationConfiguration as a JSON dictionary"""
         return convert_to_json_serializable(data=self.to_dict())
 
 
