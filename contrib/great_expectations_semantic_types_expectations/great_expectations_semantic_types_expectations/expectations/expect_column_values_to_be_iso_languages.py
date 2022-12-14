@@ -51,7 +51,7 @@ class ColumnValuesToBeIsoLanguages(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeIsoLanguages(ColumnMapExpectation):
-    """Expect value to be valid ISO 639-3 languages"""
+    """Expect value to be valid ISO 639-3 languages."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

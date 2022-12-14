@@ -71,9 +71,7 @@ class ColumnValuesHasValueIndex(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectValueAtIndex(ColumnMapExpectation):
-    """
-    check for a specified value at a given index location within each element of the column
-    """
+    """Expect a specific value at a given index location within each element of the column."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [

@@ -4,7 +4,8 @@ from great_expectations.expectations.set_based_column_map_expectation import (
 
 
 class ExpectColumnValuesToBeValidHTTPMethods(SetBasedColumnMapExpectation):
-    """Ensures all values are a valid http method:
+    """Expect column values to be valid HTTP methods.
+
     GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH
     """
 

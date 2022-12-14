@@ -50,7 +50,7 @@ class ColumnValuesIpAddressInNetwork(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesIpAddressInNetwork(ColumnMapExpectation):
-    """Expect the provided IP address in the network which passed in the parameters"""
+    """Expect column values to be IP addresses in the specified network ranges."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

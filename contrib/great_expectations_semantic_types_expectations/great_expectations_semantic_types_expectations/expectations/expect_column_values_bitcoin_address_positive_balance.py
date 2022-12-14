@@ -59,7 +59,7 @@ class ColumnValuesBitcoinAddressPositiveBalance(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesBitcoinAddressPositiveBalance(ColumnMapExpectation):
-    """Expect column values Bitcoin address has got positive balance (>0)"""
+    """Expect column values Bitcoin address has got positive balance (>0)."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

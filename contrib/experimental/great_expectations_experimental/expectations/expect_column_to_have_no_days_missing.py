@@ -52,7 +52,7 @@ class ColumnDistinctDates(ColumnAggregateMetricProvider):
 
 
 class ExpectColumnToHaveNoDaysMissing(ColumnExpectation):
-    """Expect No missing days in date column"""
+    """Expect No missing days in date column."""
 
     from datetime import datetime, timedelta
 
