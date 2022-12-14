@@ -496,10 +496,6 @@ def test_sort_batch_list_by_unknown_key(create_source):
 @pytest.mark.unit
 def test_data_source_json_has_properties(create_source):
     with create_source(lambda _: None) as source:
-        assert isinstance(TableAsset.order_by, property), (
-            "This test assumes TableAsset.order_by is a property. If it is not we "
-            "should update this test",
-        )
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col").add_sorters(
             ["year", "month"]
@@ -511,10 +507,6 @@ def test_data_source_json_has_properties(create_source):
 @pytest.mark.unit
 def test_data_source_str_has_properties(create_source):
     with create_source(lambda _: None) as source:
-        assert isinstance(TableAsset.order_by, property), (
-            "This test assumes TableAsset.order_by is a property. If it is not we "
-            "should update this test",
-        )
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col").add_sorters(
             ["year", "month"]
@@ -526,10 +518,6 @@ def test_data_source_str_has_properties(create_source):
 @pytest.mark.unit
 def test_datasource_dict_has_properties(create_source):
     with create_source(lambda _: None) as source:
-        assert isinstance(TableAsset.order_by, property), (
-            "This test assumes TableAsset.order_by is a property. If it is not we "
-            "should update this test",
-        )
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col").add_sorters(
             ["year", "month"]

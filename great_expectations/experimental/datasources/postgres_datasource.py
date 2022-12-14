@@ -7,6 +7,7 @@ from pprint import pformat as pf
 from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union, cast
 
 import pydantic
+from pydantic import Field
 from pydantic import dataclasses as pydantic_dc
 from typing_extensions import ClassVar, Literal, TypeAlias
 
@@ -116,19 +117,12 @@ class TableAsset(DataAsset):
     table_name: str
     column_splitter: Optional[ColumnSplitter] = None
     name: str
-    _order_by: List[BatchSorter] = pydantic.PrivateAttr()
+    order_by: List[BatchSorter] = Field(default_factory=list)
 
-    def __init__(self, **kwargs):
-        # I `pop("order_by", None) or []` instead of `pop("order_by", [])` because if someone
-        # passes in `order_by=None`, I want this variable to be `[]` and not `None`.
-        # `pop("order_by", [])` will return None since the order_by key exists in this case.
-        order_by = kwargs.pop("order_by", None) or []
-        self._order_by = _batch_sorter_from_list(order_by)
-        super().__init__(**kwargs)
-
-    @property
-    def order_by(self) -> List[BatchSorter]:
-        return self._order_by
+    @pydantic.validator("order_by")
+    @classmethod
+    def parse_orderby_sorters(cls, v: BatchSortersDefinition):
+        return _batch_sorter_from_list(v)
 
     def get_batch_request(
         self, options: Optional[BatchRequestOptions] = None
@@ -198,7 +192,9 @@ class TableAsset(DataAsset):
         return {p: None for p in self.column_splitter.param_names}
 
     def add_sorters(self, sorters: BatchSortersDefinition) -> TableAsset:
-        self._order_by = _batch_sorter_from_list(sorters)
+        # NOTE: (kilo59) we could use pydantic `validate_assignment` for this
+        # https://docs.pydantic.dev/usage/model_config/#options
+        self.order_by = _batch_sorter_from_list(sorters)
         return self
 
     # This asset type will support a variety of splitters
@@ -403,7 +399,7 @@ class PostgresDatasource(Datasource):
         Returns:
             The TableAsset that is added to the datasource.
         """
-        asset = TableAsset(name=name, table_name=table_name, order_by=order_by)
+        asset = TableAsset(name=name, table_name=table_name, order_by=order_by or [])
         # TODO (kilo59): custom init for `DataAsset` to accept datasource in constructor?
         # Will most DataAssets require a `Datasource` attribute?
         asset._datasource = self
