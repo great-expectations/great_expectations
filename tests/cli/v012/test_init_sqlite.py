@@ -312,7 +312,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     mock_webbrowser, caplog, initialized_sqlite_project, titanic_sqlite_db_file, sa
 ):
     project_dir = initialized_sqlite_project
-    ge_dir = os.path.join(project_dir, DataContext.GX_DIR)
+    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
 
     _remove_all_datasources(ge_dir)
     os.remove(os.path.join(ge_dir, "expectations", "warning.json"))
