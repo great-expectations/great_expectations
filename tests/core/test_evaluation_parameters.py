@@ -6,7 +6,6 @@ import dateutil
 import pandas
 import pandas as pd
 import pytest
-from freezegun import freeze_time
 
 from great_expectations.core import ExpectationValidationResult
 from great_expectations.core.batch import RuntimeBatchRequest
@@ -301,10 +300,15 @@ def test_deduplicate_evaluation_parameter_dependencies():
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "dataframe,expectation_kwargs,expected_expectation_validation_result",
+    "dataframe,evaluation_parameters,expectation_type,expectation_kwargs,expected_expectation_validation_result",
     [
         (
             pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]}),
+            (
+                ("my_min", 1),
+                ("my_max", 5),
+            ),
+            "expect_table_row_count_to_be_between",
             {
                 "min_value": {
                     "$PARAMETER": "my_min",
@@ -316,28 +320,26 @@ def test_deduplicate_evaluation_parameter_dependencies():
                 },
             },
             ExpectationValidationResult(
-                **{
-                    "expectation_config": {
-                        "meta": {
-                            "substituted_parameters": {"min_value": 1, "max_value": 5}
-                        },
-                        "kwargs": {
-                            "min_value": 1,
-                            "max_value": 5,
-                            "batch_id": "15fe04adb6ff20b9fc6eda486b7a36b7",
-                        },
-                        "expectation_type": "expect_table_row_count_to_be_between",
-                        "ge_cloud_id": None,
+                expectation_config={
+                    "meta": {
+                        "substituted_parameters": {"min_value": 1, "max_value": 5}
                     },
-                    "meta": {},
-                    "exception_info": {
-                        "raised_exception": False,
-                        "exception_traceback": None,
-                        "exception_message": None,
+                    "kwargs": {
+                        "min_value": 1,
+                        "max_value": 5,
+                        "batch_id": "15fe04adb6ff20b9fc6eda486b7a36b7",
                     },
-                    "success": True,
-                    "result": {"observed_value": 3},
-                }
+                    "expectation_type": "expect_table_row_count_to_be_between",
+                    "ge_cloud_id": None,
+                },
+                meta={},
+                exception_info={
+                    "raised_exception": False,
+                    "exception_traceback": None,
+                    "exception_message": None,
+                },
+                success=True,
+                result={"observed_value": 3},
             ),
         ),
     ],
@@ -345,59 +347,35 @@ def test_deduplicate_evaluation_parameter_dependencies():
 def test_evaluation_parameters_for_between_expectations_parse_correctly(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     dataframe,
+    evaluation_parameters,
+    expectation_type,
     expectation_kwargs,
     expected_expectation_validation_result,
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    # Note that if you modify this batch request, you may save the new version as a .json file
-    #  to pass in later via the --batch-request option
-    batch_request = {
-        "datasource_name": "my_datasource",
-        "data_connector_name": "my_runtime_data_connector",
-        "data_asset_name": "foo",
-        "runtime_parameters": {"batch_data": dataframe},
-        "batch_identifiers": {
-            "pipeline_stage_name": "kickoff",
-            "airflow_run_id": "1234",
-        },
-    }
-
-    # Feel free to change the name of your suite here. Renaming this will not remove the other one.
-    expectation_suite_name = "abcde"
-    try:
-        suite = context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(
-            f'Loaded ExpectationSuite "{suite.expectation_suite_name}" containing {len(suite.expectations)} '
-            f"expectations."
-        )
-    except DataContextError:
-        suite = context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
+    expectation_suite_name = "test_suite"
+    context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
 
     validator = context.get_validator(
-        batch_request=RuntimeBatchRequest(**batch_request),
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_datasource",
+            data_connector_name="my_runtime_data_connector",
+            data_asset_name="foo",
+            runtime_parameters={"batch_data": dataframe},
+            batch_identifiers={
+                "pipeline_stage_name": "kickoff",
+                "airflow_run_id": "1234",
+            },
+        ),
         expectation_suite_name=expectation_suite_name,
     )
-    column_names = [
-        f'"{column_name}"' for column_name in validator.metrics_calculator.columns()
-    ]
-    print(f"Columns: {', '.join(column_names)}.")
 
-    validator.set_evaluation_parameter("my_min", 1)
-    validator.set_evaluation_parameter("my_max", 5)
+    for evaluation_parameter in evaluation_parameters:
+        validator.set_evaluation_parameter(*evaluation_parameter)
 
-    # actual_expectation_validation_result = validator.expect_table_row_count_to_be_between(
-    #     min_value={"$PARAMETER": "my_min", "$PARAMETER.upstream_row_count": 10},
-    #     max_value={"$PARAMETER": "my_max", "$PARAMETER.upstream_row_count": 50},
-    # )
-
-    actual_expectation_validation_result = (
-        validator.expect_table_row_count_to_be_between(**expectation_kwargs)
+    actual_expectation_validation_result = getattr(validator, expectation_type)(
+        **expectation_kwargs
     )
 
     assert (
