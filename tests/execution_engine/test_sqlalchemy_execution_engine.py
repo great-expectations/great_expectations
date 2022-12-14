@@ -12,10 +12,13 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.execution_engine.execution_engine import (
+    MetricPartialFunctionTypes,
+)
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -90,7 +93,7 @@ def test_instantiation_via_url_and_retrieve_data_with_other_dialect(sa):
     assert my_execution_engine.credentials is None
     assert my_execution_engine.url[-36:] == "test_cases_for_sql_data_connector.db"
 
-    # 2. Change dialect to one not listed in GESqlDialect
+    # 2. Change dialect to one not listed in GXSqlDialect
     my_execution_engine.engine.dialect.name = "other_dialect"
 
     # 3. Get data
@@ -105,7 +108,7 @@ def test_instantiation_via_url_and_retrieve_data_with_other_dialect(sa):
 
     # 4. Assert dialect and data are as expected
 
-    assert batch_data.dialect == GESqlDialect.OTHER
+    assert batch_data.dialect == GXSqlDialect.OTHER
 
     my_execution_engine.load_batch_data("__", batch_data)
     validator = Validator(my_execution_engine)
@@ -169,7 +172,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     metrics.update(results)
 
     aggregate_fn_metric_1 = MetricConfiguration(
-        metric_name="column.max.aggregate_fn",
+        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -177,7 +180,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
         "table.columns": table_columns_metric,
     }
     aggregate_fn_metric_2 = MetricConfiguration(
-        metric_name="column.min.aggregate_fn",
+        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -185,7 +188,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
         "table.columns": table_columns_metric,
     }
     aggregate_fn_metric_3 = MetricConfiguration(
-        metric_name="column.max.aggregate_fn",
+        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
@@ -193,7 +196,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
         "table.columns": table_columns_metric,
     }
     aggregate_fn_metric_4 = MetricConfiguration(
-        metric_name="column.min.aggregate_fn",
+        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
@@ -858,7 +861,7 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(sa)
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
-        metric_name="column_values.length.max.aggregate_fn",
+        metric_name=f"column_values.length.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
         metric_domain_kwargs={
             "column": "names",
             "batch_id": "1234",

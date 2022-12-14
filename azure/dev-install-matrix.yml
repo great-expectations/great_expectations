@@ -71,8 +71,7 @@ jobs:
         - script: |
             pip install \
               --requirement requirements.txt \
-              --requirement reqs/requirements-dev-contrib.txt \
-              --requirement reqs/requirements-dev-lite.txt \
+              --requirement reqs/requirements-dev-test.txt \
               --constraint constraints-dev.txt \
               --editable .
           displayName: 'Install dependencies'

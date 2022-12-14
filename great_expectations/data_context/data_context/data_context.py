@@ -4,12 +4,13 @@ import logging
 import os
 import shutil
 import warnings
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
@@ -22,7 +23,7 @@ from great_expectations.data_context.templates import (
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
 from great_expectations.data_context.types.base import (
-    CURRENT_GE_CONFIG_VERSION,
+    CURRENT_GX_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
@@ -49,7 +50,7 @@ class DataContext(BaseDataContext):
 
     The DataContext is configured via a yml file stored in a directory called great_expectations; this configuration
     file as well as managed Expectation Suites should be stored in version control. There are other ways to create a
-    Data Context that may be better suited for your particular deployment e.g. ephemerally or backed by GE Cloud
+    Data Context that may be better suited for your particular deployment e.g. ephemerally or backed by GX Cloud
     (coming soon). Please refer to our documentation for more details.
 
     You can Validate data or generate Expectations using Execution Engines including:
@@ -71,35 +72,28 @@ class DataContext(BaseDataContext):
     store Expectations, Profilers, Checkpoints, Metrics, Validation Results and Data Docs and how those Stores are
     configured. Take a look at our documentation for more configuration options.
 
-    You can create or load a DataContext from disk via the following:
-    ```
-    import great_expectations as ge
-    ge.get_context()
-    ```
-
     --Public API--
 
     --Documentation--
-        https://docs.greatexpectations.io/docs/terms/data_context
+        - https://docs.greatexpectations.io/docs/terms/data_context
+
     """
 
     @classmethod
+    @public_api
     def create(
         cls,
         project_root_dir: Optional[str] = None,
         usage_statistics_enabled: bool = True,
         runtime_environment: Optional[dict] = None,
     ) -> DataContext:
-        """
-        Build a new great_expectations directory and DataContext object in the provided project_root_dir.
+        """Build a new great_expectations directory and DataContext object in the provided project_root_dir.
 
         `create` will create a new "great_expectations" directory in the provided folder, provided one does not
         already exist. Then, it will initialize a new DataContext in that folder and write the resulting config.
 
-        --Public API--
-
         --Documentation--
-            https://docs.greatexpectations.io/docs/terms/data_context
+            - https://docs.greatexpectations.io/docs/terms/data_context
 
         Args:
             project_root_dir: path to the root directory in which to create a new great_expectations directory
@@ -117,18 +111,18 @@ class DataContext(BaseDataContext):
                 "to initialize a new DataContext"
             )
 
-        ge_dir = os.path.join(project_root_dir, cls.GE_DIR)  # type: ignore[arg-type]
+        ge_dir = os.path.join(project_root_dir, cls.GX_DIR)  # type: ignore[arg-type]
         os.makedirs(ge_dir, exist_ok=True)
         cls.scaffold_directories(ge_dir)
 
-        if os.path.isfile(os.path.join(ge_dir, cls.GE_YML)):
-            message = f"""Warning. An existing `{cls.GE_YML}` was found here: {ge_dir}.
+        if os.path.isfile(os.path.join(ge_dir, cls.GX_YML)):
+            message = f"""Warning. An existing `{cls.GX_YML}` was found here: {ge_dir}.
     - No action was taken."""
             warnings.warn(message)
         else:
             cls.write_project_template_to_disk(ge_dir, usage_statistics_enabled)
 
-        uncommitted_dir = os.path.join(ge_dir, cls.GE_UNCOMMITTED_DIR)
+        uncommitted_dir = os.path.join(ge_dir, cls.GX_UNCOMMITTED_DIR)
         if os.path.isfile(os.path.join(uncommitted_dir, "config_variables.yml")):
             message = """Warning. An existing `config_variables.yml` was found here: {}.
     - No action was taken.""".format(
@@ -143,7 +137,7 @@ class DataContext(BaseDataContext):
     @classmethod
     def all_uncommitted_directories_exist(cls, ge_dir: str) -> bool:
         """Check if all uncommitted directories exist."""
-        uncommitted_dir = os.path.join(ge_dir, cls.GE_UNCOMMITTED_DIR)
+        uncommitted_dir = os.path.join(ge_dir, cls.GX_UNCOMMITTED_DIR)
         for directory in cls.UNCOMMITTED_DIRECTORIES:
             if not os.path.isdir(os.path.join(uncommitted_dir, directory)):
                 return False
@@ -153,7 +147,7 @@ class DataContext(BaseDataContext):
     @classmethod
     def config_variables_yml_exist(cls, ge_dir: str) -> bool:
         """Check if all config_variables.yml exists."""
-        path_to_yml = os.path.join(ge_dir, cls.GE_YML)
+        path_to_yml = os.path.join(ge_dir, cls.GX_YML)
 
         # TODO this is so brittle and gross
         with open(path_to_yml) as f:
@@ -173,7 +167,7 @@ class DataContext(BaseDataContext):
     def write_project_template_to_disk(
         cls, ge_dir: str, usage_statistics_enabled: bool = True
     ) -> None:
-        file_path = os.path.join(ge_dir, cls.GE_YML)
+        file_path = os.path.join(ge_dir, cls.GX_YML)
         with open(file_path, "w") as template:
             if usage_statistics_enabled:
                 template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED)
@@ -182,7 +176,7 @@ class DataContext(BaseDataContext):
 
     @classmethod
     def scaffold_directories(cls, base_dir: str) -> None:
-        """Safely create GE directories for a new project."""
+        """Safely create GX directories for a new project."""
         os.makedirs(base_dir, exist_ok=True)
         with open(os.path.join(base_dir, ".gitignore"), "w") as f:
             f.write("uncommitted/")
@@ -210,7 +204,7 @@ class DataContext(BaseDataContext):
             else:
                 os.makedirs(os.path.join(base_dir, directory), exist_ok=True)
 
-        uncommitted_dir = os.path.join(base_dir, cls.GE_UNCOMMITTED_DIR)
+        uncommitted_dir = os.path.join(base_dir, cls.GX_UNCOMMITTED_DIR)
 
         for new_directory in cls.UNCOMMITTED_DIRECTORIES:
             new_directory_path = os.path.join(uncommitted_dir, new_directory)
@@ -232,18 +226,40 @@ class DataContext(BaseDataContext):
         self,
         context_root_dir: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
+        cloud_mode: bool = False,
+        cloud_base_url: Optional[str] = None,
+        cloud_access_token: Optional[str] = None,
+        cloud_organization_id: Optional[str] = None,
+        # <GX_RENAME> Deprecated as of 0.15.37
         ge_cloud_mode: bool = False,
         ge_cloud_base_url: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
-        self._sources: _SourceFactories = _SourceFactories(self)
-        self._ge_cloud_mode = ge_cloud_mode
-        self._ge_cloud_config = self._init_ge_cloud_config(
+        # Chetan - 20221208 - not formally deprecating these values until a future date
+        (
+            cloud_base_url,
+            cloud_access_token,
+            cloud_organization_id,
+            cloud_mode,
+        ) = DataContext._resolve_cloud_args(
+            cloud_mode=cloud_mode,
+            cloud_base_url=cloud_base_url,
+            cloud_access_token=cloud_access_token,
+            cloud_organization_id=cloud_organization_id,
             ge_cloud_mode=ge_cloud_mode,
             ge_cloud_base_url=ge_cloud_base_url,
             ge_cloud_access_token=ge_cloud_access_token,
             ge_cloud_organization_id=ge_cloud_organization_id,
+        )
+
+        self._sources: _SourceFactories = _SourceFactories(self)
+        self._cloud_mode = cloud_mode
+        self._cloud_config = self._init_cloud_config(
+            cloud_mode=cloud_mode,
+            cloud_base_url=cloud_base_url,
+            cloud_access_token=cloud_access_token,
+            cloud_organization_id=cloud_organization_id,
         )
 
         self._context_root_directory = self._init_context_root_directory(
@@ -256,13 +272,57 @@ class DataContext(BaseDataContext):
             project_config=project_config,
             context_root_dir=self._context_root_directory,
             runtime_environment=runtime_environment,
-            ge_cloud_mode=self._ge_cloud_mode,
-            ge_cloud_config=self._ge_cloud_config,
+            cloud_mode=self._cloud_mode,
+            cloud_config=self._cloud_config,
         )
 
         # Save project config if data_context_id auto-generated
         if self._check_for_usage_stats_sync(project_config):
             self._save_project_config()
+
+    @staticmethod
+    def _resolve_cloud_args(  # type: ignore[override]
+        cloud_mode: bool = False,
+        cloud_base_url: Optional[str] = None,
+        cloud_access_token: Optional[str] = None,
+        cloud_organization_id: Optional[str] = None,
+        # <GX_RENAME> Deprecated as of 0.15.37
+        ge_cloud_mode: bool = False,
+        ge_cloud_base_url: Optional[str] = None,
+        ge_cloud_access_token: Optional[str] = None,
+        ge_cloud_organization_id: Optional[str] = None,
+    ) -> Tuple[Optional[str], Optional[str], Optional[str], bool]:
+        cloud_base_url = (
+            cloud_base_url if cloud_base_url is not None else ge_cloud_base_url
+        )
+        cloud_access_token = (
+            cloud_access_token
+            if cloud_access_token is not None
+            else ge_cloud_access_token
+        )
+        cloud_organization_id = (
+            cloud_organization_id
+            if cloud_organization_id is not None
+            else ge_cloud_organization_id
+        )
+        cloud_mode = True if cloud_mode or ge_cloud_mode else False
+        return cloud_base_url, cloud_access_token, cloud_organization_id, cloud_mode
+
+    def _save_project_config(self) -> None:
+        """
+        See parent 'AbstractDataContext._save_project_config()` for more information.
+
+        Explicitly override base class implementation to retain legacy behavior.
+        """
+        logger.debug("Starting DataContext._save_project_config")
+
+        config_filepath = os.path.join(self.root_directory, self.GX_YML)  # type: ignore[arg-type]
+
+        try:
+            with open(config_filepath, "w") as outfile:
+                self.config.to_yaml(outfile)
+        except PermissionError as e:
+            logger.warning(f"Could not save project config to disk: {e}")
 
     def _attach_datasource_to_context(self, datasource: XDatasource):
         # We currently don't allow one to overwrite a datasource with this internal method
@@ -277,25 +337,25 @@ class DataContext(BaseDataContext):
     def sources(self) -> _SourceFactories:
         return self._sources
 
-    def _init_ge_cloud_config(
+    def _init_cloud_config(
         self,
-        ge_cloud_mode: bool,
-        ge_cloud_base_url: Optional[str],
-        ge_cloud_access_token: Optional[str],
-        ge_cloud_organization_id: Optional[str],
+        cloud_mode: bool,
+        cloud_base_url: Optional[str],
+        cloud_access_token: Optional[str],
+        cloud_organization_id: Optional[str],
     ) -> Optional[GXCloudConfig]:
-        if not ge_cloud_mode:
+        if not cloud_mode:
             return None
 
-        ge_cloud_config = CloudDataContext.get_ge_cloud_config(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_access_token=ge_cloud_access_token,
-            ge_cloud_organization_id=ge_cloud_organization_id,
+        cloud_config = CloudDataContext.get_cloud_config(
+            cloud_base_url=cloud_base_url,
+            cloud_access_token=cloud_access_token,
+            cloud_organization_id=cloud_organization_id,
         )
-        return ge_cloud_config
+        return cloud_config
 
     def _init_context_root_directory(self, context_root_dir: Optional[str]) -> str:
-        if self.ge_cloud_mode and context_root_dir is None:
+        if self.cloud_mode and context_root_dir is None:
             context_root_dir = CloudDataContext.determine_context_root_directory(
                 context_root_dir
             )
@@ -375,20 +435,20 @@ class DataContext(BaseDataContext):
         The file may contain ${SOME_VARIABLE} variables - see self.project_config_with_variables_substituted
         for how these are substituted.
 
-        For Data Contexts in GE Cloud mode, a user-specific template is retrieved from the Cloud API
-        - see CloudDataContext.retrieve_data_context_config_from_ge_cloud for more details.
+        For Data Contexts in GX Cloud mode, a user-specific template is retrieved from the Cloud API
+        - see CloudDataContext.retrieve_data_context_config_from_cloud for more details.
 
         :return: the configuration object read from the file or template
         """
-        if self.ge_cloud_mode:
-            ge_cloud_config = self.ge_cloud_config
-            assert ge_cloud_config is not None
-            config = CloudDataContext.retrieve_data_context_config_from_ge_cloud(
-                ge_cloud_config=ge_cloud_config
+        if self.cloud_mode:
+            cloud_config = self.ge_cloud_config
+            assert cloud_config is not None
+            config = CloudDataContext.retrieve_data_context_config_from_cloud(
+                cloud_config=cloud_config
             )
             return config
 
-        path_to_yml = os.path.join(self._context_root_directory, self.GE_YML)
+        path_to_yml = os.path.join(self._context_root_directory, self.GX_YML)
         try:
             with open(path_to_yml) as data:
                 config_commented_map_from_yaml = yaml.load(data)
@@ -458,7 +518,7 @@ class DataContext(BaseDataContext):
     def find_context_root_dir(cls) -> str:
         result = None
         yml_path = None
-        ge_home_environment = os.getenv("GE_HOME")
+        ge_home_environment = os.getenv("GX_HOME")
         if ge_home_environment:
             ge_home_environment = os.path.expanduser(ge_home_environment)
             if os.path.isdir(ge_home_environment) and os.path.isfile(
@@ -509,10 +569,10 @@ class DataContext(BaseDataContext):
                         config_version, MINIMUM_SUPPORTED_CONFIG_VERSION
                     ),
                 )
-            elif config_version > CURRENT_GE_CONFIG_VERSION:
+            elif config_version > CURRENT_GX_CONFIG_VERSION:
                 raise ge_exceptions.UnsupportedConfigVersionError(
                     "Invalid config version ({}).\n    The maximum valid version is {}.".format(
-                        config_version, CURRENT_GE_CONFIG_VERSION
+                        config_version, CURRENT_GX_CONFIG_VERSION
                     ),
                 )
 
@@ -543,10 +603,10 @@ class DataContext(BaseDataContext):
                 f"Searching for config file {search_start_dir} ({i} layer deep)"
             )
 
-            potential_ge_dir = os.path.join(search_start_dir, cls.GE_DIR)
+            potential_ge_dir = os.path.join(search_start_dir, cls.GX_DIR)
 
             if os.path.isdir(potential_ge_dir):
-                potential_yml = os.path.join(potential_ge_dir, cls.GE_YML)
+                potential_yml = os.path.join(potential_ge_dir, cls.GX_YML)
                 if os.path.isfile(potential_yml):
                     yml_path = potential_yml
                     logger.debug(f"Found config file at {str(yml_path)}")
@@ -559,7 +619,7 @@ class DataContext(BaseDataContext):
     @classmethod
     def does_config_exist_on_disk(cls, context_root_dir: str) -> bool:
         """Return True if the great_expectations.yml exists on disk."""
-        return os.path.isfile(os.path.join(context_root_dir, cls.GE_YML))
+        return os.path.isfile(os.path.join(context_root_dir, cls.GX_YML))
 
     @classmethod
     def is_project_initialized(cls, ge_dir: str) -> bool:

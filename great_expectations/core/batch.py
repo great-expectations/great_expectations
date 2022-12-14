@@ -1,3 +1,4 @@
+import dataclasses
 import datetime
 import json
 import logging
@@ -547,12 +548,17 @@ class Batch(SerializableDictDot):
         self._data = data
         if batch_request is None:
             batch_request = {}
+
         self._batch_request = batch_request
+
         if batch_definition is None:
             batch_definition = IDDict()
+
         self._batch_definition = batch_definition
+
         if batch_spec is None:
             batch_spec = BatchSpec()
+
         self._batch_spec = batch_spec
 
         if batch_markers is None:
@@ -563,6 +569,7 @@ class Batch(SerializableDictDot):
                     ).strftime("%Y%m%dT%H%M%S.%fZ")
                 }
             )
+
         self._batch_markers = batch_markers
 
         # The remaining parameters are for backward compatibility.
@@ -645,11 +652,16 @@ class Batch(SerializableDictDot):
     @property
     def id(self):
         batch_definition = self._batch_definition
-        return (
-            batch_definition.id
-            if isinstance(batch_definition, BatchDefinition)
-            else batch_definition.to_id()
-        )
+        if isinstance(batch_definition, BatchDefinition):
+            return batch_definition.id
+
+        if isinstance(batch_definition, IDDict):
+            return batch_definition.to_id()
+
+        if isinstance(batch_definition, dict):
+            return IDDict(batch_definition).to_id()
+
+        return IDDict({}).to_id()
 
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
@@ -676,7 +688,11 @@ def materialize_batch_request(
         return None
 
     batch_request_class: type
-    if batch_request_contains_runtime_parameters(batch_request=effective_batch_request):
+    if "options" in effective_batch_request:
+        batch_request_class = XBatchRequest
+    elif batch_request_contains_runtime_parameters(
+        batch_request=effective_batch_request
+    ):
         batch_request_class = RuntimeBatchRequest
     else:
         batch_request_class = BatchRequest
@@ -704,13 +720,16 @@ def batch_request_contains_runtime_parameters(
 
 
 def get_batch_request_as_dict(
-    batch_request: Optional[Union[BatchRequestBase, dict]] = None
+    batch_request: Optional[Union[BatchRequestBase, XBatchRequest, dict]] = None
 ) -> Optional[dict]:
     if batch_request is None:
         return None
 
     if isinstance(batch_request, (BatchRequest, RuntimeBatchRequest)):
         batch_request = batch_request.to_dict()
+
+    if isinstance(batch_request, XBatchRequest):
+        batch_request = dataclasses.asdict(batch_request)
 
     return batch_request
 

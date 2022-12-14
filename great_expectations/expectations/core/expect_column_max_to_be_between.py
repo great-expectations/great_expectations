@@ -44,63 +44,56 @@ from great_expectations.render.renderer.renderer import renderer
 class ExpectColumnMaxToBeBetween(ColumnExpectation):
     """Expect the column maximum to be between a minimum value and a maximum value.
 
-           expect_column_max_to_be_between is a \
-           :func:`column_aggregate_expectation
-           <great_expectations.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.
+    expect_column_max_to_be_between is a \
+    [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations)
 
-           Args:
-               column (str): \
-                   The column name
-               min_value (comparable type or None): \
-                   The minimum number of unique values allowed.
-               max_value (comparable type or None): \
-                   The maximum number of unique values allowed.
-               strict_min (boolean):
-                   If True, the minimal column minimum must be strictly larger than min_value, default=False
-               strict_max (boolean):
-                   If True, the maximal column minimum must be strictly smaller than max_value, default=False
+    Args:
+        column (str): \
+            The column name
+        min_value (comparable type or None): \
+            The minimum number of unique values allowed.
+        max_value (comparable type or None): \
+            The maximum number of unique values allowed.
+        strict_min (boolean): \
+            If True, the minimal column minimum must be strictly larger than min_value, default=False
+        strict_max (boolean): \
+            If True, the maximal column minimum must be strictly smaller than max_value, default=False
 
-           Keyword Args:
-               parse_strings_as_datetimes (Boolean or None): \
-                   If True, parse min_value, max_values, and all non-null column values to datetimes before making \
-                   comparisons.
-               output_strftime_format (str or None): \
-                   A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
+    Keyword Args:
+        parse_strings_as_datetimes (Boolean or None): \
+            If True, parse min_value, max_values, and all non-null column values to datetimes before making \
+            comparisons.
+        output_strftime_format (str or None): \
+            A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
 
-           Other Parameters:
-               result_format (str or None): \
-                   Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                   For more detail, see :ref:`result_format <result_format>`.
-               include_config (boolean): \
-                   If True, then include the expectation config as part of the result object. \
-                   For more detail, see :ref:`include_config`.
-               catch_exceptions (boolean or None): \
-                   If True, then catch exceptions and include them as part of the result object. \
-                   For more detail, see :ref:`catch_exceptions`.
-               meta (dict or None): \
-                   A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-                   modification. For more detail, see :ref:`meta`.
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
-           Returns:
-               An ExpectationSuiteValidationResult
+    Returns:
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-               Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-               :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
 
-           Notes:
-               These fields in the result object are customized for this expectation:
-               ::
+    Notes:
+        * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
+        * If min_value is None, then max_value is treated as an upper bound
+        * If max_value is None, then min_value is treated as a lower bound
+        * observed_value field in the result object is customized for this expectation to be a list \
+            representing the actual column max
 
-                   {
-                       "observed_value": (list) The actual column max
-                   }
-
-
-               * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
-               * If min_value is None, then max_value is treated as an upper bound
-               * If max_value is None, then min_value is treated as a lower bound
-
-           """
+    See Also:
+        [expect_column_min_to_be_between](https://greatexpectations.io/expectations/expect_column_min_to_be_between)
+    """
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -229,7 +222,6 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -316,7 +308,6 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -387,7 +378,6 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):

@@ -16,8 +16,11 @@ from great_expectations.expectations.expectation import (
     ExpectationConfiguration,
     TableExpectation,
 )
-from great_expectations.expectations.metrics import MetricDomainTypes, metric_value
-from great_expectations.expectations.metrics.metric_provider import MetricConfiguration
+from great_expectations.expectations.metrics.metric_provider import (
+    MetricConfiguration,
+    MetricDomainTypes,
+    metric_value,
+)
 from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )

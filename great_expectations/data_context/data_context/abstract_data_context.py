@@ -34,6 +34,7 @@ from typing_extensions import Literal
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,
@@ -66,8 +67,9 @@ from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.store.expectations_store import ExpectationsStore
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.store.validations_store import ValidationsStore
+from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
-    CURRENT_GE_CONFIG_VERSION,
+    CURRENT_GX_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     ConcurrencyConfig,
@@ -120,6 +122,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # isort
     add_datasource_usage_statistics,
     get_batch_list_usage_statistics,
     run_validation_operator_usage_statistics,
+    save_expectation_suite_usage_statistics,
     send_usage_message,
     usage_statistics_enabled_method,
 )
@@ -276,7 +279,10 @@ class AbstractDataContext(ABC):
         """
         self.variables.save_config()
 
-    @abstractmethod
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
+        args_payload_fn=save_expectation_suite_usage_statistics,
+    )
     def save_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
@@ -288,7 +294,34 @@ class AbstractDataContext(ABC):
         """
         Each DataContext will define how ExpectationSuite will be saved.
         """
-        raise NotImplementedError
+        if expectation_suite_name is None:
+            key = ExpectationSuiteIdentifier(
+                expectation_suite_name=expectation_suite.expectation_suite_name
+            )
+        else:
+            expectation_suite.expectation_suite_name = expectation_suite_name
+            key = ExpectationSuiteIdentifier(
+                expectation_suite_name=expectation_suite_name
+            )
+        if (
+            self.expectations_store.has_key(key)  # noqa: @601
+            and not overwrite_existing
+        ):
+            raise ge_exceptions.DataContextError(
+                "expectation_suite with name {} already exists. If you would like to overwrite this "
+                "expectation_suite, set overwrite_existing=True.".format(
+                    expectation_suite_name
+                )
+            )
+        self._evaluation_parameter_dependencies_compiled = False
+        include_rendered_content = (
+            self._determine_if_expectation_suite_include_rendered_content(
+                include_rendered_content=include_rendered_content
+            )
+        )
+        if include_rendered_content:
+            expectation_suite.render()
+        return self.expectations_store.set(key, expectation_suite, **kwargs)
 
     # Properties
     @property
@@ -398,7 +431,7 @@ class AbstractDataContext(ABC):
                     f"with no `checkpoints` directory.\n "
                     f"Please create the following directory: {checkpoint_store_directory}.\n "
                     f"To use the new 'Checkpoint Store' feature, please update your configuration "
-                    f"to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  "
+                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)}.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} "
                     f"to learn more about the upgrade process."
                 )
@@ -408,7 +441,7 @@ class AbstractDataContext(ABC):
                     f"with no `checkpoints` directory.\n  "
                     f"Please create a `checkpoints` directory in your Great Expectations directory."
                     f"To use the new 'Checkpoint Store' feature, please update your configuration "
-                    f"to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  "
+                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)}.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} "
                     f"to learn more about the upgrade process."
                 )
@@ -431,7 +464,7 @@ class AbstractDataContext(ABC):
                 logger.warning(
                     f"Checkpoint store named '{checkpoint_store_name}' is not a configured store, "
                     f"so will try to use default Checkpoint store.\n  Please update your configuration "
-                    f"to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "
+                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)} in order to use the new "
                     f"'Checkpoint Store' feature.\n  Visit {AbstractDataContext.MIGRATION_WEBSITE} "
                     f"to learn more about the upgrade process."
                 )
@@ -464,7 +497,7 @@ class AbstractDataContext(ABC):
                     f"with no `profilers` directory.\n  "
                     f"Please create the following directory: {checkpoint_store_directory}\n"
                     f"To use the new 'Profiler Store' feature, please update your configuration "
-                    f"to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  "
+                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)}.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} to learn more about the "
                     f"upgrade process."
                 )
@@ -475,7 +508,7 @@ class AbstractDataContext(ABC):
                     f"Please create a `profilers` directory in your Great Expectations project "
                     f"directory.\n  "
                     f"To use the new 'Profiler Store' feature, please update your configuration "
-                    f"to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  "
+                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)}.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} to learn more about the "
                     f"upgrade process."
                 )
@@ -494,7 +527,7 @@ class AbstractDataContext(ABC):
                 logger.warning(
                     f"Profiler store named '{profiler_store_name}' is not a configured store, so will try to use "
                     f"default Profiler store.\n  Please update your configuration to the new version number "
-                    f"{float(CURRENT_GE_CONFIG_VERSION)} in order to use the new 'Profiler Store' feature.\n  "
+                    f"{float(CURRENT_GX_CONFIG_VERSION)} in order to use the new 'Profiler Store' feature.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} to learn more about the upgrade process."
                 )
                 built_store: Optional[Store] = self._build_store_from_config(
@@ -582,7 +615,7 @@ class AbstractDataContext(ABC):
             name: the name for the new datasource to add
             initialize: if False, add the datasource to the config, but do not
                 initialize it, for example if a user needs to debug database connectivity.
-            save_changes (bool): should GE save the Datasource config?
+            save_changes (bool): should GX save the Datasource config?
             kwargs (keyword arguments): the configuration for the new datasource
 
         Returns:
@@ -653,9 +686,9 @@ class AbstractDataContext(ABC):
     ) -> DataContextConfig:
         """
         Substitute vars in config of form ${var} or $(var) with values found in the following places,
-        in order of precedence: ge_cloud_config (for Data Contexts in GE Cloud mode), runtime_environment,
+        in order of precedence: ge_cloud_config (for Data Contexts in GX Cloud mode), runtime_environment,
         environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
-        be optional in GE Cloud mode).
+        be optional in GX Cloud mode).
         """
         if not config:
             config = self._project_config
@@ -1004,7 +1037,7 @@ class AbstractDataContext(ABC):
 
         response = self.profiler_store.set(key=key, value=profiler.config)  # type: ignore[func-returns-value]
         if isinstance(response, GXCloudResourceRef):
-            ge_cloud_id = response.ge_cloud_id
+            ge_cloud_id = response.cloud_id
 
         # If an id is present, we want to prioritize that as our key for object retrieval
         if ge_cloud_id:
@@ -1255,6 +1288,7 @@ class AbstractDataContext(ABC):
     ) -> CheckpointResult:
         """
         Validate against a pre-defined Checkpoint. (Experimental)
+
         Args:
             checkpoint_name: The name of a Checkpoint defined via the CLI or by manually creating a yml file
             template_name: The name of a Checkpoint template to retrieve from the CheckpointStore
@@ -1506,6 +1540,7 @@ class AbstractDataContext(ABC):
                 include_rendered_content=include_rendered_content
             )
         )
+
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
         execution_engine: ExecutionEngine
@@ -1517,6 +1552,7 @@ class AbstractDataContext(ABC):
             execution_engine = self.datasources[  # type: ignore[union-attr]
                 batch_list[-1].batch_definition.datasource_name
             ].execution_engine
+
         validator = Validator(
             execution_engine=execution_engine,
             interactive_evaluation=True,
@@ -1525,6 +1561,7 @@ class AbstractDataContext(ABC):
             batches=batch_list,
             include_rendered_content=include_rendered_content,
         )
+
         return validator
 
     @usage_statistics_enabled_method(
@@ -1694,12 +1731,12 @@ class AbstractDataContext(ABC):
         include_rendered_content: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> ExpectationSuite:
-        """Get an Expectation Suite by name or GE Cloud ID
+        """Get an Expectation Suite by name or GX Cloud ID
         Args:
             expectation_suite_name (str): The name of the Expectation Suite
             include_rendered_content (bool): Whether or not to re-populate rendered_content for each
                 ExpectationConfiguration.
-            ge_cloud_id (str): The GE Cloud ID for the Expectation Suite.
+            ge_cloud_id (str): The GX Cloud ID for the Expectation Suite.
 
         Returns:
             An existing ExpectationSuite
@@ -1800,7 +1837,7 @@ class AbstractDataContext(ABC):
             batch_list: Explicit list of Batch objects to supply data at runtime
             batch_request: Explicit batch_request used to supply data at runtime
             name: Identifier used to retrieve the profiler from a store.
-            ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
+            ge_cloud_id: Identifier used to retrieve the profiler from a store (GX Cloud specific).
             variables: Attribute name/value pairs (overrides)
             rules: Key-value pairs of name/configuration-dictionary (overrides)
 
@@ -1838,7 +1875,7 @@ class AbstractDataContext(ABC):
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
             name: Identifier used to retrieve the profiler from a store.
-            ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
+            ge_cloud_id: Identifier used to retrieve the profiler from a store (GX Cloud specific).
 
         Returns:
             Set of rule evaluation results in the form of an RuleBasedProfilerResult
@@ -2905,7 +2942,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 self._cached_datasources[datasource_name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
-                # this error will happen if our configuration contains datasources that GE can no longer connect to.
+                # this error will happen if our configuration contains datasources that GX can no longer connect to.
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch() step. So we just pass here.
                 pass
@@ -3026,27 +3063,27 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Raises:
             DatasourceInitializationError
         """
+        # Note that the call to `DatasourcStore.set` may alter the config object's state
+        # As such, we invoke it at the top of our function so any changes are reflected downstream
         if save_changes:
             config = self._datasource_store.set(key=None, value=config)  # type: ignore[attr-defined]
-
-        self.config.datasources[config.name] = config  # type: ignore[index,assignment]
-
-        substituted_config = self._perform_substitutions_on_datasource_config(config)
 
         datasource: Optional[Datasource] = None
         if initialize:
             try:
+                substituted_config = self._perform_substitutions_on_datasource_config(
+                    config
+                )
                 datasource = self._instantiate_datasource_from_config(
                     raw_config=config, substituted_config=substituted_config
                 )
                 self._cached_datasources[config.name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
-                # Do not keep configuration that could not be instantiated.
                 if save_changes:
                     self._datasource_store.delete(config)  # type: ignore[attr-defined]
-                # If the DatasourceStore uses an InlineStoreBackend, the config may already be updated
-                self.config.datasources.pop(config.name, None)  # type: ignore[union-attr,arg-type]
                 raise e
+
+        self.config.datasources[config.name] = config  # type: ignore[index,assignment]
 
         return datasource
 
@@ -3299,6 +3336,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             return save_changes
         return True
 
+    @public_api
     def test_yaml_config(  # noqa: C901 - complexity 17
         self,
         yaml_config: str,
@@ -3321,13 +3359,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         For many deployments of Great Expectations, these components (plus
         Expectations) are the only ones you'll need.
 
-        test_yaml_config is mainly intended for use within notebooks and tests.
-
-        --Public API--
+        `test_yaml_config` is mainly intended for use within notebooks and tests.
 
         --Documentation--
-            https://docs.greatexpectations.io/docs/terms/data_context
-            https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config
+            - https://docs.greatexpectations.io/docs/terms/data_context
+            - https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config
 
         Args:
             yaml_config: A string containing the yaml config to be tested
@@ -3335,7 +3371,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             pretty_print: Determines whether to print human-readable output
             return_mode: Determines what type of object test_yaml_config will return.
                 Valid modes are "instantiated_class" and "report_object"
-            shorten_tracebacks:If true, catch any errors during instantiation and print only the
+            shorten_tracebacks: If true, catch any errors during instantiation and print only the
                 last element of the traceback stack. This can be helpful for
                 rapid iteration on configs in a notebook, because it can remove
                 the need to scroll up and down a lot.
@@ -3345,6 +3381,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             OR
             a json object containing metadata from the component's self_check method.
             The returned object is determined by return_mode.
+
         """
         yaml_config_validator = _YamlConfigValidator(
             data_context=self,
@@ -3724,3 +3761,52 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 return value.replace("$", dollar_sign_escape_string)
             return value
         return value.replace("$", dollar_sign_escape_string)
+
+    def save_config_variable(
+        self,
+        config_variable_name: str,
+        value: Any,
+        skip_if_substitution_variable: bool = True,
+    ) -> None:
+        r"""Save config variable value
+        Escapes $ unless they are used in substitution variables e.g. the $ characters in ${SOME_VAR} or $SOME_VAR are not escaped
+
+        Args:
+            config_variable_name: name of the property
+            value: the value to save for the property
+            skip_if_substitution_variable: set to False to escape $ in values in substitution variable form e.g. ${SOME_VAR} -> r"\${SOME_VAR}" or $SOME_VAR -> r"\$SOME_VAR"
+
+        Returns:
+            None
+        """
+        config_variables = self.config_variables
+        value = self.escape_all_config_variables(
+            value,
+            self.DOLLAR_SIGN_ESCAPE_STRING,
+            skip_if_substitution_variable=skip_if_substitution_variable,
+        )
+        config_variables[config_variable_name] = value
+        # Required to call _variables instead of variables property because we don't want to trigger substitutions
+        config = self._variables.config
+        config_variables_filepath = config.config_variables_file_path
+        if not config_variables_filepath:
+            raise ge_exceptions.InvalidConfigError(
+                "'config_variables_file_path' property is not found in config - setting it is required to use this feature"
+            )
+
+        config_variables_filepath = os.path.join(
+            self.root_directory, config_variables_filepath  # type: ignore[arg-type]
+        )
+
+        os.makedirs(os.path.dirname(config_variables_filepath), exist_ok=True)
+        if not os.path.isfile(config_variables_filepath):
+            logger.info(
+                "Creating new substitution_variables file at {config_variables_filepath}".format(
+                    config_variables_filepath=config_variables_filepath
+                )
+            )
+            with open(config_variables_filepath, "w") as template:
+                template.write(CONFIG_VARIABLES_TEMPLATE)
+
+        with open(config_variables_filepath, "w") as config_variables_file:
+            yaml.dump(config_variables, config_variables_file)

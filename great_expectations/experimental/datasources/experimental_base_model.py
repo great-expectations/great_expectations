@@ -5,10 +5,13 @@ import logging
 import pathlib
 from io import StringIO
 from pprint import pformat as pf
-from typing import Union, overload
+from typing import TYPE_CHECKING, List, Type, TypeVar, Union, overload
 
 import pydantic
 from ruamel.yaml import YAML
+
+if TYPE_CHECKING:
+    from pydantic.typing import DictStrAny
 
 LOGGER = logging.getLogger(__name__)
 
@@ -17,13 +20,17 @@ yaml = YAML(typ="safe")
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
+# TODO (kilo59): replace this with `typing_extensions.Self` once mypy supports it
+# Taken from this SO answer https://stackoverflow.com/a/72182814/6304433
+_Self = TypeVar("_Self", bound="ExperimentalBaseModel")
+
 
 class ExperimentalBaseModel(pydantic.BaseModel):
     class Config:
         extra = pydantic.Extra.forbid
 
     @classmethod
-    def parse_yaml(cls, f: Union[pathlib.Path, str]) -> ExperimentalBaseModel:
+    def parse_yaml(cls: Type[_Self], f: Union[pathlib.Path, str]) -> _Self:
         loaded = yaml.load(f)
         LOGGER.debug(f"loaded from yaml ->\n{pf(loaded, depth=3)}\n")
         config = cls(**loaded)
@@ -57,3 +64,38 @@ class ExperimentalBaseModel(pydantic.BaseModel):
         if isinstance(stream_or_path, pathlib.Path):
             return stream_or_path
         return stream_or_path.getvalue()
+
+    def __str__(self):
+        return self.yaml()
+
+    # Workaround for https://github.com/pydantic/pydantic/issues/935
+    #
+    # Currently there is no way to output properties using pydantics builtin in json and dict
+    # methods. Our current fix does let one use the exclude/include arguments on properties,
+    # we always include them. We could fix this by changing the json and dict signatures
+    # to `def dict(self, *, include, exclude, **kwargs)` and add the implementation.
+    # See this comment for one way to do this:
+    # https://github.com/pydantic/pydantic/issues/935#issuecomment-554378904
+
+    @classmethod
+    def _get_properties(cls) -> List[str]:
+        return [
+            prop for prop in cls.__dict__ if isinstance(cls.__dict__[prop], property)
+        ]
+
+    def json(self, **kwargs) -> str:
+        """The json representation of the Model."""
+        self.__dict__.update(
+            {prop: getattr(self, prop) for prop in self._get_properties()}
+        )
+        attribs = super().json(**kwargs)
+        return attribs
+
+    def dict(self, **kwargs) -> DictStrAny:
+        """The dict representation of the Model."""
+        self.__dict__.update(
+            {prop: getattr(self, prop) for prop in self._get_properties()}
+        )
+        return super().dict(**kwargs)
+
+    # End Workaround

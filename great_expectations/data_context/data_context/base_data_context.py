@@ -2,17 +2,15 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any, List, Mapping, Optional, Union
+from typing import List, Mapping, Optional, Tuple, Union
 
 from ruamel.yaml import YAML
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
-    save_expectation_suite_usage_statistics,
     usage_statistics_enabled_method,
 )
 from great_expectations.data_context.data_context.cloud_data_context import (
@@ -24,7 +22,6 @@ from great_expectations.data_context.data_context.ephemeral_data_context import 
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
@@ -153,17 +150,17 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     """
 
     UNCOMMITTED_DIRECTORIES = ["data_docs", "validations"]
-    GE_UNCOMMITTED_DIR = "uncommitted"
+    GX_UNCOMMITTED_DIR = "uncommitted"
     BASE_DIRECTORIES = [
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.EXPECTATIONS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.PLUGINS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.PROFILERS_BASE_DIRECTORY.value,
-        GE_UNCOMMITTED_DIR,
+        GX_UNCOMMITTED_DIR,
     ]
-    GE_DIR = "great_expectations"
-    GE_YML = "great_expectations.yml"  # TODO: migrate this to FileDataContext. Still needed by DataContext
-    GE_EDIT_NOTEBOOK_DIR = GE_UNCOMMITTED_DIR
+    GX_DIR = "great_expectations"
+    GX_YML = "great_expectations.yml"  # TODO: migrate this to FileDataContext. Still needed by DataContext
+    GX_EDIT_NOTEBOOK_DIR = GX_UNCOMMITTED_DIR
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
 
     @usage_statistics_enabled_method(
@@ -174,6 +171,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         project_config: Union[DataContextConfig, Mapping],
         context_root_dir: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
+        cloud_mode: bool = False,
+        cloud_config: Optional[GXCloudConfig] = None,
+        # <GX_RENAME> Deprecated as of 0.15.37
         ge_cloud_mode: bool = False,
         ge_cloud_config: Optional[GXCloudConfig] = None,
     ) -> None:
@@ -184,38 +184,45 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 based on conventions for project subdirectories.
             runtime_environment: a dictionary of config variables that
                 override both those set in config_variables.yml and the environment
-            ge_cloud_mode: boolean flag that describe whether DataContext is being instantiated by ge_cloud
-           ge_cloud_config: config for ge_cloud
+            cloud_mode: boolean flag that describe whether DataContext is being instantiated by Cloud
+            cloud_config: config for Cloud
         Returns:
             None
         """
+        # Chetan - 20221208 - not formally deprecating these values until a future date
+        cloud_mode, cloud_config = BaseDataContext._resolve_cloud_args(
+            cloud_mode=cloud_mode,
+            cloud_config=cloud_config,
+            ge_cloud_mode=ge_cloud_mode,
+            ge_cloud_config=ge_cloud_config,
+        )
 
         project_data_context_config: DataContextConfig = (
             BaseDataContext.get_or_create_data_context_config(project_config)
         )
 
-        self._ge_cloud_mode = ge_cloud_mode
-        self._ge_cloud_config = ge_cloud_config
+        self._cloud_mode = cloud_mode
+        self._cloud_config = cloud_config
         if context_root_dir is not None:
             context_root_dir = os.path.abspath(context_root_dir)
         self._context_root_directory = context_root_dir
         # initialize runtime_environment as empty dict if None
         runtime_environment = runtime_environment or {}
-        if self._ge_cloud_mode:
-            ge_cloud_base_url: Optional[str] = None
-            ge_cloud_access_token: Optional[str] = None
-            ge_cloud_organization_id: Optional[str] = None
-            if ge_cloud_config:
-                ge_cloud_base_url = ge_cloud_config.base_url
-                ge_cloud_access_token = ge_cloud_config.access_token
-                ge_cloud_organization_id = ge_cloud_config.organization_id
+        if self._cloud_mode:
+            cloud_base_url: Optional[str] = None
+            cloud_access_token: Optional[str] = None
+            cloud_organization_id: Optional[str] = None
+            if cloud_config:
+                cloud_base_url = cloud_config.base_url
+                cloud_access_token = cloud_config.access_token
+                cloud_organization_id = cloud_config.organization_id
             self._data_context = CloudDataContext(
                 project_config=project_data_context_config,
                 runtime_environment=runtime_environment,
                 context_root_dir=context_root_dir,
-                ge_cloud_base_url=ge_cloud_base_url,
-                ge_cloud_access_token=ge_cloud_access_token,
-                ge_cloud_organization_id=ge_cloud_organization_id,
+                cloud_base_url=cloud_base_url,
+                cloud_access_token=cloud_access_token,
+                cloud_organization_id=cloud_organization_id,
             )
         elif self._context_root_directory:
             self._data_context = FileDataContext(  # type: ignore[assignment]
@@ -257,13 +264,30 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     validation_operator_config,
                 )
 
+    @staticmethod
+    def _resolve_cloud_args(
+        cloud_mode: bool = False,
+        cloud_config: Optional[GXCloudConfig] = None,
+        # <GX_RENAME> Deprecated as of 0.15.37
+        ge_cloud_mode: bool = False,
+        ge_cloud_config: Optional[GXCloudConfig] = None,
+    ) -> Tuple[bool, Optional[GXCloudConfig]]:
+        cloud_mode = True if cloud_mode or ge_cloud_mode else False
+        cloud_config = cloud_config if cloud_config is not None else ge_cloud_config
+        return cloud_mode, cloud_config
+
     @property
     def ge_cloud_config(self) -> Optional[GXCloudConfig]:
-        return self._ge_cloud_config
+        return self._cloud_config
+
+    @property
+    def cloud_mode(self) -> bool:
+        return self._cloud_mode
 
     @property
     def ge_cloud_mode(self) -> bool:
-        return self._ge_cloud_mode
+        # <GX_RENAME> Deprecated 0.15.37
+        return self.cloud_mode
 
     def _synchronize_self_with_underlying_data_context(self) -> None:
         """
@@ -296,72 +320,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
         self._assistants = self._data_context._assistants
 
-    def _save_project_config(self) -> None:
-        """Save the current project to disk."""
-        logger.debug("Starting DataContext._save_project_config")
-
-        config_filepath = os.path.join(self.root_directory, self.GE_YML)  # type: ignore[arg-type]
-
-        try:
-            with open(config_filepath, "w") as outfile:
-                self.config.to_yaml(outfile)
-        except PermissionError as e:
-            logger.warning(f"Could not save project config to disk: {e}")
-
     #####
     #
     # Internal helper methods
     #
     #####
-
-    def save_config_variable(
-        self,
-        config_variable_name: str,
-        value: Any,
-        skip_if_substitution_variable: bool = True,
-    ) -> None:
-        r"""Save config variable value
-        Escapes $ unless they are used in substitution variables e.g. the $ characters in ${SOME_VAR} or $SOME_VAR are not escaped
-
-        Args:
-            config_variable_name: name of the property
-            value: the value to save for the property
-            skip_if_substitution_variable: set to False to escape $ in values in substitution variable form e.g. ${SOME_VAR} -> r"\${SOME_VAR}" or $SOME_VAR -> r"\$SOME_VAR"
-
-        Returns:
-            None
-        """
-        config_variables = self.config_variables
-        value = self.escape_all_config_variables(
-            value,
-            self.DOLLAR_SIGN_ESCAPE_STRING,
-            skip_if_substitution_variable=skip_if_substitution_variable,
-        )
-        config_variables[config_variable_name] = value
-        # Required to call _variables instead of variables property because we don't want to trigger substitutions
-        config = self._variables.config
-        config_variables_filepath = config.config_variables_file_path
-        if not config_variables_filepath:
-            raise ge_exceptions.InvalidConfigError(
-                "'config_variables_file_path' property is not found in config - setting it is required to use this feature"
-            )
-
-        config_variables_filepath = os.path.join(
-            self.root_directory, config_variables_filepath  # type: ignore[arg-type]
-        )
-
-        os.makedirs(os.path.dirname(config_variables_filepath), exist_ok=True)
-        if not os.path.isfile(config_variables_filepath):
-            logger.info(
-                "Creating new substitution_variables file at {config_variables_filepath}".format(
-                    config_variables_filepath=config_variables_filepath
-                )
-            )
-            with open(config_variables_filepath, "w") as template:
-                template.write(CONFIG_VARIABLES_TEMPLATE)
-
-        with open(config_variables_filepath, "w") as config_variables_file:
-            yaml.dump(config_variables, config_variables_file)
 
     def delete_datasource(  # type: ignore[override]
         self, datasource_name: str, save_changes: Optional[bool] = None
@@ -392,9 +355,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         Args:
             name (str): Name of Datasource
-            initialize (bool): Should GE add and initialize the Datasource? If true then current
+            initialize (bool): Should GX add and initialize the Datasource? If true then current
                 method will return initialized Datasource
-            save_changes (Optional[bool]): should GE save the Datasource config?
+            save_changes (Optional[bool]): should GX save the Datasource config?
             **kwargs Optional[dict]: Additional kwargs that define Datasource initialization kwargs
 
         Returns:
@@ -435,7 +398,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             expectation_suite_name (str): The name of the Expectation Suite
             include_rendered_content (bool): Whether or not to re-populate rendered_content for each
                 ExpectationConfiguration.
-            ge_cloud_id (str): The GE Cloud ID for the Expectation Suite.
+            ge_cloud_id (str): The GX Cloud ID for the Expectation Suite.
 
         Returns:
             An existing ExpectationSuite
@@ -465,45 +428,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
         self._synchronize_self_with_underlying_data_context()
         return res
-
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
-        args_payload_fn=save_expectation_suite_usage_statistics,
-    )
-    def save_expectation_suite(
-        self,
-        expectation_suite: ExpectationSuite,
-        expectation_suite_name: Optional[str] = None,
-        overwrite_existing: bool = True,
-        include_rendered_content: Optional[bool] = None,
-        **kwargs: Optional[dict],
-    ) -> None:
-        """Save the provided expectation suite into the DataContext.
-
-        Args:
-            expectation_suite: The suite to save.
-            expectation_suite_name: The name of this Expectation Suite. If no name is provided, the name will be read
-                from the suite.
-            overwrite_existing: Whether to overwrite the suite if it already exists.
-            include_rendered_content: Whether to save the prescriptive rendered content for each expectation.
-
-        Returns:
-            None
-        """
-        include_rendered_content = (
-            self._determine_if_expectation_suite_include_rendered_content(
-                include_rendered_content=include_rendered_content
-            )
-        )
-
-        self._data_context.save_expectation_suite(
-            expectation_suite,
-            expectation_suite_name,
-            overwrite_existing,
-            include_rendered_content,
-            **kwargs,
-        )
-        self._synchronize_self_with_underlying_data_context()
 
     @property
     def root_directory(self) -> Optional[str]:
@@ -572,6 +496,22 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         self._synchronize_self_with_underlying_data_context()
         return checkpoint
+
+    def save_expectation_suite(
+        self,
+        expectation_suite: ExpectationSuite,
+        expectation_suite_name: Optional[str] = None,
+        overwrite_existing: bool = True,
+        include_rendered_content: Optional[bool] = None,
+        **kwargs: Optional[dict],
+    ) -> None:
+        self._data_context.save_expectation_suite(
+            expectation_suite,
+            expectation_suite_name=expectation_suite_name,
+            overwrite_existing=overwrite_existing,
+            include_rendered_content=include_rendered_content,
+            **kwargs,
+        )
 
     def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
         return self._data_context.list_checkpoints()
