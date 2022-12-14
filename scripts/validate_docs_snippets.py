@@ -18,12 +18,14 @@ def check_dependencies(*deps: str) -> None:
 
 
 def run_docusaurus_build(target_dir: str) -> None:
+    # https://docusaurus.io/docs/cli#docusaurus-build-sitedir
     subprocess.call(
         [
             "yarn",
             "build",
             "--out-dir",
             target_dir,
+            "--no-minify",  # Aids with debugging errors
         ],
     )
 
@@ -33,7 +35,7 @@ def run_grep(target_dir: str) -> List[str]:
         res = subprocess.run(
             [
                 "grep",
-                "-Enr",
+                "-Er",
                 r"<\/?snippet>",
                 target_dir,
             ],

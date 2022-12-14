@@ -4,8 +4,8 @@ title: How to get Data Docs URLs for use in custom Validation Actions
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-If you would like to a custom Validation Action that includes a link to <TechnicalTag tag="data_docs" text="Data Docs"/>, 
-you can access the Data Docs URL for the respective <TechnicalTag tag="validation_result" text="Validation Results"/> page from your Validation Results following a <TechnicalTag tag="checkpoint" text="Checkpoint"/> run following the steps below. 
+If you would like to a custom Validation Action that includes a link to <TechnicalTag tag="data_docs" text="Data Docs"/>,
+you can access the Data Docs URL for the respective <TechnicalTag tag="validation_result" text="Validation Results"/> page from your Validation Results following a <TechnicalTag tag="checkpoint" text="Checkpoint"/> run following the steps below.
 
 This will work to get the URLs for any type of Data Docs site setup, e.g. S3 or local setup.
 
@@ -20,14 +20,14 @@ This will work to get the URLs for any type of Data Docs site setup, e.g. S3 or 
 
 First, within the `_run` method of your custom Validation Action, instantiate an empty `dict` to hold your sites:
 
-```python file=../../../../great_expectations/checkpoint/actions.py#L1085
+```python file=../../../../great_expectations/checkpoint/actions.py#L1087
 ```
 
 ### 2. Acquire
 
 Next, call `get_docs_sites_urls` to get the urls for all the suites processed by this Checkpoint:
 
-```python file=../../../../great_expectations/checkpoint/actions.py#L1092-L1095
+```python file=../../../../great_expectations/checkpoint/actions.py#L1094-L1097
 ```
 
 
@@ -35,7 +35,7 @@ Next, call `get_docs_sites_urls` to get the urls for all the suites processed by
 
 The above step returns a list of dictionaries containing the relevant information. Now, we need to iterate through the entries to build the object we want:
 
-```python file=../../../../great_expectations/checkpoint/actions.py#L1099-L1100
+```python file=../../../../great_expectations/checkpoint/actions.py#L1101-L1102
 ```
 
 ### 4. Utilize
