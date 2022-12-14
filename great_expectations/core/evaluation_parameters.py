@@ -9,6 +9,7 @@ import traceback
 from collections import namedtuple
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
+import dateutil
 from pyparsing import (
     CaselessKeyword,
     Combine,
@@ -199,7 +200,10 @@ class EvaluationParameterParser:
             try:
                 return int(op)
             except ValueError:
-                return float(op)
+                try:
+                    return float(op)
+                except ValueError:
+                    return dateutil.parser.parse(op)
 
 
 def build_evaluation_parameters(
@@ -411,7 +415,8 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
 
     try:
         result = EXPR.evaluate_stack(EXPR.exprStack)
-        result = convert_to_json_serializable(result)
+        if not isinstance(result, datetime.datetime):
+            result = convert_to_json_serializable(result)
     except Exception as e:
         exception_traceback = traceback.format_exc()
         exception_message = (

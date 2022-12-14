@@ -2,7 +2,6 @@ import math
 from datetime import datetime, timedelta
 from timeit import timeit
 
-import dateutil
 import pandas
 import pandas as pd
 import pytest
@@ -118,7 +117,7 @@ def test_parse_evaluation_parameter():
     with pytest.raises(EvaluationParameterError) as e:
         parse_evaluation_parameter("foo + bar", {"foo": 2})
     assert (
-        "Error while evaluating evaluation parameter expression: could not convert string to float"
+        "Error while evaluating evaluation parameter expression: Unknown string format: bar"
         in str(e.value)
     )
 
@@ -204,9 +203,7 @@ def test_temporal_evaluation_parameters():
     now = datetime.now()
     assert (
         (now - timedelta(weeks=1, seconds=3))
-        < dateutil.parser.parse(
-            parse_evaluation_parameter("now() - timedelta(weeks=1, seconds=2)")
-        )
+        < parse_evaluation_parameter("now() - timedelta(weeks=1, seconds=2)")
         < now - timedelta(weeks=1, seconds=1)
     )
 
@@ -218,9 +215,7 @@ def test_temporal_evaluation_parameters_complex():
     # Choosing "2*3" == 6 weeks shows we can parse an expression inside a kwarg.
     assert (
         (now - timedelta(weeks=2 * 3, seconds=3))
-        < dateutil.parser.parse(
-            parse_evaluation_parameter("now() - timedelta(weeks=2*3, seconds=2)")
-        )
+        < parse_evaluation_parameter("now() - timedelta(weeks=2*3, seconds=2)")
         < now - timedelta(weeks=2 * 3, seconds=1)
     )
 
@@ -315,11 +310,9 @@ def test_deduplicate_evaluation_parameter_dependencies():
             {
                 "min_value": {
                     "$PARAMETER": "my_min",
-                    "$PARAMETER.upstream_row_count": 10,
                 },
                 "max_value": {
                     "$PARAMETER": "my_max",
-                    "$PARAMETER.upstream_row_count": 50,
                 },
             },
             ExpectationValidationResult(
@@ -355,13 +348,13 @@ def test_deduplicate_evaluation_parameter_dependencies():
             ),
             (
                 ("my_min_date", datetime(2016, 12, 10)),
-                ("my_max_date", datetime(2022, 12, 13) - pd.Timedelta(weeks=1)),
+                ("my_max_date", datetime(2022, 12, 13)),
             ),
             "expect_column_values_to_be_between",
             {
                 "column": "my_date",
                 "min_value": {"$PARAMETER": "my_min_date"},
-                "max_value": {"$PARAMETER": "my_max_date"},
+                "max_value": {"$PARAMETER": "my_max_date - timedelta(weeks=1)"},
             },
             ExpectationValidationResult(
                 expectation_config=ExpectationConfiguration(
@@ -450,14 +443,14 @@ def test_now_evaluation_parameter():
     """
     # By itself
     res = parse_evaluation_parameter("now()")
-    assert dateutil.parser.parse(
-        res
+    assert isinstance(
+        res, datetime
     ), "Provided evaluation parameter is not dateutil-parseable"
 
     # In conjunction with timedelta
     res = parse_evaluation_parameter("now() - timedelta(weeks=1)")
-    assert dateutil.parser.parse(
-        res
+    assert isinstance(
+        res, datetime
     ), "Provided evaluation parameter is not dateutil-parseable"
 
     # Require parens to actually invoke
