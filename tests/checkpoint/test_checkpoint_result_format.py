@@ -695,6 +695,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_outp
         "result_format": {
             "result_format": "COMPLETE",
             "unexpected_index_column_names": ["pk_1"],
+            "include_unexpected_rows": True,
         }
     }
     context: DataContext = _add_expectations_and_checkpoint(
@@ -707,4 +708,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_outp
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
     )
-    print("helo")
+    # breakpoint()
+    # this is going to be great
+    for res in result.run_results.values():
+        print(res["actions_results"]["update_data_docs"])

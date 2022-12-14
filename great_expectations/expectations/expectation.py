@@ -755,54 +755,15 @@ class Expectation(metaclass=MetaExpectation):
         ):
             return None
 
-        table_rows = []
-
         if result_dict.get("partial_unexpected_counts"):
-            # We will check to see whether we have *all* of the unexpected values
-            # accounted for in our count, and include counts if we do. If we do not,
-            # we will use this as simply a better (non-repeating) source of
-            # "sampled" unexpected values
-            total_count = 0
-            partial_unexpected_counts: Optional[List[dict]] = result_dict.get(
-                "partial_unexpected_counts"
-            )
-            if partial_unexpected_counts:
-                for unexpected_count_dict in partial_unexpected_counts:
-                    value: Optional[Any] = unexpected_count_dict.get("value")
-                    count: Optional[int] = unexpected_count_dict.get("count")
-                    if count:
-                        total_count += count
-                    if value is not None and value != "":
-                        table_rows.append([value, count])
-                    elif value == "":
-                        table_rows.append(["EMPTY", count])
-                    else:
-                        table_rows.append(["null", count])
-
-            # Check to see if we have *all* of the unexpected values accounted for. If so,
-            # we show counts. If not, we only show "sampled" unexpected values.
-            if total_count == result_dict.get("unexpected_count"):
-                header_row = ["Unexpected Value", "Count"]
-            else:
-                header_row = ["Sampled Unexpected Values"]
-                table_rows = [[row[0]] for row in table_rows]
+            (
+                header_row,
+                table_rows,
+            ) = Expectation._build_partial_unexpected_counts_table(result_dict)
         else:
-            header_row = ["Sampled Unexpected Values"]
-            sampled_values_set = set()
-            partial_unexpected_list: Optional[List[Any]] = result_dict.get(
-                "partial_unexpected_list"
+            (header_row, table_rows) = Expectation._build_sampled_unexpected_list_table(
+                result_dict
             )
-            if partial_unexpected_list:
-                for unexpected_value in partial_unexpected_list:
-                    if unexpected_value:
-                        string_unexpected_value = str(unexpected_value)
-                    elif unexpected_value == "":
-                        string_unexpected_value = "EMPTY"
-                    else:
-                        string_unexpected_value = "null"
-                    if string_unexpected_value not in sampled_values_set:
-                        table_rows.append([unexpected_value])
-                        sampled_values_set.add(string_unexpected_value)
 
         unexpected_table_content_block = RenderedTableContent(
             **{
@@ -814,8 +775,65 @@ class Expectation(metaclass=MetaExpectation):
                 },
             }
         )
-
         return unexpected_table_content_block
+
+    @classmethod
+    def _build_partial_unexpected_counts_table(cls, result_dict):
+        table_rows = []
+        # We will check to see whether we have *all* of the unexpected values
+        # accounted for in our count, and include counts if we do. If we do not,
+        # we will use this as simply a better (non-repeating) source of
+        # "sampled" unexpected values
+        total_count = 0
+        partial_unexpected_counts: Optional[List[dict]] = result_dict.get(
+            "partial_unexpected_counts"
+        )
+        print(f"hello: {result_dict}")
+        # if mapped to each of the values?
+        # no that does not exist
+
+        if partial_unexpected_counts:
+            for unexpected_count_dict in partial_unexpected_counts:
+                value: Optional[Any] = unexpected_count_dict.get("value")
+                count: Optional[int] = unexpected_count_dict.get("count")
+                if count:
+                    total_count += count
+                if value is not None and value != "":
+                    table_rows.append([value, count])
+                elif value == "":
+                    table_rows.append(["EMPTY", count])
+                else:
+                    table_rows.append(["null", count])
+        # WILLSHIN - this is the table that we will be adding things to
+        # Check to see if we have *all* of the unexpected values accounted for. If so,
+        # we show counts. If not, we only show "sampled" unexpected values.
+        if total_count == result_dict.get("unexpected_count"):
+            header_row = ["Unexpected Value", "Count"]
+        else:
+            header_row = ["Sampled Unexpected Values"]
+            table_rows = [[row[0]] for row in table_rows]
+        return header_row, table_rows
+
+    @classmethod
+    def _build_sampled_unexpected_list_table(cls, result_dict):
+        table_rows = []
+        header_row = ["Sampled Unexpected Values"]
+        sampled_values_set = set()
+        partial_unexpected_list: Optional[List[Any]] = result_dict.get(
+            "partial_unexpected_list"
+        )
+        if partial_unexpected_list:
+            for unexpected_value in partial_unexpected_list:
+                if unexpected_value:
+                    string_unexpected_value = str(unexpected_value)
+                elif unexpected_value == "":
+                    string_unexpected_value = "EMPTY"
+                else:
+                    string_unexpected_value = "null"
+                if string_unexpected_value not in sampled_values_set:
+                    table_rows.append([unexpected_value])
+                    sampled_values_set.add(string_unexpected_value)
+        return header_row, table_rows
 
     @classmethod
     def _get_observed_value_from_evr(
