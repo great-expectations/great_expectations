@@ -1786,9 +1786,14 @@ def _pandas_map_condition_index(
         unexpected_index_column_names: List[str] = result_format[
             "unexpected_index_column_names"
         ]
+        expectation_domain_column_name: str = domain_kwargs["column"]
+
         unexpected_indices: List[int] = list(df.index)
         for index in unexpected_indices:
             primary_key_dict: Dict[str, Any] = {}
+            primary_key_dict[expectation_domain_column_name] = df.at[
+                index, expectation_domain_column_name
+            ]
             for column_name in unexpected_index_column_names:
                 column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
@@ -2468,6 +2473,7 @@ def _sqlalchemy_map_condition_index(
     unexpected_index_column_names: List[str] = result_format.get(
         "unexpected_index_column_names"
     )
+    # add primary-key columns
     for column_name in unexpected_index_column_names:
         if column_name not in all_table_columns:
             raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
@@ -2475,6 +2481,9 @@ def _sqlalchemy_map_condition_index(
                 f"Please check your configuration and try again."
             )
         column_selector.append(sa.column(column_name))
+    # add column that Expectation is being run on
+    expectation_domain_column_name: str = domain_kwargs["column"]
+    column_selector.append(sa.column(expectation_domain_column_name))
 
     domain_records_as_selectable: sa.Selectable = execution_engine.get_domain_records(
         domain_kwargs=domain_kwargs
@@ -2500,6 +2509,8 @@ def _sqlalchemy_map_condition_index(
 
     for row in query_result:
         primary_key_dict: Dict[str, Any] = {}
+        # first add the expectation_domain_column value (actual unexpected_value).
+        primary_key_dict[expectation_domain_column_name] = row[-1]
         for index in range(len(unexpected_index_column_names)):
             name: str = unexpected_index_column_names[index]
             primary_key_dict[name] = row[index]
