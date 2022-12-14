@@ -4,42 +4,89 @@ import pytest
 
 
 @pytest.fixture
-def python_file_as_str() -> str:
-    """A python file represented as a string, used in parsing tests."""
+def sample_docs_example_python_file_string() -> str:
+    return """from scripts.sample_with_definitions import ExampleClass, example_module_level_function
 
-    # TODO: Replace with canned string
-    filepath = "how_to_configure_a_configuredassetdataconnector.py"
+ec = ExampleClass()
 
-    repo_root = pathlib.Path(__file__).parent.parent.parent
-    assert str(repo_root).endswith("great_expectations")
+ec.example_method()
 
-    test_dir = repo_root / "tests" / ""
+a = ec.example_method_with_args(some_arg=1, other_arg=2)
 
-    with open(repo_root / "tests" / filepath) as f:
-        file_contents: str = f.read()
+b = ec.example_staticmethod()
 
-    return file_contents
+c = ec.example_classmethod()
+
+example_module_level_function()
+
+d = example_module_level_function()
+
+assert d
+"""
 
 
 @pytest.fixture
-def sample_python_file_string():
-    return """import inspect
+def sample_with_definitions_python_file_string() -> str:
+    return """
+class ExampleClass:
 
-from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context import BaseDataContext
+    def __init__(self):
+        pass
 
-from great_expectations.expectations.expectation import ExpectationConfiguration
+    def example_method(self):
+        pass
 
-convert_to_json_serializable(1)
+    def example_method_with_args(self, some_arg, other_arg):
+        pass
 
-a = convert_to_json_serializable(2)
-print(a)
+    @staticmethod
+    def example_staticmethod():
+        pass
 
-ec = ExpectationConfiguration(expectation_type="expect_column_values_to_be_null", kwargs={})
+    @classmethod
+    def example_classmethod(cls):
+        pass
 
-b = ec.to_json_dict()
+
+def example_module_level_function():
+    pass
 """
 
-def test_parse_method_names(python_file_as_str):
-    """Ensure method names are retrieved from test file."""
-    print(python_file_as_str)
+@pytest.fixture
+def sample_docs_example_python_file_string_filepath() -> pathlib.Path:
+    return pathlib.Path("/great_expectations/sample_docs_example_python_file_string.py")
+
+@pytest.fixture
+def sample_with_definitions_python_file_string_filepath() -> pathlib.Path:
+    return pathlib.Path("/great_expectations/sample_with_definitions_python_file_string.py")
+
+@pytest.fixture
+def filesystem_with_samples(fs, sample_docs_example_python_file_string: str, sample_docs_example_python_file_string_filepath: pathlib.Path, sample_with_definitions_python_file_string: str, sample_with_definitions_python_file_string_filepath: pathlib.Path) -> None:
+    fs.create_file(sample_docs_example_python_file_string_filepath, contents=sample_docs_example_python_file_string)
+    fs.create_file(sample_with_definitions_python_file_string_filepath, contents=sample_with_definitions_python_file_string)
+
+
+def test_fixtures_are_accessible(filesystem_with_samples, sample_docs_example_python_file_string: str, sample_docs_example_python_file_string_filepath: pathlib.Path, sample_with_definitions_python_file_string: str, sample_with_definitions_python_file_string_filepath: pathlib.Path):
+    with open(sample_docs_example_python_file_string_filepath) as f:
+        file_contents = f.read()
+        assert file_contents == sample_docs_example_python_file_string
+        assert len(file_contents) > 200
+
+    with open(sample_with_definitions_python_file_string_filepath) as f:
+        file_contents = f.read()
+        assert file_contents == sample_with_definitions_python_file_string
+        assert len(file_contents) > 200
+
+
+
+# class TestDocExampleParser:
+#
+#     def test_retrieve_all_usages_in_files(self):
+#         doc_example_parser = DocExampleParser()
+
+
+
+#
+# def test_parse_method_names(sample_docs_example_python_file_string):
+#     """Ensure method names are retrieved from test file."""
+#     print(sample_docs_example_python_file_string)
