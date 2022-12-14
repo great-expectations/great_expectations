@@ -177,8 +177,58 @@ class Definition:
     ast_definition: Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]
 
 
+class PublicAPIReport:
+    def __init__(self, definitions: Set[Definition]) -> None:
+        self.definitions = definitions
+
+    def write_printable_definitions_to_file(
+        self, filepath: pathlib.Path,
+    ) -> None:
+        """
+
+        Args:
+            filepath:
+
+        Returns:
+
+        """
+
+        printable_definitions = self.generate_printable_definitions()
+        with open(filepath, "w") as f:
+            f.write("\n".join(printable_definitions))
+
+    def generate_printable_definitions(self) -> List[str]:
+        """
+
+        Args:
+            definitions:
+
+        Returns:
+
+        """
+        sorted_definitions_list = sorted(
+            list(self.definitions), key=operator.attrgetter("filepath")
+        )
+        sorted_definitions_strings: List[str] = []
+        for definition in sorted_definitions_list:
+            sorted_definitions_strings.append(
+                f"File: {str(definition.filepath)} Name: {definition.name}"
+            )
+
+        seen = set()
+        sorted_definitions_strings_no_dupes = [
+            d for d in sorted_definitions_strings if not (d in seen or seen.add(d))
+        ]
+
+        return sorted_definitions_strings_no_dupes
+
+
+
+
 class GXCodeParser:
     """"""
+
+    # TODO: Add include and exclude to get methods
 
     def __init__(self, repo_root: pathlib.Path, paths: Set[pathlib.Path]) -> None:
         """
@@ -319,48 +369,6 @@ class PublicAPIChecker:
         self.repo_root = repo_root
         self.doc_example_parser = doc_example_parser
         self.gx_code_parser = gx_code_parser
-
-    def write_printable_definitions_to_file(
-        self, filepath: pathlib.Path, definitions: Set[Definition]
-    ) -> None:
-        """
-
-        Args:
-            filepath:
-            definitions:
-
-        Returns:
-
-        """
-
-        printable_definitions = self.printable_definitions(definitions=definitions)
-        with open(filepath, "w") as f:
-            f.write("\n".join(printable_definitions))
-
-    def printable_definitions(self, definitions: Set[Definition]) -> List[str]:
-        """
-
-        Args:
-            definitions:
-
-        Returns:
-
-        """
-        sorted_definitions_list = sorted(
-            list(definitions), key=operator.attrgetter("filepath")
-        )
-        sorted_definitions_strings: List[str] = []
-        for definition in sorted_definitions_list:
-            sorted_definitions_strings.append(
-                f"File: {str(definition.filepath)} Name: {definition.name}"
-            )
-
-        seen = set()
-        sorted_definitions_strings_no_dupes = [
-            d for d in sorted_definitions_strings if not (d in seen or seen.add(d))
-        ]
-
-        return sorted_definitions_strings_no_dupes
 
     def gx_code_definitions_appearing_in_docs_examples_and_not_marked_public_api(
         self,
@@ -517,15 +525,14 @@ def main():
     gx_code_definitions_appearing_in_docs_examples = (
         public_api_checker.gx_code_definitions_appearing_in_docs_examples()
     )
-    printable_definitions = public_api_checker.printable_definitions(
-        definitions=gx_code_definitions_appearing_in_docs_examples
-    )
+    public_api_report = PublicAPIReport(definitions=gx_code_definitions_appearing_in_docs_examples)
+
+    printable_definitions = public_api_report.generate_printable_definitions()
     for printable_definition in printable_definitions:
         logger.info(printable_definition)
 
-    public_api_checker.write_printable_definitions_to_file(
+    public_api_report.write_printable_definitions_to_file(
         filepath=_repo_root() / "public_api_report.txt",
-        definitions=gx_code_definitions_appearing_in_docs_examples,
     )
 
 
