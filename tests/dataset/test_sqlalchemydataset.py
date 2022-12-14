@@ -433,7 +433,9 @@ def test_expect_compound_columns_to_be_unique_mostly(sa):
         ["col1", "col2", "col3"],
         mostly=0.99,
     ).success
-    assert not dataset.expect_compound_columns_to_be_unique(["col1", "col2", "col3"]).success
+    assert not dataset.expect_compound_columns_to_be_unique(
+        ["col1", "col2", "col3"]
+    ).success
 
 
 @pytest.fixture
