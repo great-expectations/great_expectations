@@ -50,7 +50,7 @@ class ColumnValuesToBeValidSemiprime(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidSemiprime(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid semiprime code."""
+    """Expect column values to be valid semiprime codes."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

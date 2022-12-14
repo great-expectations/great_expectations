@@ -63,7 +63,7 @@ class ColumnValuesToBeValidMicMatchCountryCode(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidMicMatchCountryCode(ColumnMapExpectation):
-    """Expect the provided MIC (Market Identifier Code) according to country which code (ISO3166) passed in the parameters"""
+    """Expect the provided MIC (Market Identifier Code) according to country which code (ISO3166) passed in the parameters."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

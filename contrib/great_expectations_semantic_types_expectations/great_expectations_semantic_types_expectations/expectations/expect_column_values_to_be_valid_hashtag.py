@@ -42,7 +42,7 @@ class ColumnValuesToBeValidHashtag(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidHashtag(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid Hashtag format."""
+    """Expect column values to be valid #hashtags."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

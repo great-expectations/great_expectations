@@ -57,7 +57,7 @@ class ColumnValuesToBeFibonacciNumber(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeFibonacciNumber(ColumnMapExpectation):
-    """Expect value to be Fibonacci number"""
+    """Expect column values to be Fibonacci numbers."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
