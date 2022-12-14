@@ -6,9 +6,7 @@ import shutil
 import warnings
 from typing import Optional, Union
 
-import requests
 from ruamel.yaml import YAML, YAMLError
-from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__
@@ -26,7 +24,6 @@ from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
     DataContextConfigDefaults,
-    GXCloudConfig,
 )
 from great_expectations.data_context.util import file_relative_path
 
@@ -196,89 +193,6 @@ class SerializableDataContext(AbstractDataContext):
             cls.write_config_variables_template_to_disk(uncommitted_dir)
 
         return cls(context_root_dir=gx_dir, runtime_environment=runtime_environment)
-
-    @classmethod
-    def _load_project_config(
-        cls,
-        context_root_directory: Optional[str],
-        cloud_mode: bool,
-        cloud_config: Optional[GXCloudConfig],
-    ):
-        """
-        Reads the project configuration from the project configuration file.
-        The file may contain ${SOME_VARIABLE} variables - see self.project_config_with_variables_substituted
-        for how these are substituted.
-
-        For Data Contexts in GE Cloud mode, a user-specific template is retrieved from the Cloud API
-        - see CloudDataContext.retrieve_data_context_config_from_cloud for more details.
-
-        :return: the configuration object read from the file or template
-        """
-        if cloud_mode:
-            assert cloud_config is not None
-            config = cls.retrieve_data_context_config_from_cloud(
-                cloud_config=cloud_config
-            )
-            return config
-
-        path_to_yml = os.path.join(context_root_directory, cls.GX_YML)
-        try:
-            with open(path_to_yml) as data:
-                config_commented_map_from_yaml = yaml.load(data)
-
-        except DuplicateKeyError:
-            raise gx_exceptions.InvalidConfigurationYamlError(
-                "Error: duplicate key found in project YAML file."
-            )
-        except YAMLError as err:
-            raise gx_exceptions.InvalidConfigurationYamlError(
-                "Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{}".format(
-                    err
-                )
-            )
-        except OSError:
-            raise gx_exceptions.ConfigNotFoundError()
-
-        try:
-            return DataContextConfig.from_commented_map(
-                commented_map=config_commented_map_from_yaml
-            )
-        except gx_exceptions.InvalidDataContextConfigError:
-            # Just to be explicit about what we intended to catch
-            raise
-
-    @classmethod
-    def retrieve_data_context_config_from_cloud(
-        cls, cloud_config: GXCloudConfig
-    ) -> DataContextConfig:
-        """
-        Utilizes the GXCloudConfig instantiated in the constructor to create a request to the Cloud API.
-        Given proper authorization, the request retrieves a data context config that is pre-populated with
-        GE objects specific to the user's Cloud environment (datasources, data connectors, etc).
-
-        Please note that substitution for ${VAR} variables is performed in GX Cloud before being sent
-        over the wire.
-
-        :return: the configuration object retrieved from the Cloud API
-        """
-        base_url = cloud_config.base_url
-        organization_id = cloud_config.organization_id
-        ge_cloud_url = (
-            f"{base_url}/organizations/{organization_id}/data-context-configuration"
-        )
-        headers = {
-            "Content-Type": "application/vnd.api+json",
-            "Authorization": f"Bearer {cloud_config.access_token}",
-            "Gx-Version": __version__,
-        }
-
-        response = requests.get(ge_cloud_url, headers=headers)
-        if response.status_code != 200:
-            raise gx_exceptions.GXCloudError(
-                f"Bad request made to GX Cloud; {response.text}"
-            )
-        config = response.json()
-        return DataContextConfig(**config)
 
     @classmethod
     def all_uncommitted_directories_exist(cls, gx_dir: str) -> bool:

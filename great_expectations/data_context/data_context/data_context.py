@@ -12,6 +12,9 @@ from great_expectations.data_context.data_context.base_data_context import (
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.data_context.serializable_data_context import (
     SerializableDataContext,
 )
@@ -60,11 +63,14 @@ def DataContext(
         context_root_dir=context_root_dir,
     )
 
-    project_config = SerializableDataContext._load_project_config(
-        context_root_directory=context_root_directory,
-        cloud_mode=cloud_mode,
-        cloud_config=cloud_config,
-    )
+    if cloud_mode:
+        project_config = CloudDataContext._load_cloud_backed_project_config(
+            cloud_config=cloud_config,
+        )
+    else:
+        project_config = FileDataContext._load_file_backed_project_config(
+            context_root_directory=context_root_directory,
+        )
 
     context = BaseDataContext(
         project_config=project_config,

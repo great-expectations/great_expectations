@@ -1,6 +1,11 @@
 import logging
+import os
 from typing import Optional
 
+from ruamel.yaml import YAML, YAMLError
+from ruamel.yaml.constructor import DuplicateKeyError
+
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.data_context.serializable_data_context import (
     SerializableDataContext,
 )
@@ -18,6 +23,9 @@ from great_expectations.datasource.datasource_serializer import (
 )
 
 logger = logging.getLogger(__name__)
+yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
+yaml.default_flow_style = False
 
 
 class FileDataContext(SerializableDataContext):
@@ -45,10 +53,8 @@ class FileDataContext(SerializableDataContext):
         """
         self._context_root_directory = context_root_dir
         if not project_config:
-            project_config = self._load_project_config(
+            project_config = FileDataContext._load_file_backed_project_config(
                 context_root_directory=context_root_dir,
-                cloud_mode=False,
-                cloud_config=None,
             )
         self._project_config = self._apply_global_config_overrides(
             config=project_config
@@ -112,3 +118,34 @@ class FileDataContext(SerializableDataContext):
         store = super().add_store(store_name=store_name, store_config=store_config)
         self._save_project_config()
         return store
+
+    @classmethod
+    def _load_file_backed_project_config(
+        cls,
+        context_root_directory: Optional[str],
+    ):
+        path_to_yml = os.path.join(context_root_directory, cls.GX_YML)
+        try:
+            with open(path_to_yml) as data:
+                config_commented_map_from_yaml = yaml.load(data)
+
+        except DuplicateKeyError:
+            raise gx_exceptions.InvalidConfigurationYamlError(
+                "Error: duplicate key found in project YAML file."
+            )
+        except YAMLError as err:
+            raise gx_exceptions.InvalidConfigurationYamlError(
+                "Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{}".format(
+                    err
+                )
+            )
+        except OSError:
+            raise gx_exceptions.ConfigNotFoundError()
+
+        try:
+            return DataContextConfig.from_commented_map(
+                commented_map=config_commented_map_from_yaml
+            )
+        except gx_exceptions.InvalidDataContextConfigError:
+            # Just to be explicit about what we intended to catch
+            raise

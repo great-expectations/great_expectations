@@ -106,9 +106,6 @@ from great_expectations.datasource.datasource_serializer import (
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.experimental.datasources.interfaces import (
-    Datasource as XDatasource,
-)
 from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.rule_based_profiler.config.base import (

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Tuple, Union, c
 
 import requests
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.config_provider import (
@@ -231,7 +231,7 @@ class CloudDataContext(SerializableDataContext):
 
         response = requests.get(cloud_url, headers=headers)
         if response.status_code != 200:
-            raise ge_exceptions.GXCloudError(
+            raise gx_exceptions.GXCloudError(
                 f"Bad request made to GX Cloud; {response.text}"
             )
         config = response.json()
@@ -489,7 +489,7 @@ class CloudDataContext(SerializableDataContext):
         existing_suite_names = self.list_expectation_suite_names()
         cloud_id: Optional[str] = None
         if expectation_suite_name in existing_suite_names and not overwrite_existing:
-            raise ge_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(
                 f"expectation_suite '{expectation_suite_name}' already exists. If you would like to overwrite this "
                 "expectation_suite, set overwrite_existing=True."
             )
@@ -535,7 +535,7 @@ class CloudDataContext(SerializableDataContext):
             cloud_id=ge_cloud_id,
         )
         if not self.expectations_store.has_key(key):  # noqa: W601
-            raise ge_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(
                 f"expectation_suite with id {ge_cloud_id} does not exist."
             )
 
@@ -562,7 +562,7 @@ class CloudDataContext(SerializableDataContext):
             cloud_id=ge_cloud_id,
         )
         if not self.expectations_store.has_key(key):  # noqa: W601
-            raise ge_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(
                 f"expectation_suite with id {ge_cloud_id} not found"
             )
 
@@ -638,7 +638,7 @@ class CloudDataContext(SerializableDataContext):
         ge_cloud_id = key.cloud_id
         if ge_cloud_id:
             if self.expectations_store.has_key(key):  # noqa: W601
-                raise ge_exceptions.DataContextError(
+                raise gx_exceptions.DataContextError(
                     f"expectation_suite with GX Cloud ID {ge_cloud_id} already exists. "
                     f"If you would like to overwrite this expectation_suite, set overwrite_existing=True."
                 )
@@ -646,7 +646,7 @@ class CloudDataContext(SerializableDataContext):
         suite_name = key.resource_name
         existing_suite_names = self.list_expectation_suite_names()
         if suite_name in existing_suite_names:
-            raise ge_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(
                 f"expectation_suite '{suite_name}' already exists. If you would like to overwrite this "
                 "expectation_suite, set overwrite_existing=True."
             )
@@ -777,3 +777,45 @@ class CloudDataContext(SerializableDataContext):
         return GXCloudIdentifier(
             resource_type=GXCloudRESTResource.PROFILER, cloud_id=id
         )
+
+    @classmethod
+    def _load_cloud_backed_project_config(
+        cls,
+        cloud_config: Optional[GXCloudConfig],
+    ):
+        assert cloud_config is not None
+        config = cls.retrieve_data_context_config_from_cloud(cloud_config=cloud_config)
+        return config
+
+    @classmethod
+    def retrieve_data_context_config_from_cloud(
+        cls, cloud_config: GXCloudConfig
+    ) -> DataContextConfig:
+        """
+        Utilizes the GXCloudConfig instantiated in the constructor to create a request to the Cloud API.
+        Given proper authorization, the request retrieves a data context config that is pre-populated with
+        GE objects specific to the user's Cloud environment (datasources, data connectors, etc).
+
+        Please note that substitution for ${VAR} variables is performed in GX Cloud before being sent
+        over the wire.
+
+        :return: the configuration object retrieved from the Cloud API
+        """
+        base_url = cloud_config.base_url
+        organization_id = cloud_config.organization_id
+        ge_cloud_url = (
+            f"{base_url}/organizations/{organization_id}/data-context-configuration"
+        )
+        headers = {
+            "Content-Type": "application/vnd.api+json",
+            "Authorization": f"Bearer {cloud_config.access_token}",
+            "Gx-Version": __version__,
+        }
+
+        response = requests.get(ge_cloud_url, headers=headers)
+        if response.status_code != 200:
+            raise gx_exceptions.GXCloudError(
+                f"Bad request made to GX Cloud; {response.text}"
+            )
+        config = response.json()
+        return DataContextConfig(**config)
