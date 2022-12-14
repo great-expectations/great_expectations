@@ -14,6 +14,7 @@ from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
+from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -594,6 +595,37 @@ def test_pandas_unexpected_rows_complete_result_format(
             {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
         ],
     }
+
+
+def test_expectation_configuration_has_unexpected_index_column_names(
+    in_memory_runtime_context,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
+):
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "COMPLETE",
+                # this should raise an error
+                "unexpected_index_column_names": ["pk_1"],
+            },
+        },
+    )
+    with pytest.raises(InvalidExpectationConfigurationError) as e:
+        result: ExpectationValidationResult = (
+            _expecation_configuration_to_validation_result_pandas(
+                expectation_configuration=expectation_configuration,
+                dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+                context=in_memory_runtime_context,
+            )
+        )
+    assert e.value.message == (
+        "'unexpected_index_column_names' cannot be configured at the "
+        "Expectation-level. Please add the configuration to your Checkpoint config or "
+        "checkpoint_run() method."
+    )
 
 
 def test_pandas_default_complete_result_format(

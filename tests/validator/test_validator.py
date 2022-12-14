@@ -1152,7 +1152,7 @@ def test_validator_sql_complete_one_column_name_from_validator(
         context=data_context_with_connection_to_animal_names_db,
     )
 
-    with pytest.raises(ge_exceptions.InvalidExpectationConfigurationError):
+    with pytest.raises(ge_exceptions.InvalidExpectationConfigurationError) as e:
         result: ExpectationValidationResult = (
             validator.expect_column_values_to_be_in_set(
                 column="animals",
@@ -1160,6 +1160,11 @@ def test_validator_sql_complete_one_column_name_from_validator(
                 result_format=result_format_config,
             )
         )
+    assert e.value.message == (
+        "'unexpected_index_column_names' cannot be configured at the "
+        "Expectation-level. Please add the configuration to your Checkpoint config or "
+        "checkpoint_run() method."
+    )
 
 
 @pytest.mark.integration
@@ -1175,7 +1180,12 @@ def test_validator_id_pk_sql_complete_one_column_name_from_expectation(
     (validator, expectation) = _context_to_validator_and_expectation_sql(
         context=data_context_with_connection_to_animal_names_db,
     )
-    with pytest.raises(ge_exceptions.InvalidExpectationConfigurationError):
+    with pytest.raises(ge_exceptions.InvalidExpectationConfigurationError) as e:
         result: ExpectationValidationResult = expectation.validate(
             validator=validator, runtime_configuration=runtime_configuration
         )
+    assert e.value.message == (
+        "'unexpected_index_column_names' cannot be configured at the "
+        "Expectation-level. Please add the configuration to your Checkpoint config or "
+        "checkpoint_run() method."
+    )
