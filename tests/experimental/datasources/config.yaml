@@ -20,6 +20,5 @@ datasources:
                 - alpha
                 - bravo
         order_by:
-          - metadata_key: year
-            reverse: true
-          - metadata_key: month
+          - year
+          - -month

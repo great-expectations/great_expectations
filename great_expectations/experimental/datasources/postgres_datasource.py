@@ -119,10 +119,19 @@ class TableAsset(DataAsset):
     name: str
     order_by: List[BatchSorter] = Field(default_factory=list)
 
-    @pydantic.validator("order_by")
+    @pydantic.validator("order_by", pre=True, each_item=True)
     @classmethod
-    def parse_orderby_sorters(cls, v: BatchSortersDefinition):
-        return _batch_sorter_from_list(v)
+    def parse_orderby_sorter(
+        cls, v: Union[str, BatchSorter]
+    ) -> Union[BatchSorter, dict]:
+        print(f"validator - {type(v)} {v}")
+        if isinstance(v, str):
+            try:
+                return _batch_sorter_from_str(v)
+            except KeyError as err:
+                # TODO: before merge - raise a helpful validation error here
+                raise err
+        return v
 
     def get_batch_request(
         self, options: Optional[BatchRequestOptions] = None

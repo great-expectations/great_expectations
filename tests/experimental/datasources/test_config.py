@@ -49,10 +49,7 @@ PG_COMPLEX_CONFIG_DICT = {
                 "with_sorters": {
                     # NOTE (kilo59): at later date we could also accept a simplified form that is
                     # just a list of keys. We would assume reverse is `false`.
-                    "order_by": [
-                        {"metadata_key": "year", "reverse": True},
-                        {"metadata_key": "month"},
-                    ],
+                    "order_by": ["year", "-month"],
                     "name": "with_sorters",
                     "table_name": "yet_another_table",
                     "type": "table",
