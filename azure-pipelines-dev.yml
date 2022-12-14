@@ -120,9 +120,8 @@ stages:
     - job: static_type_check
       steps:
       - script: |
-          echo 'This is disabled for now!'
-          # pip install --requirement reqs/requirements-dev-contrib.txt
-          # invoke type-check --install-types --warn-unused-ignores --pretty
+          pip install --requirement reqs/requirements-dev-contrib.txt
+          invoke type-check --install-types --warn-unused-ignores --pretty
         name: StaticTypeCheck
 
     - job: docstring_checker
