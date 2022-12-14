@@ -56,6 +56,7 @@ class ColumnValuesToBeValidHawaiiZip(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidHawaiiZip(ColumnMapExpectation):
     """Expect values in this column to be valid Hawaii zipcodes.
+
     See https://pypi.org/project/zipcodes/ for more information.
     """
 

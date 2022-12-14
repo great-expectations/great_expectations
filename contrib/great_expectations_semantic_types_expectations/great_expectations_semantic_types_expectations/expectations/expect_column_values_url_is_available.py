@@ -53,7 +53,7 @@ class ColumnValuesUrlIsAvailable(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesUrlIsAvailable(ColumnMapExpectation):
-    """Expect column values's URL is available"""
+    """Expect column values's URL is available."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

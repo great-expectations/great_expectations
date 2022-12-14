@@ -54,7 +54,7 @@ class ColumnValuesLinestringKMDistanceBetween(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToBeLineKMDistanceBetween(ColumnMapExpectation):
-    """This expectation will see if a linestring is between the selected distances in kilometers"""
+    """Expect linestrings in column to be between selected distances in kilometers."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [

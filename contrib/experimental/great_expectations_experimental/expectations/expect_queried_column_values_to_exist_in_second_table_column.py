@@ -10,12 +10,13 @@ from great_expectations.expectations.expectation import (
 
 class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
     """Expect all values in a specific column to exist in another table's column.
+
     Args:
-        template_dict: a dictionary containing the following keys:
-             "first_table_column" - name of the main table column
-             "second_table_column" - name of the column to compare to, in the second table
-             "second_table_full_name"
-             "condition": additional condition added in the where clause, provide "1=1" if not needed.
+        template_dict: dict containing the following keys: \
+             first_table_column (name of the main table column), \
+             second_table_column (name of the column to compare to in the second table), \
+             second_table_full_name, \
+             condition (additional condition added in the where clause, provide "1=1" if not needed)
     """
 
     library_metadata = {
