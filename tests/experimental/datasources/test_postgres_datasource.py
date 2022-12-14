@@ -12,6 +12,7 @@ from great_expectations.experimental.datasources.interfaces import (
 )
 from great_expectations.experimental.datasources.postgres_datasource import (
     BatchRequestError,
+    BatchSorter,
     PostgresDatasource,
     SqlYearMonthSplitter,
     TableAsset,
@@ -492,6 +493,29 @@ def test_sort_batch_list_by_unknown_key(create_source):
         )
         with pytest.raises(KeyError):
             source.get_batch_list_from_batch_request(batch_request)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "order_by",
+    [
+        ["+year", "-month"],
+        [{"metadata_key": "year"}, {"metadata_key": "month", "reverse": True}],
+    ],
+)
+def test_table_asset_sorter_deserialization(order_by: list):
+    expected_sorters = [
+        BatchSorter(metadata_key="year"),
+        BatchSorter(metadata_key="month", reverse=True),
+    ]
+
+    table_asset = TableAsset(
+        name="SorterTest", table_name="SORTER_TEST", order_by=order_by
+    )
+    print(table_asset)
+    print(f"\n{table_asset.json(indent=2)}")
+
+    assert table_asset.order_by == expected_sorters
 
 
 @pytest.mark.unit

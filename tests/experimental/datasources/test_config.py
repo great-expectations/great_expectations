@@ -47,8 +47,15 @@ PG_COMPLEX_CONFIG_DICT = {
                     "type": "table",
                 },
                 "with_sorters": {
-                    # NOTE (kilo59): at later date we could also accept a simplified form that is
-                    # just a list of keys. We would assume reverse is `false`.
+                    "order_by": [
+                        {"metadata_key": "year"},
+                        {"metadata_key": "month", "reverse": True},
+                    ],
+                    "name": "with_sorters",
+                    "table_name": "yet_another_table",
+                    "type": "table",
+                },
+                "with_dslish_sorters": {
                     "order_by": ["year", "-month"],
                     "name": "with_sorters",
                     "table_name": "yet_another_table",
@@ -120,7 +127,7 @@ def test_dict_config_round_trip(
     inject_engine_lookup_double, from_dict_gx_config: GxConfig
 ):
     dumped: dict = from_dict_gx_config.dict()
-    print(f"  Dumped Dict ->\n\n{pf(dumped)}")
+    print(f"  Dumped Dict ->\n\n{pf(dumped)}\n")
 
     re_loaded: GxConfig = GxConfig.parse_obj(dumped)
     pp(re_loaded)
@@ -132,8 +139,8 @@ def test_dict_config_round_trip(
 def test_json_config_round_trip(
     inject_engine_lookup_double, from_json_gx_config: GxConfig
 ):
-    dumped: str = from_json_gx_config.json()
-    print(f"  Dumped JSON ->\n\n{dumped}")
+    dumped: str = from_json_gx_config.json(indent=2)
+    print(f"  Dumped JSON ->\n\n{dumped}\n")
 
     re_loaded: GxConfig = GxConfig.parse_raw(dumped)
     pp(re_loaded)
@@ -146,7 +153,7 @@ def test_yaml_config_round_trip(
     inject_engine_lookup_double, from_yaml_gx_config: GxConfig
 ):
     dumped: str = from_yaml_gx_config.yaml()
-    print(f"  Dumped YAML ->\n\n{dumped}")
+    print(f"  Dumped YAML ->\n\n{dumped}\n")
 
     re_loaded: GxConfig = GxConfig.parse_yaml(dumped)
     pp(re_loaded)
