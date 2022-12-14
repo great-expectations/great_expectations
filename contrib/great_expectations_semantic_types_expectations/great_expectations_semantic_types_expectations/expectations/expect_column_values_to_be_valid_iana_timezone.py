@@ -56,7 +56,8 @@ class ColumnValuesIanaTimezone(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidIanaTimezone(ColumnMapExpectation):
     """Expect values in this column to be valid IANA timezone strings.
-    A full list of valid timezones can be viewed by `pytz.all_timezones`.
+
+    A full list of valid timezones can be viewed by pytz.all_timezones. \
     See https://www.iana.org/time-zones for more information.
     """
 

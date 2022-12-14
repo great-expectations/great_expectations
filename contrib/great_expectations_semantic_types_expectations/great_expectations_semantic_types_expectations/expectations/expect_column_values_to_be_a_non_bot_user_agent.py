@@ -64,10 +64,7 @@ class ColumnValuesEqualNonBotUserAgent(ColumnMapMetricProvider):
 
 
 class ExpectColumnValuesToBeANonBotUserAgent(ColumnMapExpectation):
-    """
-    Expect useragents to be non bots
-    requirements: user_agents
-    """
+    """Expect column values to be non-bot user agents."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [

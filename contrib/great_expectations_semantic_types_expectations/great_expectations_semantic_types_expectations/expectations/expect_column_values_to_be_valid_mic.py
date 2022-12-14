@@ -56,7 +56,7 @@ class ColumnValuesToBeValidMic(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidMic(ColumnMapExpectation):
-    """Expect column values to be valid MIC code (ISO10383)"""
+    """Expect column values to be valid MIC code (ISO10383)."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

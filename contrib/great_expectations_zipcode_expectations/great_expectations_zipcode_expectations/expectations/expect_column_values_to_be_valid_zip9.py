@@ -53,6 +53,7 @@ class ColumnValuesToBeValidZip9(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidZip9(ColumnMapExpectation):
     """Expect values in this column to be valid zip9 string types.
+
     See https://pypi.org/project/zipcodes/ for more information.
     """
 
