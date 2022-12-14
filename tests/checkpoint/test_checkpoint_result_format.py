@@ -677,3 +677,34 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_basic_out
         "partial_unexpected_index_list"
     )
     assert not first_result_partial_list
+
+
+@pytest.mark.integration
+def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
+    data_context_with_connection_to_animal_names_db,
+    reference_sql_checkpoint_config_for_unexpected_column_names,
+    expectation_config_expect_column_values_to_be_in_set,
+):
+    """
+    What does this test?
+        - unexpected_index_column defined in Checkpoint only.
+        - SUMMARY output, which means we have `partial_unexpected_index_list` only
+        - 1 Expectations added to suite
+    """
+    dict_to_update_checkpoint: dict = {
+        "result_format": {
+            "result_format": "COMPLETE",
+            "unexpected_index_column_names": ["pk_1"],
+        }
+    }
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=data_context_with_connection_to_animal_names_db,
+        checkpoint_config=reference_sql_checkpoint_config_for_unexpected_column_names,
+        expectations_list=[expectation_config_expect_column_values_to_be_in_set],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+    )
+    print("helo")
