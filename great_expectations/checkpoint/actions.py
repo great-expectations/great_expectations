@@ -48,6 +48,10 @@ class ValidationAction:
     def __init__(self, data_context) -> None:
         self.data_context = data_context
 
+    @property
+    def _cloud_mode(self) -> bool:
+        return hasattr(self.data_context, "cloud_mode") and self.data_context.cloud_mode
+
     def run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -823,15 +827,12 @@ class StoreValidationResultAction(ValidationAction):
                 )
             )
 
-        cloud_mode = (
-            hasattr(self.data_context, "cloud_mode") and self.data_context.cloud_mode
-        )
         checkpoint_ge_cloud_id = None
-        if cloud_mode and checkpoint_identifier:
+        if self._cloud_mode and checkpoint_identifier:
             checkpoint_ge_cloud_id = checkpoint_identifier.cloud_id
 
         expectation_suite_ge_cloud_id = None
-        if cloud_mode and expectation_suite_identifier:
+        if self._cloud_mode and expectation_suite_identifier:
             expectation_suite_ge_cloud_id = str(expectation_suite_identifier.cloud_id)
 
         return_val = self.target_store.set(
@@ -840,7 +841,7 @@ class StoreValidationResultAction(ValidationAction):
             checkpoint_id=checkpoint_ge_cloud_id,
             expectation_suite_id=expectation_suite_ge_cloud_id,
         )
-        if cloud_mode:
+        if self._cloud_mode:
             return_val: GXCloudResourceRef
             new_ge_cloud_id = return_val.cloud_id
             validation_result_suite_identifier.cloud_id = new_ge_cloud_id
@@ -1085,7 +1086,7 @@ class UpdateDataDocsAction(ValidationAction):
         # <snippet>
         data_docs_validation_results = {}
         # </snippet>
-        if hasattr(self.data_context, "cloud_mode") and self.data_context.cloud_mode:
+        if self._cloud_mode:
             return data_docs_validation_results
 
         # get the URL for the validation result
@@ -1133,9 +1134,7 @@ class CloudNotificationAction(ValidationAction):
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action. "
             )
 
-        if not (
-            hasattr(self.data_context, "cloud_mode") and self.data_context.cloud_mode
-        ):
+        if not self._cloud_mode:
             return Exception(
                 "CloudNotificationActions can only be used in GX Cloud Mode."
             )

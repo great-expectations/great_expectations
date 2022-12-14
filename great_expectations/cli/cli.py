@@ -54,7 +54,9 @@ class CLIState:
 
     @data_context.setter
     def data_context(self, data_context: DataContext) -> None:
-        assert isinstance(data_context, FileDataContext)
+        assert isinstance(
+            data_context, FileDataContext
+        ), "GX CLI interaction requires a FileDataContext"
         self._data_context = data_context
 
     def __repr__(self) -> str:

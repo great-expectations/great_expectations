@@ -273,7 +273,7 @@ class BaseCheckpoint(ConfigPeer):
         else:
             substituted_config = copy.deepcopy(source_config)
 
-        if hasattr(self.data_context, "cloud_mode") and self.data_context.cloud_mode:
+        if self._cloud_mode:
             return substituted_config
 
         return self._substitute_config_variables(config=substituted_config)
@@ -290,7 +290,7 @@ class BaseCheckpoint(ConfigPeer):
             source_config=source_config, runtime_kwargs=runtime_kwargs
         )
 
-        if hasattr(self.data_context, "cloud_mode") and self.data_context.cloud_mode:
+        if self._cloud_mode:
             return substituted_config
 
         return self._substitute_config_variables(config=substituted_config)
@@ -338,21 +338,11 @@ class BaseCheckpoint(ConfigPeer):
 
             validator: Validator = self.data_context.get_validator(
                 batch_request=batch_request,
-                expectation_suite_name=(
-                    expectation_suite_name
-                    if not (
-                        hasattr(self.data_context, "cloud_mode")
-                        and self.data_context.cloud_mode
-                    )
-                    else None
-                ),
+                expectation_suite_name=expectation_suite_name
+                if not self._cloud_mode
+                else None,
                 expectation_suite_ge_cloud_id=(
-                    expectation_suite_ge_cloud_id
-                    if (
-                        hasattr(self.data_context, "cloud_mode")
-                        and self.data_context.cloud_mode
-                    )
-                    else None
+                    expectation_suite_ge_cloud_id if self._cloud_mode else None
                 ),
                 include_rendered_content=include_rendered_content,
             )
@@ -381,10 +371,7 @@ class BaseCheckpoint(ConfigPeer):
                 )
             )
             checkpoint_identifier = None
-            if (
-                hasattr(self.data_context, "cloud_mode")
-                and self.data_context.cloud_mode
-            ):
+            if self._cloud_mode:
                 checkpoint_identifier = GXCloudIdentifier(
                     resource_type=GXCloudRESTResource.CHECKPOINT,
                     cloud_id=str(self.ge_cloud_id),
@@ -510,6 +497,10 @@ is run), with each validation having its own defined "action_list" attribute.
     @property
     def data_context(self) -> DataContext:
         return self._data_context
+
+    @property
+    def _cloud_mode(self) -> bool:
+        return hasattr(self.data_context, "cloud_mode") and self.data_context.cloud_mode
 
     def __repr__(self) -> str:
         return str(self.get_config())
