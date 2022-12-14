@@ -45,7 +45,7 @@ class ColumnValuesToBeValidPronicNumber(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidPronicNumber(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid pronic number."""
+    """Expect column values to be valid pronic numbers."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

@@ -55,7 +55,7 @@ class ColumnValuesBicBelongToCountry(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesBicBelongToCountry(ColumnMapExpectation):
-    """Expect the provided BIC (Business Identifier Codes) in the country which code (alpha-2) passed in the parameters"""
+    """Expect the provided BIC (Business Identifier Codes) in the country which code (alpha-2) passed in the parameters."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

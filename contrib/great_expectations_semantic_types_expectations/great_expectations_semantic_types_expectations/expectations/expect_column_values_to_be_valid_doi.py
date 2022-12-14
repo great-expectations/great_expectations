@@ -42,7 +42,7 @@ class ColumnValuesToBeValidDoi(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidDoi(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid DOI format."""
+    """Expect column values to be valid DOI format."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

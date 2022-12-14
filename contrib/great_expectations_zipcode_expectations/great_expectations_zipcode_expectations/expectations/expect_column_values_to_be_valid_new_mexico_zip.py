@@ -56,6 +56,7 @@ class ColumnValuesToBeValidNewMexicoZip(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidNewMexicoZip(ColumnMapExpectation):
     """Expect values in this column to be valid New Mexico zipcodes.
+
     See https://pypi.org/project/zipcodes/ for more information.
     """
 
