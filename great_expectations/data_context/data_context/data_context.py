@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import os
-from typing import Optional
+import shutil
+import warnings
+from typing import Optional, Tuple, Union
 
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
@@ -32,16 +34,21 @@ def DataContext(
     ge_cloud_organization_id: Optional[str] = None,
 ) -> AbstractDataContext:
     # Chetan - 20221208 - not formally deprecating these values until a future date
-    cloud_base_url = cloud_base_url if cloud_base_url is not None else ge_cloud_base_url
-    cloud_access_token = (
-        cloud_access_token if cloud_access_token is not None else ge_cloud_access_token
+    (
+        cloud_base_url,
+        cloud_access_token,
+        cloud_organization_id,
+        cloud_mode,
+    ) = _resolve_cloud_args(
+        cloud_mode=cloud_mode,
+        cloud_base_url=cloud_base_url,
+        cloud_access_token=cloud_access_token,
+        cloud_organization_id=cloud_organization_id,
+        ge_cloud_mode=ge_cloud_mode,
+        ge_cloud_base_url=ge_cloud_base_url,
+        ge_cloud_access_token=ge_cloud_access_token,
+        ge_cloud_organization_id=ge_cloud_organization_id,
     )
-    cloud_organization_id = (
-        cloud_organization_id
-        if cloud_organization_id is not None
-        else ge_cloud_organization_id
-    )
-    cloud_mode = True if cloud_mode or ge_cloud_mode else False
 
     cloud_config = _init_cloud_config(
         cloud_mode=cloud_mode,
@@ -74,6 +81,30 @@ def DataContext(
     # # Save project config if data_context_id auto-generated
     # if context._check_for_usage_stats_sync(project_config):
     #     context._save_project_config()
+
+
+def _resolve_cloud_args(  # type: ignore[override]
+    cloud_mode: bool = False,
+    cloud_base_url: Optional[str] = None,
+    cloud_access_token: Optional[str] = None,
+    cloud_organization_id: Optional[str] = None,
+    # <GX_RENAME> Deprecated as of 0.15.37
+    ge_cloud_mode: bool = False,
+    ge_cloud_base_url: Optional[str] = None,
+    ge_cloud_access_token: Optional[str] = None,
+    ge_cloud_organization_id: Optional[str] = None,
+) -> Tuple[Optional[str], Optional[str], Optional[str], bool]:
+    cloud_base_url = cloud_base_url if cloud_base_url is not None else ge_cloud_base_url
+    cloud_access_token = (
+        cloud_access_token if cloud_access_token is not None else ge_cloud_access_token
+    )
+    cloud_organization_id = (
+        cloud_organization_id
+        if cloud_organization_id is not None
+        else ge_cloud_organization_id
+    )
+    cloud_mode = True if cloud_mode or ge_cloud_mode else False
+    return cloud_base_url, cloud_access_token, cloud_organization_id, cloud_mode
 
 
 def _init_cloud_config(

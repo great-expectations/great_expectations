@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Tuple, Union, cast
 
 import requests
 
@@ -66,7 +66,7 @@ class CloudDataContext(SerializableDataContext):
         cloud_base_url: Optional[str] = None,
         cloud_access_token: Optional[str] = None,
         cloud_organization_id: Optional[str] = None,
-        # Deprecated as of 0.15.37
+        # <GX_RENAME> Deprecated as of 0.15.37
         ge_cloud_base_url: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
@@ -83,18 +83,17 @@ class CloudDataContext(SerializableDataContext):
         self._cloud_mode = True  # property needed for backward compatibility
 
         # Chetan - 20221208 - not formally deprecating these values until a future date
-        cloud_base_url = (
-            cloud_base_url if cloud_base_url is not None else ge_cloud_base_url
-        )
-        cloud_access_token = (
-            cloud_access_token
-            if cloud_access_token is not None
-            else ge_cloud_access_token
-        )
-        cloud_organization_id = (
-            cloud_organization_id
-            if cloud_organization_id is not None
-            else ge_cloud_organization_id
+        (
+            cloud_base_url,
+            cloud_access_token,
+            cloud_organization_id,
+        ) = CloudDataContext._resolve_cloud_args(
+            cloud_base_url=cloud_base_url,
+            cloud_access_token=cloud_access_token,
+            cloud_organization_id=cloud_organization_id,
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_organization_id=ge_cloud_organization_id,
         )
 
         self._cloud_config = self.get_cloud_config(
@@ -123,6 +122,31 @@ class CloudDataContext(SerializableDataContext):
             context_root_dir=self._context_root_directory,
             runtime_environment=runtime_environment,
         )
+
+    @staticmethod
+    def _resolve_cloud_args(
+        cloud_base_url: Optional[str] = None,
+        cloud_access_token: Optional[str] = None,
+        cloud_organization_id: Optional[str] = None,
+        # <GX_RENAME> Deprecated as of 0.15.37
+        ge_cloud_base_url: Optional[str] = None,
+        ge_cloud_access_token: Optional[str] = None,
+        ge_cloud_organization_id: Optional[str] = None,
+    ) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+        cloud_base_url = (
+            cloud_base_url if cloud_base_url is not None else ge_cloud_base_url
+        )
+        cloud_access_token = (
+            cloud_access_token
+            if cloud_access_token is not None
+            else ge_cloud_access_token
+        )
+        cloud_organization_id = (
+            cloud_organization_id
+            if cloud_organization_id is not None
+            else ge_cloud_organization_id
+        )
+        return cloud_base_url, cloud_access_token, cloud_organization_id
 
     def _register_providers(self, config_provider: _ConfigurationProvider) -> None:
         """
@@ -377,7 +401,7 @@ class CloudDataContext(SerializableDataContext):
 
     @property
     def ge_cloud_mode(self) -> bool:
-        # Deprecated 0.15.37
+        # <GX_RENAME> Deprecated 0.15.37
         return self.cloud_mode
 
     def _init_variables(self) -> CloudDataContextVariables:

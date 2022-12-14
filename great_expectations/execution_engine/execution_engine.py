@@ -419,10 +419,10 @@ class ExecutionEngine(ABC):
         if len(metric_fn_bundle) > 0:
             try:
                 # an engine-specific way of computing metrics together
-                new_resolved: Dict[
+                resolved_metric_bundle: Dict[
                     Tuple[str, str, str], MetricValue
                 ] = self.resolve_metric_bundle(metric_fn_bundle=metric_fn_bundle)
-                resolved_metrics.update(new_resolved)
+                resolved_metrics.update(resolved_metric_bundle)
             except Exception as e:
                 raise ge_exceptions.MetricResolutionError(
                     message=str(e),

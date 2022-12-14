@@ -1,16 +1,13 @@
 from __future__ import annotations
 
 import os
-from typing import Mapping, Optional, Union
+from typing import Mapping, Optional, Tuple, Union
 
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
-)
-from great_expectations.data_context.data_context.ephemeral_data_context import (
-    EphemeralDataContext,
 )
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -29,8 +26,12 @@ def BaseDataContext(
     ge_cloud_config: Optional[GXCloudConfig] = None,
 ) -> AbstractDataContext:
     # Chetan - 20221208 - not formally deprecating these values until a future date
-    cloud_config = cloud_config if cloud_config is not None else ge_cloud_config
-    cloud_mode = True if cloud_mode or ge_cloud_mode else False
+    cloud_mode, cloud_config = _resolve_cloud_args(
+        cloud_mode=cloud_mode,
+        cloud_config=cloud_config,
+        ge_cloud_mode=ge_cloud_mode,
+        ge_cloud_config=ge_cloud_config,
+    )
 
     project_data_context_config: DataContextConfig = (
         AbstractDataContext.get_or_create_data_context_config(project_config)
@@ -68,3 +69,15 @@ def BaseDataContext(
             project_config=project_data_context_config,
             runtime_environment=runtime_environment,
         )
+
+
+def _resolve_cloud_args(
+    cloud_mode: bool = False,
+    cloud_config: Optional[GXCloudConfig] = None,
+    # <GX_RENAME> Deprecated as of 0.15.37
+    ge_cloud_mode: bool = False,
+    ge_cloud_config: Optional[GXCloudConfig] = None,
+) -> Tuple[bool, Optional[GXCloudConfig]]:
+    cloud_mode = True if cloud_mode or ge_cloud_mode else False
+    cloud_config = cloud_config if cloud_config is not None else ge_cloud_config
+    return cloud_mode, cloud_config
