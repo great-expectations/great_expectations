@@ -786,36 +786,3 @@ class CloudDataContext(SerializableDataContext):
         assert cloud_config is not None
         config = cls.retrieve_data_context_config_from_cloud(cloud_config=cloud_config)
         return config
-
-    @classmethod
-    def retrieve_data_context_config_from_cloud(
-        cls, cloud_config: GXCloudConfig
-    ) -> DataContextConfig:
-        """
-        Utilizes the GXCloudConfig instantiated in the constructor to create a request to the Cloud API.
-        Given proper authorization, the request retrieves a data context config that is pre-populated with
-        GE objects specific to the user's Cloud environment (datasources, data connectors, etc).
-
-        Please note that substitution for ${VAR} variables is performed in GX Cloud before being sent
-        over the wire.
-
-        :return: the configuration object retrieved from the Cloud API
-        """
-        base_url = cloud_config.base_url
-        organization_id = cloud_config.organization_id
-        ge_cloud_url = (
-            f"{base_url}/organizations/{organization_id}/data-context-configuration"
-        )
-        headers = {
-            "Content-Type": "application/vnd.api+json",
-            "Authorization": f"Bearer {cloud_config.access_token}",
-            "Gx-Version": __version__,
-        }
-
-        response = requests.get(ge_cloud_url, headers=headers)
-        if response.status_code != 200:
-            raise gx_exceptions.GXCloudError(
-                f"Bad request made to GX Cloud; {response.text}"
-            )
-        config = response.json()
-        return DataContextConfig(**config)
