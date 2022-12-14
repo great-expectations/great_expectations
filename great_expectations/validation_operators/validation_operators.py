@@ -236,6 +236,10 @@ class ActionListValidationOperator(ValidationOperator):
             self.actions[action_config["name"]] = new_action
 
     @property
+    def _cloud_mode(self) -> bool:
+        return hasattr(self.data_context, "cloud_mode") and self.data_context.cloud_mode
+
+    @property
     def validation_operator_config(self) -> dict:
         if self._validation_operator_config is None:
             self._validation_operator_config = {
@@ -370,10 +374,7 @@ class ActionListValidationOperator(ValidationOperator):
 
             run_results = {}
             for batch, async_batch_validation_result in batch_and_async_result_tuples:
-                if (
-                    hasattr(self.data_context, "cloud_mode")
-                    and self.data_context.cloud_mode
-                ):
+                if self._cloud_mode:
                     expectation_suite_identifier = GXCloudIdentifier(
                         resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
                         cloud_id=batch._expectation_suite.ge_cloud_id,
