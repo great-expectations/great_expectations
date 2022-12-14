@@ -864,10 +864,10 @@ def test_add_store(empty_data_context):
 
 
 # noinspection PyPep8Naming
-def test_ExplorerDataContext(titanic_data_context):
-    context_root_directory = titanic_data_context.root_directory
-    explorer_data_context = ExplorerDataContext(context_root_directory)
-    assert explorer_data_context._expectation_explorer_manager
+# def test_ExplorerDataContext(titanic_data_context):
+#     context_root_directory = titanic_data_context.root_directory
+#     explorer_data_context = ExplorerDataContext(context_root_directory)
+#     assert explorer_data_context._expectation_explorer_manager
 
 
 # noinspection PyPep8Naming
