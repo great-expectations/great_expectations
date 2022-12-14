@@ -42,7 +42,7 @@ class ColumnValuesToBeValidSha1(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidSha1(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid SHA1 format."""
+    """Expect column values to be valid SHA1 hashes."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

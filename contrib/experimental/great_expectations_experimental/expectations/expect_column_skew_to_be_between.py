@@ -227,7 +227,7 @@ def _get_query_result(func, selectable, sqlalchemy_engine):
 
 
 class ExpectColumnSkewToBeBetween(ColumnExpectation):
-    """Expect column skew to be between. Currently tests against Gamma and Beta distributions"""
+    """Expect column skew to be between. Currently tests against Gamma and Beta distributions."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [

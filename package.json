@@ -26,6 +26,7 @@
     "@docusaurus/theme-search-algolia": "^2.0.0-beta.21",
     "@mdx-js/react": "^1.6.21",
     "clsx": "^1.1.1",
+    "docusaurus-gtm-plugin": "^0.0.2",
     "docusaurus-plugin-sass": "^0.2.2",
     "plugin-image-zoom": "ataft/plugin-image-zoom",
     "react": "^17.0.1",
