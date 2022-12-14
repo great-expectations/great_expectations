@@ -97,7 +97,7 @@ stages:
       steps:
       - script: |
           pip install --requirement reqs/requirements-dev-contrib.txt
-          invoke type-check --install-types --warn-unused-ignores --pretty
+          invoke type-check --install-types --warn-unused-ignores
         name: StaticTypeCheck
 
     - job: docstring_checker
