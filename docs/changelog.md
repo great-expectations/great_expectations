@@ -21,7 +21,7 @@ title: Changelog
 * [MAINTENANCE] Clean up GX rename artifacts (#6561)
 * [CONTRIB] fix observed value in custom expectation (#6515) (thanks @itaise)
 
-### 0.15.39
+### 0.15.39 - YANKED
 * [BUGFIX] Patch faulty GX Cloud arg resolution logic (#6542)
 * [BUGFIX] Fix resolution of cloud variables. (#6546)
 * [DOCS] Fix line numbers in snippets part 2 (#6537)
@@ -30,7 +30,7 @@ title: Changelog
 * [MAINTENANCE] v2 Docs link (#6534)
 * [MAINTENANCE] Fix logic around cloud_mode and ge_cloud_mode. (#6550)
 
-### 0.15.38
+### 0.15.38 - YANKED
 * [BUGFIX] Patch broken Cloud E2E test around `Datasource` CRUD (#6520)
 * [BUGFIX] Patch outdated `ge_cloud_id` attribute call in `ValidationOperator` (#6529)
 * [BUGFIX] Revert refactor to `Datasource` instantiation logic in `DataContext` (#6535)
@@ -44,7 +44,7 @@ title: Changelog
 * [MAINTENANCE] Update `Domain` computation in MetricConfiguration (#6528)
 * [MAINTENANCE] v2 Docs link (#6534)
 
-### 0.15.37
+### 0.15.37 - YANKED
 * [FEATURE] Support to include ID/PK in validation result for each row - SQL (#6448)
 * [FEATURE] Build process and example API docs (part 1) (#6474)
 * [FEATURE] Add temp_table_schema_name support for BigQuery (#6303) (thanks @BobbyRyterski)
