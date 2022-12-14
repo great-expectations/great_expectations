@@ -352,7 +352,7 @@ class ExecutionEngine(ABC):
         (
             metric_fn_direct_configurations,
             metric_fn_bundle_configurations,
-        ) = self._build_direct_and_bundled_metric_computation_configurationsd(
+        ) = self._build_direct_and_bundled_metric_computation_configurations(
             metrics_to_resolve=metrics_to_resolve,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
@@ -458,7 +458,7 @@ class ExecutionEngine(ABC):
             template_arguments=template_arguments,
         )
 
-    def _build_direct_and_bundled_metric_computation_configurationsd(
+    def _build_direct_and_bundled_metric_computation_configurations(
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
         metrics: Optional[Dict[Tuple[str, str, str], MetricValue]] = None,
