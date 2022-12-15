@@ -1195,10 +1195,10 @@ Notes:
 
         if parse_strings_as_datetimes:
             # tolerance = timedelta(days=tolerance)
-            if min_value:
+            if min_value and isinstance(min_value, str):
                 min_value = parse(min_value)
 
-            if max_value:
+            if max_value and isinstance(max_value, str):
                 max_value = parse(max_value)
 
             try:
