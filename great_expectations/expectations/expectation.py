@@ -2722,7 +2722,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
 
         if result_format_str in ["BASIC"]:
             return validation_dependencies
-
         # only for SUMMARY and COMPLETE
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
@@ -2780,9 +2779,14 @@ class ColumnMapExpectation(TableExpectation, ABC):
         ] = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
+
+        unexpected_index_column_names: Union[str, None]
         if isinstance(result_format, dict):
             include_unexpected_rows = result_format.get(
                 "include_unexpected_rows", False
+            )
+            unexpected_index_column_names = result_format.get(
+                "unexpected_index_column_names"
             )
 
         total_count: Optional[int] = metrics.get("table.row_count")
@@ -2832,6 +2836,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
             unexpected_index_list=unexpected_index_list,
             unexpected_rows=unexpected_rows,
             unexpected_index_query=unexpected_index_query,
+            unexpected_index_column_names=unexpected_index_column_names,
         )
 
 
@@ -3280,6 +3285,7 @@ def _format_map_output(
     unexpected_list: Optional[List[Any]] = None,
     unexpected_index_list: Optional[List[int]] = None,
     unexpected_index_query: Optional[str] = None,
+    unexpected_index_column_names: Optional[str] = None,
     unexpected_rows=None,
 ) -> Dict:
     """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
@@ -3405,6 +3411,10 @@ def _format_map_output(
         return_obj["result"].update({"unexpected_index_list": unexpected_index_list})
     if unexpected_index_query is not None:
         return_obj["result"].update({"unexpected_index_query": unexpected_index_query})
+    if unexpected_index_column_names is not None:
+        return_obj["result"].update(
+            {"unexpected_index_column_names": unexpected_index_column_names}
+        )
     if result_format["result_format"] == "COMPLETE":
         return return_obj
 
