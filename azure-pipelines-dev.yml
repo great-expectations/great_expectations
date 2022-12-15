@@ -122,7 +122,6 @@ stages:
       - script: |
           pip install --requirement reqs/requirements-dev-contrib.txt
           invoke type-check --install-types --warn-unused-ignores --pretty
-          exit 0
         name: StaticTypeCheck
 
     - job: docstring_checker
