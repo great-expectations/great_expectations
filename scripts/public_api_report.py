@@ -6,21 +6,33 @@ should be considered part of our public API.
 
 The utilities are generally used as follows:
 
+DocsExampleParser
 1. AST walk through docs examples to find all imports of classes and methods
     that are GX related (by checking the import location).
 2. AST walk through docs examples to find all method calls (currently we only
     retrieve the names, not the location of the method definition). These are
     not filtered to be only GX related, we filter in step 4.
+
+GXCodeParser
 3. AST walk through full GX codebase to find all classes and method names from
     their definitions, and capture the definition file location.
+
+CodeReferenceFilter
 4. Filter list of classes & methods from docs examples to only those found in
     the GX codebase (e.g. filter out print() or other python or 3rd party
     classes/methods).
 5. Use this filtered list against the list of class and method definitions in
     the GX codebase to generate the full list with definition locations in the
     GX codebase.
-6. Optionally filter list of classes & methods to those not already
+6. Filter or include based on Include and Exclude directives (include overrides).
+
+PublicAPIChecker
+7. Optionally filter list of classes & methods to those not already
     marked `public_api`.
+
+PublicAPIReport
+8. Generate report based on list of Definitions.
+
 
 Typical usage example:
 
@@ -495,6 +507,8 @@ class PublicAPIChecker:
         self.repo_root = repo_root
         self.doc_example_parser = doc_example_parser
         self.gx_code_parser = gx_code_parser
+
+    # TODO: Move exclude / include here
 
     def gx_code_definitions_appearing_in_docs_examples_and_not_marked_public_api(
         self,
