@@ -44,11 +44,14 @@ import ast
 import glob
 import logging
 import operator
-import pathlib
-from dataclasses import dataclass
-from typing import List, Set, Union, Optional
-
-import astunparse
+    # TODO: How to handle astunparse optional dependency?
+# import pathlib
+# from dataclasses import dataclass
+# from typing import List, Set, Union, Optional
+#
+#
+# # TODO: Add this as a dependency or make optional?
+# # import astunparse
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
@@ -93,13 +96,14 @@ class AstParser:
     def __init__(self, repo_root: pathlib.Path) -> None:
         self.repo_root = repo_root
 
-    def print_tree(self, filepath: pathlib.Path) -> None:
-        tree = self._parse_file_to_ast_tree(filepath=filepath)
-        self._print_ast(tree=tree)
-
-    def _print_ast(self, tree: ast.AST) -> None:
-        """Pretty print an AST tree."""
-        print(astunparse.dump(tree))
+    # TODO: How to handle astunparse optional dependency?
+    # def print_tree(self, filepath: pathlib.Path) -> None:
+    #     tree = self._parse_file_to_ast_tree(filepath=filepath)
+    #     self._print_ast(tree=tree)
+    #
+    # def _print_ast(self, tree: ast.AST) -> None:
+    #     """Pretty print an AST tree."""
+    #     print(astunparse.dump(tree))
 
     def _parse_file_to_ast_tree(self, filepath: pathlib.Path) -> ast.AST:
         with open(self.repo_root / filepath) as f:
