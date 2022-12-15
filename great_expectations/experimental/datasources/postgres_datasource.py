@@ -121,7 +121,7 @@ class TableAsset(DataAsset):
 
     @pydantic.validator("order_by", pre=True, each_item=True)
     @classmethod
-    def parse_orderby_sorter(
+    def _parse_order_by_sorter(
         cls, v: Union[str, BatchSorter]
     ) -> Union[BatchSorter, dict]:
         if isinstance(v, str):
