@@ -443,15 +443,11 @@ def test_now_evaluation_parameter():
     """
     # By itself
     res = parse_evaluation_parameter("now()")
-    assert isinstance(
-        res, datetime
-    ), "Provided evaluation parameter is not dateutil-parseable"
+    assert isinstance(res, datetime), "Parsed evaluation parameter is not a datetime"
 
     # In conjunction with timedelta
     res = parse_evaluation_parameter("now() - timedelta(weeks=1)")
-    assert isinstance(
-        res, datetime
-    ), "Provided evaluation parameter is not dateutil-parseable"
+    assert isinstance(res, datetime), "Parsed evaluation parameter is not a datetime"
 
     # Require parens to actually invoke
     with pytest.raises(EvaluationParameterError):
