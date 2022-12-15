@@ -19,11 +19,7 @@ from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.data_context import (
-    BaseDataContext,
-    DataContext,
-    ExplorerDataContext,
-)
+from great_expectations.data_context import BaseDataContext, DataContext
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
