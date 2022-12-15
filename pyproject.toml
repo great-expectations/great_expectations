@@ -25,6 +25,13 @@ ignore_missing_imports = true
 follow_imports = 'silent'
 warn_redundant_casts = true
 show_error_codes = true
+# The following list of codes are globally ignored, do not add to this list
+disable_error_code = [
+    # annotation-unchecked are 'warning notes', not errors and won't cause mypy to fail
+    # but it does create a lot of noise in the CI mypy step.
+    # https://mypy-lang.blogspot.com/2022/11/mypy-0990-released.html
+    'annotation-unchecked',
+    ]
 exclude = [
     # BEGIN ALWAYS EXCLUDE SECTION #####################################################
     # If pattern should always be excluded add comment explaining why and put
