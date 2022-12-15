@@ -34,6 +34,7 @@ class ContentBlockRenderer(Renderer):
     def validate_input(cls, render_object: Any) -> None:
         pass
 
+    # this is the content block renderer that does include the validation results
     @classmethod
     def render(
         cls, render_object: Any, **kwargs

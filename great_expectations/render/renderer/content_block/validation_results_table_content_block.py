@@ -9,6 +9,7 @@ from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less
 )
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render import (
+    AtomicDiagnosticRendererType,
     LegacyDiagnosticRendererType,
     LegacyRendererType,
     RenderedTableContent,
@@ -129,6 +130,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             )
             unexpected_statement = []
             unexpected_table = None
+            unexpected_indices = None
             observed_value = ["--"]
 
             data_docs_exception_message = """\
@@ -192,12 +194,32 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
                 )
                 logger.error(exception_message)
+            try:
+                # need to make sure that the runtime_configuration can make it all the way down here
+                expectation = result.expectation_config
+                unexpected_index_renderer = get_renderer_impl(
+                    object_name=expectation_type,
+                    renderer_type=AtomicDiagnosticRendererType.UNEXPECTED_INDICES,
+                )
+                # breakpoint()
+                unexpected_indices = unexpected_index_renderer[1](
+                    result=result, configuration=expectation
+                )
+            except Exception as e:
+                exception_traceback = traceback.format_exc()
+                exception_message = (
+                    data_docs_exception_message
+                    + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                )
+                logger.error(exception_message)
 
             # If the expectation has some unexpected values...:
             if unexpected_statement:
                 expectation_string_cell += unexpected_statement
             if unexpected_table:
                 expectation_string_cell.append(unexpected_table)
+            if unexpected_indices:
+                expectation_string_cell += unexpected_indices
             if len(expectation_string_cell) > 1:
                 output_row = [status_cell + [expectation_string_cell] + observed_value]
             else:

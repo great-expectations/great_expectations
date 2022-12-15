@@ -752,7 +752,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_basic_out
 
 
 @pytest.mark.integration
-def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
+def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_output_one(
     data_context_with_connection_to_animal_names_db,
     reference_sql_checkpoint_config_for_unexpected_column_names,
     expectation_config_expect_column_values_to_be_in_set,

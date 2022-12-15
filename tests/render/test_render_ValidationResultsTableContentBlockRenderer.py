@@ -415,6 +415,9 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
     assert content_block_fn_output == content_block_fn_expected_output
 
 
+# is this how we do the rendering testing?
+
+
 @pytest.mark.filterwarnings("ignore:V2 API style custom rendering*:DeprecationWarning")
 def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn_with_v2_api_style_custom_rendering():
     """Test backwards support for custom expectation rendering with the V2 API as described at
