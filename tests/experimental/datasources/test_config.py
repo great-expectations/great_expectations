@@ -1,7 +1,7 @@
 import functools
 import json
 import pathlib
-from typing import Callable
+from typing import Callable, List
 
 import pytest
 
@@ -202,5 +202,12 @@ def test_custom_sorter_serialization(
     dumped: str = from_json_gx_config.json(indent=2)
     print(f"  Dumped JSON ->\n\n{dumped}\n")
 
-    assert "year" in dumped
-    assert "-month" in dumped
+    expected_sorter_strings: List[str] = PG_COMPLEX_CONFIG_DICT["datasources"][
+        "my_pg_ds"
+    ]["assets"]["with_dslish_sorters"]["order_by"]
+
+    assert '"reverse": True' not in dumped
+    assert '{"metadata_key":' not in dumped
+
+    for sorter_str in expected_sorter_strings:
+        assert sorter_str in dumped, f"`{sorter_str}` not found in dumped json"
