@@ -2,6 +2,25 @@
 title: Changelog
 ---
 
+### 0.15.41
+* [FEATURE] enable mostly for expect_compound_columns_to_be_unique (#6533) (thanks @kimfrie)
+* [BUGFIX] Return unique list of batch_definitions (#6579) (thanks @tanelk)
+* [BUGFIX] convert_to_json_serializable does not accept numpy datetime (#6553) (thanks @tmilitino)
+* [DOCS] Clean up misc snippet violations (#6582)
+* [MAINTENANCE] Update json schema validation on usage stats to filter based on format. (#6502)
+* [MAINTENANCE] Renaming Metric Name Suffixes using Enum Values for Better Code Readability (#6575)
+* [MAINTENANCE] M/great 1433/cloud tests to async (#6543)
+* [MAINTENANCE] Add static type checking to `rule.py` and `rule_based_profiler_result.py` (#6573)
+* [MAINTENANCE] Update most contrib Expectation docstrings to be consistent and decently formatted for gallery (#6577)
+* [MAINTENANCE] Update changelogs to reflect PyPI yanks (0.15.37-0.15.39) (#6581)
+* [MAINTENANCE] Refactor ExecutionEngine.resolve_metrics() for better code readability (#6578)
+* [MAINTENANCE] adding googletag manager to docusaurus (#6584)
+* [MAINTENANCE] typo in method name (#6585)
+* [MAINTENANCE] `mypy` config update (#6589)
+* [MAINTENANCE] Small refactor of ExecutionEngine.resolve_metrics() for better code readability (and miscellaneous additional clean up) (#6587)
+* [MAINTENANCE] Remove `ExplorerDataContext` (#6592)
+* [MAINTENANCE] Leverage `RendererConfiguration` in existing prescriptive templates (2 of 3) (#6488)
+
 ### 0.15.40
 * [FEATURE] F/great 1397/zep checkpoints (#6525)
 * [FEATURE] Add integration test for zep sqlalchemy datasource with renderering. (#6564)
