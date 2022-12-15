@@ -55,6 +55,40 @@ logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
 
 
+@dataclass(frozen=True)
+class Definition:
+    """Class, method or function definition information from AST parsing.
+
+    Args:
+        name: name of class, method or function.
+        filepath: Relative to repo_root/great_expectations. E.g.
+            core/expectation_suite.py NOT
+            great_expectations/core/expectation_suite.py
+        ast_definition: Full AST tree of the class, method or function definition.
+    """
+
+    name: str
+    filepath: pathlib.Path
+    ast_definition: Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]
+
+
+@dataclass(frozen=True)
+class IncludeExcludeDefinition:
+    """Name and/or relative filepath of definition to exclude or include.
+
+    Args:
+        reason: Reason for include or exclude.
+        name: name of class, method or function.
+        filepath: Relative to repo_root. E.g.
+            great_expectations/core/expectation_suite.py
+            Required if providing `name`.
+    """
+
+    reason: str
+    name: Optional[str] = None
+    filepath: Optional[pathlib.Path] = None
+
+
 class AstParser:
     def __init__(self, repo_root: pathlib.Path) -> None:
         self.repo_root = repo_root
@@ -179,106 +213,44 @@ class DocExampleParser:
         return set(names)
 
 
-@dataclass(frozen=True)
-class Definition:
-    """Class, method or function definition information from AST parsing.
-
-    Args:
-        name: name of class, method or function.
-        filepath: Relative to repo_root/great_expectations. E.g.
-            core/expectation_suite.py NOT
-            great_expectations/core/expectation_suite.py
-        ast_definition: Full AST tree of the class, method or function definition.
-    """
-    name: str
-    filepath: pathlib.Path
-    ast_definition: Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]
-
-
-class PublicAPIReport:
-    def __init__(self, definitions: Set[Definition]) -> None:
-        self.definitions = definitions
-
-    def write_printable_definitions_to_file(
-        self, filepath: pathlib.Path,
-    ) -> None:
-        """
-
-        Args:
-            filepath:
-
-        Returns:
-
-        """
-
-        printable_definitions = self.generate_printable_definitions()
-        with open(filepath, "w") as f:
-            f.write("\n".join(printable_definitions))
-
-    def generate_printable_definitions(self) -> List[str]:
-        """
-
-        Args:
-            definitions:
-
-        Returns:
-
-        """
-        # TODO: Strip leading /greatexpectations here
-        sorted_definitions_list = sorted(
-            list(self.definitions), key=operator.attrgetter("filepath")
-        )
-        sorted_definitions_strings: List[str] = []
-        for definition in sorted_definitions_list:
-            sorted_definitions_strings.append(
-                f"File: {str(definition.filepath)} Name: {definition.name}"
-            )
-
-        seen = set()
-        sorted_definitions_strings_no_dupes = [
-            d for d in sorted_definitions_strings if not (d in seen or seen.add(d))
-        ]
-
-        return sorted_definitions_strings_no_dupes
-
-
-@dataclass(frozen=True)
-class IncludeExcludeDefinition:
-    """Name and/or relative filepath of definition to exclude or include.
-
-    Args:
-        reason: Reason for include or exclude.
-        name: name of class, method or function.
-        filepath: Relative to repo_root. E.g.
-            great_expectations/core/expectation_suite.py
-            Required if providing `name`.
-    """
-    reason: str
-    name: Optional[str] = None
-    filepath: Optional[pathlib.Path] = None
-
-
 class GXCodeParser:
     """"""
 
     DEFAULT_INCLUDES: List[IncludeExcludeDefinition] = [
         IncludeExcludeDefinition(
-            reason="Referenced via legacy docs, will likely need to be included in the public API. Added here as an example include.", name="remove_expectation", filepath=pathlib.Path("great_expectations/core/expectation_suite.py"))
+            reason="Referenced via legacy docs, will likely need to be included in the public API. Added here as an example include.",
+            name="remove_expectation",
+            filepath=pathlib.Path("great_expectations/core/expectation_suite.py"),
+        )
     ]
     DEFAULT_EXCLUDES: List[IncludeExcludeDefinition] = [
         IncludeExcludeDefinition(
-            reason="Experimental is not part of the public API", filepath=pathlib.Path("great_expectations/experimental/datasources/interfaces.py")),
-        IncludeExcludeDefinition(reason="Experimental is not part of the public API", filepath=pathlib.Path("great_expectations/experimental/context.py")),
-        IncludeExcludeDefinition(reason="Marshmallow dump methods are not part of the public API", name="dump", filepath=pathlib.Path("great_expectations/data_context/types/base.py")),
-        IncludeExcludeDefinition(reason="Exclude code from __init__.py", filepath=pathlib.Path("great_expectations/types/__init__.py"))
+            reason="Experimental is not part of the public API",
+            filepath=pathlib.Path(
+                "great_expectations/experimental/datasources/interfaces.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Experimental is not part of the public API",
+            filepath=pathlib.Path("great_expectations/experimental/context.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Marshmallow dump methods are not part of the public API",
+            name="dump",
+            filepath=pathlib.Path("great_expectations/data_context/types/base.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from __init__.py",
+            filepath=pathlib.Path("great_expectations/types/__init__.py"),
+        ),
     ]
 
     def __init__(
-            self,
-            repo_root: pathlib.Path,
-            paths: Set[pathlib.Path],
-            excludes: Union[List[IncludeExcludeDefinition], None] = None,
-            includes: Union[List[IncludeExcludeDefinition], None] = None,
+        self,
+        repo_root: pathlib.Path,
+        paths: Set[pathlib.Path],
+        excludes: Union[List[IncludeExcludeDefinition], None] = None,
+        includes: Union[List[IncludeExcludeDefinition], None] = None,
     ) -> None:
         """
 
@@ -329,7 +301,6 @@ class GXCodeParser:
                 return True
         return False
 
-
     def get_all_non_private_class_method_and_function_names_from_definitions_in_files(
         self,
     ) -> Set[str]:
@@ -376,7 +347,6 @@ class GXCodeParser:
 
         return set([definition.name for definition in definitions])
 
-
     def _get_all_class_method_and_function_definitions_from_files(
         self,
     ) -> Set[Definition]:
@@ -386,24 +356,30 @@ class GXCodeParser:
             file_usages = self.get_all_class_method_and_function_definitions_from_file(
                 filepath=filepath
             )
-            all_usages |= self._build_file_usage_definitions(filepath=filepath, file_usages=file_usages)
+            all_usages |= self._build_file_usage_definitions(
+                filepath=filepath, file_usages=file_usages
+            )
         return all_usages
 
-    def _get_included_class_method_and_function_definitions_from_files(self) -> Set[Definition]:
+    def _get_included_class_method_and_function_definitions_from_files(
+        self,
+    ) -> Set[Definition]:
         # TODO: Implementation
         all_defs = self._get_all_class_method_and_function_definitions_from_files()
         included_defs: List[Definition] = []
         for definition in all_defs:
-            if self._is_filepath_included(filepath=definition.filepath) or self._is_definition_included(definition=definition):
+            if self._is_filepath_included(
+                filepath=definition.filepath
+            ) or self._is_definition_included(definition=definition):
                 included_defs.append(definition)
         return set(included_defs)
 
-
-    def get_filtered_and_included_class_method_and_function_definitions_from_files(self) -> Set[Definition]:
+    def get_filtered_and_included_class_method_and_function_definitions_from_files(
+        self,
+    ) -> Set[Definition]:
         filtered = self._get_filtered_class_method_and_function_definitions_from_files()
         included = self._get_included_class_method_and_function_definitions_from_files()
         return filtered.union(included)
-
 
     def _get_filtered_class_method_and_function_definitions_from_files(
         self,
@@ -412,40 +388,46 @@ class GXCodeParser:
         all_usages: Set[Definition] = set()
         for filepath in self.paths:
             if not self._is_filepath_excluded(filepath=filepath):
-                file_usages = self.get_all_class_method_and_function_definitions_from_file(
-                    filepath=filepath
+                file_usages = (
+                    self.get_all_class_method_and_function_definitions_from_file(
+                        filepath=filepath
+                    )
                 )
-                all_usages |= self._build_filtered_file_usage_definitions(filepath=filepath, file_usages=file_usages)
+                all_usages |= self._build_filtered_file_usage_definitions(
+                    filepath=filepath, file_usages=file_usages
+                )
         return all_usages
 
-
-    def _build_file_usage_definitions(self, filepath: pathlib.Path, file_usages) -> Set[Definition]:
+    def _build_file_usage_definitions(
+        self, filepath: pathlib.Path, file_usages
+    ) -> Set[Definition]:
         # TODO: Add type info and docstring
         file_usages_definitions: List[Definition] = []
         for usage in file_usages:
             candidate_definition = Definition(
-                    name=usage.name,
-                    filepath=filepath,
-                    ast_definition=usage,
-                )
+                name=usage.name,
+                filepath=filepath,
+                ast_definition=usage,
+            )
             file_usages_definitions.append(candidate_definition)
 
         return set(file_usages_definitions)
 
-    def _build_filtered_file_usage_definitions(self, filepath: pathlib.Path, file_usages) -> Set[Definition]:
+    def _build_filtered_file_usage_definitions(
+        self, filepath: pathlib.Path, file_usages
+    ) -> Set[Definition]:
         # TODO: Add type info and docstring
         file_usages_definitions: List[Definition] = []
         for usage in file_usages:
             candidate_definition = Definition(
-                    name=usage.name,
-                    filepath=filepath,
-                    ast_definition=usage,
-                )
+                name=usage.name,
+                filepath=filepath,
+                ast_definition=usage,
+            )
             if not self._is_definition_excluded(definition=candidate_definition):
                 file_usages_definitions.append(candidate_definition)
 
         return set(file_usages_definitions)
-
 
     def get_all_class_method_and_function_definitions_from_file(
         self, filepath: pathlib.Path
@@ -493,6 +475,10 @@ class GXCodeParser:
                 function_definitions.append(node)
 
         return function_definitions
+
+
+class CodeReferenceFilter:
+    pass
 
 
 class PublicAPIChecker:
@@ -627,6 +613,54 @@ class PublicAPIChecker:
         return public_functions
 
 
+class PublicAPIReport:
+    def __init__(self, definitions: Set[Definition]) -> None:
+        self.definitions = definitions
+
+    def write_printable_definitions_to_file(
+        self,
+        filepath: pathlib.Path,
+    ) -> None:
+        """
+
+        Args:
+            filepath:
+
+        Returns:
+
+        """
+
+        printable_definitions = self.generate_printable_definitions()
+        with open(filepath, "w") as f:
+            f.write("\n".join(printable_definitions))
+
+    def generate_printable_definitions(self) -> List[str]:
+        """
+
+        Args:
+            definitions:
+
+        Returns:
+
+        """
+        # TODO: Strip leading /greatexpectations here
+        sorted_definitions_list = sorted(
+            list(self.definitions), key=operator.attrgetter("filepath")
+        )
+        sorted_definitions_strings: List[str] = []
+        for definition in sorted_definitions_list:
+            sorted_definitions_strings.append(
+                f"File: {str(definition.filepath)} Name: {definition.name}"
+            )
+
+        seen = set()
+        sorted_definitions_strings_no_dupes = [
+            d for d in sorted_definitions_strings if not (d in seen or seen.add(d))
+        ]
+
+        return sorted_definitions_strings_no_dupes
+
+
 def _repo_root() -> pathlib.Path:
     return pathlib.Path(__file__).parent.parent
 
@@ -665,7 +699,9 @@ def main():
     gx_code_definitions_appearing_in_docs_examples = (
         public_api_checker.gx_code_definitions_appearing_in_docs_examples()
     )
-    public_api_report = PublicAPIReport(definitions=gx_code_definitions_appearing_in_docs_examples)
+    public_api_report = PublicAPIReport(
+        definitions=gx_code_definitions_appearing_in_docs_examples
+    )
 
     printable_definitions = public_api_report.generate_printable_definitions()
     for printable_definition in printable_definitions:
