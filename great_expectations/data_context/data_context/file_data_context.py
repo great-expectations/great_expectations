@@ -1,5 +1,5 @@
 import logging
-import os
+import pathlib
 from typing import Optional
 
 from ruamel.yaml import YAML, YAMLError
@@ -124,7 +124,7 @@ class FileDataContext(SerializableDataContext):
         cls,
         context_root_directory: Optional[str],
     ):
-        path_to_yml = os.path.join(context_root_directory, cls.GX_YML)
+        path_to_yml = pathlib.Path(context_root_directory, cls.GX_YML)
         try:
             with open(path_to_yml) as data:
                 config_commented_map_from_yaml = yaml.load(data)

@@ -1039,7 +1039,7 @@ def test_data_context_create_does_not_raise_error_or_warning_if_ge_dir_exists(
 
 
 @pytest.fixture()
-def empty_context(tmp_path_factory):
+def empty_context(tmp_path_factory) -> FileDataContext:
     project_path = str(tmp_path_factory.mktemp("data_context"))
     FileDataContext.create(project_path)
     ge_dir = os.path.join(project_path, "great_expectations")
