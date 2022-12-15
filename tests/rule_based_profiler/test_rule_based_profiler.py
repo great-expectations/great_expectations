@@ -7,6 +7,9 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
+)
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -1181,20 +1184,22 @@ def test_add_profiler(
     )
 
 
-@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
 @pytest.mark.cloud
 @pytest.mark.unit
 def test_add_profiler_ge_cloud_mode(
-    mock_data_context: mock.MagicMock,
     ge_cloud_profiler_id: str,
     ge_cloud_profiler_key: GXCloudIdentifier,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
-    profiler: RuleBasedProfiler = RuleBasedProfiler.add_profiler(
-        profiler_config_with_placeholder_args,
-        data_context=mock_data_context,
-        profiler_store=mock_data_context.profiler_store,
-    )
+    with mock.patch(
+        "great_expectations.data_context.data_context.CloudDataContext",
+        spec=CloudDataContext,
+    ) as mock_data_context:
+        profiler: RuleBasedProfiler = RuleBasedProfiler.add_profiler(
+            profiler_config_with_placeholder_args,
+            data_context=mock_data_context,
+            profiler_store=mock_data_context.profiler_store,
+        )
 
     assert isinstance(profiler, RuleBasedProfiler)
     assert profiler.name == profiler_config_with_placeholder_args.name
