@@ -19,11 +19,7 @@ from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.data_context import (
-    BaseDataContext,
-    DataContext,
-    ExplorerDataContext,
-)
+from great_expectations.data_context import BaseDataContext, DataContext
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
@@ -858,13 +854,6 @@ def test_add_store(empty_data_context):
     assert "my_new_store" in empty_data_context.get_config()["stores"]
 
     assert isinstance(new_store, ExpectationsStore)
-
-
-# noinspection PyPep8Naming
-def test_ExplorerDataContext(titanic_data_context):
-    context_root_directory = titanic_data_context.root_directory
-    explorer_data_context = ExplorerDataContext(context_root_directory)
-    assert explorer_data_context._expectation_explorer_manager
 
 
 # noinspection PyPep8Naming

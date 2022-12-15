@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, Optional, Set, Tuple, Union
 
 import altair as alt
 import numpy as np
@@ -32,6 +32,10 @@ from great_expectations.render import (
     renderedAtomicValueSchema,
 )
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererSchemaType,
+)
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -43,6 +47,9 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import ValidationDependencies
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import RendererParams
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -827,9 +834,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
 
     @classmethod
     def _atomic_kl_divergence_chart_template(cls, partition_object: dict) -> tuple:
-        weights = partition_object.get("weights")
-        if weights is None:
-            weights = []
+        weights = partition_object.get("weights", [])
 
         chart_pixel_width = (len(weights) / 60.0) * 500
         if chart_pixel_width < 250:
@@ -990,131 +995,101 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                 table_rows.append(
                     [
                         {
-                            "type": "string",
+                            "type": RendererSchemaType.STRING,
                             "value": f"[{interval_start} - {interval_end}{interval_closing_symbol}",
                         },
-                        {"type": "string", "value": num_to_str(fraction)},
+                        {
+                            "type": RendererSchemaType.STRING,
+                            "value": num_to_str(fraction),
+                        },
                     ]
                 )
         else:
             values = partition_object["values"]
             table_rows = [
                 [
-                    {"schema": {"type": "string"}, "value": str(value)},
-                    {"schema": {"type": "string"}, "value": num_to_str(fractions[idx])},
+                    {
+                        "schema": {"type": RendererSchemaType.STRING},
+                        "value": str(value),
+                    },
+                    {
+                        "schema": {"type": RendererSchemaType.STRING},
+                        "value": num_to_str(fractions[idx]),
+                    },
                 ]
                 for idx, value in enumerate(values)
             ]
 
         header_row = [
             {
-                "schema": {"type": "string"},
+                "schema": {"type": RendererSchemaType.STRING},
                 "value": "Interval" if partition_object.get("bins") else "Value",
             },
-            {"schema": {"type": "string"}, "value": "Fraction"},
+            {"schema": {"type": RendererSchemaType.STRING}, "value": "Fraction"},
         ]
 
         return header_row, table_rows
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args = (
+            ("column", RendererSchemaType.STRING),
+            ("mostly", RendererSchemaType.NUMBER),
+            ("threshold", RendererSchemaType.NUMBER),
+            ("row_condition", RendererSchemaType.STRING),
+            ("condition_parser", RendererSchemaType.STRING),
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            [
-                "column",
-                "partition_object",
-                "threshold",
-                "row_condition",
-                "condition_parser",
-            ],
+        for name, schema_type in add_param_args:
+            renderer_configuration.add_param(name=name, schema_type=schema_type)
+
+        expected_partition_object = renderer_configuration.kwargs.get(
+            "partition_object", {}
         )
-        header_params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
-            "threshold": {
-                "schema": {"type": "number"},
-                "value": params.get("threshold"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-        }
-
-        expected_partition_object = params.get("partition_object")
-        if expected_partition_object is None:
-            expected_partition_object = {}
-        weights = expected_partition_object.get("weights")
-        if weights is None:
-            weights = []
-
-        chart = None
-        chart_container_col_width = None
-        distribution_table_header_row = None
-        distribution_table_rows = None
+        weights = expected_partition_object.get("weights", [])
 
         # generate template string for header
         if not expected_partition_object:
-            header_template_str = "can match any distribution."
+            template_str = "can match any distribution."
         else:
-            header_template_str = (
+            template_str = (
                 "Kullback-Leibler (KL) divergence with respect to the following distribution must be "
                 "lower than $threshold."
             )
 
         # optionally, add column name
-        if include_column_name:
-            header_template_str = f"$column {header_template_str}"
+        if renderer_configuration.include_column_name:
+            template_str = f"$column {template_str}"
 
         # generate table or chart depending on number of weights
         if len(weights) > 60:
             (
-                distribution_table_header_row,
-                distribution_table_rows,
+                renderer_configuration.header_row,
+                renderer_configuration.table,
             ) = cls._atomic_partition_object_table_template(
                 partition_object=expected_partition_object
             )
         else:
-            chart, chart_container_col_width = cls._atomic_kl_divergence_chart_template(
+            renderer_configuration.graph, _ = cls._atomic_kl_divergence_chart_template(
                 partition_object=expected_partition_object
             )
 
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
-            )
-            header_template_str = (
-                f"{conditional_template_str}, then {header_template_str}"
-            )
-            header_params_with_json_schema.update(conditional_params)
+        params: RendererParams = renderer_configuration.params
 
-        return (
-            header_template_str,
-            header_params_with_json_schema,
-            chart,
-            chart_container_col_width,
-            distribution_table_header_row,
-            distribution_table_rows,
-            styling,
-        )
+        if params.row_condition:
+            renderer_configuration = cls._add_row_condition_params(
+                renderer_configuration=renderer_configuration
+            )
+            row_condition_str: str = cls._get_row_condition_string(
+                renderer_configuration=renderer_configuration
+            )
+            template_str = f"{row_condition_str}, then {template_str}"
+
+        renderer_configuration.template_str = template_str
+
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=AtomicPrescriptiveRendererType.SUMMARY)
@@ -1124,31 +1099,27 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        (
-            header_template_str,
-            header_params_with_json_schema,
-            chart,
-            _,
-            distribution_table_header_row,
-            distribution_table_rows,
-            _,
-        ) = cls._atomic_prescriptive_template(
-            configuration, result, runtime_configuration, **kwargs
+    ) -> RenderedAtomicContent:
+        renderer_configuration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            runtime_configuration=runtime_configuration,
+        )
+        renderer_configuration = cls._prescriptive_template(
+            renderer_configuration=renderer_configuration
         )
 
-        if chart is not None:
+        if renderer_configuration.graph:
             value_obj = renderedAtomicValueSchema.load(
                 {
                     "header": {
                         "schema": {"type": "StringValueType"},
                         "value": {
-                            "template": header_template_str,
-                            "params": header_params_with_json_schema,
+                            "template": renderer_configuration.template_str,
+                            "params": renderer_configuration.params.dict(),
                         },
                     },
-                    "graph": chart,
+                    "graph": renderer_configuration.graph,
                     "schema": {"type": "GraphType"},
                 }
             )
@@ -1159,12 +1130,12 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                     "header": {
                         "schema": {"type": "StringValueType"},
                         "value": {
-                            "template": header_template_str,
-                            "params": header_params_with_json_schema,
+                            "template": renderer_configuration.template_str,
+                            "params": renderer_configuration.params.dict(),
                         },
                     },
-                    "header_row": distribution_table_header_row,
-                    "table": distribution_table_rows,
+                    "header_row": renderer_configuration.header_row,
+                    "table": renderer_configuration.table,
                     "schema": {"type": "TableType"},
                 }
             )
