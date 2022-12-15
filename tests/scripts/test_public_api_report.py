@@ -4,7 +4,7 @@ from typing import Set
 import pytest
 
 from scripts.public_api_report import (
-    DocExampleParser,
+    DocsExampleParser,
     GXCodeParser,
     IncludeExcludeDefinition,
     Definition,
@@ -141,10 +141,10 @@ class TestDocExampleParser:
         repo_root: pathlib.Path,
         sample_docs_example_python_file_string_filepath: pathlib.Path,
     ):
-        doc_example_parser = DocExampleParser(
+        doc_example_parser = DocsExampleParser(
             repo_root=repo_root, paths={sample_docs_example_python_file_string_filepath}
         )
-        assert isinstance(doc_example_parser, DocExampleParser)
+        assert isinstance(doc_example_parser, DocsExampleParser)
 
     def test_retrieve_all_usages_in_files(
         self,
@@ -152,7 +152,7 @@ class TestDocExampleParser:
         repo_root: pathlib.Path,
         sample_docs_example_python_file_string_filepath: pathlib.Path,
     ):
-        doc_example_parser = DocExampleParser(
+        doc_example_parser = DocsExampleParser(
             repo_root=repo_root, paths={sample_docs_example_python_file_string_filepath}
         )
         usages = doc_example_parser.retrieve_all_usages_in_docs_example_files()
