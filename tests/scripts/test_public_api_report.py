@@ -111,20 +111,23 @@ def sample_with_definitions_file_contents(
     )
 
 
-class TestDocExampleParser:
-    def test_instantiate(self, sample_docs_example_file_contents: FileContents):
-        doc_example_parser = DocsExampleParser(
-            file_contents={sample_docs_example_file_contents}
-        )
-        assert isinstance(doc_example_parser, DocsExampleParser)
+@pytest.fixture
+def docs_example_parser(
+    sample_docs_example_file_contents: FileContents,
+) -> DocsExampleParser:
+    docs_example_parser = DocsExampleParser(
+        file_contents={sample_docs_example_file_contents}
+    )
+    return docs_example_parser
 
-    def test_retrieve_all_usages_in_files(
-        self, sample_docs_example_file_contents: FileContents
-    ):
-        doc_example_parser = DocsExampleParser(
-            file_contents={sample_docs_example_file_contents}
-        )
-        usages = doc_example_parser.retrieve_all_usages_in_docs_example_files()
+
+class TestDocExampleParser:
+    def test_instantiate(self, docs_example_parser: DocsExampleParser):
+        assert isinstance(docs_example_parser, DocsExampleParser)
+
+    def test_retrieve_all_usages_in_files(self, docs_example_parser: DocsExampleParser):
+
+        usages = docs_example_parser.retrieve_all_usages_in_docs_example_files()
         assert usages == {
             "ExampleClass",
             "example_method",
@@ -135,25 +138,57 @@ class TestDocExampleParser:
         }
 
 
-class TestGXCodeParser:
-    def test_instantiate_with_default_include_exclude(
-        self,
-        repo_root: pathlib.Path,
-        sample_with_definitions_python_file_string_filepath: pathlib.Path,
-    ):
-        code_parser = CodeParser(
-            repo_root=repo_root,
-            paths={sample_with_definitions_python_file_string_filepath},
-        )
-        assert isinstance(code_parser, CodeParser)
-        assert code_parser.excludes
-        assert code_parser.includes
+@pytest.fixture
+def code_parser(sample_with_definitions_file_contents: FileContents) -> CodeParser:
+    code_parser = CodeParser(file_contents={sample_with_definitions_file_contents})
+    return code_parser
 
+
+class TestCodeParser:
+    def test_instantiate(self, code_parser: CodeParser):
+        assert isinstance(code_parser, CodeParser)
+
+    def test_get_all_class_method_and_function_names(self, code_parser: CodeParser):
+        names = code_parser.get_all_class_method_and_function_names()
+        assert names == {
+            "ExampleClass",
+            "__init__",
+            "example_classmethod",
+            "example_method",
+            "example_method_with_args",
+            "example_module_level_function",
+            "example_staticmethod",
+        }
+
+    def test_get_all_class_method_and_function_definitions(
+        self, code_parser: CodeParser
+    ):
+        definitions = code_parser.get_all_class_method_and_function_definitions()
+
+        assert len(definitions) == 7
+        assert set([d.name for d in definitions]) == {
+            "ExampleClass",
+            "__init__",
+            "example_classmethod",
+            "example_method",
+            "example_method_with_args",
+            "example_module_level_function",
+            "example_staticmethod",
+        }
+        assert set([d.filepath for d in definitions]) == {
+            pathlib.Path(
+                "great_expectations/sample_with_definitions_python_file_string.py"
+            )
+        }
+
+
+class TestCodeReferenceFilter:
     def test_instantiate_with_non_default_include_exclude(
         self,
         repo_root: pathlib.Path,
         sample_with_definitions_python_file_string_filepath: pathlib.Path,
     ):
+        raise NotImplementedError
         code_parser = CodeParser(
             repo_root=repo_root,
             paths={sample_with_definitions_python_file_string_filepath},
@@ -338,3 +373,8 @@ class TestGXCodeParser:
                 "great_expectations/sample_with_definitions_python_file_string.py"
             )
         }
+
+
+class TestPublicAPIChecker:
+    def test_instantiate(self):
+        raise NotImplementedError

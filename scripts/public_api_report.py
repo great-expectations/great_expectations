@@ -14,7 +14,7 @@ DocsExampleParser.retrieve_all_usages_in_docs_example_files()
     retrieve the names, not the location of the method definition). These are
     not filtered to be only GX related, we filter in step 4.
 
-CodeParser.get_all_class_method_and_function_definitions_from_files()
+CodeParser.get_all_class_method_and_function_definitions()
 
 3. AST walk through full GX codebase to find all classes and method names from
     their definitions, and capture the definition file location.
@@ -224,7 +224,7 @@ class CodeParser:
         """
         self.file_contents = file_contents
 
-    def get_all_class_method_and_function_names_from_definitions_in_files(
+    def get_all_class_method_and_function_names(
         self,
     ) -> Set[str]:
         all_usages = set()
@@ -246,7 +246,7 @@ class CodeParser:
 
         return set([definition.name for definition in definitions])
 
-    def get_all_class_method_and_function_definitions_from_files(
+    def get_all_class_method_and_function_definitions(
         self,
     ) -> Set[Definition]:
         # TODO: add docstring
@@ -406,7 +406,7 @@ class CodeReferenceFilter:
             str
         ] = self.docs_example_parser.retrieve_all_usages_in_docs_example_files()
         gx_code_definitions = (
-            self.code_parser.get_all_class_method_and_function_names_from_definitions_in_files()
+            self.code_parser.get_all_class_method_and_function_names()
         )
 
         doc_example_usages_of_gx_code = doc_example_usages.intersection(
@@ -427,7 +427,7 @@ class CodeReferenceFilter:
             Set of Definition objects with filepath locations.
         """
         gx_code_definitions = (
-            self.code_parser.get_all_class_method_and_function_definitions_from_files()
+            self.code_parser.get_all_class_method_and_function_definitions()
         )
         gx_code_definitions_appearing_in_docs_examples = set(
             [d for d in gx_code_definitions if d.name in gx_usages_in_docs_examples]
@@ -444,7 +444,7 @@ class CodeReferenceFilter:
     def _filter_or_include(self, definitions: Set[Definition]) -> Set[Definition]:
         included_definitions: List[Definition] = []
         all_gx_code_definitions = (
-            self.code_parser.get_all_class_method_and_function_definitions_from_files()
+            self.code_parser.get_all_class_method_and_function_definitions()
         )
         for definition in definitions:
             exclude: bool = self._is_filepath_excluded(
