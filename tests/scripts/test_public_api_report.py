@@ -57,12 +57,20 @@ class ExampleClass:
         
     def _example_private_method():
         pass
+        
+    @public_api
+    def example_public_api_method():
+        pass
 
 
 def example_module_level_function():
     pass
     
 def _example_private_module_level_function():
+    pass
+    
+@public_api
+def example_public_api_module_level_function():
     pass
 """
 
@@ -166,6 +174,8 @@ class TestCodeParser:
             "example_method",
             "example_method_with_args",
             "example_module_level_function",
+            "example_public_api_method",
+            "example_public_api_module_level_function",
             "example_staticmethod",
         }
 
@@ -174,7 +184,7 @@ class TestCodeParser:
     ):
         definitions = code_parser.get_all_class_method_and_function_definitions()
 
-        assert len(definitions) == 9
+        assert len(definitions) == 11
         assert set([d.name for d in definitions]) == {
             "ExampleClass",
             "__init__",
@@ -184,6 +194,8 @@ class TestCodeParser:
             "example_method",
             "example_method_with_args",
             "example_module_level_function",
+            "example_public_api_method",
+            "example_public_api_module_level_function",
             "example_staticmethod",
         }
         assert set([d.filepath for d in definitions]) == {
@@ -462,6 +474,23 @@ class TestCodeReferenceFilter:
         }
 
 
-class TestPublicAPIChecker:
-    def test_instantiate(self):
-        raise NotImplementedError
+# class TestPublicAPIChecker:
+#     def test_instantiate(self):
+#         raise NotImplementedError
+#
+#     def test_get_all_public_api_functions(self):
+#         raise NotImplementedError
+#
+#     def test_get_all_public_api_classes(self):
+#         raise NotImplementedError
+#
+#     def test_get_all_public_api_methods(self):
+#         raise NotImplementedError
+#
+#     def test_get_all_definitions_not_marked_public_api(self):
+#         raise NotImplementedError
+
+
+# class TestPublicAPIReport:
+#     def test_instantiate(self):
+#         raise NotImplementedError
