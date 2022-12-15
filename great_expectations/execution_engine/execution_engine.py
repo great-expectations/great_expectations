@@ -369,7 +369,7 @@ class ExecutionEngine(ABC):
         """
         # print(f'\n[ALEX_TEST-WOUTPUT] [EXECUTION_ENGINE.resolve_metrics()] RESOLVE_METRICS()-IS_CALLED_WITH_NUM_METRICS_TO_RESOLVE:\n{len(metrics_to_resolve)} ; TYPE: {str(type(len(metrics_to_resolve)))}')
         if not metrics_to_resolve:
-            return metrics
+            return metrics or {}
 
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
         metric_fn_direct_configurations: List[MetricComputationConfiguration]
