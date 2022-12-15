@@ -122,7 +122,7 @@ def DataContext(
     return context
 
 
-def _resolve_cloud_args(  # type: ignore[override]
+def _resolve_cloud_args(
     cloud_mode: bool = False,
     cloud_base_url: Optional[str] = None,
     cloud_access_token: Optional[str] = None,

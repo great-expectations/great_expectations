@@ -165,13 +165,13 @@ def BaseDataContext(
             cloud_organization_id=cloud_organization_id,
         )
     elif context_root_dir:
-        return FileDataContext(  # type: ignore[assignment]
+        return FileDataContext(
             project_config=project_data_context_config,
-            context_root_dir=context_root_dir,  # type: ignore[arg-type]
+            context_root_dir=context_root_dir,
             runtime_environment=runtime_environment,
         )
     else:
-        return EphemeralDataContext(  # type: ignore[assignment]
+        return EphemeralDataContext(
             project_config=project_data_context_config,
             runtime_environment=runtime_environment,
         )

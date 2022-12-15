@@ -347,7 +347,7 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
             res = ge_urn.parseString(parse_results[0])
             if res["urn_type"] == "stores":
                 store = data_context.stores.get(res["store_name"])  # type: ignore[union-attr]
-                return store.get_query_result(  # type: ignore[union-attr]
+                return store.get_query_result(
                     res["metric_name"], res.get("metric_kwargs", {})
                 )
             else:
@@ -390,7 +390,7 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
                     if res["urn_type"] == "stores":
                         store = data_context.stores.get(res["store_name"])  # type: ignore[union-attr]
                         EXPR.exprStack[i] = str(
-                            store.get_query_result(  # type: ignore[union-attr]
+                            store.get_query_result(
                                 res["metric_name"], res.get("metric_kwargs", {})
                             )
                         )  # value placed back in stack must be a string

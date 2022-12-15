@@ -77,7 +77,7 @@ from great_expectations.validator.validator import Validator
 if TYPE_CHECKING:
     from sqlalchemy.engine import Connection
 
-    from great_expectations.data_context import DataContext
+    from great_expectations.data_context import AbstractDataContext
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
@@ -1222,7 +1222,7 @@ def get_test_validator_with_data(  # noqa: C901 - 31
     sqlite_db_path=None,
     extra_debug_info="",
     debug_logger: Optional[logging.Logger] = None,
-    context: Optional[DataContext] = None,
+    context: Optional[AbstractDataContext] = None,
 ):
     """Utility to create datasets for json-formatted tests."""
 
@@ -1422,12 +1422,12 @@ def get_test_validator_with_data(  # noqa: C901 - 31
 def build_pandas_validator_with_data(
     df: pd.DataFrame,
     batch_definition: Optional[BatchDefinition] = None,
-    context: Optional[DataContext] = None,
+    context: Optional[AbstractDataContext] = None,
 ) -> Validator:
     batch = Batch(data=df, batch_definition=batch_definition)
 
     if context is None:
-        context = build_in_memory_runtime_context()  # type: ignore[assignment]
+        context = build_in_memory_runtime_context()
 
     return Validator(
         execution_engine=PandasExecutionEngine(),
@@ -1448,7 +1448,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     extra_debug_info="",
     batch_definition: Optional[BatchDefinition] = None,
     debug_logger: Optional[logging.Logger] = None,
-    context: Optional[DataContext] = None,
+    context: Optional[AbstractDataContext] = None,
 ):
     _debug = lambda x: x  # noqa: E731
     if debug_logger:
@@ -1700,7 +1700,7 @@ def build_spark_validator_with_data(
     df: Union[pd.DataFrame, SparkDataFrame],
     spark: SparkSession,
     batch_definition: Optional[BatchDefinition] = None,
-    context: Optional["DataContext"] = None,
+    context: Optional[AbstractDataContext] = None,
 ) -> Validator:
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
@@ -2318,7 +2318,7 @@ def generate_expectation_tests(  # noqa: C901 - 43
     ignore_only_for: bool = False,
     debug_logger: Optional[logging.Logger] = None,
     only_consider_these_backends: Optional[List[str]] = None,
-    context: Optional["DataContext"] = None,  # noqa: F821
+    context: Optional[AbstractDataContext] = None,  # noqa: F821
 ):
     """Determine tests to run
 

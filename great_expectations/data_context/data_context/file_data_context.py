@@ -106,7 +106,7 @@ class FileDataContext(SerializableDataContext):
         variables = FileDataContextVariables(
             config=self._project_config,
             config_provider=self.config_provider,
-            data_context=self,  # type: ignore[arg-type]
+            data_context=self,
         )
         return variables
 
@@ -122,7 +122,7 @@ class FileDataContext(SerializableDataContext):
     @classmethod
     def _load_file_backed_project_config(
         cls,
-        context_root_directory: Optional[str],
+        context_root_directory: str,
     ):
         path_to_yml = pathlib.Path(context_root_directory, cls.GX_YML)
         try:
