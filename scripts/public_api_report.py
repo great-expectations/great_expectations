@@ -52,7 +52,6 @@ import pathlib
 from dataclasses import dataclass
 from typing import List, Set, Union, Optional
 
-
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
@@ -110,13 +109,18 @@ class FileContents:
             file_contents: str = f.read()
         return cls(filepath=filepath, contents=file_contents)
 
+    @classmethod
+    def create_from_local_files(
+        cls, filepaths: Set[pathlib.Path]
+    ) -> Set["FileContents"]:
+        return set([cls.create_from_local_file(filepath) for filepath in filepaths])
 
 
 class DocsExampleParser:
     """Parse examples from docs to find classes, methods and functions used."""
 
-    def __init__(self, docs_examples: Set[FileContents]) -> None:
-        self.docs_examples = docs_examples
+    def __init__(self, file_contents: Set[FileContents]) -> None:
+        self.file_contents = file_contents
 
     def retrieve_all_usages_in_docs_example_files(self) -> Set[str]:
         """
@@ -125,7 +129,7 @@ class DocsExampleParser:
 
         """
         all_usages = set()
-        for file_contents in self.docs_examples:
+        for file_contents in self.file_contents:
             file_usages = self._retrieve_all_usages_in_file(file_contents=file_contents)
             all_usages |= file_usages
         return all_usages
@@ -211,38 +215,33 @@ class CodeParser:
 
     def __init__(
         self,
-        repo_root: pathlib.Path,
-        paths: Set[pathlib.Path],
+        file_contents: Set[FileContents],
     ) -> None:
         """
 
         Args:
-            repo_root:
-            paths:
+            file_contents:
         """
-        self.repo_root = repo_root
-        self.paths = paths
+        self.file_contents = file_contents
 
     def get_all_class_method_and_function_names_from_definitions_in_files(
         self,
     ) -> Set[str]:
         all_usages = set()
-        for filepath in self.paths:
-            file_usages = (
-                self._get_all_class_method_and_function_names_from_definitions_in_file(
-                    filepath=filepath
-                )
+        for file_contents in self.file_contents:
+            file_usages = self._get_all_class_method_and_function_names(
+                file_contents=file_contents
             )
             all_usages |= file_usages
         return all_usages
 
-    def _get_all_class_method_and_function_names_from_definitions_in_file(
-        self, filepath: pathlib.Path
+    def _get_all_class_method_and_function_names(
+        self, file_contents: FileContents
     ) -> Set[str]:
         definitions: Set[
             Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]
         ] = self._get_all_class_method_and_function_definitions_from_file(
-            filepath=filepath
+            file_contents=file_contents
         )
 
         return set([definition.name for definition in definitions])
@@ -252,12 +251,13 @@ class CodeParser:
     ) -> Set[Definition]:
         # TODO: add docstring
         all_usages: Set[Definition] = set()
-        for filepath in self.paths:
+        for file_contents in self.file_contents:
+
             file_usages = self._get_all_class_method_and_function_definitions_from_file(
-                filepath=filepath
+                file_contents=file_contents
             )
             all_usages |= self._build_file_usage_definitions(
-                filepath=filepath, file_usages=file_usages
+                filepath=file_contents.filepath, file_usages=file_usages
             )
         return all_usages
 
@@ -277,17 +277,18 @@ class CodeParser:
         return set(file_usages_definitions)
 
     def _get_all_class_method_and_function_definitions_from_file(
-        self, filepath: pathlib.Path
+        self, file_contents: FileContents
     ) -> Set[Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]]:
-        """
+        """# TODO: Add type info and docstring
 
         Args:
-            filepath:
+            file_contents:
 
         Returns:
 
         """
-        tree = _parse_file_to_ast_tree(filepath=self.repo_root / filepath)
+
+        tree = ast.parse(file_contents.contents)
         all_defs: List[Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]] = []
         all_defs.extend(self._list_class_definitions(tree=tree))
         all_defs.extend(self._list_function_definitions(tree=tree))
@@ -388,7 +389,9 @@ class CodeReferenceFilter:
         ] = self._filter_private_methods_and_classes(
             definitions=gx_definitions_used_in_docs_examples
         )
-        included_definitions: Set[Definition] = self._filter_or_include(definitions=non_private_definitions)
+        included_definitions: Set[Definition] = self._filter_or_include(
+            definitions=non_private_definitions
+        )
         return included_definitions
 
     def _docs_examples_usages(self) -> Set[str]:
@@ -442,15 +445,24 @@ class CodeReferenceFilter:
             self.code_parser.get_all_class_method_and_function_definitions_from_files()
         )
         for definition in definitions:
-            exclude: bool = self._is_filepath_excluded(definition.filepath) or self._is_definition_excluded(definition)
-            include: bool = self._is_filepath_included(definition.filepath) or self._is_definition_included(definition)
+            exclude: bool = self._is_filepath_excluded(
+                definition.filepath
+            ) or self._is_definition_excluded(definition)
+            include: bool = self._is_filepath_included(
+                definition.filepath
+            ) or self._is_definition_included(definition)
 
             if include or not exclude:
                 included_definitions.append(definition)
 
         for definition in all_gx_code_definitions:
-            include_from_all_gx_definitions: bool = self._is_filepath_included(definition.filepath) or self._is_definition_included(definition)
-            if include_from_all_gx_definitions and definition not in included_definitions:
+            include_from_all_gx_definitions: bool = self._is_filepath_included(
+                definition.filepath
+            ) or self._is_definition_included(definition)
+            if (
+                include_from_all_gx_definitions
+                and definition not in included_definitions
+            ):
                 included_definitions.append(definition)
 
         return set(included_definitions)
@@ -488,7 +500,6 @@ class CodeReferenceFilter:
     def _is_definition_private(self, definition: Definition) -> bool:
         """Check whether the name of a definition is for a private method or class."""
         return definition.name.startswith("_")
-
 
     # TODO: Are any of these methods needed any longer?
     # def _get_included_class_method_and_function_definitions_from_files(
@@ -543,7 +554,6 @@ class CodeReferenceFilter:
     #             file_usages_definitions.append(candidate_definition)
     #
     #     return set(file_usages_definitions)
-
 
 
 # TODO: Make this functional:
@@ -736,33 +746,29 @@ def _parse_file_to_ast_tree(filepath: pathlib.Path) -> ast.AST:
 
 def main():
 
-    docs_example_file_contents = set([FileContents.create_from_local_file(filepath) for filepath in _default_doc_example_absolute_paths()])
-
-    code_file_contents = [FileContents.create_from_local_file(filepath) for filepath in
-                     _default_code_absolute_paths()]
-
-
-    docs_example_parser = DocsExampleParser(
-        repo_root=_repo_root(), paths=_default_doc_example_paths(), docs_examples=docs_example_file_contents
+    docs_example_file_contents = FileContents.create_from_local_files(
+        _default_doc_example_absolute_paths()
     )
 
-    code_parser = CodeParser(
-        repo_root=_repo_root(), paths=_default_code_paths()
+    code_file_contents = FileContents.create_from_local_files(
+        _default_code_absolute_paths()
     )
+
+    docs_example_parser = DocsExampleParser(file_contents=docs_example_file_contents)
+
+    code_parser = CodeParser(file_contents=code_file_contents)
 
     code_reference_filter = CodeReferenceFilter(
         repo_root=_repo_root(),
         docs_example_parser=docs_example_parser,
-        code_parser=code_parser
+        code_parser=code_parser,
     )
 
     filtered_definitions = code_reference_filter.filter_definitions()
 
     # TODO: Filter here also for those not marked public_api
 
-    public_api_report = PublicAPIReport(
-        definitions=filtered_definitions
-    )
+    public_api_report = PublicAPIReport(definitions=filtered_definitions)
 
     printable_definitions = public_api_report.generate_printable_definitions()
     for printable_definition in printable_definitions:
