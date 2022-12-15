@@ -348,7 +348,7 @@ class ExecutionEngine(ABC):
             resolved_metrics (Dict): a dictionary with the values for the metrics that have just been resolved.
         """
         if not metrics_to_resolve:
-            return metrics
+            return metrics or {}
 
         metric_fn_direct_configurations: List[MetricComputationConfiguration]
         metric_fn_bundle_configurations: List[MetricComputationConfiguration]
