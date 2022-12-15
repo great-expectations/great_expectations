@@ -44,14 +44,13 @@ import ast
 import glob
 import logging
 import operator
-    # TODO: How to handle astunparse optional dependency?
-# import pathlib
-# from dataclasses import dataclass
-# from typing import List, Set, Union, Optional
-#
-#
-# # TODO: Add this as a dependency or make optional?
-# # import astunparse
+import pathlib
+from dataclasses import dataclass
+from typing import List, Set, Union, Optional
+
+
+# TODO: How to handle astunparse optional dependency?
+# import astunparse
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
