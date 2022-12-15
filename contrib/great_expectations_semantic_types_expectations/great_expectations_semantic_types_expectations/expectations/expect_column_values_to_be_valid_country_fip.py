@@ -57,6 +57,7 @@ class ColumnValuesToBeValidCountryFip(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidCountryFip(ColumnMapExpectation):
     """Expect values in this column to be valid country fip code.
+
     See https://github.com/yaph/geonamescache for more information.
     """
 

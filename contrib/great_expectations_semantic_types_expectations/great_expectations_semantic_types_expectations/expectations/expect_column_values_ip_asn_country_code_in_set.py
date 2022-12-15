@@ -54,7 +54,7 @@ class ColumnValuesToBePrivateIpV6(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesIpAsnCountryCodeInSet(ColumnMapExpectation):
-    """Expect the provided IP address ASN country code in set"""
+    """Expect the provided IP address ASN country code in set."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

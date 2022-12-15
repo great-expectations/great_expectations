@@ -56,6 +56,7 @@ class ColumnValuesToBeValidNewJerseyZip(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidNewJerseyZip(ColumnMapExpectation):
     """Expect values in this column to be valid New Jersey zipcodes.
+
     See https://pypi.org/project/zipcodes/ for more information.
     """
 

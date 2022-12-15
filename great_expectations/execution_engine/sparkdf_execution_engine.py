@@ -32,10 +32,10 @@ from great_expectations.exceptions import (
 )
 from great_expectations.exceptions import exceptions as ge_exceptions
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_engine.bundled_metric_configuration import (
-    BundledMetricConfiguration,
+from great_expectations.execution_engine.execution_engine import (
+    MetricComputationConfiguration,
+    SplitDomainKwargs,
 )
-from great_expectations.execution_engine.execution_engine import SplitDomainKwargs
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.split_and_sample.sparkdf_data_sampler import (
     SparkDataSampler,
@@ -668,15 +668,15 @@ illegal.  Please check your config."""
 
     def resolve_metric_bundle(
         self,
-        metric_fn_bundle: Iterable[BundledMetricConfiguration],
+        metric_fn_bundle: Iterable[MetricComputationConfiguration],
     ) -> Dict[Tuple[str, str, str], MetricValue]:
         """For every metric in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds
         bundles of the metrics into one large query dictionary so that they are all executed simultaneously. Will fail
         if bundling the metrics together is not possible.
 
             Args:
-                metric_fn_bundle (Iterable[BundledMetricConfiguration]): \
-                    "BundledMetricConfiguration" contains MetricProvider's MetricConfiguration (its unique identifier),
+                metric_fn_bundle (Iterable[MetricComputationConfiguration]): \
+                    "MetricComputationConfiguration" contains MetricProvider's MetricConfiguration (its unique identifier),
                     its metric provider function (the function that actually executes the metric), and arguments to pass
                     to metric provider function (dictionary of metrics defined in registry and corresponding arguments).
 
@@ -693,14 +693,14 @@ illegal.  Please check your config."""
 
         domain_id: Tuple[str, str, str]
 
-        bundled_metric_configuration: BundledMetricConfiguration
+        bundled_metric_configuration: MetricComputationConfiguration
         for bundled_metric_configuration in metric_fn_bundle:
             metric_to_resolve: MetricConfiguration = (
                 bundled_metric_configuration.metric_configuration
             )
             metric_fn: Any = bundled_metric_configuration.metric_fn
             compute_domain_kwargs: dict = (
-                bundled_metric_configuration.compute_domain_kwargs
+                bundled_metric_configuration.compute_domain_kwargs or {}
             )
             if not isinstance(compute_domain_kwargs, IDDict):
                 compute_domain_kwargs = IDDict(compute_domain_kwargs)

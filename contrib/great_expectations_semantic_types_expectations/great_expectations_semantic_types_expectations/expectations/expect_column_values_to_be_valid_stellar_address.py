@@ -51,7 +51,7 @@ class ColumnValuesToBeValidStellarAddress(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidStellarAddress(ColumnMapExpectation):
-    """Expect column values to be valid Stellar address"""
+    """Expect column values to be valid Stellar addresses."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

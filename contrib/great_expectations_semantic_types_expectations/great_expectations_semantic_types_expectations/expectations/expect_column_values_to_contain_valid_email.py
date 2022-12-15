@@ -60,7 +60,7 @@ class ColumnValuesContainValidEmail(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToContainValidEmail(ColumnMapExpectation):
-    """Expects values in given column to be valid email addresses."""
+    """Expect values in given column to be valid email addresses."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
 

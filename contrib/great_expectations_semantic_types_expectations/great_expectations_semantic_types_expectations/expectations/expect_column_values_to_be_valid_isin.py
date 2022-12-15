@@ -53,7 +53,7 @@ class ColumnValuesToBeValidIsin(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidIsin(ColumnMapExpectation):
-    """Expect column values to be valid ISIN (International Securities Identification Number)"""
+    """Expect column values to be valid ISIN (International Securities Identification Number)."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
