@@ -95,7 +95,7 @@ class DocExampleParser:
         self.repo_root = repo_root
         self.paths = paths
 
-    def retrieve_all_usages_in_files(self) -> Set[str]:
+    def retrieve_all_usages_in_docs_example_files(self) -> Set[str]:
         """
 
         Returns:
@@ -492,7 +492,7 @@ class PublicAPIChecker:
         Returns:
 
         """
-        doc_example_usages = self.doc_example_parser.retrieve_all_usages_in_files()
+        doc_example_usages = self.doc_example_parser.retrieve_all_usages_in_docs_example_files()
         gx_code_definitions = (
             self.gx_code_parser.get_all_non_private_class_method_and_function_names_from_definitions_in_files()
         )

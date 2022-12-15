@@ -155,7 +155,7 @@ class TestDocExampleParser:
         doc_example_parser = DocExampleParser(
             repo_root=repo_root, paths={sample_docs_example_python_file_string_filepath}
         )
-        usages = doc_example_parser.retrieve_all_usages_in_files()
+        usages = doc_example_parser.retrieve_all_usages_in_docs_example_files()
         assert usages == {
             "ExampleClass",
             "example_method",
