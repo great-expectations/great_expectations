@@ -14,10 +14,15 @@ module.exports = {
   organizationName: 'great-expectations',
   projectName: 'great_expectations',
   plugins: [
-    // ["plugin-image-zoom"],
     require.resolve('@cmfcmf/docusaurus-search-local'),
     '@docusaurus-terminology/parser',
-    'docusaurus-plugin-sass'
+    'docusaurus-plugin-sass',
+    [
+      require.resolve('docusaurus-gtm-plugin'),
+      {
+        id: 'GTM-K63L45F', // GTM Container ID
+      }
+    ],
   ],
 
   themeConfig: {
@@ -241,8 +246,7 @@ module.exports = {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           remarkPlugins: [remarkCodeImport, remarkNamedSnippets],
-          editUrl:
-                        'https://github.com/great-expectations/great_expectations/tree/develop/'
+          editUrl: 'https://github.com/great-expectations/great_expectations/tree/develop/'
         },
         theme: {
           customCss: require.resolve('./src/css/custom.scss')
