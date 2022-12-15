@@ -757,7 +757,6 @@ class Expectation(metaclass=MetaExpectation):
             - The table can have unexpected index column names
             - or it can just be the table [only for pandas for now]
         """
-        breakpoint()
         if runtime_configuration:
             styling = runtime_configuration.get("styling")
         else:
@@ -768,61 +767,59 @@ class Expectation(metaclass=MetaExpectation):
             return None
 
         # this is our bare minimum
-        # if not result_dict.get("partial_unexpected_index_list"):
-        #    return None
+        if not result_dict.get("partial_unexpected_index_list"):
+            return None
+        index_column_names: Union[str, None] = result_dict.get(
+            "unexpected_index_column_names"
+        )
+        if not index_column_names:
+            return None
 
-        # breakpoint()
-        # if configuration["kwargs"]["result_format"].get(
-        #         "unexpected_index_column_names"
-        # ):
-        #     index_column_names: List[str] = configuration["kwargs"]["result_format"][
-        #         "unexpected_index_column_names"
-        #     ]
-        #     # if we have index column names then we are going to be adding a differe
+        # if we have index column names then we are going to be adding a differe
+
+        # for i, v in enumerate(params["value_set"]):
+        #    params[f"v__{str(i)}"] = v
+
+        # values_string = " ".join(
+        #    [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
+        # )
+
+        # what do we want to do?
+        # 1. output a string
+        # we have defined the following primary key strings to define unexpected indices:
+        # 2. adding rows to a table
+        # key key value
+        # [ ] [ ] [ ]
+        # 3. To get query for full results run the following query
+
+        # for i, v in enumerate(params["value_set"]):
+        #     params[f"v__{str(i)}"] = v
+        # values_string = " ".join(
+        #     [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
+        # )
         #
-        #     # for i, v in enumerate(params["value_set"]):
-        #     #    params[f"v__{str(i)}"] = v
-        #
-        #     # values_string = " ".join(
-        #     #    [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
-        #     # )
-        #
-        #     # what do we want to do?
-        #     # 1. output a string
-        #     # we have defined the following primary key strings to define unexpected indices:
-        #     # 2. adding rows to a table
-        #     # key key value
-        #     # [ ] [ ] [ ]
-        #     # 3. To get query for full results run the following query
-        #
-        #     # for i, v in enumerate(params["value_set"]):
-        #     #     params[f"v__{str(i)}"] = v
-        #     # values_string = " ".join(
-        #     #     [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
-        #     # )
-        #     #
-        #     # if include_column_name:
-        #     #     template_str = (
-        #     #         f"$column distinct values must belong to this set: {values_string}."
-        #     #     )
-        #     template_str: str = (
-        #         f"\n\n We have defined the following columns as primary keys: $v__0"
+        # if include_column_name:
+        #     template_str = (
+        #         f"$column distinct values must belong to this set: {values_string}."
         #     )
-        #     unexpected_message = RenderedStringTemplateContent(
-        #         **{
-        #             "content_block_type": "string_template",
-        #             "string_template": {
-        #                 "template": template_str,
-        #                 "styling": styling,
-        #                 "params": {
-        #                     # TODO this is really brittle
-        #                     # TODO make sure the formatting is correct
-        #                     "v__0": index_column_names[0],
-        #                 },
-        #             },
-        #         }
-        #     )
-        domain_column = 0  # ensure we can get the primary key results
+
+        template_str: str = f"\n\n Unexpected Values according to $v__0 , $v__1"
+        unexpected_message = RenderedStringTemplateContent(
+            **{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": template_str,
+                    "styling": styling,
+                    "params": {
+                        # make this render
+                        "v__0": "pk_1",
+                        "v__1": "pk_2",
+                    },
+                },
+            }
+        )
+
+        domain_column: str = configuration.kwargs["column"]
         if result.result.get("partial_unexpected_index_list"):
             # adding indices table
             header_row = []
@@ -832,10 +829,15 @@ class Expectation(metaclass=MetaExpectation):
             for column_name in index_column_names:
                 header_row.append(column_name)
 
+            header_row.append(domain_column)
+
             # now process the values
-            for val in unexpected_index_list:
+            for unexpected_index_dict in unexpected_index_list:
+                row = []
                 for column_name in index_column_names:
-                    table_rows.append([val[column_name]])
+                    row.append(unexpected_index_dict[column_name])
+                row.append(unexpected_index_dict[domain_column])
+                table_rows.append(row)
 
             unexpected_indices_table_content_block = RenderedTableContent(
                 **{
@@ -854,7 +856,7 @@ class Expectation(metaclass=MetaExpectation):
                 query = result_dict.get("unexpected_index_query")
                 query_info = CollapseContent(
                     **{
-                        "collapse_toggle_link": "Show new query for Unexpected Rows...",
+                        "collapse_toggle_link": "Show query to retrieve all unexpected values...",
                         "collapse": [
                             RenderedStringTemplateContent(
                                 **{
@@ -936,7 +938,6 @@ class Expectation(metaclass=MetaExpectation):
         partial_unexpected_counts: Optional[List[dict]] = result_dict.get(
             "partial_unexpected_counts"
         )
-        print(f"hello: {result_dict}")
         # if mapped to each of the values?
         # no that does not exist
 

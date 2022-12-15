@@ -202,6 +202,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     renderer_type=AtomicDiagnosticRendererType.UNEXPECTED_INDICES,
                 )
                 # breakpoint()
+                print("do we work here?")
+                # print(result)
                 unexpected_indices = unexpected_index_renderer[1](
                     result=result, configuration=expectation
                 )
