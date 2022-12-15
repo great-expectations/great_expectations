@@ -28,7 +28,6 @@ from pyparsing import (
 )
 
 from great_expectations.core.urn import ge_urn
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import EvaluationParameterError
 
 if TYPE_CHECKING:
@@ -415,8 +414,6 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
 
     try:
         result = EXPR.evaluate_stack(EXPR.exprStack)
-        if not isinstance(result, datetime.datetime):
-            result = convert_to_json_serializable(result)
     except Exception as e:
         exception_traceback = traceback.format_exc()
         exception_message = (
