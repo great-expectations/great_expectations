@@ -52,7 +52,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.util import convert_to_json_serializable, nested_update
+from great_expectations.core.util import nested_update
 from great_expectations.exceptions import (
     ExpectationNotFoundError,
     GreatExpectationsError,
@@ -64,7 +64,6 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.expectations.registry import (
     _registered_metrics,
     _registered_renderers,
@@ -2225,19 +2224,6 @@ representation."""
                         f"""Could not parse "max_value" of {max_value} (of type "{str(type(max_value))}) into datetime \
 representation."""
                     )
-
-        # Datetime evaluation parameter expressions that require datetime arithmetic result in datetime objects
-        # in Expectation kwargs. In order to continue to support this functionality for SQLite, as well as support
-        # datetime evaluation parameters for all other dialects, we serialize the datetime objects here.
-        if (
-            isinstance(execution_engine, SqlAlchemyExecutionEngine)
-            and execution_engine.dialect_name == GXSqlDialect.SQLITE
-        ):
-            if isinstance(min_value, datetime.datetime):
-                min_value = convert_to_json_serializable(min_value)
-
-            if isinstance(max_value, datetime.datetime):
-                max_value = convert_to_json_serializable(max_value)
 
         # Checking if mean lies between thresholds
         if min_value is not None:

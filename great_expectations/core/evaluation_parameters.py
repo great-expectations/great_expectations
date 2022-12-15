@@ -28,6 +28,7 @@ from pyparsing import (
 )
 
 from great_expectations.core.urn import ge_urn
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import EvaluationParameterError
 
 if TYPE_CHECKING:
@@ -191,11 +192,9 @@ class EvaluationParameterParser:
                 args = reversed([self.evaluate_stack(s) for _ in range(num_args)])
                 return self.fn[op](*args)
         else:
-            # try to evaluate as int first, then as float if int fails
-            # NOTE: JPC - 20200403 - Originally I considered returning the raw op here if parsing as float also
-            # fails, but I decided against it to instead require that the *entire* expression evaluates
-            # numerically UNLESS there is *exactly one* expression to substitute (see cases where len(L) == 1 in the
-            # parse_evaluation_parameter method.
+            # Require that the *entire* expression evaluates to number or datetime UNLESS there is *exactly one*
+            # expression to substitute (see cases where len(parse_results) == 1 in the parse_evaluation_parameter
+            # method).
             try:
                 return int(op)
             except ValueError:
@@ -414,6 +413,8 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
 
     try:
         result = EXPR.evaluate_stack(EXPR.exprStack)
+        if not isinstance(result, datetime.datetime):
+            result = convert_to_json_serializable(result)
     except Exception as e:
         exception_traceback = traceback.format_exc()
         exception_message = (
