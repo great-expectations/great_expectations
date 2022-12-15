@@ -45,6 +45,9 @@ class RuleBasedProfilerResult(SerializableDictDot):
         fully_qualified_parameter_names: List[str]
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
         expectation_configuration: ExpectationConfiguration
+        parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
+            Domain, Dict[str, ParameterNode]
+        ] = (self.parameter_values_for_fully_qualified_parameter_names_by_domain or {})
         return {
             "fully_qualified_parameter_names_by_domain": [
                 {
@@ -64,7 +67,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
                         data=parameter_values_for_fully_qualified_parameter_names
                     ),
                 }
-                for domain, parameter_values_for_fully_qualified_parameter_names in self.parameter_values_for_fully_qualified_parameter_names_by_domain.items()
+                for domain, parameter_values_for_fully_qualified_parameter_names in parameter_values_for_fully_qualified_parameter_names_by_domain.items()
             ],
             "expectation_configurations": [
                 expectation_configuration.to_json_dict()

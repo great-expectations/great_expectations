@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 import logging
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from enum import Enum
 from typing import (
     TYPE_CHECKING,
@@ -21,15 +21,19 @@ from typing import (
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
-from great_expectations.execution_engine.bundled_metric_configuration import (
-    BundledMetricConfiguration,
+from great_expectations.core.util import (
+    AzureUrl,
+    DBFSPath,
+    GCSUrl,
+    S3Url,
+    convert_to_json_serializable,
 )
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
 )
+from great_expectations.types import DictDot
 from great_expectations.util import filter_properties_dict
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -100,6 +104,27 @@ class MetricPartialFunctionTypes(Enum):
             return "aggregate_fn"
 
         return ""
+
+
+@dataclass(frozen=True)
+class MetricComputationConfiguration(DictDot):
+    """
+    MetricComputationConfiguration is a "dataclass" object, which holds components required for metric computation.
+    """
+
+    metric_configuration: MetricConfiguration
+    metric_fn: Any
+    metric_provider_kwargs: dict
+    compute_domain_kwargs: Optional[dict] = None
+    accessor_domain_kwargs: Optional[dict] = None
+
+    def to_dict(self) -> dict:
+        """Returns: this MetricComputationConfiguration as a dictionary"""
+        return asdict(self)
+
+    def to_json_dict(self) -> dict:
+        """Returns: this MetricComputationConfiguration as a JSON dictionary"""
+        return convert_to_json_serializable(data=self.to_dict())
 
 
 class DataConnectorStorageDataReferenceResolver:
@@ -305,7 +330,7 @@ class ExecutionEngine(ABC):
     def get_batch_data_and_markers(self, batch_spec) -> Tuple[BatchData, BatchMarkers]:
         raise NotImplementedError
 
-    def resolve_metrics(  # noqa: C901 - 16
+    def resolve_metrics(
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
         metrics: Optional[Dict[Tuple[str, str, str], MetricValue]] = None,
@@ -322,112 +347,22 @@ class ExecutionEngine(ABC):
         Returns:
             resolved_metrics (Dict): a dictionary with the values for the metrics that have just been resolved.
         """
-        if metrics is None:
-            metrics = {}
-
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
-
-        metric_fn_bundle: List[BundledMetricConfiguration] = []
-
-        metric_fn_type: MetricFunctionTypes
-        metric_class: MetricProvider
-        metric_fn: Any
-        compute_domain_kwargs: dict
-        accessor_domain_kwargs: dict
-        metric_provider_kwargs: dict
-        metric_to_resolve: MetricConfiguration
-        resolved_metrics_by_metric_name: Dict[str, Any]
-        k: str
-        v: MetricConfiguration
-        for metric_to_resolve in metrics_to_resolve:
-            resolved_metrics_by_metric_name = {}
-            for k, v in metric_to_resolve.metric_dependencies.items():
-                if v.id in metrics:
-                    resolved_metrics_by_metric_name[k] = metrics[v.id]
-                elif self._caching and v.id in self._metric_cache:  # type: ignore[operator] # TODO: update NoOpDict
-                    resolved_metrics_by_metric_name[k] = self._metric_cache[v.id]
-                else:
-                    raise ge_exceptions.MetricError(
-                        message=f'Missing metric dependency: {str(k)} for metric "{metric_to_resolve.metric_name}".'
-                    )
-
-            metric_class, metric_fn = get_metric_provider(
-                metric_name=metric_to_resolve.metric_name, execution_engine=self
-            )
-            metric_provider_kwargs = {
-                "cls": metric_class,
-                "execution_engine": self,
-                "metric_domain_kwargs": metric_to_resolve.metric_domain_kwargs,
-                "metric_value_kwargs": metric_to_resolve.metric_value_kwargs,
-                "metrics": resolved_metrics_by_metric_name,
-                "runtime_configuration": runtime_configuration,
-            }
-            if metric_fn is None:
-                try:
-                    (
-                        metric_fn,
-                        compute_domain_kwargs,
-                        accessor_domain_kwargs,
-                    ) = resolved_metrics_by_metric_name.pop("metric_partial_fn")
-                except KeyError as e:
-                    raise ge_exceptions.MetricError(
-                        message=f'Missing metric dependency: {str(e)} for metric "{metric_to_resolve.metric_name}".'
-                    )
-
-                metric_fn_bundle.append(
-                    BundledMetricConfiguration(
-                        metric_configuration=metric_to_resolve,
-                        metric_fn=metric_fn,
-                        compute_domain_kwargs=compute_domain_kwargs,
-                        accessor_domain_kwargs=accessor_domain_kwargs,
-                        metric_provider_kwargs=metric_provider_kwargs,
-                    )
-                )
-                continue
-
-            metric_fn_type = getattr(
-                metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE
-            )
-            if metric_fn_type not in [
-                MetricPartialFunctionTypes.MAP_FN,
-                MetricPartialFunctionTypes.MAP_CONDITION_FN,
-                MetricPartialFunctionTypes.WINDOW_FN,
-                MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
-                MetricPartialFunctionTypes.AGGREGATE_FN,
-                MetricFunctionTypes.VALUE,
-                MetricPartialFunctionTypes.MAP_SERIES,
-                MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
-            ]:
-                logger.warning(
-                    f"Unrecognized metric function type while trying to resolve {str(metric_to_resolve.id)}"
-                )
-
-            try:
-                resolved_metrics[metric_to_resolve.id] = metric_fn(
-                    **metric_provider_kwargs
-                )
-            except Exception as e:
-                raise ge_exceptions.MetricResolutionError(
-                    message=str(e),
-                    failed_metrics=(metric_to_resolve,),
-                ) from e
-
-        if len(metric_fn_bundle) > 0:
-            try:
-                # an engine-specific way of computing metrics together
-                new_resolved: Dict[
-                    Tuple[str, str, str], MetricValue
-                ] = self.resolve_metric_bundle(metric_fn_bundle=metric_fn_bundle)
-                resolved_metrics.update(new_resolved)
-            except Exception as e:
-                raise ge_exceptions.MetricResolutionError(
-                    message=str(e),
-                    failed_metrics=[x.metric_configuration for x in metric_fn_bundle],
-                ) from e
-
-        if self._caching:
-            self._metric_cache.update(resolved_metrics)
-
+        metric_fn_direct_configurations: List[MetricComputationConfiguration]
+        metric_fn_bundle_configurations: List[MetricComputationConfiguration]
+        (
+            metric_fn_direct_configurations,
+            metric_fn_bundle_configurations,
+        ) = self._build_direct_and_bundled_metric_computation_configurations(
+            metrics_to_resolve=metrics_to_resolve,
+            metrics=metrics,
+            runtime_configuration=runtime_configuration,
+        )
+        resolved_metrics: Dict[
+            Tuple[str, str, str], MetricValue
+        ] = self._process_direct_and_bundled_metric_computation_configurations(
+            metric_fn_direct_configurations=metric_fn_direct_configurations,
+            metric_fn_bundle_configurations=metric_fn_bundle_configurations,
+        )
         return resolved_metrics
 
     def resolve_metric_bundle(
@@ -522,6 +457,208 @@ class ExecutionEngine(ABC):
             execution_engine_name=self.__class__.__name__,
             template_arguments=template_arguments,
         )
+
+    def _build_direct_and_bundled_metric_computation_configurations(
+        self,
+        metrics_to_resolve: Iterable[MetricConfiguration],
+        metrics: Optional[Dict[Tuple[str, str, str], MetricValue]] = None,
+        runtime_configuration: Optional[dict] = None,
+    ) -> Tuple[
+        List[MetricComputationConfiguration], List[MetricComputationConfiguration]
+    ]:
+        """
+        This method organizes "metrics_to_resolve" ("MetricConfiguration" objects) into two lists: direct and bundled.
+        Directly-computable "MetricConfiguration" must have non-NULL metric function ("metric_fn").  Aggregate metrics
+        have NULL metric function, but non-NULL partial metric function ("metric_partial_fn"); aggregates are bundled.
+
+        Args:
+            metrics_to_resolve: the metrics to evaluate
+            metrics: already-computed metrics currently available to the engine
+            runtime_configuration: runtime configuration information
+
+        Returns:
+            Tuple with two elements: directly-computable and bundled "MetricComputationConfiguration" objects
+        """
+        if metrics is None:
+            metrics = {}
+
+        metric_fn_direct_configurations: List[MetricComputationConfiguration] = []
+        metric_fn_bundle_configurations: List[MetricComputationConfiguration] = []
+
+        resolved_metric_dependencies_by_metric_name: Dict[
+            str, Union[MetricValue, Tuple[Any, dict, dict]]
+        ]
+        metric_class: MetricProvider
+        metric_fn: Any
+        metric_provider_kwargs: dict
+        compute_domain_kwargs: dict
+        accessor_domain_kwargs: dict
+        metric_to_resolve: MetricConfiguration
+        for metric_to_resolve in metrics_to_resolve:
+            resolved_metric_dependencies_by_metric_name = (
+                self._get_computed_metric_evaluation_dependencies_by_metric_name(
+                    metric_to_resolve=metric_to_resolve,
+                    metrics=metrics,
+                )
+            )
+            metric_class, metric_fn = get_metric_provider(
+                metric_name=metric_to_resolve.metric_name, execution_engine=self
+            )
+            metric_provider_kwargs = {
+                "cls": metric_class,
+                "execution_engine": self,
+                "metric_domain_kwargs": metric_to_resolve.metric_domain_kwargs,
+                "metric_value_kwargs": metric_to_resolve.metric_value_kwargs,
+                "metrics": resolved_metric_dependencies_by_metric_name,
+                "runtime_configuration": runtime_configuration,
+            }
+            if metric_fn is None:
+                try:
+                    (
+                        metric_fn,
+                        compute_domain_kwargs,
+                        accessor_domain_kwargs,
+                    ) = resolved_metric_dependencies_by_metric_name.pop(  # type: ignore[misc,assignment]
+                        "metric_partial_fn"
+                    )
+                except KeyError as e:
+                    raise ge_exceptions.MetricError(
+                        message=f'Missing metric dependency: {str(e)} for metric "{metric_to_resolve.metric_name}".'
+                    )
+
+                metric_fn_bundle_configurations.append(
+                    MetricComputationConfiguration(
+                        metric_configuration=metric_to_resolve,
+                        metric_fn=metric_fn,
+                        metric_provider_kwargs=metric_provider_kwargs,
+                        compute_domain_kwargs=compute_domain_kwargs,
+                        accessor_domain_kwargs=accessor_domain_kwargs,
+                    )
+                )
+            else:
+                metric_fn_type: MetricFunctionTypes = getattr(
+                    metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE
+                )
+                if isinstance(
+                    metric_fn_type, MetricFunctionTypes
+                ) and metric_fn_type not in [
+                    MetricPartialFunctionTypes.MAP_FN,
+                    MetricPartialFunctionTypes.MAP_SERIES,
+                    MetricPartialFunctionTypes.MAP_CONDITION_FN,
+                    MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
+                    MetricPartialFunctionTypes.WINDOW_FN,
+                    MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
+                    MetricPartialFunctionTypes.AGGREGATE_FN,
+                    MetricFunctionTypes.VALUE,
+                ]:
+                    logger.warning(
+                        f'Unrecognized metric function type while trying to resolve "{metric_to_resolve.id}".'
+                    )
+                metric_fn_direct_configurations.append(
+                    MetricComputationConfiguration(
+                        metric_configuration=metric_to_resolve,
+                        metric_fn=metric_fn,
+                        metric_provider_kwargs=metric_provider_kwargs,
+                    )
+                )
+
+        return metric_fn_direct_configurations, metric_fn_bundle_configurations
+
+    def _get_computed_metric_evaluation_dependencies_by_metric_name(
+        self,
+        metric_to_resolve: MetricConfiguration,
+        metrics: Dict[Tuple[str, str, str], MetricValue],
+    ) -> Dict[str, Union[MetricValue, Tuple[Any, dict, dict]]]:
+        """
+        Gathers resolved (already computed) evaluation dependencies of metric-to-resolve (not yet computed)
+        "MetricConfiguration" object by "metric_name" property of resolved "MetricConfiguration" objects.
+
+        Args:
+            metric_to_resolve: dependent (not yet resolved) "MetricConfiguration" object
+            metrics: resolved (already computed) "MetricConfiguration" objects keyd by ID of that object
+
+        Returns:
+            Dictionary keyed by "metric_name" with values as computed metric or partial bundling information tuple
+        """
+        metric_dependencies_by_metric_name: Dict[
+            str, Union[MetricValue, Tuple[Any, dict, dict]]
+        ] = {}
+
+        metric_name: str
+        metric_configuration: MetricConfiguration
+        for (
+            metric_name,
+            metric_configuration,
+        ) in metric_to_resolve.metric_dependencies.items():
+            if metric_configuration.id in metrics:
+                metric_dependencies_by_metric_name[metric_name] = metrics[
+                    metric_configuration.id
+                ]
+            elif self._caching and metric_configuration.id in self._metric_cache:  # type: ignore[operator] # TODO: update NoOpDict
+                metric_dependencies_by_metric_name[metric_name] = self._metric_cache[
+                    metric_configuration.id
+                ]
+            else:
+                raise ge_exceptions.MetricError(
+                    message=f'Missing metric dependency: "{metric_name}" for metric "{metric_to_resolve.metric_name}".'
+                )
+
+        return metric_dependencies_by_metric_name
+
+    def _process_direct_and_bundled_metric_computation_configurations(
+        self,
+        metric_fn_direct_configurations: List[MetricComputationConfiguration],
+        metric_fn_bundle_configurations: List[MetricComputationConfiguration],
+    ) -> Dict[Tuple[str, str, str], MetricValue]:
+        """
+        This method processes directly-computable and bundled "MetricComputationConfiguration" objects.
+
+        Args:
+            metric_fn_direct_configurations: directly-computable "MetricComputationConfiguration" objects
+            metric_fn_bundle_configurations: bundled "MetricComputationConfiguration" objects (column aggregates)
+
+        Returns:
+            resolved_metrics (Dict): a dictionary with the values for the metrics that have just been resolved.
+        """
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+
+        metric_computation_configuration: MetricComputationConfiguration
+        for metric_computation_configuration in metric_fn_direct_configurations:
+            try:
+                resolved_metrics[
+                    metric_computation_configuration.metric_configuration.id
+                ] = metric_computation_configuration.metric_fn(
+                    **metric_computation_configuration.metric_provider_kwargs
+                )
+            except Exception as e:
+                raise ge_exceptions.MetricResolutionError(
+                    message=str(e),
+                    failed_metrics=(
+                        metric_computation_configuration.metric_configuration,
+                    ),
+                ) from e
+
+        if len(metric_fn_bundle_configurations) > 0:
+            try:
+                # an engine-specific way of computing metrics together
+                resolved_metric_bundle: Dict[
+                    Tuple[str, str, str], MetricValue
+                ] = self.resolve_metric_bundle(
+                    metric_fn_bundle=metric_fn_bundle_configurations
+                )
+                resolved_metrics.update(resolved_metric_bundle)
+            except Exception as e:
+                raise ge_exceptions.MetricResolutionError(
+                    message=str(e),
+                    failed_metrics=[
+                        x.metric_configuration for x in metric_fn_bundle_configurations
+                    ],
+                ) from e
+
+        if self._caching:
+            self._metric_cache.update(resolved_metrics)
+
+        return resolved_metrics
 
     def _split_domain_kwargs(
         self,

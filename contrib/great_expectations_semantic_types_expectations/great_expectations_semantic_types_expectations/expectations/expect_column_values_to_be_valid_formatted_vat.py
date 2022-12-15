@@ -54,7 +54,7 @@ class ColumnValuesToBeValidFormattedVat(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidFormattedVat(ColumnMapExpectation):
-    """Expect column values to be valid formatted VAT (Value Added Tax)"""
+    """Expect column values to be valid formatted VAT (Value Added Tax)."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

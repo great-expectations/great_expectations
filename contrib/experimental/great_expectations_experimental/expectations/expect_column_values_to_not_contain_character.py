@@ -65,36 +65,33 @@ class ColumnValuesToNotContainCharacter(ColumnMapMetricProvider):
 class ExpectColumnValuesToNotContainCharacter(ColumnMapExpectation):
     """Expect the set of column values to not contain a given character.
 
-           expect_column_values_to_not_contain_character is a \
-           :func:`column_map_expectation
-   <great_expectations.execution_engine.MetaExecutionEngine.column_map_expectation>`.
+    expect_column_values_to_not_contain_character is a \
+    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
-           Args:
-               column (str): \
-                   The provided column name
-               character (str): \
-                   A character to test for the nonexistence of
+    Args:
+        column (str): \
+            The provided column name
+        character (str): \
+            A character to test for the nonexistence of
 
-           Other Parameters:
-               result_format (str or None): \
-                   Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                   For more detail, see :ref:`result_format <result_format>`.
-               include_config (boolean): \
-                   If True, then include the expectation config as part of the result object. \
-                   For more detail, see :ref:`include_config`.
-               catch_exceptions (boolean or None): \
-                   If True, then catch exceptions and include them as part of the result object. \
-                   For more detail, see :ref:`catch_exceptions`.
-               meta (dict or None): \
-                   A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-                   modification. For more detail, see :ref:`meta`.
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
-           Returns:
-               An ExpectationSuiteValidationResult
+    Returns:
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-               Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-               :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-           """
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+    """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
