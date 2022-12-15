@@ -803,7 +803,9 @@ class Expectation(metaclass=MetaExpectation):
         #         f"$column distinct values must belong to this set: {values_string}."
         #     )
 
-        template_str: str = f"\n\n Unexpected Values according to $v__0 , $v__1"
+        template_str: str = (
+            f"\n\n Unexpected Values of $v__0 according to $v__1 , $v__2"
+        )
         unexpected_message = RenderedStringTemplateContent(
             **{
                 "content_block_type": "string_template",
@@ -812,8 +814,9 @@ class Expectation(metaclass=MetaExpectation):
                     "styling": styling,
                     "params": {
                         # make this render
-                        "v__0": "pk_1",
-                        "v__1": "pk_2",
+                        "v__0": "animals",
+                        "v__1": "pk_1",
+                        "v__2": "pk_2",
                     },
                 },
             }
