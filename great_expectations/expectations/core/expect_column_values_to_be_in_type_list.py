@@ -34,7 +34,10 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.util import get_pyathena_potential_type
+from great_expectations.util import (
+    get_pyathena_potential_type,
+    get_trino_potential_type,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import ValidationDependencies
 
@@ -421,6 +424,9 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                         else:
                             real_type = potential_type
                         types.append(real_type)
+                    elif type_module.__name__ == "trino.sqlalchemy.datatype":
+                        potential_type = get_trino_potential_type(type_module, type_)
+                        types.append(type(potential_type))
                     else:
                         potential_type = getattr(type_module, type_)
                         types.append(potential_type)

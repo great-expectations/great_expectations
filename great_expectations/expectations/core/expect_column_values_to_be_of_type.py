@@ -111,6 +111,12 @@ try:
 except ImportError:
     teradatasqlalchemy = None
 
+try:
+    import trino.sqlalchemy.datatype as trinotypes
+    import trino.sqlalchemy.dialect
+except ImportError:
+    trino = None
+
 
 class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
     """Expect a column to contain values of a specified data type.
@@ -599,6 +605,19 @@ def _get_dialect_type_module(
             and teradatatypes is not None
         ):
             return teradatatypes
+    except (TypeError, AttributeError):
+        pass
+
+    # Trino types module
+    try:
+        if (
+            isinstance(
+                execution_engine.dialect,
+                trino.sqlalchemy.dialect.TrinoDialect,
+            )
+            and trinotypes is not None
+        ):
+            return trinotypes
     except (TypeError, AttributeError):
         pass
 
