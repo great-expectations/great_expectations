@@ -152,9 +152,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             if schema_type is RendererSchemaType.STRING:
                 try:
                     str(value)
-                except Exception:
+                except Exception as e:
                     raise RendererConfigurationError(
-                        "Value was unable to be represented as a string."
+                        f"Value was unable to be represented as a string: {str(e)}"
                     )
             else:
                 renderer_configuration_error = RendererConfigurationError(

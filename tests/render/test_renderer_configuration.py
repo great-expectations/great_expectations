@@ -105,7 +105,7 @@ def test_failed_renderer_configuration_instantiation():
 
 class NotString:
     def __str__(self):
-        raise Exception("I'm not a string")
+        raise TypeError("I'm not a string")
 
 
 @pytest.mark.parametrize(
@@ -131,7 +131,9 @@ def test_renderer_configuration_add_param_validation(
         renderer_configuration.add_param(name="value", schema_type=schema_type)
 
     if schema_type is RendererSchemaType.STRING:
-        exception_message = "Value was unable to be represented as a string."
+        exception_message = (
+            "Value was unable to be represented as a string: I'm not a string"
+        )
     else:
         exception_message = (
             f"Param schema_type: <{schema_type}> does not match value: <{value}>."
