@@ -350,7 +350,7 @@ class CodeReferenceFilter:
 
     def __init__(
         self,
-        repo_root: pathlib.Path,
+
         docs_example_parser: DocsExampleParser,
         code_parser: CodeParser,
         excludes: Union[List[IncludeExcludeDefinition], None] = None,
@@ -362,7 +362,7 @@ class CodeReferenceFilter:
             repo_root:
             paths:
         """
-        self.repo_root = repo_root
+
         self.docs_example_parser = docs_example_parser
         self.code_parser = code_parser
 
@@ -501,59 +501,6 @@ class CodeReferenceFilter:
         """Check whether the name of a definition is for a private method or class."""
         return definition.name.startswith("_")
 
-    # TODO: Are any of these methods needed any longer?
-    # def _get_included_class_method_and_function_definitions_from_files(
-    #     self,
-    # ) -> Set[Definition]:
-    #     # TODO: Implementation
-    #     all_defs = self._get_all_class_method_and_function_definitions_from_files()
-    #     included_defs: List[Definition] = []
-    #     for definition in all_defs:
-    #         if self._is_filepath_included(
-    #             filepath=definition.filepath
-    #         ) or self._is_definition_included(definition=definition):
-    #             included_defs.append(definition)
-    #     return set(included_defs)
-    #
-    # def get_filtered_and_included_class_method_and_function_definitions_from_files(
-    #     self,
-    # ) -> Set[Definition]:
-    #     filtered = self._get_filtered_class_method_and_function_definitions_from_files()
-    #     included = self._get_included_class_method_and_function_definitions_from_files()
-    #     return filtered.union(included)
-    #
-    # def _get_filtered_class_method_and_function_definitions_from_files(
-    #     self,
-    # ) -> Set[Definition]:
-    #     # TODO: add docstring
-    #     all_usages: Set[Definition] = set()
-    #     for filepath in self.paths:
-    #         if not self._is_filepath_excluded(filepath=filepath):
-    #             file_usages = (
-    #                 self.get_all_class_method_and_function_definitions_from_file(
-    #                     filepath=filepath
-    #                 )
-    #             )
-    #             all_usages |= self._build_filtered_file_usage_definitions(
-    #                 filepath=filepath, file_usages=file_usages
-    #             )
-    #     return all_usages
-    #
-    # def _build_filtered_file_usage_definitions(
-    #     self, filepath: pathlib.Path, file_usages
-    # ) -> Set[Definition]:
-    #     # TODO: Add type info and docstring
-    #     file_usages_definitions: List[Definition] = []
-    #     for usage in file_usages:
-    #         candidate_definition = Definition(
-    #             name=usage.name,
-    #             filepath=filepath,
-    #             ast_definition=usage,
-    #         )
-    #         if not self._is_definition_excluded(definition=candidate_definition):
-    #             file_usages_definitions.append(candidate_definition)
-    #
-    #     return set(file_usages_definitions)
 
 
 # TODO: Make this functional:
@@ -759,7 +706,6 @@ def main():
     code_parser = CodeParser(file_contents=code_file_contents)
 
     code_reference_filter = CodeReferenceFilter(
-        repo_root=_repo_root(),
         docs_example_parser=docs_example_parser,
         code_parser=code_parser,
     )
