@@ -1,5 +1,4 @@
 import pathlib
-from typing import Set
 
 import pytest
 
@@ -7,8 +6,7 @@ from scripts.public_api_report import (
     DocsExampleParser,
     CodeParser,
     IncludeExcludeDefinition,
-    Definition,
-    _repo_root,
+    FileContents,
 )
 
 
@@ -92,68 +90,39 @@ def sample_with_definitions_python_file_string_filepath(
 
 
 @pytest.fixture
-def filesystem_with_samples(
-    fs,
+def sample_docs_example_file_contents(
     sample_docs_example_python_file_string: str,
     sample_docs_example_python_file_string_filepath: pathlib.Path,
-    sample_with_definitions_python_file_string: str,
-    sample_with_definitions_python_file_string_filepath: pathlib.Path,
-) -> None:
-    fs.create_file(
-        sample_docs_example_python_file_string_filepath,
+) -> FileContents:
+    return FileContents(
+        filepath=sample_docs_example_python_file_string_filepath,
         contents=sample_docs_example_python_file_string,
     )
-    fs.create_file(
-        sample_with_definitions_python_file_string_filepath,
+
+
+@pytest.fixture
+def sample_with_definitions_file_contents(
+    sample_with_definitions_python_file_string: str,
+    sample_with_definitions_python_file_string_filepath: pathlib.Path,
+) -> FileContents:
+    return FileContents(
+        filepath=sample_with_definitions_python_file_string_filepath,
         contents=sample_with_definitions_python_file_string,
     )
 
 
-def test_fixtures_are_accessible(
-    filesystem_with_samples,
-    sample_docs_example_python_file_string: str,
-    sample_docs_example_python_file_string_filepath: pathlib.Path,
-    sample_with_definitions_python_file_string: str,
-    sample_with_definitions_python_file_string_filepath: pathlib.Path,
-):
-
-    assert sample_docs_example_python_file_string_filepath == pathlib.Path(
-        "tests/integration/docusaurus/sample_docs_example_python_file_string.py"
-    )
-    assert sample_with_definitions_python_file_string_filepath == pathlib.Path(
-        "great_expectations/sample_with_definitions_python_file_string.py"
-    )
-
-    with open(sample_docs_example_python_file_string_filepath) as f:
-        file_contents = f.read()
-        assert file_contents == sample_docs_example_python_file_string
-        assert len(file_contents) > 200
-
-    with open(sample_with_definitions_python_file_string_filepath) as f:
-        file_contents = f.read()
-        assert file_contents == sample_with_definitions_python_file_string
-        assert len(file_contents) > 200
-
-
 class TestDocExampleParser:
-    def test_instantiate(
-        self,
-        repo_root: pathlib.Path,
-        sample_docs_example_python_file_string_filepath: pathlib.Path,
-    ):
+    def test_instantiate(self, sample_docs_example_file_contents: FileContents):
         doc_example_parser = DocsExampleParser(
-            repo_root=repo_root, paths={sample_docs_example_python_file_string_filepath}
+            file_contents={sample_docs_example_file_contents}
         )
         assert isinstance(doc_example_parser, DocsExampleParser)
 
     def test_retrieve_all_usages_in_files(
-        self,
-        filesystem_with_samples,
-        repo_root: pathlib.Path,
-        sample_docs_example_python_file_string_filepath: pathlib.Path,
+        self, sample_docs_example_file_contents: FileContents
     ):
         doc_example_parser = DocsExampleParser(
-            repo_root=repo_root, paths={sample_docs_example_python_file_string_filepath}
+            file_contents={sample_docs_example_file_contents}
         )
         usages = doc_example_parser.retrieve_all_usages_in_docs_example_files()
         assert usages == {

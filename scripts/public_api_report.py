@@ -359,8 +359,10 @@ class CodeReferenceFilter:
         """
 
         Args:
-            repo_root:
-            paths:
+            docs_example_parser:
+            code_parser:
+            excludes:
+            includes:
         """
 
         self.docs_example_parser = docs_example_parser
