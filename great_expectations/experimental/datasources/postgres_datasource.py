@@ -408,7 +408,8 @@ class PostgresDatasource(Datasource):
         asset = TableAsset(
             name=name,
             table_name=table_name,
-            order_by=order_by or [],  # type: ignore[arg-type]  # empty list is allowed
+            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            # see TableAsset._parse_order_by_sorter()
         )
         # TODO (kilo59): custom init for `DataAsset` to accept datasource in constructor?
         # Will most DataAssets require a `Datasource` attribute?
