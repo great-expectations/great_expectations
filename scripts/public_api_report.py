@@ -49,9 +49,6 @@ from dataclasses import dataclass
 from typing import List, Set, Union, Optional
 
 
-# TODO: How to handle astunparse optional dependency?
-# import astunparse
-
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
@@ -91,27 +88,6 @@ class IncludeExcludeDefinition:
     filepath: Optional[pathlib.Path] = None
 
 
-class AstParser:
-    def __init__(self, repo_root: pathlib.Path) -> None:
-        self.repo_root = repo_root
-
-    # TODO: How to handle astunparse optional dependency?
-    # def print_tree(self, filepath: pathlib.Path) -> None:
-    #     tree = self._parse_file_to_ast_tree(filepath=filepath)
-    #     self._print_ast(tree=tree)
-    #
-    # def _print_ast(self, tree: ast.AST) -> None:
-    #     """Pretty print an AST tree."""
-    #     print(astunparse.dump(tree))
-
-    def _parse_file_to_ast_tree(self, filepath: pathlib.Path) -> ast.AST:
-        with open(self.repo_root / filepath) as f:
-            file_contents: str = f.read()
-
-        tree = ast.parse(file_contents)
-        return tree
-
-
 class DocExampleParser:
     """Parse examples from docs to find classes, methods and functions used."""
 
@@ -134,7 +110,7 @@ class DocExampleParser:
     def _retrieve_all_usages_in_file(self, filepath: pathlib.Path) -> Set[str]:
         """Retrieve all class, method + functions used in test examples."""
 
-        tree = self._parse_file_to_ast_tree(filepath=filepath)
+        tree = _parse_file_to_ast_tree(filepath=filepath)
         function_calls = self._list_all_function_calls(tree=tree)
         function_names = self._get_non_private_function_names(calls=function_calls)
         logger.debug(f"function_names: {function_names}")
@@ -144,17 +120,6 @@ class DocExampleParser:
         logger.debug(f"import_names: {import_names}")
 
         return function_names | import_names
-
-    def _print_ast(self, tree: ast.AST) -> None:
-        """Pretty print an AST tree."""
-        print(astunparse.dump(tree))
-
-    def _parse_file_to_ast_tree(self, filepath: pathlib.Path) -> ast.AST:
-        with open(filepath) as f:
-            file_contents: str = f.read()
-
-        tree = ast.parse(file_contents)
-        return tree
 
     def _list_all_gx_imports(
         self, tree: ast.AST
@@ -443,19 +408,12 @@ class GXCodeParser:
         Returns:
 
         """
-        tree = self._parse_file_to_ast_tree(filepath=filepath)
+        tree = _parse_file_to_ast_tree(filepath=filepath)
         all_defs: List[Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]] = []
         all_defs.extend(self._list_class_definitions(tree=tree))
         all_defs.extend(self._list_function_definitions(tree=tree))
 
         return set(all_defs)
-
-    def _parse_file_to_ast_tree(self, filepath: pathlib.Path) -> ast.AST:
-        with open(filepath) as f:
-            file_contents: str = f.read()
-
-        tree = ast.parse(file_contents)
-        return tree
 
     def _list_class_definitions(self, tree: ast.AST) -> List[ast.ClassDef]:
 
@@ -680,6 +638,14 @@ def _default_gx_code_paths() -> Set[pathlib.Path]:
     base_directory = _repo_root() / "great_expectations"
     paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
     return set([pathlib.Path(p).relative_to(_repo_root()) for p in paths])
+
+
+def _parse_file_to_ast_tree(filepath: pathlib.Path) -> ast.AST:
+    with open(filepath) as f:
+        file_contents: str = f.read()
+
+    tree = ast.parse(file_contents)
+    return tree
 
 
 def main():
