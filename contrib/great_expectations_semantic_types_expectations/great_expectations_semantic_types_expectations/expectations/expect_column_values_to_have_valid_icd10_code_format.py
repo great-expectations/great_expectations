@@ -4,7 +4,9 @@ from great_expectations.expectations.regex_based_column_map_expectation import (
 
 
 class ExpectColumnValuesToHaveValidICD10CodeFormat(RegexBasedColumnMapExpectation):
-    """Checks if each value matches a regex for ICD10 codes. Does NOT ensure
+    """Expect column values to have valid ICD10 code format.
+
+    Checks if each value matches a regex for ICD10 codes. Does NOT ensure \
     the given code actually exists in any version of the ICD10.
     """
 

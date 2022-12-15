@@ -41,7 +41,7 @@ class ColumnValuesToBeValidIsbn13(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidIsbn13(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid ISBN13 format."""
+    """Expect column values to conform to the valid ISBN13 format."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

@@ -103,40 +103,37 @@ class ColumnValuesGeometryWithinPlace(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesGeometryToBeWithinPlace(ColumnMapExpectation):
-    """
-    Expect that column values as geometries are within a place that can be returned through geocoding (as a shape)
+    """Expect that column values as geometries are within a place that can be returned through geocoding (as a shape).
 
-    expect_column_values_geometry_to_be_near_shape is a :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
+    expect_column_values_geometry_to_be_near_shape is a \
+    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
     Args:
         column (str): \
-            The column name.
-            Column values must be provided in WKT or WKB format, which are commom formats for GIS Database formats.
-            WKT can be accessed thhrough the ST_AsText() or ST_AsBinary() functions in queries for PostGIS and MSSQL.
+            The column name. \
+            Column values must be provided in WKT or WKB format, which are commom formats for GIS Database formats. \
+            WKT can be accessed thhrough the ST_AsText() or ST_AsBinary() functions in queries for PostGIS and MSSQL. \
             Values must be in longitude - latitude format for this method to work.
 
     Keyword Args:
-        place: str
+        place (str): \
             The country, place, address, etc. to query. Expect to return a geometry from OpenStreetMaps (Nominatim)
-
-        column_shape_format: str
-            Geometry format for 'column'. Column values must be provided in WKT or WKB format, which are commom formats for GIS Database formats.
+        column_shape_format (str): \
+            Geometry format for 'column'. Column values must be provided in WKT or WKB format, which are commom formats for GIS Database formats. \
             WKT can be accessed thhrough the ST_AsText() or ST_AsBinary() functions in queries for PostGIS and MSSQL.
-
-        geocoder: str
+        geocoder (str): \
             Geocoder from GeoPy to use to return the shape. While this is generic, the api is required to be available from GeoPy and must return a geometry.
-
-        geocoder_config: dict(str)
+        geocoder_config (dict str): \
             arguments to initialize the GeoPy geocoder. e.g. for paid services, an API_key is usually required. See GeoPy for reference.
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
     Notes:
-        The user is responsible to transform the column to a WKT or WKB format that is in the WGS84 coordianate system for earth.
-        Other Coordinate Reference Systems are not yet supported.
-        See Nominatim for appropriate use of the service as open-source. Requests are subject to timeout and blocking.
-        Frequent queries should be cached locally and use (expect_column_value_geometries_to_be_within_shape)
+        * The user is responsible to transform the column to a WKT or WKB format that is in the WGS84 coordianate system for earth.
+        * Other Coordinate Reference Systems are not yet supported.
+        * See Nominatim for appropriate use of the service as open-source. Requests are subject to timeout and blocking.
+        * Frequent queries should be cached locally and use (expect_column_value_geometries_to_be_within_shape)
     """
 
     # These examples will be shown in the public gallery.

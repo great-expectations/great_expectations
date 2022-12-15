@@ -51,7 +51,7 @@ class ColumnValuesToBeValidGithubUsername(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidGithubUsername(ColumnMapExpectation):
-    """This Expectation validates data as conforming to be valid github users."""
+    """Expect column values to be valid github users."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

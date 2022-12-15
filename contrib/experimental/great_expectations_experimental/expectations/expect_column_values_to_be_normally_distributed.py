@@ -148,7 +148,7 @@ class ColumnNormallyDistributed(ColumnMetricProvider):
 
 
 class ExpectColumnValuesToBeNormallyDistributed(ColumnExpectation):
-    """Test whether column values are normally distributed. NaN values are omitted."""
+    """Expect column values to be normally distributed. NaN values are omitted."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [

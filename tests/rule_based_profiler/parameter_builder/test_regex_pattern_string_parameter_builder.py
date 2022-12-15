@@ -375,7 +375,7 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
 def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Batch):
     batch: Batch = batch_fixture
     mock_data_context.get_batch_list.return_value = [batch]
-    mock_data_context.get_validator_using_batch_list.return_value = Validator(
+    mock_data_context.get_validator.return_value = Validator(
         execution_engine=PandasExecutionEngine(), batches=[batch]
     )
 

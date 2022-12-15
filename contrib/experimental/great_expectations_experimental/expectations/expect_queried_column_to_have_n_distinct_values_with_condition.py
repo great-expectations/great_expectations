@@ -10,12 +10,13 @@ from great_expectations.expectations.expectation import (
 
 class ExpectQueriedColumnToHaveNDistinctValuesWithCondition(QueryExpectation):
     """Expect a column to have N distinct values, with an filter.
+
     Args:
-    *****
-    template_dict: dict with the following keys:
-    column_to_check - column to check uniqueness on. can be multiple column names separated by comma
-    condition - the filter - for boolean column, you can provide just the column name (evaluated to True)
-    num_of_distinct_values - number of distinct values the column is supposed ot have"""
+        template_dict: dict with the following keys: \
+            column_to_check (column to check uniqueness on. can be multiple column names separated by comma), \
+            condition (the filter for boolean column, you can provide just the column name, evaluated to True), \
+            num_of_distinct_values (number of distinct values the column is supposed ot have)
+    """
 
     metric_dependencies = ("query.template_values",)
 
@@ -77,7 +78,7 @@ class ExpectQueriedColumnToHaveNDistinctValuesWithCondition(QueryExpectation):
 
         if actual_num_of_distinct_values == expected_num_of_distinct_values:
             return {
-                "result": {"observed_value": query_result},
+                "result": {"observed_value": [list(row) for row in query_result]},
                 "success": True,
             }
         else:
@@ -85,7 +86,7 @@ class ExpectQueriedColumnToHaveNDistinctValuesWithCondition(QueryExpectation):
                 "success": False,
                 "result": {
                     "info": f"Expected {expected_num_of_distinct_values} but found {actual_num_of_distinct_values} distinct values",
-                    "observed_value": query_result,
+                    "observed_value": [list(row) for row in query_result],
                 },
             }
 

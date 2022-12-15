@@ -55,7 +55,7 @@ class ColumnValuesToBeHexadecimal(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeHexadecimal(ColumnMapExpectation):
-    """This expectation checks if the column values are valid hexadecimals"""
+    """Expect column values to be valid hexadecimals."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

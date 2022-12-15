@@ -43,7 +43,7 @@ class ColumnValuesToBeValidLeapYear(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidLeapYear(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid leap year."""
+    """Expect column values to be a valid leap year."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

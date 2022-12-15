@@ -162,6 +162,13 @@ class ColumnWassersteinDistance(ColumnMetricProvider):
 
 
 class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
+    """Expect that the Wasserstein Distance of the specified column with respect to an optional partition object to be lower than the provided value.
+
+    See Also:
+        [partition objects for distributional Expectations](https://docs.greatexpectations.io/docs/reference/expectations/distributional_expectations/#partition-objects)
+        [Wasserstein Metric on Wikipedia](https://en.wikipedia.org/wiki/Wasserstein_metric)
+    """
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.custom.wasserstein",)
     success_keys = (
