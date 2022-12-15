@@ -500,7 +500,11 @@ is run), with each validation having its own defined "action_list" attribute.
 
     @property
     def _cloud_mode(self) -> bool:
-        return hasattr(self.data_context, "cloud_mode") and self.data_context.cloud_mode
+        from great_expectations.data_context.data_context.cloud_data_context import (
+            CloudDataContext,
+        )
+
+        return isinstance(self.data_context, CloudDataContext)
 
     def __repr__(self) -> str:
         return str(self.get_config())

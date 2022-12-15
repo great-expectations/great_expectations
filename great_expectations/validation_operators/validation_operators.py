@@ -237,7 +237,11 @@ class ActionListValidationOperator(ValidationOperator):
 
     @property
     def _cloud_mode(self) -> bool:
-        return hasattr(self.data_context, "cloud_mode") and self.data_context.cloud_mode
+        from great_expectations.data_context.data_context.cloud_data_context import (
+            CloudDataContext,
+        )
+
+        return isinstance(self.data_context, CloudDataContext)
 
     @property
     def validation_operator_config(self) -> dict:

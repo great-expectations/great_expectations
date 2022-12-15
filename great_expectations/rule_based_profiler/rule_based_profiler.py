@@ -1138,7 +1138,12 @@ class BaseRuleBasedProfiler(ConfigPeer):
         )
 
         key: Union[GXCloudIdentifier, ConfigurationIdentifier]
-        if hasattr(data_context, "cloud_mode") and data_context.cloud_mode:
+
+        from great_expectations.data_context.data_context.cloud_data_context import (
+            CloudDataContext,
+        )
+
+        if isinstance(data_context, CloudDataContext):
             key = GXCloudIdentifier(resource_type=GXCloudRESTResource.PROFILER)
         else:
             key = ConfigurationIdentifier(

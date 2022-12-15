@@ -1190,7 +1190,6 @@ def test_add_profiler_ge_cloud_mode(
     ge_cloud_profiler_key: GXCloudIdentifier,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
-    mock_data_context.ge_cloud_mode.return_value = True
     profiler: RuleBasedProfiler = RuleBasedProfiler.add_profiler(
         profiler_config_with_placeholder_args,
         data_context=mock_data_context,

@@ -80,8 +80,6 @@ class CloudDataContext(SerializableDataContext):
                 config_variables.yml and the environment
             cloud_config (GXCloudConfig): GXCloudConfig corresponding to current CloudDataContext
         """
-        self._cloud_mode = True  # property needed for backward compatibility
-
         # Chetan - 20221208 - not formally deprecating these values until a future date
         (
             cloud_base_url,
@@ -395,15 +393,6 @@ class CloudDataContext(SerializableDataContext):
     def ge_cloud_config(self) -> Optional[GXCloudConfig]:
         return self._cloud_config
 
-    @property
-    def cloud_mode(self) -> bool:
-        return self._cloud_mode
-
-    @property
-    def ge_cloud_mode(self) -> bool:
-        # <GX_RENAME> Deprecated 0.15.37
-        return self.cloud_mode
-
     def _init_variables(self) -> CloudDataContextVariables:
         ge_cloud_base_url: str = self._cloud_config.base_url
         ge_cloud_organization_id: str = self._cloud_config.organization_id  # type: ignore[assignment]
@@ -425,8 +414,6 @@ class CloudDataContext(SerializableDataContext):
         Returns:
             UUID to use as the data_context_id
         """
-
-        # if in cloud_mode, use ge_cloud_organization_id
         return self.ge_cloud_config.organization_id  # type: ignore[return-value,union-attr]
 
     def get_config_with_variables_substituted(
@@ -733,11 +720,12 @@ class CloudDataContext(SerializableDataContext):
         return checkpoint
 
     def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
-        return self.checkpoint_store.list_checkpoints(ge_cloud_mode=self.cloud_mode)
+        return self.checkpoint_store.list_checkpoints(ge_cloud_mode=True)
 
     def list_profilers(self) -> Union[List[str], List[ConfigurationIdentifier]]:
         return RuleBasedProfiler.list_profilers(
-            profiler_store=self.profiler_store, ge_cloud_mode=self.cloud_mode
+            profiler_store=self.profiler_store,
+            ge_cloud_mode=True,
         )
 
     def _init_site_builder_for_data_docs_site_creation(
@@ -756,7 +744,7 @@ class CloudDataContext(SerializableDataContext):
                 "data_context": self,
                 "root_directory": self.root_directory,
                 "site_name": site_name,
-                "cloud_mode": self.cloud_mode,
+                "cloud_mode": True,
             },
             config_defaults={
                 "module_name": "great_expectations.render.renderer.site_builder"

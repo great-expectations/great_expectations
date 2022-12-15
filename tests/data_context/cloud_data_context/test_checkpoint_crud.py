@@ -162,7 +162,6 @@ def test_cloud_backed_data_context_add_checkpoint(
 
     # Make sure the fixture has the right configuration
     assert isinstance(context, CloudDataContext)
-    assert context.cloud_mode
 
     validation_id_1, validation_id_2 = validation_ids
 
@@ -240,7 +239,6 @@ def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
 
     # Make sure the fixture has the right configuration
     assert isinstance(context, CloudDataContext)
-    assert context.ge_cloud_mode
 
     with mock.patch(
         "requests.Session.post", autospec=True, side_effect=mocked_post_response
