@@ -5,7 +5,7 @@ import pytest
 
 from scripts.public_api_report import (
     DocsExampleParser,
-    GXCodeParser,
+    CodeParser,
     IncludeExcludeDefinition,
     Definition,
     _repo_root,
@@ -172,20 +172,20 @@ class TestGXCodeParser:
         repo_root: pathlib.Path,
         sample_with_definitions_python_file_string_filepath: pathlib.Path,
     ):
-        gx_code_parser = GXCodeParser(
+        code_parser = CodeParser(
             repo_root=repo_root,
             paths={sample_with_definitions_python_file_string_filepath},
         )
-        assert isinstance(gx_code_parser, GXCodeParser)
-        assert gx_code_parser.excludes
-        assert gx_code_parser.includes
+        assert isinstance(code_parser, CodeParser)
+        assert code_parser.excludes
+        assert code_parser.includes
 
     def test_instantiate_with_non_default_include_exclude(
         self,
         repo_root: pathlib.Path,
         sample_with_definitions_python_file_string_filepath: pathlib.Path,
     ):
-        gx_code_parser = GXCodeParser(
+        code_parser = CodeParser(
             repo_root=repo_root,
             paths={sample_with_definitions_python_file_string_filepath},
             includes=[
@@ -199,11 +199,11 @@ class TestGXCodeParser:
                 )
             ],
         )
-        assert isinstance(gx_code_parser, GXCodeParser)
-        assert gx_code_parser.excludes
-        assert gx_code_parser.includes
-        assert len(gx_code_parser.excludes) == 1
-        assert len(gx_code_parser.includes) == 1
+        assert isinstance(code_parser, CodeParser)
+        assert code_parser.excludes
+        assert code_parser.includes
+        assert len(code_parser.excludes) == 1
+        assert len(code_parser.includes) == 1
 
     def test_get_filtered_and_included_class_method_and_function_definitions_from_files_no_include_exclude(
         self,
@@ -211,7 +211,7 @@ class TestGXCodeParser:
         repo_root: pathlib.Path,
         sample_with_definitions_python_file_string_filepath: pathlib.Path,
     ):
-        gx_code_parser = GXCodeParser(
+        gx_code_parser = CodeParser(
             repo_root=repo_root,
             paths={
                 sample_with_definitions_python_file_string_filepath,
@@ -244,7 +244,7 @@ class TestGXCodeParser:
         repo_root: pathlib.Path,
         sample_with_definitions_python_file_string_filepath: pathlib.Path,
     ):
-        gx_code_parser = GXCodeParser(
+        gx_code_parser = CodeParser(
             repo_root=repo_root,
             paths={
                 sample_with_definitions_python_file_string_filepath,
@@ -273,7 +273,7 @@ class TestGXCodeParser:
         sample_docs_example_python_file_string_filepath: pathlib.Path,
         sample_with_definitions_python_file_string_filepath: pathlib.Path,
     ):
-        gx_code_parser = GXCodeParser(
+        gx_code_parser = CodeParser(
             repo_root=repo_root,
             paths={
                 sample_with_definitions_python_file_string_filepath,
@@ -326,7 +326,7 @@ class TestGXCodeParser:
         definitions will not include multiple copies of the same definitions when
         not accounting for different ast definitions.
         """
-        gx_code_parser = GXCodeParser(
+        gx_code_parser = CodeParser(
             repo_root=repo_root,
             paths={
                 sample_with_definitions_python_file_string_filepath,

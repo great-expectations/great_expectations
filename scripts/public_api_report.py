@@ -14,7 +14,7 @@ DocsExampleParser.retrieve_all_usages_in_docs_example_files()
     retrieve the names, not the location of the method definition). These are
     not filtered to be only GX related, we filter in step 4.
 
-GXCodeParser.get_all_class_method_and_function_definitions_from_files()
+CodeParser.get_all_class_method_and_function_definitions_from_files()
 
 3. AST walk through full GX codebase to find all classes and method names from
     their definitions, and capture the definition file location.
@@ -185,7 +185,7 @@ class DocsExampleParser:
         return set(names)
 
 
-class GXCodeParser:
+class CodeParser:
     """"""
 
     def __init__(
@@ -330,7 +330,7 @@ class CodeReferenceFilter:
         self,
         repo_root: pathlib.Path,
         docs_example_parser: DocsExampleParser,
-        gx_code_parser: GXCodeParser,
+        code_parser: CodeParser,
         excludes: Union[List[IncludeExcludeDefinition], None] = None,
         includes: Union[List[IncludeExcludeDefinition], None] = None,
     ) -> None:
@@ -342,7 +342,7 @@ class CodeReferenceFilter:
         """
         self.repo_root = repo_root
         self.docs_example_parser = docs_example_parser
-        self.gx_code_parser = gx_code_parser
+        self.gx_code_parser = code_parser
 
         if not excludes:
             self.excludes = self.DEFAULT_EXCLUDES
@@ -533,7 +533,7 @@ class PublicAPIChecker:
         self,
         repo_root: pathlib.Path,
         doc_example_parser: DocsExampleParser,
-        gx_code_parser: GXCodeParser,
+        gx_code_parser: CodeParser,
     ) -> None:
         self.repo_root = repo_root
         self.doc_example_parser = doc_example_parser
@@ -684,7 +684,7 @@ def _default_doc_example_paths() -> Set[pathlib.Path]:
     return set([pathlib.Path(p).relative_to(_repo_root()) for p in paths])
 
 
-def _default_gx_code_paths() -> Set[pathlib.Path]:
+def _default_code_paths() -> Set[pathlib.Path]:
     """All gx modules related to the main library."""
     base_directory = _repo_root() / "great_expectations"
     paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
@@ -705,14 +705,14 @@ def main():
         repo_root=_repo_root(), paths=_default_doc_example_paths()
     )
 
-    gx_code_parser = GXCodeParser(
-        repo_root=_repo_root(), paths=_default_gx_code_paths()
+    code_parser = CodeParser(
+        repo_root=_repo_root(), paths=_default_code_paths()
     )
 
     code_reference_filter = CodeReferenceFilter(
         repo_root=_repo_root(),
         docs_example_parser=docs_example_parser,
-        gx_code_parser=gx_code_parser
+        code_parser=code_parser
     )
 
     filtered_definitions = code_reference_filter.filter_definitions()
