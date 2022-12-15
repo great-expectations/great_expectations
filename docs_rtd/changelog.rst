@@ -19,10 +19,6 @@ Changelog
 * [MAINTENANCE] Refactor ExecutionEngine.resolve_metrics() for better code readability (#6578)
 * [MAINTENANCE] adding googletag manager to docusaurus (#6584)
 * [MAINTENANCE] typo in method name (#6585)
-* [MAINTENANCE] `mypy` config update (#6589)
-* [MAINTENANCE] Small refactor of ExecutionEngine.resolve_metrics() for better code readability (and miscellaneous additional clean up) (#6587)
-* [MAINTENANCE] Remove `ExplorerDataContext` (#6592)
-* [MAINTENANCE] Leverage `RendererConfiguration` in existing prescriptive templates (2 of 3) (#6488)
 
 0.15.40
 -----------------
