@@ -342,7 +342,7 @@ class CodeReferenceFilter:
         """
         self.repo_root = repo_root
         self.docs_example_parser = docs_example_parser
-        self.gx_code_parser = code_parser
+        self.code_parser = code_parser
 
         if not excludes:
             self.excludes = self.DEFAULT_EXCLUDES
@@ -380,7 +380,7 @@ class CodeReferenceFilter:
             str
         ] = self.docs_example_parser.retrieve_all_usages_in_docs_example_files()
         gx_code_definitions = (
-            self.gx_code_parser.get_all_class_method_and_function_names_from_definitions_in_files()
+            self.code_parser.get_all_class_method_and_function_names_from_definitions_in_files()
         )
 
         doc_example_usages_of_gx_code = doc_example_usages.intersection(
@@ -401,7 +401,7 @@ class CodeReferenceFilter:
             Set of Definition objects with filepath locations.
         """
         gx_code_definitions = (
-            self.gx_code_parser.get_all_class_method_and_function_definitions_from_files()
+            self.code_parser.get_all_class_method_and_function_definitions_from_files()
         )
         gx_code_definitions_appearing_in_docs_examples = set(
             [d for d in gx_code_definitions if d.name in gx_usages_in_docs_examples]
@@ -418,7 +418,7 @@ class CodeReferenceFilter:
     def _filter_or_include(self, definitions: Set[Definition]) -> Set[Definition]:
         included_definitions: List[Definition] = []
         all_gx_code_definitions = (
-            self.gx_code_parser.get_all_class_method_and_function_definitions_from_files()
+            self.code_parser.get_all_class_method_and_function_definitions_from_files()
         )
         for definition in definitions:
             exclude: bool = self._is_filepath_excluded(definition.filepath) or self._is_definition_excluded(definition)
@@ -533,22 +533,22 @@ class PublicAPIChecker:
         self,
         repo_root: pathlib.Path,
         doc_example_parser: DocsExampleParser,
-        gx_code_parser: CodeParser,
+        code_parser: CodeParser,
     ) -> None:
         self.repo_root = repo_root
         self.doc_example_parser = doc_example_parser
-        self.gx_code_parser = gx_code_parser
+        self.code_parser = code_parser
 
-    def gx_code_definitions_appearing_in_docs_examples_and_not_marked_public_api(
+    def code_definitions_appearing_in_docs_examples_and_not_marked_public_api(
         self,
     ) -> Set[Definition]:
-        gx_code_definitions_appearing_in_docs_examples = (
-            self.gx_code_definitions_appearing_in_docs_examples()
+        code_definitions_appearing_in_docs_examples = (
+            self.code_definitions_appearing_in_docs_examples()
         )
         return set(
             [
                 d
-                for d in gx_code_definitions_appearing_in_docs_examples
+                for d in code_definitions_appearing_in_docs_examples
                 if not self._is_definition_marked_public_api(d.ast_definition)
             ]
         )
