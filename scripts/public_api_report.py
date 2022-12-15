@@ -64,8 +64,8 @@ class Definition:
 
     Args:
         name: name of class, method or function.
-        filepath: Relative to repo_root/great_expectations. E.g.
-            core/expectation_suite.py NOT
+        filepath: Where the definition was found. Relative to
+            repo_root/great_expectations. E.g. core/expectation_suite.py NOT
             great_expectations/core/expectation_suite.py
         ast_definition: Full AST tree of the class, method or function definition.
     """
@@ -92,12 +92,31 @@ class IncludeExcludeDefinition:
     filepath: Optional[pathlib.Path] = None
 
 
+class FileContents:
+    """File contents as a string and file path.
+
+    Args:
+        filepath: Absolute path to the file.
+        contents: String of the file contents.
+    """
+
+    def __init__(self, filepath: pathlib.Path, contents: str):
+        self.filepath = filepath
+        self.contents = contents
+
+    @classmethod
+    def create_from_local_file(cls, filepath: pathlib.Path) -> "FileContents":
+        with open(filepath) as f:
+            file_contents: str = f.read()
+        return cls(filepath=filepath, contents=file_contents)
+
+
+
 class DocsExampleParser:
     """Parse examples from docs to find classes, methods and functions used."""
 
-    def __init__(self, repo_root: pathlib.Path, paths: Set[pathlib.Path]) -> None:
-        self.repo_root = repo_root
-        self.paths = paths
+    def __init__(self, docs_examples: Set[FileContents]) -> None:
+        self.docs_examples = docs_examples
 
     def retrieve_all_usages_in_docs_example_files(self) -> Set[str]:
         """
@@ -106,15 +125,16 @@ class DocsExampleParser:
 
         """
         all_usages = set()
-        for filepath in self.paths:
-            file_usages = self._retrieve_all_usages_in_file(filepath=filepath)
+        for file_contents in self.docs_examples:
+            file_usages = self._retrieve_all_usages_in_file(file_contents=file_contents)
             all_usages |= file_usages
         return all_usages
 
-    def _retrieve_all_usages_in_file(self, filepath: pathlib.Path) -> Set[str]:
+    def _retrieve_all_usages_in_file(self, file_contents: FileContents) -> Set[str]:
         """Retrieve all class, method + functions used in test examples."""
 
-        tree = _parse_file_to_ast_tree(filepath=self.repo_root / filepath)
+        tree = ast.parse(file_contents.contents)
+
         function_calls = self._list_all_function_calls(tree=tree)
         function_names = self._get_non_private_function_names(calls=function_calls)
         logger.debug(f"function_names: {function_names}")
@@ -174,12 +194,13 @@ class DocsExampleParser:
     def _get_non_private_function_names(self, calls: List[ast.Call]) -> Set[str]:
         names = []
         for call in calls:
+            name = None
             if isinstance(call.func, ast.Attribute):
                 name = call.func.attr
             elif isinstance(call.func, ast.Name):
                 name = call.func.id
 
-            if not name.startswith("_"):
+            if name and not name.startswith("_"):
                 names.append(name)
 
         return set(names)
@@ -655,7 +676,7 @@ class PublicAPIReport:
         Returns:
 
         """
-        # TODO: Strip leading /greatexpectations here
+        # TODO: Strip leading /greatexpectations here, also make path non absolute if necessary
         sorted_definitions_list = sorted(
             list(self.definitions), key=operator.attrgetter("filepath")
         )
@@ -684,11 +705,25 @@ def _default_doc_example_paths() -> Set[pathlib.Path]:
     return set([pathlib.Path(p).relative_to(_repo_root()) for p in paths])
 
 
+def _default_doc_example_absolute_paths() -> Set[pathlib.Path]:
+    """Get all paths of doc examples (docs examples)."""
+    base_directory = _repo_root() / "tests" / "integration" / "docusaurus"
+    paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
+    return set([pathlib.Path(p) for p in paths])
+
+
 def _default_code_paths() -> Set[pathlib.Path]:
     """All gx modules related to the main library."""
     base_directory = _repo_root() / "great_expectations"
     paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
     return set([pathlib.Path(p).relative_to(_repo_root()) for p in paths])
+
+
+def _default_code_absolute_paths() -> Set[pathlib.Path]:
+    """All gx modules related to the main library."""
+    base_directory = _repo_root() / "great_expectations"
+    paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
+    return set([pathlib.Path(p) for p in paths])
 
 
 def _parse_file_to_ast_tree(filepath: pathlib.Path) -> ast.AST:
@@ -701,8 +736,14 @@ def _parse_file_to_ast_tree(filepath: pathlib.Path) -> ast.AST:
 
 def main():
 
+    docs_example_file_contents = set([FileContents.create_from_local_file(filepath) for filepath in _default_doc_example_absolute_paths()])
+
+    code_file_contents = [FileContents.create_from_local_file(filepath) for filepath in
+                     _default_code_absolute_paths()]
+
+
     docs_example_parser = DocsExampleParser(
-        repo_root=_repo_root(), paths=_default_doc_example_paths()
+        repo_root=_repo_root(), paths=_default_doc_example_paths(), docs_examples=docs_example_file_contents
     )
 
     code_parser = CodeParser(
