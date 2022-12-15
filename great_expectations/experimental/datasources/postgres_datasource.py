@@ -44,7 +44,7 @@ class ColumnSplitter:
 
 @pydantic_dc.dataclass(frozen=True)
 class SqlYearMonthSplitter(ColumnSplitter):
-    method_name: str = "split_on_year_and_month"
+    method_name: Literal["split_on_year_and_month"] = "split_on_year_and_month"
     param_names: List[str] = pydantic.Field(default_factory=lambda: ["year", "month"])
 
     def param_defaults(self, data_asset: DataAsset) -> Dict[str, List]:
@@ -115,7 +115,7 @@ class TableAsset(DataAsset):
     # Instance fields
     type: Literal["table"] = "table"
     table_name: str
-    column_splitter: Optional[ColumnSplitter] = None
+    column_splitter: Optional[Union[SqlYearMonthSplitter, ColumnSplitter]] = None
     name: str
     order_by: List[BatchSorter] = Field(default_factory=list)
 
