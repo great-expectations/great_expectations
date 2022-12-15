@@ -6,6 +6,7 @@ from typing import (
     Any,
     Dict,
     Generic,
+    List,
     Optional,
     Type,
     TypeVar,
@@ -25,8 +26,8 @@ if TYPE_CHECKING:
     from pydantic.typing import AbstractSetIntStr, DictStrAny, MappingIntStrAny
 
 
-class ParamSchemaType(str, Enum):
-    """schema_type passed to RendererConfiguration.add_param()"""
+class RendererSchemaType(str, Enum):
+    """Type used in renderer json schema dictionary."""
 
     STRING = "string"
     NUMBER = "number"
@@ -86,6 +87,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     styling: Optional[dict] = Field(None, allow_mutation=False)
     params: RendererParams = Field(..., allow_mutation=True)
     template_str: str = Field("", allow_mutation=True)
+    header_row: List[Dict[str, Optional[Any]]] = Field([], allow_mutation=True)
+    table: List[List[Dict[str, Optional[Any]]]] = Field([], allow_mutation=True)
+    graph: dict = Field({}, allow_mutation=True)
 
     class Config:
         validate_assignment = True
@@ -127,7 +131,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         return kwargs
 
     class _RendererParamBase(BaseModel):
-        renderer_schema: Optional[ParamSchemaType] = Field(..., allow_mutation=False)
+        renderer_schema: Optional[RendererSchemaType] = Field(..., allow_mutation=False)
         value: Optional[Any] = Field(..., allow_mutation=False)
 
         class Config:
@@ -145,14 +149,14 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     def add_param(
         self,
         name: str,
-        schema_type: Union[ParamSchemaType, str],
+        schema_type: Union[RendererSchemaType, str],
         value: Optional[Any] = None,
     ) -> None:
         """Adds a param that can be substituted into a template string during rendering.
 
         Attributes:
             name (str): A name for the attribute to be added to this RendererConfiguration instance.
-            schema_type (ParamSchemaType or string): The type of value being substituted. One of:
+            schema_type (RendererSchemaType or string): The type of value being substituted. One of:
                 - string
                 - number
                 - boolean
@@ -167,7 +171,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         renderer_param: Type[BaseModel] = create_model(
             name,
             renderer_schema=(
-                Dict[str, Optional[ParamSchemaType]],
+                Dict[str, Optional[RendererSchemaType]],
                 Field(..., alias="schema"),
             ),
             value=(Union[Any, None], ...),
