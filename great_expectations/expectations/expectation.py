@@ -2613,13 +2613,15 @@ class ColumnMapExpectation(TableExpectation, ABC):
             configuration=configuration, runtime_configuration=runtime_configuration
         )
 
-        unexpected_index_column_names: Union[str, None]
+        unexpected_index_column_names: Union[str, None] = None
+        include_unexpected_rows: bool = False
+
         if isinstance(result_format, dict):
             include_unexpected_rows = result_format.get(
                 "include_unexpected_rows", False
             )
             unexpected_index_column_names = result_format.get(
-                "unexpected_index_column_names"
+                "unexpected_index_column_names", None
             )
 
         total_count: Optional[int] = metrics.get("table.row_count")
