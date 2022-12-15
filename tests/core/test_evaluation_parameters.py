@@ -2,7 +2,7 @@ import math
 from datetime import datetime, timedelta
 from timeit import timeit
 
-import pandas
+import dateutil
 import pandas as pd
 import pytest
 
@@ -203,7 +203,9 @@ def test_temporal_evaluation_parameters():
     now = datetime.now()
     assert (
         (now - timedelta(weeks=1, seconds=3))
-        < parse_evaluation_parameter("now() - timedelta(weeks=1, seconds=2)")
+        < dateutil.parser.parse(
+            parse_evaluation_parameter("now() - timedelta(weeks=1, seconds=2)")
+        )
         < now - timedelta(weeks=1, seconds=1)
     )
 
@@ -215,7 +217,9 @@ def test_temporal_evaluation_parameters_complex():
     # Choosing "2*3" == 6 weeks shows we can parse an expression inside a kwarg.
     assert (
         (now - timedelta(weeks=2 * 3, seconds=3))
-        < parse_evaluation_parameter("now() - timedelta(weeks=2*3, seconds=2)")
+        < dateutil.parser.parse(
+            parse_evaluation_parameter("now() - timedelta(weeks=2*3, seconds=2)")
+        )
         < now - timedelta(weeks=2 * 3, seconds=1)
     )
 
@@ -336,7 +340,7 @@ def test_deduplicate_evaluation_parameter_dependencies():
             ),
         ),
         (
-            pandas.DataFrame(
+            pd.DataFrame(
                 {
                     "my_date": [
                         datetime(year=2017, month=1, day=1),
@@ -361,14 +365,14 @@ def test_deduplicate_evaluation_parameter_dependencies():
                     expectation_type="expect_column_values_to_be_between",
                     kwargs={
                         "column": "my_date",
-                        "min_value": datetime(2016, 12, 10),
-                        "max_value": datetime(2022, 12, 6),
+                        "min_value": "2016-12-10T00:00:00",
+                        "max_value": "2022-12-06T00:00:00",
                         "batch_id": "15fe04adb6ff20b9fc6eda486b7a36b7",
                     },
                     meta={
                         "substituted_parameters": {
-                            "min_value": datetime(2016, 12, 10),
-                            "max_value": datetime(2022, 12, 6),
+                            "min_value": "2016-12-10T00:00:00",
+                            "max_value": "2022-12-06T00:00:00",
                         }
                     },
                     ge_cloud_id=None,
@@ -443,11 +447,15 @@ def test_now_evaluation_parameter():
     """
     # By itself
     res = parse_evaluation_parameter("now()")
-    assert isinstance(res, datetime), "Parsed evaluation parameter is not a datetime"
+    assert dateutil.parser.parse(
+        res
+    ), "Provided evaluation parameter is not dateutil-parseable"
 
     # In conjunction with timedelta
     res = parse_evaluation_parameter("now() - timedelta(weeks=1)")
-    assert isinstance(res, datetime), "Parsed evaluation parameter is not a datetime"
+    assert dateutil.parser.parse(
+        res
+    ), "Provided evaluation parameter is not dateutil-parseable"
 
     # Require parens to actually invoke
     with pytest.raises(EvaluationParameterError):

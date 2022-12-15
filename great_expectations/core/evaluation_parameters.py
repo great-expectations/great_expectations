@@ -413,8 +413,7 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
 
     try:
         result = EXPR.evaluate_stack(EXPR.exprStack)
-        if not isinstance(result, datetime.datetime):
-            result = convert_to_json_serializable(result)
+        result = convert_to_json_serializable(result)
     except Exception as e:
         exception_traceback = traceback.format_exc()
         exception_message = (

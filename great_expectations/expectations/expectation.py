@@ -2128,7 +2128,7 @@ class TableExpectation(Expectation, ABC):
             assert (
                 min_val is None
                 or is_parseable_date(min_val)
-                or isinstance(min_val, (float, int, dict, datetime.datetime))
+                or isinstance(min_val, (float, int, dict))
             ), "Provided min threshold must be a datetime (for datetime columns) or number"
             if isinstance(min_val, dict):
                 assert (
@@ -2138,7 +2138,7 @@ class TableExpectation(Expectation, ABC):
             assert (
                 max_val is None
                 or is_parseable_date(max_val)
-                or isinstance(max_val, (float, int, dict, datetime.datetime))
+                or isinstance(max_val, (float, int, dict))
             ), "Provided max threshold must be a datetime (for datetime columns) or number"
             if isinstance(max_val, dict):
                 assert (
