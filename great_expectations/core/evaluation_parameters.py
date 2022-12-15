@@ -31,7 +31,7 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import EvaluationParameterError
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import DataContext
+    from great_expectations.data_context import AbstractDataContext
 
 logger = logging.getLogger(__name__)
 _epsilon = 1e-12
@@ -313,7 +313,7 @@ def find_evaluation_parameter_dependencies(parameter_expression):
 def parse_evaluation_parameter(  # noqa: C901 - complexity 19
     parameter_expression: str,
     evaluation_parameters: Optional[Dict[str, Any]] = None,
-    data_context: Optional[DataContext] = None,
+    data_context: Optional[AbstractDataContext] = None,
 ) -> Any:
     """Use the provided evaluation_parameters dict to parse a given parameter expression.
 

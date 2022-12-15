@@ -1,6 +1,6 @@
 import logging
 import pathlib
-from typing import Optional
+from typing import Optional, cast
 
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
@@ -123,7 +123,7 @@ class FileDataContext(SerializableDataContext):
     def _load_file_backed_project_config(
         cls,
         context_root_directory: str,
-    ):
+    ) -> DataContextConfig:
         path_to_yml = pathlib.Path(context_root_directory, cls.GX_YML)
         try:
             with open(path_to_yml) as data:
@@ -143,8 +143,11 @@ class FileDataContext(SerializableDataContext):
             raise gx_exceptions.ConfigNotFoundError()
 
         try:
-            return DataContextConfig.from_commented_map(
-                commented_map=config_commented_map_from_yaml
+            return cast(
+                DataContextConfig,
+                DataContextConfig.from_commented_map(
+                    commented_map=config_commented_map_from_yaml
+                ),
             )
         except gx_exceptions.InvalidDataContextConfigError:
             # Just to be explicit about what we intended to catch

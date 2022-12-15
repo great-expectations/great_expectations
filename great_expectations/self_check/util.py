@@ -1617,7 +1617,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
     if context is None:
-        context = build_in_memory_runtime_context()  # type: ignore[assignment]
+        context = build_in_memory_runtime_context()
 
     assert (
         context is not None
@@ -1722,7 +1722,7 @@ def build_spark_validator_with_data(
     )
 
     if context is None:
-        context = build_in_memory_runtime_context()  # type: ignore[assignment]
+        context = build_in_memory_runtime_context()
 
     return Validator(
         execution_engine=execution_engine,
