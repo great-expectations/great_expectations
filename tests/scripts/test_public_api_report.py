@@ -95,7 +95,7 @@ class ExampleClass:
     @public_api
     def example_public_api_method(self):
         pass
-        
+
     def example_no_usages_in_sample_docs_example_python_file_string():
         pass
 
@@ -184,18 +184,20 @@ class TestDocExampleParser:
     def test_retrieve_all_usages_in_files(self, docs_example_parser: DocsExampleParser):
 
         usages = docs_example_parser.retrieve_all_usages_in_docs_example_files()
-        assert usages == {'ExampleClass',
- 'ExamplePublicAPIClass',
- 'example_classmethod',
- 'example_method',
- 'example_method_with_args',
- 'example_module_level_function',
- 'example_multiple_decorator_public_method',
- 'example_public_api_method',
- 'example_public_api_module_level_function',
- 'example_public_classmethod',
- 'example_public_staticmethod',
- 'example_staticmethod'}
+        assert usages == {
+            "ExampleClass",
+            "ExamplePublicAPIClass",
+            "example_classmethod",
+            "example_method",
+            "example_method_with_args",
+            "example_module_level_function",
+            "example_multiple_decorator_public_method",
+            "example_public_api_method",
+            "example_public_api_module_level_function",
+            "example_public_classmethod",
+            "example_public_staticmethod",
+            "example_staticmethod",
+        }
 
 
 @pytest.fixture
@@ -210,22 +212,24 @@ class TestCodeParser:
 
     def test_get_all_class_method_and_function_names(self, code_parser: CodeParser):
         names = code_parser.get_all_class_method_and_function_names()
-        assert names == {'ExampleClass',
- 'ExamplePublicAPIClass',
- '__init__',
- '_example_private_method',
- '_example_private_module_level_function',
- 'example_classmethod',
- 'example_method',
- 'example_method_with_args',
- 'example_module_level_function',
- 'example_multiple_decorator_public_method',
- 'example_no_usages_in_sample_docs_example_python_file_string',
- 'example_public_api_method',
- 'example_public_api_module_level_function',
- 'example_public_classmethod',
- 'example_public_staticmethod',
- 'example_staticmethod'}
+        assert names == {
+            "ExampleClass",
+            "ExamplePublicAPIClass",
+            "__init__",
+            "_example_private_method",
+            "_example_private_module_level_function",
+            "example_classmethod",
+            "example_method",
+            "example_method_with_args",
+            "example_module_level_function",
+            "example_multiple_decorator_public_method",
+            "example_no_usages_in_sample_docs_example_python_file_string",
+            "example_public_api_method",
+            "example_public_api_module_level_function",
+            "example_public_classmethod",
+            "example_public_staticmethod",
+            "example_staticmethod",
+        }
 
     def test_get_all_class_method_and_function_definitions(
         self, code_parser: CodeParser
@@ -233,22 +237,24 @@ class TestCodeParser:
         definitions = code_parser.get_all_class_method_and_function_definitions()
 
         assert len(definitions) == 16
-        assert {d.name for d in definitions} == {'ExampleClass',
- 'ExamplePublicAPIClass',
- '__init__',
- '_example_private_method',
- '_example_private_module_level_function',
- 'example_classmethod',
- 'example_method',
- 'example_method_with_args',
- 'example_module_level_function',
- 'example_multiple_decorator_public_method',
- 'example_no_usages_in_sample_docs_example_python_file_string',
- 'example_public_api_method',
- 'example_public_api_module_level_function',
- 'example_public_classmethod',
- 'example_public_staticmethod',
- 'example_staticmethod'}
+        assert {d.name for d in definitions} == {
+            "ExampleClass",
+            "ExamplePublicAPIClass",
+            "__init__",
+            "_example_private_method",
+            "_example_private_module_level_function",
+            "example_classmethod",
+            "example_method",
+            "example_method_with_args",
+            "example_module_level_function",
+            "example_multiple_decorator_public_method",
+            "example_no_usages_in_sample_docs_example_python_file_string",
+            "example_public_api_method",
+            "example_public_api_module_level_function",
+            "example_public_classmethod",
+            "example_public_staticmethod",
+            "example_staticmethod",
+        }
         assert {d.filepath for d in definitions} == {
             pathlib.Path(
                 "great_expectations/sample_with_definitions_python_file_string.py"

@@ -514,9 +514,7 @@ class CodeReferenceFilter:
     def _filter_private_methods_and_classes(
         self, definitions: Set[Definition]
     ) -> Set[Definition]:
-        return {
-            d for d in definitions if not self._is_definition_private(definition=d)
-        }
+        return {d for d in definitions if not self._is_definition_private(definition=d)}
 
     def _filter_or_include(self, definitions: Set[Definition]) -> Set[Definition]:
         included_definitions: List[Definition] = []
