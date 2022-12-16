@@ -643,25 +643,11 @@ def _repo_root() -> pathlib.Path:
     return pathlib.Path(__file__).parent.parent
 
 
-def _default_doc_example_paths() -> Set[pathlib.Path]:
-    """Get all paths of doc examples (docs examples)."""
-    base_directory = _repo_root() / "tests" / "integration" / "docusaurus"
-    paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
-    return {pathlib.Path(p).relative_to(_repo_root()) for p in paths}
-
-
 def _default_doc_example_absolute_paths() -> Set[pathlib.Path]:
     """Get all paths of doc examples (docs examples)."""
     base_directory = _repo_root() / "tests" / "integration" / "docusaurus"
     paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
     return {pathlib.Path(p) for p in paths}
-
-
-def _default_code_paths() -> Set[pathlib.Path]:
-    """All gx modules related to the main library."""
-    base_directory = _repo_root() / "great_expectations"
-    paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
-    return {pathlib.Path(p).relative_to(_repo_root()) for p in paths}
 
 
 def _default_code_absolute_paths() -> Set[pathlib.Path]:
@@ -704,8 +690,6 @@ def main():
     )
 
     filtered_definitions = code_reference_filter.filter_definitions()
-
-    # TODO: Filter here also for those not marked public_api
 
     public_api_report = PublicAPIReport(definitions=filtered_definitions)
 
