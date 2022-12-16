@@ -320,6 +320,76 @@ class CodeParser:
         return function_definitions
 
 
+# TODO: Make this functional:
+class PublicAPIChecker:
+    """Check if functions, methods and classes are marked part of the PublicAPI."""
+
+    def __init__(
+        self,
+        docs_example_parser: DocsExampleParser,
+        code_parser: CodeParser,
+    ) -> None:
+        self.repo_root = _repo_root()  # TODO: REMOVE
+        self.docs_example_parser = docs_example_parser
+        self.code_parser = code_parser
+
+    def code_definitions_appearing_in_docs_examples_and_not_marked_public_api(
+        self,
+    ) -> Set[Definition]:
+        code_definitions_appearing_in_docs_examples = (
+            self.code_definitions_appearing_in_docs_examples()
+        )
+        return set(
+            [
+                d
+                for d in code_definitions_appearing_in_docs_examples
+                if not self._is_definition_marked_public_api(d.ast_definition)
+            ]
+        )
+
+    def _is_definition_marked_public_api(
+        self, definition: Definition
+    ) -> bool:
+
+        result = False
+        found_decorators = self._get_decorator_names(ast_definition=definition.ast_definition)
+
+        if public_api.__name__ in found_decorators:
+            result = True
+
+        return result
+
+    def _get_decorator_names(
+        self, ast_definition: Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]
+    ) -> Set[str]:
+        def flatten_attr(node):
+            if isinstance(node, ast.Attribute):
+                return str(flatten_attr(node.value)) + "." + node.attr
+            elif isinstance(node, ast.Name):
+                return str(node.id)
+            else:
+                pass
+
+        found_decorators = []
+        for decorator in ast_definition.decorator_list:
+            if isinstance(decorator, ast.Name):
+                found_decorators.append(decorator.id)
+            elif isinstance(decorator, ast.Attribute):
+                found_decorators.append(flatten_attr(decorator))
+
+        return set(found_decorators)
+
+    def get_all_public_api_definitions(self) -> Set[Definition]:
+
+        definitions: List[Definition] = []
+
+        for definition in self.code_parser.get_all_class_method_and_function_definitions():
+            if self._is_definition_marked_public_api(definition):
+                definitions.append(definition)
+
+        return set(definitions)
+
+
 class CodeReferenceFilter:
     DEFAULT_INCLUDES: List[IncludeExcludeDefinition] = [
         IncludeExcludeDefinition(
@@ -352,9 +422,9 @@ class CodeReferenceFilter:
 
     def __init__(
         self,
-
         docs_example_parser: DocsExampleParser,
         code_parser: CodeParser,
+        public_api_checker: PublicAPIChecker,
         excludes: Union[List[IncludeExcludeDefinition], None] = None,
         includes: Union[List[IncludeExcludeDefinition], None] = None,
     ) -> None:
@@ -363,12 +433,14 @@ class CodeReferenceFilter:
         Args:
             docs_example_parser:
             code_parser:
+            public_api_checker:
             excludes:
             includes:
         """
 
         self.docs_example_parser = docs_example_parser
         self.code_parser = code_parser
+        self.public_api_checker = public_api_checker
 
         if not excludes:
             self.excludes = self.DEFAULT_EXCLUDES
@@ -379,6 +451,8 @@ class CodeReferenceFilter:
             self.includes = self.DEFAULT_INCLUDES
         else:
             self.includes = includes
+
+    # TODO: Create methods for including public_api_checker or not
 
     def filter_definitions(self) -> Set[Definition]:
         """Main method."""
@@ -507,103 +581,7 @@ class CodeReferenceFilter:
 
 
 
-# TODO: Make this functional:
-class PublicAPIChecker:
-    """Check if functions, methods and classes are marked part of the PublicAPI."""
 
-    def __init__(
-        self,
-        docs_example_parser: DocsExampleParser,
-        code_parser: CodeParser,
-    ) -> None:
-        self.repo_root = _repo_root()  # TODO: REMOVE
-        self.docs_example_parser = docs_example_parser
-        self.code_parser = code_parser
-
-    def code_definitions_appearing_in_docs_examples_and_not_marked_public_api(
-        self,
-    ) -> Set[Definition]:
-        code_definitions_appearing_in_docs_examples = (
-            self.code_definitions_appearing_in_docs_examples()
-        )
-        return set(
-            [
-                d
-                for d in code_definitions_appearing_in_docs_examples
-                if not self._is_definition_marked_public_api(d.ast_definition)
-            ]
-        )
-
-    def _is_definition_marked_public_api(
-        self, definition: Definition
-    ) -> bool:
-
-        result = False
-        found_decorators = self._get_decorator_names(ast_definition=definition.ast_definition)
-
-        if public_api.__name__ in found_decorators:
-            result = True
-
-        return result
-
-    def _get_decorator_names(
-        self, ast_definition: Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]
-    ) -> Set[str]:
-        def flatten_attr(node):
-            if isinstance(node, ast.Attribute):
-                return str(flatten_attr(node.value)) + "." + node.attr
-            elif isinstance(node, ast.Name):
-                return str(node.id)
-            else:
-                pass
-
-        found_decorators = []
-        for decorator in ast_definition.decorator_list:
-            if isinstance(decorator, ast.Name):
-                found_decorators.append(decorator.id)
-            elif isinstance(decorator, ast.Attribute):
-                found_decorators.append(flatten_attr(decorator))
-
-        return set(found_decorators)
-
-    def get_all_public_api_definitions(self) -> Set[Definition]:
-
-        definitions: List[Definition] = []
-
-        for definition in self.code_parser.get_all_class_method_and_function_definitions():
-            if self._is_definition_marked_public_api(definition):
-                definitions.append(definition)
-
-        return set(definitions)
-
-    # def _get_public_function_definitions(self, file_contents: FileContents) -> List[str]:
-    #     # TODO: Make this return function with dotted path, not just str
-    #
-    #     tree = ast.parse(file_contents)
-    #
-    #     def flatten_attr(node):
-    #         if isinstance(node, ast.Attribute):
-    #             return str(flatten_attr(node.value)) + "." + node.attr
-    #         elif isinstance(node, ast.Name):
-    #             return str(node.id)
-    #         else:
-    #             pass
-    #
-    #     public_functions: List[str] = []
-    #
-    #     for node in ast.walk(tree):
-    #         if isinstance(node, ast.FunctionDef):
-    #             found_decorators = []
-    #             for decorator in node.decorator_list:
-    #                 if isinstance(decorator, ast.Name):
-    #                     found_decorators.append(decorator.id)
-    #                 elif isinstance(decorator, ast.Attribute):
-    #                     found_decorators.append(flatten_attr(decorator))
-    #
-    #             if "public_api" in found_decorators:
-    #                 public_functions.append(node.name)
-    #
-    #     return public_functions
 
 
 class PublicAPIReport:
