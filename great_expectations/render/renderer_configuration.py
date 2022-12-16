@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from enum import Enum
+from numbers import Number
 from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
     Generic,
+    Iterable,
     List,
     Optional,
     Type,
@@ -14,13 +16,14 @@ from typing import (
     cast,
 )
 
-from pydantic import BaseModel, Field, create_model
+from pydantic import BaseModel, Field, create_model, root_validator
 from pydantic.generics import GenericModel
 
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.render.exceptions import RendererConfigurationError
 
 if TYPE_CHECKING:
     from pydantic.typing import AbstractSetIntStr, DictStrAny, MappingIntStrAny
@@ -84,7 +87,6 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     expectation_type: str = Field("", allow_mutation=False)
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
-    styling: Optional[dict] = Field(None, allow_mutation=False)
     params: RendererParams = Field(..., allow_mutation=True)
     template_str: str = Field("", allow_mutation=True)
     header_row: List[Dict[str, Optional[Any]]] = Field([], allow_mutation=True)
@@ -95,48 +97,80 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         validate_assignment = True
         arbitrary_types_allowed = True
 
-    def __init__(self, **kwargs) -> None:
-        kwargs = RendererConfiguration._set_expectation_type_and_kwargs(kwargs=kwargs)
-        kwargs = RendererConfiguration._set_include_column_name_and_styling(
-            kwargs=kwargs
-        )
-        kwargs["params"] = _RendererParamsBase()
-        super().__init__(**kwargs)
-
-    @staticmethod
-    def _set_expectation_type_and_kwargs(kwargs: dict) -> dict:
-        if "configuration" in kwargs and kwargs["configuration"]:
-            kwargs["expectation_type"] = kwargs["configuration"].expectation_type
-            kwargs["kwargs"] = kwargs["configuration"].kwargs
-        elif (
-            "result" in kwargs
-            and kwargs["result"]
-            and kwargs["result"].expectation_config
+    @root_validator(pre=True)
+    def _validate_configuration_or_result(cls, values: dict) -> dict:
+        if ("configuration" not in values or values["configuration"] is None) and (
+            "result" not in values or values["result"] is None
         ):
-            kwargs["expectation_type"] = kwargs[
+            raise RendererConfigurationError(
+                "RendererConfiguration must be passed either configuration or result."
+            )
+        return values
+
+    @root_validator()
+    def _validate_for_expectation_type_and_kwargs(cls, values: dict) -> dict:
+        if (
+            "result" in values
+            and values["result"] is not None
+            and values["result"].expectation_config is not None
+        ):
+            values["expectation_type"] = values[
                 "result"
             ].expectation_config.expectation_type
-            kwargs["kwargs"] = kwargs["result"].expectation_config.kwargs
-        return kwargs
+            values["kwargs"] = values["result"].expectation_config.kwargs
+        else:
+            values["expectation_type"] = values["configuration"].expectation_type
+            values["kwargs"] = values["configuration"].kwargs
+        return values
 
-    @staticmethod
-    def _set_include_column_name_and_styling(kwargs: dict) -> dict:
-        if "runtime_configuration" in kwargs and kwargs["runtime_configuration"]:
-            kwargs["include_column_name"] = (
+    @root_validator()
+    def _validate_for_include_column_name(cls, values: dict) -> dict:
+        if "runtime_configuration" in values and values["runtime_configuration"]:
+            values["include_column_name"] = (
                 False
-                if kwargs["runtime_configuration"].get("include_column_name") is False
+                if values["runtime_configuration"].get("include_column_name") is False
                 else True
             )
-            kwargs["styling"] = kwargs["runtime_configuration"].get("styling")
-        return kwargs
+        return values
+
+    def __init__(self, **values) -> None:
+        values["params"] = _RendererParamsBase()
+        super().__init__(**values)
 
     class _RendererParamBase(BaseModel):
-        renderer_schema: Optional[RendererSchemaType] = Field(..., allow_mutation=False)
-        value: Optional[Any] = Field(..., allow_mutation=False)
+        renderer_schema: RendererSchemaType = Field(..., allow_mutation=False)
+        value: Any = Field(..., allow_mutation=False)
 
         class Config:
             validate_assignment = True
             arbitrary_types_allowed = True
+
+        @root_validator()
+        def _validate_schema_matches_value(cls, values: dict) -> dict:
+            schema_type: RendererSchemaType = values["renderer_schema"]["type"]
+            value: Any = values["value"]
+            if schema_type is RendererSchemaType.STRING:
+                try:
+                    str(value)
+                except Exception as e:
+                    raise RendererConfigurationError(
+                        f"Value was unable to be represented as a string: {str(e)}"
+                    )
+            else:
+                renderer_configuration_error = RendererConfigurationError(
+                    f"Param schema_type: <{schema_type}> does "
+                    f"not match value: <{value}>."
+                )
+                if schema_type is RendererSchemaType.NUMBER:
+                    if not isinstance(value, Number):
+                        raise renderer_configuration_error
+                elif schema_type is RendererSchemaType.BOOLEAN:
+                    if value is not True and value is not False:
+                        raise renderer_configuration_error
+                else:
+                    if not isinstance(value, Iterable):
+                        raise renderer_configuration_error
+            return values
 
         def __eq__(self, other: Any) -> bool:
             if isinstance(other, BaseModel):

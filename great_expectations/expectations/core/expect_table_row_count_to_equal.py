@@ -126,7 +126,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
         runtime_configuration: Optional[dict] = None,
     ) -> List[RenderedStringTemplateContent]:
         renderer_configuration = RendererConfiguration(
-            configuraiton=configuration,
+            configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
         )
@@ -136,6 +136,10 @@ class ExpectTableRowCountToEqual(TableExpectation):
         )
         template_str = "Must have exactly $value rows."
 
+        styling = (
+            runtime_configuration.get("styling", {}) if runtime_configuration else {}
+        )
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -143,7 +147,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
                     "string_template": {
                         "template": template_str,
                         "params": params,
-                        "styling": renderer_configuration.styling,
+                        "styling": styling,
                     },
                 }
             )
