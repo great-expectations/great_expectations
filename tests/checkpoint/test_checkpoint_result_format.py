@@ -1,5 +1,5 @@
 import logging
-from typing import List, Union
+from typing import Any, Dict, List, Union
 
 import pandas as pd
 import pytest
@@ -193,6 +193,11 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
         checkpoint_name="my_checkpoint",
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+    index_column_names = evrs[0]["results"][0]["result"][
+        "unexpected_index_column_names"
+    ]
+    assert index_column_names == ["pk_1"]
+
     first_result_full_list = evrs[0]["results"][0]["result"]["unexpected_index_list"]
     assert first_result_full_list == [
         {"pk_1": 3, "animals": "giraffe"},
@@ -237,13 +242,21 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
         checkpoint_name="my_checkpoint", result_format=result_format
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
-    first_result_full_list = evrs[0]["results"][0]["result"]["unexpected_index_list"]
+
+    index_column_names: List[str] = evrs[0]["results"][0]["result"][
+        "unexpected_index_column_names"
+    ]
+    assert index_column_names == ["pk_1"]
+
+    first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
+        "unexpected_index_list"
+    ]
     assert first_result_full_list == [
         {"animals": "giraffe", "pk_1": 3},
         {"animals": "lion", "pk_1": 4},
         {"animals": "zebra", "pk_1": 5},
     ]
-    first_result_partial_list = evrs[0]["results"][0]["result"][
+    first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
         "partial_unexpected_index_list"
     ]
     assert first_result_partial_list == [
@@ -279,7 +292,13 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
         checkpoint_name="my_checkpoint", result_format=result_format
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
-    first_result_partial_list = evrs[0]["results"][0]["result"][
+
+    index_column_names: List[str] = evrs[0]["results"][0]["result"][
+        "unexpected_index_column_names"
+    ]
+    assert index_column_names == ["pk_1"]
+
+    first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
         "partial_unexpected_index_list"
     ]
     assert first_result_partial_list == [{"animals": "giraffe", "pk_1": 3}]
@@ -351,15 +370,22 @@ def test_sql_result_format_in_checkpoint_pk_defined_two_expectation_complete_out
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
 
+    index_column_names: List[str] = evrs[0]["results"][0]["result"][
+        "unexpected_index_column_names"
+    ]
+    assert index_column_names == ["pk_1"]
+
     # first and second expectations have same results. Although one is "expect_to_be"
     # and the other is "expect_to_not_be", they have opposite value_sets
-    first_result_full_list = evrs[0]["results"][0]["result"]["unexpected_index_list"]
+    first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
+        "unexpected_index_list"
+    ]
     assert first_result_full_list == [
         {"animals": "giraffe", "pk_1": 3},
         {"animals": "lion", "pk_1": 4},
         {"animals": "zebra", "pk_1": 5},
     ]
-    first_result_partial_list = evrs[0]["results"][0]["result"][
+    first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
         "partial_unexpected_index_list"
     ]
     assert first_result_partial_list == [
@@ -368,13 +394,15 @@ def test_sql_result_format_in_checkpoint_pk_defined_two_expectation_complete_out
         {"animals": "zebra", "pk_1": 5},
     ]
 
-    second_result_full_list = evrs[0]["results"][1]["result"]["unexpected_index_list"]
+    second_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][1]["result"][
+        "unexpected_index_list"
+    ]
     assert second_result_full_list == [
         {"animals": "giraffe", "pk_1": 3},
         {"animals": "lion", "pk_1": 4},
         {"animals": "zebra", "pk_1": 5},
     ]
-    second_result_partial_list = evrs[0]["results"][1]["result"][
+    second_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][1]["result"][
         "partial_unexpected_index_list"
     ]
     assert second_result_partial_list == [
