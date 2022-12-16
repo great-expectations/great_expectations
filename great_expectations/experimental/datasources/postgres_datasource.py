@@ -4,7 +4,7 @@ import copy
 import dataclasses
 import itertools
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Type, Union, cast
 
 import pydantic
 from pydantic import Field
@@ -36,7 +36,7 @@ class BatchRequestError(Exception):
 class ColumnSplitter:
     column_name: str
     method_name: str
-    param_names: List[str]
+    param_names: Sequence[str]
 
     def param_defaults(self, data_asset: DataAsset) -> Dict[str, List]:
         raise NotImplementedError
