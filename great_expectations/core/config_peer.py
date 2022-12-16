@@ -49,18 +49,18 @@ class ConfigPeer(ABC):
 
         config: BaseYamlConfig = self.config
 
-        if mode is ConfigOutputModes.TYPED:
+        if mode == ConfigOutputModes.TYPED:
             return config
 
-        if mode is ConfigOutputModes.COMMENTED_MAP:
+        if mode == ConfigOutputModes.COMMENTED_MAP:
             return config.commented_map
 
-        if mode is ConfigOutputModes.YAML:
+        if mode == ConfigOutputModes.YAML:
             return config.to_yaml_str()
 
-        if mode is ConfigOutputModes.DICT:
+        if mode == ConfigOutputModes.DICT:
             config_kwargs: dict = config.to_dict()
-        elif mode is ConfigOutputModes.JSON_DICT:
+        elif mode == ConfigOutputModes.JSON_DICT:
             config_kwargs: dict = config.to_json_dict()  # type: ignore[no-redef]
         else:
             raise ValueError(f'Unknown mode {mode} in "BaseCheckpoint.get_config()".')
