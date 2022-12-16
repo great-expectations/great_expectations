@@ -58,10 +58,10 @@ class SerializableDataContext(AbstractDataContext):
         super().__init__(runtime_environment=runtime_environment)
 
     def _init_datasource_store(self):
-        pass
+        raise NotImplementedError  # Required by parent ABC but this class is never instantiated
 
     def _init_variables(self):
-        pass
+        raise NotImplementedError  # Required by parent ABC but this class is never instantiated
 
     def _save_project_config(self) -> None:
         """
@@ -69,9 +69,11 @@ class SerializableDataContext(AbstractDataContext):
 
         Explicitly override base class implementation to retain legacy behavior.
         """
-        logger.debug("Starting DataContext._save_project_config")
-
         config_filepath = os.path.join(self.root_directory, self.GX_YML)  # type: ignore[arg-type]
+
+        logger.debug(
+            f"Starting DataContext._save_project_config; attempting to update {config_filepath}"
+        )
 
         try:
             with open(config_filepath, "w") as outfile:
