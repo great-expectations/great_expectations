@@ -229,36 +229,38 @@ class DocsExampleParser:
 
 
 class CodeParser:
-    """"""
+    """Parse code for class, method and function definitions."""
 
     def __init__(
         self,
         file_contents: Set[FileContents],
     ) -> None:
-        """
+        """Create a CodeParser.
 
         Args:
-            file_contents:
+            file_contents: A set of FileContents objects to parse.
         """
         self.file_contents = file_contents
 
     def get_all_class_method_and_function_names(
         self,
     ) -> Set[str]:
+        """Get string names of all classes, methods and functions in all FileContents."""
         all_usages = set()
         for file_contents in self.file_contents:
-            file_usages = self._get_all_class_method_and_function_names(
+            usages = self._get_all_class_method_and_function_names_from_file_contents(
                 file_contents=file_contents
             )
-            all_usages |= file_usages
+            all_usages |= usages
         return all_usages
 
-    def _get_all_class_method_and_function_names(
+    def _get_all_class_method_and_function_names_from_file_contents(
         self, file_contents: FileContents
     ) -> Set[str]:
+        """Get string names of all classes, methods and functions in a single FileContents."""
         definitions: Set[
             Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]
-        ] = self._get_all_class_method_and_function_definitions_from_file(
+        ] = self._get_all_entity_definitions_from_file_contents(
             file_contents=file_contents
         )
 
@@ -267,45 +269,37 @@ class CodeParser:
     def get_all_class_method_and_function_definitions(
         self,
     ) -> Set[Definition]:
-        # TODO: add docstring
+        """Get Definition objects for all class, method and function definitions."""
         all_usages: Set[Definition] = set()
         for file_contents in self.file_contents:
 
-            file_usages = self._get_all_class_method_and_function_definitions_from_file(
+            entity_definitions = self._get_all_entity_definitions_from_file_contents(
                 file_contents=file_contents
             )
             all_usages |= self._build_file_usage_definitions(
-                filepath=file_contents.filepath, file_usages=file_usages
+                file_contents=file_contents, entity_definitions=entity_definitions
             )
         return all_usages
 
     def _build_file_usage_definitions(
-        self, filepath: pathlib.Path, file_usages
+        self, file_contents: FileContents, entity_definitions: Set[Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]]
     ) -> Set[Definition]:
-        # TODO: Add type info and docstring
+        """Build Definitions from FileContents."""
         file_usages_definitions: List[Definition] = []
-        for usage in file_usages:
+        for usage in entity_definitions:
             candidate_definition = Definition(
                 name=usage.name,
-                filepath=filepath,
+                filepath=file_contents.filepath,
                 ast_definition=usage,
             )
             file_usages_definitions.append(candidate_definition)
 
         return set(file_usages_definitions)
 
-    def _get_all_class_method_and_function_definitions_from_file(
+    def _get_all_entity_definitions_from_file_contents(
         self, file_contents: FileContents
     ) -> Set[Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]]:
-        """# TODO: Add type info and docstring
-
-        Args:
-            file_contents:
-
-        Returns:
-
-        """
-
+        """Parse FileContents to retrieve entity definitions as ast trees."""
         tree = ast.parse(file_contents.contents)
         all_defs: List[Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]] = []
         all_defs.extend(self._list_class_definitions(tree=tree))
@@ -314,6 +308,7 @@ class CodeParser:
         return set(all_defs)
 
     def _list_class_definitions(self, tree: ast.AST) -> List[ast.ClassDef]:
+        """List class definitions from an ast tree."""
 
         class_defs = []
 
@@ -326,6 +321,7 @@ class CodeParser:
     def _list_function_definitions(
         self, tree: ast.AST
     ) -> List[Union[ast.FunctionDef, ast.AsyncFunctionDef]]:
+        """List function definitions from an ast tree."""
         function_definitions = []
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef) or isinstance(
