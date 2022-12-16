@@ -175,9 +175,9 @@ class DocsExampleParser:
         for node in ast.walk(tree):
             node_is_imported_from_gx = isinstance(
                 node, ast.ImportFrom
-            ) and node.module.startswith(
+            ) and node.module.startswith(  # type: ignore[union-attr]
                 "great_expectations"
-            )  # type: ignore[union-attr]
+            )
             node_is_gx_import = isinstance(node, ast.Import) and any(
                 n.name.startswith("great_expectations") for n in node.names
             )
@@ -413,6 +413,7 @@ class CodeReferenceFilter:
             filepath=pathlib.Path("great_expectations/core/expectation_suite.py"),
         )
     ]
+
     DEFAULT_EXCLUDES: List[IncludeExcludeDefinition] = [
         IncludeExcludeDefinition(
             reason="Experimental is not part of the public API",
@@ -433,10 +434,19 @@ class CodeReferenceFilter:
             reason="Exclude code from __init__.py",
             filepath=pathlib.Path("great_expectations/types/__init__.py"),
         ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path("great_expectations/cli/v012/datasource.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path("great_expectations/cli/v012/toolkit.py"),
+        ),
     ]
 
     def __init__(
         self,
+        repo_root: pathlib.Path,
         docs_example_parser: DocsExampleParser,
         code_parser: CodeParser,
         public_api_checker: PublicAPIChecker,
@@ -446,6 +456,7 @@ class CodeReferenceFilter:
         """Create a CodeReferenceFilter.
 
         Args:
+            repo_root: Repository root directory, for use in creating relative paths.
             docs_example_parser: A DocsExampleParser initialized with the file
                 contents from all docs examples to process.
             code_parser: A CodeParser initialized with library code.
@@ -456,6 +467,7 @@ class CodeReferenceFilter:
                 IncludeExcludeDefinition instances. Note: Includes override
                 excludes if they are conflicting.
         """
+        self.repo_root = repo_root
         self.docs_example_parser = docs_example_parser
         self.code_parser = code_parser
         self.public_api_checker = public_api_checker
@@ -554,19 +566,21 @@ class CodeReferenceFilter:
             self.code_parser.get_all_class_method_and_function_definitions()
         )
         for definition in definitions:
+            definition_filepath = self._repo_relative_filepath(filepath=definition.filepath)
             exclude: bool = self._is_filepath_excluded(
-                definition.filepath
+                definition_filepath
             ) or self._is_definition_excluded(definition)
             include: bool = self._is_filepath_included(
-                definition.filepath
+                definition_filepath
             ) or self._is_definition_included(definition)
 
             if include or not exclude:
                 included_definitions.append(definition)
 
         for definition in all_gx_code_definitions:
+            definition_filepath = self._repo_relative_filepath(filepath=definition.filepath)
             include_from_all_gx_definitions: bool = self._is_filepath_included(
-                definition.filepath
+                definition_filepath
             ) or self._is_definition_included(definition)
             if (
                 include_from_all_gx_definitions
@@ -575,6 +589,12 @@ class CodeReferenceFilter:
                 included_definitions.append(definition)
 
         return set(included_definitions)
+
+    def _repo_relative_filepath(self, filepath: pathlib.Path) -> pathlib.Path:
+        if filepath.is_absolute():
+            return filepath.relative_to(self.repo_root)
+        else:
+            return filepath
 
     def _filter_for_definitions_not_marked_public_api(
         self, definitions: Set[Definition]
@@ -650,12 +670,9 @@ class PublicAPIReport:
             f.write("\n".join(printable_definitions))
 
     def generate_printable_definitions(
-        self, file_prefix_to_strip: str = "great_expectations/"
+        self,
     ) -> List[str]:
         """Generate a printable (human readable) definition.
-
-        Args:
-            file_prefix_to_strip: String to strip from the front of all filepaths if it exists.
 
         Returns:
             List of strings representing each Definition.
@@ -669,8 +686,6 @@ class PublicAPIReport:
                 filepath = str(definition.filepath.relative_to(self.repo_root))
             else:
                 filepath = str(definition.filepath)
-            if filepath.startswith(file_prefix_to_strip):
-                filepath = filepath[len(file_prefix_to_strip) :]
             sorted_definitions_strings.append(
                 f"File: {filepath} Name: {definition.name}"
             )
@@ -738,6 +753,7 @@ def main():
     )
 
     code_reference_filter = CodeReferenceFilter(
+        repo_root=_repo_root(),
         docs_example_parser=docs_example_parser,
         code_parser=code_parser,
         public_api_checker=public_api_checker,

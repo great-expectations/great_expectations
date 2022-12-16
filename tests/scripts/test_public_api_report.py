@@ -408,11 +408,13 @@ class ExampleClass:
 
 @pytest.fixture
 def code_reference_filter(
+    repo_root: pathlib.Path,
     docs_example_parser: DocsExampleParser,
     code_parser: CodeParser,
     public_api_checker: PublicAPIChecker,
 ) -> CodeReferenceFilter:
     return CodeReferenceFilter(
+        repo_root=repo_root,
         docs_example_parser=docs_example_parser,
         code_parser=code_parser,
         public_api_checker=public_api_checker,
@@ -421,11 +423,13 @@ def code_reference_filter(
 
 @pytest.fixture
 def code_reference_filter_with_non_default_include_exclude(
+    repo_root: pathlib.Path,
     docs_example_parser: DocsExampleParser,
     code_parser: CodeParser,
     public_api_checker: PublicAPIChecker,
 ) -> CodeReferenceFilter:
     return CodeReferenceFilter(
+        repo_root=repo_root,
         docs_example_parser=docs_example_parser,
         code_parser=code_parser,
         public_api_checker=public_api_checker,
@@ -444,11 +448,13 @@ def code_reference_filter_with_non_default_include_exclude(
 
 @pytest.fixture
 def code_reference_filter_with_no_include_exclude(
+    repo_root: pathlib.Path,
     docs_example_parser: DocsExampleParser,
     code_parser: CodeParser,
     public_api_checker: PublicAPIChecker,
 ) -> CodeReferenceFilter:
     return CodeReferenceFilter(
+        repo_root=repo_root,
         docs_example_parser=docs_example_parser,
         code_parser=code_parser,
         public_api_checker=public_api_checker,
@@ -459,11 +465,13 @@ def code_reference_filter_with_no_include_exclude(
 
 @pytest.fixture
 def code_reference_filter_with_exclude_by_file(
+    repo_root: pathlib.Path,
     docs_example_parser: DocsExampleParser,
     code_parser: CodeParser,
     public_api_checker: PublicAPIChecker,
 ) -> CodeReferenceFilter:
     return CodeReferenceFilter(
+        repo_root=repo_root,
         docs_example_parser=docs_example_parser,
         code_parser=code_parser,
         public_api_checker=public_api_checker,
@@ -481,11 +489,13 @@ def code_reference_filter_with_exclude_by_file(
 
 @pytest.fixture
 def code_reference_filter_with_exclude_by_file_and_name(
+    repo_root: pathlib.Path,
     docs_example_parser: DocsExampleParser,
     code_parser: CodeParser,
     public_api_checker: PublicAPIChecker,
 ) -> CodeReferenceFilter:
     return CodeReferenceFilter(
+        repo_root=repo_root,
         docs_example_parser=docs_example_parser,
         code_parser=code_parser,
         public_api_checker=public_api_checker,
@@ -511,11 +521,13 @@ def code_reference_filter_with_exclude_by_file_and_name(
 
 @pytest.fixture
 def code_reference_filter_with_include_by_file_and_name_already_included(
+    repo_root: pathlib.Path,
     docs_example_parser: DocsExampleParser,
     code_parser: CodeParser,
     public_api_checker: PublicAPIChecker,
 ) -> CodeReferenceFilter:
     return CodeReferenceFilter(
+        repo_root=repo_root,
         docs_example_parser=docs_example_parser,
         code_parser=code_parser,
         public_api_checker=public_api_checker,
@@ -541,11 +553,13 @@ def code_reference_filter_with_include_by_file_and_name_already_included(
 
 @pytest.fixture
 def code_reference_filter_with_include_by_file_and_name_already_excluded(
+    repo_root: pathlib.Path,
     docs_example_parser: DocsExampleParser,
     code_parser: CodeParser,
     public_api_checker: PublicAPIChecker,
 ) -> CodeReferenceFilter:
     return CodeReferenceFilter(
+        repo_root=repo_root,
         docs_example_parser=docs_example_parser,
         code_parser=code_parser,
         public_api_checker=public_api_checker,
@@ -707,10 +721,20 @@ class TestCodeReferenceFilter:
 @pytest.fixture
 def public_api_report(
     code_reference_filter_with_no_include_exclude: CodeReferenceFilter,
-    repo_root: pathlib.Path
+    repo_root: pathlib.Path,
 ) -> PublicAPIReport:
     return PublicAPIReport(
         definitions=code_reference_filter_with_no_include_exclude.filter_definitions(),
+        repo_root=repo_root,
+    )
+
+@pytest.fixture
+def public_api_report_filter_out_file(
+    code_reference_filter_with_exclude_by_file: CodeReferenceFilter,
+    repo_root: pathlib.Path,
+) -> PublicAPIReport:
+    return PublicAPIReport(
+        definitions=code_reference_filter_with_exclude_by_file.filter_definitions(),
         repo_root=repo_root,
     )
 
@@ -723,19 +747,30 @@ class TestPublicAPIReport:
     @pytest.mark.integration
     def test_generate_printable_definitions(self, public_api_report: PublicAPIReport):
         expected: List[str] = [
-            "File: sample_with_definitions_python_file_string.py Name: ExampleClass",
-            "File: sample_with_definitions_python_file_string.py Name: "
+            "File: great_expectations/sample_with_definitions_python_file_string.py Name: "
+            "ExampleClass",
+            "File: great_expectations/sample_with_definitions_python_file_string.py Name: "
             "example_classmethod",
-            "File: sample_with_definitions_python_file_string.py Name: example_method",
-            "File: sample_with_definitions_python_file_string.py Name: "
+            "File: great_expectations/sample_with_definitions_python_file_string.py Name: "
+            "example_method",
+            "File: great_expectations/sample_with_definitions_python_file_string.py Name: "
             "example_method_with_args",
-            "File: sample_with_definitions_python_file_string.py Name: "
+            "File: great_expectations/sample_with_definitions_python_file_string.py Name: "
             "example_module_level_function",
-            "File: sample_with_definitions_python_file_string.py Name: "
+            "File: great_expectations/sample_with_definitions_python_file_string.py Name: "
             "example_staticmethod",
         ]
         observed = public_api_report.generate_printable_definitions()
         assert observed == expected
+
+    @pytest.mark.integration
+    def test_generate_printable_definitions_exclude_by_file(self, public_api_report_filter_out_file: PublicAPIReport):
+        expected: List[str] = []
+        observed = public_api_report_filter_out_file.generate_printable_definitions()
+        assert observed == expected
+
+
+
 
 
 class TestIncludeExcludeDefinition:
