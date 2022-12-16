@@ -99,6 +99,7 @@ def test_load_config(inject_engine_lookup_double, load_method: Callable, input_)
         assert isinstance(datasource, Datasource)
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     ["bad_asset_config", "expected_error_loc", "expected_msg"],
     [
@@ -120,7 +121,22 @@ def test_load_config(inject_engine_lookup_double, load_method: Callable, input_)
             },
             ("datasources", "assets", "column_splitter", "method_name"),
             "unexpected value; permitted: 'split_on_year_and_month'",
-            id="bad splitter",
+            id="unknown splitter method",
+        ),
+        p(
+            {
+                "name": "bad splitter param",
+                "type": "table",
+                "table_name": "pool",
+                "column_splitter": {
+                    "method_name": "split_on_year_and_month",
+                    "column_name": "foo",
+                    "param_names": ["year", "month", "INVALID"],
+                },
+            },
+            ("datasources", "assets", "column_splitter", "param_names", 2),
+            "unexpected value; permitted: 'year', 'month'",
+            id="invalid splitter param_name",
         ),
     ],
 )
