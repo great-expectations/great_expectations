@@ -19,23 +19,23 @@ CodeParser.get_all_class_method_and_function_definitions()
 3. AST walk through full GX codebase to find all classes and method names from
     their definitions, and capture the definition file location.
 
+PublicAPIChecker
+4. Get list of classes & methods that are marked `public_api`.
+
 CodeReferenceFilter
 
-4. Filter list of classes & methods from docs examples to only those found in
+5. Filter list of classes & methods from docs examples to only those found in
     the GX codebase (e.g. filter out print() or other python or 3rd party
     classes/methods).
-5. Use this filtered list against the list of class and method definitions in
+6. Use this filtered list against the list of class and method definitions in
     the GX codebase to generate the full list with definition locations in the
     GX codebase.
-6. Filter out private methods and classes.
-7. Filter or include based on Include and Exclude directives (include overrides).
-
-PublicAPIChecker
-8. Optionally filter list of classes & methods to those not already
-    marked `public_api`.
+7. Filter out private methods and classes.
+8. Filter or include based on Include and Exclude directives (include overrides).
+9. Filter out methods that are not marked @public_api
 
 PublicAPIReport
-9. Generate report based on list of Definitions.
+10. Generate report based on list of Definitions.
 
 
 Typical usage example:
@@ -320,7 +320,6 @@ class CodeParser:
         return function_definitions
 
 
-# TODO: Make this functional:
 class PublicAPIChecker:
     """Check if functions, methods and classes are marked part of the PublicAPI."""
 
@@ -609,23 +608,25 @@ class PublicAPIReport:
         with open(filepath, "w") as f:
             f.write("\n".join(printable_definitions))
 
-    def generate_printable_definitions(self) -> List[str]:
+    def generate_printable_definitions(self, file_prefix_to_strip: str = "great_expectations/") -> List[str]:
         """
 
         Args:
-            definitions:
+            file_prefix_to_strip: String to strip from the front of all filepaths if it exists.
 
         Returns:
 
         """
-        # TODO: Strip leading /greatexpectations here, also make path non absolute if necessary
         sorted_definitions_list = sorted(
-            list(self.definitions), key=operator.attrgetter("filepath")
+            list(self.definitions), key=operator.attrgetter("filepath", "name")
         )
         sorted_definitions_strings: List[str] = []
         for definition in sorted_definitions_list:
+            filepath = str(definition.filepath)
+            if filepath.startswith(file_prefix_to_strip):
+                filepath = filepath[len(file_prefix_to_strip):]
             sorted_definitions_strings.append(
-                f"File: {str(definition.filepath)} Name: {definition.name}"
+                f"File: {filepath} Name: {definition.name}"
             )
 
         seen = set()
