@@ -2555,6 +2555,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
 
         if result_format_str in ["BASIC"]:
             return validation_dependencies
+
         # only for SUMMARY and COMPLETE
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
@@ -2614,7 +2615,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
         )
 
         unexpected_index_column_names: Union[str, int, None] = None
-        include_unexpected_rows: bool = False
 
         if isinstance(result_format, dict):
             include_unexpected_rows = result_format.get(
