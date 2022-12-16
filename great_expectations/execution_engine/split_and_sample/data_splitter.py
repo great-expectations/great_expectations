@@ -3,7 +3,7 @@ from __future__ import annotations
 import abc
 import datetime
 import enum
-from typing import Callable, List, Union
+from typing import Callable, List, Set, Union
 
 import ruamel
 from dateutil.parser import parse
@@ -66,6 +66,12 @@ class SplitterMethod(enum.Enum):
 
     def __hash__(self: SplitterMethod):
         return hash(self.value)
+
+    @classmethod
+    def members(cls) -> Set[SplitterMethod]:
+        """Returns a set of all the member values."""
+        # FIXME: before merge do this for real
+        return {cls.SPLIT_ON_COLUMN_VALUE, cls.SPLIT_ON_CONVERTED_DATETIME}
 
 
 class DataSplitter(abc.ABC):
