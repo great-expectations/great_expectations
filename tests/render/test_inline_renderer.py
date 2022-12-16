@@ -403,22 +403,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                                         "schema": {"type": "string"},
                                         "value": "user_id",
                                     },
-                                    "condition_parser": {
-                                        "schema": {"type": "string"},
-                                        "value": None,
-                                    },
-                                    "mostly": {
-                                        "schema": {"type": "number"},
-                                        "value": None,
-                                    },
-                                    "row_condition": {
-                                        "schema": {"type": "string"},
-                                        "value": None,
-                                    },
-                                    "threshold": {
-                                        "schema": {"type": "number"},
-                                        "value": None,
-                                    },
                                 },
                                 "template": "$column Kullback-Leibler (KL) "
                                 "divergence with respect to the "
@@ -456,7 +440,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 {
                     "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
                     "value": {
-                        "header": None,
                         "params": {},
                         "schema": {"type": "com.superconductive.rendered.string"},
                         "template": "0% unexpected",
@@ -466,15 +449,10 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 {
                     "name": AtomicPrescriptiveRendererType.SUMMARY,
                     "value": {
-                        "header": None,
                         "params": {
                             "column": {
                                 "schema": {"type": "string"},
                                 "value": "event_datetime",
-                            },
-                            "condition_parser": {
-                                "schema": {"type": "string"},
-                                "value": None,
                             },
                             "max_value": {
                                 "schema": {"type": "number"},
@@ -483,20 +461,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                             "min_value": {
                                 "schema": {"type": "number"},
                                 "value": {"$PARAMETER": "now() - timedelta(weeks=208)"},
-                            },
-                            "mostly": {"schema": {"type": "number"}, "value": None},
-                            "mostly_pct": {"schema": {"type": "string"}, "value": None},
-                            "row_condition": {
-                                "schema": {"type": "string"},
-                                "value": None,
-                            },
-                            "strict_max": {
-                                "schema": {"type": "boolean"},
-                                "value": None,
-                            },
-                            "strict_min": {
-                                "schema": {"type": "boolean"},
-                                "value": None,
                             },
                         },
                         "schema": {"type": "com.superconductive.rendered.string"},
@@ -564,7 +528,6 @@ def test_inline_renderer_expectation_validation_result_serialization(
                     "value_type": "StringValueType",
                     "name": AtomicPrescriptiveRendererType.SUMMARY,
                     "value": {
-                        "header": None,
                         "template": "Must have exactly $value rows.",
                         "schema": {"type": "com.superconductive.rendered.string"},
                         "params": {
@@ -584,7 +547,6 @@ def test_inline_renderer_expectation_validation_result_serialization(
                 {
                     "name": AtomicPrescriptiveRendererType.SUMMARY,
                     "value": {
-                        "header": None,
                         "params": {
                             "column": {
                                 "schema": {"type": "string"},
@@ -764,15 +726,10 @@ def test_inline_renderer_expectation_validation_result_serialization(
                 {
                     "name": AtomicPrescriptiveRendererType.SUMMARY,
                     "value": {
-                        "header": None,
                         "params": {
                             "column": {
                                 "schema": {"type": "string"},
                                 "value": "event_datetime",
-                            },
-                            "condition_parser": {
-                                "schema": {"type": "string"},
-                                "value": None,
                             },
                             "max_value": {
                                 "schema": {"type": "number"},
@@ -781,20 +738,6 @@ def test_inline_renderer_expectation_validation_result_serialization(
                             "min_value": {
                                 "schema": {"type": "number"},
                                 "value": {"$PARAMETER": "now() - timedelta(weeks=208)"},
-                            },
-                            "mostly": {"schema": {"type": "number"}, "value": None},
-                            "mostly_pct": {"schema": {"type": "string"}, "value": None},
-                            "row_condition": {
-                                "schema": {"type": "string"},
-                                "value": None,
-                            },
-                            "strict_max": {
-                                "schema": {"type": "boolean"},
-                                "value": None,
-                            },
-                            "strict_min": {
-                                "schema": {"type": "boolean"},
-                                "value": None,
                             },
                         },
                         "schema": {"type": "com.superconductive.rendered.string"},
