@@ -45,7 +45,7 @@ class ColumnValuesToBeValidIban(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidIban(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid IBAN format."""
+    """Expect column values to be valid IBAN format."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

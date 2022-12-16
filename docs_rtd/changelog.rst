@@ -4,7 +4,68 @@
 Changelog
 #########
 
-0.15.37
+0.15.41
+-----------------
+* [FEATURE] enable mostly for expect_compound_columns_to_be_unique (#6533) (thanks @kimfrie)
+* [BUGFIX] Return unique list of batch_definitions (#6579) (thanks @tanelk)
+* [BUGFIX] convert_to_json_serializable does not accept numpy datetime (#6553) (thanks @tmilitino)
+* [DOCS] Clean up misc snippet violations (#6582)
+* [MAINTENANCE] Update json schema validation on usage stats to filter based on format. (#6502)
+* [MAINTENANCE] Renaming Metric Name Suffixes using Enum Values for Better Code Readability (#6575)
+* [MAINTENANCE] M/great 1433/cloud tests to async (#6543)
+* [MAINTENANCE] Add static type checking to `rule.py` and `rule_based_profiler_result.py` (#6573)
+* [MAINTENANCE] Update most contrib Expectation docstrings to be consistent and decently formatted for gallery (#6577)
+* [MAINTENANCE] Update changelogs to reflect PyPI yanks (0.15.37-0.15.39) (#6581)
+* [MAINTENANCE] Refactor ExecutionEngine.resolve_metrics() for better code readability (#6578)
+* [MAINTENANCE] adding googletag manager to docusaurus (#6584)
+* [MAINTENANCE] typo in method name (#6585)
+
+0.15.40
+-----------------
+* [FEATURE] F/great 1397/zep checkpoints (#6525)
+* [FEATURE] Add integration test for zep sqlalchemy datasource with renderering. (#6564)
+* [BUGFIX] Patch additional deprecated call to `GXCloudIdentifier.ge_cloud_id` attr (#6555)
+* [BUGFIX] Patch `packaging_and_installation` Azure pipeline test failures (#6559)
+* [BUGFIX] Fix dependency issues to reenable RTD builds (#6560)
+* [BUGFIX] Add missing `raise` statement in `RuntimeDataConnector` logic (#6569)
+* [DOCS] doc 383: bring sql datasource configuration examples under test (#6466)
+* [MAINTENANCE] Add error handling to docs snippet checker (#6556)
+* [MAINTENANCE] ID/PK tests at `Checkpoint`-level (#6539)
+* [MAINTENANCE] Improve DataAssistant Parameter Builder Naming/Sanitization Mechanism and Enhance TableDomainBuilder (#6554)
+* [MAINTENANCE] Simplify computational graph assembly from metric configurations (#6563)
+* [MAINTENANCE] RTD Mobile header brand adjustment (#6557)
+* [MAINTENANCE] Use MetricsCalculator methods for ValidationGraph construction and resolution operations in Validator (#6566)
+* [MAINTENANCE] Cast type in `execution_environment.py` to bypass flaky `mypy` warnings (#6572)
+* [MAINTENANCE] Additional patch for `mypy` issue in `execution_environment.py` (#6574)
+* [MAINTENANCE] Clean up GX rename artifacts (#6561)
+* [CONTRIB] fix observed value in custom expectation (#6515) (thanks @itaise)
+
+0.15.39 - YANKED
+-----------------
+* [BUGFIX] Patch faulty GX Cloud arg resolution logic (#6542)
+* [BUGFIX] Fix resolution of cloud variables. (#6546)
+* [DOCS] Fix line numbers in snippets part 2 (#6537)
+* [DOCS] Convert nested snippets to named snippets (#6541)
+* [DOCS] Simplify snippet checker logic to catch stray tags in CI (#6538)
+* [MAINTENANCE] v2 Docs link (#6534)
+* [MAINTENANCE] Fix logic around cloud_mode and ge_cloud_mode. (#6550)
+
+0.15.38 - YANKED
+-----------------
+* [BUGFIX] Patch broken Cloud E2E test around `Datasource` CRUD (#6520)
+* [BUGFIX] Patch outdated `ge_cloud_id` attribute call in `ValidationOperator` (#6529)
+* [BUGFIX] Revert refactor to `Datasource` instantiation logic in `DataContext` (#6535)
+* [BUGFIX] Patch faulty GX Cloud arg resolution logic (#6542)
+* [DOCS] Fix line numbers in snippets (#6536)
+* [DOCS] Fix line numbers in snippets part 2 (#6537)
+* [DOCS] Convert nested snippets to named snippets (#6541)
+* [MAINTENANCE] Update Data Assistant plot images (#6521)
+* [MAINTENANCE] Clean up type hints and make test generation more elegant (#6523)
+* [MAINTENANCE] Clean up `Datasource` instantiation logic in `DataContext` (#6517)
+* [MAINTENANCE] Update `Domain` computation in MetricConfiguration (#6528)
+* [MAINTENANCE] v2 Docs link (#6534)
+
+0.15.37 - YANKED
 -----------------
 * [FEATURE] Support to include ID/PK in validation result for each row - SQL (#6448)
 * [FEATURE] Build process and example API docs (part 1) (#6474)

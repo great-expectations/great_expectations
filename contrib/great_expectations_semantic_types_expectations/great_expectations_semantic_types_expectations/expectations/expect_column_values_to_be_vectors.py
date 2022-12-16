@@ -75,7 +75,7 @@ class ColumnValuesIsVector(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToBeVectors(ColumnMapExpectation):
-    """Expect column values to be vectors"""
+    """Expect column values to be vectors."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [

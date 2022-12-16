@@ -230,13 +230,13 @@ class ParameterContainer(SerializableDictDot):
 def deep_convert_properties_iterable_to_parameter_node(
     source: Union[T, dict]
 ) -> Union[T, ParameterNode]:
-    if type(source) == dict:
+    if isinstance(source, dict):
         return _deep_convert_properties_iterable_to_parameter_node(
             source=ParameterNode(source)
         )
 
     # Must allow for non-dictionary source types, since their internal nested structures may contain dictionaries.
-    if type(source) in (list, set, tuple):
+    if isinstance(source, (list, set, tuple)):
         data_type: type = type(source)
 
         element: Any
@@ -254,11 +254,11 @@ def _deep_convert_properties_iterable_to_parameter_node(source: dict) -> Paramet
     key: str
     value: Any
     for key, value in source.items():
-        if type(value) == dict:
+        if isinstance(value, dict):
             source[key] = _deep_convert_properties_iterable_to_parameter_node(
                 source=value
             )
-        elif type(value) in (list, set, tuple):
+        elif isinstance(value, (list, set, tuple)):
             data_type: type = type(value)
 
             element: Any
@@ -498,6 +498,9 @@ def _get_parameter_value_from_parameter_container(
     fully_qualified_parameter_name_as_list: List[str],
     parameter_container: ParameterContainer,
 ) -> Optional[Union[Any, ParameterNode]]:
+    if parameter_container is None:
+        return None
+
     parameter_node: Optional[ParameterNode] = parameter_container.get_parameter_node(
         parameter_name_root=fully_qualified_parameter_name_as_list[0]
     )

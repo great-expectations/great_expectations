@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+from pprint import pprint
 from typing import Callable, ContextManager
 
 import pytest
@@ -11,6 +12,7 @@ from great_expectations.experimental.datasources.interfaces import (
 )
 from great_expectations.experimental.datasources.postgres_datasource import (
     BatchRequestError,
+    BatchSorter,
     PostgresDatasource,
     SqlYearMonthSplitter,
     TableAsset,
@@ -494,29 +496,44 @@ def test_sort_batch_list_by_unknown_key(create_source):
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    "order_by",
+    [
+        ["+year", "-month"],
+        [{"metadata_key": "year"}, {"metadata_key": "month", "reverse": True}],
+    ],
+)
+def test_table_asset_sorter_parsing(order_by: list):
+    """Ensure that arguments to `order_by` are parsed correctly regardless if they are lists of dicts or a list of strings"""
+    expected_sorters = [
+        BatchSorter(metadata_key="year"),
+        BatchSorter(metadata_key="month", reverse=True),
+    ]
+
+    table_asset = TableAsset(
+        name="SorterTest", table_name="SORTER_TEST", order_by=order_by
+    )
+    print(table_asset)
+    pprint(f"\n{table_asset.dict()}")
+
+    assert table_asset.order_by == expected_sorters
+
+
+@pytest.mark.unit
 def test_data_source_json_has_properties(create_source):
     with create_source(lambda _: None) as source:
-        assert (
-            type(TableAsset.order_by) == property,
-            "This test assumes TableAsset.order_by is a property. If it is not we "
-            "should update this test",
-        )
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col").add_sorters(
             ["year", "month"]
         )
-        source_json = source.json()
+        source_json = source.json(indent=4, sort_keys=True)
+        print(source_json)
         assert '"order_by": ' in source_json
 
 
 @pytest.mark.unit
 def test_data_source_str_has_properties(create_source):
     with create_source(lambda _: None) as source:
-        assert (
-            type(TableAsset.order_by) == property,
-            "This test assumes TableAsset.order_by is a property. If it is not we "
-            "should update this test",
-        )
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col").add_sorters(
             ["year", "month"]
@@ -528,14 +545,10 @@ def test_data_source_str_has_properties(create_source):
 @pytest.mark.unit
 def test_datasource_dict_has_properties(create_source):
     with create_source(lambda _: None) as source:
-        assert (
-            type(TableAsset.order_by) == property,
-            "This test assumes TableAsset.order_by is a property. If it is not we "
-            "should update this test",
-        )
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col").add_sorters(
             ["year", "month"]
         )
         source_dict = source.dict()
-        assert type(source_dict["assets"]["my_asset"]["order_by"]) == list
+        pprint(source_dict)
+        assert isinstance(source_dict["assets"]["my_asset"]["order_by"], list)

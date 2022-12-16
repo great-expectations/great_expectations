@@ -3675,7 +3675,9 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             for value in attributed_values[0].values()
         ]
 
-        sanitized_metric_name: str = sanitize_parameter_name(name=metric_name)
+        sanitized_metric_name: str = sanitize_parameter_name(
+            name=metric_name, suffix=None
+        )
 
         df: pd.DataFrame = pd.DataFrame({sanitized_metric_name: metric_values})
 
@@ -3976,7 +3978,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     ) -> Set[str]:
         metric_types: Dict[str, AltairDataTypes] = self.metric_types
         return {
-            sanitize_parameter_name(name=metric)
+            sanitize_parameter_name(name=metric, suffix=None)
             for metric in metric_types.keys()
             if metric_types[metric] == altair_type
         }
@@ -3986,7 +3988,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         metric_names: Tuple[str],
     ) -> Set[str]:
         return {
-            sanitize_parameter_name(name=metric_name) for metric_name in metric_names
+            sanitize_parameter_name(name=metric_name, suffix=None)
+            for metric_name in metric_names
         }
 
     @staticmethod

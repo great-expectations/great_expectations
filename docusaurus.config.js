@@ -14,10 +14,15 @@ module.exports = {
   organizationName: 'great-expectations',
   projectName: 'great_expectations',
   plugins: [
-    // ["plugin-image-zoom"],
     require.resolve('@cmfcmf/docusaurus-search-local'),
     '@docusaurus-terminology/parser',
-    'docusaurus-plugin-sass'
+    'docusaurus-plugin-sass',
+    [
+      require.resolve('docusaurus-gtm-plugin'),
+      {
+        id: 'GTM-K63L45F', // GTM Container ID
+      }
+    ],
   ],
 
   themeConfig: {
@@ -75,6 +80,14 @@ module.exports = {
           position: 'right'
         },
         {
+          to: 'https://legacy.docs.greatexpectations.io/',
+          // Only one of "to" or "href" should be used
+          // href: 'https://www.facebook.com',
+          label: 'V2 DOCS',
+          target: '_blank',
+          position:'right'
+        },
+        {
           label: 'Product',
           position: 'right',
           items: [
@@ -105,7 +118,7 @@ module.exports = {
               to: 'https://github.com/great-expectations/great_expectations'
             },
             {
-              label: 'NEWSLETTER',
+              label: 'JOIN THE EMAIL LIST',
               to: 'https://greatexpectations.io/newsletter'
             }
           ]
@@ -146,12 +159,12 @@ module.exports = {
             },
             {
               label: 'CAREERS',
-              to: 'https://greatexpectations.io/case-studies'
+              to: 'https://jobs.greatexpectations.io/'
             }
           ]
         },
         {
-          to: 'https://greatexpectations.io/cloud',
+          to: 'https://greatexpectations.io/gx-cloud',
           label: 'Cloud early access',
           position: 'right',
           className: 'header-cloud-link',
@@ -219,7 +232,7 @@ module.exports = {
               `,
             },
           ]
-        }
+        },
       ],
       copyright: `Copyright © ${new Date().getFullYear()} Great Expectations. All Rights Reserved.`
     }
@@ -233,8 +246,7 @@ module.exports = {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           remarkPlugins: [remarkCodeImport, remarkNamedSnippets],
-          editUrl:
-                        'https://github.com/great-expectations/great_expectations/tree/develop/'
+          editUrl: 'https://github.com/great-expectations/great_expectations/tree/develop/'
         },
         theme: {
           customCss: require.resolve('./src/css/custom.scss')

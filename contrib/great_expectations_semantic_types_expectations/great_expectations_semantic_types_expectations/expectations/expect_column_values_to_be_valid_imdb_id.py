@@ -42,7 +42,7 @@ class ColumnValuesToBeValidImdbId(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidImdbId(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid IMDB ID format."""
+    """Expect column values to conform to valid IMDB ID format."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

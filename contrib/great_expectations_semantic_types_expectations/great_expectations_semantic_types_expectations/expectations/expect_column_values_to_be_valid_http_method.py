@@ -54,7 +54,7 @@ class ColumnValuesToBeValidHttpMethod(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidHttpMethod(ColumnMapExpectation):
-    """Expect column values to be valid HTTP method"""
+    """Expect column values to be valid HTTP methods."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
