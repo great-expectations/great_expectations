@@ -6,7 +6,7 @@ should be considered part of our public API.
 
 The utilities are generally used as follows:
 
-DocsExampleParser.retrieve_all_usages_in_docs_example_files()
+DocsExampleParser.get_names_from_usage_in_docs_examples()
 
 1. AST walk through docs examples to find all imports of classes and methods
     that are GX related (by checking the import location).
@@ -44,13 +44,14 @@ Typical usage example:
   These utilities can also be used in tests to determine if there has been a
   change to our public API.
 """
+from __future__ import annotations
 import ast
 import glob
 import logging
 import operator
 import pathlib
 from dataclasses import dataclass
-from typing import List, Optional, Set, Union
+from typing import List, Optional, Set, Union, cast
 
 from great_expectations.core._docs_decorators import public_api
 
@@ -66,7 +67,8 @@ class Definition:
     Args:
         name: name of class, method or function.
         filepath: Where the definition was found.
-        ast_definition: Full AST tree of the class, method or function definition.
+        ast_definition: Full AST tree of the class,
+            method or function definition.
     """
 
     name: str
@@ -76,7 +78,10 @@ class Definition:
 
 @dataclass(frozen=True)
 class IncludeExcludeDefinition:
-    """Name and/or relative filepath of definition to exclude or include.
+    """Include or exclude directive for a class, function or method.
+
+    Name and/or relative filepath of class, function or method definition
+    to exclude or include.
 
     Args:
         reason: Reason for include or exclude.
@@ -110,7 +115,7 @@ class FileContents:
         self.contents = contents
 
     @classmethod
-    def create_from_local_file(cls, filepath: pathlib.Path) -> "FileContents":
+    def create_from_local_file(cls, filepath: pathlib.Path) -> FileContents:
         with open(filepath) as f:
             file_contents: str = f.read()
         return cls(filepath=filepath, contents=file_contents)
@@ -118,7 +123,7 @@ class FileContents:
     @classmethod
     def create_from_local_files(
         cls, filepaths: Set[pathlib.Path]
-    ) -> Set["FileContents"]:
+    ) -> Set[FileContents]:
         return {cls.create_from_local_file(filepath) for filepath in filepaths}
 
 
@@ -128,20 +133,22 @@ class DocsExampleParser:
     def __init__(self, file_contents: Set[FileContents]) -> None:
         self.file_contents = file_contents
 
-    def retrieve_all_usages_in_docs_example_files(self) -> Set[str]:
-        """
+    def get_names_from_usage_in_docs_examples(self) -> Set[str]:
+        """Get names in docs examples of classes, methods and functions used.
+
+        Usages are retrieved from imports and function / method calls.
 
         Returns:
-
+            Names of classes, methods and functions as a set of strings.
         """
         all_usages = set()
         for file_contents in self.file_contents:
-            file_usages = self._retrieve_all_usages_in_file(file_contents=file_contents)
+            file_usages = self._get_names_of_all_usages_in_file(file_contents=file_contents)
             all_usages |= file_usages
         return all_usages
 
-    def _retrieve_all_usages_in_file(self, file_contents: FileContents) -> Set[str]:
-        """Retrieve all class, method + functions used in test examples."""
+    def _get_names_of_all_usages_in_file(self, file_contents: FileContents) -> Set[str]:
+        """Retrieve the names of all class, method + functions used in file_contents."""
 
         tree = ast.parse(file_contents.contents)
 
@@ -160,19 +167,21 @@ class DocsExampleParser:
     ) -> List[Union[ast.Import, ast.ImportFrom]]:
         """Get all of the GX related imports in a file."""
 
-        imports = []
+        imports: List[Union[ast.Import, ast.ImportFrom]] = []
 
         for node in ast.walk(tree):
             node_is_imported_from_gx = isinstance(
                 node, ast.ImportFrom
-            ) and node.module.startswith("great_expectations")
+            ) and node.module.startswith("great_expectations")  # type: ignore[union-attr]
             node_is_gx_import = isinstance(node, ast.Import) and any(
                 n.name.startswith("great_expectations") for n in node.names
             )
             if node_is_imported_from_gx:
-                imports.append(node)
+                cast(ast.ImportFrom, node)
+                imports.append(node)  # type: ignore[arg-type]
             elif node_is_gx_import:
-                imports.append(node)
+                cast(ast.Import, node)
+                imports.append(node)  # type: ignore[arg-type]
 
         return imports
 
@@ -486,7 +495,7 @@ class CodeReferenceFilter:
         """
         doc_example_usages: Set[
             str
-        ] = self.docs_example_parser.retrieve_all_usages_in_docs_example_files()
+        ] = self.docs_example_parser.get_names_from_usage_in_docs_examples()
         gx_code_definitions = self.code_parser.get_all_class_method_and_function_names()
 
         doc_example_usages_of_gx_code = doc_example_usages.intersection(
