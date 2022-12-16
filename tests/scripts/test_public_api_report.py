@@ -734,3 +734,34 @@ class TestPublicAPIReport:
         ]
         observed = public_api_report.generate_printable_definitions()
         assert observed == expected
+
+
+class TestIncludeExcludeDefinition:
+    @pytest.mark.unit
+    def test_instantiate_name_and_filepath(self):
+        definition = IncludeExcludeDefinition(reason="reason", name="name", filepath=pathlib.Path("filepath"))
+        assert isinstance(definition, IncludeExcludeDefinition)
+
+    @pytest.mark.unit
+    def test_instantiate_filepath_only(self):
+        definition = IncludeExcludeDefinition(reason="reason", filepath=pathlib.Path("filepath"))
+        assert isinstance(definition, IncludeExcludeDefinition)
+
+    @pytest.mark.unit
+    def test_instantiate_name_and_filepath_no_reason(self):
+        with pytest.raises(TypeError):
+            IncludeExcludeDefinition(name="name", filepath=pathlib.Path("filepath"))
+
+    @pytest.mark.unit
+    def test_instantiate_name_only(self):
+        with pytest.raises(ValueError) as exc:
+            IncludeExcludeDefinition(reason="reason", name="name")
+
+        assert "You must provide a filepath if also providing a name" in exc.value.args[0]
+
+    @pytest.mark.unit
+    def test_instantiate_reason_only(self):
+        with pytest.raises(ValueError) as exc:
+            IncludeExcludeDefinition(reason="reason")
+
+        assert "You must provide at least a filepath or filepath and name" in exc.value.args[0]

@@ -65,9 +65,7 @@ class Definition:
 
     Args:
         name: name of class, method or function.
-        filepath: Where the definition was found. Relative to
-            repo_root/great_expectations. E.g. core/expectation_suite.py NOT
-            great_expectations/core/expectation_suite.py
+        filepath: Where the definition was found.
         ast_definition: Full AST tree of the class, method or function definition.
     """
 
@@ -91,6 +89,12 @@ class IncludeExcludeDefinition:
     reason: str
     name: Optional[str] = None
     filepath: Optional[pathlib.Path] = None
+
+    def __post_init__(self):
+        if self.name and not self.filepath:
+            raise ValueError("You must provide a filepath if also providing a name.")
+        if not self.name and not self.filepath:
+            raise ValueError("You must provide at least a filepath or filepath and name.")
 
 
 class FileContents:
