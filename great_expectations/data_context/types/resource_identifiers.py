@@ -415,7 +415,7 @@ class BatchMetricIdentifier(DataContextKey):
         for element in batch_metric_key:
             if isinstance(element, UUID):
                 conditioned_batch_metric_key.append(str(element))
-            elif isinstance(element, (tuple, dict)):
+            elif isinstance(element, (type(None), tuple, dict)):
                 conditioned_batch_metric_key.append(
                     hashlib.md5(
                         json.dumps(

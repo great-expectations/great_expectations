@@ -97,6 +97,9 @@ from great_expectations.util import load_class, verify_dynamic_loading_support
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.metric_multi_batch_validation_graph_builder import (
+    MetricMultiBatchValidationGraphBuilder,
+)
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 from great_expectations.validator.validation_graph import (
     ExpectationValidationGraph,
@@ -1133,10 +1136,18 @@ class Validator:
                     graph=ValidationGraph(execution_engine=self._execution_engine),
                 )
                 # TODO: <Alex>ALEX</Alex>
-                metrics_by_domain = self.compute_multi_batch_metrics(
+                # TODO: <Alex>ALEX</Alex>
+                # metrics_by_domain = self.compute_multi_batch_metrics(
+                #     metric_configurations=validation_dependencies.get_metric_configurations(),
+                #     result_format=MetricsComputationResultFormat.VALIDATION_GRAPH,
+                # )
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                metrics_by_domain = MetricMultiBatchValidationGraphBuilder(
+                    validator=self,
                     metric_configurations=validation_dependencies.get_metric_configurations(),
-                    result_format=MetricsComputationResultFormat.VALIDATION_GRAPH,
-                )
+                ).run()
+                # TODO: <Alex>ALEX</Alex>
                 # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] ALL_VALIDATION_GRAPH_METRICS_BY_DOMAIN:\n{metrics_by_domain} ; TYPE: {str(type(metrics_by_domain))}")
                 for (
                     domain,
