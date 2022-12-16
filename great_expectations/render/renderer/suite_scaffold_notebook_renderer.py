@@ -1,16 +1,24 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import nbformat
 
-from great_expectations import DataContext
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.dataset import Dataset
 from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
 
 class SuiteScaffoldNotebookRenderer(SuiteEditNotebookRenderer):
     def __init__(
-        self, context: DataContext, suite: ExpectationSuite, batch_kwargs
+        self, context: AbstractDataContext, suite: ExpectationSuite, batch_kwargs
     ) -> None:
         super().__init__(context=context)
         self.suite = suite

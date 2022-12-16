@@ -1,14 +1,20 @@
-from typing import List, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, List, Optional
 
 import click
 
-from great_expectations import DataContext
 from great_expectations.cli import toolkit
 from great_expectations.cli.build_docs import build_docs
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.exceptions import DataContextError
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.file_data_context import (
+        FileDataContext,
+    )
 
 
 @click.group()
@@ -57,7 +63,7 @@ def docs_build(
     ctx: click.Context, site_name: Optional[str] = None, no_view: bool = False
 ) -> None:
     """Build Data Docs for a project."""
-    context: DataContext = ctx.obj.data_context
+    context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     if site_name is not None and site_name not in context.get_site_names():
