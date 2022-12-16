@@ -8,6 +8,9 @@ from ruamel.yaml import YAML
 import great_expectations as gx
 from great_expectations.core.config_provider import _ConfigurationSubstitutor
 from great_expectations.data_context.data_context import DataContext
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigSchema,
@@ -638,7 +641,7 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
     """
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context = gx.DataContext.create(
+    context = FileDataContext.create(
         project_root_dir=project_path,
         usage_statistics_enabled=False,
     )
