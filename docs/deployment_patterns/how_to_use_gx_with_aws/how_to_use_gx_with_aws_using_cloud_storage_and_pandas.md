@@ -255,4 +255,26 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 ## Part 3: Create Expectations
 
+### 3.1: Prepare an empty Expectation Suite
+
+### 3.2: Prepare a Batch Request
+
+### 3.3: Use a Validator to add Expectations to the Expectation Suite
+
+### 3.4: Save the Expectation Suite
+
+### Additional Notes on creating Expectations
+
 ## Part 4: Validate Data
+
+### 4.1: Create and run a Checkpoint
+
+#### 4.1.1 Create a Checkpoint
+
+#### 4.1.2 Save the Checkpoint
+
+#### 4.1.3 Run the Checkpoint
+
+### 4.2: Build and view Data Docs
+
+## Congratulations!
