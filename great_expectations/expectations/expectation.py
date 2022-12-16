@@ -2613,7 +2613,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
             configuration=configuration, runtime_configuration=runtime_configuration
         )
 
-        unexpected_index_column_names: Union[str, None] = None
+        unexpected_index_column_names: Union[str, int, None] = None
         include_unexpected_rows: bool = False
 
         if isinstance(result_format, dict):
