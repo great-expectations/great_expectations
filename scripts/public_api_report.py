@@ -391,6 +391,11 @@ class PublicAPIChecker:
 
 
 class CodeReferenceFilter:
+    """Bring together various parsing and filtering tools to build a filtered set of Definitions.
+
+    Also adds the capability of filtering and including whole files or entities manually.
+    """
+
     DEFAULT_INCLUDES: List[IncludeExcludeDefinition] = [
         IncludeExcludeDefinition(
             reason="Referenced via legacy docs, will likely need to be included in the public API. Added here as an example include.",
@@ -428,16 +433,19 @@ class CodeReferenceFilter:
         excludes: Union[List[IncludeExcludeDefinition], None] = None,
         includes: Union[List[IncludeExcludeDefinition], None] = None,
     ) -> None:
-        """
+        """Create a CodeReferenceFilter.
 
         Args:
-            docs_example_parser:
-            code_parser:
-            public_api_checker:
-            excludes:
-            includes:
+            docs_example_parser: A DocsExampleParser initialized with the file
+                contents from all docs examples to process.
+            code_parser: A CodeParser initialized with library code.
+            public_api_checker: A PublicAPIChecker to aid in filtering.
+            excludes: Override default excludes by supplying a list of
+                IncludeExcludeDefinition instances.
+            includes: Override default includes by supplying a list of
+                IncludeExcludeDefinition instances. Note: Includes override
+                excludes if they are conflicting.
         """
-
         self.docs_example_parser = docs_example_parser
         self.code_parser = code_parser
         self.public_api_checker = public_api_checker
@@ -452,12 +460,12 @@ class CodeReferenceFilter:
         else:
             self.includes = includes
 
-    # TODO: Create methods for including public_api_checker or not
 
     def filter_definitions(self) -> Set[Definition]:
         """Main method to perform all filtering.
 
-        Filters Definitions (Class, method and function). Returned Definitions:
+        Filters Definitions of entities (class, method and function).
+        Returned Definitions:
             1. Appear in published documentation examples.
             2. Are not private.
             3. Are included or not excluded by an IncludeExcludeDefinition.
@@ -474,7 +482,7 @@ class CodeReferenceFilter:
         )
         non_private_definitions: Set[
             Definition
-        ] = self._filter_private_methods_and_classes(
+        ] = self._filter_private_entities(
             definitions=gx_definitions_used_in_docs_examples
         )
         included_definitions: Set[Definition] = self._filter_or_include(
@@ -524,12 +532,18 @@ class CodeReferenceFilter:
         }
         return gx_code_definitions_appearing_in_docs_examples
 
-    def _filter_private_methods_and_classes(
+    def _filter_private_entities(
         self, definitions: Set[Definition]
     ) -> Set[Definition]:
+        """Filter out private entities (classes, methods and functions with leading underscore)."""
         return {d for d in definitions if not self._is_definition_private(definition=d)}
 
     def _filter_or_include(self, definitions: Set[Definition]) -> Set[Definition]:
+        """Filter definitions per all IncludeExcludeDefinition directives.
+
+        Includes override excludes, and also don't require the included entity
+        to be used in docs examples.
+        """
         included_definitions: List[Definition] = []
         all_gx_code_definitions = (
             self.code_parser.get_all_class_method_and_function_definitions()
@@ -560,6 +574,7 @@ class CodeReferenceFilter:
     def _filter_for_definitions_not_marked_public_api(
         self, definitions: Set[Definition]
     ) -> Set[Definition]:
+        """Return only those Definitions that are not marked with the public api decorator."""
         return {
             d
             for d in definitions
