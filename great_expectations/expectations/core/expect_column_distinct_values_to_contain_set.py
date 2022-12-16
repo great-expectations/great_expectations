@@ -213,6 +213,10 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
+        styling = (
+            runtime_configuration.get("styling", {}) if runtime_configuration else {}
+        )
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -220,7 +224,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
                     "string_template": {
                         "template": template_str,
                         "params": params,
-                        "styling": renderer_configuration.styling,
+                        "styling": styling,
                     },
                 }
             )
