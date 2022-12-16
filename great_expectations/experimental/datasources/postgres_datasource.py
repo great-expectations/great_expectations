@@ -41,6 +41,19 @@ class ColumnSplitter:
     def param_defaults(self, data_asset: DataAsset) -> Dict[str, List]:
         raise NotImplementedError
 
+    @pydantic.validator("method_name")
+    def _splitter_method_exists(cls, v: str):
+        from great_expectations.execution_engine.split_and_sample.data_splitter import (
+            SplitterMethod,
+        )
+
+        method_names = SplitterMethod.members()
+        if v not in method_names:
+            raise ValueError(
+                f"unexpected value; permitted: '{', '.join(method_names)}'"
+            )
+        return v
+
 
 @pydantic_dc.dataclass(frozen=True)
 class SqlYearMonthSplitter(ColumnSplitter):
