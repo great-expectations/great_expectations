@@ -64,12 +64,6 @@ from great_expectations.expectations.registry import (
 from great_expectations.experimental.datasources.interfaces import Batch as XBatch
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.rule_based_profiler.data_assistant.metric_multi_batch_data_assistant import (
-    MetricMultiBatchDataAssistant,
-)
-from great_expectations.rule_based_profiler.data_assistant_result import (
-    DataAssistantResult,
-)
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
@@ -79,9 +73,6 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
     ReconciliationStrategy,
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
-from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
-    MetricsComputationResultFormat,
-)
 from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     RAW_PARAMETER_KEY,
@@ -1137,12 +1128,6 @@ class Validator:
                 )
                 # TODO: <Alex>ALEX</Alex>
                 # TODO: <Alex>ALEX</Alex>
-                # metrics_by_domain = self.compute_multi_batch_metrics(
-                #     metric_configurations=validation_dependencies.get_metric_configurations(),
-                #     result_format=MetricsComputationResultFormat.VALIDATION_GRAPH,
-                # )
-                # TODO: <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX</Alex>
                 metrics_by_domain = MetricMultiBatchValidationGraphBuilder(
                     validator=self,
                     metric_configurations=validation_dependencies.get_metric_configurations(),
@@ -1313,38 +1298,6 @@ class Validator:
             evrs.append(result)
 
         return evrs
-
-    # TODO: <Alex>ALEX</Alex>
-    def compute_multi_batch_metrics(
-        self,
-        metric_configurations: List[MetricConfiguration],
-        result_format: MetricsComputationResultFormat,
-    ) -> Dict[Domain, Dict[str, ParameterNode]]:
-        """
-        This method builds and parametrizes statistics style "DataAssistant" dynamically, then runs it to produce either
-        "ValidationGraph" or resolved multi-Batch metrics (corressponding to "result_format" directive).
-
-        Args:
-            metric_configurations: List of "MetricConfiguration" objects, containing metric name/domain/value arguments.
-            result_format: Directive controlling whether or not to return only unresolved "ValidationGraph".
-
-        Returns:
-            Dictionaries of values for fully-qualified parameter names by Domain for metrics, from "RuleBasedProfiler"
-        """
-        data_assistant_name: str = MetricMultiBatchDataAssistant.data_assistant_type
-        data_assistant: "DataAssistant" = MetricMultiBatchDataAssistant(  # noqa: F821
-            name=data_assistant_name,
-            validator=self,
-            metric_configurations=metric_configurations,
-            result_format=result_format,
-        )
-        data_assistant_result: DataAssistantResult = data_assistant.run()
-        metrics_by_domain: Optional[
-            Dict[Domain, Dict[str, ParameterNode]]
-        ] = data_assistant_result.metrics_by_domain
-        return metrics_by_domain
-
-    # TODO: <Alex>ALEX</Alex>
 
     def append_expectation(self, expectation_config: ExpectationConfiguration) -> None:
         """This method is a thin wrapper for ExpectationSuite.append_expectation"""
