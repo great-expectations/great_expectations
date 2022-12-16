@@ -9,6 +9,7 @@ import traceback
 from collections import namedtuple
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
+import dateutil
 from pyparsing import (
     CaselessKeyword,
     Combine,
@@ -191,15 +192,35 @@ class EvaluationParameterParser:
                 args = reversed([self.evaluate_stack(s) for _ in range(num_args)])
                 return self.fn[op](*args)
         else:
-            # try to evaluate as int first, then as float if int fails
-            # NOTE: JPC - 20200403 - Originally I considered returning the raw op here if parsing as float also
-            # fails, but I decided against it to instead require that the *entire* expression evaluates
-            # numerically UNLESS there is *exactly one* expression to substitute (see cases where len(L) == 1 in the
-            # parse_evaluation_parameter method.
+            # Require that the *entire* expression evaluates to number or datetime UNLESS there is *exactly one*
+            # expression to substitute (see cases where len(parse_results) == 1 in the parse_evaluation_parameter
+            # method).
+            evaluated: Union[int, float, datetime.datetime]
             try:
-                return int(op)
+                evaluated = int(op)
+                logger.info(
+                    "Evaluation parameter operand successfully parsed as integer."
+                )
             except ValueError:
-                return float(op)
+                logger.info("Parsing evaluation parameter operand as integer failed.")
+                try:
+                    evaluated = float(op)
+                    logger.info(
+                        "Evaluation parameter operand successfully parsed as float."
+                    )
+                except ValueError:
+                    logger.info("Parsing evaluation parameter operand as float failed.")
+                    try:
+                        evaluated = dateutil.parser.parse(op)
+                        logger.info(
+                            "Evaluation parameter operand successfully parsed as datetime."
+                        )
+                    except ValueError as e:
+                        logger.info(
+                            "Parsing evaluation parameter operand as datetime failed."
+                        )
+                        raise e
+            return evaluated
 
 
 def build_evaluation_parameters(
