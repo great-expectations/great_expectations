@@ -617,22 +617,26 @@ class CodeReferenceFilter:
 
 
 class PublicAPIReport:
+    """Generate a report from entity definitions (class, method and function)."""
+
     def __init__(self, definitions: Set[Definition]) -> None:
+        """Create a PublicAPIReport object.
+
+        Args:
+            definitions: Entity definitions to include in the report. Generally,
+                these are filtered before inclusion.
+        """
         self.definitions = definitions
 
     def write_printable_definitions_to_file(
         self,
         filepath: pathlib.Path,
     ) -> None:
-        """
+        """Generate then write the printable version of definitions to a file.
 
         Args:
-            filepath:
-
-        Returns:
-
+            filepath: Output filepath.
         """
-
         printable_definitions = self.generate_printable_definitions()
         with open(filepath, "w") as f:
             f.write("\n".join(printable_definitions))
@@ -640,13 +644,13 @@ class PublicAPIReport:
     def generate_printable_definitions(
         self, file_prefix_to_strip: str = "great_expectations/"
     ) -> List[str]:
-        """
+        """Generate a printable (human readable) definition.
 
         Args:
             file_prefix_to_strip: String to strip from the front of all filepaths if it exists.
 
         Returns:
-
+            List of strings representing each Definition.
         """
         sorted_definitions_list = sorted(
             list(self.definitions), key=operator.attrgetter("filepath", "name")
@@ -660,13 +664,20 @@ class PublicAPIReport:
                 f"File: {filepath} Name: {definition.name}"
             )
 
-        seen = set()
-        sorted_definitions_strings_no_dupes = [
-            d for d in sorted_definitions_strings if not (d in seen or seen.add(d))
-        ]
+        sorted_definitions_strings_no_dupes = self._deduplicate_strings(sorted_definitions_strings)
 
         return sorted_definitions_strings_no_dupes
 
+    def _deduplicate_strings(self, strings: List[str]) -> List[str]:
+        """Deduplicate a list of strings, keeping order intact."""
+        seen = set()
+        no_duplicates = []
+        for s in strings:
+            if not s in seen:
+                no_duplicates.append(s)
+                seen.add(s)
+
+        return no_duplicates
 
 def _repo_root() -> pathlib.Path:
     return pathlib.Path(__file__).parent.parent
@@ -680,7 +691,7 @@ def _default_doc_example_absolute_paths() -> Set[pathlib.Path]:
 
 
 def _default_code_absolute_paths() -> Set[pathlib.Path]:
-    """All gx modules related to the main library."""
+    """All Great Expectations modules related to the main library."""
     base_directory = _repo_root() / "great_expectations"
     paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
     return {pathlib.Path(p) for p in paths}
