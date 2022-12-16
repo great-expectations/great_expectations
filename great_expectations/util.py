@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import cProfile
 import datetime
@@ -61,10 +63,8 @@ if TYPE_CHECKING:
     # needed until numpy min version 1.20
     import numpy.typing as npt
 
-    from great_expectations.data_context.data_context import (
-        BaseDataContext,
-        CloudDataContext,
-        DataContext,
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
     )
     from great_expectations.data_context.types.base import DataContextConfig
 
@@ -888,7 +888,7 @@ def read_sas(
         )
 
 
-def build_in_memory_runtime_context() -> "BaseDataContext":  # noqa: F821
+def build_in_memory_runtime_context() -> AbstractDataContext:
     """
     Create generic in-memory "BaseDataContext" context for manipulations as required by tests.
     """
@@ -944,7 +944,7 @@ def build_in_memory_runtime_context() -> "BaseDataContext":  # noqa: F821
         store_backend_defaults=InMemoryStoreBackendDefaults(),
     )
 
-    context: BaseDataContext = BaseDataContext(project_config=data_context_config)
+    context = BaseDataContext(project_config=data_context_config)
 
     return context
 
@@ -1743,7 +1743,7 @@ def get_context(
     ge_cloud_access_token: Optional[str] = None,
     ge_cloud_organization_id: Optional[str] = None,
     ge_cloud_mode: Optional[bool] = None,
-) -> Union["DataContext", "BaseDataContext", "CloudDataContext"]:
+) -> AbstractDataContext:
     """
     Method to return the appropriate DataContext depending on parameters and environment.
 

@@ -48,6 +48,16 @@ class ValidationAction:
     def __init__(self, data_context) -> None:
         self.data_context = data_context
 
+    @property
+    def _using_cloud_context(self) -> bool:
+        # Chetan - 20221216 - This is a temporary property to encapsulate any Cloud leakage
+        # Upon refactoring this class to decouple Cloud-specific branches, this should be removed
+        from great_expectations.data_context.data_context.cloud_data_context import (
+            CloudDataContext,
+        )
+
+        return isinstance(self.data_context, CloudDataContext)
+
     def run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -824,11 +834,11 @@ class StoreValidationResultAction(ValidationAction):
             )
 
         checkpoint_ge_cloud_id = None
-        if self.data_context.cloud_mode and checkpoint_identifier:
+        if self._using_cloud_context and checkpoint_identifier:
             checkpoint_ge_cloud_id = checkpoint_identifier.cloud_id
 
         expectation_suite_ge_cloud_id = None
-        if self.data_context.cloud_mode and expectation_suite_identifier:
+        if self._using_cloud_context and expectation_suite_identifier:
             expectation_suite_ge_cloud_id = str(expectation_suite_identifier.cloud_id)
 
         return_val = self.target_store.set(
@@ -837,7 +847,7 @@ class StoreValidationResultAction(ValidationAction):
             checkpoint_id=checkpoint_ge_cloud_id,
             expectation_suite_id=expectation_suite_ge_cloud_id,
         )
-        if self.data_context.cloud_mode:
+        if self._using_cloud_context:
             return_val: GXCloudResourceRef
             new_ge_cloud_id = return_val.cloud_id
             validation_result_suite_identifier.cloud_id = new_ge_cloud_id
@@ -1082,7 +1092,7 @@ class UpdateDataDocsAction(ValidationAction):
         # <snippet>
         data_docs_validation_results = {}
         # </snippet>
-        if self.data_context.cloud_mode:
+        if self._using_cloud_context:
             return data_docs_validation_results
 
         # get the URL for the validation result
@@ -1130,7 +1140,7 @@ class CloudNotificationAction(ValidationAction):
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action. "
             )
 
-        if not self.data_context.cloud_mode:
+        if not self._using_cloud_context:
             return Exception(
                 "CloudNotificationActions can only be used in GX Cloud Mode."
             )
