@@ -1,6 +1,7 @@
 import math
 from datetime import datetime, timedelta
 from timeit import timeit
+from typing import Any, Dict
 
 import dateutil
 import pandas as pd
@@ -16,6 +17,7 @@ from great_expectations.core.evaluation_parameters import (
     find_evaluation_parameter_dependencies,
     parse_evaluation_parameter,
 )
+from great_expectations.data_context import DataContext
 from great_expectations.exceptions import EvaluationParameterError
 
 
@@ -399,12 +401,12 @@ def test_deduplicate_evaluation_parameter_dependencies():
     ],
 )
 def test_evaluation_parameters_for_between_expectations_parse_correctly(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-    dataframe,
-    evaluation_parameters,
-    expectation_type,
-    expectation_kwargs,
-    expected_expectation_validation_result,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled: DataContext,
+    dataframe: pd.DataFrame,
+    evaluation_parameters: Dict[str, Any],
+    expectation_type: str,
+    expectation_kwargs: Dict[str, dict],
+    expected_expectation_validation_result: ExpectationValidationResult,
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
