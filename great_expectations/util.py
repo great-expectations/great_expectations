@@ -1793,9 +1793,9 @@ def get_context(
 
     """
     from great_expectations.data_context.data_context import (
-        BaseDataContext,
         CloudDataContext,
-        DataContext,
+        EphemeralDataContext,
+        FileDataContext,
     )
 
     # Chetan - 20221208 - not formally deprecating these values until a future date
@@ -1840,15 +1840,14 @@ def get_context(
         )
 
     # Second, check for which type of local
-
     if project_config is not None:
-        return BaseDataContext(
+        return EphemeralDataContext(
             project_config=project_config,
-            context_root_dir=context_root_dir,
             runtime_environment=runtime_environment,
         )
 
-    return DataContext(
+    return FileDataContext(
+        project_config=project_config,
         context_root_dir=context_root_dir,
         runtime_environment=runtime_environment,
     )

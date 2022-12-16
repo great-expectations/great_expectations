@@ -109,12 +109,12 @@ class CloudDataContext(SerializableDataContext):
                 cloud_config=self._cloud_config,
             )
 
-        project_data_context_config: DataContextConfig = (
-            self.get_or_create_data_context_config(project_config)
+        project_config = CloudDataContext.get_or_create_data_context_config(
+            project_config
         )
 
         self._project_config = self._apply_global_config_overrides(
-            config=project_data_context_config
+            config=project_config
         )
         super().__init__(
             context_root_dir=self._context_root_directory,

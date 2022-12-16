@@ -1,6 +1,6 @@
 import logging
 import pathlib
-from typing import Optional, cast
+from typing import Mapping, Optional, Union, cast
 
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
@@ -38,8 +38,8 @@ class FileDataContext(SerializableDataContext):
 
     def __init__(
         self,
-        context_root_dir: str,
-        project_config: Optional[DataContextConfig] = None,
+        project_config: Optional[Union[DataContextConfig, Mapping]] = None,
+        context_root_dir: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
     ) -> None:
         """FileDataContext constructor
@@ -51,11 +51,26 @@ class FileDataContext(SerializableDataContext):
             runtime_environment (Optional[dict]): a dictionary of config variables that override both those set in
                 config_variables.yml and the environment
         """
+        # If not context_root_dir is provided, search the filesystem for one
+        if not context_root_dir:
+            context_root_dir = FileDataContext.find_context_yml_file()
+            # If we still can't find one, panic since a FileDataContext is dependent on a local project config
+            if not context_root_dir:
+                raise ValueError(
+                    "A FileDataContext relies on the presence of a local great_expectations.yml project config"
+                )
+
         self._context_root_directory = context_root_dir
-        if not project_config:
+
+        if project_config:
+            project_config = FileDataContext.get_or_create_data_context_config(
+                project_config
+            )
+        else:
             project_config = FileDataContext._load_file_backed_project_config(
                 context_root_directory=context_root_dir,
             )
+
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )

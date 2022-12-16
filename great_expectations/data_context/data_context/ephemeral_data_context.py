@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Mapping, Optional, Union
 
 from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context.data_context.abstract_data_context import (
@@ -27,7 +27,7 @@ class EphemeralDataContext(AbstractDataContext):
 
     def __init__(
         self,
-        project_config: DataContextConfig,
+        project_config: Union[DataContextConfig, Mapping],
         runtime_environment: Optional[dict] = None,
     ) -> None:
         """EphemeralDataContext constructor
@@ -37,6 +37,10 @@ class EphemeralDataContext(AbstractDataContext):
                 override both those set in config_variables.yml and the environment
 
         """
+        project_config = EphemeralDataContext.get_or_create_data_context_config(
+            project_config
+        )
+
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
