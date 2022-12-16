@@ -8,7 +8,7 @@ from makefun import create_function
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequestBase
-from great_expectations.core.config_peer import ConfigOutputModes, ConfigOutputModeType
+from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.rule_based_profiler import BaseRuleBasedProfiler
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
@@ -78,7 +78,7 @@ class DataAssistantRunner:
 
     def get_profiler_config(
         self,
-        mode: ConfigOutputModeType = ConfigOutputModes.JSON_DICT,
+        mode: ConfigOutputModes = ConfigOutputModes.JSON_DICT,
     ) -> Union[BaseYamlConfig, dict, str]:
         """
         This method returns configuration of effective "BaseRuleBasedProfiler", corresponding to this instance's
