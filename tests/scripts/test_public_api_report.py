@@ -590,6 +590,39 @@ def code_reference_filter_with_include_by_file_and_name_already_excluded(
     )
 
 
+@pytest.fixture
+def code_reference_filter_with_include_by_file_and_name_not_used_in_docs_example_exclude_file(
+    repo_root: pathlib.Path,
+    docs_example_parser: DocsExampleParser,
+    code_parser: CodeParser,
+    public_api_checker: PublicAPIChecker,
+) -> CodeReferenceFilter:
+    return CodeReferenceFilter(
+        repo_root=repo_root,
+        docs_example_parser=docs_example_parser,
+        code_parser=code_parser,
+        public_api_checker=public_api_checker,
+        includes=[
+            IncludeExcludeDefinition(
+                reason="test",
+                name="example_no_usages_in_sample_docs_example_python_file_string",
+                filepath=pathlib.Path(
+                    "great_expectations/sample_with_definitions_python_file_string.py"
+                ),
+            ),
+        ],
+        excludes=[
+            IncludeExcludeDefinition(
+                reason="test",
+                filepath=pathlib.Path(
+                    "great_expectations/sample_with_definitions_python_file_string.py"
+                ),
+            )
+        ],
+    )
+
+
+
 class TestCodeReferenceFilter:
     @pytest.mark.unit
     def test_instantiate(self, code_reference_filter: CodeReferenceFilter):
@@ -717,6 +750,30 @@ class TestCodeReferenceFilter:
             )
         }
 
+
+
+    @pytest.mark.integration
+    def test_filter_definitions_include_by_file_and_name_already_excluded(
+            self,
+            code_reference_filter_with_include_by_file_and_name_not_used_in_docs_example_exclude_file: CodeReferenceFilter,
+    ):
+        """What does this test and why?
+
+        Include overrides exclude. Method that was not included in docs examples
+        is still included if manually added.
+        """
+        observed = (
+            code_reference_filter_with_include_by_file_and_name_not_used_in_docs_example_exclude_file.filter_definitions()
+        )
+        assert len(observed) == 1
+        assert {d.name for d in observed} == {
+            "example_no_usages_in_sample_docs_example_python_file_string",
+        }
+        assert {d.filepath for d in observed} == {
+            pathlib.Path(
+                "great_expectations/sample_with_definitions_python_file_string.py"
+            )
+        }
 
 @pytest.fixture
 def public_api_report(
