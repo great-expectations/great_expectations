@@ -172,7 +172,7 @@ class TestCodeParser:
         names = code_parser.get_all_class_method_and_function_names()
         assert names == {
             "ExampleClass",
-            'ExamplePublicAPIClass',
+            "ExamplePublicAPIClass",
             "__init__",
             "_example_private_method",
             "_example_private_module_level_function",
@@ -193,7 +193,7 @@ class TestCodeParser:
         assert len(definitions) == 12
         assert set([d.name for d in definitions]) == {
             "ExampleClass",
-            'ExamplePublicAPIClass',
+            "ExamplePublicAPIClass",
             "__init__",
             "_example_private_method",
             "_example_private_module_level_function",
@@ -210,7 +210,6 @@ class TestCodeParser:
                 "great_expectations/sample_with_definitions_python_file_string.py"
             )
         }
-
 
 
 @pytest.fixture
@@ -252,24 +251,29 @@ class TestPublicAPIChecker:
 #         raise NotImplementedError
 
 
-
-
 @pytest.fixture
 def code_reference_filter(
-    docs_example_parser: DocsExampleParser, code_parser: CodeParser, public_api_checker: PublicAPIChecker
+    docs_example_parser: DocsExampleParser,
+    code_parser: CodeParser,
+    public_api_checker: PublicAPIChecker,
 ) -> CodeReferenceFilter:
     return CodeReferenceFilter(
-        docs_example_parser=docs_example_parser, code_parser=code_parser, public_api_checker=public_api_checker
+        docs_example_parser=docs_example_parser,
+        code_parser=code_parser,
+        public_api_checker=public_api_checker,
     )
 
 
 @pytest.fixture
 def code_reference_filter_with_non_default_include_exclude(
-    docs_example_parser: DocsExampleParser, code_parser: CodeParser, public_api_checker: PublicAPIChecker
+    docs_example_parser: DocsExampleParser,
+    code_parser: CodeParser,
+    public_api_checker: PublicAPIChecker,
 ) -> CodeReferenceFilter:
     return CodeReferenceFilter(
         docs_example_parser=docs_example_parser,
-        code_parser=code_parser, public_api_checker=public_api_checker,
+        code_parser=code_parser,
+        public_api_checker=public_api_checker,
         includes=[
             IncludeExcludeDefinition(
                 reason="test", name="test_name", filepath=pathlib.Path("test_path")
@@ -285,11 +289,14 @@ def code_reference_filter_with_non_default_include_exclude(
 
 @pytest.fixture
 def code_reference_filter_with_no_include_exclude(
-    docs_example_parser: DocsExampleParser, code_parser: CodeParser, public_api_checker: PublicAPIChecker
+    docs_example_parser: DocsExampleParser,
+    code_parser: CodeParser,
+    public_api_checker: PublicAPIChecker,
 ) -> CodeReferenceFilter:
     return CodeReferenceFilter(
         docs_example_parser=docs_example_parser,
-        code_parser=code_parser,public_api_checker=public_api_checker,
+        code_parser=code_parser,
+        public_api_checker=public_api_checker,
         includes=[],
         excludes=[],
     )
@@ -297,11 +304,14 @@ def code_reference_filter_with_no_include_exclude(
 
 @pytest.fixture
 def code_reference_filter_with_exclude_by_file(
-    docs_example_parser: DocsExampleParser, code_parser: CodeParser, public_api_checker: PublicAPIChecker
+    docs_example_parser: DocsExampleParser,
+    code_parser: CodeParser,
+    public_api_checker: PublicAPIChecker,
 ) -> CodeReferenceFilter:
     return CodeReferenceFilter(
         docs_example_parser=docs_example_parser,
-        code_parser=code_parser,public_api_checker=public_api_checker,
+        code_parser=code_parser,
+        public_api_checker=public_api_checker,
         includes=[],
         excludes=[
             IncludeExcludeDefinition(
@@ -316,11 +326,14 @@ def code_reference_filter_with_exclude_by_file(
 
 @pytest.fixture
 def code_reference_filter_with_exclude_by_file_and_name(
-    docs_example_parser: DocsExampleParser, code_parser: CodeParser, public_api_checker: PublicAPIChecker
+    docs_example_parser: DocsExampleParser,
+    code_parser: CodeParser,
+    public_api_checker: PublicAPIChecker,
 ) -> CodeReferenceFilter:
     return CodeReferenceFilter(
         docs_example_parser=docs_example_parser,
-        code_parser=code_parser,public_api_checker=public_api_checker,
+        code_parser=code_parser,
+        public_api_checker=public_api_checker,
         includes=[],
         excludes=[
             IncludeExcludeDefinition(
@@ -343,11 +356,14 @@ def code_reference_filter_with_exclude_by_file_and_name(
 
 @pytest.fixture
 def code_reference_filter_with_include_by_file_and_name_already_included(
-    docs_example_parser: DocsExampleParser, code_parser: CodeParser, public_api_checker: PublicAPIChecker
+    docs_example_parser: DocsExampleParser,
+    code_parser: CodeParser,
+    public_api_checker: PublicAPIChecker,
 ) -> CodeReferenceFilter:
     return CodeReferenceFilter(
         docs_example_parser=docs_example_parser,
-        code_parser=code_parser,public_api_checker=public_api_checker,
+        code_parser=code_parser,
+        public_api_checker=public_api_checker,
         includes=[
             IncludeExcludeDefinition(
                 reason="test",
@@ -370,11 +386,14 @@ def code_reference_filter_with_include_by_file_and_name_already_included(
 
 @pytest.fixture
 def code_reference_filter_with_include_by_file_and_name_already_excluded(
-    docs_example_parser: DocsExampleParser, code_parser: CodeParser, public_api_checker: PublicAPIChecker
+    docs_example_parser: DocsExampleParser,
+    code_parser: CodeParser,
+    public_api_checker: PublicAPIChecker,
 ) -> CodeReferenceFilter:
     return CodeReferenceFilter(
         docs_example_parser=docs_example_parser,
-        code_parser=code_parser,public_api_checker=public_api_checker,
+        code_parser=code_parser,
+        public_api_checker=public_api_checker,
         includes=[
             IncludeExcludeDefinition(
                 reason="test",

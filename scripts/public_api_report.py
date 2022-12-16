@@ -347,12 +347,12 @@ class PublicAPIChecker:
             ]
         )
 
-    def _is_definition_marked_public_api(
-        self, definition: Definition
-    ) -> bool:
+    def _is_definition_marked_public_api(self, definition: Definition) -> bool:
 
         result = False
-        found_decorators = self._get_decorator_names(ast_definition=definition.ast_definition)
+        found_decorators = self._get_decorator_names(
+            ast_definition=definition.ast_definition
+        )
 
         if public_api.__name__ in found_decorators:
             result = True
@@ -383,7 +383,9 @@ class PublicAPIChecker:
 
         definitions: List[Definition] = []
 
-        for definition in self.code_parser.get_all_class_method_and_function_definitions():
+        for (
+            definition
+        ) in self.code_parser.get_all_class_method_and_function_definitions():
             if self._is_definition_marked_public_api(definition):
                 definitions.append(definition)
 
@@ -481,9 +483,7 @@ class CodeReferenceFilter:
         doc_example_usages: Set[
             str
         ] = self.docs_example_parser.retrieve_all_usages_in_docs_example_files()
-        gx_code_definitions = (
-            self.code_parser.get_all_class_method_and_function_names()
-        )
+        gx_code_definitions = self.code_parser.get_all_class_method_and_function_names()
 
         doc_example_usages_of_gx_code = doc_example_usages.intersection(
             gx_code_definitions
@@ -578,10 +578,6 @@ class CodeReferenceFilter:
     def _is_definition_private(self, definition: Definition) -> bool:
         """Check whether the name of a definition is for a private method or class."""
         return definition.name.startswith("_")
-
-
-
-
 
 
 class PublicAPIReport:
