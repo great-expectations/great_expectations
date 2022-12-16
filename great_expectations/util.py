@@ -1731,7 +1731,7 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
 
 
 def get_context(
-    project_config: Optional[Union["DataContextConfig", Mapping]] = None,
+    project_config: Optional[Union[DataContextConfig, Mapping]] = None,
     context_root_dir: Optional[str] = None,
     runtime_environment: Optional[dict] = None,
     cloud_base_url: Optional[str] = None,
@@ -1752,18 +1752,18 @@ def get_context(
         my_context = gx.get_context([parameters])
 
     1. If gx.get_context() is run in a filesystem where `great_expectations init` has been run, then it will return a
-        DataContext
+        FileDataContext
 
     2. If gx.get_context() is passed in a `context_root_dir` (which contains great_expectations.yml) then it will return
-         a DataContext
+         a FileDataContext
 
-    3. If gx.get_context() is passed in an in-memory `project_config` then it will return BaseDataContext.
+    3. If gx.get_context() is passed in an in-memory `project_config` then it will return EphemeralDataContext.
         `context_root_dir` can also be passed in, but the configurations from the in-memory config will override the
         configurations in the `great_expectations.yml` file.
 
 
-    4. If GX is being run in the cloud, and the information needed for ge_cloud_config (ie ge_cloud_base_url,
-        ge_cloud_access_token, ge_cloud_organization_id) are passed in as parameters to get_context(), configured as
+    4. If GX is being run in the Cloud, and the information needed for cloud_config (ie cloud_base_url,
+        cloud_access_token, cloud_organization_id) are passed in as parameters to get_context(), configured as
         environment variables, or in a .conf file, then get_context() will return a CloudDataContext.
 
 
@@ -1775,8 +1775,6 @@ def get_context(
     | (cloud_mode=False)    | Local               | Local         |
     +-----------------------+---------------------+---------------+
 
-    TODO: This method will eventually return FileDataContext and EphemeralDataContext, rather than DataContext and Base
-
     Args:
         project_config (dict or DataContextConfig): In-memory configuration for DataContext.
         context_root_dir (str): Path to directory that contains great_expectations.yml file
@@ -1784,15 +1782,14 @@ def get_context(
             These values will override both values from the config variables file and
             from environment variables.
 
-        The following parameters are relevant when running ge_cloud
-        cloud_base_url (str): url for ge_cloud endpoint.
-        cloud_access_token (str): access_token for ge_cloud account.
-        cloud_organization_id (str): org_id for ge_cloud account.
-        cloud_mode (bool): bool flag to specify whether to run GX in cloud mode (default is None).
+        The following parameters are relevant when running GX Cloud:
+            * cloud_base_url (str): url for GX Cloud endpoint.
+            * cloud_access_token (str): access_token for GX Cloud account.
+            * cloud_organization_id (str): org_id for GX Cloud account.
+            * cloud_mode (bool): flag to specify whether to run GX in Cloud mode (default is None).
 
     Returns:
-        DataContext. Either a DataContext, BaseDataContext, or CloudDataContext depending on environment and/or
-        parameters
+        One of EphemeralDataContext, FileDataContext, or CloudDataContext depending on environment and/or parameters.
 
     """
     from great_expectations.data_context.data_context import (
