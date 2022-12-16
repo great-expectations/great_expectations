@@ -2608,9 +2608,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format: Union[
-            Dict[str, Union[str, int, bool]], str
-        ] = self.get_result_format(
+        result_format: Union[Dict[str, Any], str] = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
 
