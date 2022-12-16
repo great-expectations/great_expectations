@@ -136,6 +136,7 @@ exclude = [
     'rule_based_profiler/data_assistant_result/onboarding_data_assistant_result\.py', # 1
     'rule_based_profiler/data_assistant_result/plot_components\.py', # 12
     'rule_based_profiler/data_assistant/data_assistant_dispatcher\.py',  # 3
+    'rule_based_profiler/data_assistant/data_assistant_runner\.py',  # 10
     'rule_based_profiler/data_assistant/data_assistant\.py',  # 15
     'rule_based_profiler/domain_builder/categorical_column_domain_builder\.py',  # 18
     'rule_based_profiler/domain_builder/column_domain_builder\.py',
