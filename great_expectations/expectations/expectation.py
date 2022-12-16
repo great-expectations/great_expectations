@@ -15,7 +15,18 @@ from collections import Counter, defaultdict
 from copy import deepcopy
 from inspect import isabstract
 from numbers import Number
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    Union,
+)
 
 import pandas as pd
 from dateutil.parser import parse
@@ -89,10 +100,11 @@ from great_expectations.render import (
     ValueListContent,
     renderedAtomicValueSchema,
 )
+from great_expectations.render.exceptions import RendererConfigurationError
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
-    ParamSchemaType,
     RendererConfiguration,
+    RendererSchemaType,
 )
 from great_expectations.render.util import num_to_str
 from great_expectations.self_check.util import (
@@ -105,7 +117,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from great_expectations.validator.validator import ValidationDependencies, Validator
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import DataContext
+    from great_expectations.data_context import AbstractDataContext
 
 logger = logging.getLogger(__name__)
 
@@ -179,25 +191,43 @@ def render_evaluation_parameter_string(render_func) -> Callable:
 def param_method(param_name: str) -> Callable:
     """
     Decorator that wraps helper methods dealing with dynamic attributes on RendererConfiguration.params. Ensures a given
-    param_name exists on RendererConfiguration.params before executing the helper method because params are defined by
-    the renderer.
+    param_name exists and is not None before executing the helper method. Params are unknown as they are defined by the
+    renderer, and if a given param is None, no value was set/found that can be used in the helper method.
+
+    If a helper method is decorated with @param_method(param_name="<param_name>") and the param attribute does not
+    exist, the method will return either the input RendererConfiguration or None depending on the declared return type.
     """
 
     def _param_method(param_func: Callable) -> Callable:
         @functools.wraps(param_func)
         def wrapper(
             renderer_configuration: RendererConfiguration,
-        ) -> RendererConfiguration:
-            if hasattr(renderer_configuration.params, param_name):
-                renderer_configuration = param_func(
-                    renderer_configuration=renderer_configuration
+        ) -> Optional[Any]:
+            try:
+                return_type: Type = param_func.__annotations__["return"]
+            except KeyError:
+                method_name: str = getattr(param_func, "__name__", repr(param_func))
+                raise RendererConfigurationError(
+                    "Methods decorated with @param_method must have an annotated return "
+                    f"type, but method {method_name} does not."
                 )
+
+            if hasattr(renderer_configuration.params, param_name):
+                if getattr(renderer_configuration.params, param_name, None):
+                    return_obj = param_func(
+                        renderer_configuration=renderer_configuration
+                    )
+                else:
+                    if return_type is RendererConfiguration:
+                        return_obj = renderer_configuration
+                    else:
+                        return_obj = None
             else:
-                raise AttributeError(
+                raise RendererConfigurationError(
                     f"RendererConfiguration.param does not have a param called {param_name}. "
                     f'Use RendererConfiguration.add_param() with name="{param_name}" to add it.'
                 )
-            return renderer_configuration
+            return return_obj
 
         return wrapper
 
@@ -349,10 +379,10 @@ class Expectation(metaclass=MetaExpectation):
         add_param_args = (
             (
                 "expectation_type",
-                ParamSchemaType.STRING,
+                RendererSchemaType.STRING,
                 renderer_configuration.expectation_type,
             ),
-            ("kwargs", ParamSchemaType.STRING, renderer_configuration.kwargs),
+            ("kwargs", RendererSchemaType.STRING, renderer_configuration.kwargs),
         )
         for name, schema_type, value in add_param_args:
             renderer_configuration.add_param(
@@ -390,10 +420,10 @@ class Expectation(metaclass=MetaExpectation):
         add_param_args = (
             (
                 "expectation_type",
-                ParamSchemaType.STRING,
+                RendererSchemaType.STRING,
                 renderer_configuration.expectation_type,
             ),
-            ("kwargs", ParamSchemaType.STRING, renderer_configuration.kwargs),
+            ("kwargs", RendererSchemaType.STRING, renderer_configuration.kwargs),
         )
         for name, schema_type, value in add_param_args:
             renderer_configuration.add_param(
@@ -422,10 +452,13 @@ class Expectation(metaclass=MetaExpectation):
         renderer_configuration = cls._prescriptive_template(
             renderer_configuration=renderer_configuration,
         )
+        styling = (
+            runtime_configuration.get("styling", {}) if runtime_configuration else {}
+        )
         return (
             renderer_configuration.template_str,
             renderer_configuration.params.dict(),
-            renderer_configuration.styling,
+            styling,
         )
 
     @classmethod
@@ -1036,10 +1069,10 @@ class Expectation(metaclass=MetaExpectation):
         add_param_args = (
             (
                 "expectation_type",
-                ParamSchemaType.STRING,
+                RendererSchemaType.STRING,
                 renderer_configuration.expectation_type,
             ),
-            ("kwargs", ParamSchemaType.STRING, renderer_configuration.kwargs),
+            ("kwargs", RendererSchemaType.STRING, renderer_configuration.kwargs),
         )
         for name, schema_type, value in add_param_args:
             renderer_configuration.add_param(
@@ -1250,14 +1283,14 @@ class Expectation(metaclass=MetaExpectation):
         self,
         configuration: ExpectationConfiguration,
         runtime_configuration: Optional[dict] = None,
-    ) -> Union[Dict[str, Union[str, int, bool]], str]:
+    ) -> Union[Dict[str, Union[str, int, bool, List[str], None]], str]:
         default_result_format: Optional[Any] = self.default_kwarg_values.get(
             "result_format"
         )
         configuration_result_format: Union[
-            Dict[str, Union[str, int, bool]], str
+            Dict[str, Union[str, int, bool, List[str], None]], str
         ] = configuration.kwargs.get("result_format", default_result_format)
-        result_format: Union[Dict[str, Union[str, int, bool]], str]
+        result_format: Union[Dict[str, Union[str, int, bool, List[str], None]], str]
         if runtime_configuration:
             result_format = runtime_configuration.get(
                 "result_format",
@@ -1285,7 +1318,7 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         evaluation_parameters: Optional[dict] = None,
         interactive_evaluation: bool = True,
-        data_context: Optional[DataContext] = None,
+        data_context: Optional[AbstractDataContext] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ExpectationValidationResult:
         include_rendered_content: bool = validator._include_rendered_content or False
@@ -1328,7 +1361,7 @@ class Expectation(metaclass=MetaExpectation):
         ignore_only_for: bool = False,
         debug_logger: Optional[logging.Logger] = None,
         only_consider_these_backends: Optional[List[str]] = None,
-        context: Optional[DataContext] = None,
+        context: Optional[AbstractDataContext] = None,
     ) -> ExpectationDiagnostics:
         """Produce a diagnostic report about this Expectation.
 
@@ -1708,9 +1741,9 @@ class Expectation(metaclass=MetaExpectation):
         if len(value_set) > 0:
             for idx, value in enumerate(value_set):
                 if isinstance(value, Number):
-                    schema_type = ParamSchemaType.NUMBER
+                    schema_type = RendererSchemaType.NUMBER
                 else:
-                    schema_type = ParamSchemaType.STRING
+                    schema_type = RendererSchemaType.STRING
                 renderer_configuration.add_param(
                     name=f"v__{str(idx)}", schema_type=schema_type, value=value
                 )
@@ -1779,7 +1812,7 @@ class Expectation(metaclass=MetaExpectation):
             name = f"row_condition__{str(idx)}"
             value = condition.replace(" NOT ", " not ")
             renderer_configuration.add_param(
-                name=name, schema_type=ParamSchemaType.STRING, value=value
+                name=name, schema_type=RendererSchemaType.STRING, value=value
             )
 
         return renderer_configuration
@@ -1814,10 +1847,28 @@ class Expectation(metaclass=MetaExpectation):
         )
         renderer_configuration.add_param(
             name="mostly_pct",
-            schema_type=ParamSchemaType.STRING,
+            schema_type=RendererSchemaType.STRING,
             value=mostly_pct_value,
         )
         return renderer_configuration
+
+    @staticmethod
+    @param_method(param_name="strict_min")
+    def _get_strict_min_string(renderer_configuration: RendererConfiguration) -> str:
+        return (
+            "greater than"
+            if renderer_configuration.params.strict_min.value is True
+            else "greater than or equal to"
+        )
+
+    @staticmethod
+    @param_method(param_name="strict_max")
+    def _get_strict_max_string(renderer_configuration: RendererConfiguration) -> str:
+        return (
+            "less than"
+            if renderer_configuration.params.strict_max.value is True
+            else "less than or equal to"
+        )
 
     @staticmethod
     def _choose_example(
@@ -1855,7 +1906,7 @@ class Expectation(metaclass=MetaExpectation):
         ignore_only_for: bool = False,
         debug_logger: Optional[logging.Logger] = None,
         only_consider_these_backends: Optional[List[str]] = None,
-        context: Optional[DataContext] = None,
+        context: Optional[AbstractDataContext] = None,
     ) -> List[ExpectationTestDiagnostics]:
         """Generate test results. This is an internal method for run_diagnostics."""
 
@@ -2726,6 +2777,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
 
         if result_format_str in ["BASIC"]:
             return validation_dependencies
+
         # only for SUMMARY and COMPLETE
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
@@ -2779,18 +2831,20 @@ class ColumnMapExpectation(TableExpectation, ABC):
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         result_format: Union[
-            Dict[str, Union[str, int, bool]], str
+            Dict[str, Union[int, str, bool, List[str], None]], str
         ] = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
 
-        unexpected_index_column_names: Union[str, None]
+        unexpected_index_column_names = None
+        include_unexpected_rows = None
+
         if isinstance(result_format, dict):
             include_unexpected_rows = result_format.get(
                 "include_unexpected_rows", False
             )
             unexpected_index_column_names = result_format.get(
-                "unexpected_index_column_names"
+                "unexpected_index_column_names", None
             )
 
         total_count: Optional[int] = metrics.get("table.row_count")
@@ -3016,7 +3070,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         result_format: Union[
-            Dict[str, Union[str, int, bool]], str
+            Dict[str, Union[str, int, bool, List[str], None]], str
         ] = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
@@ -3289,7 +3343,7 @@ def _format_map_output(
     unexpected_list: Optional[List[Any]] = None,
     unexpected_index_list: Optional[List[int]] = None,
     unexpected_index_query: Optional[str] = None,
-    unexpected_index_column_names: Optional[str] = None,
+    unexpected_index_column_names: Optional[Union[int, str, List[str]]] = None,
     unexpected_rows=None,
 ) -> Dict:
     """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
@@ -3343,6 +3397,11 @@ def _format_map_output(
         return_obj["result"]["partial_unexpected_list"] = unexpected_list[
             : result_format["partial_unexpected_count"]
         ]
+
+    if unexpected_index_column_names is not None:
+        return_obj["result"].update(
+            {"unexpected_index_column_names": unexpected_index_column_names}
+        )
 
     if not skip_missing:
         return_obj["result"]["missing_count"] = missing_count
@@ -3415,10 +3474,6 @@ def _format_map_output(
         return_obj["result"].update({"unexpected_index_list": unexpected_index_list})
     if unexpected_index_query is not None:
         return_obj["result"].update({"unexpected_index_query": unexpected_index_query})
-    if unexpected_index_column_names is not None:
-        return_obj["result"].update(
-            {"unexpected_index_column_names": unexpected_index_column_names}
-        )
     if result_format["result_format"] == "COMPLETE":
         return return_obj
 

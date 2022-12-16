@@ -10,6 +10,9 @@ from great_expectations import __version__ as ge_version
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_logging import _set_up_logger
 from great_expectations.cli.pretty_printing import cli_message
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.types.base import (
     FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE,
 )
@@ -51,7 +54,9 @@ class CLIState:
 
     @data_context.setter
     def data_context(self, data_context: DataContext) -> None:
-        assert isinstance(data_context, DataContext)
+        assert isinstance(
+            data_context, FileDataContext
+        ), "GX CLI interaction requires a FileDataContext"
         self._data_context = data_context
 
     def __repr__(self) -> str:

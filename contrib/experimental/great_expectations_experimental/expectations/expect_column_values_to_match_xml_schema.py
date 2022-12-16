@@ -147,7 +147,7 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
     }
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration)
 

@@ -7,11 +7,13 @@ from freezegun import freeze_time
 from moto import mock_s3
 
 import great_expectations
-from great_expectations import DataContext
 
 # NOTE: we explicitly import the v012 CLI module, so the tests don't require the --v2-api flag explicitly,
 # although that is what is being run.
 from great_expectations.cli.v012 import cli
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.utils import escape_ansi
@@ -85,7 +87,8 @@ def test_upgrade_helper_intervention_on_cli_command(v10_project_directory, caplo
 
     # make sure config version unchanged
     assert (
-        DataContext.get_ge_config_version(context_root_dir=v10_project_directory) == 1
+        FileDataContext.get_ge_config_version(context_root_dir=v10_project_directory)
+        == 1
     )
 
     expected_project_tree_str = """\
@@ -195,7 +198,8 @@ great_expectations/
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number incremented
     assert (
-        DataContext.get_ge_config_version(context_root_dir=v10_project_directory) == 3
+        FileDataContext.get_ge_config_version(context_root_dir=v10_project_directory)
+        == 3
     )
 
     with open(
@@ -308,7 +312,8 @@ great_expectations/
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number not incremented
     assert (
-        DataContext.get_ge_config_version(context_root_dir=v10_project_directory) == 1
+        FileDataContext.get_ge_config_version(context_root_dir=v10_project_directory)
+        == 1
     )
 
     with open(
@@ -411,7 +416,8 @@ great_expectations/
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number not incremented
     assert (
-        DataContext.get_ge_config_version(context_root_dir=v10_project_directory) == 1
+        FileDataContext.get_ge_config_version(context_root_dir=v10_project_directory)
+        == 1
     )
 
     with open(
@@ -516,7 +522,8 @@ great_expectations/
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number incremented
     assert (
-        DataContext.get_ge_config_version(context_root_dir=v20_project_directory) == 3
+        FileDataContext.get_ge_config_version(context_root_dir=v20_project_directory)
+        == 3
     )
 
     with open(

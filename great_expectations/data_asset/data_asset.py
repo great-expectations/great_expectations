@@ -328,15 +328,7 @@ class DataAsset:
                 if meta is not None:
                     return_obj.meta = meta
 
-                return_obj = recursively_convert_to_json_serializable(return_obj)
-
-                # NOTE: <DataContextRefactor> Indirect way to checking whether _data_context is a ExplorerDataContext
-                if self._data_context is not None and hasattr(
-                    self._data_context, "update_return_obj"
-                ):
-                    return_obj = self._data_context.update_return_obj(self, return_obj)
-
-                return return_obj
+                return recursively_convert_to_json_serializable(return_obj)
 
             return wrapper
 

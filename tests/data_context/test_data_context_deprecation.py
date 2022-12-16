@@ -1,14 +1,16 @@
 import pytest
 
 from great_expectations.data_context.data_context.base_data_context import (
-    BaseDataContext,
+    _resolve_cloud_args as base_data_context_resolver,
 )
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
-from great_expectations.data_context.data_context.data_context import DataContext
+from great_expectations.data_context.data_context.data_context import (
+    _resolve_cloud_args as data_context_resolver,
+)
 from great_expectations.data_context.types.base import GXCloudConfig
-from great_expectations.util import _resolve_cloud_args
+from great_expectations.util import _resolve_cloud_args as get_context_resolver
 
 # Globally scoped so we can reuse across test parameterization
 cloud_base_url = "my_cloud_url"
@@ -59,7 +61,7 @@ ge_cloud_config = GXCloudConfig(
 def test_BaseDataContext_resolve_cloud_args(
     cloud_args: dict, expected_resolved_args: tuple
 ):
-    actual_resolved_args = BaseDataContext._resolve_cloud_args(**cloud_args)
+    actual_resolved_args = base_data_context_resolver(**cloud_args)
     assert actual_resolved_args == expected_resolved_args
 
 
@@ -107,7 +109,7 @@ def test_BaseDataContext_resolve_cloud_args(
 def test_DataContext_resolve_cloud_args(
     cloud_args: dict, expected_resolved_args: tuple
 ):
-    actual_resolved_args = DataContext._resolve_cloud_args(**cloud_args)
+    actual_resolved_args = data_context_resolver(**cloud_args)
     assert actual_resolved_args == expected_resolved_args
 
 
@@ -232,5 +234,5 @@ def test_CloudDataContext_resolve_cloud_args(
 def test_get_context_resolve_cloud_args(
     cloud_args: dict, expected_resolved_args: tuple
 ):
-    actual_resolved_args = _resolve_cloud_args(**cloud_args)
+    actual_resolved_args = get_context_resolver(**cloud_args)
     assert actual_resolved_args == expected_resolved_args
