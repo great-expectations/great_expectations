@@ -160,14 +160,18 @@ class FilePathDataConnector(DataConnector):
         if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
 
-        batch_definition_list: List[BatchDefinition] = list(
-            filter(
-                lambda batch_definition: batch_definition_matches_batch_request(
+        # Use a combination of a list and set to preserve iteration order
+        batch_definition_list: List[BatchDefinition] = list()
+        batch_definition_set = set()
+        for batch_definition in self._get_batch_definition_list_from_cache():
+            if (
+                batch_definition_matches_batch_request(
                     batch_definition=batch_definition, batch_request=batch_request
-                ),
-                self._get_batch_definition_list_from_cache(),
-            )
-        )
+                )
+                and batch_definition not in batch_definition_set
+            ):
+                batch_definition_list.append(batch_definition)
+                batch_definition_set.add(batch_definition)
 
         if self.sorters:
             batch_definition_list = self._sort_batch_definition_list(
@@ -213,7 +217,7 @@ class FilePathDataConnector(DataConnector):
         return batch_definition_list
 
     def _map_data_reference_to_batch_definition_list(
-        self, data_reference: str, data_asset_name: str = None
+        self, data_reference: str, data_asset_name: Optional[str] = None
     ) -> Optional[List[BatchDefinition]]:
         regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
         pattern: str = regex_config["pattern"]

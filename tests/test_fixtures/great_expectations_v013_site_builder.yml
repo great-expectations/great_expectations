@@ -49,7 +49,7 @@ stores:
 
 data_docs_sites:
   local_site: # site name
-  # “local_site” renders documentation for all the datasources in the project from GE artifacts in the local repo.
+  # “local_site” renders documentation for all the datasources in the project from GX artifacts in the local repo.
   # The site includes expectation suites and profiling and validation results from uncommitted directory.
   # Local site provides the convenience of visualizing all the entities stored in JSON files as HTML.
 

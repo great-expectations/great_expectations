@@ -1,3 +1,4 @@
+import logging
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, Iterator, List, Optional, Sized
 
@@ -6,11 +7,32 @@ import pandas as pd
 
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.metric_computation_result import (
-    MetricValue,
     MetricValues,
 )
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.attributes import Attributes
+from great_expectations.util import deep_filter_properties_iterable
+from great_expectations.validator.computed_metric import MetricValue
+
+logger = logging.getLogger(__name__)
+
+try:
+    import sqlalchemy as sa
+except ImportError:
+    logger.debug("No SqlAlchemy module available.")
+    sa = None
+
+try:
+    from sqlalchemy.engine import Row as sqlalchemy_engine_Row
+except ImportError:
+    logger.debug("No SqlAlchemy.engine module available.")
+    sqlalchemy_engine_Row = None
+
+try:
+    from pyspark.sql import Row as pyspark_sql_Row
+except ImportError:
+    logger.debug("No spark SQLContext available.")
+    pyspark_sql_Row = None
 
 
 def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
@@ -20,7 +42,18 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
             return True
 
         # Pandas "DataFrame" and "Series" are illegal as candidates for conversion into "numpy.ndarray" type.
-        if isinstance(values, (pd.DataFrame, pd.Series, set)):
+        if isinstance(
+            values,
+            deep_filter_properties_iterable(
+                properties=(
+                    pd.DataFrame,
+                    pd.Series,
+                    sqlalchemy_engine_Row,
+                    pyspark_sql_Row,
+                    set,
+                )
+            ),
+        ):
             return True
 
         if isinstance(values, (list, tuple)):
@@ -31,7 +64,18 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
                     return True
 
                 # Pandas "DataFrame" and "Series" are illegal as candidates for conversion into "numpy.ndarray" type.
-                if isinstance(value, (pd.DataFrame, pd.Series, set)):
+                if isinstance(
+                    value,
+                    deep_filter_properties_iterable(
+                        properties=(
+                            pd.DataFrame,
+                            pd.Series,
+                            sqlalchemy_engine_Row,
+                            pyspark_sql_Row,
+                            set,
+                        )
+                    ),
+                ):
                     return True
 
                 # Components of different lengths cannot be packaged into "numpy.ndarray" type (due to undefined shape).
@@ -44,6 +88,16 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
                         for current_value in values_iterator
                     ):
                         return True
+
+                # Components of different types cannot be packaged into "numpy.ndarray" type (due to type mismatch).
+                values_iterator: Iterator = iter(values)
+                first_value_type: type = type(next(values_iterator))
+                current_type: type
+                if not all(
+                    type(current_value) == first_value_type
+                    for current_value in values_iterator
+                ):
+                    return True
 
                 # Recursively evaluate each element of properly shaped iterable (list or tuple).
                 for value in values:

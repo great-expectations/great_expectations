@@ -20,7 +20,7 @@ except ImportError:
     from jinja2 import pass_context as contextfilter
 
 from great_expectations import __version__ as ge_version
-from great_expectations.render.types import (
+from great_expectations.render import (
     RenderedComponentContent,
     RenderedContent,
     RenderedDocumentContent,

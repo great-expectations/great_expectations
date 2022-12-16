@@ -88,7 +88,7 @@ stages:
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - script: |
-          pip install mypy invoke # Prereq for type hint script
+          pip install --requirement reqs/requirements-dev-contrib.txt
           invoke type-coverage
         name: TypeHintChecker
 
@@ -96,8 +96,8 @@ stages:
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - script: |
-          pip install mypy invoke
-          invoke type-check --install-types --warn-unused-ignores --pretty 
+          pip install --requirement reqs/requirements-dev-contrib.txt
+          invoke type-check --install-types --warn-unused-ignores --pretty
         name: StaticTypeCheck
 
     - job: docstring_checker
@@ -110,7 +110,7 @@ stages:
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - script: |
-          pip install flake8
+          pip install --requirement reqs/requirements-dev-contrib.txt
           # https://www.flake8rules.com/rules/F401.html - Prunes the dgtest graph to improve accuracy
           flake8 --select F401 great_expectations tests
         name: UnusedImportChecker
@@ -170,7 +170,7 @@ stages:
               DOCKER_USER: $(DOCKER_USER)
               DOCKER_TOKEN: $(DOCKER_TOKEN)
 
-      - job: test_comprehensive
+      - job: test_majority
         dependsOn: [make_suffix, build_push]
         condition: succeeded()
         timeoutInMinutes: 120
@@ -436,11 +436,43 @@ stages:
               eval ${PYTEST}
             displayName: 'Pytest Usage Stats'
 
+      - job: cloud_integration_tests
+        dependsOn: [make_suffix, build_push]
+        condition: succeeded()
+        strategy:
+          matrix:
+            Python37:
+              python.version: '3.7'
+            Python38:
+              python.version: '3.8'
+            Python39:
+              python.version: '3.9'
+        variables:
+          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+        steps:
+          - bash: |
+              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              # We set both GX_* and GE_* in the docker container until we are able to update the config in our
+              # cloud CI account.
+              PYTEST="docker run -e GX_CLOUD_ORGANIZATION_ID=${GX_CLOUD_ORGANIZATION_ID} "
+              PYTEST+="-e GX_CLOUD_ACCESS_TOKEN=${GX_CLOUD_ACCESS_TOKEN} -e GX_CLOUD_BASE_URL=${GX_CLOUD_BASE_URL} "
+              PYTEST+="-e GE_CLOUD_ORGANIZATION_ID=${GX_CLOUD_ORGANIZATION_ID} "
+              PYTEST+="-e GE_CLOUD_ACCESS_TOKEN=${GX_CLOUD_ACCESS_TOKEN} -e GE_CLOUD_BASE_URL=${GX_CLOUD_BASE_URL} "
+              PYTEST+="greatexpectations/test:${DOCKER_TAG} "
+              PYTEST+="pytest --random-order --cloud -m \"cloud and e2e\""
+              echo ${PYTEST}
+              eval ${PYTEST}
+            env:
+              GX_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GX_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GX_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
+            displayName: 'Cloud integration Tests'
+
 
   - stage: import_ge
     dependsOn: [lint]
     pool:
-      vmImage: 'ubuntu-18.04'
+      vmImage: 'ubuntu-latest'
     jobs:
       - job: import_ge
         condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
@@ -466,10 +498,10 @@ stages:
 
          - script: |
              pip install  .
-           displayName: 'Install GE and required dependencies (i.e. not sqlalchemy)'
+           displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
 
          - script: |
-             python -c "import great_expectations as ge; print('Successfully imported GE Version:', ge.__version__)"
+             python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
            displayName: 'Import Great Expectations'
 
   - stage: db_integration

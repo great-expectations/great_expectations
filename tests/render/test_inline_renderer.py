@@ -82,28 +82,8 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                                 "schema": {"type": "string"},
                                 "value": "event_type",
                             },
-                            "condition_parser": {
-                                "schema": {"type": "string"},
-                                "value": None,
-                            },
                             "max_value": {"schema": {"type": "number"}, "value": 20},
                             "min_value": {"schema": {"type": "number"}, "value": 3},
-                            "parse_strings_as_datetimes": {
-                                "schema": {"type": "boolean"},
-                                "value": None,
-                            },
-                            "row_condition": {
-                                "schema": {"type": "string"},
-                                "value": None,
-                            },
-                            "strict_max": {
-                                "schema": {"type": "boolean"},
-                                "value": None,
-                            },
-                            "strict_min": {
-                                "schema": {"type": "boolean"},
-                                "value": None,
-                            },
                         },
                         "schema": {"type": "com.superconductive.rendered.string"},
                         "template": "$column minimum value must be greater than or equal "
@@ -152,18 +132,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                                     "column": {
                                         "schema": {"type": "string"},
                                         "value": "user_id",
-                                    },
-                                    "condition_parser": {
-                                        "schema": {"type": "string"},
-                                        "value": None,
-                                    },
-                                    "mostly": {
-                                        "schema": {"type": "number"},
-                                        "value": None,
-                                    },
-                                    "row_condition": {
-                                        "schema": {"type": "string"},
-                                        "value": None,
                                     },
                                 },
                                 "template": "$column quantiles must be within "
@@ -242,23 +210,9 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                                 "schema": {"type": "string"},
                                 "value": "event_type",
                             },
-                            "condition_parser": {
-                                "schema": {"type": "string"},
-                                "value": None,
-                            },
-                            "mostly": {"schema": {"type": "number"}, "value": None},
-                            "mostly_pct": {"schema": {"type": "string"}, "value": None},
-                            "parse_strings_as_datetimes": {
-                                "schema": {"type": "boolean"},
-                                "value": None,
-                            },
-                            "row_condition": {
-                                "schema": {"type": "string"},
-                                "value": None,
-                            },
-                            "v__0": {"schema": {"type": "string"}, "value": 19},
-                            "v__1": {"schema": {"type": "string"}, "value": 22},
-                            "v__2": {"schema": {"type": "string"}, "value": 73},
+                            "v__0": {"schema": {"type": "number"}, "value": 19},
+                            "v__1": {"schema": {"type": "number"}, "value": 22},
+                            "v__2": {"schema": {"type": "number"}, "value": 73},
                             "value_set": {
                                 "schema": {"type": "array"},
                                 "value": [19, 22, 73],
@@ -327,22 +281,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                                     "column": {
                                         "schema": {"type": "string"},
                                         "value": "user_id",
-                                    },
-                                    "condition_parser": {
-                                        "schema": {"type": "string"},
-                                        "value": None,
-                                    },
-                                    "mostly": {
-                                        "schema": {"type": "number"},
-                                        "value": None,
-                                    },
-                                    "row_condition": {
-                                        "schema": {"type": "string"},
-                                        "value": None,
-                                    },
-                                    "threshold": {
-                                        "schema": {"type": "number"},
-                                        "value": None,
                                     },
                                 },
                                 "template": "$column Kullback-Leibler (KL) "

@@ -33,7 +33,7 @@ def is_valid_mic(mic_code: str, df) -> bool:
 class ColumnValuesToBeValidMic(ColumnMapMetricProvider):
 
     url = "https://www.iso20022.org/sites/default/files/ISO10383_MIC/ISO10383_MIC.csv"
-    df = pd.read_csv(url)
+    df = pd.read_csv(url, encoding="cp1250")
 
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_mic"
@@ -56,7 +56,7 @@ class ColumnValuesToBeValidMic(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidMic(ColumnMapExpectation):
-    """Expect column values to be valid MIC code (ISO10383)"""
+    """Expect column values to be valid MIC code (ISO10383)."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

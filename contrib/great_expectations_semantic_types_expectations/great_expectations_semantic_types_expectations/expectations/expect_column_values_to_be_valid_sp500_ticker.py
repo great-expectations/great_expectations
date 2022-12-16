@@ -42,7 +42,7 @@ class ColumnValuesToBeValidSp500Ticker(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidSp500Ticker(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid S&P 500 ticker."""
+    """Expect column values to be valid S&P 500 tickers."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

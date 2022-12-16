@@ -27,7 +27,7 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
 )
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.execution_environment import (
-    GEExecutionEnvironment,
+    GXExecutionEnvironment,
     PackageInfo,
     PackageInfoSchema,
 )
@@ -160,8 +160,8 @@ class UsageStatisticsHandler:
 
     @staticmethod
     def _get_serialized_dependencies() -> List[dict]:
-        """Get the serialized dependencies from the GEExecutionEnvironment."""
-        ge_execution_environment = GEExecutionEnvironment()
+        """Get the serialized dependencies from the GXExecutionEnvironment."""
+        ge_execution_environment = GXExecutionEnvironment()
         dependencies: List[PackageInfo] = ge_execution_environment.dependencies
 
         schema = PackageInfoSchema()
@@ -173,7 +173,7 @@ class UsageStatisticsHandler:
         return serialized_dependencies
 
     def build_envelope(self, message: dict) -> dict:
-        message["version"] = "1.0.0"
+        message["version"] = "1.0.1"
         message["ge_version"] = self._ge_version
 
         message["data_context_id"] = self._data_context_id
@@ -198,7 +198,10 @@ class UsageStatisticsHandler:
     @staticmethod
     def validate_message(message: dict, schema: dict) -> bool:
         try:
-            jsonschema.validate(message, schema=schema)
+            jsonschema.validators.Draft202012Validator(
+                schema=schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message)
             return True
         except jsonschema.ValidationError as e:
             logger.debug(

@@ -4,7 +4,7 @@ from typing import Callable, Dict, Optional, Union
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.rule_based_profiler.domain import Domain
+from great_expectations.core.domain import Domain
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
     NumericRangeEstimationResult,
 )

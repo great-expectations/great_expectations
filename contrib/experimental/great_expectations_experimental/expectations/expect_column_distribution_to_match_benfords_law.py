@@ -33,8 +33,8 @@ from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_value,
 )
+from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     handle_strict_min_max,
     num_to_str,
@@ -232,9 +232,9 @@ class ColumnDistributionMatchesBenfordsLaw(ColumnMetricProvider):
 
 
 class ExpectColumnDistributionToMatchBenfordsLaw(ColumnExpectation):
-    """
-    Tests whether data matches Benford's Law Fraud Detection Algorithm.
-    Uses a Chi-Square Goodness of Fit test with an 80@ p-value
+    """Expect column distribution to match Benford's Law.
+
+    Tests whether data matches Benford's Law Fraud Detection Algorithm. Uses a Chi-Square Goodness of Fit test with an 80@ p-value.
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
@@ -311,15 +311,11 @@ class ExpectColumnDistributionToMatchBenfordsLaw(ColumnExpectation):
     #     cls,
     #     configuration=None,
     #     result=None,
-    #     language=None,
     #     runtime_configuration=None,
     #     **kwargs,
     # ):
     #     runtime_configuration = runtime_configuration or {}
-    #     include_column_name = runtime_configuration.get("include_column_name", True)
-    #     include_column_name = (
-    #         include_column_name if include_column_name is not None else True
-    #     )
+    #     include_column_name = False if runtime_configuration.get("include_column_name") is False else True
     #     styling = runtime_configuration.get("styling")
     #     params = substitute_none_for_missing(
     #         configuration.kwargs,

@@ -22,7 +22,7 @@ from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.data_context import DataContext
-from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
+from great_expectations.data_context.types.base import CURRENT_GX_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     RunIdentifier,
@@ -381,7 +381,9 @@ def load_checkpoint(
         exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}</red>")
 
 
-def select_datasource(context: DataContext, datasource_name: str = None) -> Datasource:
+def select_datasource(
+    context: DataContext, datasource_name: Optional[str] = None
+) -> Datasource:
     """Select a datasource interactively."""
     # TODO consolidate all the myriad CLI tests into this
     data_source = None
@@ -425,7 +427,7 @@ def load_data_context_with_error_handling(
         ge_config_version: int = context.get_config().config_version
         if (
             from_cli_upgrade_command
-            and int(ge_config_version) < CURRENT_GE_CONFIG_VERSION
+            and int(ge_config_version) < CURRENT_GX_CONFIG_VERSION
         ):
             directory = directory or context.root_directory
             (
@@ -450,7 +452,7 @@ def load_data_context_with_error_handling(
             if ge_config_version
             else None
         )
-        if upgrade_helper_class and ge_config_version < CURRENT_GE_CONFIG_VERSION:
+        if upgrade_helper_class and ge_config_version < CURRENT_GX_CONFIG_VERSION:
             upgrade_project(
                 context_root_dir=directory,
                 ge_config_version=ge_config_version,
@@ -483,13 +485,13 @@ def upgrade_project(
         message = (
             f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - "
             f"the version "
-            f"number must be at least {CURRENT_GE_CONFIG_VERSION}.</red>"
+            f"number must be at least {CURRENT_GX_CONFIG_VERSION}.</red>"
         )
     else:
         message = (
             f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - "
             f"the version "
-            f"number must be at least {CURRENT_GE_CONFIG_VERSION}.\nIn order to proceed, "
+            f"number must be at least {CURRENT_GX_CONFIG_VERSION}.\nIn order to proceed, "
             f"your project must be upgraded.</red>"
         )
 
@@ -504,7 +506,7 @@ def upgrade_project(
     cli_message(SECTION_SEPARATOR)
 
     # use loop in case multiple upgrades need to take place
-    while ge_config_version < CURRENT_GE_CONFIG_VERSION:
+    while ge_config_version < CURRENT_GX_CONFIG_VERSION:
         (
             increment_version,
             exception_occurred,
@@ -530,7 +532,7 @@ To learn more about the upgrade process, visit \
 <cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html</cyan>
 """
 
-    if ge_config_version < CURRENT_GE_CONFIG_VERSION:
+    if ge_config_version < CURRENT_GX_CONFIG_VERSION:
         cli_message(upgrade_incomplete_message)
     else:
         cli_message(upgrade_success_message)
@@ -547,9 +549,9 @@ def upgrade_project_up_to_one_version_increment(
     if not upgrade_helper_class:
         return False, False
     target_ge_config_version = int(ge_config_version) + 1
-    # set version temporarily to CURRENT_GE_CONFIG_VERSION to get functional DataContext
+    # set version temporarily to CURRENT_GX_CONFIG_VERSION to get functional DataContext
     DataContext.set_ge_config_version(
-        config_version=CURRENT_GE_CONFIG_VERSION,
+        config_version=CURRENT_GX_CONFIG_VERSION,
         context_root_dir=context_root_dir,
     )
     upgrade_helper = upgrade_helper_class(context_root_dir=context_root_dir)

@@ -55,7 +55,11 @@ def integer_and_datetime_sample_dataset() -> dict:
     ],
 )
 def test_column_partition_metric(
-    sa, spark_session, integer_and_datetime_sample_dataset: dict, backend: str
+    sa,
+    in_memory_runtime_context,
+    spark_session,
+    integer_and_datetime_sample_dataset: dict,
+    backend: str,
 ):
     """
     Test of "column.partition" metric for both, standard numeric column and "datetime.datetime" valued column.
@@ -70,6 +74,7 @@ def test_column_partition_metric(
     validator_with_data: Validator = get_test_validator_with_data(
         execution_engine=backend,
         data=integer_and_datetime_sample_dataset,
+        context=in_memory_runtime_context,
     )
 
     metrics_calculator: MetricsCalculator = validator_with_data.metrics_calculator
@@ -90,7 +95,6 @@ def test_column_partition_metric(
             "n_bins": n_bins,
             "allow_relative_error": False,
         },
-        metric_dependencies=None,
     )
     results = metrics_calculator.compute_metrics(metric_configurations=[desired_metric])
 
@@ -110,7 +114,6 @@ def test_column_partition_metric(
             "n_bins": n_bins,
             "allow_relative_error": False,
         },
-        metric_dependencies=None,
     )
     results = metrics_calculator.compute_metrics(metric_configurations=[desired_metric])
 

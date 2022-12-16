@@ -9,7 +9,7 @@ import textwrap
 import click
 
 try:
-    from pybigquery.parse_url import parse_url as parse_bigquery_url
+    from sqlalchemy_bigquery.parse_url import parse_url as parse_bigquery_url
 except (ImportError, ModuleNotFoundError):
     parse_bigquery_url = None
 
@@ -43,7 +43,7 @@ from great_expectations.exceptions import (
     BatchKwargsError,
     DatasourceInitializationError,
 )
-from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.validator.validator import BridgeValidator
 
 logger = logging.getLogger(__name__)
@@ -498,7 +498,7 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
     # with the datasource's name as the variable name.
     # The value of the datasource's "credentials" key in the config file (great_expectations.yml) will
     # be ${datasource name}.
-    # GE will replace the ${datasource name} with the value from the credentials file in runtime.
+    # GX will replace the ${datasource name} with the value from the credentials file in runtime.
 
     while True:
         cli_message(msg_db_config.format(datasource_name))
@@ -606,7 +606,7 @@ After you connect to the datasource, run great_expectations init to continue.
 
 """.format(
                         datasource_name,
-                        DataContext.GE_YML,
+                        DataContext.GX_YML,
                         context.get_config()["config_variables_file_path"],
                         rtd_url_ge_version,
                         selected_database.value.lower(),
@@ -1368,7 +1368,7 @@ Would you like to continue?"""
     temp_table_kwargs = {}
     datasource = context.get_datasource(datasource_name)
 
-    if datasource.engine.dialect.name.lower() == GESqlDialect.BIGQUERY:
+    if datasource.engine.dialect.name.lower() == GXSqlDialect.BIGQUERY:
         # bigquery table needs to contain the project id if it differs from the credentials project
         if len(data_asset_name.split(".")) < 3:
             project_id, _, _, _, _, _ = parse_bigquery_url(datasource.engine.url)
@@ -1441,17 +1441,12 @@ def _verify_snowflake_dependent_modules() -> bool:
 
 
 def _verify_bigquery_dependent_modules() -> bool:
-    pybigquery_ok = verify_library_dependent_modules(
-        python_import_name="pybigquery.sqlalchemy_bigquery",
-        pip_library_name="pybigquery",
-        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
-    )
     sqlalchemy_bigquery_ok = verify_library_dependent_modules(
         python_import_name="sqlalchemy_bigquery",
         pip_library_name="sqlalchemy_bigquery",
         module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
     )
-    return pybigquery_ok or sqlalchemy_bigquery_ok
+    return sqlalchemy_bigquery_ok
 
 
 def _verify_pyspark_dependent_modules() -> bool:

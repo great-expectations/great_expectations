@@ -1,25 +1,25 @@
-class GeCloudIdAwareRef:
+class GXCloudIDAwareRef:
     """
     This class serves as a base class for refs tied to a Great Expectations Cloud ID.
     """
 
-    def __init__(self, ge_cloud_id: str) -> None:
-        self._ge_cloud_id = ge_cloud_id
+    def __init__(self, cloud_id: str) -> None:
+        self._cloud_id = cloud_id
 
     @property
-    def ge_cloud_id(self):
-        return self._ge_cloud_id
+    def cloud_id(self):
+        return self._cloud_id
 
 
-class GeCloudResourceRef(GeCloudIdAwareRef):
+class GXCloudResourceRef(GXCloudIDAwareRef):
     """
     This class represents a reference to a Great Expectations object persisted to Great Expectations Cloud.
     """
 
-    def __init__(self, resource_type: str, ge_cloud_id: str, url: str) -> None:
+    def __init__(self, resource_type: str, cloud_id: str, url: str) -> None:
         self._resource_type = resource_type
         self._url = url
-        super().__init__(ge_cloud_id=ge_cloud_id)
+        super().__init__(cloud_id=cloud_id)
 
     @property
     def resource_type(self):

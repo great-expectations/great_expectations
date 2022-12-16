@@ -30,7 +30,7 @@ This style guide will be enforced for all incoming PRs. However, certain legacy 
 :::
 
 
-* The **project name “Great Expectations” is always spaced and capitalized.** Good: “Great Expectations”. Bad: “great_expectations”, “great expectations”, “GE.”
+* The **project name “Great Expectations” is always spaced and capitalized.** Good: “Great Expectations”. Bad: “great_expectations”, “great expectations”, “GX.”
 
 * **We refer to ourselves in the first person plural.** Good: “we”, “our”. Bad: “I”. This helps us avoid awkward passive sentences. Occasionally, we refer to ourselves as “the Great Expectations team” (or community) for clarity.
 

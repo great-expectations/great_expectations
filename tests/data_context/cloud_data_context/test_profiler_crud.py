@@ -3,15 +3,13 @@ from unittest import mock
 
 import pytest
 
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
 from great_expectations.data_context.data_context.data_context import DataContext
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
-from great_expectations.data_context.types.base import DataContextConfig, GeCloudConfig
-from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
+from great_expectations.data_context.types.base import DataContextConfig, GXCloudConfig
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
@@ -212,7 +210,7 @@ def test_cloud_backed_data_context_add_profiler_e2e(
     mock_save_project_config: mock.MagicMock,
     profiler_rules: dict,
 ) -> None:
-    context = DataContext(ge_cloud_mode=True)
+    context = DataContext(cloud_mode=True)
 
     name = "oss_test_profiler"
     config_version = 1.0
@@ -340,7 +338,7 @@ def mock_get_all_profilers_json(
 @pytest.mark.cloud
 def test_list_profilers(
     empty_ge_cloud_data_context_config: DataContextConfig,
-    ge_cloud_config: GeCloudConfig,
+    ge_cloud_config: GXCloudConfig,
     profiler_names_and_ids: Tuple[Tuple[str, str], Tuple[str, str]],
     mock_get_all_profilers_json: dict,
 ) -> None:
@@ -349,8 +347,8 @@ def test_list_profilers(
     context = BaseDataContext(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path_name,
-        ge_cloud_config=ge_cloud_config,
-        ge_cloud_mode=True,
+        cloud_config=ge_cloud_config,
+        cloud_mode=True,
     )
 
     profiler_1, profiler_2 = profiler_names_and_ids
@@ -364,14 +362,14 @@ def test_list_profilers(
         profilers = context.list_profilers()
 
     assert profilers == [
-        GeCloudIdentifier(
-            resource_type=GeCloudRESTResource.PROFILER,
-            ge_cloud_id=profiler_id_1,
+        GXCloudIdentifier(
+            resource_type=GXCloudRESTResource.PROFILER,
+            cloud_id=profiler_id_1,
             resource_name=profiler_name_1,
         ),
-        GeCloudIdentifier(
-            resource_type=GeCloudRESTResource.PROFILER,
-            ge_cloud_id=profiler_id_2,
+        GXCloudIdentifier(
+            resource_type=GXCloudRESTResource.PROFILER,
+            cloud_id=profiler_id_2,
             resource_name=profiler_name_2,
         ),
     ]

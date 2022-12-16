@@ -124,13 +124,11 @@ def build_continuous_partition_object(
         metric_value_kwargs={
             "bins": tuple(bins),
         },
-        metric_dependencies=None,
     )
     nonnull_configuration = MetricConfiguration(
         "column_values.nonnull.count",
         metric_domain_kwargs=domain_kwargs,
         metric_value_kwargs=None,
-        metric_dependencies=None,
     )
     metrics = execution_engine.resolve_metrics(
         (hist_metric_configuration, nonnull_configuration)
@@ -174,13 +172,11 @@ def build_categorical_partition_object(execution_engine, domain_kwargs, sort="va
         metric_value_kwargs={
             "sort": sort,
         },
-        metric_dependencies=None,
     )
     nonnull_configuration = MetricConfiguration(
         "column_values.nonnull.count",
         metric_domain_kwargs=domain_kwargs,
         metric_value_kwargs=None,
-        metric_dependencies=None,
     )
     metrics = execution_engine.resolve_metrics(
         (counts_configuration, nonnull_configuration)
@@ -465,7 +461,7 @@ def validate_distribution_parameters(distribution, params):  # noqa: C901 - 33
 
     else:
         raise ValueError(
-            "params must be a dict or list, or use ge.dataset.util.infer_distribution_parameters(data, distribution)"
+            "params must be a dict or list, or use great_expectations.dataset.util.infer_distribution_parameters(data, distribution)"
         )
 
     return

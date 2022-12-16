@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 from freezegun import freeze_time
 
-import great_expectations as ge
+import great_expectations as gx
 
 # noinspection PyUnresolvedReferences
 from contrib.experimental.great_expectations_experimental.rule_based_profiler.data_assistant import (
@@ -21,13 +21,13 @@ from contrib.experimental.great_expectations_experimental.tests.test_utils impor
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     ParameterNode,
@@ -192,7 +192,7 @@ def test_growth_numeric_data_assistant_metrics_count(
         domain,
         parameter_values_for_fully_qualified_parameter_names,
     ) in bobby_growth_numeric_data_assistant_result.metrics_by_domain.items():
-        if domain.is_superset(domain_key):
+        if domain.is_superset(other=domain_key):
             num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
 
     assert num_metrics == 2
@@ -318,7 +318,7 @@ def test_pandas_happy_path_growth_numeric_data_assistant(empty_data_context) -> 
     3. Running GrowthNumericDataAssistantResult and saving resulting ExpectationSuite as 'taxi_data_2019_suite'
     4. Configuring BatchRequest to load 2020 January data
     """
-    data_context: ge.DataContext = empty_data_context
+    data_context: gx.DataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__,
         os.path.join(
@@ -429,7 +429,7 @@ def test_spark_happy_path_growth_numeric_data_assistant(
     from pyspark.sql.types import StructType
 
     schema: StructType = spark_df_taxi_data_schema
-    data_context: ge.DataContext = empty_data_context
+    data_context: gx.DataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__, os.path.join("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
     )
@@ -531,7 +531,7 @@ def test_sql_happy_path_growth_numeric_data_assistant(
     else:
         load_data_into_postgres_database(sa)
 
-    data_context: ge.DataContext = empty_data_context
+    data_context: gx.DataContext = empty_data_context
 
     datasource_config = {
         "name": "taxi_multi_batch_sql_datasource",
