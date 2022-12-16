@@ -775,7 +775,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_outp
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
         expectation_suite_name="animal_names_exp",
-        batch_request=batch_request_for_pandas_unexpected_rows_and_index,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
 
@@ -788,6 +787,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_outp
         "unexpected_index_list"
     )
     assert not first_result_full_list
+
     first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
         "partial_unexpected_index_list"
     ]
@@ -837,4 +837,8 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
     first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0][
         "result"
     ].get("partial_unexpected_index_list")
-    assert not first_result_partial_list
+    assert first_result_partial_list == [
+        {"animals": "giraffe", "pk_1": 3},
+        {"animals": "lion", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+    ]

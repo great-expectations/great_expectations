@@ -1113,14 +1113,14 @@ class Expectation(metaclass=MetaExpectation):
         self,
         configuration: ExpectationConfiguration,
         runtime_configuration: Optional[dict] = None,
-    ) -> Union[Dict[str, Union[str, int, bool]], str]:
+    ) -> Union[Dict[str, Union[str, int, bool, List[str], None]], str]:
         default_result_format: Optional[Any] = self.default_kwarg_values.get(
             "result_format"
         )
         configuration_result_format: Union[
-            Dict[str, Union[str, int, bool]], str
+            Dict[str, Union[str, int, bool, List[str], None]], str
         ] = configuration.kwargs.get("result_format", default_result_format)
-        result_format: Union[Dict[str, Union[str, int, bool]], str]
+        result_format: Union[Dict[str, Union[str, int, bool, List[str], None]], str]
         if runtime_configuration:
             result_format = runtime_configuration.get(
                 "result_format",
@@ -2659,12 +2659,14 @@ class ColumnMapExpectation(TableExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format: Union[Dict[str, Any], str] = self.get_result_format(
+        result_format: Union[
+            Dict[str, Union[int, str, bool, List[str], None]], str
+        ] = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
 
-        unexpected_index_column_names: Optional[List[str]] = None
-        include_unexpected_rows: Union[bool, None] = None
+        unexpected_index_column_names = None
+        include_unexpected_rows = None
 
         if isinstance(result_format, dict):
             include_unexpected_rows = result_format.get(
@@ -2897,7 +2899,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         result_format: Union[
-            Dict[str, Union[str, int, bool]], str
+            Dict[str, Union[str, int, bool, List[str], None]], str
         ] = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
@@ -3170,7 +3172,7 @@ def _format_map_output(
     unexpected_list: Optional[List[Any]] = None,
     unexpected_index_list: Optional[List[int]] = None,
     unexpected_index_query: Optional[str] = None,
-    unexpected_index_column_names: Optional[List[str]] = None,
+    unexpected_index_column_names: Optional[Union[int, str, List[str]]] = None,
     unexpected_rows=None,
 ) -> Dict:
     """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
@@ -3220,15 +3222,15 @@ def _format_map_output(
         "unexpected_percent": unexpected_percent_nonmissing,
     }
 
-    if unexpected_index_column_names is not None:
-        return_obj["result"].update(
-            {"unexpected_index_column_names": unexpected_index_column_names}
-        )
-
     if unexpected_list is not None:
         return_obj["result"]["partial_unexpected_list"] = unexpected_list[
             : result_format["partial_unexpected_count"]
         ]
+
+    if unexpected_index_column_names is not None:
+        return_obj["result"].update(
+            {"unexpected_index_column_names": unexpected_index_column_names}
+        )
 
     if not skip_missing:
         return_obj["result"]["missing_count"] = missing_count
