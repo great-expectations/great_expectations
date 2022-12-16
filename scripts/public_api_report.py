@@ -344,7 +344,7 @@ class PublicAPIChecker:
         self.code_parser = code_parser
 
     def get_all_public_api_definitions(self) -> Set[Definition]:
-
+        """Get definitions that are marked with the public api decorator."""
         definitions: List[Definition] = []
 
         for (
@@ -356,6 +356,7 @@ class PublicAPIChecker:
         return set(definitions)
 
     def is_definition_marked_public_api(self, definition: Definition) -> bool:
+        """Determine if a definition is marked with the public api decorator."""
 
         result = False
         found_decorators = self._get_decorator_names(
@@ -370,6 +371,7 @@ class PublicAPIChecker:
     def _get_decorator_names(
         self, ast_definition: Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]
     ) -> Set[str]:
+        """Get all decorator names for a single definition from an ast tree."""
         def flatten_attr(node):
             if isinstance(node, ast.Attribute):
                 return f"{str(flatten_attr(node.value))}.{node.attr}"
