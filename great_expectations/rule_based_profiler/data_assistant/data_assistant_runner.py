@@ -123,7 +123,7 @@ class DataAssistantRunner:
                 DataAssistantResult: The result object for the DataAssistant
             """
             if batch_request is None:
-                data_assistant_name: str = self._data_assistant_cls.data_assistant_type
+                data_assistant_name: str = self._data_assistant_cls.data_assistant_type  # type: ignore[attr-defined] # Dynamic attr assigned in __new__
                 raise ge_exceptions.DataAssistantExecutionError(
                     message=f"""Utilizing "{data_assistant_name}.run()" requires valid "batch_request" to be specified \
 (empty or missing "batch_request" detected)."""
@@ -219,7 +219,7 @@ class DataAssistantRunner:
         Returns:
             DataAssistant: The "DataAssistant" object, corresponding to this instance's specified "DataAssistant" type.
         """
-        data_assistant_name: str = self._data_assistant_cls.data_assistant_type
+        data_assistant_name: str = self._data_assistant_cls.data_assistant_type  # type: ignore[attr-defined] # Dynamic attr assigned in __new__
 
         data_assistant: DataAssistant
 
@@ -272,15 +272,18 @@ class DataAssistantRunner:
         conflicting_domain_type_attribute_names: List[str] = []
 
         rule: Rule
-        domain_builder: DomainBuilder
+        domain_builder: Optional[DomainBuilder]
         domain_builder_attributes: List[str]
         key: str
         accessor_method: Callable
         accessor_method_return_type: Type
         property_value: Any
-        parameter: Parameter
+        parameter: Optional[Parameter]
         for rule in self._profiler.rules:
             domain_builder = rule.domain_builder
+            assert (
+                domain_builder
+            ), "Must have a non-null domain_builder attr on the underlying RuleBasedProfiler"
             domain_builder_attributes = self._get_rule_domain_type_attributes(rule=rule)
             for key in domain_builder_attributes:
                 accessor_method = getattr_static(domain_builder, key, None).fget
@@ -337,11 +340,18 @@ class DataAssistantRunner:
     @staticmethod
     def _get_rule_domain_type_attributes(rule: Rule) -> List[str]:
         klass: type = rule.domain_builder.__class__
-        sig: Signature = signature(obj=klass.__init__)
+        sig: Signature = signature(obj=klass.__init__)  # type: ignore[misc] # mypy does not like direct __init__ access
         parameters: Dict[str, Parameter] = dict(sig.parameters)
+
+        domain_builder = rule.domain_builder
+        assert (
+            domain_builder
+        ), f"The underlying domain_builder on rule {rule.name} must be non-null"
+        exclude_field_names = domain_builder.exclude_field_names
+
         attribute_names: List[str] = list(
             filter(
-                lambda element: element not in rule.domain_builder.exclude_field_names,
+                lambda element: element not in exclude_field_names,  # type: ignore[arg-type] # filter type check is strict: https://github.com/python/mypy/issues/12682
                 list(parameters.keys())[1:],
             )
         )
