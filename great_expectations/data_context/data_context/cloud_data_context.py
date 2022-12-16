@@ -605,7 +605,7 @@ class CloudDataContext(AbstractDataContext):
         Returns:
             None
         """
-        ge_cloud_id = (
+        id = (
             str(expectation_suite.ge_cloud_id)
             if expectation_suite.ge_cloud_id
             else None

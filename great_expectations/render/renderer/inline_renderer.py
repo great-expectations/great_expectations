@@ -18,7 +18,7 @@ from great_expectations.render import (
     AtomicRendererType,
     RenderedAtomicContent,
 )
-from great_expectations.render.exceptions import InvalidRenderedContentError
+from great_expectations.render.exceptions import InlineRendererError
 from great_expectations.render.renderer.renderer import Renderer
 
 logger = logging.getLogger(__name__)
@@ -41,7 +41,7 @@ class InlineRenderer(Renderer):
         ):
             self._render_object = render_object
         else:
-            raise InvalidRenderedContentError(
+            raise InlineRendererError(
                 f"InlineRenderer can only be used with an ExpectationConfiguration or ExpectationValidationResult, but {type(render_object)} was used."
             )
 
@@ -63,15 +63,18 @@ class InlineRenderer(Renderer):
             expectation_type = render_object.expectation_type
             renderer_types = [AtomicRendererType.PRESCRIPTIVE]
         elif isinstance(render_object, ExpectationValidationResult):
-            expectation_type: Union[str, None] = None
             if render_object.expectation_config:
                 expectation_type = render_object.expectation_config.expectation_type
+            else:
+                raise InlineRendererError(
+                    "ExpectationValidationResult passed to InlineRenderer._get_atomic_rendered_content_for_object is missing an expectation_config."
+                )
             renderer_types = [
                 AtomicRendererType.DIAGNOSTIC,
                 AtomicRendererType.PRESCRIPTIVE,
             ]
         else:
-            raise InvalidRenderedContentError(
+            raise InlineRendererError(
                 f"InlineRenderer._get_atomic_rendered_content_for_object can only be used with an ExpectationConfiguration or ExpectationValidationResult, but {type(render_object)} was used."
             )
 
@@ -158,14 +161,19 @@ class InlineRenderer(Renderer):
         expectation_type: str,
     ) -> RenderedAtomicContent:
         renderer_rendered_content: RenderedAtomicContent
-        renderer_impl: RendererImpl = get_renderer_impl(
+        renderer_impl: Optional[RendererImpl] = get_renderer_impl(
             object_name=expectation_type, renderer_type=renderer_name
         )
-        renderer_fn: Callable = renderer_impl.renderer
-        if isinstance(render_object, ExpectationConfiguration):
-            renderer_rendered_content = renderer_fn(configuration=render_object)
+        if renderer_impl:
+            renderer_fn: Callable = renderer_impl.renderer
+            if isinstance(render_object, ExpectationConfiguration):
+                renderer_rendered_content = renderer_fn(configuration=render_object)
+            else:
+                renderer_rendered_content = renderer_fn(result=render_object)
         else:
-            renderer_rendered_content = renderer_fn(result=render_object)
+            raise InlineRendererError(
+                f"renderer_name: {renderer_name} was not found in the registry for expectation_type: {expectation_type}"
+            )
 
         return renderer_rendered_content
 

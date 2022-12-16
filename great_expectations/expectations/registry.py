@@ -137,9 +137,16 @@ def get_renderer_impls(object_name: str) -> List[str]:
     return list(_registered_renderers.get(object_name, {}).values())
 
 
-def get_renderer_impl(object_name: str, renderer_type: str) -> RendererImpl:
-    renderer_tuple = _registered_renderers.get(object_name, {}).get(renderer_type)
-    return RendererImpl(expectation=renderer_tuple[0], renderer=renderer_tuple[1])
+def get_renderer_impl(object_name: str, renderer_type: str) -> Optional[RendererImpl]:
+    renderer_tuple: Optional[tuple] = _registered_renderers.get(object_name, {}).get(
+        renderer_type
+    )
+    renderer_impl: Optional[RendererImpl] = None
+    if renderer_tuple:
+        renderer_impl = RendererImpl(
+            expectation=renderer_tuple[0], renderer=renderer_tuple[1]
+        )
+    return renderer_impl
 
 
 def register_expectation(expectation: Type[Expectation]) -> None:
