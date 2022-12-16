@@ -5,13 +5,13 @@ from typing import List, Union
 import pytest
 
 from scripts.public_api_report import (
-    DocsExampleParser,
     CodeParser,
-    IncludeExcludeDefinition,
-    FileContents,
     CodeReferenceFilter,
-    PublicAPIChecker,
     Definition,
+    DocsExampleParser,
+    FileContents,
+    IncludeExcludeDefinition,
+    PublicAPIChecker,
 )
 
 
@@ -58,7 +58,7 @@ class ExampleClass:
     @classmethod
     def example_classmethod(cls):
         pass
-    
+
     @staticmethod
     @public_api
     def example_public_staticmethod():
@@ -68,16 +68,16 @@ class ExampleClass:
     @public_api
     def example_public_classmethod(cls):
         pass
-        
+
     @some_other_decorator
     @public_api
     @another_decorator
     def example_multiple_decorator_public_method(self):
         pass
-    
+
     def _example_private_method(self):
         pass
-        
+
     @public_api
     def example_public_api_method(self):
         pass
@@ -85,14 +85,14 @@ class ExampleClass:
 
 def example_module_level_function():
     pass
-    
+
 def _example_private_module_level_function():
     pass
-    
+
 @public_api
 def example_public_api_module_level_function():
     pass
-    
+
 @public_api
 class ExamplePublicAPIClass:
     pass
@@ -213,7 +213,7 @@ class TestCodeParser:
         definitions = code_parser.get_all_class_method_and_function_definitions()
 
         assert len(definitions) == 15
-        assert set(d.name for d in definitions) == {
+        assert {d.name for d in definitions} == {
             "ExampleClass",
             "ExamplePublicAPIClass",
             "__init__",
@@ -230,7 +230,7 @@ class TestCodeParser:
             "example_public_staticmethod",
             "example_staticmethod",
         }
-        assert set(d.filepath for d in definitions) == {
+        assert {d.filepath for d in definitions} == {
             pathlib.Path(
                 "great_expectations/sample_with_definitions_python_file_string.py"
             )
@@ -253,7 +253,7 @@ class TestPublicAPIChecker:
     def test_get_all_public_api_definitions(self, public_api_checker: PublicAPIChecker):
         observed = public_api_checker.get_all_public_api_definitions()
         assert len(observed) == 6
-        assert set(d.name for d in observed) == {
+        assert {d.name for d in observed} == {
             "ExamplePublicAPIClass",
             "example_multiple_decorator_public_method",
             "example_public_api_method",
@@ -261,7 +261,7 @@ class TestPublicAPIChecker:
             "example_public_classmethod",
             "example_public_staticmethod",
         }
-        assert set(d.filepath for d in observed) == {
+        assert {d.filepath for d in observed} == {
             pathlib.Path(
                 "great_expectations/sample_with_definitions_python_file_string.py"
             )
@@ -295,7 +295,7 @@ class ExamplePublicAPIClass:
     @public_api
     def example_public_api_method():
         pass
-        
+
     @staticmethod
     @public_api
     def example_public_api_staticmethod():
@@ -305,7 +305,7 @@ class ExamplePublicAPIClass:
     @public_api
     def example_public_api_classmethod(cls):
         pass
-        
+
     @some_other_decorator
     @public_api
     @another_decorator
@@ -339,7 +339,7 @@ def example_module_level_function():
 class ExampleClass:
     def example_method():
         pass
-        
+
     @staticmethod
     def example_public_staticmethod():
         pass
@@ -347,7 +347,7 @@ class ExampleClass:
     @classmethod
     def example_public_classmethod(cls):
         pass
-        
+
     @some_other_decorator
     @another_decorator
     def example_multiple_decorator_public_method(self):
@@ -563,7 +563,7 @@ class TestCodeReferenceFilter:
     ):
         observed = code_reference_filter_with_no_include_exclude.filter_definitions()
         assert len(observed) == 6
-        assert set(d.name for d in observed) == {
+        assert {d.name for d in observed} == {
             "ExampleClass",
             # "__init__",  # Filtered private methods
             # "_example_private_method",  # Filtered private methods
@@ -574,7 +574,7 @@ class TestCodeReferenceFilter:
             "example_module_level_function",
             "example_staticmethod",
         }
-        assert set(d.filepath for d in observed) == {
+        assert {d.filepath for d in observed} == {
             pathlib.Path(
                 "great_expectations/sample_with_definitions_python_file_string.py"
             )
@@ -585,8 +585,8 @@ class TestCodeReferenceFilter:
     ):
         observed = code_reference_filter_with_exclude_by_file.filter_definitions()
         assert len(observed) == 0
-        assert set(d.name for d in observed) == set()
-        assert set(d.filepath for d in observed) == set()
+        assert {d.name for d in observed} == set()
+        assert {d.filepath for d in observed} == set()
 
     def test_filter_definitions_exclude_by_file_and_name(
         self, code_reference_filter_with_exclude_by_file_and_name: CodeReferenceFilter
@@ -595,13 +595,13 @@ class TestCodeReferenceFilter:
             code_reference_filter_with_exclude_by_file_and_name.filter_definitions()
         )
         assert len(observed) == 4
-        assert set(d.name for d in observed) == {
+        assert {d.name for d in observed} == {
             "ExampleClass",
             "example_classmethod",
             "example_method_with_args",
             "example_staticmethod",
         }
-        assert set(d.filepath for d in observed) == {
+        assert {d.filepath for d in observed} == {
             pathlib.Path(
                 "great_expectations/sample_with_definitions_python_file_string.py"
             )
@@ -623,7 +623,7 @@ class TestCodeReferenceFilter:
         # There are two extra (8 vs 6) here due to the ast_definition classes
         #  pointing to different but equivalent objects.
         assert len(observed) == 8
-        assert set(d.name for d in observed) == {
+        assert {d.name for d in observed} == {
             "ExampleClass",
             "example_classmethod",
             "example_method",
@@ -631,7 +631,7 @@ class TestCodeReferenceFilter:
             "example_module_level_function",
             "example_staticmethod",
         }
-        assert set(d.filepath for d in observed) == {
+        assert {d.filepath for d in observed} == {
             pathlib.Path(
                 "great_expectations/sample_with_definitions_python_file_string.py"
             )
@@ -651,11 +651,11 @@ class TestCodeReferenceFilter:
         # There are two extra (4 vs 2) here due to the ast_definition classes
         #  pointing to different but equivalent objects.
         assert len(observed) == 4
-        assert set(d.name for d in observed) == {
+        assert {d.name for d in observed} == {
             "example_method",
             "example_module_level_function",
         }
-        assert set(d.filepath for d in observed) == {
+        assert {d.filepath for d in observed} == {
             pathlib.Path(
                 "great_expectations/sample_with_definitions_python_file_string.py"
             )

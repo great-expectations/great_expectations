@@ -50,7 +50,7 @@ import logging
 import operator
 import pathlib
 from dataclasses import dataclass
-from typing import List, Set, Union, Optional
+from typing import List, Optional, Set, Union
 
 from great_expectations.core._docs_decorators import public_api
 
@@ -115,7 +115,7 @@ class FileContents:
     def create_from_local_files(
         cls, filepaths: Set[pathlib.Path]
     ) -> Set["FileContents"]:
-        return set(cls.create_from_local_file(filepath) for filepath in filepaths)
+        return {cls.create_from_local_file(filepath) for filepath in filepaths}
 
 
 class DocsExampleParser:
@@ -246,7 +246,7 @@ class CodeParser:
             file_contents=file_contents
         )
 
-        return set(definition.name for definition in definitions)
+        return {definition.name for definition in definitions}
 
     def get_all_class_method_and_function_definitions(
         self,
@@ -506,17 +506,17 @@ class CodeReferenceFilter:
         gx_code_definitions = (
             self.code_parser.get_all_class_method_and_function_definitions()
         )
-        gx_code_definitions_appearing_in_docs_examples = set(
-            [d for d in gx_code_definitions if d.name in gx_usages_in_docs_examples]
-        )
+        gx_code_definitions_appearing_in_docs_examples = {
+            d for d in gx_code_definitions if d.name in gx_usages_in_docs_examples
+        }
         return gx_code_definitions_appearing_in_docs_examples
 
     def _filter_private_methods_and_classes(
         self, definitions: Set[Definition]
     ) -> Set[Definition]:
-        return set(
-            [d for d in definitions if not self._is_definition_private(definition=d)]
-        )
+        return {
+            d for d in definitions if not self._is_definition_private(definition=d)
+        }
 
     def _filter_or_include(self, definitions: Set[Definition]) -> Set[Definition]:
         included_definitions: List[Definition] = []
@@ -549,11 +549,11 @@ class CodeReferenceFilter:
     def _filter_for_definitions_not_marked_public_api(
         self, definitions: Set[Definition]
     ) -> Set[Definition]:
-        return set(
+        return {
             d
             for d in definitions
             if not self.public_api_checker.is_definition_marked_public_api(d)
-        )
+        }
 
     def _is_filepath_excluded(self, filepath: pathlib.Path) -> bool:
         """Check whether an entire filepath is excluded."""
@@ -646,28 +646,28 @@ def _default_doc_example_paths() -> Set[pathlib.Path]:
     """Get all paths of doc examples (docs examples)."""
     base_directory = _repo_root() / "tests" / "integration" / "docusaurus"
     paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
-    return set(pathlib.Path(p).relative_to(_repo_root()) for p in paths)
+    return {pathlib.Path(p).relative_to(_repo_root()) for p in paths}
 
 
 def _default_doc_example_absolute_paths() -> Set[pathlib.Path]:
     """Get all paths of doc examples (docs examples)."""
     base_directory = _repo_root() / "tests" / "integration" / "docusaurus"
     paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
-    return set(pathlib.Path(p) for p in paths)
+    return {pathlib.Path(p) for p in paths}
 
 
 def _default_code_paths() -> Set[pathlib.Path]:
     """All gx modules related to the main library."""
     base_directory = _repo_root() / "great_expectations"
     paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
-    return set(pathlib.Path(p).relative_to(_repo_root()) for p in paths)
+    return {pathlib.Path(p).relative_to(_repo_root()) for p in paths}
 
 
 def _default_code_absolute_paths() -> Set[pathlib.Path]:
     """All gx modules related to the main library."""
     base_directory = _repo_root() / "great_expectations"
     paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
-    return set(pathlib.Path(p) for p in paths)
+    return {pathlib.Path(p) for p in paths}
 
 
 def _parse_file_to_ast_tree(filepath: pathlib.Path) -> ast.AST:
