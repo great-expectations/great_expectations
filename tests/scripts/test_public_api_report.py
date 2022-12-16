@@ -8,6 +8,7 @@ from scripts.public_api_report import (
     IncludeExcludeDefinition,
     FileContents,
     CodeReferenceFilter,
+    PublicAPIChecker,
 )
 
 
@@ -71,6 +72,10 @@ def _example_private_module_level_function():
     
 @public_api
 def example_public_api_module_level_function():
+    pass
+    
+@public_api
+class ExamplePublicAPIClass:
     pass
 """
 
@@ -474,12 +479,34 @@ class TestCodeReferenceFilter:
         }
 
 
-# class TestPublicAPIChecker:
-#     def test_instantiate(self):
-#         raise NotImplementedError
-#
-#     def test_get_all_public_api_functions(self):
-#         raise NotImplementedError
+@pytest.fixture
+def public_api_checker(
+    docs_example_parser: DocsExampleParser, code_parser: CodeParser
+) -> PublicAPIChecker:
+    return PublicAPIChecker(
+        docs_example_parser=docs_example_parser, code_parser=code_parser
+    )
+
+
+class TestPublicAPIChecker:
+    def test_instantiate(self, public_api_checker: PublicAPIChecker):
+        assert isinstance(public_api_checker, PublicAPIChecker)
+
+    def test_get_all_public_api_definitions(self, public_api_checker):
+        observed = public_api_checker.get_all_public_api_definitions()
+        assert len(observed) == 3
+        assert set([d.name for d in observed]) == {
+            "ExamplePublicAPIClass",
+            "example_public_api_method",
+            "example_public_api_module_level_function",
+        }
+        assert set([d.filepath for d in observed]) == {
+            pathlib.Path(
+                "great_expectations/sample_with_definitions_python_file_string.py"
+            )
+        }
+
+
 #
 #     def test_get_all_public_api_classes(self):
 #         raise NotImplementedError

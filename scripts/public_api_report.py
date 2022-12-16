@@ -52,6 +52,8 @@ import pathlib
 from dataclasses import dataclass
 from typing import List, Set, Union, Optional
 
+from great_expectations.core._docs_decorators import public_api
+
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
@@ -511,12 +513,11 @@ class PublicAPIChecker:
 
     def __init__(
         self,
-        repo_root: pathlib.Path,
-        doc_example_parser: DocsExampleParser,
+        docs_example_parser: DocsExampleParser,
         code_parser: CodeParser,
     ) -> None:
-        self.repo_root = repo_root
-        self.doc_example_parser = doc_example_parser
+        self.repo_root = _repo_root()  # TODO: REMOVE
+        self.docs_example_parser = docs_example_parser
         self.code_parser = code_parser
 
     def code_definitions_appearing_in_docs_examples_and_not_marked_public_api(
@@ -534,19 +535,19 @@ class PublicAPIChecker:
         )
 
     def _is_definition_marked_public_api(
-        self, definition: Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]
+        self, definition: Definition
     ) -> bool:
 
         result = False
-        found_decorators = self._get_decorator_names(definition=definition)
+        found_decorators = self._get_decorator_names(ast_definition=definition.ast_definition)
 
-        if "public_api" in found_decorators:
+        if public_api.__name__ in found_decorators:
             result = True
 
         return result
 
     def _get_decorator_names(
-        self, definition: Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]
+        self, ast_definition: Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]
     ) -> Set[str]:
         def flatten_attr(node):
             if isinstance(node, ast.Attribute):
@@ -557,7 +558,7 @@ class PublicAPIChecker:
                 pass
 
         found_decorators = []
-        for decorator in definition.decorator_list:
+        for decorator in ast_definition.decorator_list:
             if isinstance(decorator, ast.Name):
                 found_decorators.append(decorator.id)
             elif isinstance(decorator, ast.Attribute):
@@ -565,44 +566,44 @@ class PublicAPIChecker:
 
         return set(found_decorators)
 
-    def get_all_public_api_functions(self):
+    def get_all_public_api_definitions(self) -> Set[Definition]:
 
-        filepath = (
-            self.repo_root
-            / "great_expectations/data_context/data_context/abstract_data_context.py"
-        )
-        print(self._list_public_functions_in_file(filepath=filepath))
+        definitions: List[Definition] = []
 
-    def _list_public_functions_in_file(self, filepath: pathlib.Path) -> List[str]:
-        # TODO: Make this return function with dotted path, not just str
-        with open(self.repo_root / filepath) as f:
-            file_contents: str = f.read()
+        for definition in self.code_parser.get_all_class_method_and_function_definitions():
+            if self._is_definition_marked_public_api(definition):
+                definitions.append(definition)
 
-        tree = ast.parse(file_contents)
+        return set(definitions)
 
-        def flatten_attr(node):
-            if isinstance(node, ast.Attribute):
-                return str(flatten_attr(node.value)) + "." + node.attr
-            elif isinstance(node, ast.Name):
-                return str(node.id)
-            else:
-                pass
-
-        public_functions: List[str] = []
-
-        for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef):
-                found_decorators = []
-                for decorator in node.decorator_list:
-                    if isinstance(decorator, ast.Name):
-                        found_decorators.append(decorator.id)
-                    elif isinstance(decorator, ast.Attribute):
-                        found_decorators.append(flatten_attr(decorator))
-
-                if "public_api" in found_decorators:
-                    public_functions.append(node.name)
-
-        return public_functions
+    # def _get_public_function_definitions(self, file_contents: FileContents) -> List[str]:
+    #     # TODO: Make this return function with dotted path, not just str
+    #
+    #     tree = ast.parse(file_contents)
+    #
+    #     def flatten_attr(node):
+    #         if isinstance(node, ast.Attribute):
+    #             return str(flatten_attr(node.value)) + "." + node.attr
+    #         elif isinstance(node, ast.Name):
+    #             return str(node.id)
+    #         else:
+    #             pass
+    #
+    #     public_functions: List[str] = []
+    #
+    #     for node in ast.walk(tree):
+    #         if isinstance(node, ast.FunctionDef):
+    #             found_decorators = []
+    #             for decorator in node.decorator_list:
+    #                 if isinstance(decorator, ast.Name):
+    #                     found_decorators.append(decorator.id)
+    #                 elif isinstance(decorator, ast.Attribute):
+    #                     found_decorators.append(flatten_attr(decorator))
+    #
+    #             if "public_api" in found_decorators:
+    #                 public_functions.append(node.name)
+    #
+    #     return public_functions
 
 
 class PublicAPIReport:
