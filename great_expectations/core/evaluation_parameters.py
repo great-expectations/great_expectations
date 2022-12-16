@@ -195,13 +195,32 @@ class EvaluationParameterParser:
             # Require that the *entire* expression evaluates to number or datetime UNLESS there is *exactly one*
             # expression to substitute (see cases where len(parse_results) == 1 in the parse_evaluation_parameter
             # method).
+            evaluated: Union[int, float, datetime.datetime]
             try:
-                return int(op)
+                evaluated = int(op)
+                logger.info(
+                    "Evaluation parameter operand successfully parsed as integer."
+                )
             except ValueError:
+                logger.info("Parsing evaluation parameter operand as integer failed.")
                 try:
-                    return float(op)
+                    evaluated = float(op)
+                    logger.info(
+                        "Evaluation parameter operand successfully parsed as float."
+                    )
                 except ValueError:
-                    return dateutil.parser.parse(op)
+                    logger.info("Parsing evaluation parameter operand as float failed.")
+                    try:
+                        evaluated = dateutil.parser.parse(op)
+                        logger.info(
+                            "Evaluation parameter operand successfully parsed as datetime."
+                        )
+                    except ValueError as e:
+                        logger.info(
+                            "Parsing evaluation parameter operand as datetime failed."
+                        )
+                        raise e
+            return evaluated
 
 
 def build_evaluation_parameters(
