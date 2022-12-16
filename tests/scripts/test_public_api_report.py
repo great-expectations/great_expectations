@@ -119,7 +119,7 @@ class ExamplePublicAPIClass:
 
 @pytest.fixture
 def repo_root() -> pathlib.Path:
-    return pathlib.Path("/repo_root/")
+    return pathlib.Path("/some/absolute/path/repo_root/")
 
 
 @pytest.fixture
@@ -707,9 +707,11 @@ class TestCodeReferenceFilter:
 @pytest.fixture
 def public_api_report(
     code_reference_filter_with_no_include_exclude: CodeReferenceFilter,
+    repo_root: pathlib.Path
 ) -> PublicAPIReport:
     return PublicAPIReport(
-        definitions=code_reference_filter_with_no_include_exclude.filter_definitions()
+        definitions=code_reference_filter_with_no_include_exclude.filter_definitions(),
+        repo_root=repo_root,
     )
 
 

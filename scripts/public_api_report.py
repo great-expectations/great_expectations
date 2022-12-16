@@ -624,14 +624,17 @@ class CodeReferenceFilter:
 class PublicAPIReport:
     """Generate a report from entity definitions (class, method and function)."""
 
-    def __init__(self, definitions: Set[Definition]) -> None:
+    def __init__(self, definitions: Set[Definition], repo_root: pathlib.Path) -> None:
         """Create a PublicAPIReport object.
 
         Args:
             definitions: Entity definitions to include in the report. Generally,
                 these are filtered before inclusion.
+            repo_root: Path to the repo root for stripping filenames relative
+                to the repository root.
         """
         self.definitions = definitions
+        self.repo_root = repo_root
 
     def write_printable_definitions_to_file(
         self,
@@ -662,7 +665,10 @@ class PublicAPIReport:
         )
         sorted_definitions_strings: List[str] = []
         for definition in sorted_definitions_list:
-            filepath = str(definition.filepath)
+            if definition.filepath.is_absolute():
+                filepath = str(definition.filepath.relative_to(self.repo_root))
+            else:
+                filepath = str(definition.filepath)
             if filepath.startswith(file_prefix_to_strip):
                 filepath = filepath[len(file_prefix_to_strip) :]
             sorted_definitions_strings.append(
@@ -739,7 +745,7 @@ def main():
 
     filtered_definitions = code_reference_filter.filter_definitions()
 
-    public_api_report = PublicAPIReport(definitions=filtered_definitions)
+    public_api_report = PublicAPIReport(definitions=filtered_definitions, repo_root=_repo_root())
 
     printable_definitions = public_api_report.generate_printable_definitions()
     for printable_definition in printable_definitions:
