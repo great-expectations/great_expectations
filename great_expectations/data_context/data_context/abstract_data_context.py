@@ -41,6 +41,7 @@ from great_expectations.core.batch import (
     IDDict,
     get_batch_request_from_acceptable_arguments,
 )
+from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.config_provider import (
     _ConfigurationProvider,
     _ConfigurationVariablesConfigurationProvider,
@@ -105,6 +106,7 @@ from great_expectations.datasource.datasource_serializer import (
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfig,
@@ -161,7 +163,7 @@ yaml = YAMLHandler()
 T = TypeVar("T", dict, list, str)
 
 
-class AbstractDataContext(ABC):
+class AbstractDataContext(ConfigPeer, ABC):
     """
     Base class for all DataContexts that contain all context-agnostic data context operations.
 
@@ -184,6 +186,9 @@ class AbstractDataContext(ABC):
     PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND = 4
     PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND = 5
 
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT___INIT__,
+    )
     def __init__(self, runtime_environment: Optional[dict] = None) -> None:
         """
         Constructor for AbstractDataContext. Will handle instantiation logic that is common to all DataContext objects
@@ -235,8 +240,22 @@ class AbstractDataContext(ABC):
 
         self._assistants = DataAssistantDispatcher(data_context=self)
 
+        self._sources: _SourceFactories = _SourceFactories(self)
+
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         self.validation_operators: dict = {}
+        if (
+            "validation_operators" in self.get_config().commented_map  # type: ignore[union-attr]
+            and self.config.validation_operators
+        ):
+            for (
+                validation_operator_name,
+                validation_operator_config,
+            ) in self.config.validation_operators.items():
+                self.add_validation_operator(
+                    validation_operator_name,
+                    validation_operator_config,
+                )
 
     def _init_config_provider(self) -> _ConfigurationProvider:
         config_provider = _ConfigurationProvider()
@@ -547,6 +566,19 @@ class AbstractDataContext(ABC):
     @property
     def assistants(self) -> DataAssistantDispatcher:
         return self._assistants
+
+    @property
+    def sources(self) -> _SourceFactories:
+        return self._sources
+
+    def _attach_datasource_to_context(self, datasource: XDatasource):
+        # We currently don't allow one to overwrite a datasource with this internal method
+        if datasource.name in self.datasources:
+            raise ge_exceptions.DataContextError(
+                f"Can not write the experimental datasource {datasource.name} because a datasource of that "
+                "name already exists in the data context."
+            )
+        self.datasources[datasource.name] = datasource
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config

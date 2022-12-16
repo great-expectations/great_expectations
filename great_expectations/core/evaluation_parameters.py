@@ -32,7 +32,7 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import EvaluationParameterError
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import DataContext
+    from great_expectations.data_context import AbstractDataContext
 
 logger = logging.getLogger(__name__)
 _epsilon = 1e-12
@@ -334,7 +334,7 @@ def find_evaluation_parameter_dependencies(parameter_expression):
 def parse_evaluation_parameter(  # noqa: C901 - complexity 19
     parameter_expression: str,
     evaluation_parameters: Optional[Dict[str, Any]] = None,
-    data_context: Optional[DataContext] = None,
+    data_context: Optional[AbstractDataContext] = None,
 ) -> Any:
     """Use the provided evaluation_parameters dict to parse a given parameter expression.
 
@@ -368,9 +368,11 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
             res = ge_urn.parseString(parse_results[0])
             if res["urn_type"] == "stores":
                 store = data_context.stores.get(res["store_name"])  # type: ignore[union-attr]
-                return store.get_query_result(  # type: ignore[union-attr]
-                    res["metric_name"], res.get("metric_kwargs", {})
-                )
+                if store:
+                    return store.get_query_result(
+                        res["metric_name"], res.get("metric_kwargs", {})
+                    )
+                return None
             else:
                 logger.error(
                     "Unrecognized urn_type in ge_urn: must be 'stores' to use a metric store."
@@ -410,11 +412,12 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
                     res = ge_urn.parseString(ob)
                     if res["urn_type"] == "stores":
                         store = data_context.stores.get(res["store_name"])  # type: ignore[union-attr]
-                        EXPR.exprStack[i] = str(
-                            store.get_query_result(  # type: ignore[union-attr]
-                                res["metric_name"], res.get("metric_kwargs", {})
-                            )
-                        )  # value placed back in stack must be a string
+                        if store:
+                            EXPR.exprStack[i] = str(
+                                store.get_query_result(
+                                    res["metric_name"], res.get("metric_kwargs", {})
+                                )
+                            )  # value placed back in stack must be a string
                     else:
                         # handle other urn_types here, but note that validations URNs are being resolved elsewhere.
                         pass
