@@ -3121,7 +3121,7 @@ def _format_map_output(
     unexpected_list: Optional[List[Any]] = None,
     unexpected_index_list: Optional[List[int]] = None,
     unexpected_index_query: Optional[str] = None,
-    unexpected_index_column_names: Optional[str] = None,
+    unexpected_index_column_names: Optional[Union[str, int]] = None,
     unexpected_rows=None,
 ) -> Dict:
     """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
