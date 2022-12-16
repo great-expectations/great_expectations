@@ -152,7 +152,7 @@ class DocsExampleParser:
 
         tree = ast.parse(file_contents.contents)
 
-        function_calls = self._list_all_function_calls(tree=tree)
+        function_calls = self._get_all_function_calls(tree=tree)
         function_names = self._get_non_private_function_names(calls=function_calls)
         logger.debug(f"function_names: {function_names}")
 
@@ -165,7 +165,7 @@ class DocsExampleParser:
     def _list_all_gx_imports(
         self, tree: ast.AST
     ) -> List[Union[ast.Import, ast.ImportFrom]]:
-        """Get all of the GX related imports in a file."""
+        """Get all the GX related imports in an ast tree."""
 
         imports: List[Union[ast.Import, ast.ImportFrom]] = []
 
@@ -188,6 +188,7 @@ class DocsExampleParser:
     def _get_non_private_gx_import_names(
         self, imports: List[Union[ast.Import, ast.ImportFrom]]
     ) -> Set[str]:
+        """From ast trees, get names of all non private GX related imports."""
 
         names = []
         for import_ in imports:
@@ -202,7 +203,8 @@ class DocsExampleParser:
 
         return set(names)
 
-    def _list_all_function_calls(self, tree: ast.AST) -> List[ast.Call]:
+    def _get_all_function_calls(self, tree: ast.AST) -> List[ast.Call]:
+        """Get all the function calls from an ast tree."""
         calls = []
         for node in ast.walk(tree):
             if isinstance(node, ast.Call):
@@ -211,6 +213,7 @@ class DocsExampleParser:
         return calls
 
     def _get_non_private_function_names(self, calls: List[ast.Call]) -> Set[str]:
+        """Get function names that are not private from ast.Call objects."""
         names = []
         for call in calls:
             name = None
