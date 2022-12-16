@@ -123,7 +123,7 @@ class DataAssistantRunner:
                 DataAssistantResult: The result object for the DataAssistant
             """
             if batch_request is None:
-                data_assistant_name: str = self._data_assistant_cls.data_assistant_type  # type: ignore[attr-defined] # Dynamic attr assigned in __new__
+                data_assistant_name: str = self._data_assistant_cls.data_assistant_type  # type: ignore[attr-defined] # dynamic attr assigned in __new__
                 raise ge_exceptions.DataAssistantExecutionError(
                     message=f"""Utilizing "{data_assistant_name}.run()" requires valid "batch_request" to be specified \
 (empty or missing "batch_request" detected)."""
@@ -219,7 +219,7 @@ class DataAssistantRunner:
         Returns:
             DataAssistant: The "DataAssistant" object, corresponding to this instance's specified "DataAssistant" type.
         """
-        data_assistant_name: str = self._data_assistant_cls.data_assistant_type  # type: ignore[attr-defined] # Dynamic attr assigned in __new__
+        data_assistant_name: str = self._data_assistant_cls.data_assistant_type  # type: ignore[attr-defined] # dynamic attr assigned in __new__
 
         data_assistant: DataAssistant
 
@@ -351,7 +351,7 @@ class DataAssistantRunner:
 
         attribute_names: List[str] = list(
             filter(
-                lambda element: element not in exclude_field_names,  # type: ignore[arg-type] # filter type check is strict: https://github.com/python/mypy/issues/12682
+                lambda element: element not in exclude_field_names,
                 list(parameters.keys())[1:],
             )
         )
