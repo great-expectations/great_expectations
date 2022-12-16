@@ -1,4 +1,6 @@
+import ast
 import pathlib
+from typing import List, Union
 
 import pytest
 
@@ -9,6 +11,7 @@ from scripts.public_api_report import (
     FileContents,
     CodeReferenceFilter,
     PublicAPIChecker,
+    Definition,
 )
 
 
@@ -55,12 +58,28 @@ class ExampleClass:
     @classmethod
     def example_classmethod(cls):
         pass
+    
+    @staticmethod
+    @public_api
+    def example_public_staticmethod():
+        pass
+
+    @classmethod
+    @public_api
+    def example_public_classmethod(cls):
+        pass
         
-    def _example_private_method():
+    @some_other_decorator
+    @public_api
+    @another_decorator
+    def example_multiple_decorator_public_method(self):
+        pass
+    
+    def _example_private_method(self):
         pass
         
     @public_api
-    def example_public_api_method():
+    def example_public_api_method(self):
         pass
 
 
@@ -180,8 +199,11 @@ class TestCodeParser:
             "example_method",
             "example_method_with_args",
             "example_module_level_function",
+            "example_multiple_decorator_public_method",
             "example_public_api_method",
             "example_public_api_module_level_function",
+            "example_public_classmethod",
+            "example_public_staticmethod",
             "example_staticmethod",
         }
 
@@ -190,8 +212,8 @@ class TestCodeParser:
     ):
         definitions = code_parser.get_all_class_method_and_function_definitions()
 
-        assert len(definitions) == 12
-        assert set([d.name for d in definitions]) == {
+        assert len(definitions) == 15
+        assert set(d.name for d in definitions) == {
             "ExampleClass",
             "ExamplePublicAPIClass",
             "__init__",
@@ -201,11 +223,14 @@ class TestCodeParser:
             "example_method",
             "example_method_with_args",
             "example_module_level_function",
+            "example_multiple_decorator_public_method",
             "example_public_api_method",
             "example_public_api_module_level_function",
+            "example_public_classmethod",
+            "example_public_staticmethod",
             "example_staticmethod",
         }
-        assert set([d.filepath for d in definitions]) == {
+        assert set(d.filepath for d in definitions) == {
             pathlib.Path(
                 "great_expectations/sample_with_definitions_python_file_string.py"
             )
@@ -225,30 +250,125 @@ class TestPublicAPIChecker:
     def test_instantiate(self, public_api_checker: PublicAPIChecker):
         assert isinstance(public_api_checker, PublicAPIChecker)
 
-    def test_get_all_public_api_definitions(self, public_api_checker):
+    def test_get_all_public_api_definitions(self, public_api_checker: PublicAPIChecker):
         observed = public_api_checker.get_all_public_api_definitions()
-        assert len(observed) == 3
-        assert set([d.name for d in observed]) == {
+        assert len(observed) == 6
+        assert set(d.name for d in observed) == {
             "ExamplePublicAPIClass",
+            "example_multiple_decorator_public_method",
             "example_public_api_method",
             "example_public_api_module_level_function",
+            "example_public_classmethod",
+            "example_public_staticmethod",
         }
-        assert set([d.filepath for d in observed]) == {
+        assert set(d.filepath for d in observed) == {
             pathlib.Path(
                 "great_expectations/sample_with_definitions_python_file_string.py"
             )
         }
 
+    def _class_and_function_definitions(
+        self, tree: ast.AST
+    ) -> List[Union[ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef]]:
+        """Helper function to find class and function definitions from ast tree for tests."""
+        definitions = []
+        for node in ast.walk(tree):
+            if (
+                isinstance(node, ast.ClassDef)
+                or isinstance(node, ast.FunctionDef)
+                or isinstance(node, ast.AsyncFunctionDef)
+            ):
+                definitions.append(node)
 
-#
-#     def test_get_all_public_api_classes(self):
-#         raise NotImplementedError
-#
-#     def test_get_all_public_api_methods(self):
-#         raise NotImplementedError
-#
-#     def test_get_all_definitions_not_marked_public_api(self):
-#         raise NotImplementedError
+        return definitions
+
+    def test_is_definition_marked_public_api_yes(
+        self, public_api_checker: PublicAPIChecker
+    ):
+        file_string = """
+@public_api
+def example_public_api_module_level_function():
+    pass
+
+@public_api
+class ExamplePublicAPIClass:
+    @public_api
+    def example_public_api_method():
+        pass
+        
+    @staticmethod
+    @public_api
+    def example_public_api_staticmethod():
+        pass
+
+    @classmethod
+    @public_api
+    def example_public_api_classmethod(cls):
+        pass
+        
+    @some_other_decorator
+    @public_api
+    @another_decorator
+    def example_multiple_decorator_public_api_method(self):
+        pass
+
+"""
+        ast_definitions = self._class_and_function_definitions(
+            tree=ast.parse(file_string)
+        )
+        definitions = [
+            Definition(
+                name="test_name",
+                filepath=pathlib.Path("test_path"),
+                ast_definition=ast_definition,
+            )
+            for ast_definition in ast_definitions
+        ]
+        assert all(
+            public_api_checker.is_definition_marked_public_api(definition)
+            for definition in definitions
+        )
+
+    def test_is_definition_marked_public_api_no(
+        self, public_api_checker: PublicAPIChecker
+    ):
+        file_string = """
+def example_module_level_function():
+    pass
+
+class ExampleClass:
+    def example_method():
+        pass
+        
+    @staticmethod
+    def example_public_staticmethod():
+        pass
+
+    @classmethod
+    def example_public_classmethod(cls):
+        pass
+        
+    @some_other_decorator
+    @another_decorator
+    def example_multiple_decorator_public_method(self):
+        pass
+
+"""
+        ast_definitions = self._class_and_function_definitions(
+            tree=ast.parse(file_string)
+        )
+        definitions = [
+            Definition(
+                name="test_name",
+                filepath=pathlib.Path("test_path"),
+                ast_definition=ast_definition,
+            )
+            for ast_definition in ast_definitions
+        ]
+        assert not all(
+            public_api_checker.is_definition_marked_public_api(definition)
+            for definition in definitions
+        )
 
 
 @pytest.fixture
@@ -443,7 +563,7 @@ class TestCodeReferenceFilter:
     ):
         observed = code_reference_filter_with_no_include_exclude.filter_definitions()
         assert len(observed) == 6
-        assert set([d.name for d in observed]) == {
+        assert set(d.name for d in observed) == {
             "ExampleClass",
             # "__init__",  # Filtered private methods
             # "_example_private_method",  # Filtered private methods
@@ -454,7 +574,7 @@ class TestCodeReferenceFilter:
             "example_module_level_function",
             "example_staticmethod",
         }
-        assert set([d.filepath for d in observed]) == {
+        assert set(d.filepath for d in observed) == {
             pathlib.Path(
                 "great_expectations/sample_with_definitions_python_file_string.py"
             )
@@ -465,8 +585,8 @@ class TestCodeReferenceFilter:
     ):
         observed = code_reference_filter_with_exclude_by_file.filter_definitions()
         assert len(observed) == 0
-        assert set([d.name for d in observed]) == set()
-        assert set([d.filepath for d in observed]) == set()
+        assert set(d.name for d in observed) == set()
+        assert set(d.filepath for d in observed) == set()
 
     def test_filter_definitions_exclude_by_file_and_name(
         self, code_reference_filter_with_exclude_by_file_and_name: CodeReferenceFilter
@@ -475,13 +595,13 @@ class TestCodeReferenceFilter:
             code_reference_filter_with_exclude_by_file_and_name.filter_definitions()
         )
         assert len(observed) == 4
-        assert set([d.name for d in observed]) == {
+        assert set(d.name for d in observed) == {
             "ExampleClass",
             "example_classmethod",
             "example_method_with_args",
             "example_staticmethod",
         }
-        assert set([d.filepath for d in observed]) == {
+        assert set(d.filepath for d in observed) == {
             pathlib.Path(
                 "great_expectations/sample_with_definitions_python_file_string.py"
             )
@@ -503,7 +623,7 @@ class TestCodeReferenceFilter:
         # There are two extra (8 vs 6) here due to the ast_definition classes
         #  pointing to different but equivalent objects.
         assert len(observed) == 8
-        assert set([d.name for d in observed]) == {
+        assert set(d.name for d in observed) == {
             "ExampleClass",
             "example_classmethod",
             "example_method",
@@ -511,7 +631,7 @@ class TestCodeReferenceFilter:
             "example_module_level_function",
             "example_staticmethod",
         }
-        assert set([d.filepath for d in observed]) == {
+        assert set(d.filepath for d in observed) == {
             pathlib.Path(
                 "great_expectations/sample_with_definitions_python_file_string.py"
             )
@@ -531,11 +651,11 @@ class TestCodeReferenceFilter:
         # There are two extra (4 vs 2) here due to the ast_definition classes
         #  pointing to different but equivalent objects.
         assert len(observed) == 4
-        assert set([d.name for d in observed]) == {
+        assert set(d.name for d in observed) == {
             "example_method",
             "example_module_level_function",
         }
-        assert set([d.filepath for d in observed]) == {
+        assert set(d.filepath for d in observed) == {
             pathlib.Path(
                 "great_expectations/sample_with_definitions_python_file_string.py"
             )

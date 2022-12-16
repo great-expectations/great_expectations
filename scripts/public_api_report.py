@@ -115,7 +115,7 @@ class FileContents:
     def create_from_local_files(
         cls, filepaths: Set[pathlib.Path]
     ) -> Set["FileContents"]:
-        return set([cls.create_from_local_file(filepath) for filepath in filepaths])
+        return set(cls.create_from_local_file(filepath) for filepath in filepaths)
 
 
 class DocsExampleParser:
@@ -246,7 +246,7 @@ class CodeParser:
             file_contents=file_contents
         )
 
-        return set([definition.name for definition in definitions])
+        return set(definition.name for definition in definitions)
 
     def get_all_class_method_and_function_definitions(
         self,
@@ -329,25 +329,22 @@ class PublicAPIChecker:
         docs_example_parser: DocsExampleParser,
         code_parser: CodeParser,
     ) -> None:
-        self.repo_root = _repo_root()  # TODO: REMOVE
         self.docs_example_parser = docs_example_parser
         self.code_parser = code_parser
 
-    def code_definitions_appearing_in_docs_examples_and_not_marked_public_api(
-        self,
-    ) -> Set[Definition]:
-        code_definitions_appearing_in_docs_examples = (
-            self.code_definitions_appearing_in_docs_examples()
-        )
-        return set(
-            [
-                d
-                for d in code_definitions_appearing_in_docs_examples
-                if not self._is_definition_marked_public_api(d.ast_definition)
-            ]
-        )
+    def get_all_public_api_definitions(self) -> Set[Definition]:
 
-    def _is_definition_marked_public_api(self, definition: Definition) -> bool:
+        definitions: List[Definition] = []
+
+        for (
+            definition
+        ) in self.code_parser.get_all_class_method_and_function_definitions():
+            if self.is_definition_marked_public_api(definition):
+                definitions.append(definition)
+
+        return set(definitions)
+
+    def is_definition_marked_public_api(self, definition: Definition) -> bool:
 
         result = False
         found_decorators = self._get_decorator_names(
@@ -364,7 +361,7 @@ class PublicAPIChecker:
     ) -> Set[str]:
         def flatten_attr(node):
             if isinstance(node, ast.Attribute):
-                return str(flatten_attr(node.value)) + "." + node.attr
+                return f"{str(flatten_attr(node.value))}.{node.attr}"
             elif isinstance(node, ast.Name):
                 return str(node.id)
             else:
@@ -378,18 +375,6 @@ class PublicAPIChecker:
                 found_decorators.append(flatten_attr(decorator))
 
         return set(found_decorators)
-
-    def get_all_public_api_definitions(self) -> Set[Definition]:
-
-        definitions: List[Definition] = []
-
-        for (
-            definition
-        ) in self.code_parser.get_all_class_method_and_function_definitions():
-            if self._is_definition_marked_public_api(definition):
-                definitions.append(definition)
-
-        return set(definitions)
 
 
 class CodeReferenceFilter:
@@ -457,7 +442,17 @@ class CodeReferenceFilter:
     # TODO: Create methods for including public_api_checker or not
 
     def filter_definitions(self) -> Set[Definition]:
-        """Main method."""
+        """Main method to perform all filtering.
+
+        Filters Definitions (Class, method and function). Returned Definitions:
+            1. Appear in published documentation examples.
+            2. Are not private.
+            3. Are included or not excluded by an IncludeExcludeDefinition.
+            4. Are not marked with the @public_api decorator.
+
+        Returns:
+            Definitions that pass all filters.
+        """
         usages_in_docs_examples: Set[str] = self._docs_examples_usages()
         gx_definitions_used_in_docs_examples: Set[
             Definition
@@ -472,7 +467,13 @@ class CodeReferenceFilter:
         included_definitions: Set[Definition] = self._filter_or_include(
             definitions=non_private_definitions
         )
-        return included_definitions
+        definitions_not_marked_public_api: Set[
+            Definition
+        ] = self._filter_for_definitions_not_marked_public_api(
+            definitions=included_definitions
+        )
+
+        return definitions_not_marked_public_api
 
     def _docs_examples_usages(self) -> Set[str]:
         """Filter list of classes & methods from docs examples to only those found in
@@ -544,6 +545,15 @@ class CodeReferenceFilter:
                 included_definitions.append(definition)
 
         return set(included_definitions)
+
+    def _filter_for_definitions_not_marked_public_api(
+        self, definitions: Set[Definition]
+    ) -> Set[Definition]:
+        return set(
+            d
+            for d in definitions
+            if not self.public_api_checker.is_definition_marked_public_api(d)
+        )
 
     def _is_filepath_excluded(self, filepath: pathlib.Path) -> bool:
         """Check whether an entire filepath is excluded."""
@@ -636,28 +646,28 @@ def _default_doc_example_paths() -> Set[pathlib.Path]:
     """Get all paths of doc examples (docs examples)."""
     base_directory = _repo_root() / "tests" / "integration" / "docusaurus"
     paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
-    return set([pathlib.Path(p).relative_to(_repo_root()) for p in paths])
+    return set(pathlib.Path(p).relative_to(_repo_root()) for p in paths)
 
 
 def _default_doc_example_absolute_paths() -> Set[pathlib.Path]:
     """Get all paths of doc examples (docs examples)."""
     base_directory = _repo_root() / "tests" / "integration" / "docusaurus"
     paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
-    return set([pathlib.Path(p) for p in paths])
+    return set(pathlib.Path(p) for p in paths)
 
 
 def _default_code_paths() -> Set[pathlib.Path]:
     """All gx modules related to the main library."""
     base_directory = _repo_root() / "great_expectations"
     paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
-    return set([pathlib.Path(p).relative_to(_repo_root()) for p in paths])
+    return set(pathlib.Path(p).relative_to(_repo_root()) for p in paths)
 
 
 def _default_code_absolute_paths() -> Set[pathlib.Path]:
     """All gx modules related to the main library."""
     base_directory = _repo_root() / "great_expectations"
     paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
-    return set([pathlib.Path(p) for p in paths])
+    return set(pathlib.Path(p) for p in paths)
 
 
 def _parse_file_to_ast_tree(filepath: pathlib.Path) -> ast.AST:
@@ -682,9 +692,14 @@ def main():
 
     code_parser = CodeParser(file_contents=code_file_contents)
 
+    public_api_checker = PublicAPIChecker(
+        docs_example_parser=docs_example_parser, code_parser=code_parser
+    )
+
     code_reference_filter = CodeReferenceFilter(
         docs_example_parser=docs_example_parser,
         code_parser=code_parser,
+        public_api_checker=public_api_checker,
     )
 
     filtered_definitions = code_reference_filter.filter_definitions()
