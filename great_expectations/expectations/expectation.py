@@ -2663,7 +2663,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
             configuration=configuration, runtime_configuration=runtime_configuration
         )
 
-        unexpected_index_column_names: Union[str, int, None] = None
+        unexpected_index_column_names: Optional[List[str]] = None
         include_unexpected_rows: Union[bool, None] = None
 
         if isinstance(result_format, dict):
@@ -3170,7 +3170,7 @@ def _format_map_output(
     unexpected_list: Optional[List[Any]] = None,
     unexpected_index_list: Optional[List[int]] = None,
     unexpected_index_query: Optional[str] = None,
-    unexpected_index_column_names: Optional[Union[str, int]] = None,
+    unexpected_index_column_names: Optional[List[str]] = None,
     unexpected_rows=None,
 ) -> Dict:
     """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
@@ -3219,6 +3219,11 @@ def _format_map_output(
         "unexpected_count": unexpected_count,
         "unexpected_percent": unexpected_percent_nonmissing,
     }
+
+    if unexpected_index_column_names is not None:
+        return_obj["result"].update(
+            {"unexpected_index_column_names": unexpected_index_column_names}
+        )
 
     if unexpected_list is not None:
         return_obj["result"]["partial_unexpected_list"] = unexpected_list[
@@ -3296,10 +3301,6 @@ def _format_map_output(
         return_obj["result"].update({"unexpected_index_list": unexpected_index_list})
     if unexpected_index_query is not None:
         return_obj["result"].update({"unexpected_index_query": unexpected_index_query})
-    if unexpected_index_column_names is not None:
-        return_obj["result"].update(
-            {"unexpected_index_column_names": unexpected_index_column_names}
-        )
     if result_format["result_format"] == "COMPLETE":
         return return_obj
 

@@ -332,44 +332,6 @@ def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_
     )
 
 
-def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_engine):
-    mp = ColumnValuesNonNull()
-    metric = MetricConfiguration(
-        metric_name="column_values.nonnull.unexpected_count",
-        metric_domain_kwargs={},
-        metric_value_kwargs=None,
-    )
-    dependencies = mp.get_evaluation_dependencies(
-        metric, execution_engine=PandasExecutionEngine()
-    )
-    assert (
-        dependencies["unexpected_condition"].id[0] == "column_values.nonnull.condition"
-    )
-
-    metric = MetricConfiguration(
-        metric_name="column_values.nonnull.unexpected_count",
-        metric_domain_kwargs={},
-        metric_value_kwargs=None,
-    )
-    dependencies = mp.get_evaluation_dependencies(
-        metric, execution_engine=basic_spark_df_execution_engine
-    )
-    assert (
-        dependencies["metric_partial_fn"].id[0]
-        == "column_values.nonnull.unexpected_count.aggregate_fn"
-    )
-
-    metric = MetricConfiguration(
-        metric_name="column_values.nonnull.unexpected_count.aggregate_fn",
-        metric_domain_kwargs={},
-        metric_value_kwargs=None,
-    )
-    dependencies = mp.get_evaluation_dependencies(metric)
-    assert (
-        dependencies["unexpected_condition"].id[0] == "column_values.nonnull.condition"
-    )
-
-
 def test_get_map_metric_dependencies():
     mp = ColumnMapMetricProvider()
     metric = MetricConfiguration(
