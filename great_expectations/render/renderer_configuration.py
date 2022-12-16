@@ -145,9 +145,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             validate_assignment = True
             arbitrary_types_allowed = True
 
-        @root_validator(pre=True)
+        @root_validator()
         def _validate_schema_matches_value(cls, values: dict) -> dict:
-            schema_type: RendererSchemaType = values["schema"]["type"]
+            schema_type: RendererSchemaType = values["renderer_schema"]["type"]
             value: Any = values["value"]
             if schema_type is RendererSchemaType.STRING:
                 try:
