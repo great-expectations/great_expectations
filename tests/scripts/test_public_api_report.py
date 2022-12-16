@@ -29,9 +29,23 @@ b = ec.example_staticmethod()
 
 c = ec.example_classmethod()
 
-example_module_level_function()
+ec.example_public_staticmethod()
 
-d = example_module_level_function()
+ec.example_public_classmethod()
+
+d = ec.example_multiple_decorator_public_method()
+
+ec._example_private_method()
+
+ec.example_public_api_method()
+
+e = example_module_level_function()
+
+_example_private_module_level_function()
+
+example_public_api_module_level_function()
+
+epub = ExamplePublicAPIClass()
 
 assert d
 """
@@ -167,14 +181,18 @@ class TestDocExampleParser:
     def test_retrieve_all_usages_in_files(self, docs_example_parser: DocsExampleParser):
 
         usages = docs_example_parser.retrieve_all_usages_in_docs_example_files()
-        assert usages == {
-            "ExampleClass",
-            "example_method",
-            "example_method_with_args",
-            "example_staticmethod",
-            "example_classmethod",
-            "example_module_level_function",
-        }
+        assert usages == {'ExampleClass',
+ 'ExamplePublicAPIClass',
+ 'example_classmethod',
+ 'example_method',
+ 'example_method_with_args',
+ 'example_module_level_function',
+ 'example_multiple_decorator_public_method',
+ 'example_public_api_method',
+ 'example_public_api_module_level_function',
+ 'example_public_classmethod',
+ 'example_public_staticmethod',
+ 'example_staticmethod'}
 
 
 @pytest.fixture
