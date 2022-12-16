@@ -26,6 +26,7 @@ def docs(ctx):
 
     doc_builder.build_docs()
 
+
 @invoke.task
 def public_api(ctx):
     """Generate a report to determine the state of our Public API. Lists classes, methods and functions that are used in examples in our documentation, and any manual includes or excludes (see public_api_report.py). Items listed when generating this report need the @public_api decorator (and a good docstring) or to be excluded from consideration if they are not applicable to our Public API."""

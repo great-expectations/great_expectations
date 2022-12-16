@@ -45,6 +45,7 @@ Typical usage example:
   change to our public API.
 """
 from __future__ import annotations
+
 import ast
 import glob
 import logging
@@ -99,7 +100,9 @@ class IncludeExcludeDefinition:
         if self.name and not self.filepath:
             raise ValueError("You must provide a filepath if also providing a name.")
         if not self.name and not self.filepath:
-            raise ValueError("You must provide at least a filepath or filepath and name.")
+            raise ValueError(
+                "You must provide at least a filepath or filepath and name."
+            )
 
 
 class FileContents:
@@ -121,9 +124,7 @@ class FileContents:
         return cls(filepath=filepath, contents=file_contents)
 
     @classmethod
-    def create_from_local_files(
-        cls, filepaths: Set[pathlib.Path]
-    ) -> Set[FileContents]:
+    def create_from_local_files(cls, filepaths: Set[pathlib.Path]) -> Set[FileContents]:
         return {cls.create_from_local_file(filepath) for filepath in filepaths}
 
 
@@ -143,7 +144,9 @@ class DocsExampleParser:
         """
         all_usages = set()
         for file_contents in self.file_contents:
-            file_usages = self._get_names_of_all_usages_in_file(file_contents=file_contents)
+            file_usages = self._get_names_of_all_usages_in_file(
+                file_contents=file_contents
+            )
             all_usages |= file_usages
         return all_usages
 
@@ -172,7 +175,9 @@ class DocsExampleParser:
         for node in ast.walk(tree):
             node_is_imported_from_gx = isinstance(
                 node, ast.ImportFrom
-            ) and node.module.startswith("great_expectations")  # type: ignore[union-attr]
+            ) and node.module.startswith(
+                "great_expectations"
+            )  # type: ignore[union-attr]
             node_is_gx_import = isinstance(node, ast.Import) and any(
                 n.name.startswith("great_expectations") for n in node.names
             )
@@ -282,7 +287,11 @@ class CodeParser:
         return all_usages
 
     def _build_file_usage_definitions(
-        self, file_contents: FileContents, entity_definitions: Set[Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]]
+        self,
+        file_contents: FileContents,
+        entity_definitions: Set[
+            Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]
+        ],
     ) -> Set[Definition]:
         """Build Definitions from FileContents."""
         file_usages_definitions: List[Definition] = []
@@ -372,6 +381,7 @@ class PublicAPIChecker:
         self, ast_definition: Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]
     ) -> Set[str]:
         """Get all decorator names for a single definition from an ast tree."""
+
         def flatten_attr(node):
             if isinstance(node, ast.Attribute):
                 return f"{str(flatten_attr(node.value))}.{node.attr}"
@@ -460,7 +470,6 @@ class CodeReferenceFilter:
         else:
             self.includes = includes
 
-
     def filter_definitions(self) -> Set[Definition]:
         """Main method to perform all filtering.
 
@@ -480,9 +489,7 @@ class CodeReferenceFilter:
         ] = self._filter_gx_definitions_from_docs_examples(
             gx_usages_in_docs_examples=usages_in_docs_examples
         )
-        non_private_definitions: Set[
-            Definition
-        ] = self._filter_private_entities(
+        non_private_definitions: Set[Definition] = self._filter_private_entities(
             definitions=gx_definitions_used_in_docs_examples
         )
         included_definitions: Set[Definition] = self._filter_or_include(
@@ -532,9 +539,7 @@ class CodeReferenceFilter:
         }
         return gx_code_definitions_appearing_in_docs_examples
 
-    def _filter_private_entities(
-        self, definitions: Set[Definition]
-    ) -> Set[Definition]:
+    def _filter_private_entities(self, definitions: Set[Definition]) -> Set[Definition]:
         """Filter out private entities (classes, methods and functions with leading underscore)."""
         return {d for d in definitions if not self._is_definition_private(definition=d)}
 
@@ -664,7 +669,9 @@ class PublicAPIReport:
                 f"File: {filepath} Name: {definition.name}"
             )
 
-        sorted_definitions_strings_no_dupes = self._deduplicate_strings(sorted_definitions_strings)
+        sorted_definitions_strings_no_dupes = self._deduplicate_strings(
+            sorted_definitions_strings
+        )
 
         return sorted_definitions_strings_no_dupes
 
@@ -678,6 +685,7 @@ class PublicAPIReport:
                 seen.add(s)
 
         return no_duplicates
+
 
 def _repo_root() -> pathlib.Path:
     return pathlib.Path(__file__).parent.parent
