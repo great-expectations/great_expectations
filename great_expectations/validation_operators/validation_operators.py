@@ -236,6 +236,16 @@ class ActionListValidationOperator(ValidationOperator):
             self.actions[action_config["name"]] = new_action
 
     @property
+    def _using_cloud_context(self) -> bool:
+        # Chetan - 20221216 - This is a temporary property to encapsulate any Cloud leakage
+        # Upon refactoring this class to decouple Cloud-specific branches, this should be removed
+        from great_expectations.data_context.data_context.cloud_data_context import (
+            CloudDataContext,
+        )
+
+        return isinstance(self.data_context, CloudDataContext)
+
+    @property
     def validation_operator_config(self) -> dict:
         if self._validation_operator_config is None:
             self._validation_operator_config = {
@@ -370,7 +380,7 @@ class ActionListValidationOperator(ValidationOperator):
 
             run_results = {}
             for batch, async_batch_validation_result in batch_and_async_result_tuples:
-                if self.data_context.cloud_mode:
+                if self._using_cloud_context:
                     expectation_suite_identifier = GXCloudIdentifier(
                         resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
                         cloud_id=batch._expectation_suite.ge_cloud_id,

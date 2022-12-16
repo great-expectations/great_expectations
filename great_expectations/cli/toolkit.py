@@ -21,6 +21,9 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.data_context import DataContext
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.types.base import CURRENT_GX_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -392,7 +395,7 @@ def load_data_context_with_error_handling(
     context: Optional[DataContext]
     ge_config_version: float
     try:
-        directory = directory or DataContext.find_context_root_dir()
+        directory = directory or FileDataContext.find_context_root_dir()
         context = DataContext(context_root_dir=directory)
         ge_config_version = context.get_config().config_version
 
@@ -420,8 +423,8 @@ def load_data_context_with_error_handling(
 
         return context
     except ge_exceptions.UnsupportedConfigVersionError as err:
-        directory = directory or DataContext.find_context_root_dir()
-        ge_config_version = DataContext.get_ge_config_version(
+        directory = directory or FileDataContext.find_context_root_dir()
+        ge_config_version = FileDataContext.get_ge_config_version(
             context_root_dir=directory
         )
         context = upgrade_project_strictly_multiple_versions_increment(
@@ -739,7 +742,7 @@ def upgrade_project_up_to_one_version_increment(
         return False, False
 
     # set version temporarily to CURRENT_GX_CONFIG_VERSION to get functional DataContext
-    DataContext.set_ge_config_version(
+    FileDataContext.set_ge_config_version(
         config_version=CURRENT_GX_CONFIG_VERSION,
         context_root_dir=context_root_dir,
     )
@@ -779,27 +782,27 @@ def upgrade_project_up_to_one_version_increment(
         cli_message(string=upgrade_report)
         if exception_occurred:
             # restore version number to current number
-            DataContext.set_ge_config_version(
+            FileDataContext.set_ge_config_version(
                 ge_config_version, context_root_dir, validate_config_version=False
             )
             # display report to user
             return False, True
         # set config version to target version
         if increment_version:
-            DataContext.set_ge_config_version(
+            FileDataContext.set_ge_config_version(
                 int(ge_config_version) + 1,
                 context_root_dir,
                 validate_config_version=False,
             )
             return True, False
         # restore version number to current number
-        DataContext.set_ge_config_version(
+        FileDataContext.set_ge_config_version(
             ge_config_version, context_root_dir, validate_config_version=False
         )
         return False, False
 
     # restore version number to current number
-    DataContext.set_ge_config_version(
+    FileDataContext.set_ge_config_version(
         ge_config_version, context_root_dir, validate_config_version=False
     )
     cli_message(string=continuation_message)

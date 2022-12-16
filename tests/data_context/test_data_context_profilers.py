@@ -51,7 +51,7 @@ def test_run_profiler_with_dynamic_arguments_emits_proper_usage_stats(
     profiler_name: str,
 ):
     with mock.patch(
-        "great_expectations.data_context.DataContext.profiler_store"
+        "great_expectations.data_context.AbstractDataContext.profiler_store"
     ) as mock_profiler_store:
         mock_profiler_store.__get__ = mock.Mock(return_value=populated_profiler_store)
         empty_data_context_stats_enabled.run_profiler_with_dynamic_arguments(
@@ -82,7 +82,7 @@ def test_run_profiler_on_data_emits_proper_usage_stats(
     profiler_name: str,
 ):
     with mock.patch(
-        "great_expectations.data_context.DataContext.profiler_store"
+        "great_expectations.data_context.AbstractDataContext.profiler_store"
     ) as mock_profiler_store:
         mock_profiler_store.__get__ = mock.Mock(return_value=populated_profiler_store)
         empty_data_context_stats_enabled.run_profiler_on_data(
