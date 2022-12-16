@@ -98,7 +98,7 @@ class BatchManager:
         the list of "Batch" objects, each of whose BatchData has already been loaded (and cached).  Since BatchData IDs
         are from the same name space as Batch IDs, this helps avoid unnecessary loading of data from different backends.
         """
-        active_batch_data_id: Optional[str] = self._active_batch_data_id
+        active_batch_data_id: Optional[str] = self.active_batch_data_id
         if active_batch_data_id != self._active_batch_id:
             logger.warning(
                 "ID of active Batch and ID of active loaded BatchData differ."

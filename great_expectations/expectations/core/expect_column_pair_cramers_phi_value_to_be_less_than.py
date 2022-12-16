@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -15,7 +15,14 @@ from great_expectations.render import (
     RenderedTableContent,
 )
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererSchemaType,
+)
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import RendererParams
 
 
 class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
@@ -56,31 +63,27 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
     )
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args = (
+            ("column_A", RendererSchemaType.STRING),
+            ("column_B", RendererSchemaType.STRING),
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs, ["column_A", "column_B"]
-        )
-        if (params["column_A"] is None) or (params["column_B"] is None):
-            template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."
-        else:
-            template_str = "Values in $column_A and $column_B must be independent."
+        for name, schema_type in add_param_args:
+            renderer_configuration.add_param(name=name, schema_type=schema_type)
 
-        params_with_json_schema = {
-            "column_A": {"schema": {"type": "string"}, "value": params.get("column_A")},
-            "column_B": {"schema": {"type": "string"}, "value": params.get("column_B")},
-        }
-        return (template_str, params_with_json_schema, styling)
+        params: RendererParams = renderer_configuration.params
+
+        if not params.column_A or not params.column_B:
+            renderer_configuration.template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."
+        else:
+            renderer_configuration.template_str = (
+                "Values in $column_A and $column_B must be independent."
+            )
+
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
