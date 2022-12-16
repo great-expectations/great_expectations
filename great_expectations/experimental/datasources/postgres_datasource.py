@@ -45,7 +45,9 @@ class ColumnSplitter:
 @pydantic_dc.dataclass(frozen=True)
 class SqlYearMonthSplitter(ColumnSplitter):
     method_name: Literal["split_on_year_and_month"] = "split_on_year_and_month"
-    param_names: List[str] = pydantic.Field(default_factory=lambda: ["year", "month"])
+    param_names: List[Literal["year", "month"]] = pydantic.Field(
+        default_factory=lambda: ["year", "month"]
+    )
 
     def param_defaults(self, data_asset: DataAsset) -> Dict[str, List]:
         """Query the database to get the years and months to split over.
