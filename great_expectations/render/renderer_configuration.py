@@ -107,7 +107,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             )
         return values
 
-    @root_validator(pre=True)
+    @root_validator()
     def _validate_for_expectation_type_and_kwargs(cls, values: dict) -> dict:
         if (
             "result" in values
@@ -123,7 +123,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             values["kwargs"] = values["configuration"].kwargs
         return values
 
-    @root_validator(pre=True)
+    @root_validator()
     def _validate_for_include_column_name(cls, values: dict) -> dict:
         if "runtime_configuration" in values and values["runtime_configuration"]:
             values["include_column_name"] = (
