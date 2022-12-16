@@ -43,15 +43,18 @@ class ColumnSplitter:
 
     @pydantic.validator("method_name")
     def _splitter_method_exists(cls, v: str):
+        """Fail early if the `method_name` does not exist and would fail at runtime."""
+        # NOTE (kilo59): this could be achieved by simply annotating the method_name field
+        # as a `SplitterMethod` enum but we get cyclic imports.
+        # We could use `update_forward_refs()` but would have to change this to a BaseModel
         from great_expectations.execution_engine.split_and_sample.data_splitter import (
             SplitterMethod,
         )
 
-        method_names = SplitterMethod.members()
-        if v not in method_names:
-            raise ValueError(
-                f"unexpected value; permitted: '{', '.join(method_names)}'"
-            )
+        method_members = SplitterMethod.members()
+        if v not in method_members:
+            permitted_values_str = "', '".join([m.value for m in method_members])
+            raise ValueError(f"unexpected value; permitted: {permitted_values_str}")
         return v
 
 
