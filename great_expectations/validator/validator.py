@@ -1871,7 +1871,7 @@ class Validator:
             parameter_value (any): The value to be used
         """
         self._expectation_suite.evaluation_parameters.update(
-            {parameter_name: parameter_value}
+            {parameter_name: convert_to_json_serializable(parameter_value)}
         )
 
     def add_citation(

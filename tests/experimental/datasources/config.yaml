@@ -19,3 +19,18 @@ datasources:
               param_names:
                 - alpha
                 - bravo
+      with_sorters:
+        type: table
+        name: with_sorters
+        table_name: another_table
+        order_by:
+          - metadata_key: year
+          - metadata_key: month
+            reverse: true
+      with_dsl_ish_sorters:
+        type: table
+        name: with_dsl_ish_sorters
+        table_name: another_table
+        order_by:
+          - year
+          - -month
