@@ -98,7 +98,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         arbitrary_types_allowed = True
 
     @root_validator(pre=True)
-    def validate_configuration_or_result(cls, values: dict) -> dict:
+    def _validate_configuration_or_result(cls, values: dict) -> dict:
         if ("configuration" not in values or values["configuration"] is None) and (
             "result" not in values or values["result"] is None
         ):
@@ -108,7 +108,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         return values
 
     @root_validator(pre=True)
-    def validate_for_expectation_type_and_kwargs(cls, values: dict) -> dict:
+    def _validate_for_expectation_type_and_kwargs(cls, values: dict) -> dict:
         if (
             "result" in values
             and values["result"] is not None
@@ -124,7 +124,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         return values
 
     @root_validator(pre=True)
-    def validate_for_include_column_name(cls, values: dict) -> dict:
+    def _validate_for_include_column_name(cls, values: dict) -> dict:
         if "runtime_configuration" in values and values["runtime_configuration"]:
             values["include_column_name"] = (
                 False
@@ -146,7 +146,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             arbitrary_types_allowed = True
 
         @root_validator(pre=True)
-        def validate_schema_matches_value(cls, values: dict) -> dict:
+        def _validate_schema_matches_value(cls, values: dict) -> dict:
             schema_type: RendererSchemaType = values["schema"]["type"]
             value: Any = values["value"]
             if schema_type is RendererSchemaType.STRING:

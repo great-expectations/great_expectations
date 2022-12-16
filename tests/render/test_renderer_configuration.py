@@ -29,6 +29,7 @@ def mock_expectation_validation_result_from_expectation_configuration(
     )
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "expectation_type,kwargs,runtime_configuration,fake_result,include_column_name",
     [
@@ -89,6 +90,7 @@ def test_successful_renderer_configuration_instantiation(
     assert renderer_configuration.include_column_name is include_column_name
 
 
+@pytest.mark.unit
 def test_failed_renderer_configuration_instantiation():
     with pytest.raises(ValidationError) as e:
         RendererConfiguration(
@@ -108,6 +110,7 @@ class NotString:
         raise TypeError("I'm not a string")
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "schema_type,value",
     [
