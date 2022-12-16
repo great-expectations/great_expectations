@@ -11,7 +11,8 @@ from scripts.public_api_report import (
     DocsExampleParser,
     FileContents,
     IncludeExcludeDefinition,
-    PublicAPIChecker, PublicAPIReport,
+    PublicAPIChecker,
+    PublicAPIReport,
 )
 
 
@@ -178,7 +179,6 @@ def docs_example_parser(
 
 
 class TestDocExampleParser:
-
     @pytest.mark.unit
     def test_instantiate(self, docs_example_parser: DocsExampleParser):
         assert isinstance(docs_example_parser, DocsExampleParser)
@@ -705,27 +705,32 @@ class TestCodeReferenceFilter:
 
 
 @pytest.fixture
-def public_api_report(code_reference_filter_with_no_include_exclude: CodeReferenceFilter) -> PublicAPIReport:
-    return PublicAPIReport(definitions=code_reference_filter_with_no_include_exclude.filter_definitions())
+def public_api_report(
+    code_reference_filter_with_no_include_exclude: CodeReferenceFilter,
+) -> PublicAPIReport:
+    return PublicAPIReport(
+        definitions=code_reference_filter_with_no_include_exclude.filter_definitions()
+    )
+
 
 class TestPublicAPIReport:
-
     @pytest.mark.unit
     def test_instantiate(self, public_api_report: PublicAPIReport):
         assert isinstance(public_api_report, PublicAPIReport)
 
     @pytest.mark.integration
     def test_generate_printable_definitions(self, public_api_report: PublicAPIReport):
-        expected: List[str] = ['File: sample_with_definitions_python_file_string.py Name: ExampleClass',
- 'File: sample_with_definitions_python_file_string.py Name: '
- 'example_classmethod',
- 'File: sample_with_definitions_python_file_string.py Name: example_method',
- 'File: sample_with_definitions_python_file_string.py Name: '
- 'example_method_with_args',
- 'File: sample_with_definitions_python_file_string.py Name: '
- 'example_module_level_function',
- 'File: sample_with_definitions_python_file_string.py Name: '
- 'example_staticmethod']
+        expected: List[str] = [
+            "File: sample_with_definitions_python_file_string.py Name: ExampleClass",
+            "File: sample_with_definitions_python_file_string.py Name: "
+            "example_classmethod",
+            "File: sample_with_definitions_python_file_string.py Name: example_method",
+            "File: sample_with_definitions_python_file_string.py Name: "
+            "example_method_with_args",
+            "File: sample_with_definitions_python_file_string.py Name: "
+            "example_module_level_function",
+            "File: sample_with_definitions_python_file_string.py Name: "
+            "example_staticmethod",
+        ]
         observed = public_api_report.generate_printable_definitions()
         assert observed == expected
-

@@ -608,7 +608,9 @@ class PublicAPIReport:
         with open(filepath, "w") as f:
             f.write("\n".join(printable_definitions))
 
-    def generate_printable_definitions(self, file_prefix_to_strip: str = "great_expectations/") -> List[str]:
+    def generate_printable_definitions(
+        self, file_prefix_to_strip: str = "great_expectations/"
+    ) -> List[str]:
         """
 
         Args:
@@ -624,7 +626,7 @@ class PublicAPIReport:
         for definition in sorted_definitions_list:
             filepath = str(definition.filepath)
             if filepath.startswith(file_prefix_to_strip):
-                filepath = filepath[len(file_prefix_to_strip):]
+                filepath = filepath[len(file_prefix_to_strip) :]
             sorted_definitions_strings.append(
                 f"File: {filepath} Name: {definition.name}"
             )
