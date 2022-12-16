@@ -35,25 +35,14 @@ PG_COMPLEX_CONFIG_DICT = {
                     "table_name": "my_table",
                     "type": "table",
                 },
-                "with_generic_splitter": {
-                    "column_splitter": {
-                        "column_name": "my_column",
-                        "method_name": "some_method",
-                        "name": "my_splitter",
-                        "param_names": ["foo", "bar"],
-                    },
-                    "name": "with_splitter",
-                    "table_name": "another_table",
-                    "type": "table",
-                },
-                "with_year_month_splitter": {
+                "with_splitter": {
                     "column_splitter": {
                         "column_name": "my_column",
                         "method_name": "split_on_year_and_month",
                         "name": "y_m_splitter",
                         "param_names": ["year", "month"],
                     },
-                    "name": "with_year_month_splitter",
+                    "name": "with_splitter",
                     "table_name": "another_table",
                     "type": "table",
                 },

@@ -115,7 +115,7 @@ class TableAsset(DataAsset):
     # Instance fields
     type: Literal["table"] = "table"
     table_name: str
-    column_splitter: Optional[Union[SqlYearMonthSplitter, ColumnSplitter]] = None
+    column_splitter: Optional[SqlYearMonthSplitter] = None
     name: str
     order_by: List[BatchSorter] = Field(default_factory=list)
 
