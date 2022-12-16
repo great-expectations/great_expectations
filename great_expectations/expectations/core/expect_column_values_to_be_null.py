@@ -18,8 +18,8 @@ from great_expectations.render import (
 )
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
-    ParamSchemaType,
     RendererConfiguration,
+    RendererSchemaType,
 )
 from great_expectations.render.util import (
     num_to_str,
@@ -102,10 +102,10 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         cls, renderer_configuration: RendererConfiguration
     ) -> RendererConfiguration:
         add_param_args = (
-            ("column", ParamSchemaType.STRING),
-            ("mostly", ParamSchemaType.NUMBER),
-            ("row_condition", ParamSchemaType.STRING),
-            ("condition_parser", ParamSchemaType.STRING),
+            ("column", RendererSchemaType.STRING),
+            ("mostly", RendererSchemaType.NUMBER),
+            ("row_condition", RendererSchemaType.STRING),
+            ("condition_parser", RendererSchemaType.STRING),
         )
         for name, schema_type in add_param_args:
             renderer_configuration.add_param(name=name, schema_type=schema_type)
@@ -175,6 +175,10 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
+        styling = (
+            runtime_configuration.get("styling", {}) if runtime_configuration else {}
+        )
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -182,7 +186,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
                     "string_template": {
                         "template": template_str,
                         "params": params,
-                        "styling": renderer_configuration.styling,
+                        "styling": styling,
                     },
                 }
             )

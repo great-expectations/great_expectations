@@ -44,7 +44,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                     "value_type": "StringValueType",
                     "name": AtomicPrescriptiveRendererType.SUMMARY,
                     "value": {
-                        "header": None,
                         "template": "Must have exactly $value rows.",
                         "schema": {"type": "com.superconductive.rendered.string"},
                         "params": {
@@ -57,7 +56,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 {
                     "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
                     "value": {
-                        "header": None,
                         "params": {},
                         "schema": {"type": "com.superconductive.rendered.string"},
                         "template": "3",
@@ -76,34 +74,13 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 {
                     "name": AtomicPrescriptiveRendererType.SUMMARY,
                     "value": {
-                        "header": None,
                         "params": {
                             "column": {
                                 "schema": {"type": "string"},
                                 "value": "event_type",
                             },
-                            "condition_parser": {
-                                "schema": {"type": "string"},
-                                "value": None,
-                            },
                             "max_value": {"schema": {"type": "number"}, "value": 20},
                             "min_value": {"schema": {"type": "number"}, "value": 3},
-                            "parse_strings_as_datetimes": {
-                                "schema": {"type": "boolean"},
-                                "value": None,
-                            },
-                            "row_condition": {
-                                "schema": {"type": "string"},
-                                "value": None,
-                            },
-                            "strict_max": {
-                                "schema": {"type": "boolean"},
-                                "value": None,
-                            },
-                            "strict_min": {
-                                "schema": {"type": "boolean"},
-                                "value": None,
-                            },
                         },
                         "schema": {"type": "com.superconductive.rendered.string"},
                         "template": "$column minimum value must be greater than or equal "
@@ -116,7 +93,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 {
                     "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
                     "value": {
-                        "header": None,
                         "params": {},
                         "schema": {"type": "com.superconductive.rendered.string"},
                         "template": "19",
@@ -152,18 +128,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                                     "column": {
                                         "schema": {"type": "string"},
                                         "value": "user_id",
-                                    },
-                                    "condition_parser": {
-                                        "schema": {"type": "string"},
-                                        "value": None,
-                                    },
-                                    "mostly": {
-                                        "schema": {"type": "number"},
-                                        "value": None,
-                                    },
-                                    "row_condition": {
-                                        "schema": {"type": "string"},
-                                        "value": None,
                                     },
                                 },
                                 "template": "$column quantiles must be within "
@@ -201,7 +165,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 {
                     "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
                     "value": {
-                        "header": None,
                         "header_row": [
                             {"schema": {"type": "string"}, "value": "Quantile"},
                             {"schema": {"type": "string"}, "value": "Value"},
@@ -236,7 +199,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 {
                     "name": AtomicPrescriptiveRendererType.SUMMARY,
                     "value": {
-                        "header": None,
                         "params": {
                             "column": {
                                 "schema": {"type": "string"},
@@ -261,7 +223,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 {
                     "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
                     "value": {
-                        "header": None,
                         "params": {},
                         "schema": {"type": "com.superconductive.rendered.string"},
                         "template": "0% unexpected",
@@ -313,22 +274,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                                     "column": {
                                         "schema": {"type": "string"},
                                         "value": "user_id",
-                                    },
-                                    "condition_parser": {
-                                        "schema": {"type": "string"},
-                                        "value": None,
-                                    },
-                                    "mostly": {
-                                        "schema": {"type": "number"},
-                                        "value": None,
-                                    },
-                                    "row_condition": {
-                                        "schema": {"type": "string"},
-                                        "value": None,
-                                    },
-                                    "threshold": {
-                                        "schema": {"type": "number"},
-                                        "value": None,
                                     },
                                 },
                                 "template": "$column Kullback-Leibler (KL) "
