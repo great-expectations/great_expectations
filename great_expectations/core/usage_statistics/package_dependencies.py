@@ -77,6 +77,7 @@ class GXDependencies:
             "flask",
             "freezegun",
             "gcsfs",
+            "google-cloud-bigquery",
             "google-cloud-secret-manager",
             "google-cloud-storage",
             "invoke",
