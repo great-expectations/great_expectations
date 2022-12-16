@@ -13,6 +13,17 @@ datasources:
         name: with_splitter
         table_name: another_table
         column_splitter:
+              method_name: foobar_splitter
+              column_name: my_column
+              name: my_generic_splitter
+              param_names:
+                - foo
+                - bar
+      with_month_year_splitter:
+        type: table
+        name: with_month_year_splitter
+        table_name: another_table
+        column_splitter:
               method_name: split_on_year_and_month
               column_name: my_column
               name: my_year_and_month_splitter
