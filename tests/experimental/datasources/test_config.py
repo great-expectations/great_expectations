@@ -1,18 +1,18 @@
 import functools
 import json
 import pathlib
+from pprint import pformat as pf
 from typing import Callable, List
 
+import pydantic
 import pytest
 
 from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Datasource
 
 try:
-    from devtools import PrettyFormat as pf
     from devtools import debug as pp
-except ImportError:
-    from pprint import pformat as pf  # type: ignore[assignment]
+except ImportError:  # type: ignore[assignment]
     from pprint import pprint as pp  # type: ignore[assignment]
 
 p = pytest.param
@@ -97,6 +97,58 @@ def test_load_config(inject_engine_lookup_double, load_method: Callable, input_)
     assert loaded.datasources
     for datasource in loaded.datasources.values():
         assert isinstance(datasource, Datasource)
+
+
+@pytest.mark.parametrize(
+    ["bad_asset_config", "expected_error_loc", "expected_msg"],
+    [
+        p(
+            {"name": "missing `table_name`", "type": "table"},
+            ("datasources", "assets", "table_name"),
+            "field required",
+            id="missing `table_name`",
+        ),
+        p(
+            {
+                "name": "unknown splitter",
+                "type": "table",
+                "table_name": "pool",
+                "column_splitter": {
+                    "method_name": "not_a_valid_method_name",
+                    "column_name": "foo",
+                },
+            },
+            ("datasources", "assets", "column_splitter", "method_name"),
+            "unexpected value; permitted: 'split_on_year_and_month'",
+            id="bad splitter",
+        ),
+    ],
+)
+def test_catch_bad_asset_configs(
+    inject_engine_lookup_double,
+    bad_asset_config: dict,
+    expected_error_loc: tuple,
+    expected_msg: str,
+):
+    config: dict = {
+        "my_test_ds": {
+            "type": "postgres",
+            "name": "my_test_ds",
+            "connection_string": "my_db://",
+            "assets": {bad_asset_config["name"]: bad_asset_config},
+        }
+    }
+    print(f"  Config\n{pf(config)}\n")
+
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        GxConfig.parse_obj({"datasources": config})
+
+    print(f"\n{exc_info.typename}:{exc_info.value}")
+
+    all_errors = exc_info.value.errors()
+    assert len(all_errors) == 1, "Expected 1 error"
+    assert expected_error_loc == all_errors[0]["loc"]
+    assert expected_msg == all_errors[0]["msg"]
 
 
 @pytest.fixture
