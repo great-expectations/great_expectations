@@ -109,6 +109,7 @@ class CloudDataContext(SerializableDataContext):
                 cloud_config=self._cloud_config,
             )
 
+        # If a mapping was provided, convert to a rich DataContextConfig for downstream usage
         project_config = CloudDataContext.get_or_create_data_context_config(
             project_config
         )

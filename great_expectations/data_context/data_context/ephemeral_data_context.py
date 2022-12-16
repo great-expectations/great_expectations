@@ -37,6 +37,7 @@ class EphemeralDataContext(AbstractDataContext):
                 override both those set in config_variables.yml and the environment
 
         """
+        # If a mapping was provided, convert to a rich DataContextConfig for downstream usage
         project_config = EphemeralDataContext.get_or_create_data_context_config(
             project_config
         )

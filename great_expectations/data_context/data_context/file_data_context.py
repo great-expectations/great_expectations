@@ -21,6 +21,7 @@ from great_expectations.data_context.types.base import (
 from great_expectations.datasource.datasource_serializer import (
     YAMLReadyDictDatasourceConfigSerializer,
 )
+from great_expectations.exceptions.exceptions import ConfigNotFoundError
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -51,7 +52,17 @@ class FileDataContext(SerializableDataContext):
             runtime_environment (Optional[dict]): a dictionary of config variables that override both those set in
                 config_variables.yml and the environment
         """
-        # If not context_root_dir is provided, search the filesystem for one
+        self._context_root_directory = self._init_context_root_directory(
+            context_root_dir
+        )
+        self._project_config = self._init_project_config(project_config=project_config)
+
+        super().__init__(
+            context_root_dir=self._context_root_directory,
+            runtime_environment=runtime_environment,
+        )
+
+    def _init_context_root_directory(self, context_root_dir: Optional[str]) -> str:
         if not context_root_dir:
             context_root_dir = FileDataContext.find_context_yml_file()
             # If we still can't find one, panic since a FileDataContext is dependent on a local project config
@@ -59,25 +70,23 @@ class FileDataContext(SerializableDataContext):
                 raise ValueError(
                     "A FileDataContext relies on the presence of a local great_expectations.yml project config"
                 )
+        return context_root_dir
 
-        self._context_root_directory = context_root_dir
-
+    def _init_project_config(
+        self,
+        project_config: Optional[Union[DataContextConfig, Mapping]],
+    ) -> DataContextConfig:
         if project_config:
+            # If a mapping was provided, convert to a rich DataContextConfig for downstream usage
             project_config = FileDataContext.get_or_create_data_context_config(
                 project_config
             )
         else:
             project_config = FileDataContext._load_file_backed_project_config(
-                context_root_directory=context_root_dir,
+                context_root_directory=self._context_root_directory,
             )
 
-        self._project_config = self._apply_global_config_overrides(
-            config=project_config
-        )
-        super().__init__(
-            context_root_dir=self._context_root_directory,
-            runtime_environment=runtime_environment,
-        )
+        return self._apply_global_config_overrides(config=project_config)
 
     def _init_datasource_store(self) -> None:
         from great_expectations.data_context.store.datasource_store import (
