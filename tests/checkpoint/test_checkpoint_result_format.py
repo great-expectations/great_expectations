@@ -748,12 +748,17 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
 
 
 @pytest.mark.integration
-def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
-    in_memory_runtime_context,
-    batch_request_for_pandas_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
+def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
+    data_context_with_connection_to_animal_names_db,
+    reference_sql_checkpoint_config_for_unexpected_column_names,
     expectation_config_expect_column_values_to_be_in_set,
 ):
+    """
+    What does this test?
+        - unexpected_index_column defined in Checkpoint only.
+        - SUMMARY output, which means we have `partial_unexpected_index_list` only
+        - 1 Expectations added to suite
+    """
     dict_to_update_checkpoint: dict = {
         "result_format": {
             "result_format": "SUMMARY",
@@ -761,8 +766,8 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
         }
     }
     context: DataContext = _add_expectations_and_checkpoint(
-        data_context=in_memory_runtime_context,
-        checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
+        data_context=data_context_with_connection_to_animal_names_db,
+        checkpoint_config=reference_sql_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
@@ -794,7 +799,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
 
 
 @pytest.mark.integration
-def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_basic_output(
+def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
     in_memory_runtime_context,
     batch_request_for_pandas_unexpected_rows_and_index,
     reference_checkpoint_config_for_unexpected_column_names,
@@ -802,7 +807,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_basic_out
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
-            "result_format": "BASIC",
+            "result_format": "SUMMARY",
             "unexpected_index_column_names": ["pk_1"],
         }
     }

@@ -14,8 +14,8 @@ from great_expectations.expectations.metrics.util import parse_value_set
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
-    ParamSchemaType,
     RendererConfiguration,
+    RendererSchemaType,
 )
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
@@ -123,11 +123,11 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         add_param_args = (
-            ("column", ParamSchemaType.STRING),
-            ("value_set", ParamSchemaType.ARRAY),
-            ("parse_strings_as_datetimes", ParamSchemaType.BOOLEAN),
-            ("row_condition", ParamSchemaType.STRING),
-            ("condition_parser", ParamSchemaType.STRING),
+            ("column", RendererSchemaType.STRING),
+            ("value_set", RendererSchemaType.ARRAY),
+            ("parse_strings_as_datetimes", RendererSchemaType.BOOLEAN),
+            ("row_condition", RendererSchemaType.STRING),
+            ("condition_parser", RendererSchemaType.STRING),
         )
         for name, schema_type in add_param_args:
             renderer_configuration.add_param(name=name, schema_type=schema_type)
@@ -240,6 +240,10 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
+        styling = (
+            runtime_configuration.get("styling", {}) if runtime_configuration else {}
+        )
+
         return [
             RenderedStringTemplateContent(
                 **{
@@ -247,7 +251,7 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
                     "string_template": {
                         "template": template_str,
                         "params": params,
-                        "styling": renderer_configuration.styling,
+                        "styling": styling,
                     },
                 }
             )
