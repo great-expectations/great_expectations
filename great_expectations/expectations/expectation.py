@@ -2615,6 +2615,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
         )
 
         unexpected_index_column_names: Union[str, int, None] = None
+        include_unexpected_rows: Union[bool, None] = None
 
         if isinstance(result_format, dict):
             include_unexpected_rows = result_format.get(
