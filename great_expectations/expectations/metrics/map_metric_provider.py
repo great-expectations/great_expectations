@@ -2513,7 +2513,7 @@ def _sqlalchemy_map_condition_index(
 
     for row in query_result:
         primary_key_dict: Dict[str, Any] = {}
-        # add is the actual unexpected value
+        # add the actual unexpected value
         primary_key_dict[expectation_domain_column_name] = row[-1]
         for index in range(len(unexpected_index_column_names)):
             name: str = unexpected_index_column_names[index]
