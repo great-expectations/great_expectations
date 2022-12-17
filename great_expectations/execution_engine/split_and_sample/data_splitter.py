@@ -70,8 +70,7 @@ class SplitterMethod(enum.Enum):
     @classmethod
     def members(cls) -> Set[SplitterMethod]:
         """Returns a set of all the member values."""
-        # FIXME: before merge do this for real
-        return {cls.SPLIT_ON_COLUMN_VALUE, cls.SPLIT_ON_CONVERTED_DATETIME}
+        return {m for m in cls}
 
 
 class DataSplitter(abc.ABC):
