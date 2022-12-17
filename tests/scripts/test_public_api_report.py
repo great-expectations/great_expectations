@@ -622,7 +622,6 @@ def code_reference_filter_with_include_by_file_and_name_not_used_in_docs_example
     )
 
 
-
 class TestCodeReferenceFilter:
     @pytest.mark.unit
     def test_instantiate(self, code_reference_filter: CodeReferenceFilter):
@@ -750,12 +749,10 @@ class TestCodeReferenceFilter:
             )
         }
 
-
-
     @pytest.mark.integration
     def test_filter_definitions_include_by_file_and_name_already_excluded(
-            self,
-            code_reference_filter_with_include_by_file_and_name_not_used_in_docs_example_exclude_file: CodeReferenceFilter,
+        self,
+        code_reference_filter_with_include_by_file_and_name_not_used_in_docs_example_exclude_file: CodeReferenceFilter,
     ):
         """What does this test and why?
 
@@ -775,6 +772,7 @@ class TestCodeReferenceFilter:
             )
         }
 
+
 @pytest.fixture
 def public_api_report(
     code_reference_filter_with_no_include_exclude: CodeReferenceFilter,
@@ -784,6 +782,7 @@ def public_api_report(
         definitions=code_reference_filter_with_no_include_exclude.filter_definitions(),
         repo_root=repo_root,
     )
+
 
 @pytest.fixture
 def public_api_report_filter_out_file(
@@ -821,13 +820,12 @@ class TestPublicAPIReport:
         assert observed == expected
 
     @pytest.mark.integration
-    def test_generate_printable_definitions_exclude_by_file(self, public_api_report_filter_out_file: PublicAPIReport):
+    def test_generate_printable_definitions_exclude_by_file(
+        self, public_api_report_filter_out_file: PublicAPIReport
+    ):
         expected: List[str] = []
         observed = public_api_report_filter_out_file.generate_printable_definitions()
         assert observed == expected
-
-
-
 
 
 class TestIncludeExcludeDefinition:

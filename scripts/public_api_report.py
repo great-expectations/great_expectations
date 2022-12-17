@@ -444,7 +444,9 @@ class CodeReferenceFilter:
         ),
         IncludeExcludeDefinition(
             reason="Exclude code from v2 API",
-            filepath=pathlib.Path("great_expectations/datasource/batch_kwargs_generator/batch_kwargs_generator.py"),
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/batch_kwargs_generator.py"
+            ),
         ),
     ]
 
@@ -570,7 +572,9 @@ class CodeReferenceFilter:
             self.code_parser.get_all_class_method_and_function_definitions()
         )
         for definition in definitions:
-            definition_filepath = self._repo_relative_filepath(filepath=definition.filepath)
+            definition_filepath = self._repo_relative_filepath(
+                filepath=definition.filepath
+            )
             exclude: bool = self._is_filepath_excluded(
                 definition_filepath
             ) or self._is_definition_excluded(definition)
@@ -582,7 +586,9 @@ class CodeReferenceFilter:
                 included_definitions.append(definition)
 
         for definition in all_gx_code_definitions:
-            definition_filepath = self._repo_relative_filepath(filepath=definition.filepath)
+            definition_filepath = self._repo_relative_filepath(
+                filepath=definition.filepath
+            )
             include_from_all_gx_definitions: bool = self._is_filepath_included(
                 definition_filepath
             ) or self._is_definition_included(definition)
@@ -600,8 +606,12 @@ class CodeReferenceFilter:
         else:
             return filepath
 
-    def _repo_relative_filepath_comparison(self, filepath_1: pathlib.Path, filepath_2: pathlib.Path) -> bool:
-        return str(self._repo_relative_filepath(filepath_1)) == str(self._repo_relative_filepath(filepath_2))
+    def _repo_relative_filepath_comparison(
+        self, filepath_1: pathlib.Path, filepath_2: pathlib.Path
+    ) -> bool:
+        return str(self._repo_relative_filepath(filepath_1)) == str(
+            self._repo_relative_filepath(filepath_2)
+        )
 
     def _filter_for_definitions_not_marked_public_api(
         self, definitions: Set[Definition]
@@ -768,7 +778,9 @@ def main():
 
     filtered_definitions = code_reference_filter.filter_definitions()
 
-    public_api_report = PublicAPIReport(definitions=filtered_definitions, repo_root=_repo_root())
+    public_api_report = PublicAPIReport(
+        definitions=filtered_definitions, repo_root=_repo_root()
+    )
 
     printable_definitions = public_api_report.generate_printable_definitions()
     for printable_definition in printable_definitions:
