@@ -1802,7 +1802,7 @@ def _pandas_map_condition_index(
                     execution_engine=execution_engine,
                     error_message_template='Error: The unexpected_index_column "{column_name:s}" does not exist in Dataframe. Please check your configuration and try again.',
                 )
-                # add is the actual unexpected value
+                # add the actual unexpected value
                 primary_key_dict[column_name] = df.at[index, column_name]
 
             unexpected_index_list.append(primary_key_dict)
