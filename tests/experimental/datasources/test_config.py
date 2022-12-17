@@ -9,6 +9,11 @@ import pytest
 
 from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Datasource
+from great_expectations.experimental.datasources.postgres_datasource import (
+    ColumnSplitter,
+    SqlYearMonthSplitter,
+    TableAsset,
+)
 
 try:
     from devtools import debug as pp
@@ -167,6 +172,39 @@ def test_catch_bad_asset_configs(
     assert expected_msg == all_errors[0]["msg"]
 
 
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ["bad_column_kwargs", "expected_error_type", "expected_msg"],
+    [
+        (
+            {
+                "column_name": "flavor",
+                "method_name": "NOT_VALID",
+                "param_names": ["cherry", "strawberry"],
+            },
+            "value_error",
+            "unexpected value; permitted:",
+        )
+    ],
+)
+def test_general_column_splitter_errors(
+    inject_engine_lookup_double,
+    bad_column_kwargs: dict,
+    expected_error_type: str,
+    expected_msg: str,
+):
+
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        ColumnSplitter(**bad_column_kwargs)
+
+    print(f"\n{exc_info.typename}:{exc_info.value}")
+
+    all_errors = exc_info.value.errors()
+    assert len(all_errors) == 1, "Expected 1 error"
+    assert expected_error_type == all_errors[0]["type"]
+    assert all_errors[0]["msg"].startswith(expected_msg)
+
+
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
 def from_dict_gx_config() -> GxConfig:
@@ -247,6 +285,16 @@ def test_yaml_file_config_round_trip(
     assert re_loaded
 
     assert from_yaml_gx_config == re_loaded
+
+
+def test_splitters_deserialization(
+    inject_engine_lookup_double, from_json_gx_config: GxConfig
+):
+    table_asset: TableAsset = from_json_gx_config.datasources["my_pg_ds"].assets[
+        "with_splitter"
+    ]
+    assert isinstance(table_asset.column_splitter, SqlYearMonthSplitter)
+    assert table_asset.column_splitter.method_name == "split_on_year_and_month"
 
 
 # TDD Tests for future work
