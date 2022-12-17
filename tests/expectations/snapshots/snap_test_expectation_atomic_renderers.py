@@ -55,7 +55,6 @@ snapshots[
 ] = {
     "name": "atomic.diagnostic.observed_value",
     "value": {
-        "header": None,
         "header_row": [
             {"schema": {"type": "string"}, "value": "Quantile"},
             {"schema": {"type": "string"}, "value": "Value"},
@@ -90,7 +89,6 @@ snapshots[
 snapshots["test_atomic_diagnostic_observed_value_with_empty_result 1"] = {
     "name": "atomic.diagnostic.observed_value",
     "value": {
-        "header": None,
         "params": {},
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "--",
@@ -101,7 +99,6 @@ snapshots["test_atomic_diagnostic_observed_value_with_empty_result 1"] = {
 snapshots["test_atomic_diagnostic_observed_value_with_numeric_observed_value 1"] = {
     "name": "atomic.diagnostic.observed_value",
     "value": {
-        "header": None,
         "params": {},
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "1,776",
@@ -112,7 +109,6 @@ snapshots["test_atomic_diagnostic_observed_value_with_numeric_observed_value 1"]
 snapshots["test_atomic_diagnostic_observed_value_with_str_observed_value 1"] = {
     "name": "atomic.diagnostic.observed_value",
     "value": {
-        "header": None,
         "params": {},
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "foo",
@@ -123,7 +119,6 @@ snapshots["test_atomic_diagnostic_observed_value_with_str_observed_value 1"] = {
 snapshots["test_atomic_diagnostic_observed_value_with_unexpected_percent 1"] = {
     "name": "atomic.diagnostic.observed_value",
     "value": {
-        "header": None,
         "params": {},
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "10% unexpected",
@@ -134,7 +129,6 @@ snapshots["test_atomic_diagnostic_observed_value_with_unexpected_percent 1"] = {
 snapshots["test_atomic_diagnostic_observed_value_without_result 1"] = {
     "name": "atomic.diagnostic.observed_value",
     "value": {
-        "header": None,
         "params": {},
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "--",
@@ -147,7 +141,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "v__0": {"schema": {"type": "number"}, "value": 1},
@@ -166,7 +159,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "parse_strings_as_datetimes": {
@@ -189,7 +181,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "parse_strings_as_datetimes": {
@@ -257,7 +248,6 @@ snapshots[
 snapshots["test_atomic_prescriptive_summary_expect_column_max_to_be_between 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "max_value": {"schema": {"type": "number"}, "value": 5},
@@ -276,7 +266,6 @@ snapshots["test_atomic_prescriptive_summary_expect_column_max_to_be_between 1"] 
 snapshots["test_atomic_prescriptive_summary_expect_column_mean_to_be_between 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "max_value": {"schema": {"type": "number"}, "value": 7},
@@ -291,7 +280,6 @@ snapshots["test_atomic_prescriptive_summary_expect_column_mean_to_be_between 1"]
 snapshots["test_atomic_prescriptive_summary_expect_column_median_to_be_between 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "max_value": {"schema": {"type": "number"}, "value": 10},
@@ -306,7 +294,6 @@ snapshots["test_atomic_prescriptive_summary_expect_column_median_to_be_between 1
 snapshots["test_atomic_prescriptive_summary_expect_column_min_to_be_between 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "max_value": {"schema": {"type": "number"}, "value": 5},
@@ -327,7 +314,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "ties_okay": {"schema": {"type": "boolean"}, "value": True},
@@ -347,7 +333,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column_A": {"schema": {"type": "string"}, "value": "foo"},
             "column_B": {"schema": {"type": "string"}, "value": "bar"},
@@ -363,7 +348,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column_A": {"schema": {"type": "string"}, "value": "foo"},
             "column_B": {"schema": {"type": "string"}, "value": "bar"},
@@ -387,7 +371,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column_A": {"schema": {"type": "string"}, "value": "foo"},
             "column_B": {"schema": {"type": "string"}, "value": "bar"},
@@ -406,7 +389,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "max_value": {"schema": {"type": "number"}, "value": 20},
@@ -472,7 +454,6 @@ snapshots[
 snapshots["test_atomic_prescriptive_summary_expect_column_stdev_to_be_between 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "max_value": {"schema": {"type": "number"}, "value": 20},
@@ -487,7 +468,6 @@ snapshots["test_atomic_prescriptive_summary_expect_column_stdev_to_be_between 1"
 snapshots["test_atomic_prescriptive_summary_expect_column_sum_to_be_between 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "max_value": {"schema": {"type": "number"}, "value": 20},
@@ -502,7 +482,6 @@ snapshots["test_atomic_prescriptive_summary_expect_column_sum_to_be_between 1"] 
 snapshots["test_atomic_prescriptive_summary_expect_column_to_exist 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "column_index": {"schema": {"type": "number"}, "value": 5},
@@ -519,7 +498,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "max_value": {"schema": {"type": "number"}, "value": 20},
@@ -538,7 +516,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "max_value": {"schema": {"type": "number"}, "value": 20},
@@ -555,7 +532,6 @@ snapshots[
 snapshots["test_atomic_prescriptive_summary_expect_column_value_lengths_to_equal 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
@@ -571,7 +547,6 @@ snapshots["test_atomic_prescriptive_summary_expect_column_value_lengths_to_equal
 snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_between 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -594,7 +569,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -613,7 +587,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -635,7 +608,6 @@ snapshots[
 snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_in_set 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
@@ -661,7 +633,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -687,7 +658,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -711,7 +681,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -728,7 +697,6 @@ snapshots[
 snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_null 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
@@ -745,7 +713,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "mostly": {"schema": {"type": "number"}, "value": 1.0},
@@ -759,7 +726,6 @@ snapshots[
 snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_of_type 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -777,7 +743,6 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_of_type 1
 snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_unique 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -796,7 +761,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -814,7 +778,6 @@ snapshots[
 snapshots["test_atomic_prescriptive_summary_expect_column_values_to_match_regex 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -834,7 +797,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -860,7 +822,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -880,7 +841,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
@@ -899,7 +859,6 @@ snapshots[
 snapshots["test_atomic_prescriptive_summary_expect_column_values_to_not_be_null 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -918,7 +877,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -938,7 +896,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -959,7 +916,6 @@ snapshots[
 snapshots["test_atomic_prescriptive_summary_expect_compound_columns_to_be_unique 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column_list": {
                 "schema": {"type": "array"},
@@ -982,7 +938,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column_list": {"schema": {"type": "array"}, "value": ["A", "B", "C"]},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -1005,7 +960,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column_list": {
                 "schema": {"type": "array"},
@@ -1030,7 +984,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "max_value": {"schema": {"type": "number"}, "value": None},
             "min_value": {"schema": {"type": "number"}, "value": 5},
@@ -1046,7 +999,6 @@ snapshots[
 snapshots["test_atomic_prescriptive_summary_expect_table_column_count_to_equal 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {"value": {"schema": {"type": "number"}, "value": 10}},
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "Must have exactly $value columns.",
@@ -1059,7 +1011,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column_list": {"schema": {"type": "array"}, "value": ["a", "b", "c"]},
             "v__0": {"schema": {"type": "string"}, "value": "a"},
@@ -1075,7 +1026,6 @@ snapshots[
 snapshots["test_atomic_prescriptive_summary_expect_table_columns_to_match_set 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "column_list": {"schema": {"type": "array"}, "value": ["a", "b", "c"]},
             "exact_match": {"schema": {"type": "boolean"}, "value": True},
@@ -1089,7 +1039,6 @@ snapshots["test_atomic_prescriptive_summary_expect_table_columns_to_match_set 1"
 snapshots["test_atomic_prescriptive_summary_expect_table_row_count_to_be_between 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "max_value": {"schema": {"type": "number"}, "value": None},
             "min_value": {"schema": {"type": "number"}, "value": 1},
@@ -1105,7 +1054,6 @@ snapshots["test_atomic_prescriptive_summary_expect_table_row_count_to_be_between
 snapshots["test_atomic_prescriptive_summary_expect_table_row_count_to_equal 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {"value": {"schema": {"type": "number"}, "value": 10}},
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "Must have exactly $value rows.",
@@ -1118,7 +1066,6 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "header": None,
         "params": {
             "other_table_name": {
                 "schema": {"type": "string"},

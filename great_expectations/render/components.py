@@ -701,6 +701,7 @@ class RenderedAtomicValueSchema(Schema):
         return RenderedAtomicValue(**data)
 
     REMOVE_KEYS_IF_NONE = [
+        "header",
         "template",
         "table",
         "params",

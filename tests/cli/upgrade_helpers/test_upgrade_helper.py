@@ -8,8 +8,10 @@ from freezegun import freeze_time
 from moto import mock_s3
 
 import great_expectations
-from great_expectations import DataContext
 from great_expectations.cli import cli
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.utils import (
@@ -147,7 +149,8 @@ def test_upgrade_helper_intervention_on_cli_command(
 
     # make sure config version unchanged
     assert (
-        DataContext.get_ge_config_version(context_root_dir=v10_project_directory) == 1.0
+        FileDataContext.get_ge_config_version(context_root_dir=v10_project_directory)
+        == 1.0
     )
 
     expected_project_tree_str: str = """\
@@ -257,7 +260,8 @@ great_expectations/
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number incremented
     assert (
-        DataContext.get_ge_config_version(context_root_dir=v10_project_directory) == 3.0
+        FileDataContext.get_ge_config_version(context_root_dir=v10_project_directory)
+        == 3.0
     )
 
     with open(
@@ -370,7 +374,8 @@ great_expectations/
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number not incremented
     assert (
-        DataContext.get_ge_config_version(context_root_dir=v10_project_directory) == 1.0
+        FileDataContext.get_ge_config_version(context_root_dir=v10_project_directory)
+        == 1.0
     )
 
     with open(
@@ -473,7 +478,8 @@ great_expectations/
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number not incremented
     assert (
-        DataContext.get_ge_config_version(context_root_dir=v10_project_directory) == 1.0
+        FileDataContext.get_ge_config_version(context_root_dir=v10_project_directory)
+        == 1.0
     )
 
     with open(
@@ -578,7 +584,8 @@ great_expectations/
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number incremented
     assert (
-        DataContext.get_ge_config_version(context_root_dir=v20_project_directory) == 3.0
+        FileDataContext.get_ge_config_version(context_root_dir=v20_project_directory)
+        == 3.0
     )
 
     with open(
@@ -688,7 +695,7 @@ great_expectations/
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number incremented
     assert (
-        DataContext.get_ge_config_version(
+        FileDataContext.get_ge_config_version(
             context_root_dir=v20_project_directory_with_v30_configuration_and_v20_checkpoints
         )
         == 3.0
@@ -796,7 +803,7 @@ great_expectations/
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number incremented
     assert (
-        DataContext.get_ge_config_version(
+        FileDataContext.get_ge_config_version(
             context_root_dir=v20_project_directory_with_v30_configuration_and_no_checkpoints
         )
         == 3.0

@@ -14,6 +14,7 @@ from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
+from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -34,24 +35,6 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
-
-
-@pytest.fixture
-def pandas_animals_dataframe_for_unexpected_rows_and_index():
-    return pd.DataFrame(
-        {
-            "pk_1": [0, 1, 2, 3, 4, 5],
-            "pk_2": ["zero", "one", "two", "three", "four", "five"],
-            "animals": [
-                "cat",
-                "fish",
-                "dog",
-                "giraffe",
-                "lion",
-                "zebra",
-            ],
-        }
-    )
 
 
 @pytest.fixture
@@ -576,6 +559,35 @@ def test_pandas_unexpected_rows_complete_result_format(
     }
 
 
+def test_expectation_configuration_has_result_format(
+    in_memory_runtime_context,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
+):
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "COMPLETE",
+            },
+        },
+    )
+    with pytest.warns(UserWarning) as config_warning:
+        result: ExpectationValidationResult = (
+            _expecation_configuration_to_validation_result_pandas(
+                expectation_configuration=expectation_configuration,
+                dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+                context=in_memory_runtime_context,
+            )
+        )
+
+    assert (
+        "`result_format` configured at the Expectation-level will not be persisted."
+        in str(config_warning.list[0].message)
+    )
+
+
 def test_pandas_default_complete_result_format(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
@@ -615,329 +627,6 @@ def test_pandas_default_complete_result_format(
         "unexpected_percent_nonmissing": 50.0,
         "unexpected_percent_total": 50.0,
     }
-
-
-def test_pandas_single_unexpected_index_column_names_complete_result_format(
-    in_memory_runtime_context,
-    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
-):
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "COMPLETE",
-                "unexpected_index_column_names": ["pk_1"],  # Single column
-            },
-        },
-    )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_pandas(
-            expectation_configuration=expectation_configuration,
-            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-            context=in_memory_runtime_context,
-        )
-    )
-    assert convert_to_json_serializable(result.result) == {
-        "element_count": 6,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "partial_unexpected_counts": [
-            {"count": 1, "value": "giraffe"},
-            {"count": 1, "value": "lion"},
-            {"count": 1, "value": "zebra"},
-        ],
-        "partial_unexpected_index_list": [
-            {"pk_1": 3},
-            {"pk_1": 4},
-            {"pk_1": 5},
-        ],  # Dict since a column was provided
-        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_count": 3,
-        "unexpected_index_list": [
-            {"pk_1": 3},
-            {"pk_1": 4},
-            {"pk_1": 5},
-        ],  # Dict since a column was provided
-        "unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_percent": 50.0,
-        "unexpected_percent_nonmissing": 50.0,
-        "unexpected_percent_total": 50.0,
-    }
-
-
-def test_pandas_multiple_unexpected_index_column_names_complete_result_format(
-    in_memory_runtime_context,
-    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
-):
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "COMPLETE",
-                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
-            },
-        },
-    )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_pandas(
-            expectation_configuration=expectation_configuration,
-            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-            context=in_memory_runtime_context,
-        )
-    )
-    assert convert_to_json_serializable(result.result) == {
-        "element_count": 6,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "partial_unexpected_counts": [
-            {"count": 1, "value": "giraffe"},
-            {"count": 1, "value": "lion"},
-            {"count": 1, "value": "zebra"},
-        ],
-        "partial_unexpected_index_list": [
-            {"pk_1": 3, "pk_2": "three"},
-            {"pk_1": 4, "pk_2": "four"},
-            {"pk_1": 5, "pk_2": "five"},
-        ],  # Dicts since columns were provided
-        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_count": 3,
-        "unexpected_index_list": [
-            {"pk_1": 3, "pk_2": "three"},
-            {"pk_1": 4, "pk_2": "four"},
-            {"pk_1": 5, "pk_2": "five"},
-        ],  # Dicts since columns were provided
-        "unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_percent": 50.0,
-        "unexpected_percent_nonmissing": 50.0,
-        "unexpected_percent_total": 50.0,
-    }
-
-
-def test_pandas_multiple_unexpected_index_column_names_complete_result_format_limit_1(
-    in_memory_runtime_context,
-    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
-):
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "COMPLETE",
-                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
-                "partial_unexpected_count": 1,
-            },
-        },
-    )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_pandas(
-            expectation_configuration=expectation_configuration,
-            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-            context=in_memory_runtime_context,
-        )
-    )
-    assert convert_to_json_serializable(result.result) == {
-        "element_count": 6,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "partial_unexpected_counts": [{"count": 1, "value": "giraffe"}],
-        "partial_unexpected_index_list": [{"pk_1": 3, "pk_2": "three"}],
-        "partial_unexpected_list": ["giraffe"],
-        "unexpected_count": 3,
-        "unexpected_index_list": [
-            {"pk_1": 3, "pk_2": "three"},
-            {"pk_1": 4, "pk_2": "four"},
-            {"pk_1": 5, "pk_2": "five"},
-        ],
-        "unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_percent": 50.0,
-        "unexpected_percent_nonmissing": 50.0,
-        "unexpected_percent_total": 50.0,
-    }
-
-
-def test_pandas_multiple_unexpected_index_column_names_summary_result_format(
-    in_memory_runtime_context,
-    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
-):
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "SUMMARY",  # SUMMARY will include partial_unexpected* values only
-                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
-            },
-        },
-    )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_pandas(
-            expectation_configuration=expectation_configuration,
-            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-            context=in_memory_runtime_context,
-        )
-    )
-    assert convert_to_json_serializable(result.result) == {
-        "element_count": 6,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "partial_unexpected_counts": [
-            {"count": 1, "value": "giraffe"},
-            {"count": 1, "value": "lion"},
-            {"count": 1, "value": "zebra"},
-        ],  # Dicts since columns were provided
-        "partial_unexpected_index_list": [
-            {"pk_1": 3, "pk_2": "three"},
-            {"pk_1": 4, "pk_2": "four"},
-            {"pk_1": 5, "pk_2": "five"},
-        ],  # Dicts since columns were provided
-        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_count": 3,
-        "unexpected_percent": 50.0,
-        "unexpected_percent_nonmissing": 50.0,
-        "unexpected_percent_total": 50.0,
-    }
-
-
-def test_pandas_multiple_unexpected_index_column_names_summary_result_format_limit_1(
-    in_memory_runtime_context,
-    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
-):
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "SUMMARY",  # SUMMARY will include partial_unexpected* values only
-                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
-                "partial_unexpected_count": 1,
-            },
-        },
-    )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_pandas(
-            expectation_configuration=expectation_configuration,
-            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-            context=in_memory_runtime_context,
-        )
-    )
-    assert convert_to_json_serializable(result.result) == {
-        "element_count": 6,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "partial_unexpected_counts": [{"count": 1, "value": "giraffe"}],
-        "partial_unexpected_index_list": [
-            {"pk_1": 3, "pk_2": "three"}
-        ],  # Dicts since columns were provided
-        "partial_unexpected_list": ["giraffe"],
-        "unexpected_count": 3,
-        "unexpected_percent": 50.0,
-        "unexpected_percent_nonmissing": 50.0,
-        "unexpected_percent_total": 50.0,
-    }
-
-
-def test_pandas_multiple_unexpected_index_column_names_basic_result_format(
-    in_memory_runtime_context,
-    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
-):
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "BASIC",  # BASIC will not include index information
-                "unexpected_index_column_names": ["pk_1", "pk_2"],
-            },
-        },
-    )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_pandas(
-            expectation_configuration=expectation_configuration,
-            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-            context=in_memory_runtime_context,
-        )
-    )
-    assert convert_to_json_serializable(result.result) == {
-        "element_count": 6,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_count": 3,
-        "unexpected_percent": 50.0,
-        "unexpected_percent_nonmissing": 50.0,
-        "unexpected_percent_total": 50.0,
-    }
-
-
-def test_pandas_single_unexpected_index_column_names_complete_result_format_non_existing_column(
-    in_memory_runtime_context,
-    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
-):
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "COMPLETE",
-                "unexpected_index_column_names": ["i_dont_exist"],  # Single column
-            },
-        },
-    )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_pandas(
-            expectation_configuration=expectation_configuration,
-            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-            context=in_memory_runtime_context,
-        )
-    )
-    assert result.success is False
-    assert result.exception_info
-    assert (
-        result.exception_info["exception_message"]
-        == 'Error: The unexpected_index_column "i_dont_exist" does not exist in Dataframe. Please check your configuration and try again.'
-    )
-
-
-def test_pandas_multiple_unexpected_index_column_names_complete_result_format_non_existing_column(
-    in_memory_runtime_context,
-    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
-):
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "COMPLETE",
-                "unexpected_index_column_names": [
-                    "pk_1",
-                    "i_dont_exist",
-                ],  # Only 1 column is valid
-            },
-        },
-    )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_pandas(
-            expectation_configuration=expectation_configuration,
-            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-            context=in_memory_runtime_context,
-        )
-    )
-    assert result.success is False
-    assert result.exception_info
-    assert (
-        result.exception_info["exception_message"]
-        == 'Error: The unexpected_index_column "i_dont_exist" does not exist in Dataframe. Please check your configuration and try again.'
-    )
 
 
 def test_pandas_default_to_not_include_unexpected_rows(
@@ -1136,6 +825,112 @@ def test_spark_single_column_summary_result_format(
     }
 
 
+# Spark
+def test_spark_single_column_complete_result_format(
+    in_memory_runtime_context,
+    spark_dataframe_for_unexpected_rows_with_index,
+):
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "COMPLETE",
+            },
+        },
+    )
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
+    batch_definition = BatchDefinition(
+        datasource_name="spark_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    batch = Batch(
+        data=spark_dataframe_for_unexpected_rows_with_index,
+        batch_definition=batch_definition,
+    )
+    engine = SparkDFExecutionEngine()
+    validator = Validator(
+        execution_engine=engine,
+        data_context=in_memory_runtime_context,
+        batches=[
+            batch,
+        ],
+    )
+    result = expectation.validate(validator)
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "partial_unexpected_counts": [
+            {"count": 1, "value": "giraffe"},
+            {"count": 1, "value": "lion"},
+            {"count": 1, "value": "zebra"},
+        ],
+        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_count": 3,
+        "unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_percent": 50.0,
+        "unexpected_percent_nonmissing": 50.0,
+        "unexpected_percent_total": 50.0,
+    }
+
+
+def test_spark_single_column_summary_result_format(
+    in_memory_runtime_context,
+    spark_dataframe_for_unexpected_rows_with_index,
+):
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "SUMMARY",
+            },
+        },
+    )
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
+    batch_definition = BatchDefinition(
+        datasource_name="spark_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    batch = Batch(
+        data=spark_dataframe_for_unexpected_rows_with_index,
+        batch_definition=batch_definition,
+    )
+    engine = SparkDFExecutionEngine()
+    validator = Validator(
+        execution_engine=engine,
+        data_context=in_memory_runtime_context,
+        batches=[
+            batch,
+        ],
+    )
+    result = expectation.validate(validator)
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "partial_unexpected_counts": [
+            {"count": 1, "value": "giraffe"},
+            {"count": 1, "value": "lion"},
+            {"count": 1, "value": "zebra"},
+        ],
+        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_count": 3,
+        "unexpected_percent": 50.0,
+        "unexpected_percent_nonmissing": 50.0,
+        "unexpected_percent_total": 50.0,
+    }
+
+
 def test_sqlite_single_column_complete_result_format(
     sa,
     in_memory_runtime_context,
@@ -1211,7 +1006,7 @@ def test_sqlite_single_column_summary_result_format(
     }
 
 
-def test_sqlite_single_unexpected_index_column_names_complete_result_format(
+def test_sqlite_single_column_basic_result_format(
     sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):
     expectation_configuration = ExpectationConfiguration(
@@ -1220,8 +1015,7 @@ def test_sqlite_single_unexpected_index_column_names_complete_result_format(
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
             "result_format": {
-                "result_format": "COMPLETE",
-                "unexpected_index_column_names": ["pk_1"],
+                "result_format": "BASIC",
             },
         },
     )
@@ -1235,325 +1029,9 @@ def test_sqlite_single_unexpected_index_column_names_complete_result_format(
         "element_count": 6,
         "missing_count": 0,
         "missing_percent": 0.0,
-        "partial_unexpected_counts": [
-            {"count": 1, "value": "giraffe"},
-            {"count": 1, "value": "lion"},
-            {"count": 1, "value": "zebra"},
-        ],
-        "partial_unexpected_index_list": [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}],
+        "unexpected_count": 3,
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_count": 3,
-        "unexpected_index_list": [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}],
-        "unexpected_index_query": "SELECT animals, pk_1 \n"
-        "FROM animal_names \n"
-        "WHERE animals IS NOT NULL AND (animals NOT IN "
-        "('cat', 'fish', 'dog'))",
-        "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
         "unexpected_percent_total": 50.0,
     }
-
-
-def test_sqlite_single_unexpected_index_column_names_summary_result_format(
-    sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
-):
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "SUMMARY",
-                "unexpected_index_column_names": ["pk_1"],  # Single column
-            },
-        },
-    )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_sql(
-            expectation_configuration=expectation_configuration,
-            context=in_memory_runtime_context,
-        )
-    )
-    assert convert_to_json_serializable(result.result) == {
-        "element_count": 6,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "partial_unexpected_counts": [
-            {"count": 1, "value": "giraffe"},
-            {"count": 1, "value": "lion"},
-            {"count": 1, "value": "zebra"},
-        ],
-        "partial_unexpected_index_list": [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}],
-        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_count": 3,
-        "unexpected_percent": 50.0,
-        "unexpected_percent_nonmissing": 50.0,
-        "unexpected_percent_total": 50.0,
-    }
-
-
-def test_sqlite_multiple_unexpected_index_column_names_complete_result_format(
-    sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
-):
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "COMPLETE",
-                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
-            },
-        },
-    )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_sql(
-            expectation_configuration=expectation_configuration,
-            context=in_memory_runtime_context,
-        )
-    )
-    assert convert_to_json_serializable(result.result) == {
-        "element_count": 6,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "partial_unexpected_counts": [
-            {"count": 1, "value": "giraffe"},
-            {"count": 1, "value": "lion"},
-            {"count": 1, "value": "zebra"},
-        ],
-        "partial_unexpected_index_list": [
-            {"pk_1": 3, "pk_2": "three"},
-            {"pk_1": 4, "pk_2": "four"},
-            {"pk_1": 5, "pk_2": "five"},
-        ],
-        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_count": 3,
-        "unexpected_index_list": [
-            {"pk_1": 3, "pk_2": "three"},
-            {"pk_1": 4, "pk_2": "four"},
-            {"pk_1": 5, "pk_2": "five"},
-        ],
-        "unexpected_index_query": "SELECT animals, pk_1, pk_2 \n"
-        "FROM animal_names \n"
-        "WHERE animals IS NOT NULL AND (animals NOT IN "
-        "('cat', 'fish', 'dog'))",
-        "unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_percent": 50.0,
-        "unexpected_percent_nonmissing": 50.0,
-        "unexpected_percent_total": 50.0,
-    }
-
-
-def test_sql_multiple_unexpected_index_column_names_complete_result_format_limit_1(
-    sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
-):
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "COMPLETE",
-                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
-                "partial_unexpected_count": 1,
-            },
-        },
-    )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_sql(
-            expectation_configuration=expectation_configuration,
-            context=in_memory_runtime_context,
-        )
-    )
-    assert convert_to_json_serializable(result.result) == {
-        "element_count": 6,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "partial_unexpected_counts": [{"count": 1, "value": "giraffe"}],
-        "partial_unexpected_index_list": [{"pk_1": 3, "pk_2": "three"}],
-        "partial_unexpected_list": ["giraffe"],
-        "unexpected_count": 3,
-        "unexpected_index_list": [
-            {"pk_1": 3, "pk_2": "three"},
-        ],
-        "unexpected_index_query": "SELECT animals, pk_1, pk_2 \n"
-        "FROM animal_names \n"
-        "WHERE animals IS NOT NULL AND (animals NOT IN "
-        "('cat', 'fish', 'dog'))",
-        "unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_percent": 50.0,
-        "unexpected_percent_nonmissing": 50.0,
-        "unexpected_percent_total": 50.0,
-    }
-
-
-def test_sql_multiple_unexpected_index_column_names_summary_result_format(
-    sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
-):
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "SUMMARY",  # SUMMARY will include partial_unexpected* values only
-                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
-            },
-        },
-    )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_sql(
-            expectation_configuration=expectation_configuration,
-            context=in_memory_runtime_context,
-        )
-    )
-    assert convert_to_json_serializable(result.result) == {
-        "element_count": 6,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "partial_unexpected_counts": [
-            {"count": 1, "value": "giraffe"},
-            {"count": 1, "value": "lion"},
-            {"count": 1, "value": "zebra"},
-        ],
-        "partial_unexpected_index_list": [
-            {"pk_1": 3, "pk_2": "three"},
-            {"pk_1": 4, "pk_2": "four"},
-            {"pk_1": 5, "pk_2": "five"},
-        ],
-        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_count": 3,
-        "unexpected_percent": 50.0,
-        "unexpected_percent_nonmissing": 50.0,
-        "unexpected_percent_total": 50.0,
-    }
-
-
-def test_sql_multiple_unexpected_index_column_names_summary_result_format_limit_1(
-    sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
-):
-
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "SUMMARY",  # SUMMARY will include partial_unexpected* values only
-                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
-                "partial_unexpected_count": 1,
-            },
-        },
-    )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_sql(
-            expectation_configuration=expectation_configuration,
-            context=in_memory_runtime_context,
-        )
-    )
-    assert convert_to_json_serializable(result.result) == {
-        "element_count": 6,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "partial_unexpected_counts": [{"count": 1, "value": "giraffe"}],
-        "partial_unexpected_index_list": [{"pk_1": 3, "pk_2": "three"}],
-        "partial_unexpected_list": ["giraffe"],
-        "unexpected_count": 3,
-        "unexpected_percent": 50.0,
-        "unexpected_percent_nonmissing": 50.0,
-        "unexpected_percent_total": 50.0,
-    }
-
-
-def test_sql_multiple_unexpected_index_column_names_basic_result_format(
-    sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
-):
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "BASIC",  # SUMMARY will include partial_unexpected_list only, which means unexpected_index_column_names will have no effect
-                "unexpected_index_column_names": ["pk_1", "pk_2"],
-            },
-        },
-    )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_sql(
-            expectation_configuration=expectation_configuration,
-            context=in_memory_runtime_context,
-        )
-    )
-    assert convert_to_json_serializable(result.result) == {
-        "element_count": 6,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_count": 3,
-        "unexpected_percent": 50.0,
-        "unexpected_percent_nonmissing": 50.0,
-        "unexpected_percent_total": 50.0,
-    }
-
-
-def test_sql_single_unexpected_index_column_names_complete_result_format_non_existing_column(
-    sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
-):
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "COMPLETE",
-                "unexpected_index_column_names": ["i_dont_exist"],  # Single column
-            },
-        },
-    )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_sql(
-            expectation_configuration=expectation_configuration,
-            context=in_memory_runtime_context,
-        )
-    )
-
-    assert result.success is False
-    assert result.exception_info
-    assert (
-        result.exception_info["exception_message"]
-        == 'Error: The unexpected_index_column: "i_dont_exist" in does not exist in SQL Table. Please check your configuration and try again.'
-    )
-
-
-def test_sql_multiple_unexpected_index_column_names_complete_result_format_non_existing_column(
-    sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
-):
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "COMPLETE",
-                "unexpected_index_column_names": [
-                    "pk_1",
-                    "i_dont_exist",
-                ],  # Only 1 column is valid
-            },
-        },
-    )
-
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_sql(
-            expectation_configuration=expectation_configuration,
-            context=in_memory_runtime_context,
-        )
-    )
-    assert result.success is False
-    assert result.exception_info
-    assert (
-        result.exception_info["exception_message"]
-        == 'Error: The unexpected_index_column: "i_dont_exist" in does not exist in SQL Table. Please check your configuration and try again.'
-    )

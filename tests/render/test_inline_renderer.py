@@ -44,7 +44,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                     "value_type": "StringValueType",
                     "name": AtomicPrescriptiveRendererType.SUMMARY,
                     "value": {
-                        "header": None,
                         "template": "Must have exactly $value rows.",
                         "schema": {"type": "com.superconductive.rendered.string"},
                         "params": {
@@ -57,7 +56,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 {
                     "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
                     "value": {
-                        "header": None,
                         "params": {},
                         "schema": {"type": "com.superconductive.rendered.string"},
                         "template": "3",
@@ -76,7 +74,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 {
                     "name": AtomicPrescriptiveRendererType.SUMMARY,
                     "value": {
-                        "header": None,
                         "params": {
                             "column": {
                                 "schema": {"type": "string"},
@@ -96,7 +93,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 {
                     "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
                     "value": {
-                        "header": None,
                         "params": {},
                         "schema": {"type": "com.superconductive.rendered.string"},
                         "template": "19",
@@ -169,7 +165,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 {
                     "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
                     "value": {
-                        "header": None,
                         "header_row": [
                             {"schema": {"type": "string"}, "value": "Quantile"},
                             {"schema": {"type": "string"}, "value": "Value"},
@@ -204,7 +199,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 {
                     "name": AtomicPrescriptiveRendererType.SUMMARY,
                     "value": {
-                        "header": None,
                         "params": {
                             "column": {
                                 "schema": {"type": "string"},
@@ -229,7 +223,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 {
                     "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
                     "value": {
-                        "header": None,
                         "params": {},
                         "schema": {"type": "com.superconductive.rendered.string"},
                         "template": "0% unexpected",
