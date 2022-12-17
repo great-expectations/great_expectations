@@ -596,6 +596,9 @@ class CodeReferenceFilter:
         else:
             return filepath
 
+    def _repo_relative_filepath_comparison(self, filepath_1: pathlib.Path, filepath_2: pathlib.Path) -> bool:
+        return str(self._repo_relative_filepath(filepath_1)) == str(self._repo_relative_filepath(filepath_2))
+
     def _filter_for_definitions_not_marked_public_api(
         self, definitions: Set[Definition]
     ) -> Set[Definition]:
@@ -615,7 +618,7 @@ class CodeReferenceFilter:
         """Check whether a definition (filepath / name combo) is excluded."""
         definitions_excluded = [d for d in self.excludes if d.name and d.filepath]
         for definition_excluded in definitions_excluded:
-            filepath_excluded = definition.filepath == definition_excluded.filepath
+            filepath_excluded = self._repo_relative_filepath_comparison(definition.filepath, definition_excluded.filepath)  # type: ignore[arg-type]
             name_excluded = definition.name == definition_excluded.name
             if filepath_excluded and name_excluded:
                 return True
@@ -630,7 +633,7 @@ class CodeReferenceFilter:
         """Check whether a definition (filepath / name combo) is included."""
         definitions_included = [d for d in self.includes if d.name and d.filepath]
         for definition_included in definitions_included:
-            filepath_included = definition.filepath == definition_included.filepath
+            filepath_included = self._repo_relative_filepath_comparison(definition.filepath, definition_included.filepath)  # type: ignore[arg-type]
             name_included = definition.name == definition_included.name
             if filepath_included and name_included:
                 return True
