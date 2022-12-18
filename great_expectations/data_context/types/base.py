@@ -26,6 +26,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations import deprecation_wrappers
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.run_identifier import RunIdentifier
@@ -232,37 +233,42 @@ class SorterConfigSchema(Schema):
         required=True,
         allow_none=False,
     )
-    module_name = fields.String(
+    module_name = deprecation_wrappers.mm_field(
+        fields.String,
         required=False,
         allow_none=True,
-        missing="great_expectations.datasource.data_connector.sorter",
+        load_default="great_expectations.datasource.data_connector.sorter",
     )
-    orderby = fields.String(
+    orderby = deprecation_wrappers.mm_field(
+        fields.String,
         required=False,
         allow_none=True,
-        missing="asc",
+        load_default="asc",
     )
 
     # allow_none = True because it is only used by some Sorters
-    reference_list = fields.List(
+    reference_list = deprecation_wrappers.mm_field(
+        fields.List,
         cls_or_instance=fields.Str(),
         required=False,
-        missing=None,
+        load_default=None,
         allow_none=True,
     )
     order_keys_by = fields.String(
         required=False,
         allow_none=True,
     )
-    key_reference_list = fields.List(
+    key_reference_list = deprecation_wrappers.mm_field(
+        fields.List,
         cls_or_instance=fields.Str(),
         required=False,
-        missing=None,
+        load_default=None,
         allow_none=True,
     )
-    datetime_format = fields.String(
+    datetime_format = deprecation_wrappers.mm_field(
+        fields.String,
         required=False,
-        missing=None,
+        load_default=None,
         allow_none=True,
     )
 
