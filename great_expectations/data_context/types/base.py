@@ -362,15 +362,17 @@ class AssetConfigSchema(Schema):
         unknown = INCLUDE
 
     name = fields.String(required=False, allow_none=True)
-    class_name = fields.String(
+    class_name = deprecation_wrappers.mm_field(
+        fields.String,
         required=False,
         allow_none=True,
-        missing="Asset",
+        load_default="Asset",
     )
-    module_name = fields.String(
+    module_name = deprecation_wrappers.mm_field(
+        fields.String,
         required=False,
-        all_none=True,
-        missing="great_expectations.datasource.data_connector.asset",
+        metadata={"all_none": True},
+        load_default="great_expectations.datasource.data_connector.asset",
     )
     base_directory = fields.String(required=False, allow_none=True)
     glob_directive = fields.String(required=False, allow_none=True)
