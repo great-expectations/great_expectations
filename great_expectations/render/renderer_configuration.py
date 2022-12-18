@@ -23,6 +23,7 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.render.exceptions import RendererConfigurationError
 
 if TYPE_CHECKING:
@@ -85,10 +86,11 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     result: Optional[ExpectationValidationResult] = Field(None, allow_mutation=False)
     runtime_configuration: Optional[dict] = Field({}, allow_mutation=False)
     expectation_type: str = Field("", allow_mutation=False)
+    raw_kwargs: dict = Field({}, allow_mutation=False)
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
     params: RendererParams = Field(..., allow_mutation=True)
-    template_str: str = Field("", allow_mutation=True)
+    _template_str: str = Field("", allow_mutation=True)
     header_row: List[Dict[str, Optional[Any]]] = Field([], allow_mutation=True)
     table: List[List[Dict[str, Optional[Any]]]] = Field([], allow_mutation=True)
     graph: dict = Field({}, allow_mutation=True)
@@ -108,7 +110,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         return values
 
     @root_validator()
-    def _validate_for_expectation_type_and_kwargs(cls, values: dict) -> dict:
+    def _validate_and_set_renderer_attrs(cls, values: dict) -> dict:
         if (
             "result" in values
             and values["result"] is not None
@@ -118,6 +120,11 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 "result"
             ].expectation_config.expectation_type
             values["kwargs"] = values["result"].expectation_config.kwargs
+            values["raw_kwargs"] = {
+                key: value
+                for key, value in values["result"].expectation_config.raw_kwargs.items()
+                if value not in values["kwargs"].values()
+            }
         else:
             values["expectation_type"] = values["configuration"].expectation_type
             values["kwargs"] = values["configuration"].kwargs
@@ -179,6 +186,17 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 return self.dict() == other
             else:
                 return self == other
+
+    @property
+    def template_str(self) -> str:
+        template_str: str = self._template_str
+        if self.raw_kwargs:
+            template_str += f"   {convert_to_json_serializable(data=self.raw_kwargs)}"
+        return self._template_str
+
+    @template_str.setter
+    def template_str(self, template_str: str) -> None:
+        self._template_str = template_str
 
     def add_param(
         self,

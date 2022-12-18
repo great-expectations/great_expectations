@@ -113,20 +113,8 @@ class ExpectTableRowCountToEqual(TableExpectation):
         renderer_configuration.add_param(
             name="value", schema_type=RendererSchemaType.NUMBER
         )
-        template_str = "Must have exactly $value rows."
 
-        if configuration and configuration._raw_kwargs:
-            evaluation_params = substitute_none_for_missing(
-                configuration._raw_kwargs,
-                ["value"],
-            )
-            params_with_json_schema["evaluation_parameters"] = {
-                "schema": {"type": ""},
-                "value": evaluation_params.get("value"),
-            }
-            template_str += "   $evaluation_parameters"
-
-        renderer_configuration.template_str = template_str
+        renderer_configuration.template_str = "Must have exactly $value rows."
 
         return renderer_configuration
 
