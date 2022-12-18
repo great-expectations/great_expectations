@@ -37,10 +37,6 @@ except ImportError:
 
 def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
     def _detect_illegal_array_type_or_shape(values: MetricValues) -> bool:
-        # Python "None" is illegal as candidate for conversion into "numpy.ndarray" type.
-        if values is None:
-            return True
-
         # Pandas "DataFrame" and "Series" are illegal as candidates for conversion into "numpy.ndarray" type.
         if isinstance(
             values,
@@ -56,48 +52,34 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
         ):
             return True
 
+        value: MetricValue
         if isinstance(values, (list, tuple)):
             if len(values) > 0:
-                value: MetricValue = values[0]
-                # Python "None" is illegal as candidate for conversion into "numpy.ndarray" type.
-                if value is None:
-                    return True
-
-                # Pandas "DataFrame" and "Series" are illegal as candidates for conversion into "numpy.ndarray" type.
-                if isinstance(
-                    value,
-                    deep_filter_properties_iterable(
-                        properties=(
-                            pd.DataFrame,
-                            pd.Series,
-                            sqlalchemy_engine_Row,
-                            pyspark_sql_Row,
-                            set,
-                        )
-                    ),
-                ):
-                    return True
-
+                values_iterator: Iterator
                 # Components of different lengths cannot be packaged into "numpy.ndarray" type (due to undefined shape).
                 if all(isinstance(value, (list, tuple)) for value in values):
-                    values_iterator: Iterator = iter(values)
-                    first_value_length: int = len(next(values_iterator))
-                    current_value: Sized[Any]
+                    values = deep_filter_properties_iterable(properties=values)
+                    if len(values) > 0:
+                        values_iterator = iter(values)
+                        first_value_length: int = len(next(values_iterator))
+                        current_value: Sized[Any]
+                        if not all(
+                            len(current_value) == first_value_length
+                            for current_value in values_iterator
+                        ):
+                            return True
+
+                # Components of different types cannot be packaged into "numpy.ndarray" type (due to type mismatch).
+                values = deep_filter_properties_iterable(properties=values)
+                if len(values) > 0:
+                    values_iterator = iter(values)
+                    first_value_type: type = type(next(values_iterator))
+                    current_type: type
                     if not all(
-                        len(current_value) == first_value_length
+                        type(current_value) == first_value_type
                         for current_value in values_iterator
                     ):
                         return True
-
-                # Components of different types cannot be packaged into "numpy.ndarray" type (due to type mismatch).
-                values_iterator: Iterator = iter(values)
-                first_value_type: type = type(next(values_iterator))
-                current_type: type
-                if not all(
-                    type(current_value) == first_value_type
-                    for current_value in values_iterator
-                ):
-                    return True
 
                 # Recursively evaluate each element of properly shaped iterable (list or tuple).
                 for value in values:
@@ -107,17 +89,9 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
         return False
 
     if _detect_illegal_array_type_or_shape(values=metric_values):
-        value: MetricValue
-        if (
-            metric_values is not None
-            and isinstance(metric_values, (list, tuple))
-            and all(value is None for value in metric_values)
-        ):
-            return np.asarray(metric_values)
-
         return metric_values
-    else:
-        return np.asarray(metric_values)
+
+    return np.asarray(metric_values)
 
 
 @dataclass
