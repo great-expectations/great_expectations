@@ -20,7 +20,7 @@ migrator.retry_migrate_validation_results()
 from __future__ import annotations
 
 import logging
-from typing import Dict, List, NamedTuple, Optional
+from typing import TYPE_CHECKING, Dict, List, NamedTuple, Optional
 
 import requests
 
@@ -30,9 +30,6 @@ from great_expectations.core.http import create_session
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
-from great_expectations.data_context.data_context.base_data_context import (
-    BaseDataContext,
-)
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
@@ -48,6 +45,11 @@ from great_expectations.data_context.store.gx_cloud_store_backend import (
     get_user_friendly_error_message,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
 logger = logging.getLogger(__name__)
 
 
@@ -60,7 +62,7 @@ class MigrationResponse(NamedTuple):
 class CloudMigrator:
     def __init__(
         self,
-        context: BaseDataContext,
+        context: AbstractDataContext,
         cloud_base_url: Optional[str] = None,
         cloud_access_token: Optional[str] = None,
         cloud_organization_id: Optional[str] = None,
@@ -94,7 +96,7 @@ class CloudMigrator:
     @classmethod
     def migrate(
         cls,
-        context: BaseDataContext,
+        context: AbstractDataContext,
         test_migrate: bool,
         cloud_base_url: Optional[str] = None,
         cloud_access_token: Optional[str] = None,
