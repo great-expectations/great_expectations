@@ -13,7 +13,7 @@ from great_expectations.render import (
     AtomicPrescriptiveRendererType,
     RenderedAtomicContent,
 )
-from great_expectations.render.exceptions import InvalidRenderedContentError
+from great_expectations.render.exceptions import InlineRendererError
 from great_expectations.render.renderer.inline_renderer import InlineRenderer
 
 
@@ -29,10 +29,10 @@ def clean_serialized_rendered_atomic_content_graphs(
     return serialized_rendered_atomic_content
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite):
     expectation_suite: ExpectationSuite = basic_expectation_suite
-    with pytest.raises(InvalidRenderedContentError) as e:
+    with pytest.raises(InlineRendererError) as e:
         InlineRenderer(render_object=expectation_suite)  # type: ignore
     assert (
         str(e.value)
