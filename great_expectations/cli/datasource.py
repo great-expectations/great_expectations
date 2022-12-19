@@ -450,7 +450,7 @@ execution_engine:
             yaml_str += f"""
     drivername: {self.driver}"""
 
-        yaml_str += '''
+        yaml_str += f'''
 data_connectors:
   default_runtime_data_connector_name:
     class_name: RuntimeDataConnector
@@ -467,7 +467,7 @@ data_connectors:
       {{table_name}}:
         class_name: Asset
         schema_name: {{schema_name}}
-"""'''
+"""'''  # noqa: F541 # need these placeholders
 
         return yaml_str
 
