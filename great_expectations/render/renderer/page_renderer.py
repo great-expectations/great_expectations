@@ -186,7 +186,7 @@ class ValidationResultsPageRenderer(Renderer):
                 if self._data_context is not None
                 else None
             )
-        except:
+        except Exception:
             suite_meta = None
         meta_properties_to_render = self._get_meta_properties_notes(suite_meta)
         for evr in validation_results.results:
@@ -934,7 +934,7 @@ class ProfilingResultsPageRenderer(Renderer):
                 class_name=column_section_renderer["class_name"],
             )
 
-    def render(self, validation_results):
+    def render(self, validation_results):  # noqa: C901 - 16
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
             try:
