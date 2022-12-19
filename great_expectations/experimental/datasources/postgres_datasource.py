@@ -4,7 +4,7 @@ import copy
 import dataclasses
 import itertools
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Type, Union, cast
 
 import pydantic
 from pydantic import Field
@@ -36,16 +36,37 @@ class BatchRequestError(Exception):
 class ColumnSplitter:
     column_name: str
     method_name: str
-    param_names: List[str]
+    param_names: Sequence[str]
 
     def param_defaults(self, data_asset: DataAsset) -> Dict[str, List]:
         raise NotImplementedError
 
+    @pydantic.validator("method_name")
+    def _splitter_method_exists(cls, v: str):
+        """Fail early if the `method_name` does not exist and would fail at runtime."""
+        # NOTE (kilo59): this could be achieved by simply annotating the method_name field
+        # as a `SplitterMethod` enum but we get cyclic imports.
+        # This also adds the enums to the generated json schema.
+        # https://docs.pydantic.dev/usage/types/#enums-and-choices
+        # We could use `update_forward_refs()` but would have to change this to a BaseModel
+        # https://docs.pydantic.dev/usage/postponed_annotations/
+        from great_expectations.execution_engine.split_and_sample.data_splitter import (
+            SplitterMethod,
+        )
+
+        method_members = set(SplitterMethod)
+        if v not in method_members:
+            permitted_values_str = "', '".join([m.value for m in method_members])
+            raise ValueError(f"unexpected value; permitted: '{permitted_values_str}'")
+        return v
+
 
 @pydantic_dc.dataclass(frozen=True)
 class SqlYearMonthSplitter(ColumnSplitter):
-    method_name: str = "split_on_year_and_month"
-    param_names: List[str] = pydantic.Field(default_factory=lambda: ["year", "month"])
+    method_name: Literal["split_on_year_and_month"] = "split_on_year_and_month"
+    param_names: List[Literal["year", "month"]] = pydantic.Field(
+        default_factory=lambda: ["year", "month"]
+    )
 
     def param_defaults(self, data_asset: DataAsset) -> Dict[str, List]:
         """Query the database to get the years and months to split over.
@@ -115,7 +136,7 @@ class TableAsset(DataAsset):
     # Instance fields
     type: Literal["table"] = "table"
     table_name: str
-    column_splitter: Optional[ColumnSplitter] = None
+    column_splitter: Optional[SqlYearMonthSplitter] = None
     name: str
     order_by: List[BatchSorter] = Field(default_factory=list)
 
