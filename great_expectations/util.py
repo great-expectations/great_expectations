@@ -60,9 +60,6 @@ from great_expectations.exceptions import (
 )
 
 if TYPE_CHECKING:
-    # needed until numpy min version 1.20
-    import numpy.typing as npt
-
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
