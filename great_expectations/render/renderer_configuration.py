@@ -204,7 +204,15 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     @validator("template_str")
     def _set_template_str(cls, v: str, values: dict) -> str:
         if "raw_kwargs" in values and values["raw_kwargs"]:
-            v += f'   {convert_to_json_serializable(data=values["raw_kwargs"])}'
+            evaluation_parameters = convert_to_json_serializable(
+                data={
+                    key: value["$PARAMETER"]
+                    for key, value in values["raw_kwargs"].items()
+                }
+            )
+            v += "   "
+            for key, value in evaluation_parameters.items():
+                v += f"{key}: {value}"
         return v
 
     @staticmethod

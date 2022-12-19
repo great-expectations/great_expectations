@@ -1030,7 +1030,7 @@ def test_validator_include_rendered_content_evaluation_parameters(
         value=RenderedAtomicValue(
             schema={"type": "com.superconductive.rendered.string"},
             params={"value": {"schema": {"type": "number"}, "value": 10000}},
-            template="Must have exactly $value rows.   {'value': {'$PARAMETER': 'upstream_row_count'}}",
+            template="Must have exactly $value rows.   value: upstream_row_count",
         ),
         value_type="StringValueType",
     )
