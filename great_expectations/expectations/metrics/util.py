@@ -1050,9 +1050,11 @@ def get_sqlalchemy_source_table_and_schema(
     """
     schema_name = engine.batch_manager.active_batch_data.source_schema_name
     table_name = engine.batch_manager.active_batch_data.source_table_name
-    selectable = sa.Table(
-        table_name,
-        sa.MetaData(),
-        schema=schema_name,
-    )
-    return selectable
+    if table_name:
+        return sa.Table(
+            table_name,
+            sa.MetaData(),
+            schema=schema_name,
+        )
+    else:
+        return engine.batch_manager.active_batch_data.selectable

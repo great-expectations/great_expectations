@@ -40,7 +40,7 @@ from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfi
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import Checkpoint
-    from great_expectations.data_context import AbstractDataContext, DataContext
+    from great_expectations.data_context import AbstractDataContext
     from great_expectations.rule_based_profiler.rule_based_profiler import (
         RuleBasedProfiler,
     )
@@ -344,7 +344,7 @@ def usage_statistics_enabled_method(
 
 # noinspection PyUnusedLocal
 def run_validation_operator_usage_statistics(
-    data_context: DataContext,
+    data_context: AbstractDataContext,
     validation_operator_name: str,
     assets_to_validate: list,
     **kwargs,
@@ -384,7 +384,7 @@ def run_validation_operator_usage_statistics(
 # noinspection SpellCheckingInspection
 # noinspection PyUnusedLocal
 def save_expectation_suite_usage_statistics(
-    data_context: DataContext,
+    data_context: AbstractDataContext,
     expectation_suite: ExpectationSuite,
     expectation_suite_name: Optional[str] = None,
     **kwargs: dict,
@@ -403,7 +403,7 @@ def save_expectation_suite_usage_statistics(
 
 
 def get_expectation_suite_usage_statistics(
-    data_context: DataContext,
+    data_context: AbstractDataContext,
     expectation_suite_name: str,
     **kwargs: dict,
 ) -> dict:
@@ -421,7 +421,7 @@ def get_expectation_suite_usage_statistics(
 
 
 def edit_expectation_suite_usage_statistics(
-    data_context: DataContext,
+    data_context: AbstractDataContext,
     expectation_suite_name: str,
     interactive_mode: Optional[CLISuiteInteractiveFlagCombinations] = None,
     **kwargs: dict,
@@ -440,7 +440,7 @@ def edit_expectation_suite_usage_statistics(
 
 
 def add_datasource_usage_statistics(
-    data_context: DataContext, name: str, **kwargs
+    data_context: AbstractDataContext, name: str, **kwargs
 ) -> dict:
     if not data_context._usage_statistics_handler:
         return {}
@@ -471,7 +471,9 @@ def add_datasource_usage_statistics(
 
 
 # noinspection SpellCheckingInspection
-def get_batch_list_usage_statistics(data_context: DataContext, *args, **kwargs) -> dict:
+def get_batch_list_usage_statistics(
+    data_context: AbstractDataContext, *args, **kwargs
+) -> dict:
     try:
         data_context_id = data_context.data_context_id
     except AttributeError:
@@ -633,7 +635,7 @@ def send_usage_message_from_handler(
 # noinspection SpellCheckingInspection
 # noinspection PyUnusedLocal
 def _handle_expectation_suite_usage_statistics(
-    data_context: DataContext,
+    data_context: AbstractDataContext,
     event_arguments_payload_handler_name: str,
     expectation_suite: Optional[ExpectationSuite] = None,
     expectation_suite_name: Optional[str] = None,
