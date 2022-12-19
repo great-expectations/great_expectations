@@ -337,7 +337,7 @@ def test_sql_happy_path_onboarding_data_assistant(
 
 
 @pytest.mark.integration
-@pytest.mark.slow  # 5.58 seconds
+@pytest.mark.slow  # 6.54 seconds
 def test_sql_happy_path_onboarding_data_assistant_null_column_quantiles_metric_values(
     sa,
     empty_data_context,
@@ -349,6 +349,7 @@ def test_sql_happy_path_onboarding_data_assistant_null_column_quantiles_metric_v
         os.path.join(
             "..",
             "..",
+            "test_sets",
             "taxi_yellow_tripdata_samples",
             "sqlite",
             "yellow_tripdata.db",
@@ -385,8 +386,11 @@ def test_sql_happy_path_onboarding_data_assistant_null_column_quantiles_metric_v
     assert len(result.expectation_configurations) == 122
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 25.51 seconds
 def test_sql_happy_path_onboarding_data_assistant_mixed_decimal_float_column_unique_proportion_metric_values(
-    sa, empty_data_context
+    sa,
+    empty_data_context,
 ) -> None:
     context: DataContext = empty_data_context
 
