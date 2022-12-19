@@ -11,7 +11,7 @@ class SlackRenderer(Renderer):
     def __init__(self) -> None:
         super().__init__()
 
-    def render(
+    def render(  # noqa: C901 - 17
         self,
         validation_result=None,
         data_docs_pages=None,
