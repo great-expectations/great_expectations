@@ -67,11 +67,6 @@ class SplitterMethod(enum.Enum):
     def __hash__(self: SplitterMethod):
         return hash(self.value)
 
-    @classmethod
-    def members(cls) -> Set[SplitterMethod]:
-        """Returns a set of all the member values."""
-        return {m for m in cls}
-
 
 class DataSplitter(abc.ABC):
     """Abstract base class containing methods for splitting data accessible via Execution Engines.

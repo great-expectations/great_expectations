@@ -51,7 +51,7 @@ class ColumnSplitter:
             SplitterMethod,
         )
 
-        method_members = SplitterMethod.members()
+        method_members = set(SplitterMethod)
         if v not in method_members:
             permitted_values_str = "', '".join([m.value for m in method_members])
             raise ValueError(f"unexpected value; permitted: '{permitted_values_str}'")
