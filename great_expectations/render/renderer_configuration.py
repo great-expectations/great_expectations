@@ -171,7 +171,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         raw_kwargs: Dict[str, Any]
     ) -> BaseModel:
         evaluation_parameter_count = 0
-        renderer_params_args: Dict[str, dict] = {}
+        renderer_params_args: Dict[str, BaseModel] = {}
         renderer_param_definitions: Dict[str, Any] = {}
         for key, value in raw_kwargs.items():
             evaluation_parameter_name = f"eval_param__{evaluation_parameter_count}"
@@ -255,7 +255,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     @staticmethod
     def _choose_schema_type_for_value(
         schema_types: List[Union[RendererSchemaType, str]], value: Any
-    ) -> RendererSchemaType:
+    ) -> Union[RendererSchemaType, str]:
         for schema_type in schema_types:
             try:
                 renderer_param: Type[BaseModel] = create_model(
@@ -271,6 +271,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 return schema_type
             except RendererConfigurationError:
                 pass
+        raise RendererConfigurationError(
+            f"None of the schema_types: {schema_types} match the value: {value}"
+        )
 
     def add_param(
         self,
