@@ -28,7 +28,6 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations import deprecation_wrappers
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.run_identifier import RunIdentifier
@@ -239,42 +238,37 @@ class SorterConfigSchema(Schema):
         required=True,
         allow_none=False,
     )
-    module_name = deprecation_wrappers.mm_field(
-        fields.String,
+    module_name = fields.String(
         required=False,
         allow_none=True,
-        load_default="great_expectations.datasource.data_connector.sorter",
+        missing="great_expectations.datasource.data_connector.sorter",
     )
-    orderby = deprecation_wrappers.mm_field(
-        fields.String,
+    orderby = fields.String(
         required=False,
         allow_none=True,
-        load_default="asc",
+        missing="asc",
     )
 
     # allow_none = True because it is only used by some Sorters
-    reference_list = deprecation_wrappers.mm_field(
-        fields.List,
+    reference_list = fields.List(
         cls_or_instance=fields.Str(),
         required=False,
-        load_default=None,
+        missing=None,
         allow_none=True,
     )
     order_keys_by = fields.String(
         required=False,
         allow_none=True,
     )
-    key_reference_list = deprecation_wrappers.mm_field(
-        fields.List,
+    key_reference_list = fields.List(
         cls_or_instance=fields.Str(),
         required=False,
-        load_default=None,
+        missing=None,
         allow_none=True,
     )
-    datetime_format = deprecation_wrappers.mm_field(
-        fields.String,
+    datetime_format = fields.String(
         required=False,
-        load_default=None,
+        missing=None,
         allow_none=True,
     )
 
@@ -368,17 +362,15 @@ class AssetConfigSchema(Schema):
         unknown = INCLUDE
 
     name = fields.String(required=False, allow_none=True)
-    class_name = deprecation_wrappers.mm_field(
-        fields.String,
+    class_name = fields.String(
         required=False,
         allow_none=True,
-        load_default="Asset",
+        missing="Asset",
     )
-    module_name = deprecation_wrappers.mm_field(
-        fields.String,
+    module_name = fields.String(
         required=False,
-        metadata={"all_none": True},
-        load_default="great_expectations.datasource.data_connector.asset",
+        all_none=True,
+        missing="great_expectations.datasource.data_connector.asset",
     )
     base_directory = fields.String(required=False, allow_none=True)
     glob_directive = fields.String(required=False, allow_none=True)
@@ -990,7 +982,7 @@ class ExecutionEngineConfigSchema(Schema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        load_default="great_expectations.execution_engine",
+        missing="great_expectations.execution_engine",
     )
     connection_string = fields.String(required=False, allow_none=True)
     credentials = fields.Raw(required=False, allow_none=True)
