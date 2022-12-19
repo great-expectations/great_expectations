@@ -51,7 +51,6 @@ exclude = [
     'checkpoint/configurator\.py', # 2
     'checkpoint/types/checkpoint_result\.py',  # 34
     'checkpoint/util\.py',  # 5
-    'cli/batch_request\.py',  # 11
     'cli/checkpoint\.py',  # 9
     'cli/cli\.py',  # 10
     'cli/datasource\.py',  # 12
