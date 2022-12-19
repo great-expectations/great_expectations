@@ -58,7 +58,6 @@ from great_expectations.util import (
     is_ndarray_decimal_dtype,
     is_numeric,
 )
-from great_expectations.validator.computed_metric import MetricValue
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
@@ -600,7 +599,6 @@ detected.
         for metric_value_idx in metric_value_vector_indices:
             # Obtain "N"-element-long vector of samples for each element of multi-dimensional metric.
             metric_value_vector = metric_values[metric_value_idx]
-            metric_value: MetricValue
             if not datetime_detected and np.all(
                 np.isclose(metric_value_vector, metric_value_vector[0])
             ):
