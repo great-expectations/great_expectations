@@ -81,6 +81,56 @@ class _RendererParamsBase(BaseModel):
 RendererParams = TypeVar("RendererParams", bound=_RendererParamsBase)
 
 
+class _RendererParamBase(BaseModel):
+    renderer_schema: RendererSchemaType = Field(..., allow_mutation=False)
+    value: Any = Field(..., allow_mutation=False)
+
+    class Config:
+        validate_assignment = True
+        arbitrary_types_allowed = True
+
+    @root_validator()
+    def _validate_schema_matches_value(cls, values: dict) -> dict:
+        schema_type: RendererSchemaType = values["renderer_schema"]["type"]
+        value: Any = values["value"]
+        if schema_type is RendererSchemaType.STRING:
+            try:
+                str(value)
+            except Exception as e:
+                raise RendererConfigurationError(
+                    f"Value was unable to be represented as a string: {str(e)}"
+                )
+        else:
+            renderer_configuration_error = RendererConfigurationError(
+                f"Param schema_type: <{schema_type}> does "
+                f"not match value: <{value}>."
+            )
+            if schema_type is RendererSchemaType.NUMBER:
+                if not isinstance(value, Number):
+                    raise renderer_configuration_error
+            elif schema_type is RendererSchemaType.DATE:
+                if not isinstance(value, datetime):
+                    try:
+                        dateutil.parser.parse(value)
+                    except ParserError:
+                        raise renderer_configuration_error
+            elif schema_type is RendererSchemaType.BOOLEAN:
+                if value is not True and value is not False:
+                    raise renderer_configuration_error
+            else:
+                if not isinstance(value, Iterable):
+                    raise renderer_configuration_error
+        return values
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, BaseModel):
+            return self.dict() == other.dict()
+        elif isinstance(other, dict):
+            return self.dict() == other
+        else:
+            return self == other
+
+
 class RendererConfiguration(GenericModel, Generic[RendererParams]):
     """Configuration object built for each renderer."""
 
@@ -90,7 +140,6 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     result: Optional[ExpectationValidationResult] = Field(None, allow_mutation=False)
     runtime_configuration: Optional[dict] = Field({}, allow_mutation=False)
     expectation_type: str = Field("", allow_mutation=False)
-    raw_kwargs: dict = Field({}, allow_mutation=False)
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
     params: RendererParams = Field(..., allow_mutation=True)
@@ -98,6 +147,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     header_row: List[Dict[str, Optional[Any]]] = Field([], allow_mutation=True)
     table: List[List[Dict[str, Optional[Any]]]] = Field([], allow_mutation=True)
     graph: dict = Field({}, allow_mutation=True)
+    _raw_kwargs: dict = Field({}, allow_mutation=False)
 
     class Config:
         validate_assignment = True
@@ -112,6 +162,44 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 "RendererConfiguration must be passed either configuration or result."
             )
         return values
+
+    def __init__(self, **values) -> None:
+        values["params"] = _RendererParamsBase()
+        super().__init__(**values)
+
+    @staticmethod
+    def _get_evaluation_parameter_params_from_raw_kwargs(
+        raw_kwargs: Dict[str, Any]
+    ) -> BaseModel:
+        evaluation_parameter_count = 0
+        renderer_params_args = {}
+        renderer_param_definitions: Dict[str, Any] = {}
+        for key, value in raw_kwargs.items():
+            evaluation_parameter_name = f"eval_param__{evaluation_parameter_count}"
+            renderer_param: Type[BaseModel] = create_model(
+                evaluation_parameter_name,
+                renderer_schema=(
+                    Dict[str, Optional[RendererSchemaType]],
+                    Field(..., alias="schema"),
+                ),
+                value=(Union[Any, None], ...),
+                __base__=_RendererParamBase,
+            )
+            renderer_param_definitions[evaluation_parameter_name] = (
+                Optional[renderer_param],
+                ...,
+            )
+            renderer_params_args[evaluation_parameter_name] = renderer_param(
+                schema={"type": RendererSchemaType.STRING},
+                value=f'{key}: {value["$PARAMETER"]}',
+            )
+
+        renderer_params: Type[BaseModel] = create_model(
+            "RendererParams",
+            **renderer_param_definitions,
+            __base__=_RendererParamsBase,
+        )
+        return renderer_params(**renderer_params_args)
 
     @root_validator()
     def _validate_and_set_renderer_attrs(cls, values: dict) -> dict:
@@ -128,11 +216,18 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             raw_configuration: ExpectationConfiguration = (
                 expectation_configuration.get_raw_configuration()
             )
-            values["raw_kwargs"] = {
-                key: value
-                for key, value in raw_configuration.kwargs.items()
-                if (key, value) not in values["kwargs"].items()
-            }
+            if "_raw_kwargs" not in values:
+                values["_raw_kwargs"] = {
+                    key: value
+                    for key, value in raw_configuration.kwargs.items()
+                    if (key, value) not in values["kwargs"].items()
+                }
+                values[
+                    "params"
+                ] = RendererConfiguration._get_evaluation_parameter_params_from_raw_kwargs(
+                    raw_kwargs=values["_raw_kwargs"]
+                )
+
         else:
             values["expectation_type"] = values["configuration"].expectation_type
             values["kwargs"] = values["configuration"].kwargs
@@ -148,71 +243,12 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             )
         return values
 
-    def __init__(self, **values) -> None:
-        values["params"] = _RendererParamsBase()
-        super().__init__(**values)
-
-    class _RendererParamBase(BaseModel):
-        renderer_schema: RendererSchemaType = Field(..., allow_mutation=False)
-        value: Any = Field(..., allow_mutation=False)
-
-        class Config:
-            validate_assignment = True
-            arbitrary_types_allowed = True
-
-        @root_validator()
-        def _validate_schema_matches_value(cls, values: dict) -> dict:
-            schema_type: RendererSchemaType = values["renderer_schema"]["type"]
-            value: Any = values["value"]
-            if schema_type is RendererSchemaType.STRING:
-                try:
-                    str(value)
-                except Exception as e:
-                    raise RendererConfigurationError(
-                        f"Value was unable to be represented as a string: {str(e)}"
-                    )
-            else:
-                renderer_configuration_error = RendererConfigurationError(
-                    f"Param schema_type: <{schema_type}> does "
-                    f"not match value: <{value}>."
-                )
-                if schema_type is RendererSchemaType.NUMBER:
-                    if not isinstance(value, Number):
-                        raise renderer_configuration_error
-                elif schema_type is RendererSchemaType.DATE:
-                    if not isinstance(value, datetime):
-                        try:
-                            dateutil.parser.parse(value)
-                        except ParserError:
-                            raise renderer_configuration_error
-                elif schema_type is RendererSchemaType.BOOLEAN:
-                    if value is not True and value is not False:
-                        raise renderer_configuration_error
-                else:
-                    if not isinstance(value, Iterable):
-                        raise renderer_configuration_error
-            return values
-
-        def __eq__(self, other: Any) -> bool:
-            if isinstance(other, BaseModel):
-                return self.dict() == other.dict()
-            elif isinstance(other, dict):
-                return self.dict() == other
-            else:
-                return self == other
-
     @validator("template_str")
     def _set_template_str(cls, v: str, values: dict) -> str:
-        if "raw_kwargs" in values and values["raw_kwargs"]:
-            evaluation_parameters = convert_to_json_serializable(
-                data={
-                    key: value["$PARAMETER"]
-                    for key, value in values["raw_kwargs"].items()
-                }
-            )
+        if "_raw_kwargs" in values and values["_raw_kwargs"]:
             v += "   "
-            for key, value in evaluation_parameters.items():
-                v += f"{key}: {value}"
+            for evaluation_parameter_count in range(len(values["_raw_kwargs"])):
+                v += f"$eval_param__{evaluation_parameter_count}"
         return v
 
     @staticmethod
@@ -287,7 +323,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 Field(..., alias="schema"),
             ),
             value=(Union[Any, None], ...),
-            __base__=RendererConfiguration._RendererParamBase,
+            __base__=_RendererParamBase,
         )
         renderer_param_definition: Dict[str, Any] = {
             name: (Optional[renderer_param], ...)

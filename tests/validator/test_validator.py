@@ -1035,8 +1035,14 @@ def test_validator_include_rendered_content_evaluation_parameters(
         name="atomic.prescriptive.summary",
         value=RenderedAtomicValue(
             schema={"type": "com.superconductive.rendered.string"},
-            params={"value": {"schema": {"type": "number"}, "value": 10000}},
-            template="Must have exactly $value rows.   value: upstream_row_count",
+            params={
+                "value": {"schema": {"type": "number"}, "value": 10000},
+                "eval_param__0": {
+                    "schema": {"type": "string"},
+                    "value": "value: upstream_row_count",
+                },
+            },
+            template="Must have exactly $value rows.   $eval_param__0",
         ),
         value_type="StringValueType",
     )
