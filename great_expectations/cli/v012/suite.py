@@ -553,6 +553,6 @@ def suite_list(directory):
 def _get_notebook_path(context, notebook_name):
     return os.path.abspath(
         os.path.join(
-            context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name
+            context.root_directory, context.GX_EDIT_NOTEBOOK_DIR, notebook_name
         )
     )

@@ -56,6 +56,7 @@ class ColumnValuesToBeValidNewMexicoZip(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidNewMexicoZip(ColumnMapExpectation):
     """Expect values in this column to be valid New Mexico zipcodes.
+
     See https://pypi.org/project/zipcodes/ for more information.
     """
 
@@ -97,7 +98,7 @@ class ExpectColumnValuesToBeValidNewMexicoZip(ColumnMapExpectation):
     default_kwarg_values = {}
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that

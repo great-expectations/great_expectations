@@ -7,11 +7,13 @@ from freezegun import freeze_time
 from moto import mock_s3
 
 import great_expectations
-from great_expectations import DataContext
 
 # NOTE: we explicitly import the v012 CLI module, so the tests don't require the --v2-api flag explicitly,
 # although that is what is being run.
 from great_expectations.cli.v012 import cli
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.utils import escape_ansi
@@ -85,7 +87,8 @@ def test_upgrade_helper_intervention_on_cli_command(v10_project_directory, caplo
 
     # make sure config version unchanged
     assert (
-        DataContext.get_ge_config_version(context_root_dir=v10_project_directory) == 1
+        FileDataContext.get_ge_config_version(context_root_dir=v10_project_directory)
+        == 1
     )
 
     expected_project_tree_str = """\
@@ -146,7 +149,7 @@ def test_basic_project_upgrade(v10_project_directory, caplog):
     ) as f:
         expected_stdout = f.read().strip()
         expected_stdout = expected_stdout.replace(
-            "GE_PROJECT_DIR", v10_project_directory
+            "GX_PROJECT_DIR", v10_project_directory
         )
         assert stdout == expected_stdout
 
@@ -195,7 +198,8 @@ great_expectations/
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number incremented
     assert (
-        DataContext.get_ge_config_version(context_root_dir=v10_project_directory) == 3
+        FileDataContext.get_ge_config_version(context_root_dir=v10_project_directory)
+        == 3
     )
 
     with open(
@@ -207,7 +211,7 @@ great_expectations/
         expected_upgrade_log_dict = json.load(f)
         expected_upgrade_log_str = json.dumps(expected_upgrade_log_dict)
         expected_upgrade_log_str = expected_upgrade_log_str.replace(
-            "GE_PROJECT_DIR", v10_project_directory
+            "GX_PROJECT_DIR", v10_project_directory
         )
         expected_upgrade_log_dict = json.loads(expected_upgrade_log_str)
 
@@ -252,7 +256,7 @@ def test_project_upgrade_with_manual_steps(
     ) as f:
         expected_stdout = f.read().strip()
         expected_stdout = expected_stdout.replace(
-            "GE_PROJECT_DIR", v10_project_directory
+            "GX_PROJECT_DIR", v10_project_directory
         )
         assert stdout == expected_stdout
 
@@ -308,7 +312,8 @@ great_expectations/
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number not incremented
     assert (
-        DataContext.get_ge_config_version(context_root_dir=v10_project_directory) == 1
+        FileDataContext.get_ge_config_version(context_root_dir=v10_project_directory)
+        == 1
     )
 
     with open(
@@ -320,7 +325,7 @@ great_expectations/
         expected_upgrade_log_dict = json.load(f)
         expected_upgrade_log_str = json.dumps(expected_upgrade_log_dict)
         expected_upgrade_log_str = expected_upgrade_log_str.replace(
-            "GE_PROJECT_DIR", v10_project_directory
+            "GX_PROJECT_DIR", v10_project_directory
         )
         expected_upgrade_log_dict = json.loads(expected_upgrade_log_str)
 
@@ -363,7 +368,7 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
     ) as f:
         expected_stdout = f.read().strip()
         expected_stdout = expected_stdout.replace(
-            "GE_PROJECT_DIR", v10_project_directory
+            "GX_PROJECT_DIR", v10_project_directory
         )
         assert stdout == expected_stdout
 
@@ -411,7 +416,8 @@ great_expectations/
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number not incremented
     assert (
-        DataContext.get_ge_config_version(context_root_dir=v10_project_directory) == 1
+        FileDataContext.get_ge_config_version(context_root_dir=v10_project_directory)
+        == 1
     )
 
     with open(
@@ -423,7 +429,7 @@ great_expectations/
         expected_upgrade_log_dict = json.load(f)
         expected_upgrade_log_str = json.dumps(expected_upgrade_log_dict)
         expected_upgrade_log_str = expected_upgrade_log_str.replace(
-            "GE_PROJECT_DIR", v10_project_directory
+            "GX_PROJECT_DIR", v10_project_directory
         )
         expected_upgrade_log_str = expected_upgrade_log_str.replace(
             "GE_PATH", os.path.split(great_expectations.__file__)[0]
@@ -460,7 +466,7 @@ def test_v2_to_v3_project_upgrade(v20_project_directory, caplog):
     ) as f:
         expected_stdout = f.read().strip()
         expected_stdout = expected_stdout.replace(
-            "GE_PROJECT_DIR", v20_project_directory
+            "GX_PROJECT_DIR", v20_project_directory
         )
         assert stdout == expected_stdout
 
@@ -516,7 +522,8 @@ great_expectations/
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number incremented
     assert (
-        DataContext.get_ge_config_version(context_root_dir=v20_project_directory) == 3
+        FileDataContext.get_ge_config_version(context_root_dir=v20_project_directory)
+        == 3
     )
 
     with open(
@@ -528,7 +535,7 @@ great_expectations/
         expected_upgrade_log_dict = json.load(f)
         expected_upgrade_log_str = json.dumps(expected_upgrade_log_dict)
         expected_upgrade_log_str = expected_upgrade_log_str.replace(
-            "GE_PROJECT_DIR", v20_project_directory
+            "GX_PROJECT_DIR", v20_project_directory
         )
         expected_upgrade_log_dict = json.loads(expected_upgrade_log_str)
 

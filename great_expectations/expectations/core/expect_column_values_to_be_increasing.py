@@ -23,15 +23,14 @@ logger = logging.getLogger(__name__)
 class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
     """Expect the column values to be increasing.
 
-    By default, this expectation only works for numeric or datetime data.
-    When `parse_strings_as_datetimes=True`, it can also parse strings to datetimes.
+    By default, this expectation only works for numeric or datetime data. \
+    When 'parse_strings_as_datetimes=True', it can also parse strings to datetimes.
 
-    If `strictly=True`, then this expectation is only satisfied if each consecutive value
+    If 'strictly=True', then this expectation is only satisfied if each consecutive value \
     is strictly increasing--equal values are treated as failures.
 
     expect_column_values_to_be_increasing is a \
-    :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine
-    .column_map_expectation>`.
+    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
     Args:
         column (str): \
@@ -43,34 +42,29 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
         parse_strings_as_datetimes (boolean or None) : \
             If True, all non-null column values to datetimes before making comparisons
         mostly (None or a float between 0 and 1): \
-            Return `"success": True` if at least mostly fraction of values match the expectation. \
-            For more detail, see :ref:`mostly`.
+            Successful if at least mostly fraction of values match the expectation. \
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
 
     Other Parameters:
         result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
         include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
+            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
         meta (dict or None): \
             A JSON-serializable dictionary (nesting allowed) that will be included in the output without
-            modification. For more detail, see :ref:`meta`.
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
 
     See Also:
-        :func:`expect_column_values_to_be_decreasing \
-        <great_expectations.execution_engine.execution_engine.ExecutionEngine
-        .expect_column_values_to_be_decreasing>`
-
+        [expect_column_values_to_be_decreasing](https://greatexpectations.io/expectations/expect_column_values_to_be_decreasing)
     """
 
     # This dictionary contains metadata for display in the public gallery
@@ -107,7 +101,6 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -191,7 +184,6 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):

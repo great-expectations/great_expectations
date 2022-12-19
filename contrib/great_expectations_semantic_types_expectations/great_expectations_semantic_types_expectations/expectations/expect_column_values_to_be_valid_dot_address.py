@@ -51,7 +51,7 @@ class ColumnValuesToBeValidDotAddress(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidDotAddress(ColumnMapExpectation):
-    """Expect column values to be valid Polkadot address"""
+    """Expect column values to be valid Polkadot addresses."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

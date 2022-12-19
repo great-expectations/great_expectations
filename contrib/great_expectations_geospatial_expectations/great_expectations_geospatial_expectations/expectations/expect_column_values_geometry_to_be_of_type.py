@@ -42,6 +42,7 @@ class ColumnValuesGeometryOfType(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesGeometryToBeOfType(ColumnMapExpectation):
     """Expect values in a column to belong to one of the specified geometry types.
+
     Args:
         column (str): \
             The column name.
@@ -147,7 +148,6 @@ class ExpectColumnValuesGeometryToBeOfType(ColumnMapExpectation):
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
-        language: str = None,
         runtime_configuration: dict = None,
         **kwargs,
     ) -> List[

@@ -1,7 +1,7 @@
 import functools
 import json
 import pathlib
-from typing import Callable
+from typing import Callable, List
 
 import pytest
 
@@ -40,13 +40,25 @@ PG_COMPLEX_CONFIG_DICT = {
                         "column_name": "my_column",
                         "method_name": "foobar_it",
                         "name": "my_splitter",
-                        "param_defaults": {
-                            "alpha": ["fizz", "bizz"],
-                            "bravo": ["foo", "bar"],
-                        },
+                        "param_names": ["alpha", "bravo"],
                     },
                     "name": "with_splitters",
                     "table_name": "another_table",
+                    "type": "table",
+                },
+                "with_sorters": {
+                    "order_by": [
+                        {"metadata_key": "year"},
+                        {"metadata_key": "month", "reverse": True},
+                    ],
+                    "name": "with_sorters",
+                    "table_name": "yet_another_table",
+                    "type": "table",
+                },
+                "with_dslish_sorters": {
+                    "order_by": ["year", "-month"],
+                    "name": "with_sorters",
+                    "table_name": "yet_another_table",
                     "type": "table",
                 },
             },
@@ -115,7 +127,7 @@ def test_dict_config_round_trip(
     inject_engine_lookup_double, from_dict_gx_config: GxConfig
 ):
     dumped: dict = from_dict_gx_config.dict()
-    print(f"  Dumped Dict ->\n\n{pf(dumped)}")
+    print(f"  Dumped Dict ->\n\n{pf(dumped)}\n")
 
     re_loaded: GxConfig = GxConfig.parse_obj(dumped)
     pp(re_loaded)
@@ -127,8 +139,8 @@ def test_dict_config_round_trip(
 def test_json_config_round_trip(
     inject_engine_lookup_double, from_json_gx_config: GxConfig
 ):
-    dumped: str = from_json_gx_config.json()
-    print(f"  Dumped JSON ->\n\n{dumped}")
+    dumped: str = from_json_gx_config.json(indent=2)
+    print(f"  Dumped JSON ->\n\n{dumped}\n")
 
     re_loaded: GxConfig = GxConfig.parse_raw(dumped)
     pp(re_loaded)
@@ -141,7 +153,7 @@ def test_yaml_config_round_trip(
     inject_engine_lookup_double, from_yaml_gx_config: GxConfig
 ):
     dumped: str = from_yaml_gx_config.yaml()
-    print(f"  Dumped YAML ->\n\n{dumped}")
+    print(f"  Dumped YAML ->\n\n{dumped}\n")
 
     re_loaded: GxConfig = GxConfig.parse_yaml(dumped)
     pp(re_loaded)
@@ -169,6 +181,9 @@ def test_yaml_file_config_round_trip(
     assert from_yaml_gx_config == re_loaded
 
 
+# TDD Tests for future work
+
+
 @pytest.mark.xfail(reason="Key Ordering needs to be implemented")
 def test_yaml_config_round_trip_ordering(
     inject_engine_lookup_double, from_yaml_gx_config: GxConfig
@@ -176,3 +191,23 @@ def test_yaml_config_round_trip_ordering(
     dumped: str = from_yaml_gx_config.yaml()
 
     assert PG_CONFIG_YAML_STR == dumped
+
+
+@pytest.mark.xfail(
+    reason="Custom BatchSorter serialization logic needs to be implemented"
+)
+def test_custom_sorter_serialization(
+    inject_engine_lookup_double, from_json_gx_config: GxConfig
+):
+    dumped: str = from_json_gx_config.json(indent=2)
+    print(f"  Dumped JSON ->\n\n{dumped}\n")
+
+    expected_sorter_strings: List[str] = PG_COMPLEX_CONFIG_DICT["datasources"][
+        "my_pg_ds"
+    ]["assets"]["with_dslish_sorters"]["order_by"]
+
+    assert '"reverse": True' not in dumped
+    assert '{"metadata_key":' not in dumped
+
+    for sorter_str in expected_sorter_strings:
+        assert sorter_str in dumped, f"`{sorter_str}` not found in dumped json"

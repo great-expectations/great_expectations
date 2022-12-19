@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
+from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain import Domain, SemanticDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
     AbsoluteCardinalityLimit,

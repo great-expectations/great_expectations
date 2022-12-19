@@ -147,7 +147,7 @@ class ColumnKurtosis(ColumnMetricProvider):
 
 
 class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
-    """Expect column Kurtosis to be between. Test values are drawn from various distributions (uniform, normal, gamma, student-t)"""
+    """Expect column Kurtosis to be between. Test values are drawn from various distributions (uniform, normal, gamma, student-t)."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
@@ -303,7 +303,7 @@ class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
         "catch_exceptions": False,
     }
 
-    # def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    # def validate_configuration(self, configuration: Optional[ExpectationConfiguration] = None):
     #     """
     #     Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
     #     necessary configuration arguments have been provided for the validation of the expectation.
@@ -324,7 +324,6 @@ class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
     #     cls,
     #     configuration=None,
     #     result=None,
-    #     language=None,
     #     runtime_configuration=None,
     #     **kwargs,
     # ):

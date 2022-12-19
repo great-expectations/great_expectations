@@ -60,7 +60,7 @@ class ColumnValuesContainValidEmail(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToContainValidEmail(ColumnMapExpectation):
-    """Expects values in given column to be valid email addresses."""
+    """Expect values in given column to be valid email addresses."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
 
@@ -246,7 +246,7 @@ class ExpectColumnValuesToContainValidEmail(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.question")
 #     def _question_renderer(
-#         cls, configuration, result=None, language=None, runtime_configuration=None
+#         cls, configuration, result=None, runtime_configuration=None
 #     ):
 #         column = configuration.kwargs.get("column")
 #         mostly = configuration.kwargs.get("mostly")
@@ -258,7 +258,7 @@ class ExpectColumnValuesToContainValidEmail(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.answer")
 #     def _answer_renderer(
-#         cls, configuration=None, result=None, language=None, runtime_configuration=None
+#         cls, configuration=None, result=None, runtime_configuration=None
 #     ):
 #         column = result.expectation_config.kwargs.get("column")
 #         mostly = result.expectation_config.kwargs.get("mostly")
@@ -276,7 +276,6 @@ class ExpectColumnValuesToContainValidEmail(ColumnMapExpectation):
 #         cls,
 #         configuration=None,
 #         result=None,
-#         language=None,
 #         runtime_configuration=None,
 #         **kwargs,
 #     ):

@@ -99,7 +99,18 @@ class ColumnRuleFollowers(ColumnMapMetricProvider):
 
 
 class ExpectColumnValuesToFollowRule(ColumnMapExpectation):
-    """This expectation compares all rows of a column against a given input expression."""
+    """Expect that all rows of a column satisfy a given input rule that specifies ranges and expressions.
+
+    Args:
+        column (str): The column name
+
+    Keyword Args:
+        rule (dict): Dict with keys "ranges" and "expr". \
+            ranges is a dict whos keys are variables in the expression (expr) and whos values are \
+            an empty list or two-item list of indicies. \
+            expr is a string in the form of a Python expression that uses the variable names in the \
+            ranges dict and will be parsed with exec(); each variable is passed in as a string
+    """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
@@ -195,7 +206,7 @@ class ExpectColumnValuesToFollowRule(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.question")
 #     def _question_renderer(
-#         cls, configuration, result=None, language=None, runtime_configuration=None
+#         cls, configuration, result=None, runtime_configuration=None
 #     ):
 #         column = configuration.kwargs.get("column")
 #         mostly = configuration.kwargs.get("mostly")
@@ -207,7 +218,7 @@ class ExpectColumnValuesToFollowRule(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.answer")
 #     def _answer_renderer(
-#         cls, configuration=None, result=None, language=None, runtime_configuration=None
+#         cls, configuration=None, result=None, runtime_configuration=None
 #     ):
 #         column = result.expectation_config.kwargs.get("column")
 #         mostly = result.expectation_config.kwargs.get("mostly")
@@ -225,7 +236,6 @@ class ExpectColumnValuesToFollowRule(ColumnMapExpectation):
 #         cls,
 #         configuration=None,
 #         result=None,
-#         language=None,
 #         runtime_configuration=None,
 #         **kwargs,
 #     ):

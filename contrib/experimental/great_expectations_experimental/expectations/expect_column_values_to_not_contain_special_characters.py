@@ -49,15 +49,19 @@ class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
-    """Expect column entries to not contain special characters
+    """Expect column entries to not contain special characters.
+
     Args:
         column (str): \
             The column name
+
     Keyword Args:
         mostly (None or a float value between 0 and 1): \
-            Return `"success": True` if at least mostly fraction of values match the expectation \
+            Successful if at least mostly fraction of values match the expectation \
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
+
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for the Expectation
@@ -119,7 +123,6 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):

@@ -1,6 +1,5 @@
 --requirement requirements.txt
---requirement reqs/requirements-dev-lite.txt
---requirement reqs/requirements-dev-contrib.txt
+--requirement reqs/requirements-dev-test.txt
 --requirement reqs/requirements-dev-sqlalchemy.txt
 
 --requirement reqs/requirements-dev-arrow.txt

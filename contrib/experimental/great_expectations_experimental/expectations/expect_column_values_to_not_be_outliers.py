@@ -71,9 +71,14 @@ class ColumnValuesNotOutliers(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToNotBeOutliers(ColumnMapExpectation):
-    """
-    Expect Column Values to not be outliers. User is asked to specify the column, method and multiplier. Currently
-    standard deviation (std) and inter-quantile range (iqr) are supported.
+    """Expect Column Values to not be outliers.
+
+    Args:
+        column (str): The column name
+
+    Keyword Args:
+        method (str): Either "std" (standard deviation) or "iqr" (inter-quantile range)
+        multiplier (float): multiplier
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
@@ -277,7 +282,7 @@ class ExpectColumnValuesToNotBeOutliers(ColumnMapExpectation):
     # @classmethod
     # @renderer(renderer_type="renderer.question")
     # def _question_renderer(
-    #     cls, configuration, result=None, language=None, runtime_configuration=None
+    #     cls, configuration, result=None, runtime_configuration=None
     # ):
     #     column = configuration.kwargs.get("column")
     #     mostly = configuration.kwargs.get("mostly")
@@ -290,7 +295,7 @@ class ExpectColumnValuesToNotBeOutliers(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.answer")
 #     def _answer_renderer(
-#         cls, configuration=None, result=None, language=None, runtime_configuration=None
+#         cls, configuration=None, result=None, runtime_configuration=None
 #     ):
 #         column = result.expectation_config.kwargs.get("column")
 #         mostly = result.expectation_config.kwargs.get("mostly")
@@ -308,7 +313,6 @@ class ExpectColumnValuesToNotBeOutliers(ColumnMapExpectation):
 #         cls,
 #         configuration=None,
 #         result=None,
-#         language=None,
 #         runtime_configuration=None,
 #         **kwargs,
 #     ):

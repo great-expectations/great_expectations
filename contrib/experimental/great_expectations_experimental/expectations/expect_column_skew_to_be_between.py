@@ -227,7 +227,7 @@ def _get_query_result(func, selectable, sqlalchemy_engine):
 
 
 class ExpectColumnSkewToBeBetween(ColumnExpectation):
-    """Expect column skew to be between. Currently tests against Gamma and Beta distributions"""
+    """Expect column skew to be between. Currently tests against Gamma and Beta distributions."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
@@ -394,7 +394,7 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
         "catch_exceptions": False,
     }
 
-    # def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    # def validate_configuration(self, configuration: Optional[ExpectationConfiguration] = None):
     #     """
     #     Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
     #     necessary configuration arguments have been provided for the validation of the expectation.
@@ -415,7 +415,6 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
     #     cls,
     #     configuration=None,
     #     result=None,
-    #     language=None,
     #     runtime_configuration=None,
     #     **kwargs,
     # ):

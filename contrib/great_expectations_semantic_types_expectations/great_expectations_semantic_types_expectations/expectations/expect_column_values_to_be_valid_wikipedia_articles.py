@@ -73,9 +73,10 @@ class ColumnValuesValidWikipediaArticles(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToBeValidWikipediaArticles(ColumnMapExpectation):
-    """This Expectation checks whether a column contains valid titles/slugs of Wikipedia articles.
-    It simply plugs the column value into the Wikipedia URL and checks whether the HTTP status
-    code is 200. This Expectation can be used as a template for other (or a more generic) "does this website
+    """Expect column values to be valid Wikipedia article titles/slugs.
+
+    It simply plugs the column value into the Wikipedia URL and checks whether the HTTP status \
+    code is 200. This Expectation can be used as a template for other (or a more generic) "does this website \
     exist" type checks, e.g. for things like user handles, dictionary entries, etc.
     """
 
@@ -143,7 +144,7 @@ class ExpectColumnValuesToBeValidWikipediaArticles(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.question")
 #     def _question_renderer(
-#         cls, configuration, result=None, language=None, runtime_configuration=None
+#         cls, configuration, result=None, runtime_configuration=None
 #     ):
 #         column = configuration.kwargs.get("column")
 #         mostly = configuration.kwargs.get("mostly")
@@ -155,7 +156,7 @@ class ExpectColumnValuesToBeValidWikipediaArticles(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.answer")
 #     def _answer_renderer(
-#         cls, configuration=None, result=None, language=None, runtime_configuration=None
+#         cls, configuration=None, result=None, runtime_configuration=None
 #     ):
 #         column = result.expectation_config.kwargs.get("column")
 #         mostly = result.expectation_config.kwargs.get("mostly")
@@ -173,7 +174,6 @@ class ExpectColumnValuesToBeValidWikipediaArticles(ColumnMapExpectation):
 #         cls,
 #         configuration=None,
 #         result=None,
-#         language=None,
 #         runtime_configuration=None,
 #         **kwargs,
 #     ):

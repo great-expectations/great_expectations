@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core.domain import Domain
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
@@ -9,7 +10,6 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
 )
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_or_create_expectation_suite,
 )
@@ -45,6 +45,9 @@ class RuleBasedProfilerResult(SerializableDictDot):
         fully_qualified_parameter_names: List[str]
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
         expectation_configuration: ExpectationConfiguration
+        parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
+            Domain, Dict[str, ParameterNode]
+        ] = (self.parameter_values_for_fully_qualified_parameter_names_by_domain or {})
         return {
             "fully_qualified_parameter_names_by_domain": [
                 {
@@ -64,7 +67,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
                         data=parameter_values_for_fully_qualified_parameter_names
                     ),
                 }
-                for domain, parameter_values_for_fully_qualified_parameter_names in self.parameter_values_for_fully_qualified_parameter_names_by_domain.items()
+                for domain, parameter_values_for_fully_qualified_parameter_names in parameter_values_for_fully_qualified_parameter_names_by_domain.items()
             ],
             "expectation_configurations": [
                 expectation_configuration.to_json_dict()

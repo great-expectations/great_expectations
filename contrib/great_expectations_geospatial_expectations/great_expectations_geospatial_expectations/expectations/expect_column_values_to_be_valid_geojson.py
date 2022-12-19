@@ -49,12 +49,12 @@ class ColumnValuesValidGeojson(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidGeojson(ColumnMapExpectation):
     """Expect values in a column to be valid geojson strings as defined in https://geojson.org/.
+
     Note that this makes use of https://pygeos.readthedocs.io/en/stable/io.html#pygeos.io.from_geojson which has some limitations.
 
     Args:
         column (str): \
             The column name.
-
     """
 
     # These examples will be shown in the public gallery.
@@ -138,7 +138,6 @@ class ExpectColumnValuesToBeValidGeojson(ColumnMapExpectation):
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
-        language: str = None,
         runtime_configuration: dict = None,
         **kwargs,
     ) -> List[

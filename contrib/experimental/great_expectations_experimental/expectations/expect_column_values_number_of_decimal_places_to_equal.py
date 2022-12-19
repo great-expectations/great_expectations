@@ -71,7 +71,8 @@ class ColumnValuesDecimalPlacesEquals(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesNumberOfDecimalPlacesToEqual(ColumnMapExpectation):
-    """
+    """Expect all values in a numeric column to have the same number of specified decimal places.
+
     This expectation tests if all the values in a column has the same number of decimal places as the
     inputted number of decimal places. In the case where the decimal places are all 0s (an integer),
     the value automatically passes. Currently have not figured out how to preserve 0s in decimal to string conversion.
@@ -149,7 +150,7 @@ class ExpectColumnValuesNumberOfDecimalPlacesToEqual(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.question")
 #     def _question_renderer(
-#         cls, configuration, result=None, language=None, runtime_configuration=None
+#         cls, configuration, result=None, runtime_configuration=None
 #     ):
 #         column = configuration.kwargs.get("column")
 #         mostly = configuration.kwargs.get("mostly")
@@ -161,7 +162,7 @@ class ExpectColumnValuesNumberOfDecimalPlacesToEqual(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.answer")
 #     def _answer_renderer(
-#         cls, configuration=None, result=None, language=None, runtime_configuration=None
+#         cls, configuration=None, result=None, runtime_configuration=None
 #     ):
 #         column = result.expectation_config.kwargs.get("column")
 #         mostly = result.expectation_config.kwargs.get("mostly")
@@ -179,7 +180,6 @@ class ExpectColumnValuesNumberOfDecimalPlacesToEqual(ColumnMapExpectation):
 #         cls,
 #         configuration=None,
 #         result=None,
-#         language=None,
 #         runtime_configuration=None,
 #         **kwargs,
 #     ):

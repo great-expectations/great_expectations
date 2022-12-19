@@ -56,7 +56,7 @@ class ColumnValuesToBeValidGeneralZipcode(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidGeneralZipcode(ColumnMapExpectation):
-    """Expect the provided zipcode in the country which code (alpha-2) passed in the parameters"""
+    """Expect the provided zipcode in the country which code (alpha-2) passed in the parameters."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -122,7 +122,7 @@ class ExpectColumnValuesToBeValidGeneralZipcode(ColumnMapExpectation):
     default_kwarg_values = {}
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that

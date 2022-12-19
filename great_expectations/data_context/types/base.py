@@ -7,6 +7,7 @@ import itertools
 import json
 import logging
 import uuid
+import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional, Set, Union
 from uuid import UUID
 
@@ -21,6 +22,7 @@ from marshmallow import (
     validates_schema,
 )
 from marshmallow.validate import OneOf
+from marshmallow.warnings import RemovedInMarshmallow4Warning
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
@@ -50,13 +52,17 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-CURRENT_GE_CONFIG_VERSION = 3
-FIRST_GE_CONFIG_VERSION_WITH_CHECKPOINT_STORE = 3
+CURRENT_GX_CONFIG_VERSION = 3
+FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE = 3
 CURRENT_CHECKPOINT_CONFIG_VERSION = 1
 MINIMUM_SUPPORTED_CONFIG_VERSION = 2
 DEFAULT_USAGE_STATISTICS_URL = (
     "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 )
+
+
+# NOTE 121822: (kilo59) likely won't moving to marshmallow v4 so we don't care about this
+warnings.simplefilter(action="ignore", category=RemovedInMarshmallow4Warning)
 
 
 def object_to_yaml_str(obj):
@@ -976,7 +982,7 @@ class ExecutionEngineConfigSchema(Schema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        load_default="great_expectations.execution_engine",
+        missing="great_expectations.execution_engine",
     )
     connection_string = fields.String(required=False, allow_none=True)
     credentials = fields.Raw(required=False, allow_none=True)
@@ -1206,7 +1212,7 @@ class DatasourceConfigSchema(AbstractConfigSchema):
         if "generators" in data:
             raise ge_exceptions.InvalidConfigError(
                 'Your current configuration uses the "generators" key in a datasource, but in version 0.10 of '
-                'GE that key is renamed to "batch_kwargs_generators". Please update your configuration to continue.'
+                'GX that key is renamed to "batch_kwargs_generators". Please update your configuration to continue.'
             )
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
         if data["class_name"][0] == "$":
@@ -1672,15 +1678,15 @@ class DataContextConfigSchema(Schema):
                 ),
             )
 
-        if data["config_version"] > CURRENT_GE_CONFIG_VERSION:
+        if data["config_version"] > CURRENT_GX_CONFIG_VERSION:
             raise ge_exceptions.InvalidDataContextConfigError(
                 "You appear to have an invalid config version ({}).\n    The maximum valid version is {}.".format(
-                    data["config_version"], CURRENT_GE_CONFIG_VERSION
+                    data["config_version"], CURRENT_GX_CONFIG_VERSION
                 ),
                 validation_error=ValidationError(message="config version too high"),
             )
 
-        if data["config_version"] < CURRENT_GE_CONFIG_VERSION and (
+        if data["config_version"] < CURRENT_GX_CONFIG_VERSION and (
             "checkpoint_store_name" in data
             or any(
                 [
@@ -1691,17 +1697,17 @@ class DataContextConfigSchema(Schema):
         ):
             raise ge_exceptions.InvalidDataContextConfigError(
                 "You appear to be using a Checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a Checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a Checkpoint store.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.".format(
-                    data["config_version"], float(CURRENT_GE_CONFIG_VERSION)
+                    data["config_version"], float(CURRENT_GX_CONFIG_VERSION)
                 ),
                 validation_error=ValidationError(
                     message="You appear to be using a Checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a Checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a Checkpoint store.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.".format(
-                        data["config_version"], float(CURRENT_GE_CONFIG_VERSION)
+                        data["config_version"], float(CURRENT_GX_CONFIG_VERSION)
                     )
                 ),
             )
 
         if (
-            data["config_version"] >= FIRST_GE_CONFIG_VERSION_WITH_CHECKPOINT_STORE
+            data["config_version"] >= FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE
             and "validation_operators" in data
             and data["validation_operators"] is not None
         ):
@@ -1710,14 +1716,14 @@ class DataContextConfigSchema(Schema):
 ({data["config_version"]}).\n    Your data context with this configuration version uses validation_operators, which \
 are being deprecated.  Please consult the V3 API migration guide \
 https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and \
-update your configuration to be compatible with the version number {CURRENT_GE_CONFIG_VERSION}.\n    (This message \
+update your configuration to be compatible with the version number {CURRENT_GX_CONFIG_VERSION}.\n    (This message \
 will appear repeatedly until your configuration is updated.)
 """
             )
 
 
 class DataContextConfigDefaults(enum.Enum):
-    DEFAULT_CONFIG_VERSION = CURRENT_GE_CONFIG_VERSION
+    DEFAULT_CONFIG_VERSION = CURRENT_GX_CONFIG_VERSION
     DEFAULT_EXPECTATIONS_STORE_NAME = "expectations_store"
     EXPECTATIONS_BASE_DIRECTORY = "expectations"
     DEFAULT_EXPECTATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME = (

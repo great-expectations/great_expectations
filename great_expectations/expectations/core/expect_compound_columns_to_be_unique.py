@@ -18,7 +18,35 @@ from great_expectations.render.util import (
 
 
 class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
-    """Expect the compound columns to be unique."""
+    """Expect the compound columns to be unique.
+
+    expect_compound_columns_to_be_unique is a \
+    [Multicolumn Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_multicolumn_map_expectations).
+
+    Args:
+        column_list (tuple or list): Set of columns to be checked
+
+    Keyword Args:
+        ignore_row_if (str): "all_values_are_missing", "any_value_is_missing", "never"
+
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
+
+    Returns:
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
+
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+    """
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -67,7 +95,6 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -156,7 +183,6 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
@@ -175,7 +201,7 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
         )
 
         if params["mostly"] is not None and params["mostly"] < 1.0:
-            params["mostly_pct"]["value"] = num_to_str(
+            params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
             template_str = "Values for given compound columns must be unique together, at least $mostly_pct % of the time: "

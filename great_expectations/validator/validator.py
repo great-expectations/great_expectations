@@ -109,6 +109,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class ValidationDependencies:
+    # Note: Dependent "metric_name" (key) is different from "metric_name" in dependency "MetricConfiguration" (value).
     metric_configurations: Dict[str, MetricConfiguration] = field(default_factory=dict)
     result_format: Dict[str, Any] = field(default_factory=dict)
 
@@ -175,7 +176,7 @@ class Validator:
         expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
         data_context: Optional[AbstractDataContext] = None,
-        batches: Optional[Sequence[Union[Batch, XBatch]]] = None,
+        batches: Optional[Union[List[Batch], Sequence[Union[Batch, XBatch]]]] = None,
         include_rendered_content: Optional[bool] = None,
         **kwargs,
     ) -> None:
@@ -352,6 +353,7 @@ class Validator:
     def compute_metrics(
         self,
         metric_configurations: List[MetricConfiguration],
+        runtime_configuration: Optional[dict] = None,
     ) -> Dict[Tuple[str, str, str], MetricValue]:
         """
         Convenience method that computes requested metrics (specified as elements of "MetricConfiguration" list).
@@ -360,12 +362,14 @@ class Validator:
 
         Args:
             metric_configurations: List of desired MetricConfiguration objects to be resolved.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
 
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
         """
         return self._metrics_calculator.compute_metrics(
-            metric_configurations=metric_configurations
+            metric_configurations=metric_configurations,
+            runtime_configuration=runtime_configuration,
         )
 
     def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
@@ -555,13 +559,6 @@ class Validator:
                     # Add a "success" object to the config
                     stored_config.success_on_last_run = validation_result.success
 
-                # NOTE: <DataContextRefactor> Indirect way to checking whether _data_context is a ExplorerDataContext
-                if self._data_context is not None and hasattr(
-                    self._data_context, "update_return_obj"
-                ):
-                    validation_result = self._data_context.update_return_obj(
-                        self, validation_result
-                    )
             except Exception as err:
                 if basic_runtime_configuration.get("catch_exceptions"):
                     exception_traceback = traceback.format_exc()
@@ -974,7 +971,6 @@ class Validator:
         Args:
             configurations(List[ExpectationConfiguration]): A list of needed Expectation Configurations that will be
             used to supply domain and values for metrics.
-            metrics (dict): A list of currently registered metrics in the registry
             runtime_configuration (dict): A dictionary of runtime keyword arguments, controlling semantics, such as the
             result_format.
 
@@ -989,18 +985,18 @@ class Validator:
         else:
             catch_exceptions = False
 
-        expectation_validation_graphs: List[ExpectationValidationGraph] = []
+        expectation_validation_graphs: List[ExpectationValidationGraph]
 
         evrs: List[ExpectationValidationResult]
 
         processed_configurations: List[ExpectationConfiguration] = []
 
         (
+            expectation_validation_graphs,
             evrs,
             processed_configurations,
         ) = self._generate_metric_dependency_subgraphs_for_each_expectation_configuration(
             expectation_configurations=configurations,
-            expectation_validation_graphs=expectation_validation_graphs,
             processed_configurations=processed_configurations,
             catch_exceptions=catch_exceptions,
             runtime_configuration=runtime_configuration,
@@ -1025,9 +1021,10 @@ class Validator:
                 expectation_validation_graphs=expectation_validation_graphs,
                 evrs=evrs,
                 processed_configurations=processed_configurations,
+                show_progress_bars=self._determine_progress_bars(),
             )
         except Exception as err:
-            # If a general Exception occurs during the execution of "ValidationGraph.resolve_validation_graph()", then
+            # If a general Exception occurs during the execution of "ValidationGraph.resolve()", then
             # all expectations in the suite are impacted, because it is impossible to attribute the failure to a metric.
             if catch_exceptions:
                 exception_traceback: str = traceback.format_exc()
@@ -1068,13 +1065,17 @@ class Validator:
     def _generate_metric_dependency_subgraphs_for_each_expectation_configuration(
         self,
         expectation_configurations: List[ExpectationConfiguration],
-        expectation_validation_graphs: List[ExpectationValidationGraph],
         processed_configurations: List[ExpectationConfiguration],
         catch_exceptions: bool,
         runtime_configuration: Optional[dict] = None,
-    ) -> Tuple[List[ExpectationValidationResult], List[ExpectationConfiguration]]:
+    ) -> Tuple[
+        List[ExpectationValidationGraph],
+        List[ExpectationValidationResult],
+        List[ExpectationConfiguration],
+    ]:
         # While evaluating expectation configurations, create sub-graph for every metric dependency and incorporate
         # these sub-graphs under corresponding expectation-level sub-graph (state of ExpectationValidationGraph object).
+        expectation_validation_graphs: List[ExpectationValidationGraph] = []
         evrs: List[ExpectationValidationResult] = []
         configuration: ExpectationConfiguration
         evaluated_config: ExpectationConfiguration
@@ -1102,22 +1103,13 @@ class Validator:
             )
 
             try:
-                expectation_validation_graph: ExpectationValidationGraph = (
-                    ExpectationValidationGraph(
-                        execution_engine=self._execution_engine,
-                        configuration=evaluated_config,
-                    )
-                )
-                graph = ValidationGraph(execution_engine=self._execution_engine)
-                for (
-                    metric_configuration
-                ) in validation_dependencies.get_metric_configurations():
-                    graph.build_metric_dependency_graph(
-                        metric_configuration=metric_configuration,
+                expectation_validation_graph: ExpectationValidationGraph = ExpectationValidationGraph(
+                    configuration=evaluated_config,
+                    graph=self._metrics_calculator.build_metric_dependency_graph(
+                        metric_configurations=validation_dependencies.get_metric_configurations(),
                         runtime_configuration=runtime_configuration,
-                    )
-
-                expectation_validation_graph.update(graph=graph)
+                    ),
+                )
                 expectation_validation_graphs.append(expectation_validation_graph)
                 processed_configurations.append(evaluated_config)
             except Exception as err:
@@ -1137,7 +1129,7 @@ class Validator:
                 else:
                     raise err
 
-        return evrs, processed_configurations
+        return expectation_validation_graphs, evrs, processed_configurations
 
     def _generate_suite_level_graph_from_expectation_level_sub_graphs(
         self,
@@ -1158,13 +1150,14 @@ class Validator:
         )
         return validation_graph
 
-    @staticmethod
     def _resolve_suite_level_graph_and_process_metric_evaluation_errors(
+        self,
         graph: ValidationGraph,
         runtime_configuration: dict,
         expectation_validation_graphs: List[ExpectationValidationGraph],
         evrs: List[ExpectationValidationResult],
         processed_configurations: List[ExpectationConfiguration],
+        show_progress_bars: bool,
     ) -> Tuple[
         Dict[Tuple[str, str, str], MetricValue],
         List[ExpectationValidationResult],
@@ -1176,10 +1169,13 @@ class Validator:
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ]
-        resolved_metrics, aborted_metrics_info = graph.resolve_validation_graph(
+        (
+            resolved_metrics,
+            aborted_metrics_info,
+        ) = self._metrics_calculator.resolve_validation_graph(
+            graph=graph,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=0,
-            show_progress_bars=True,
         )
 
         # Trace MetricResolutionError occurrences to expectations relying on corresponding malfunctioning metrics.
@@ -1337,13 +1333,20 @@ class Validator:
         return self.default_expectation_args
 
     @property
+    def cloud_mode(self) -> bool:
+        """
+        Wrapper around cloud_mode property of associated Data Context
+        """
+        from great_expectations.data_context.data_context.cloud_data_context import (
+            CloudDataContext,
+        )
+
+        return isinstance(self._data_context, CloudDataContext)
+
+    @property
     def ge_cloud_mode(self) -> bool:
-        """
-        Wrapper around ge_cloud_mode property of associated Data Context
-        """
-        if self._data_context:
-            return self._data_context.ge_cloud_mode
-        return False
+        # <GE_RENAME> Deprecated 0.15.37
+        return self.cloud_mode
 
     @property
     def default_expectation_args(self) -> dict:
@@ -1540,7 +1543,7 @@ class Validator:
         )
         if filepath is None and self._data_context is not None:
             self._data_context.save_expectation_suite(expectation_suite)
-            if self.ge_cloud_mode:
+            if self.cloud_mode:
                 updated_suite = self._data_context.get_expectation_suite(
                     ge_cloud_id=str(expectation_suite.ge_cloud_id)
                 )
@@ -1870,7 +1873,7 @@ class Validator:
             parameter_value (any): The value to be used
         """
         self._expectation_suite.evaluation_parameters.update(
-            {parameter_name: parameter_value}
+            {parameter_name: convert_to_json_serializable(parameter_value)}
         )
 
     def add_citation(

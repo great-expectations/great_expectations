@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import cProfile
 import datetime
@@ -61,10 +63,8 @@ if TYPE_CHECKING:
     # needed until numpy min version 1.20
     import numpy.typing as npt
 
-    from great_expectations.data_context.data_context import (
-        BaseDataContext,
-        CloudDataContext,
-        DataContext,
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
     )
     from great_expectations.data_context.types.base import DataContextConfig
 
@@ -888,6 +888,67 @@ def read_sas(
         )
 
 
+def build_in_memory_runtime_context() -> AbstractDataContext:
+    """
+    Create generic in-memory "BaseDataContext" context for manipulations as required by tests.
+    """
+    from great_expectations.data_context.data_context.base_data_context import (
+        BaseDataContext,
+    )
+    from great_expectations.data_context.types.base import (
+        DataContextConfig,
+        InMemoryStoreBackendDefaults,
+    )
+
+    data_context_config: DataContextConfig = DataContextConfig(
+        datasources={  # type: ignore[arg-type]
+            "pandas_datasource": {
+                "execution_engine": {
+                    "class_name": "PandasExecutionEngine",
+                    "module_name": "great_expectations.execution_engine",
+                },
+                "class_name": "Datasource",
+                "module_name": "great_expectations.datasource",
+                "data_connectors": {
+                    "runtime_data_connector": {
+                        "class_name": "RuntimeDataConnector",
+                        "batch_identifiers": [
+                            "id_key_0",
+                            "id_key_1",
+                        ],
+                    }
+                },
+            },
+            "spark_datasource": {
+                "execution_engine": {
+                    "class_name": "SparkDFExecutionEngine",
+                    "module_name": "great_expectations.execution_engine",
+                },
+                "class_name": "Datasource",
+                "module_name": "great_expectations.datasource",
+                "data_connectors": {
+                    "runtime_data_connector": {
+                        "class_name": "RuntimeDataConnector",
+                        "batch_identifiers": [
+                            "id_key_0",
+                            "id_key_1",
+                        ],
+                    }
+                },
+            },
+        },
+        expectations_store_name="expectations_store",
+        validations_store_name="validations_store",
+        evaluation_parameter_store_name="evaluation_parameter_store",
+        checkpoint_store_name="checkpoint_store",
+        store_backend_defaults=InMemoryStoreBackendDefaults(),
+    )
+
+    context = BaseDataContext(project_config=data_context_config)
+
+    return context
+
+
 def validate(
     data_asset,
     expectation_suite=None,
@@ -984,7 +1045,7 @@ def validate(
     from great_expectations.dataset import Dataset, PandasDataset
 
     if data_asset_class is None:
-        # Guess the GE data_asset_type based on the type of the data_asset
+        # Guess the GX data_asset_type based on the type of the data_asset
         if isinstance(data_asset, pd.DataFrame):
             data_asset_class = PandasDataset
         # Add other data_asset_type conditions here as needed
@@ -1673,11 +1734,16 @@ def get_context(
     project_config: Optional[Union["DataContextConfig", Mapping]] = None,
     context_root_dir: Optional[str] = None,
     runtime_environment: Optional[dict] = None,
+    cloud_base_url: Optional[str] = None,
+    cloud_access_token: Optional[str] = None,
+    cloud_organization_id: Optional[str] = None,
+    cloud_mode: Optional[bool] = None,
+    # <GX_RENAME> Deprecated as of 0.15.37
     ge_cloud_base_url: Optional[str] = None,
     ge_cloud_access_token: Optional[str] = None,
     ge_cloud_organization_id: Optional[str] = None,
     ge_cloud_mode: Optional[bool] = None,
-) -> Union["DataContext", "BaseDataContext", "CloudDataContext"]:
+) -> AbstractDataContext:
     """
     Method to return the appropriate DataContext depending on parameters and environment.
 
@@ -1705,8 +1771,8 @@ def get_context(
     |  get_context params   |    Env Not Config'd |  Env Config'd |
     +-----------------------+---------------------+---------------+
     | ()                    | Local               | Cloud         |
-    | (ge_cloud_mode=True)  | Exception!          | Cloud         |
-    | (ge_cloud_mode=False) | Local               | Local         |
+    | (cloud_mode=True)     | Exception!          | Cloud         |
+    | (cloud_mode=False)    | Local               | Local         |
     +-----------------------+---------------------+---------------+
 
     TODO: This method will eventually return FileDataContext and EphemeralDataContext, rather than DataContext and Base
@@ -1719,10 +1785,10 @@ def get_context(
             from environment variables.
 
         The following parameters are relevant when running ge_cloud
-        ge_cloud_base_url (str): url for ge_cloud endpoint.
-        ge_cloud_access_token (str): access_token for ge_cloud account.
-        ge_cloud_organization_id (str): org_id for ge_cloud account.
-        ge_cloud_mode (bool): bool flag to specify whether to run GE in cloud mode (default is None).
+        cloud_base_url (str): url for ge_cloud endpoint.
+        cloud_access_token (str): access_token for ge_cloud account.
+        cloud_organization_id (str): org_id for ge_cloud account.
+        cloud_mode (bool): bool flag to specify whether to run GX in cloud mode (default is None).
 
     Returns:
         DataContext. Either a DataContext, BaseDataContext, or CloudDataContext depending on environment and/or
@@ -1735,28 +1801,45 @@ def get_context(
         DataContext,
     )
 
-    # First, check for ge_cloud conditions
-
-    config_available = CloudDataContext.is_ge_cloud_config_available(
+    # Chetan - 20221208 - not formally deprecating these values until a future date
+    (
+        cloud_base_url,
+        cloud_access_token,
+        cloud_organization_id,
+        cloud_mode,
+    ) = _resolve_cloud_args(
+        cloud_mode=cloud_mode,
+        cloud_base_url=cloud_base_url,
+        cloud_access_token=cloud_access_token,
+        cloud_organization_id=cloud_organization_id,
+        ge_cloud_mode=ge_cloud_mode,
         ge_cloud_base_url=ge_cloud_base_url,
         ge_cloud_access_token=ge_cloud_access_token,
         ge_cloud_organization_id=ge_cloud_organization_id,
     )
 
+    # First, check for ge_cloud conditions
+
+    config_available = CloudDataContext.is_cloud_config_available(
+        cloud_base_url=cloud_base_url,
+        cloud_access_token=cloud_access_token,
+        cloud_organization_id=cloud_organization_id,
+    )
+
     # If config available and not explicitly disabled
-    if config_available and ge_cloud_mode is not False:
+    if config_available and cloud_mode is not False:
         return CloudDataContext(
             project_config=project_config,
             runtime_environment=runtime_environment,
             context_root_dir=context_root_dir,
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_access_token=ge_cloud_access_token,
-            ge_cloud_organization_id=ge_cloud_organization_id,
+            cloud_base_url=cloud_base_url,
+            cloud_access_token=cloud_access_token,
+            cloud_organization_id=cloud_organization_id,
         )
 
-    if ge_cloud_mode and not config_available:
+    if cloud_mode and not config_available:
         raise GXCloudConfigurationError(
-            "GE Cloud Mode enabled, but missing env vars: GE_CLOUD_ORGANIZATION_ID, GE_CLOUD_ACCESS_TOKEN"
+            "GX Cloud Mode enabled, but missing env vars: GX_CLOUD_ORGANIZATION_ID, GX_CLOUD_ACCESS_TOKEN"
         )
 
     # Second, check for which type of local
@@ -1772,6 +1855,30 @@ def get_context(
         context_root_dir=context_root_dir,
         runtime_environment=runtime_environment,
     )
+
+
+def _resolve_cloud_args(
+    cloud_base_url: Optional[str] = None,
+    cloud_access_token: Optional[str] = None,
+    cloud_organization_id: Optional[str] = None,
+    cloud_mode: Optional[bool] = None,
+    # <GX_RENAME> Deprecated as of 0.15.37
+    ge_cloud_base_url: Optional[str] = None,
+    ge_cloud_access_token: Optional[str] = None,
+    ge_cloud_organization_id: Optional[str] = None,
+    ge_cloud_mode: Optional[bool] = None,
+) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[bool]]:
+    cloud_base_url = cloud_base_url if cloud_base_url is not None else ge_cloud_base_url
+    cloud_access_token = (
+        cloud_access_token if cloud_access_token is not None else ge_cloud_access_token
+    )
+    cloud_organization_id = (
+        cloud_organization_id
+        if cloud_organization_id is not None
+        else ge_cloud_organization_id
+    )
+    cloud_mode = cloud_mode if cloud_mode is not None else ge_cloud_mode
+    return cloud_base_url, cloud_access_token, cloud_organization_id, cloud_mode
 
 
 def is_sane_slack_webhook(url: str) -> bool:

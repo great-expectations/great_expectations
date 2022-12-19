@@ -41,7 +41,7 @@ class ColumnValuesMatchPowersOfBase(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToMatchPowersOfBase(ColumnMapExpectation):
-    """Expect column values to match powers of Base (Base ** power == column value)"""
+    """Expect column values to match powers of Base (Base ** power == column value)."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -203,7 +203,7 @@ class ExpectColumnValuesToMatchPowersOfBase(ColumnMapExpectation):
     default_kwarg_values = {"mostly": 1}
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that

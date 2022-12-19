@@ -72,10 +72,13 @@ class ColumnValuesPointWithinGeoRegion(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
-    """This expectation will check a (longitude, latitude) tuple to see if it falls within a country input by the
-    user or a polygon specified by user input points. To do this geo calculation, it leverages the Geopandas library. So for now it only supports the countries
-    that are in the Geopandas world database. Importantly, countries are defined by their iso_a3 country code, not their
-    full name."""
+    """Expect column values to be lat/lon points within a geographic region.
+
+    This expectation will check a (longitude, latitude) tuple to see if it falls within a country input by the \
+    user or a polygon specified by user input points. To do this geo calculation, it leverages the Geopandas \
+    library. So for now it only supports the countries that are in the Geopandas world database. Importantly, \
+    countries are defined by their iso_a3 country code, not their full name.
+    """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
@@ -237,7 +240,7 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
     #     @classmethod
     #     @renderer(renderer_type="renderer.question")
     #     def _question_renderer(
-    #         cls, configuration, result=None, language=None, runtime_configuration=None
+    #         cls, configuration, result=None, runtime_configuration=None
     #     ):
     #         column = configuration.kwargs.get("column")
     #         mostly = configuration.kwargs.get("mostly")
@@ -248,7 +251,7 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
     #     @classmethod
     #     @renderer(renderer_type="renderer.answer")
     #     def _answer_renderer(
-    #         cls, configuration=None, result=None, language=None, runtime_configuration=None
+    #         cls, configuration=None, result=None, runtime_configuration=None
     #     ):
     #         column = result.expectation_config.kwargs.get("column")
     #         mostly = result.expectation_config.kwargs.get("mostly")
@@ -266,7 +269,6 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):

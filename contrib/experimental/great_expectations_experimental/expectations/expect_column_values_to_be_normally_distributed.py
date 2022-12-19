@@ -148,7 +148,7 @@ class ColumnNormallyDistributed(ColumnMetricProvider):
 
 
 class ExpectColumnValuesToBeNormallyDistributed(ColumnExpectation):
-    """Test whether column values are normally distributed. NaN values are omitted."""
+    """Expect column values to be normally distributed. NaN values are omitted."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
@@ -231,7 +231,7 @@ class ExpectColumnValuesToBeNormallyDistributed(ColumnExpectation):
     }
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -253,7 +253,6 @@ class ExpectColumnValuesToBeNormallyDistributed(ColumnExpectation):
     #     cls,
     #     configuration=None,
     #     result=None,
-    #     language=None,
     #     runtime_configuration=None,
     #     **kwargs,
     # ):

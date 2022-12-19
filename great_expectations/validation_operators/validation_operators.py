@@ -236,6 +236,16 @@ class ActionListValidationOperator(ValidationOperator):
             self.actions[action_config["name"]] = new_action
 
     @property
+    def _using_cloud_context(self) -> bool:
+        # Chetan - 20221216 - This is a temporary property to encapsulate any Cloud leakage
+        # Upon refactoring this class to decouple Cloud-specific branches, this should be removed
+        from great_expectations.data_context.data_context.cloud_data_context import (
+            CloudDataContext,
+        )
+
+        return isinstance(self.data_context, CloudDataContext)
+
+    @property
     def validation_operator_config(self) -> dict:
         if self._validation_operator_config is None:
             self._validation_operator_config = {
@@ -286,7 +296,7 @@ class ActionListValidationOperator(ValidationOperator):
         run_time=None,
         catch_exceptions=None,
         result_format=None,
-        checkpoint_identifier=None,
+        checkpoint_identifier: Optional[GXCloudIdentifier] = None,
         checkpoint_name: Optional[str] = None,
         validation_id: Optional[str] = None,
     ) -> ValidationOperatorResult:
@@ -370,10 +380,10 @@ class ActionListValidationOperator(ValidationOperator):
 
             run_results = {}
             for batch, async_batch_validation_result in batch_and_async_result_tuples:
-                if self.data_context.ge_cloud_mode:
+                if self._using_cloud_context:
                     expectation_suite_identifier = GXCloudIdentifier(
                         resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-                        ge_cloud_id=batch._expectation_suite.ge_cloud_id,
+                        cloud_id=batch._expectation_suite.ge_cloud_id,
                     )
                     validation_result_id = GXCloudIdentifier(
                         resource_type=GXCloudRESTResource.VALIDATION_RESULT
@@ -391,7 +401,7 @@ class ActionListValidationOperator(ValidationOperator):
                 validation_result = async_batch_validation_result.result()
                 validation_result.meta["validation_id"] = validation_id
                 validation_result.meta["checkpoint_id"] = (
-                    checkpoint_identifier.ge_cloud_id if checkpoint_identifier else None
+                    checkpoint_identifier.cloud_id if checkpoint_identifier else None
                 )
 
                 batch_actions_results = self._run_actions(

@@ -55,7 +55,7 @@ class ColumnValuesToBeHexadecimal(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeHexadecimal(ColumnMapExpectation):
-    """This expectation checks if the column values are valid hexadecimals"""
+    """Expect column values to be valid hexadecimals."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -175,7 +175,7 @@ class ExpectColumnValuesToBeHexadecimal(ColumnMapExpectation):
     default_kwarg_values = {}
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that

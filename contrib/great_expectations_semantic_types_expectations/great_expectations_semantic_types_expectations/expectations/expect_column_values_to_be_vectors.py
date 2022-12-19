@@ -75,7 +75,7 @@ class ColumnValuesIsVector(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToBeVectors(ColumnMapExpectation):
-    """Expect column values to be vectors"""
+    """Expect column values to be vectors."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
@@ -165,7 +165,7 @@ class ExpectColumnValuesToBeVectors(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.question")
 #     def _question_renderer(
-#         cls, configuration, result=None, language=None, runtime_configuration=None
+#         cls, configuration, result=None, runtime_configuration=None
 #     ):
 #         column = configuration.kwargs.get("column")
 #         mostly = configuration.kwargs.get("mostly")
@@ -177,7 +177,7 @@ class ExpectColumnValuesToBeVectors(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.answer")
 #     def _answer_renderer(
-#         cls, configuration=None, result=None, language=None, runtime_configuration=None
+#         cls, configuration=None, result=None, runtime_configuration=None
 #     ):
 #         column = result.expectation_config.kwargs.get("column")
 #         mostly = result.expectation_config.kwargs.get("mostly")
@@ -195,7 +195,6 @@ class ExpectColumnValuesToBeVectors(ColumnMapExpectation):
 #         cls,
 #         configuration=None,
 #         result=None,
-#         language=None,
 #         runtime_configuration=None,
 #         **kwargs,
 #     ):

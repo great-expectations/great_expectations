@@ -37,6 +37,7 @@ class MetricsCalculator:
 
         Args:
             execution_engine: ExecutionEngine to perform metrics computation.
+            show_progress_bars: Directive for whether or not to show progress bars.
         """
         self._execution_engine: ExecutionEngine = execution_engine
         self._show_progress_bars: bool = show_progress_bars
@@ -130,8 +131,9 @@ class MetricsCalculator:
             Tuple[str, str, str], MetricValue
         ] = self.compute_metrics(
             metric_configurations=list(metrics.values()),
+            runtime_configuration=None,
+            min_graph_edges_pbar_enable=0,
         )
-
         return {
             metric_configuration.metric_name: resolved_metrics[metric_configuration.id]
             for metric_configuration in metrics.values()
@@ -140,13 +142,53 @@ class MetricsCalculator:
     def compute_metrics(
         self,
         metric_configurations: List[MetricConfiguration],
+        runtime_configuration: Optional[dict] = None,
+        min_graph_edges_pbar_enable: int = 0,
+        # Set to low number (e.g., 3) to suppress progress bar for small graphs.
     ) -> Dict[Tuple[str, str, str], MetricValue]:
         """
         Args:
             metric_configurations: List of desired MetricConfiguration objects to be resolved.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
+            min_graph_edges_pbar_enable: Minumum number of graph edges to warrant showing progress bars.
 
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
+        """
+        graph: ValidationGraph = self.build_metric_dependency_graph(
+            metric_configurations=metric_configurations,
+            runtime_configuration=runtime_configuration,
+        )
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
+        aborted_metrics_info: Dict[
+            Tuple[str, str, str],
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ]
+        (
+            resolved_metrics,
+            aborted_metrics_info,
+        ) = self.resolve_validation_graph_and_handle_aborted_metrics_info(
+            graph=graph,
+            runtime_configuration=runtime_configuration,
+            min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
+        )
+        return resolved_metrics
+
+    def build_metric_dependency_graph(
+        self,
+        metric_configurations: List[MetricConfiguration],
+        runtime_configuration: Optional[dict] = None,
+    ) -> ValidationGraph:
+        """
+        Obtain domain and value keys for metrics and proceeds to add these metrics to the validation graph
+        until all metrics have been added.
+
+        Args:
+            metric_configurations: List of "MetricConfiguration" objects, for which to build combined "ValidationGraph".
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
+
+        Returns:
+            Resulting "ValidationGraph" object.
         """
         graph: ValidationGraph = ValidationGraph(
             execution_engine=self._execution_engine
@@ -156,18 +198,42 @@ class MetricsCalculator:
         for metric_configuration in metric_configurations:
             graph.build_metric_dependency_graph(
                 metric_configuration=metric_configuration,
-                runtime_configuration=None,
+                runtime_configuration=runtime_configuration,
             )
 
+        return graph
+
+    def resolve_validation_graph_and_handle_aborted_metrics_info(
+        self,
+        graph: ValidationGraph,
+        runtime_configuration: Optional[dict] = None,
+        min_graph_edges_pbar_enable: int = 0,
+        # Set to low number (e.g., 3) to suppress progress bar for small graphs.
+    ) -> Tuple[
+        Dict[Tuple[str, str, str], MetricValue],
+        Dict[
+            Tuple[str, str, str],
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ],
+    ]:
+        """
+        Args:
+            graph: "ValidationGraph" object, containing "metric_edge" structures with "MetricConfiguration" objects.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
+            min_graph_edges_pbar_enable: Minumum number of graph edges to warrant showing progress bars.
+
+        Returns:
+            Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
+        """
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
         aborted_metrics_info: Dict[
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ]
-        resolved_metrics, aborted_metrics_info = graph.resolve_validation_graph(
-            runtime_configuration=None,
-            min_graph_edges_pbar_enable=0,
-            show_progress_bars=True,
+        (resolved_metrics, aborted_metrics_info,) = self.resolve_validation_graph(
+            graph=graph,
+            runtime_configuration=runtime_configuration,
+            min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
         )
 
         if aborted_metrics_info:
@@ -175,4 +241,44 @@ class MetricsCalculator:
                 f"Exceptions\n{str(aborted_metrics_info)}\noccurred while resolving metrics."
             )
 
-        return resolved_metrics
+        return (
+            resolved_metrics,
+            aborted_metrics_info,
+        )
+
+    def resolve_validation_graph(
+        self,
+        graph: ValidationGraph,
+        runtime_configuration: Optional[dict] = None,
+        min_graph_edges_pbar_enable: int = 0,
+        # Set to low number (e.g., 3) to suppress progress bar for small graphs.
+    ) -> Tuple[
+        Dict[Tuple[str, str, str], MetricValue],
+        Dict[
+            Tuple[str, str, str],
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ],
+    ]:
+        """
+        Calls "ValidationGraph.resolve()" method with supplied arguments.
+
+        Args:
+            graph: "ValidationGraph" object, containing "metric_edge" structures with "MetricConfiguration" objects.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
+            min_graph_edges_pbar_enable: Minumum number of graph edges to warrant showing progress bars.
+
+        Returns:
+            Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
+            Aborted metrics information, with metric ID as key.
+        """
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
+        aborted_metrics_info: Dict[
+            Tuple[str, str, str],
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ]
+        resolved_metrics, aborted_metrics_info = graph.resolve(
+            runtime_configuration=runtime_configuration,
+            min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
+            show_progress_bars=self._show_progress_bars,
+        )
+        return resolved_metrics, aborted_metrics_info

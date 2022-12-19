@@ -193,13 +193,17 @@ class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToBeAlphabetical(ColumnMapExpectation):
-    """
+    """Expect values to be alphabetical.
+
     Given a list of string values, check if the list is alphabetical, either forwards or backwards (specified with the
     `reverse` parameter). Comparison is case-insensitive. Using `mostly` will give you how many items are alphabetical
     relative to the immediately previous item in the list.
 
-    conditions:
-        reverse: Checks for Z to A alphabetical if True, otherwise checks A to Z
+    Args:
+        column (str): The column name
+
+    Keyword Args:
+        reverse (boolean): Checks for Z to A alphabetical if True, otherwise checks A to Z
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
@@ -369,7 +373,7 @@ class ExpectColumnValuesToBeAlphabetical(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.question")
 #     def _question_renderer(
-#         cls, configuration, result=None, language=None, runtime_configuration=None
+#         cls, configuration, result=None, runtime_configuration=None
 #     ):
 #         column = configuration.kwargs.get("column")
 #         mostly = configuration.kwargs.get("mostly")
@@ -381,7 +385,7 @@ class ExpectColumnValuesToBeAlphabetical(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.answer")
 #     def _answer_renderer(
-#         cls, configuration=None, result=None, language=None, runtime_configuration=None
+#         cls, configuration=None, result=None, runtime_configuration=None
 #     ):
 #         column = result.expectation_config.kwargs.get("column")
 #         mostly = result.expectation_config.kwargs.get("mostly")
@@ -399,7 +403,6 @@ class ExpectColumnValuesToBeAlphabetical(ColumnMapExpectation):
 #         cls,
 #         configuration=None,
 #         result=None,
-#         language=None,
 #         runtime_configuration=None,
 #         **kwargs,
 #     ):

@@ -8,7 +8,7 @@ from typing_extensions import ClassVar
 from great_expectations.experimental.datasources.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import DataContext as GXDataContext
+    from great_expectations.data_context import AbstractDataContext as GXDataContext
     from great_expectations.experimental.datasources.context import DataContext
     from great_expectations.experimental.datasources.interfaces import (
         DataAsset,
@@ -154,6 +154,7 @@ class _SourceFactories:
                 self._data_context._attach_datasource_to_context(datasource)
                 return datasource
 
+            wrapped.__doc__ = ds_constructor.__doc__
             return wrapped
         except KeyError:
             raise AttributeError(f"No factory {attr_name} in {self.factories}")

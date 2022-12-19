@@ -246,7 +246,7 @@ def test_cli_datasource_new_connection_string(
 
     assert result.exit_code == 0
 
-    uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
+    uncommitted_dir = os.path.join(root_dir, context.GX_UNCOMMITTED_DIR)
     expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
 
     assert os.path.isfile(expected_notebook)

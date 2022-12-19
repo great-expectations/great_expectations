@@ -55,7 +55,7 @@ from great_expectations.validation_operators.types.validation_operator_result im
 from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import AbstractDataContext, DataContext
+    from great_expectations.data_context import AbstractDataContext
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +69,7 @@ class BaseCheckpoint(ConfigPeer):
     def __init__(
         self,
         checkpoint_config: CheckpointConfig,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
     ) -> None:
         from great_expectations.data_context.data_context.abstract_data_context import (
             AbstractDataContext,
@@ -273,7 +273,7 @@ class BaseCheckpoint(ConfigPeer):
         else:
             substituted_config = copy.deepcopy(source_config)
 
-        if self.data_context.ge_cloud_mode:
+        if self._using_cloud_context:
             return substituted_config
 
         return self._substitute_config_variables(config=substituted_config)
@@ -290,7 +290,7 @@ class BaseCheckpoint(ConfigPeer):
             source_config=source_config, runtime_kwargs=runtime_kwargs
         )
 
-        if self.data_context.ge_cloud_mode:
+        if self._using_cloud_context:
             return substituted_config
 
         return self._substitute_config_variables(config=substituted_config)
@@ -338,15 +338,11 @@ class BaseCheckpoint(ConfigPeer):
 
             validator: Validator = self.data_context.get_validator(
                 batch_request=batch_request,
-                expectation_suite_name=(
-                    expectation_suite_name
-                    if not self.data_context.ge_cloud_mode
-                    else None
-                ),
+                expectation_suite_name=expectation_suite_name
+                if not self._using_cloud_context
+                else None,
                 expectation_suite_ge_cloud_id=(
-                    expectation_suite_ge_cloud_id
-                    if self.data_context.ge_cloud_mode
-                    else None
+                    expectation_suite_ge_cloud_id if self._using_cloud_context else None
                 ),
                 include_rendered_content=include_rendered_content,
             )
@@ -375,10 +371,10 @@ class BaseCheckpoint(ConfigPeer):
                 )
             )
             checkpoint_identifier = None
-            if self.data_context.ge_cloud_mode:
+            if self._using_cloud_context:
                 checkpoint_identifier = GXCloudIdentifier(
                     resource_type=GXCloudRESTResource.CHECKPOINT,
-                    ge_cloud_id=str(self.ge_cloud_id),
+                    cloud_id=str(self.ge_cloud_id),
                 )
 
             operator_run_kwargs = {}
@@ -409,7 +405,7 @@ class BaseCheckpoint(ConfigPeer):
         ) as e:
             raise ge_exceptions.CheckpointError(
                 f"Exception occurred while running validation[{idx}] of Checkpoint '{self.name}': {e.message}."
-            )
+            ) from e
 
     def self_check(self, pretty_print=True) -> dict:
         # Provide visibility into parameters that Checkpoint was instantiated with.
@@ -499,8 +495,18 @@ is run), with each validation having its own defined "action_list" attribute.
             return None
 
     @property
-    def data_context(self) -> DataContext:
+    def data_context(self) -> AbstractDataContext:
         return self._data_context
+
+    @property
+    def _using_cloud_context(self) -> bool:
+        # Chetan - 20221216 - This is a temporary property to encapsulate any Cloud leakage
+        # Upon refactoring this class to decouple Cloud-specific branches, this should be removed
+        from great_expectations.data_context.data_context.cloud_data_context import (
+            CloudDataContext,
+        )
+
+        return isinstance(self.data_context, CloudDataContext)
 
     def __repr__(self) -> str:
         return str(self.get_config())

@@ -1,4 +1,6 @@
-from great_expectations import DataContext
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 
 GREETING = r"""<cyan>
   ___              _     ___                  _        _   _
@@ -56,7 +58,7 @@ HOW_TO_CUSTOMIZE = f"""\n<cyan>You can customize your configuration in many ways
     - Run `<green>great_expectations suite --help</green>` to create, edit, list, profile Expectation Suites.
     - Run `<green>great_expectations docs --help</green>` to build and manage Data Docs sites.
 
-  <cyan>Edit your configuration in {DataContext.GE_YML} to:</cyan>
+  <cyan>Edit your configuration in {FileDataContext.GX_YML} to:</cyan>
     - Move Stores to the cloud
     - Add Slack notifications, PagerDuty alerts, etc.
     - Customize your Data Docs

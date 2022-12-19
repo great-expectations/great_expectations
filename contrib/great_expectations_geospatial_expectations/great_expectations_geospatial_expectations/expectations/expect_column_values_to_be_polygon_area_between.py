@@ -69,7 +69,10 @@ class ColumnValuesPolygonArea(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToBePolygonAreaBetween(ColumnMapExpectation):
-    """This expectation will compute the area of each polygon/multipolygon in square kilometers and check if it's between two values."""
+    """Expect the area of polygons in the column are between two specified values.
+
+    This expectation will compute the area of each polygon/multipolygon in square kilometers and check if it's between two values.
+    """
 
     world = geopandas.read_file(geopandas.datasets.get_path("naturalearth_lowres"))
     # Index by name to make example data shorter
@@ -194,7 +197,6 @@ class ExpectColumnValuesToBePolygonAreaBetween(ColumnMapExpectation):
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
-        language: str = None,
         runtime_configuration: dict = None,
         **kwargs,
     ) -> List[

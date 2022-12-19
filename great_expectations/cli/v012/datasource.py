@@ -8,13 +8,17 @@ import textwrap
 
 import click
 
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
+
 try:
     from sqlalchemy_bigquery.parse_url import parse_url as parse_bigquery_url
 except (ImportError, ModuleNotFoundError):
     parse_bigquery_url = None
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations import DataContext, rtd_url_ge_version
+from great_expectations import rtd_url_ge_version
 from great_expectations.cli.v012 import toolkit
 from great_expectations.cli.v012.cli_messages import NO_DATASOURCES_FOUND
 from great_expectations.cli.v012.docs import build_docs
@@ -43,7 +47,7 @@ from great_expectations.exceptions import (
     BatchKwargsError,
     DatasourceInitializationError,
 )
-from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.validator.validator import BridgeValidator
 
 logger = logging.getLogger(__name__)
@@ -501,7 +505,7 @@ def _add_sqlalchemy_datasource(  # noqa: C901 - 21
     # with the datasource's name as the variable name.
     # The value of the datasource's "credentials" key in the config file (great_expectations.yml) will
     # be ${datasource name}.
-    # GE will replace the ${datasource name} with the value from the credentials file in runtime.
+    # GX will replace the ${datasource name} with the value from the credentials file in runtime.
 
     while True:
         cli_message(msg_db_config.format(datasource_name))
@@ -609,7 +613,7 @@ After you connect to the datasource, run great_expectations init to continue.
 
 """.format(
                         datasource_name,
-                        DataContext.GE_YML,
+                        FileDataContext.GX_YML,
                         context.get_config()["config_variables_file_path"],
                         rtd_url_ge_version,
                         selected_database.value.lower(),
@@ -1371,7 +1375,7 @@ Would you like to continue?"""
     temp_table_kwargs = {}
     datasource = context.get_datasource(datasource_name)
 
-    if datasource.engine.dialect.name.lower() == GESqlDialect.BIGQUERY:
+    if datasource.engine.dialect.name.lower() == GXSqlDialect.BIGQUERY:
         # bigquery table needs to contain the project id if it differs from the credentials project
         if len(data_asset_name.split(".")) < 3:
             project_id, _, _, _, _, _ = parse_bigquery_url(datasource.engine.url)
@@ -1563,7 +1567,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
         while not do_exit:
             if (
                 profiling_results["error"]["code"]
-                == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
+                == FileDataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
             ):
                 cli_message(
                     msg_some_data_assets_not_found.format(
@@ -1572,7 +1576,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 )
             elif (
                 profiling_results["error"]["code"]
-                == DataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS
+                == FileDataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS
             ):
                 cli_message(
                     msg_too_many_data_assets.format(
@@ -1581,13 +1585,13 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 )
             elif (
                 profiling_results["error"]["code"]
-                == DataContext.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND
+                == FileDataContext.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND
             ):
                 cli_message(msg_error_multiple_generators_found.format(datasource_name))
                 sys.exit(1)
             elif (
                 profiling_results["error"]["code"]
-                == DataContext.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND
+                == FileDataContext.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND
             ):
                 cli_message(msg_error_no_generators_found.format(datasource_name))
                 sys.exit(1)

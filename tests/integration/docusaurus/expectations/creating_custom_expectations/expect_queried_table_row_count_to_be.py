@@ -51,7 +51,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
     }
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration)
         value = configuration["kwargs"].get("value")
@@ -64,7 +64,8 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
-    # <snippet>
+    # <snippet name="expect_queried_table_row_count_to_be.py _validate function">
+    # <snippet name="expect_queried_table_row_count_to_be.py _validate function signature">
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -84,7 +85,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         }
 
     # </snippet>
-    # <snippet>
+    # <snippet name="expect_queried_table_row_count_to_be.py examples">
     examples = [
         {
             "data": [
@@ -148,16 +149,16 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
     ]
     # </snippet>
     # This dictionary contains metadata for display in the public gallery
-    # <snippet>
+    # <snippet name="expect_queried_table_row_count_to_be.py library_metadata">
     library_metadata = {
         "tags": ["query-based"],
         "contributors": ["@joegargery"],
     }
-    # </snippet
+    # </snippet>
 
 
 if __name__ == "__main__":
-    # <snippet>
+    # <snippet name="expect_queried_table_row_count_to_be.py print_diagnostic_checklist">
     ExpectQueriedTableRowCountToBe().print_diagnostic_checklist()
     # </snippet>
 

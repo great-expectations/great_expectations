@@ -73,19 +73,19 @@ class ColumnValuesToChangeBetween(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToChangeBetween(ColumnMapExpectation):
-    """
-    Given a list of numeric values,
-    check if the difference between the current and the previous row
-    is within the expected difference range.
+    """Expect the numeric difference between current and previous row is within expected range.
 
     E.g:
     input = [1,2,5]
     expected difference range = between 1 and 2
-    Result: `false` because the difference between 2 and 5 is not between 1 and 2
+    result = false because the difference between 2 and 5 is not between 1 and 2
 
-    parameters:
-        from_value: low range value
-        to_value: high range value
+    Args:
+        column (str): The column name
+
+    Keyword Args:
+        from_value (float): low range value
+        to_value (float): high range value
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
@@ -173,7 +173,7 @@ class ExpectColumnValuesToChangeBetween(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.question")
 #     def _question_renderer(
-#         cls, configuration, result=None, language=None, runtime_configuration=None
+#         cls, configuration, result=None, runtime_configuration=None
 #     ):
 #         column = configuration.kwargs.get("column")
 #         mostly = configuration.kwargs.get("mostly")
@@ -185,7 +185,7 @@ class ExpectColumnValuesToChangeBetween(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.answer")
 #     def _answer_renderer(
-#         cls, configuration=None, result=None, language=None, runtime_configuration=None
+#         cls, configuration=None, result=None, runtime_configuration=None
 #     ):
 #         column = result.expectation_config.kwargs.get("column")
 #         mostly = result.expectation_config.kwargs.get("mostly")
@@ -203,7 +203,6 @@ class ExpectColumnValuesToChangeBetween(ColumnMapExpectation):
 #         cls,
 #         configuration=None,
 #         result=None,
-#         language=None,
 #         runtime_configuration=None,
 #         **kwargs,
 #     ):

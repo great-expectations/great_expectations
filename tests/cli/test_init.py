@@ -7,6 +7,9 @@ from click.testing import CliRunner, Result
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.test_cli import yaml
@@ -212,7 +215,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then
         in stdout
     )
 
-    context = DataContext(os.path.join(root_dir, DataContext.GE_DIR))
+    context = DataContext(os.path.join(root_dir, FileDataContext.GX_DIR))
     uncommitted_dir = os.path.join(context.root_directory, "uncommitted")
     shutil.rmtree(uncommitted_dir)
     assert not os.path.isdir(uncommitted_dir)

@@ -147,7 +147,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
     }
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -236,7 +236,6 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
-        language: str = None,
         runtime_configuration: dict = None,
         **kwargs,
     ):
