@@ -28,7 +28,14 @@ MARSHMALLOW_VERSION: VersionType = parse_version(marshmallow.__version__)
 # https://marshmallow.readthedocs.io/en/stable/changelog.html#id9
 MM_LOAD_DEFAULT_DEPRECATED_VERSION: VersionType = Version("3.13.0")
 
-DEPRECATED_FIELD_ARGS: Set[str] = {"missing", "all_none"}
+# https://marshmallow.readthedocs.io/en/stable/changelog.html#id15
+MM_KW_METADATA_DEPRECATED_VERSION: VersionType = Version("3.10.0")
+
+
+DEPRECATED_FIELD_ARGS: Set[str] = {
+    "missing",  # load_default - missing
+    "all_none",  # metadata - **additional_metadata
+}
 
 
 def mm_field(
