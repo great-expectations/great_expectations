@@ -1025,6 +1025,21 @@ def test_validator_include_rendered_content_evaluation_parameters(
         in validation_result.rendered_content
     )
 
+    expected_expectation_configuration_rendered_content = RenderedAtomicContent(
+        name="atomic.prescriptive.summary",
+        value=RenderedAtomicValue(
+            schema={"type": "com.superconductive.rendered.string"},
+            params={"value": {"schema": {"type": "number"}, "value": 10000}},
+            template="Must have exactly $value rows.   {'value': {'$PARAMETER': 'upstream_row_count'}}",
+        ),
+        value_type="StringValueType",
+    )
+
+    assert (
+        expected_expectation_configuration_rendered_content
+        in validation_result.expectation_config.rendered_content
+    )
+
 
 @pytest.fixture
 def validator_with_mock_execution_engine() -> Validator:
