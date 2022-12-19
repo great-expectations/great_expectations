@@ -36,7 +36,7 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import AbstractDataContext
+    from great_expectations.data_context import DataContext
 
 logger = logging.getLogger(__name__)
 
@@ -1122,7 +1122,7 @@ class CloudNotificationAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: AbstractDataContext,
+        data_context: DataContext,
         checkpoint_ge_cloud_id: str,
     ) -> None:
         super().__init__(data_context)
@@ -1173,7 +1173,7 @@ class SNSNotificationAction(ValidationAction):
     """
 
     def __init__(
-        self, data_context: AbstractDataContext, sns_topic_arn: str, sns_message_subject
+        self, data_context: DataContext, sns_topic_arn: str, sns_message_subject
     ) -> None:
         super().__init__(data_context)
         self.sns_topic_arn = sns_topic_arn
