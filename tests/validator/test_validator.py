@@ -27,7 +27,7 @@ from great_expectations.datasource.data_connector.batch_filter import (
 )
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
-from great_expectations.render import RenderedAtomicContent
+from great_expectations.render import RenderedAtomicContent, RenderedAtomicValue
 from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import Validator
 
@@ -991,11 +991,13 @@ def test_validator_include_rendered_content_evaluation_parameters(
         data_connector_name="monthly",
         data_asset_name="my_reports",
     )
-    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+    expectation_suite: ExpectationSuite = context.create_expectation_suite(
+        "validating_taxi_data"
+    )
 
     validator: Validator = context.get_validator(
         batch_request=batch_request,
-        expectation_suite=suite,
+        expectation_suite=expectation_suite,
         include_rendered_content=True,
     )
 
@@ -1008,27 +1010,19 @@ def test_validator_include_rendered_content_evaluation_parameters(
         )
     )
 
-    assert (
-        validation_result.expectation_config.rendered_content[0].value.params["value"][
-            "value"
-        ]
-        == 10000
-    )
-
-    validator.set_evaluation_parameter("upstream_row_count", 8000)
-
-    validation_result: ExpectationValidationResult = (
-        validator.expect_table_row_count_to_equal(
-            value={"$PARAMETER": "upstream_row_count"},
-            result_format={"result_format": "BOOLEAN_ONLY"},
-        )
+    expected_expectation_validation_result_rendered_content = RenderedAtomicContent(
+        name="atomic.diagnostic.observed_value",
+        value=RenderedAtomicValue(
+            schema={"type": "com.superconductive.rendered.string"},
+            params={},
+            template="10,000",
+        ),
+        value_type="StringValueType",
     )
 
     assert (
-        validation_result.expectation_config.rendered_content[0].value.params["value"][
-            "value"
-        ]
-        == 8000
+        expected_expectation_validation_result_rendered_content
+        in validation_result.rendered_content
     )
 
 
