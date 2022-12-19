@@ -732,11 +732,11 @@ def test_inline_renderer_expectation_validation_result_serialization(
                                 "value": "event_datetime",
                             },
                             "max_value": {
-                                "schema": {"type": "number"},
+                                "schema": {"type": "string"},
                                 "value": {"$PARAMETER": "now() - timedelta(weeks=1)"},
                             },
                             "min_value": {
-                                "schema": {"type": "number"},
+                                "schema": {"type": "string"},
                                 "value": {"$PARAMETER": "now() - timedelta(weeks=208)"},
                             },
                         },

@@ -16,7 +16,7 @@ from typing import (
     cast,
 )
 
-from pydantic import BaseModel, Field, create_model, root_validator
+from pydantic import BaseModel, Field, create_model, root_validator, validator
 from pydantic.generics import GenericModel
 
 from great_expectations.core import (
@@ -90,7 +90,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
     params: RendererParams = Field(..., allow_mutation=True)
-    _template_str: str = Field("", allow_mutation=True)
+    template_str: str = Field("", allow_mutation=True)
     header_row: List[Dict[str, Optional[Any]]] = Field([], allow_mutation=True)
     table: List[List[Dict[str, Optional[Any]]]] = Field([], allow_mutation=True)
     graph: dict = Field({}, allow_mutation=True)
@@ -116,13 +116,17 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             and values["result"] is not None
             and values["result"].expectation_config is not None
         ):
-            values["expectation_type"] = values[
+            expectation_configuration: ExpectationConfiguration = values[
                 "result"
-            ].expectation_config.expectation_type
-            values["kwargs"] = values["result"].expectation_config.kwargs
+            ].expectation_config
+            values["expectation_type"] = expectation_configuration.expectation_type
+            values["kwargs"] = expectation_configuration.kwargs
+            raw_configuration: ExpectationConfiguration = (
+                expectation_configuration.get_raw_configuration()
+            )
             values["raw_kwargs"] = {
                 key: value
-                for key, value in values["result"].expectation_config.raw_kwargs.items()
+                for key, value in raw_configuration.kwargs.items()
                 if value not in values["kwargs"].values()
             }
         else:
@@ -187,16 +191,11 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             else:
                 return self == other
 
-    @property
-    def template_str(self) -> str:
-        template_str: str = self._template_str
-        if self.raw_kwargs:
-            template_str += f"   {convert_to_json_serializable(data=self.raw_kwargs)}"
-        return self._template_str
-
-    @template_str.setter
-    def template_str(self, template_str: str) -> None:
-        self._template_str = template_str
+    @validator("template_str")
+    def _set_template_str(cls, v: str, values: dict) -> str:
+        if "raw_kwargs" in values and values["raw_kwargs"]:
+            v += f'   {convert_to_json_serializable(data=values["raw_kwargs"])}'
+        return v
 
     def add_param(
         self,
