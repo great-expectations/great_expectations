@@ -3,10 +3,11 @@ An action is a way to take an arbitrary method and make it configurable and runn
 
 The only requirement from an action is for it to have a take_action method.
 """
+from __future__ import annotations
 
 import logging
 import warnings
-from typing import Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 from urllib.parse import urljoin
 
 from great_expectations.core import ExpectationSuiteValidationResult
@@ -33,6 +34,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
 
 logger = logging.getLogger(__name__)
 
@@ -1118,7 +1122,7 @@ class CloudNotificationAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: "DataContext",
+        data_context: AbstractDataContext,
         checkpoint_ge_cloud_id: str,
     ) -> None:
         super().__init__(data_context)
@@ -1169,7 +1173,7 @@ class SNSNotificationAction(ValidationAction):
     """
 
     def __init__(
-        self, data_context: "DataContext", sns_topic_arn: str, sns_message_subject
+        self, data_context: AbstractDataContext, sns_topic_arn: str, sns_message_subject
     ) -> None:
         super().__init__(data_context)
         self.sns_topic_arn = sns_topic_arn
