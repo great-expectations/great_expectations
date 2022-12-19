@@ -189,6 +189,8 @@ filterwarnings = [
     "ignore:Using or importing the ABCs:DeprecationWarning:moto.cloudformation.parsing",
     # This deprecation warning comes from getsentry/responses, a mocking utility for requests. It is a dependency in moto.
     "ignore:stream argument is deprecated. Use stream parameter in request directly:DeprecationWarning",
+    # We likely won't be updating to `marhsmallow` 4, these errors should be filtered out
+    "error::marshmallow.warnings.RemovedInMarshmallow4Warning"
 ]
 junit_family="xunit2"
 markers = [
