@@ -137,7 +137,6 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
             data=[row[1] for row in results],
             index=pd.Index(data=[row[0] for row in results], name="value"),
             name="count",
-            dtype="object",
         )
         return series
 
