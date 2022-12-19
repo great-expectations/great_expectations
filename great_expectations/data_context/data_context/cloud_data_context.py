@@ -481,7 +481,6 @@ class CloudDataContext(SerializableDataContext):
                 "expectation_suite, set overwrite_existing=True."
             )
         elif expectation_suite_name in existing_suite_names and overwrite_existing:
-            # TODO: NF 09-11-2022 - Replace this logic once retrieving expectations suites by name is possible
             identifiers: Optional[
                 Union[List[str], List[GXCloudIdentifier]]
             ] = self.list_expectation_suites()
@@ -605,7 +604,7 @@ class CloudDataContext(SerializableDataContext):
         )
 
         if not overwrite_existing:
-            self._validate_suite_unique_constraints_before_save(key)
+            self._validate_suite_unique_constaints_before_save(key)
 
         self._evaluation_parameter_dependencies_compiled = False
         include_rendered_content = (
@@ -620,7 +619,7 @@ class CloudDataContext(SerializableDataContext):
         if isinstance(response, GXCloudResourceRef):
             expectation_suite.ge_cloud_id = response.cloud_id
 
-    def _validate_suite_unique_constraints_before_save(
+    def _validate_suite_unique_constaints_before_save(
         self, key: GXCloudIdentifier
     ) -> None:
         ge_cloud_id = key.cloud_id
