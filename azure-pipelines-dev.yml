@@ -114,8 +114,7 @@ stages:
     - job: static_type_check
       steps:
       - script: |
-          pip install $(grep -E '^(invoke|mypy|pydantic)' reqs/requirements-dev-contrib.txt)
-          mkdir .mypy_cache
+          pip install --requirement reqs/requirements-dev-contrib.txt
           invoke type-check --install-types --warn-unused-ignores --pretty
         name: StaticTypeCheck
 
