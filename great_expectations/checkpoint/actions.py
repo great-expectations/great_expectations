@@ -1110,7 +1110,7 @@ class UpdateDataDocsAction(ValidationAction):
         # <snippet name="great_expectations/checkpoint/actions.py iterate">
         for sites in docs_site_urls_list:
             data_docs_validation_results[sites["site_name"]] = sites["site_url"]
-        # <snippet>
+        # </snippet>
         return data_docs_validation_results
 
 
