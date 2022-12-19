@@ -115,6 +115,7 @@ stages:
       steps:
       - script: |
           pip install $(grep -E '^(invoke|mypy)' reqs/requirements-dev-contrib.txt)
+          mkdir .mypy_cache
           invoke type-check --install-types --warn-unused-ignores --pretty
         name: StaticTypeCheck
 
