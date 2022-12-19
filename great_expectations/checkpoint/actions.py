@@ -3,10 +3,11 @@ An action is a way to take an arbitrary method and make it configurable and runn
 
 The only requirement from an action is for it to have a take_action method.
 """
+from __future__ import annotations
 
 import logging
 import warnings
-from typing import Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 from urllib.parse import urljoin
 
 from great_expectations.core import ExpectationSuiteValidationResult
@@ -34,6 +35,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
 
+if TYPE_CHECKING:
+    from great_expectations.data_context import DataContext
+
 logger = logging.getLogger(__name__)
 
 
@@ -47,6 +51,16 @@ class ValidationAction:
 
     def __init__(self, data_context) -> None:
         self.data_context = data_context
+
+    @property
+    def _using_cloud_context(self) -> bool:
+        # Chetan - 20221216 - This is a temporary property to encapsulate any Cloud leakage
+        # Upon refactoring this class to decouple Cloud-specific branches, this should be removed
+        from great_expectations.data_context.data_context.cloud_data_context import (
+            CloudDataContext,
+        )
+
+        return isinstance(self.data_context, CloudDataContext)
 
     def run(
         self,
@@ -824,11 +838,11 @@ class StoreValidationResultAction(ValidationAction):
             )
 
         checkpoint_ge_cloud_id = None
-        if self.data_context.cloud_mode and checkpoint_identifier:
+        if self._using_cloud_context and checkpoint_identifier:
             checkpoint_ge_cloud_id = checkpoint_identifier.cloud_id
 
         expectation_suite_ge_cloud_id = None
-        if self.data_context.cloud_mode and expectation_suite_identifier:
+        if self._using_cloud_context and expectation_suite_identifier:
             expectation_suite_ge_cloud_id = str(expectation_suite_identifier.cloud_id)
 
         return_val = self.target_store.set(
@@ -837,7 +851,7 @@ class StoreValidationResultAction(ValidationAction):
             checkpoint_id=checkpoint_ge_cloud_id,
             expectation_suite_id=expectation_suite_ge_cloud_id,
         )
-        if self.data_context.cloud_mode:
+        if self._using_cloud_context:
             return_val: GXCloudResourceRef
             new_ge_cloud_id = return_val.cloud_id
             validation_result_suite_identifier.cloud_id = new_ge_cloud_id
@@ -1082,7 +1096,7 @@ class UpdateDataDocsAction(ValidationAction):
         # <snippet>
         data_docs_validation_results = {}
         # </snippet>
-        if self.data_context.cloud_mode:
+        if self._using_cloud_context:
             return data_docs_validation_results
 
         # get the URL for the validation result
@@ -1108,7 +1122,7 @@ class CloudNotificationAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: "DataContext",
+        data_context: DataContext,
         checkpoint_ge_cloud_id: str,
     ) -> None:
         super().__init__(data_context)
@@ -1130,7 +1144,7 @@ class CloudNotificationAction(ValidationAction):
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action. "
             )
 
-        if not self.data_context.cloud_mode:
+        if not self._using_cloud_context:
             return Exception(
                 "CloudNotificationActions can only be used in GX Cloud Mode."
             )
@@ -1159,7 +1173,7 @@ class SNSNotificationAction(ValidationAction):
     """
 
     def __init__(
-        self, data_context: "DataContext", sns_topic_arn: str, sns_message_subject
+        self, data_context: DataContext, sns_topic_arn: str, sns_message_subject
     ) -> None:
         super().__init__(data_context)
         self.sns_topic_arn = sns_topic_arn

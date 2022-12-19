@@ -60,12 +60,6 @@ stages:
             inputs:
               verbose: true
               rules: |
-                [ContribChanged]
-                contrib/**
-
-                [ExperimentalChanged]
-                contrib/experimental/**
-
                 [DocsChanged]
                 docs/**
                 tests/integration/docusaurus/**
@@ -136,6 +130,14 @@ stages:
           # https://www.flake8rules.com/rules/F401.html
           flake8 --select F401 great_expectations tests
         name: UnusedImportChecker
+
+    - job: docs_snippet_checker
+      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
+      steps:
+      - script: |
+          yarn install
+          python scripts/validate_docs_snippets.py
+        name: DocsSnippetChecker
 
   - stage: import_ge
     dependsOn: scope_check

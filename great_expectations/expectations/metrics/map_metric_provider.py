@@ -2441,7 +2441,7 @@ def _sqlalchemy_map_condition_query(
 
 def _sqlalchemy_map_condition_index(
     cls,
-    execution_engine: PandasExecutionEngine,
+    execution_engine: SqlAlchemyExecutionEngine,
     metric_domain_kwargs: Dict,
     metric_value_kwargs: Dict,
     metrics: Dict[str, Any],
