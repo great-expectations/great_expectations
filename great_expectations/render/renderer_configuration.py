@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from enum import Enum
 from numbers import Number
 from typing import (
@@ -16,6 +17,8 @@ from typing import (
     cast,
 )
 
+import dateutil
+from dateutil.parser import ParserError
 from pydantic import BaseModel, Field, create_model, root_validator, validator
 from pydantic.generics import GenericModel
 
@@ -33,10 +36,11 @@ if TYPE_CHECKING:
 class RendererSchemaType(str, Enum):
     """Type used in renderer json schema dictionary."""
 
-    STRING = "string"
-    NUMBER = "number"
-    BOOLEAN = "boolean"
     ARRAY = "array"
+    BOOLEAN = "boolean"
+    DATE = "date"
+    NUMBER = "number"
+    STRING = "string"
 
 
 class _RendererParamsBase(BaseModel):
@@ -127,7 +131,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             values["raw_kwargs"] = {
                 key: value
                 for key, value in raw_configuration.kwargs.items()
-                if value not in values["kwargs"].values()
+                if (key, value) not in values["kwargs"].items()
             }
         else:
             values["expectation_type"] = values["configuration"].expectation_type
@@ -175,6 +179,12 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 if schema_type is RendererSchemaType.NUMBER:
                     if not isinstance(value, Number):
                         raise renderer_configuration_error
+                elif schema_type is RendererSchemaType.DATE:
+                    if not isinstance(value, datetime):
+                        try:
+                            dateutil.parser.parse(value)
+                        except ParserError:
+                            raise renderer_configuration_error
                 elif schema_type is RendererSchemaType.BOOLEAN:
                     if value is not True and value is not False:
                         raise renderer_configuration_error
@@ -197,21 +207,60 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             v += f'   {convert_to_json_serializable(data=values["raw_kwargs"])}'
         return v
 
+    @staticmethod
+    def _choose_schema_type_for_value(
+        schema_types: List[RendererSchemaType], value: Any
+    ) -> RendererSchemaType:
+        if isinstance(value, dict):
+            return RendererSchemaType.STRING
+
+        for schema_type in schema_types:
+            if schema_type is RendererSchemaType.STRING:
+                try:
+                    str(value)
+                    return schema_type
+                except Exception:
+                    pass
+            elif schema_type is RendererSchemaType.NUMBER:
+                if isinstance(value, Number):
+                    return schema_type
+            elif schema_type is RendererSchemaType.DATE:
+                if isinstance(value, datetime):
+                    return schema_type
+                elif isinstance(value, str):
+                    try:
+                        dateutil.parser.parse(value)
+                        return schema_type
+                    except ParserError:
+                        pass
+            elif schema_type is RendererSchemaType.BOOLEAN:
+                if value is True or value is False:
+                    return schema_type
+            else:
+                if isinstance(value, Iterable):
+                    return schema_type
+
     def add_param(
         self,
         name: str,
-        schema_type: Union[RendererSchemaType, str],
+        schema_type: Union[
+            RendererSchemaType, str, List[Union[RendererSchemaType, str]]
+        ],
         value: Optional[Any] = None,
     ) -> None:
         """Adds a param that can be substituted into a template string during rendering.
 
         Attributes:
             name (str): A name for the attribute to be added to this RendererConfiguration instance.
-            schema_type (RendererSchemaType or string): The type of value being substituted. One of:
-                - string
-                - number
-                - boolean
-                - array
+            schema_type (list of RendererSchemaType or string): The possible types for the value being substituted.
+                If more than one schema_type is passed, inference based on param value will be performed, and the first
+                schema_type to match the value will be selected.
+                    One of:
+                     - array
+                     - boolean
+                     - date
+                     - number
+                     - string
             value (Optional[Any]): The value to be substituted into the template string. If no value is
                 provided, a value lookup will be attempted in RendererConfiguration.kwargs using the
                 provided name.
@@ -242,6 +291,11 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
         if value is None:
             value = self.kwargs.get(name)
+
+        if isinstance(schema_type, list) and value is not None:
+            schema_type: RendererSchemaType = self._choose_schema_type_for_value(
+                schema_types=schema_type, value=value
+            )
 
         renderer_params_definition: Dict[str, Optional[Any]]
         if value is None:

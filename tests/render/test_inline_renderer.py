@@ -715,7 +715,7 @@ def test_inline_renderer_expectation_validation_result_serialization(
         ),
         pytest.param(
             ExpectationConfiguration(
-                expectation_type="expect_column_values_to_be_between",
+                expectation_type="expect_column_max_to_be_between",
                 kwargs={
                     "column": "event_datetime",
                     "min_value": {"$PARAMETER": "now() - timedelta(weeks=208)"},
@@ -741,8 +741,8 @@ def test_inline_renderer_expectation_validation_result_serialization(
                             },
                         },
                         "schema": {"type": "com.superconductive.rendered.string"},
-                        "template": "$column values must be greater than or equal to "
-                        "$min_value and less than or equal to $max_value.",
+                        "template": "$column maximum value must be greater than or equal "
+                        "to $min_value and less than or equal to $max_value.",
                     },
                     "value_type": "StringValueType",
                 }

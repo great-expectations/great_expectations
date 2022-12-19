@@ -231,8 +231,8 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
     ) -> RendererConfiguration:
         add_param_args = (
             ("column", RendererSchemaType.STRING),
-            ("min_value", RendererSchemaType.NUMBER),
-            ("max_value", RendererSchemaType.NUMBER),
+            ("min_value", [RendererSchemaType.NUMBER, RendererSchemaType.DATE]),
+            ("max_value", [RendererSchemaType.NUMBER, RendererSchemaType.DATE]),
             ("parse_strings_as_datetimes", RendererSchemaType.BOOLEAN),
             ("row_condition", RendererSchemaType.STRING),
             ("condition_parser", RendererSchemaType.STRING),
