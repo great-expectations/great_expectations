@@ -1093,24 +1093,24 @@ class UpdateDataDocsAction(ValidationAction):
                 expectation_suite_identifier,
             ],
         )
-        # <snippet>
+        # <snippet name="great_expectations/checkpoint/actions.py empty dict">
         data_docs_validation_results = {}
         # </snippet>
         if self._using_cloud_context:
             return data_docs_validation_results
 
         # get the URL for the validation result
-        # <snippet>
+        # <snippet name="great_expectations/checkpoint/actions.py get_docs_sites_urls">
         docs_site_urls_list = self.data_context.get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier,
             site_names=self._site_names,
         )
         # </snippet>
         # process payload
-        # <snippet>
+        # <snippet name="great_expectations/checkpoint/actions.py iterate">
         for sites in docs_site_urls_list:
             data_docs_validation_results[sites["site_name"]] = sites["site_url"]
-        # <snippet>
+        # </snippet>
         return data_docs_validation_results
 
 
