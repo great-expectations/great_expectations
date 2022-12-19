@@ -3172,6 +3172,7 @@ def _format_map_output(
     unexpected_list: Optional[List[Any]] = None,
     unexpected_index_list: Optional[List[int]] = None,
     unexpected_index_query: Optional[str] = None,
+    # Actually Optional[List[str]], but this is necessary to keep the typechecker happy
     unexpected_index_column_names: Optional[Union[int, str, List[str]]] = None,
     unexpected_rows=None,
 ) -> Dict:
