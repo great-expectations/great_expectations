@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 
 import pytest
@@ -53,7 +54,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 {
                     "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
                     "value": {
-                        "header": None,
                         "params": {},
                         "schema": {"type": "com.superconductive.rendered.string"},
                         "template": "3",
@@ -98,28 +98,8 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                                 "schema": {"type": "string"},
                                 "value": "event_type",
                             },
-                            "condition_parser": {
-                                "schema": {"type": "string"},
-                                "value": None,
-                            },
                             "max_value": {"schema": {"type": "number"}, "value": 20},
                             "min_value": {"schema": {"type": "number"}, "value": 3},
-                            "parse_strings_as_datetimes": {
-                                "schema": {"type": "boolean"},
-                                "value": None,
-                            },
-                            "row_condition": {
-                                "schema": {"type": "string"},
-                                "value": None,
-                            },
-                            "strict_max": {
-                                "schema": {"type": "boolean"},
-                                "value": None,
-                            },
-                            "strict_min": {
-                                "schema": {"type": "boolean"},
-                                "value": None,
-                            },
                         },
                         "schema": {"type": "com.superconductive.rendered.string"},
                         "template": "$column minimum value must be greater than or equal "
@@ -156,7 +136,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 {
                     "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
                     "value": {
-                        "header": None,
                         "header_row": [
                             {"schema": {"type": "string"}, "value": "Quantile"},
                             {"schema": {"type": "string"}, "value": "Value"},
@@ -189,18 +168,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                                     "column": {
                                         "schema": {"type": "string"},
                                         "value": "user_id",
-                                    },
-                                    "condition_parser": {
-                                        "schema": {"type": "string"},
-                                        "value": None,
-                                    },
-                                    "mostly": {
-                                        "schema": {"type": "number"},
-                                        "value": None,
-                                    },
-                                    "row_condition": {
-                                        "schema": {"type": "string"},
-                                        "value": None,
                                     },
                                 },
                                 "template": "$column quantiles must be within "
@@ -255,7 +222,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 {
                     "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
                     "value": {
-                        "header": None,
                         "params": {},
                         "schema": {"type": "com.superconductive.rendered.string"},
                         "template": "0% unexpected",
@@ -265,29 +231,14 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 {
                     "name": AtomicPrescriptiveRendererType.SUMMARY,
                     "value": {
-                        "header": None,
                         "params": {
                             "column": {
                                 "schema": {"type": "string"},
                                 "value": "event_type",
                             },
-                            "condition_parser": {
-                                "schema": {"type": "string"},
-                                "value": None,
-                            },
-                            "mostly": {"schema": {"type": "number"}, "value": None},
-                            "mostly_pct": {"schema": {"type": "string"}, "value": None},
-                            "parse_strings_as_datetimes": {
-                                "schema": {"type": "boolean"},
-                                "value": None,
-                            },
-                            "row_condition": {
-                                "schema": {"type": "string"},
-                                "value": None,
-                            },
-                            "v__0": {"schema": {"type": "string"}, "value": 19},
-                            "v__1": {"schema": {"type": "string"}, "value": 22},
-                            "v__2": {"schema": {"type": "string"}, "value": 73},
+                            "v__0": {"schema": {"type": "number"}, "value": 19},
+                            "v__1": {"schema": {"type": "number"}, "value": 22},
+                            "v__2": {"schema": {"type": "number"}, "value": 73},
                             "value_set": {
                                 "schema": {"type": "array"},
                                 "value": [19, 22, 73],
@@ -419,11 +370,11 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
         ),
         pytest.param(
             ExpectationConfiguration(
-                expectation_type="expect_column_values_to_be_between",
+                expectation_type="expect_column_max_to_be_between",
                 kwargs={
                     "column": "event_datetime",
-                    "min_value": {"$PARAMETER": "now() - timedelta(weeks=208)"},
-                    "max_value": {"$PARAMETER": "now() - timedelta(weeks=1)"},
+                    "min_value": datetime(year=2020, month=12, day=18),
+                    "max_value": datetime(year=2022, month=12, day=11),
                 },
             ),
             {
@@ -455,17 +406,17 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                                 "value": "event_datetime",
                             },
                             "max_value": {
-                                "schema": {"type": "number"},
-                                "value": {"$PARAMETER": "now() - timedelta(weeks=1)"},
+                                "schema": {"type": "date"},
+                                "value": datetime(year=2022, month=12, day=11),
                             },
                             "min_value": {
-                                "schema": {"type": "number"},
-                                "value": {"$PARAMETER": "now() - timedelta(weeks=208)"},
+                                "schema": {"type": "date"},
+                                "value": datetime(year=2020, month=12, day=18),
                             },
                         },
                         "schema": {"type": "com.superconductive.rendered.string"},
-                        "template": "$column values must be greater than or equal to "
-                        "$min_value and less than or equal to $max_value.",
+                        "template": "$column maximum value must be greater than or equal "
+                        "to $min_value and less than or equal to $max_value.",
                     },
                     "value_type": "StringValueType",
                 },
