@@ -47,6 +47,7 @@ class ColumnSplitter:
         # NOTE (kilo59): this could be achieved by simply annotating the method_name field
         # as a `SplitterMethod` enum but we get cyclic imports.
         # We could use `update_forward_refs()` but would have to change this to a BaseModel
+        # https://docs.pydantic.dev/usage/types/#enums-and-choices
         from great_expectations.execution_engine.split_and_sample.data_splitter import (
             SplitterMethod,
         )
