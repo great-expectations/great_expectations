@@ -1007,11 +1007,14 @@ def test_validator_include_rendered_content_evaluation_parameters(
         include_rendered_content=True,
     )
 
-    validator.set_evaluation_parameter("upstream_row_count", 10000)
+    validator.set_evaluation_parameter("upstream_column_min", 1)
+    validator.set_evaluation_parameter("upstream_column_max", 8)
 
     validation_result: ExpectationValidationResult = (
-        validator.expect_table_row_count_to_equal(
-            value={"$PARAMETER": "upstream_row_count"},
+        validator.expect_column_max_to_be_between(
+            column="passenger_count",
+            min_value={"$PARAMETER": "upstream_column_min"},
+            max_value={"$PARAMETER": "upstream_column_max"},
             result_format={"result_format": "BOOLEAN_ONLY"},
         )
     )
@@ -1021,7 +1024,7 @@ def test_validator_include_rendered_content_evaluation_parameters(
         value=RenderedAtomicValue(
             schema={"type": "com.superconductive.rendered.string"},
             params={},
-            template="10,000",
+            template="6",
         ),
         value_type="StringValueType",
     )
@@ -1036,13 +1039,19 @@ def test_validator_include_rendered_content_evaluation_parameters(
         value=RenderedAtomicValue(
             schema={"type": "com.superconductive.rendered.string"},
             params={
-                "value": {"schema": {"type": "number"}, "value": 10000},
+                "column": {"schema": {"type": "string"}, "value": "passenger_count"},
+                "min_value": {"schema": {"type": "number"}, "value": 1},
+                "max_value": {"schema": {"type": "number"}, "value": 8},
                 "eval_param__0": {
                     "schema": {"type": "string"},
-                    "value": "value: upstream_row_count",
+                    "value": "min_value: upstream_column_min",
+                },
+                "eval_param__1": {
+                    "schema": {"type": "string"},
+                    "value": "max_value: upstream_column_max",
                 },
             },
-            template="Must have exactly $value rows.   $eval_param__0",
+            template="$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.   $eval_param__0, $eval_param__1",
         ),
         value_type="StringValueType",
     )
