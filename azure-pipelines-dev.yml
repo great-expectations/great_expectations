@@ -107,14 +107,14 @@ stages:
     - job: type_hint_checker
       steps:
       - script: |
-          pip install $(grep -E '^(pytest-cov)' reqs/requirements-dev-contrib.txt)
+          pip install $(grep -E '^(invoke|pytest-cov)' reqs/requirements-dev-contrib.txt)
           invoke type-coverage
         name: TypeHintChecker
 
     - job: static_type_check
       steps:
       - script: |
-          pip install $(grep -E '^(mypy)' reqs/requirements-dev-contrib.txt)
+          pip install $(grep -E '^(invoke|mypy)' reqs/requirements-dev-contrib.txt)
           invoke type-check --install-types --warn-unused-ignores --pretty
         name: StaticTypeCheck
 
