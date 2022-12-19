@@ -306,7 +306,7 @@ def validate_checkpoint(
 ) -> None:
     try:
         # noinspection PyUnusedLocal
-        checkpoint: Union[Checkpoint, LegacyCheckpoint] = load_checkpoint(
+        _: Union[Checkpoint, LegacyCheckpoint] = load_checkpoint(
             context=context, checkpoint_name=checkpoint_name, usage_event=usage_event
         )
     except ge_exceptions.CheckpointError as e:

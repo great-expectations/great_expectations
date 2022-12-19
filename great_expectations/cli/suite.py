@@ -1,11 +1,12 @@
+from __future__ import annotations
+
 import copy
 import os
 import sys
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 import click
 
-from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
 
@@ -37,6 +38,8 @@ except ImportError:
     # just fall through
     SQLAlchemyError = ge_exceptions.ProfilerError
 
+if TYPE_CHECKING:
+    from great_expectations.data_context import DataContext
 
 MESSAGE_USER_CONFIGURABLE_PROFILER: str = "Since you did not supply a profiler name, defaulting to the UserConfigurableProfiler"
 MESSAGE_ONBOARDING_DATA_ASSISTANT: str = "Since you did not supply a profiler name, defaulting to the OnboardingDataAssistant"
@@ -702,7 +705,7 @@ How would you like to edit your Expectation Suite?
     return interactive_mode
 
 
-def _suite_edit_workflow(
+def _suite_edit_workflow(  # noqa: C901 - 19
     context: DataContext,
     expectation_suite_name: str,
     profile: bool,

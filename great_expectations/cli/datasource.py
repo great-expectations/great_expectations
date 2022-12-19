@@ -1,12 +1,13 @@
+from __future__ import annotations
+
 import enum
 import logging
 import os
 import sys
-from typing import List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 import click
 
-from great_expectations import DataContext
 from great_expectations.cli import toolkit
 from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
 from great_expectations.cli.util import verify_library_dependent_modules
@@ -27,6 +28,9 @@ except ImportError:
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
     )
     sqlalchemy = None
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import DataContext
 
 yaml = YAMLToString()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -450,7 +454,7 @@ execution_engine:
             yaml_str += f"""
     drivername: {self.driver}"""
 
-        yaml_str += f'''
+        yaml_str += '''
 data_connectors:
   default_runtime_data_connector_name:
     class_name: RuntimeDataConnector
