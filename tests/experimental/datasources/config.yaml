@@ -8,17 +8,17 @@ datasources:
         type: table
         name: my_table_asset_wo_splitters
         table_name: my_table
-      with_splitters:
+      with_splitter:
         type: table
-        name: with_splitters
+        name: with_splitter
         table_name: another_table
         column_splitter:
-              method_name: foobar_it
+              method_name: split_on_year_and_month
               column_name: my_column
-              name: my_splitter
+              name: my_year_and_month_splitter
               param_names:
-                - alpha
-                - bravo
+                - year
+                - month
       with_sorters:
         type: table
         name: with_sorters
