@@ -209,7 +209,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
     @staticmethod
     def _choose_schema_type_for_value(
-        schema_types: List[RendererSchemaType], value: Any
+        schema_types: List[Union[RendererSchemaType, str]], value: Any
     ) -> RendererSchemaType:
         if isinstance(value, dict):
             return RendererSchemaType.STRING
@@ -238,7 +238,11 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                     return schema_type
             else:
                 if isinstance(value, Iterable):
-                    return schema_type
+                    return RendererSchemaType.ARRAY
+
+        raise RendererConfigurationError(
+            "None of the provided schema_types match the value."
+        )
 
     def add_param(
         self,
@@ -293,7 +297,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             value = self.kwargs.get(name)
 
         if isinstance(schema_type, list) and value is not None:
-            schema_type: RendererSchemaType = self._choose_schema_type_for_value(
+            schema_type = self._choose_schema_type_for_value(
                 schema_types=schema_type, value=value
             )
 
