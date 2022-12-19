@@ -71,8 +71,7 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install twine
-              pip install wheel
+              pip install twine wheel
               git config --global user.email "team@greatexpectations.io"
               git config --global user.name "Great Expectations"
               echo '$(contrib_major).$(contrib_minor).$(Build.BuildNumber)' > ./PACKAGE_VERSION
