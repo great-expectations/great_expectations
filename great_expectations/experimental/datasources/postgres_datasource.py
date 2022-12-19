@@ -46,7 +46,10 @@ class ColumnSplitter:
         """Fail early if the `method_name` does not exist and would fail at runtime."""
         # NOTE (kilo59): this could be achieved by simply annotating the method_name field
         # as a `SplitterMethod` enum but we get cyclic imports.
+        # This also adds the enums to the generated json schema.
+        # https://docs.pydantic.dev/usage/types/#enums-and-choices
         # We could use `update_forward_refs()` but would have to change this to a BaseModel
+        # https://docs.pydantic.dev/usage/postponed_annotations/
         from great_expectations.execution_engine.split_and_sample.data_splitter import (
             SplitterMethod,
         )
