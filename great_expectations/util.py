@@ -41,6 +41,7 @@ from typing import (
     Mapping,
     Optional,
     Set,
+    SupportsFloat,
     Tuple,
     Union,
     cast,
@@ -1499,7 +1500,7 @@ def is_nan(value: Any) -> bool:
         return True
 
 
-def convert_decimal_to_float(d: Union[decimal.Decimal, Number]) -> float:
+def convert_decimal_to_float(d: SupportsFloat) -> float:
     """
     This method convers "decimal.Decimal" to standard "float" type.
     """
