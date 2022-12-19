@@ -73,6 +73,7 @@ from great_expectations.exceptions import (
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
+    SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.registry import (
@@ -2642,6 +2643,35 @@ class ColumnMapExpectation(TableExpectation, ABC):
                     configuration=configuration,
                     runtime_configuration=runtime_configuration,
                 )
+                validation_dependencies.set_metric_configuration(
+                    metric_name=f"{self.map_metric}.unexpected_index_query",
+                    metric_configuration=MetricConfiguration(
+                        metric_name=f"{self.map_metric}.unexpected_index_query",
+                        metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                        metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                    ),
+                )
+        if isinstance(execution_engine, SparkDFExecutionEngine):
+            if "unexpected_index_column_names" in validation_dependencies.result_format:
+                metric_kwargs = get_metric_kwargs(
+                    f"{self.map_metric}.unexpected_index_list",
+                    configuration=configuration,
+                    runtime_configuration=runtime_configuration,
+                )
+                validation_dependencies.set_metric_configuration(
+                    metric_name=f"{self.map_metric}.unexpected_index_list",
+                    metric_configuration=MetricConfiguration(
+                        metric_name=f"{self.map_metric}.unexpected_index_list",
+                        metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                        metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                    ),
+                )
+                metric_kwargs = get_metric_kwargs(
+                    f"{self.map_metric}.unexpected_index_query",
+                    configuration=configuration,
+                    runtime_configuration=runtime_configuration,
+                )
+                # we are still registering this TODO still remains to add to Pandas
                 validation_dependencies.set_metric_configuration(
                     metric_name=f"{self.map_metric}.unexpected_index_query",
                     metric_configuration=MetricConfiguration(

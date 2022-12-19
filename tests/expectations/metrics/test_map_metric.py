@@ -14,7 +14,6 @@ from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -35,30 +34,6 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
-
-
-@pytest.fixture
-def spark_dataframe_for_unexpected_rows_with_index(
-    spark_session,
-) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821
-    df: pandas.DataFrame = pd.DataFrame(
-        {
-            "pk_1": [0, 1, 2, 3, 4, 5],
-            "pk_2": ["zero", "one", "two", "three", "four", "five"],
-            "animals": [
-                "cat",
-                "fish",
-                "dog",
-                "giraffe",
-                "lion",
-                "zebra",
-            ],
-        }
-    )
-    test_df: "pyspark.sql.dataframe.DataFrame" = spark_session.createDataFrame(
-        data=df
-    )  # noqa: F821
-    return test_df
 
 
 @pytest.fixture
