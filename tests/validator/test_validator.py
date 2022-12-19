@@ -311,17 +311,19 @@ def multi_batch_taxi_validator_ge_cloud_mode(
 
 
 @mock.patch(
-    "great_expectations.data_context.data_context.BaseDataContext.save_expectation_suite"
+    "great_expectations.data_context.data_context.AbstractDataContext.save_expectation_suite"
 )
 @mock.patch(
-    "great_expectations.data_context.data_context.BaseDataContext.get_expectation_suite"
+    "great_expectations.data_context.data_context.AbstractDataContext.get_expectation_suite"
 )
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@mock.patch("great_expectations.validator.validator.Validator.cloud_mode")
 @pytest.mark.cloud
 @pytest.mark.integration
 def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
+    mock_cloud_mode,
     mock_emit,
     mock_context_get_suite,
     mock_context_save_suite,
@@ -334,7 +336,8 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     :param mock_context_get_suite: Under normal circumstances, this would be ExpectationSuite object returned from GX Cloud
     :param mock_context_save_suite: Under normal circumstances, this would trigger post or patch to GX Cloud
     """
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
+
     mock_suite = ExpectationSuite(
         expectation_suite_name="validating_taxi_data",
         expectations=[
@@ -342,32 +345,35 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
                 expectation_type="expect_column_values_to_be_between",
                 kwargs={"column": "passenger_count", "min_value": 0, "max_value": 99},
                 meta={"notes": "This is an expectation."},
-                ge_cloud_id=UUID("0faf94a9-f53a-41fb-8e94-32f218d4a774"),
+                ge_cloud_id="0faf94a9-f53a-41fb-8e94-32f218d4a774",
             ),
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_between",
                 kwargs={"column": "trip_distance", "min_value": 11, "max_value": 22},
                 meta={"notes": "This is an expectation."},
-                ge_cloud_id=UUID("3e8eee33-b425-4b36-a831-6e9dd31ad5af"),
+                ge_cloud_id="3e8eee33-b425-4b36-a831-6e9dd31ad5af",
             ),
         ],
         data_context=context,
         meta={"notes": "This is an expectation suite."},
     )
-    mock_context_save_suite.return_value = True
     mock_context_get_suite.return_value = mock_suite
+    mock_cloud_mode.return_value = True
+    mock_context_save_suite.return_value = True
+
     multi_batch_taxi_validator_ge_cloud_mode.expect_column_values_to_be_between(
         column="trip_distance", min_value=11, max_value=22
     )
     multi_batch_taxi_validator_ge_cloud_mode.save_expectation_suite()
-    assert (
+
+    expected = mock_suite.to_json_dict()
+    actual = (
         multi_batch_taxi_validator_ge_cloud_mode.get_expectation_suite().to_json_dict()
-        == mock_suite.to_json_dict()
     )
+    assert expected == actual
 
     # add_expectation() will not send usage_statistics event when called from a Validator
     assert mock_emit.call_count == 0
-    assert mock_emit.call_args_list == []
 
 
 @pytest.mark.integration
