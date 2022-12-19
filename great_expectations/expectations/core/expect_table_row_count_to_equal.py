@@ -113,9 +113,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
         renderer_configuration.add_param(
             name="value", schema_type=RendererSchemaType.NUMBER
         )
-
         renderer_configuration.template_str = "Must have exactly $value rows."
-
         return renderer_configuration
 
     @classmethod
