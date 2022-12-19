@@ -3,7 +3,7 @@ from __future__ import annotations
 import abc
 import datetime
 import enum
-from typing import Callable, List, Set, Union
+from typing import Callable, List, Union
 
 import ruamel
 from dateutil.parser import parse
