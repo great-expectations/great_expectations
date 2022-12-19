@@ -27,7 +27,10 @@ def test_run_checkpoint_and_data_doc(empty_data_context, include_rendered_conten
         os.path.join(
             "..",
             "..",
-            "test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db",
+            "test_sets",
+            "taxi_yellow_tripdata_samples",
+            "sqlite",
+            "yellow_tripdata.db",
         ),
     )
     context: DataContext = empty_data_context
