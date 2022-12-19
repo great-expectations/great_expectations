@@ -433,7 +433,7 @@ def load_data_context_with_error_handling(
         return context
     except ge_exceptions.UnsupportedConfigVersionError as err:
         directory = directory or FileDataContext.find_context_root_dir()
-        ge_config_version = FileDataContext.get_ge_config_version(
+        ge_config_version = FileDataContext.get_ge_config_version(  # type: ignore[assignment] # could be none
             context_root_dir=directory
         )
         context = upgrade_project_strictly_multiple_versions_increment(
