@@ -1714,7 +1714,7 @@ def convert_ndarray_float_to_datetime_tuple(
     return tuple(convert_ndarray_float_to_datetime_dtype(data=data).tolist())
 
 
-def is_ndarray_decimal_dtype(
+def does_ndarray_contain_decimal_dtype(
     data: "npt.NDArray",
 ) -> TypeGuard["npt.NDArray"]:
     """
