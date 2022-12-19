@@ -61,6 +61,9 @@ from great_expectations.exceptions import (
 )
 
 if TYPE_CHECKING:
+    # needed until numpy min version 1.20
+    import numpy.typing as npt
+
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
@@ -1711,7 +1714,9 @@ def convert_ndarray_float_to_datetime_tuple(
     return tuple(convert_ndarray_float_to_datetime_dtype(data=data).tolist())
 
 
-def is_ndarray_decimal_dtype(data: np.ndarray) -> bool:
+def is_ndarray_decimal_dtype(
+    data: "npt.NDArray",
+) -> TypeGuard["npt.NDArray"]:
     """
     Determine whether or not all elements of 1-D "np.ndarray" argument are "decimal.Decimal" type objects.
     """
