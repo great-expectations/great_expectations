@@ -368,7 +368,7 @@ stages:
             displayName: 'Configure mysql'
 
           - script: |
-              pip install --constraint constraints-dev.txt ".[test, mysql, spark]" pytest-azurepipelines
+              pip install --constraint constraints-dev.txt ".[test, mysql]" pytest-azurepipelines
             displayName: 'Install dependencies'
 
           - script: |
@@ -407,7 +407,7 @@ stages:
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
           - script: |
-              pip install --constraint constraints-dev.txt ".[test, mssql, spark]" pytest-azurepipelines
+              pip install --constraint constraints-dev.txt ".[test, mssql]" pytest-azurepipelines
             displayName: 'Install dependencies'
 
           - script: |
@@ -452,7 +452,7 @@ stages:
             displayName: Wait for database to initialise
 
           - script: |
-              pip install --constraint constraints-dev.txt ".[test, trino, spark]" pytest-azurepipelines
+              pip install --constraint constraints-dev.txt ".[test, trino]" pytest-azurepipelines
             displayName: 'Install dependencies'
 
           - script: |
