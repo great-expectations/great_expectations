@@ -107,7 +107,7 @@ stages:
     - job: type_hint_checker
       steps:
       - script: |
-          pip install $(grep -E '^(invoke|pytest-cov)' reqs/requirements-dev-contrib.txt)
+          pip install $(grep -E '^(invoke|mypy|pytest-cov)' reqs/requirements-dev-contrib.txt)
           invoke type-coverage
         name: TypeHintChecker
 
