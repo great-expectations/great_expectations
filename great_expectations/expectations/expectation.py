@@ -976,15 +976,72 @@ class Expectation(metaclass=MetaExpectation):
         )
         # if mapped to each of the values?
         # no that does not exist
+        # this is where we would be adding the ?
+        partial_unexpected_list: Optional[List[dict]] = result_dict.get(
+            "partial_unexpected_list"
+        )
+
+        partial_unexpected_index_list: Optional[List[dict]] = result_dict.get(
+            "partial_unexpected_index_list"
+        )
+        # this is where we are going to process the things
+        unexpected_index_list: Optional[List[dict]] = result_dict.get(
+            "unexpected_index_list"
+        )
+
+        unexpected_index_column_names: Optional[List[dict]] = result_dict.get(
+            "unexpected_index_column_names"
+        )
+        # breakpoint()
+
+        is_truncated: bool = False
+        # wow this is a weird one
+        if (
+            unexpected_index_list
+            and partial_unexpected_index_list
+            and len(unexpected_index_list) > len(partial_unexpected_index_list)
+        ):
+            # this means we will be adding a ... to the end
+            is_truncated = True
+
+        # find the first index:
+        #
+        index_dict = {}
+        if not partial_unexpected_index_list:
+            return
+        # what do we want to look like in the end?
+        # {"apple": {"pk_1" : [3, 4, 5], "pk_"2: ["three", "four", "five"]}}
+        # find the apple?
+        for name in partial_unexpected_list:
+            index_dict[name] = {}
+        # how do you find out the column?
+        # this is the dict that I want
+        dict_to_render = {
+            "giraffe": {"pk_1": [3], "pk_2": ["three"]},
+            "lion": {"pk_1": [4], "pk_2": ["four"]},
+            "zebra": {"pk_1": [5], "pk_2": ["five"]},
+        }
 
         if partial_unexpected_counts:
             for unexpected_count_dict in partial_unexpected_counts:
                 value: Optional[Any] = unexpected_count_dict.get("value")
                 count: Optional[int] = unexpected_count_dict.get("count")
+
+                pk_counts = dict_to_render[value]
+
                 if count:
                     total_count += count
                 if value is not None and value != "":
-                    table_rows.append([value, count])
+                    row_list = []
+                    row_list.append(value)
+                    row_list.append(count)
+                    # table_rows.append([value, count])
+
+                    for column_name in unexpected_index_column_names:
+                        row_list.append(dict_to_render[value][column_name])
+
+                    table_rows.append(row_list)
+
                 elif value == "":
                     table_rows.append(["EMPTY", count])
                 else:
@@ -994,9 +1051,13 @@ class Expectation(metaclass=MetaExpectation):
         # we show counts. If not, we only show "sampled" unexpected values.
         if total_count == result_dict.get("unexpected_count"):
             header_row = ["Unexpected Value", "Count"]
+            for column_name in unexpected_index_column_names:
+                header_row.append(column_name)
         else:
             header_row = ["Sampled Unexpected Values"]
             table_rows = [[row[0]] for row in table_rows]
+
+        # breakpoint()
         return header_row, table_rows
 
     @classmethod
