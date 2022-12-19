@@ -1802,7 +1802,7 @@ def _pandas_map_condition_index(
                     execution_engine=execution_engine,
                     error_message_template='Error: The unexpected_index_column "{column_name:s}" does not exist in Dataframe. Please check your configuration and try again.',
                 )
-                # add is the actual unexpected value
+                # add the actual unexpected value
                 primary_key_dict[column_name] = df.at[index, column_name]
 
             unexpected_index_list.append(primary_key_dict)
@@ -2473,9 +2473,11 @@ def _sqlalchemy_map_condition_index(
     column_selector: List[sa.Column] = []
     all_table_columns: List[str] = metrics.get("table.columns")
 
-    unexpected_index_column_names: List[Union[str, None]] = result_format.get(
+    unexpected_index_column_names: Optional[List[str]] = result_format.get(
         "unexpected_index_column_names"
     )
+    if not unexpected_index_column_names:
+        return
 
     for column_name in unexpected_index_column_names:
         if column_name not in all_table_columns:
@@ -2489,8 +2491,8 @@ def _sqlalchemy_map_condition_index(
     # the last column we SELECT is the column the Expectation is being run on
     column_selector.append(sa.column(expectation_domain_column_name))
 
-    domain_records_as_selectable: sa.Selectable = execution_engine.get_domain_records(
-        domain_kwargs=domain_kwargs
+    domain_records_as_selectable: sa.sql.Selectable = (
+        execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
     )
     unexpected_condition_query_with_selected_columns: sa.select = sa.select(
         column_selector
@@ -2513,7 +2515,7 @@ def _sqlalchemy_map_condition_index(
 
     for row in query_result:
         primary_key_dict: Dict[str, Any] = {}
-        # add is the actual unexpected value
+        # add the actual unexpected value
         primary_key_dict[expectation_domain_column_name] = row[-1]
         for index in range(len(unexpected_index_column_names)):
             name: str = unexpected_index_column_names[index]
