@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import sys
-from typing import TYPE_CHECKING, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Optional, Tuple
 
 import click
 
@@ -72,7 +72,7 @@ def project_upgrade(ctx: click.Context) -> None:
 
 
 def do_config_check(
-    target_directory: Union[str, None]
+    target_directory: Optional[str],
 ) -> Tuple[bool, str, Optional[AbstractDataContext]]:
     is_config_ok: bool = True
     upgrade_message: str = ""

@@ -78,7 +78,7 @@ When you run this notebook, Great Expectations will store these expectations in 
 
 
 def get_or_create_expectation_suite(
-    expectation_suite_name: Union[str, None],
+    expectation_suite_name: Optional[str],
     data_context: AbstractDataContext,
     data_asset_name: Optional[str] = None,
     usage_event: Optional[str] = None,
@@ -132,7 +132,7 @@ def get_or_create_expectation_suite(
 
 
 def get_default_expectation_suite_name(
-    data_asset_name: Union[str, None],
+    data_asset_name: Optional[str],
     batch_request: Optional[
         Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
     ] = None,
@@ -150,7 +150,7 @@ def get_default_expectation_suite_name(
 def tell_user_suite_exists(
     data_context: AbstractDataContext,
     expectation_suite_name: str,
-    usage_event: Union[str, None],
+    usage_event: Optional[str],
     suppress_usage_message: bool = False,
 ) -> None:
     exit_with_failure_message_and_stats(
@@ -197,7 +197,7 @@ def get_validator(
 def load_expectation_suite(  # type: ignore[return] # sys.exit if no suite
     data_context: AbstractDataContext,
     expectation_suite_name: str,
-    usage_event: Union[str, None],
+    usage_event: Optional[str],
     suppress_usage_message: bool = False,
     create_if_not_exist: bool = True,
 ) -> ExpectationSuite:
@@ -239,7 +239,7 @@ def load_expectation_suite(  # type: ignore[return] # sys.exit if no suite
 
 def exit_with_failure_message_and_stats(
     data_context: AbstractDataContext,
-    usage_event: Union[str, None],
+    usage_event: Optional[str],
     suppress_usage_message: bool = False,
     message: Optional[str] = None,
 ) -> None:
@@ -398,7 +398,7 @@ def select_datasource(
 
 
 def load_data_context_with_error_handling(
-    directory: Union[str, None], from_cli_upgrade_command: bool = False
+    directory: Optional[str], from_cli_upgrade_command: bool = False
 ) -> Optional[AbstractDataContext]:
     """Return a DataContext with good error handling and exit codes."""
     context: Optional[AbstractDataContext]
