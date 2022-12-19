@@ -2476,8 +2476,6 @@ def _sqlalchemy_map_condition_index(
     unexpected_index_column_names: Optional[List[str]] = result_format.get(
         "unexpected_index_column_names"
     )
-    if not unexpected_index_column_names:
-        return
 
     for column_name in unexpected_index_column_names:
         if column_name not in all_table_columns:
