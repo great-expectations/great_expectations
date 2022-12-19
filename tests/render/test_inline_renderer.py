@@ -368,61 +368,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
             ],
             id="graph",
         ),
-        pytest.param(
-            ExpectationConfiguration(
-                expectation_type="expect_column_max_to_be_between",
-                kwargs={
-                    "column": "event_datetime",
-                    "min_value": datetime(year=2020, month=12, day=18),
-                    "max_value": datetime(year=2022, month=12, day=11),
-                },
-            ),
-            {
-                "element_count": 2834,
-                "unexpected_count": 0,
-                "unexpected_percent": 0.0,
-                "partial_unexpected_list": [],
-                "missing_count": 0,
-                "missing_percent": 0.0,
-                "unexpected_percent_total": 0.0,
-                "unexpected_percent_nonmissing": 0.0,
-            },
-            [
-                {
-                    "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
-                    "value": {
-                        "params": {},
-                        "schema": {"type": "com.superconductive.rendered.string"},
-                        "template": "0% unexpected",
-                    },
-                    "value_type": "StringValueType",
-                },
-                {
-                    "name": AtomicPrescriptiveRendererType.SUMMARY,
-                    "value": {
-                        "params": {
-                            "column": {
-                                "schema": {"type": "string"},
-                                "value": "event_datetime",
-                            },
-                            "max_value": {
-                                "schema": {"type": "date"},
-                                "value": datetime(year=2022, month=12, day=11),
-                            },
-                            "min_value": {
-                                "schema": {"type": "date"},
-                                "value": datetime(year=2020, month=12, day=18),
-                            },
-                        },
-                        "schema": {"type": "com.superconductive.rendered.string"},
-                        "template": "$column maximum value must be greater than or equal "
-                        "to $min_value and less than or equal to $max_value.",
-                    },
-                    "value_type": "StringValueType",
-                },
-            ],
-            id="evaluation parameters",
-        ),
     ],
 )
 def test_inline_renderer_expectation_validation_result_serialization(
@@ -663,42 +608,6 @@ def test_inline_renderer_expectation_validation_result_serialization(
                 }
             ],
             id="graph",
-        ),
-        pytest.param(
-            ExpectationConfiguration(
-                expectation_type="expect_column_max_to_be_between",
-                kwargs={
-                    "column": "event_datetime",
-                    "min_value": {"$PARAMETER": "now() - timedelta(weeks=208)"},
-                    "max_value": {"$PARAMETER": "now() - timedelta(weeks=1)"},
-                },
-            ),
-            [
-                {
-                    "name": AtomicPrescriptiveRendererType.SUMMARY,
-                    "value": {
-                        "params": {
-                            "column": {
-                                "schema": {"type": "string"},
-                                "value": "event_datetime",
-                            },
-                            "max_value": {
-                                "schema": {"type": "string"},
-                                "value": {"$PARAMETER": "now() - timedelta(weeks=1)"},
-                            },
-                            "min_value": {
-                                "schema": {"type": "string"},
-                                "value": {"$PARAMETER": "now() - timedelta(weeks=208)"},
-                            },
-                        },
-                        "schema": {"type": "com.superconductive.rendered.string"},
-                        "template": "$column maximum value must be greater than or equal "
-                        "to $min_value and less than or equal to $max_value.",
-                    },
-                    "value_type": "StringValueType",
-                }
-            ],
-            id="evaluation_parameters",
         ),
     ],
 )
