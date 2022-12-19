@@ -40,9 +40,9 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
     )
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 @pytest.mark.parametrize(
-    "expectation_configuration,result,expected_serialized_expectation_validation_result_rendered_atomic_content",
+    "expectation_configuration,fake_result,expected_serialized_expectation_validation_result_rendered_atomic_content",
     [
         pytest.param(
             ExpectationConfiguration(
@@ -427,7 +427,7 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
 )
 def test_inline_renderer_expectation_validation_result_serialization(
     expectation_configuration: ExpectationConfiguration,
-    result: dict,
+    fake_result: dict,
     expected_serialized_expectation_validation_result_rendered_atomic_content: dict,
 ):
 
@@ -438,7 +438,7 @@ def test_inline_renderer_expectation_validation_result_serialization(
             "exception_message": None,
         },
         expectation_config=expectation_configuration,
-        result=result,
+        result=fake_result,
         success=True,
     )
 
@@ -465,7 +465,7 @@ def test_inline_renderer_expectation_validation_result_serialization(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "expectation_configuration,expected_serialized_expectation_configuration_rendered_atomic_content",
     [
