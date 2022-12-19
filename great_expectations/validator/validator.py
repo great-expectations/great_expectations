@@ -1336,9 +1336,11 @@ class Validator:
         """
         Wrapper around cloud_mode property of associated Data Context
         """
-        if self._data_context:
-            return self._data_context.cloud_mode
-        return False
+        from great_expectations.data_context.data_context.cloud_data_context import (
+            CloudDataContext,
+        )
+
+        return isinstance(self._data_context, CloudDataContext)
 
     @property
     def ge_cloud_mode(self) -> bool:
