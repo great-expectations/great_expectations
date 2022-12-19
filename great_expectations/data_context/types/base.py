@@ -7,6 +7,7 @@ import itertools
 import json
 import logging
 import uuid
+import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional, Set, Union
 from uuid import UUID
 
@@ -21,6 +22,7 @@ from marshmallow import (
     validates_schema,
 )
 from marshmallow.validate import OneOf
+from marshmallow.warnings import RemovedInMarshmallow4Warning
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
@@ -58,6 +60,10 @@ MINIMUM_SUPPORTED_CONFIG_VERSION = 2
 DEFAULT_USAGE_STATISTICS_URL = (
     "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 )
+
+
+# NOTE 121822: (kilo59) likely won't moving to marshmallow v4 so we don't care about this
+warnings.simplefilter(action="ignore", category=RemovedInMarshmallow4Warning)
 
 
 def object_to_yaml_str(obj):
