@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import os
-from typing import Optional, Tuple
+import pathlib
+from typing import Optional, Tuple, Union
 
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
@@ -22,7 +23,7 @@ from great_expectations.data_context.types.base import GXCloudConfig
 
 
 def DataContext(
-    context_root_dir: Optional[str] = None,
+    context_root_dir: Union[str, pathlib.Path, None] = None,
     runtime_environment: Optional[dict] = None,
     cloud_mode: bool = False,
     cloud_base_url: Optional[str] = None,
@@ -164,7 +165,7 @@ def _init_cloud_config(
 
 
 def _init_context_root_directory(
-    cloud_mode: bool, context_root_dir: Optional[str]
+    cloud_mode: bool, context_root_dir: Union[str, pathlib.Path, None]
 ) -> str:
     if cloud_mode and context_root_dir is None:
         context_root_dir = CloudDataContext.determine_context_root_directory(

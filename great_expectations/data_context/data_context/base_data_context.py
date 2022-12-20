@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import pathlib
 from typing import Mapping, Optional, Tuple, Union
 
 from great_expectations.data_context.data_context.abstract_data_context import (
@@ -20,7 +21,7 @@ from great_expectations.data_context.types.base import DataContextConfig, GXClou
 
 def BaseDataContext(
     project_config: Union[DataContextConfig, Mapping],
-    context_root_dir: Optional[str] = None,
+    context_root_dir: Union[str, pathlib.Path, None] = None,
     runtime_environment: Optional[dict] = None,
     cloud_mode: bool = False,
     cloud_config: Optional[GXCloudConfig] = None,
