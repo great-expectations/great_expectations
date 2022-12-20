@@ -3,10 +3,11 @@ An action is a way to take an arbitrary method and make it configurable and runn
 
 The only requirement from an action is for it to have a take_action method.
 """
+from __future__ import annotations
 
 import logging
 import warnings
-from typing import Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 from urllib.parse import urljoin
 
 from great_expectations.core import ExpectationSuiteValidationResult
@@ -33,6 +34,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import DataContext
 
 logger = logging.getLogger(__name__)
 
@@ -1089,24 +1093,24 @@ class UpdateDataDocsAction(ValidationAction):
                 expectation_suite_identifier,
             ],
         )
-        # <snippet>
+        # <snippet name="great_expectations/checkpoint/actions.py empty dict">
         data_docs_validation_results = {}
         # </snippet>
         if self._using_cloud_context:
             return data_docs_validation_results
 
         # get the URL for the validation result
-        # <snippet>
+        # <snippet name="great_expectations/checkpoint/actions.py get_docs_sites_urls">
         docs_site_urls_list = self.data_context.get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier,
             site_names=self._site_names,
         )
         # </snippet>
         # process payload
-        # <snippet>
+        # <snippet name="great_expectations/checkpoint/actions.py iterate">
         for sites in docs_site_urls_list:
             data_docs_validation_results[sites["site_name"]] = sites["site_url"]
-        # <snippet>
+        # </snippet>
         return data_docs_validation_results
 
 
@@ -1118,7 +1122,7 @@ class CloudNotificationAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: "DataContext",
+        data_context: DataContext,
         checkpoint_ge_cloud_id: str,
     ) -> None:
         super().__init__(data_context)
@@ -1169,7 +1173,7 @@ class SNSNotificationAction(ValidationAction):
     """
 
     def __init__(
-        self, data_context: "DataContext", sns_topic_arn: str, sns_message_subject
+        self, data_context: DataContext, sns_topic_arn: str, sns_message_subject
     ) -> None:
         super().__init__(data_context)
         self.sns_topic_arn = sns_topic_arn

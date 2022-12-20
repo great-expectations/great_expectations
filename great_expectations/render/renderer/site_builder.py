@@ -110,7 +110,7 @@ class SiteBuilder:
                         class_name: DefaultJinjaIndexPageView
     """
 
-    def __init__(
+    def __init__(  # noqa: C901 - 16
         self,
         data_context,
         store_backend,
@@ -686,7 +686,7 @@ class DefaultSiteIndexBuilder:
             "How to Create Expectations",
             "https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data",
         )
-        see_glossary = CallToActionButton(
+        _ = CallToActionButton(
             "See More Kinds of Expectations",
             "https://greatexpectations.io/expectations",
         )
@@ -694,7 +694,7 @@ class DefaultSiteIndexBuilder:
             "How to Validate Data",
             "https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint",
         )
-        customize_data_docs = CallToActionButton(
+        _ = CallToActionButton(
             "How to Customize Data Docs",
             "https://docs.greatexpectations.io/docs/reference/data_docs#customizing-html-documentation",
         )
