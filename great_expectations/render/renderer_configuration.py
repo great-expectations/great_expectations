@@ -19,7 +19,14 @@ from typing import (
 
 import dateutil
 from dateutil.parser import ParserError
-from pydantic import BaseModel, Field, create_model, root_validator, validator
+from pydantic import (
+    BaseModel,
+    Field,
+    ValidationError,
+    create_model,
+    root_validator,
+    validator,
+)
 from pydantic.generics import GenericModel
 
 from great_expectations.core import (
@@ -265,6 +272,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     def _choose_schema_type_for_value(
         schema_types: List[RendererSchemaType], value: Any
     ) -> RendererSchemaType:
+        if isinstance(value, dict):
+            return RendererSchemaType.STRING
+
         for schema_type in schema_types:
             try:
                 renderer_param: Type[
@@ -274,7 +284,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 )
                 renderer_param(schema={"type": schema_type}, value=value)
                 return schema_type
-            except RendererConfigurationError:
+            except ValidationError:
                 pass
         raise RendererConfigurationError(
             f"None of the schema_types: {schema_types} match the value: {value}"
