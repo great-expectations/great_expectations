@@ -263,8 +263,8 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
     @staticmethod
     def _choose_schema_type_for_value(
-        schema_types: List[Union[RendererSchemaType, str]], value: Any
-    ) -> Union[RendererSchemaType, str]:
+        schema_types: List[RendererSchemaType], value: Any
+    ) -> RendererSchemaType:
         for schema_type in schema_types:
             try:
                 renderer_param: Type[
@@ -283,9 +283,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     def add_param(
         self,
         name: str,
-        schema_type: Union[
-            RendererSchemaType, str, List[Union[RendererSchemaType, str]]
-        ],
+        schema_type: Union[RendererSchemaType, List[RendererSchemaType]],
         value: Optional[Any] = None,
     ) -> None:
         """Adds a param that can be substituted into a template string during rendering.
