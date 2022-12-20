@@ -377,7 +377,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._config_provider
 
     @property
-    def root_directory(self) -> Optional[str]:
+    def root_directory(self) -> Optional[str]:  # TODO: This should be a `pathlib.Path`
         """The root directory for configuration objects in the data context; the location in which
         ``great_expectations.yml`` is located.
         """
