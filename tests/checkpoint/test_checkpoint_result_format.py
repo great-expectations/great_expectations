@@ -780,10 +780,10 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
         "unexpected_index_list"
     )
     assert not first_result_full_list
-    first_result_partial_list = evrs[0]["results"][0]["result"].get(
-        "partial_unexpected_index_list"
-    )
-    assert not first_result_partial_list
+    first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0][
+        "result"
+    ].get("partial_unexpected_index_list")
+    assert first_result_partial_list == expected_unexpected_indices_output
 
 
 @pytest.mark.integration
@@ -848,4 +848,3 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
     )
     for res in result.run_results.values():
         print(res["actions_results"]["update_data_docs"])
-

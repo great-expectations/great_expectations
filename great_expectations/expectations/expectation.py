@@ -772,7 +772,7 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> Optional[RenderedTableContent]:
+    ) -> Optional[List[Union[RenderedStringTemplateContent, RenderedTableContent]]]:
         if result is None:
             return None
 
@@ -806,7 +806,29 @@ class Expectation(metaclass=MetaExpectation):
                 },
             }
         )
-        return unexpected_table_content_block
+        # breakpoint()
+        if result_dict.get("unexpected_index_query"):
+            # how do you add a new rendererj
+            # unexpected index table is next
+            query = result_dict.get("unexpected_index_query")
+            query_info = CollapseContent(
+                **{
+                    "collapse_toggle_link": "Show query to retrieve all unexpected values...",
+                    "collapse": [
+                        RenderedStringTemplateContent(
+                            **{
+                                "content_block_type": "string_template",
+                                "string_template": {
+                                    "template": query,
+                                    "tag": "code",
+                                },
+                            }
+                        )
+                    ],
+                }
+            )
+            return [unexpected_table_content_block, query_info]
+        return [unexpected_table_content_block]
 
     @classmethod
     def _build_partial_unexpected_counts_table(cls, result_dict):

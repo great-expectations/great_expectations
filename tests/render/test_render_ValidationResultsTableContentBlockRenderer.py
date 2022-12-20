@@ -40,6 +40,21 @@ def evr_failed_with_exception():
     )
 
 
+@pytest.fixture
+def evr_success_with_unexpected_sql():
+    return ExpectationValidationResult()
+
+
+@pytest.fixture
+def evr_success_with_unexpected_index_pandas():
+    return ExpectationValidationResult()
+
+
+@pytest.fixture
+def evr_success_index_pandas():
+    return ExpectationValidationResult()
+
+
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_with_errored_expectation(
     evr_failed_with_exception,
 ):
@@ -1102,3 +1117,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
             },
         },
     }
+
+
+# marker this is where we want to update
+# Tests to write:
