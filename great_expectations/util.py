@@ -1728,7 +1728,7 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
 
 def get_context(
     project_config: Optional[Union["DataContextConfig", Mapping]] = None,
-    context_root_dir: Optional[str] = None,
+    context_root_dir: Union[str, Path, None] = None,
     runtime_environment: Optional[dict] = None,
     cloud_base_url: Optional[str] = None,
     cloud_access_token: Optional[str] = None,
@@ -1775,7 +1775,7 @@ def get_context(
 
     Args:
         project_config (dict or DataContextConfig): In-memory configuration for DataContext.
-        context_root_dir (str): Path to directory that contains great_expectations.yml file
+        context_root_dir (str or pathlib.Path): Path to directory that contains great_expectations.yml file
         runtime_environment (dict): A dictionary of values can be passed to a DataContext when it is instantiated.
             These values will override both values from the config variables file and
             from environment variables.
@@ -1791,6 +1791,9 @@ def get_context(
         parameters
 
     """
+    if isinstance(context_root_dir, Path):
+        context_root_dir = str(context_root_dir)
+
     from great_expectations.data_context.data_context import (
         BaseDataContext,
         CloudDataContext,
