@@ -7,8 +7,8 @@ import re
 import sys
 import uuid
 from collections import OrderedDict
-from collections.abc import Mapping
-from typing import Any, Callable, Dict, Iterable, List, Optional, Union
+from types import ModuleType
+from typing import Any, Callable, Dict, List, Mapping, MutableMapping, Optional, Union
 from urllib.parse import urlparse
 
 import dateutil.parser
@@ -29,7 +29,7 @@ from great_expectations.util import convert_decimal_to_float
 try:
     from pyspark.sql.types import StructType
 except ImportError:
-    StructType = None  # type: ignore
+    StructType = None  # type: ignore[assignment, misc]
 
 logger = logging.getLogger(__name__)
 
@@ -70,11 +70,10 @@ SCHEMAS = {
     },
 }
 
-
+pyspark: Optional[ModuleType]
 try:
     import pyspark
 except ImportError:
-    pyspark = None
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
@@ -84,11 +83,11 @@ _SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
 
 
 def nested_update(
-    d: Union[Iterable, dict],
-    u: Union[Iterable, dict],
+    d: MutableMapping,
+    u: Mapping,
     dedup: bool = False,
     concat_lists: bool = True,
-):
+) -> MutableMapping:
     """
     Update d with items from u, recursively and joining elements. By default, list values are
     concatenated without de-duplication. If concat_lists is set to False, lists in u (new dict)
