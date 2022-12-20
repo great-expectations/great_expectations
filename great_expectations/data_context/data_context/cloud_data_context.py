@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import pathlib
 from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Tuple, Union, cast
 
 import requests
@@ -61,7 +62,7 @@ class CloudDataContext(SerializableDataContext):
     def __init__(
         self,
         project_config: Optional[Union[DataContextConfig, Mapping]] = None,
-        context_root_dir: Optional[str] = None,
+        context_root_dir: Union[str, pathlib.Path, None] = None,
         runtime_environment: Optional[dict] = None,
         cloud_base_url: Optional[str] = None,
         cloud_access_token: Optional[str] = None,
@@ -193,7 +194,9 @@ class CloudDataContext(SerializableDataContext):
         return all(val for val in cloud_config_dict.values())
 
     @classmethod
-    def determine_context_root_directory(cls, context_root_dir: Optional[str]) -> str:
+    def determine_context_root_directory(
+        cls, context_root_dir: Union[str, pathlib.Path, None]
+    ) -> str:
         if context_root_dir is None:
             context_root_dir = os.getcwd()
             logger.info(
