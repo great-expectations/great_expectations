@@ -3,10 +3,19 @@ from __future__ import annotations
 import copy
 import dataclasses
 import itertools
-from collections import namedtuple
 from datetime import datetime
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Type, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Dict,
+    List,
+    NamedTuple,
+    Optional,
+    Sequence,
+    Type,
+    Union,
+    cast,
+)
 
 import pydantic
 from pydantic import Field
@@ -23,8 +32,9 @@ from great_expectations.experimental.datasources.interfaces import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.execution_engine import ExecutionEngine
     import sqlalchemy
+
+    from great_expectations.execution_engine import ExecutionEngine
 
 
 class PostgresDatasourceError(Exception):
@@ -64,7 +74,9 @@ class ColumnSplitter:
         return v
 
 
-DatetimeRange = namedtuple("DatetimeRange", ["min", "max"])
+class DatetimeRange(NamedTuple):
+    min: datetime
+    max: datetime
 
 
 @pydantic_dc.dataclass(frozen=True)
@@ -90,9 +102,21 @@ class SqlYearMonthSplitter(ColumnSplitter):
         )
         with data_asset.datasource.execution_engine.engine.connect() as conn:
             datetimes: DatetimeRange = (
-                _get_sqlite_datetime_range(conn, table_name=data_asset.table_name, col_name=self.column_name)
-            ) if conn.dialect.name == 'sqlite' else (
-                _get_sql_datetime_range(conn, table_name=data_asset.table_name, col_name=self.column_name)
+                (
+                    _get_sqlite_datetime_range(
+                        conn,
+                        table_name=data_asset.table_name,
+                        col_name=self.column_name,
+                    )
+                )
+                if conn.dialect.name == "sqlite"
+                else (
+                    _get_sql_datetime_range(
+                        conn,
+                        table_name=data_asset.table_name,
+                        col_name=self.column_name,
+                    )
+                )
             )
         year: List[int] = list(range(datetimes.min.year, datetimes.max.year + 1))
         month: List[int]
@@ -106,14 +130,17 @@ class SqlYearMonthSplitter(ColumnSplitter):
 # In _get_sql*, we opt to use a raw string instead of sqlalchemy.text because we don't
 # need any of the features for these queries:
 # https://docs.sqlalchemy.org/en/14/core/sqlelement.html#sqlalchemy.sql.expression.text
-def _get_sql_datetime_range(conn: sqlalchemy.engine.base.Connection, table_name:str, col_name:str) -> DatetimeRange:
-    q = f'select min({col_name}), max({col_name}) from {table_name}'
+def _get_sql_datetime_range(
+    conn: sqlalchemy.engine.base.Connection, table_name: str, col_name: str
+) -> DatetimeRange:
+    q = f"select min({col_name}), max({col_name}) from {table_name}"
     min_max_dt = list(conn.execute(q))[0]
     return DatetimeRange(min=min_max_dt[0], max=min_max_dt[1])
 
 
-def _get_sqlite_datetime_range(conn: sqlalchemy.engine.base.Connection, table_name: str,
-                                   col_name: str) -> DatetimeRange:
+def _get_sqlite_datetime_range(
+    conn: sqlalchemy.engine.base.Connection, table_name: str, col_name: str
+) -> DatetimeRange:
     q = f"select STRFTIME('%Y%m%d', min({col_name})), STRFTIME('%Y%m%d', max({col_name})) from {table_name}"
     min_max_dt = [datetime.strptime(dt, "%Y%m%d") for dt in list(conn.execute(q))[0]]
     return DatetimeRange(min=min_max_dt[0], max=min_max_dt[1])
