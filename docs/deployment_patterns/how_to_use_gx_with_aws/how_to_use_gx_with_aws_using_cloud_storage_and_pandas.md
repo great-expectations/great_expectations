@@ -1,10 +1,10 @@
 ---
-title: How to use Great Expectations with Amazon Web Services using cloud storage and Pandas
+title: How to use Great Expectations with Amazon Web Services using S3 cloud storage and Pandas
 ---
 import Prerequisites from '../components/deployment_pattern_prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import Congratulations from '../../guides/connecting_to_your_data/components/congratulations.md'
+import Congratulations from './components/_congratulations_aws_s3_pandas.md'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 <!-- Part 1: Setup -->
@@ -12,7 +12,7 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 <!-- 1.1 Ensure that the AWS CLI is ready for use -->
 
 <!-- 1.1.1 Verify that the AWS CLI is installed -->
-import VerifyAwsInstalled from './components/_verify_that_the_aws_cli_is_installed.md'
+import VerifyAwsInstalled from './components/_aws_cli_verify_installation.md'
 
 <!-- 1.1.2 Verify that your AWS credentials are properly configured -->
 import VerifyAwsCredentials from '@site/docs/guides/setup/configuring_metadata_stores/components/_verify_aws_credentials_are_configured_properly.mdx'
@@ -22,7 +22,7 @@ import VerifyAwsCredentials from '@site/docs/guides/setup/configuring_metadata_s
 <!-- 1.2.1 Verify that your Python version meets requirements -->
 
 import VerifyPythonVersion from '@site/docs/guides/setup/installation/components_local/_check_python_version.mdx'
-import WhereToGetPython from './components/_where_to_get_python.md'
+import WhereToGetPython from './components/_python_where_to_get.md'
 
 <!-- 1.2.2 Create a virtual environment for your Great Expectations project -->
 
@@ -112,7 +112,7 @@ import AdditionalDataDocsNotes from '@site/docs/guides/setup/configuring_data_do
 
 <!-- 2.1 Choose how to run the code for configuring a new Datasource -->
 
-import HowToRunDatasourceCode from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_how_to_run_datasource_code.md'
+import HowToRunDatasourceCode from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_datasource_code_environment.md'
 
 <!-- 2.2 Instantiate your project's DataContext -->
 
@@ -134,17 +134,36 @@ import TestS3Datasource from '@site/docs/guides/connecting_to_your_data/cloud/s3
 
 <!-- 3.1 Prepare a Batch Request, Empty Expectation Suite, and Validator -->
 
-import PrepareABatchRequestAndValidatorForCreatingExpectations from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_prepare_or_reuse_a_batch_request_expectation_suite_and_validator.md'
+import PrepareABatchRequestAndValidatorForCreatingExpectations from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_expectation_suite_batch_request_validator_prepare_or_reuse.md'
 
 <!-- 3.2: Use a Validator to add Expectations to the Expectation Suite -->
 
-import CreateExpectationsInteractively from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_use_a_validator_to_add_expectations_to_the_expectation_suite.md'
+import CreateExpectationsInteractively from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_expectation_suite_add_expectations_with_validator.md'
 
 <!-- 3.3 Save the Expectation Suite -->
 
-import SaveTheExpectationSuite from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_save_the_expectation_suite.md'
+import SaveTheExpectationSuite from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_expectation_suite_save.md'
 
 <!-- Part 4: Validate Data -->
+
+<!-- 4.1 Create and run a Checkpoint -->
+
+import CheckpointCreateAndRun from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_create_and_run.md'
+
+<!-- 4.1.1 Create a Checkpoint -->
+
+import CreateCheckpoint from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_create_tabs.md'
+
+<!-- 4.1.2 Save the Checkpoint -->
+
+import SaveCheckpoint from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_save.md'
+
+<!-- 4.1.3 Run the Checkpoint -->
+
+import RunCheckpoint from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_run.md'
+
+<!-- 4.2 Build and view Data Docs -->
+import BuildAndViewDataDocs from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_data_docs_build_and_view.md'
 
 Great Expectations can work within many frameworks.  In this guide you will be shown a workflow for using Great Expectations with AWS and cloud storage.  You will configure a local Great Expectations project to store Expectations, Validation Results, and Data Docs in Amazon S3 buckets.  You will further configure Great Expectations to use Pandas and access data stored in another Amazon S3 bucket.
 
@@ -283,12 +302,24 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 ### 4.1: Create and run a Checkpoint
 
+<CheckpointCreateAndRun />
+
 #### 4.1.1 Create a Checkpoint
+
+<CreateCheckpoint />
 
 #### 4.1.2 Save the Checkpoint
 
+<SaveCheckpoint />
+
 #### 4.1.3 Run the Checkpoint
+
+<RunCheckpoint />
 
 ### 4.2: Build and view Data Docs
 
+<BuildAndViewDataDocs />
+
 ## Congratulations!
+
+<Congratulations />
