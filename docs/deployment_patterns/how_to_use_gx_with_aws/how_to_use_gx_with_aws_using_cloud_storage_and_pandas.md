@@ -132,6 +132,18 @@ import TestS3Datasource from '@site/docs/guides/connecting_to_your_data/cloud/s3
 
 <!-- Part 3: Create Expectations -->
 
+<!-- 3.1 Prepare a Batch Request, Empty Expectation Suite, and Validator -->
+
+import PrepareABatchRequestAndValidatorForCreatingExpectations from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_prepare_or_reuse_a_batch_request_expectation_suite_and_validator.md'
+
+<!-- 3.2: Use a Validator to add Expectations to the Expectation Suite -->
+
+import CreateExpectationsInteractively from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_use_a_validator_to_add_expectations_to_the_expectation_suite.md'
+
+<!-- 3.3 Save the Expectation Suite -->
+
+import SaveTheExpectationSuite from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_save_the_expectation_suite.md'
+
 <!-- Part 4: Validate Data -->
 
 Great Expectations can work within many frameworks.  In this guide you will be shown a workflow for using Great Expectations with AWS and cloud storage.  You will configure a local Great Expectations project to store Expectations, Validation Results, and Data Docs in Amazon S3 buckets.  You will further configure Great Expectations to use Pandas and access data stored in another Amazon S3 bucket.
@@ -255,15 +267,17 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 ## Part 3: Create Expectations
 
-### 3.1: Prepare an empty Expectation Suite
+### 3.1: Prepare a Batch Request, Empty Expectation Suite, and Validator
 
-### 3.2: Prepare a Batch Request
+<PrepareABatchRequestAndValidatorForCreatingExpectations />
 
-### 3.3: Use a Validator to add Expectations to the Expectation Suite
+### 3.2: Use a Validator to add Expectations to the Expectation Suite
 
-### 3.4: Save the Expectation Suite
+<CreateExpectationsInteractively />
 
-### Additional Notes on creating Expectations
+### 3.3: Save the Expectation Suite
+
+<SaveTheExpectationSuite />
 
 ## Part 4: Validate Data
 
