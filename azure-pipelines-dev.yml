@@ -264,7 +264,7 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install --constraint constraints-dev.txt ".[test, arrow, postgresql, spark]" pytest-azurepipelines
+              pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
             displayName: 'Install dependencies'
 
           - script: |
