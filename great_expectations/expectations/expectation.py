@@ -1011,23 +1011,25 @@ class Expectation(metaclass=MetaExpectation):
             return
         # what do we want to look like in the end?
         # {"apple": {"pk_1" : [3, 4, 5], "pk_"2: ["three", "four", "five"]}}
-        # find the apple?
+        # find the apple
+        print("so far so goo")
+        res = pd.DataFrame(partial_unexpected_index_list)
         for name in partial_unexpected_list:
             index_dict[name] = {}
         # how do you find out the column?
         # this is the dict that I want
-        dict_to_render = {
-            "giraffe": {"pk_1": [3], "pk_2": ["three"]},
-            "lion": {"pk_1": [4], "pk_2": ["four"]},
-            "zebra": {"pk_1": [5], "pk_2": ["five"]},
-        }
+
+        partial_unexpected_index_df = Expectation._convert_unexpected_indices_to_df(
+            result=partial_unexpected_index_list,
+            unexpected_index_column_names=unexpected_index_column_names,
+        )
+
+        # TODO: and then do rendering stuff to it
 
         if partial_unexpected_counts:
             for unexpected_count_dict in partial_unexpected_counts:
                 value: Optional[Any] = unexpected_count_dict.get("value")
                 count: Optional[int] = unexpected_count_dict.get("count")
-
-                pk_counts = dict_to_render[value]
 
                 if count:
                     total_count += count
@@ -1038,7 +1040,11 @@ class Expectation(metaclass=MetaExpectation):
                     # table_rows.append([value, count])
 
                     for column_name in unexpected_index_column_names:
-                        row_list.append(dict_to_render[value][column_name])
+                        row_list.append(
+                            (
+                                partial_unexpected_index_df[[column_name]].loc[value]
+                            ).item()
+                        )
 
                     table_rows.append(row_list)
 
@@ -1058,7 +1064,28 @@ class Expectation(metaclass=MetaExpectation):
             table_rows = [[row[0]] for row in table_rows]
 
         # breakpoint()
+        # TODO turn this into
         return header_row, table_rows
+
+    @classmethod
+    def _convert_unexpected_indices_to_df(
+        cls, result: List[dict], unexpected_index_column_names: List[str]
+    ) -> pd.DataFrame:
+        """
+
+        Args:
+            result ():
+
+        Returns:
+            pd.DataFrame that
+        """
+        # create dataframe but change them all to a stringj
+        df_version = pd.DataFrame(result, dtype="string")
+        domain_column_name = (
+            set(result[0].keys()).difference(set(unexpected_index_column_names)).pop()
+        )
+        new_df = df_version.groupby(domain_column_name).agg(lambda y: y)
+        return new_df
 
     @classmethod
     def _build_sampled_unexpected_list_table(cls, result_dict):
