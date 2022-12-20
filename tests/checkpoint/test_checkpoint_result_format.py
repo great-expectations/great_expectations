@@ -737,7 +737,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_outp
         "unexpected_index_list"
     )
     assert not first_result_full_list
-
     first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
         "partial_unexpected_index_list"
     ]
@@ -778,46 +777,6 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
     assert index_column_names == ["pk_1"]
 
     first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"].get(
-        "unexpected_index_list"
-    )
-    assert not first_result_full_list
-    first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0][
-        "result"
-    ].get("partial_unexpected_index_list")
-    assert first_result_partial_list == [
-        {"animals": "giraffe", "pk_1": 3},
-        {"animals": "lion", "pk_1": 4},
-        {"animals": "zebra", "pk_1": 5},
-    ]
-
-
-@pytest.mark.integration
-def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_basic_output(
-    in_memory_runtime_context,
-    batch_request_for_pandas_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-):
-    dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "BASIC",
-            "unexpected_index_column_names": ["pk_1"],
-        }
-    }
-    context: DataContext = _add_expectations_and_checkpoint(
-        data_context=in_memory_runtime_context,
-        checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
-        expectations_list=[expectation_config_expect_column_values_to_be_in_set],
-        dict_to_update_checkpoint=dict_to_update_checkpoint,
-    )
-
-    result: CheckpointResult = context.run_checkpoint(
-        checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
-        batch_request=batch_request_for_pandas_unexpected_rows_and_index,
-    )
-    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
-    first_result_full_list = evrs[0]["results"][0]["result"].get(
         "unexpected_index_list"
     )
     assert not first_result_full_list
@@ -889,3 +848,4 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
     )
     for res in result.run_results.values():
         print(res["actions_results"]["update_data_docs"])
+

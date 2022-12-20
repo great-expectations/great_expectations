@@ -151,7 +151,7 @@ def render_evaluation_parameter_string(render_func) -> Callable:
 
         # if expectation configuration has no eval params, then don't look for the values in runtime_configuration
         # isinstance check should be removed upon implementation of RenderedAtomicContent evaluation parameter support
-        if len(current_expectation_params) > 0 and not isinstance(
+        if current_expectation_params and not isinstance(
             rendered_string_template, RenderedAtomicContent
         ):
             runtime_configuration: Optional[dict] = kwargs.get("runtime_configuration")
@@ -159,8 +159,6 @@ def render_evaluation_parameter_string(render_func) -> Callable:
                 eval_params = runtime_configuration.get("evaluation_parameters", {})
                 styling = runtime_configuration.get("styling")
                 for key, val in eval_params.items():
-                    # this needs to be more complicated?
-                    # the possibility that it is a substring?
                     for param in current_expectation_params:
                         # "key in param" condition allows for eval param values to be rendered if arithmetic is present
                         if key == param or key in param:
