@@ -177,7 +177,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     @staticmethod
     def _get_renderer_param_base_model_type(
         name: str,
-    ) -> Type[RendererConfiguration._RendererParamBase]:
+    ) -> Type[BaseModel]:
         return create_model(
             name,
             renderer_schema=(
@@ -193,12 +193,12 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         raw_kwargs: Dict[str, Any]
     ) -> _RendererParamsBase:
         evaluation_parameter_count = 0
-        renderer_params_args: Dict[str, RendererConfiguration._RendererParamBase] = {}
+        renderer_params_args: Dict[str, BaseModel] = {}
         renderer_param_definitions: Dict[str, Any] = {}
         for key, value in raw_kwargs.items():
             evaluation_parameter_name = f"eval_param__{evaluation_parameter_count}"
             renderer_param: Type[
-                RendererConfiguration._RendererParamBase
+                BaseModel
             ] = RendererConfiguration._get_renderer_param_base_model_type(
                 name=evaluation_parameter_name
             )
@@ -207,7 +207,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 ...,
             )
             renderer_params_args[evaluation_parameter_name] = renderer_param(
-                renderer_schema={"type": RendererSchemaType.STRING},
+                schema={"type": RendererSchemaType.STRING},
                 value=f'{key}: {value["$PARAMETER"]}',
             )
             evaluation_parameter_count += 1
@@ -280,11 +280,11 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         for schema_type in schema_types:
             try:
                 renderer_param: Type[
-                    RendererConfiguration._RendererParamBase
+                    BaseModel
                 ] = RendererConfiguration._get_renderer_param_base_model_type(
                     name="try_param"
                 )
-                renderer_param(renderer_schema={"type": schema_type}, value=value)
+                renderer_param(schema={"type": schema_type}, value=value)
                 return schema_type
             except ValidationError:
                 pass
@@ -319,7 +319,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             None
         """
         renderer_param: Type[
-            RendererConfiguration._RendererParamBase
+            BaseModel
         ] = RendererConfiguration._get_renderer_param_base_model_type(name=name)
         renderer_param_definition: Dict[str, Any] = {
             name: (Optional[renderer_param], ...)
@@ -327,7 +327,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
         # As of Nov 30, 2022 there is a bug in autocompletion for pydantic dynamic models
         # See: https://github.com/pydantic/pydantic/issues/3930
-        renderer_params: Type[_RendererParamsBase] = create_model(
+        renderer_params: Type[BaseModel] = create_model(
             "RendererParams",
             **renderer_param_definition,
             __base__=self.params.__class__,
@@ -348,10 +348,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 name: None,
             }
         else:
-            new_renderer_param: RendererConfiguration._RendererParamBase = renderer_param(schema={"type": schema_type}, value=value)  # type: ignore[call-arg]
             renderer_params_args = {
                 **self.params.dict(exclude_none=False),
-                name: new_renderer_param.dict(by_alias=True),
+                name: renderer_param(schema={"type": schema_type}, value=value),
             }
 
         self.params = cast(RendererParams, renderer_params(**renderer_params_args))
