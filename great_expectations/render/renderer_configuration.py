@@ -292,9 +292,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
         Attributes:
             name (str): A name for the attribute to be added to this RendererConfiguration instance.
-            schema_type (list of RendererSchemaType or string): The possible types for the value being substituted.
-                If more than one schema_type is passed, inference based on param value will be performed, and the first
-                schema_type to match the value will be selected.
+            schema_type (list of, or single, RendererSchemaType or string): The possible types for the value being
+                substituted. If more than one schema_type is passed, inference based on param value will be performed,
+                and the first schema_type to match the value will be selected.
                     One of:
                      - array
                      - boolean
