@@ -1791,9 +1791,6 @@ def get_context(
         parameters
 
     """
-    if isinstance(context_root_dir, Path):
-        context_root_dir = str(context_root_dir)
-
     from great_expectations.data_context.data_context import (
         BaseDataContext,
         CloudDataContext,
