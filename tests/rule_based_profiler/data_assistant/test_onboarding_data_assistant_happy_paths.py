@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 from typing import List
 
 import pandas as pd
@@ -336,6 +337,7 @@ def test_sql_happy_path_onboarding_data_assistant(
     assert results.success is False
 
 
+@pytest.mark.skipif(sys.version_info < (3, 8), reason="requires Python3.8")
 @pytest.mark.integration
 @pytest.mark.slow  # 6.54 seconds
 def test_sql_happy_path_onboarding_data_assistant_null_column_quantiles_metric_values(
