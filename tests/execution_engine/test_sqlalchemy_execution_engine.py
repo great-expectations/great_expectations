@@ -904,12 +904,14 @@ def test_get_batch_data_and_markers_using_query(sqlite_view_engine, test_df):
     test_df.to_sql("test_table_0", con=my_execution_engine.engine)
 
     query: str = "SELECT * FROM test_table_0"
-    batch_data, batch_markers = my_execution_engine.get_batch_data_and_markers(
-        batch_spec=RuntimeQueryBatchSpec(
+    batch_spec = RuntimeQueryBatchSpec(
             query=query,
         )
+    batch_data, batch_markers = my_execution_engine.get_batch_data_and_markers(
+        batch_spec=batch_spec
     )
 
+    assert batch_spec.query == query
     assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 2
     assert batch_markers.get("ge_load_time") is not None
 
