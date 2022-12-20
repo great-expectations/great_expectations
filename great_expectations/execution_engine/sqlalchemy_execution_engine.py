@@ -1018,6 +1018,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
                 if self.dialect_name == GXSqlDialect.SQLITE:
                     if not isinstance(self._engine_backup, sa.engine.base.Connection):
+                        assert (
+                            self._engine_backup is not None
+                        ), f'Using "{self.__class__.__name__}" metric with "{GXSqlDialect.SQLITE.value}" requires ability to exercise "sqlite3" "create_function()" method.'
                         raw_connection = self._engine_backup.raw_connection()
                         raw_connection.create_function(
                             "sqrt", 1, lambda x: math.sqrt(x)
