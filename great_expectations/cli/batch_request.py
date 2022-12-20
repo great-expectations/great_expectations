@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Union
 
 import click
 from typing_extensions import Final
@@ -99,7 +99,7 @@ def get_batch_request(
 
     batch_request.update(
         {
-            "data_asset_name": data_asset_name,  # type: ignore[arg-type,dict-item] # could be none
+            "data_asset_name": data_asset_name,  # type: ignore[dict-item] # could be none
         }
     )
 
