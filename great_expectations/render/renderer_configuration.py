@@ -272,7 +272,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     def _get_condition_params(
         row_condition_str: str,
     ) -> Dict[str, BaseModel]:
-        row_condition_str: str = RendererConfiguration._parse_row_condition_str(
+        row_condition_str = RendererConfiguration._parse_row_condition_str(
             row_condition_str=row_condition_str
         )
         row_conditions_list: List[
@@ -354,7 +354,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
     @staticmethod
     def _get_row_condition_string(row_condition_str: str) -> str:
-        row_condition_str: str = RendererConfiguration._parse_row_condition_str(
+        row_condition_str = RendererConfiguration._parse_row_condition_str(
             row_condition_str=row_condition_str
         )
         row_conditions_list: List[
