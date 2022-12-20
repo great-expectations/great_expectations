@@ -41,7 +41,6 @@ class AtomicDiagnosticRendererType(str, Enum):
 
     FAILED = ".".join([AtomicRendererType.DIAGNOSTIC, "failed"])
     OBSERVED_VALUE = ".".join([AtomicRendererType.DIAGNOSTIC, "observed_value"])
-    UNEXPECTED_INDICES = ".".join([AtomicRendererType.DIAGNOSTIC, "unexpected_indices"])
 
     def __str__(self):
         return self.value
