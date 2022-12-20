@@ -1015,7 +1015,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     sa_query_object = sa.select(query["select"]).select_from(selectable)
 
                 logger.debug(f"Attempting query {str(sa_query_object)}")
-                if self.engine.dialect.name.lower() == GXSqlDialect.SQLITE:
+                if (
+                    self.engine.dialect.name.lower() == GXSqlDialect.SQLITE
+                    and self._engine_backup is not None
+                ):
                     raw_connection = self._engine_backup.raw_connection()
                     raw_connection.create_function("sqrt", 1, lambda x: math.sqrt(x))
                     raw_connection.create_function(
