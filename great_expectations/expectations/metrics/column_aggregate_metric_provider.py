@@ -157,9 +157,6 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 )
 
                 sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
-                sqlalchemy_engine_backup: sa.engine.Engine = (
-                    execution_engine._engine_backup
-                )
 
                 dialect = sqlalchemy_engine.dialect
                 metric_aggregate = metric_fn(
@@ -170,7 +167,6 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                     _table=selectable,
                     _column_name=column_name,
                     _sqlalchemy_engine=sqlalchemy_engine,
-                    _sqlalchemy_engine_backup=sqlalchemy_engine_backup,
                     _metrics=metrics,
                 )
                 return metric_aggregate, compute_domain_kwargs, accessor_domain_kwargs

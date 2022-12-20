@@ -1,6 +1,4 @@
-import hashlib
 import logging
-import math
 from typing import Optional
 
 from great_expectations.core import ExpectationConfiguration
@@ -46,21 +44,6 @@ class ColumnStandardDeviation(ColumnAggregateMetricProvider):
         if _dialect.name.lower() == GXSqlDialect.MSSQL:
             standard_deviation = sa.func.stdev(column)
         elif _dialect.name.lower() == GXSqlDialect.SQLITE:
-            _sqlalchemy_engine_backup = kwargs.get("_sqlalchemy_engine_backup")
-            if not isinstance(_sqlalchemy_engine_backup, sa.engine.base.Connection):
-                assert (
-                    _sqlalchemy_engine_backup is not None
-                ), f'Using "{cls.__name__}" metric with "{GXSqlDialect.SQLITE.value}" requires ability to exercise "sqlite3" "create_function()" method.'
-                raw_connection = _sqlalchemy_engine_backup.raw_connection()
-                raw_connection.create_function("sqrt", 1, lambda x: math.sqrt(x))
-                raw_connection.create_function(
-                    "md5",
-                    2,
-                    lambda x, d: hashlib.md5(str(x).encode("utf-8")).hexdigest()[
-                        -1 * d :
-                    ],
-                )
-
             mean = _metrics["column.mean"]
             nonnull_row_count = _metrics["column_values.null.unexpected_count"]
             standard_deviation = sa.func.sqrt(
