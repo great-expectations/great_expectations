@@ -52,6 +52,7 @@ import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
+from typing_extensions import TypeGuard
 
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
@@ -67,11 +68,6 @@ if TYPE_CHECKING:
         AbstractDataContext,
     )
     from great_expectations.data_context.types.base import DataContextConfig
-
-try:
-    from typing import TypeGuard  # type: ignore[attr-defined]
-except ImportError:
-    from typing_extensions import TypeGuard
 
 try:
     import black
