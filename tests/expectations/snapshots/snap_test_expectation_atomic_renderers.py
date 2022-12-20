@@ -1040,10 +1040,7 @@ snapshots["test_atomic_prescriptive_summary_expect_table_row_count_to_be_between
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
-            "max_value": {"schema": {"type": "number"}, "value": None},
             "min_value": {"schema": {"type": "number"}, "value": 1},
-            "strict_max": {"schema": {"type": "boolean"}, "value": None},
-            "strict_min": {"schema": {"type": "boolean"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "Must have greater than or equal to $min_value rows.",
