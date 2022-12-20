@@ -905,8 +905,8 @@ def test_get_batch_data_and_markers_using_query(sqlite_view_engine, test_df):
 
     query: str = "SELECT * FROM test_table_0"
     batch_spec = RuntimeQueryBatchSpec(
-            query=query,
-        )
+        query=query,
+    )
     batch_data, batch_markers = my_execution_engine.get_batch_data_and_markers(
         batch_spec=batch_spec
     )
