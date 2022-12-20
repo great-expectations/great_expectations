@@ -163,7 +163,11 @@ def test_pd_unexpected_index_list_metric_with_id_pk(
         metrics_to_resolve=(unexpected_index_list,), metrics=metrics
     )
     for (key, val) in results.items():
-        assert val == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+        assert val == [
+            {"animals": "giraffe", "pk_1": 3},
+            {"animals": "lion", "pk_1": 4},
+            {"animals": "zebra", "pk_1": 5},
+        ]
 
 
 @pytest.mark.unit
@@ -193,7 +197,11 @@ def test_sa_unexpected_index_list_metric_with_id_pk(
         metrics_to_resolve=(unexpected_index_list,), metrics=metrics
     )
     for (key, val) in results.items():
-        assert val == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+        assert val == [
+            {"animals": "giraffe", "pk_1": 3},
+            {"animals": "lion", "pk_1": 4},
+            {"animals": "zebra", "pk_1": 5},
+        ]
 
 
 @pytest.mark.unit
