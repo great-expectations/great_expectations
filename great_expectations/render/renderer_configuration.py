@@ -110,6 +110,8 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     table: List[List[Dict[str, Optional[Any]]]] = Field([], allow_mutation=True)
     graph: dict = Field({}, allow_mutation=True)
     _raw_kwargs: dict = Field({}, allow_mutation=False)
+    _row_condition: str = Field("", allow_mutation=False)
+    _condition_parser: str = Field("", allow_mutation=False)
 
     class Config:
         validate_assignment = True
@@ -202,10 +204,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     @staticmethod
     def _get_evaluation_parameter_params_from_raw_kwargs(
         raw_kwargs: Dict[str, Any]
-    ) -> _RendererParamsBase:
+    ) -> Dict[str, BaseModel]:
         evaluation_parameter_count = 0
         renderer_params_args: Dict[str, BaseModel] = {}
-        renderer_param_definitions: Dict[str, Any] = {}
         for key, value in raw_kwargs.items():
             evaluation_parameter_name = f"eval_param__{evaluation_parameter_count}"
             renderer_param: Type[
@@ -213,22 +214,13 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             ] = RendererConfiguration._get_renderer_param_base_model_type(
                 name=evaluation_parameter_name
             )
-            renderer_param_definitions[evaluation_parameter_name] = (
-                Optional[renderer_param],
-                ...,
-            )
             renderer_params_args[evaluation_parameter_name] = renderer_param(
                 schema={"type": RendererSchemaType.STRING},
                 value=f'{key}: {value["$PARAMETER"]}',
             )
             evaluation_parameter_count += 1
 
-        renderer_params: Type[_RendererParamsBase] = create_model(
-            "RendererParams",
-            **renderer_param_definitions,
-            __base__=_RendererParamsBase,
-        )
-        return renderer_params(**renderer_params_args)
+        return renderer_params_args
 
     @root_validator()
     def _validate_and_set_renderer_attrs(cls, values: dict) -> dict:
@@ -251,12 +243,16 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                     for key, value in raw_configuration.kwargs.items()
                     if (key, value) not in values["kwargs"].items()
                 }
-                values[
-                    "params"
+                renderer_params_args: Dict[
+                    str, BaseModel
                 ] = RendererConfiguration._get_evaluation_parameter_params_from_raw_kwargs(
                     raw_kwargs=values["_raw_kwargs"]
                 )
-
+                values["_params"] = (
+                    {**values["_params"], **renderer_params_args}
+                    if "_params" in values and values["_params"]
+                    else renderer_params_args
+                )
         else:
             values["expectation_type"] = values["configuration"].expectation_type
             values["kwargs"] = values["configuration"].kwargs
@@ -269,6 +265,65 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 False
                 if values["runtime_configuration"].get("include_column_name") is False
                 else True
+            )
+        return values
+
+    @staticmethod
+    def _get_condition_params(
+        row_condition: str,
+        condition_parser: str,
+    ) -> Dict[str, BaseModel]:
+        renderer_params_args: Dict[str, BaseModel] = {}
+        row_condition_renderer_param: Type[
+            BaseModel
+        ] = RendererConfiguration._get_renderer_param_base_model_type(
+            name="row_condition"
+        )
+        renderer_params_args["row_condition"] = row_condition_renderer_param(
+            schema={"type", RendererSchemaType.STRING}, value=row_condition
+        )
+        condition_parser_renderer_param: Type[
+            BaseModel
+        ] = RendererConfiguration._get_renderer_param_base_model_type(
+            name="condition_parser"
+        )
+        renderer_params_args["condition_parser"] = condition_parser_renderer_param(
+            schema={"type", RendererSchemaType.STRING}, value=condition_parser
+        )
+        return renderer_params_args
+
+    @root_validator()
+    def _validate_for_row_condition(cls, values: dict) -> dict:
+        kwargs: Dict[str, Any]
+        if (
+            "result" in values
+            and values["result"] is not None
+            and values["result"].expectation_config is not None
+        ):
+            kwargs = values["result"].expectation_config.kwargs
+        else:
+            kwargs = values["configuration"].kwargs
+
+        values["_row_condition"] = kwargs.get("row_condition", "")
+        values["_condition_parser"] = kwargs.get("condition_parser", "")
+        if values["_row_condition"] and values["_condition_parser"]:
+            renderer_params_args: Dict[
+                str, BaseModel
+            ] = RendererConfiguration._get_condition_params(
+                row_condition=values["_row_condition"],
+                condition_parser=values["_condition_parser"],
+            )
+            values["_params"] = (
+                {**values["_params"], **renderer_params_args}
+                if "_params" in values and values["_params"]
+                else renderer_params_args
+            )
+        elif (values["_row_condition"] and not values["_condition_parser"]) or (
+            not values["_row_condition"] and values["_condition_parser"]
+        ):
+            raise RendererConfigurationError(
+                "Only one of row_condition and condition_parser found in Expectation ",
+                "kwargs. For conditional Expectations both fields are required.",
             )
         return values
 
