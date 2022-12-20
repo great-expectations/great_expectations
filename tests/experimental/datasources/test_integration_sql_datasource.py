@@ -1,6 +1,6 @@
 import os
-from typing import Dict, Any
-
+import pathlib
+from typing import Any, Dict
 
 import pytest
 
@@ -180,12 +180,15 @@ def test_run_checkpoint_and_data_doc(empty_data_context, include_rendered_conten
 @pytest.mark.slow
 def test_run_data_assistant_and_checkpoint(empty_data_context):
     """Test using data assistants to create expectation suite and run checkpoint"""
+    path = pathlib.Path(
+        "../../test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db"
+    )
     (
         data_assistant_result,
         checkpoint_result,
     ) = configure_and_run_data_assistant_checkpoint(
         context=empty_data_context,
-        sqlite_db_file_relative_path="../../test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db",
+        sqlite_db_file_relative_path=str(path),
         table_name="yellow_tripdata_sample_2019_01",
         date_splitter_column="pickup_datetime",
         batch_request_options={"year": 2019, "month": 1},
@@ -218,12 +221,15 @@ pytest.mark.integration
 @pytest.mark.slow
 def test_run_multibatch_data_assistant_and_checkpoint(empty_data_context):
     """Test using data assistants to create expectation suite and run checkpoint"""
+    db_path = pathlib.Path(
+        "../../test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata_sample_2020_all_months_combined.db"
+    )
     (
         data_assistant_result,
         checkpoint_result,
     ) = configure_and_run_data_assistant_checkpoint(
         context=empty_data_context,
-        sqlite_db_file_relative_path="../../test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata_sample_2020_all_months_combined.db",
+        sqlite_db_file_relative_path=str(db_path),
         table_name="yellow_tripdata_sample_2020",
         date_splitter_column="pickup_datetime",
         batch_request_options={"year": 2020},
