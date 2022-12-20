@@ -329,18 +329,16 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 schema_types=schema_type, value=value
             )
 
-        renderer_params_definition: Dict[str, Optional[Any]]
+        renderer_params_args: Dict[str, Optional[Any]]
         if value is None:
-            renderer_params_definition = {
+            renderer_params_args = {
                 **self.params.dict(exclude_none=False),
                 name: None,
             }
         else:
-            renderer_params_definition = {
+            renderer_params_args = {
                 **self.params.dict(exclude_none=False),
                 name: renderer_param(schema={"type": schema_type}, value=value),
             }
 
-        self.params = cast(
-            RendererParams, renderer_params(**renderer_params_definition)
-        )
+        self.params = cast(RendererParams, renderer_params(**renderer_params_args))
