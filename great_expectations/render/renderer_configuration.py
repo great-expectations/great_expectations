@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from datetime import datetime
 from enum import Enum
 from numbers import Number
@@ -111,7 +112,6 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     graph: dict = Field({}, allow_mutation=True)
     _raw_kwargs: dict = Field({}, allow_mutation=False)
     _row_condition: str = Field("", allow_mutation=False)
-    _condition_parser: str = Field("", allow_mutation=False)
 
     class Config:
         validate_assignment = True
@@ -128,7 +128,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         return values
 
     def __init__(self, **values) -> None:
-        values["params"] = _RendererParamsBase()
+        values["params"] = values.get("_params") or _RendererParamsBase()
         super().__init__(**values)
 
     class _RendererParamBase(BaseModel):
@@ -270,26 +270,26 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
     @staticmethod
     def _get_condition_params(
-        row_condition: str,
-        condition_parser: str,
+        row_condition_str: str,
     ) -> Dict[str, BaseModel]:
+        row_condition_str: str = RendererConfiguration._parse_row_condition_str(
+            row_condition_str=row_condition_str
+        )
+        row_conditions_list: List[
+            str
+        ] = RendererConfiguration._get_row_conditions_list_from_row_condition_str(
+            row_condition_str=row_condition_str
+        )
         renderer_params_args: Dict[str, BaseModel] = {}
-        row_condition_renderer_param: Type[
-            BaseModel
-        ] = RendererConfiguration._get_renderer_param_base_model_type(
-            name="row_condition"
-        )
-        renderer_params_args["row_condition"] = row_condition_renderer_param(
-            schema={"type", RendererSchemaType.STRING}, value=row_condition
-        )
-        condition_parser_renderer_param: Type[
-            BaseModel
-        ] = RendererConfiguration._get_renderer_param_base_model_type(
-            name="condition_parser"
-        )
-        renderer_params_args["condition_parser"] = condition_parser_renderer_param(
-            schema={"type", RendererSchemaType.STRING}, value=condition_parser
-        )
+        for idx, condition in enumerate(row_conditions_list):
+            name = f"row_condition__{str(idx)}"
+            value = condition.replace(" NOT ", " not ")
+            renderer_param: Type[
+                BaseModel
+            ] = RendererConfiguration._get_renderer_param_base_model_type(name=name)
+            renderer_params_args[name] = renderer_param(
+                schema={"type", RendererSchemaType.STRING}, value=value
+            )
         return renderer_params_args
 
     @root_validator()
@@ -305,30 +305,83 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             kwargs = values["configuration"].kwargs
 
         values["_row_condition"] = kwargs.get("row_condition", "")
-        values["_condition_parser"] = kwargs.get("condition_parser", "")
-        if values["_row_condition"] and values["_condition_parser"]:
+        if values["_row_condition"]:
             renderer_params_args: Dict[
                 str, BaseModel
             ] = RendererConfiguration._get_condition_params(
-                row_condition=values["_row_condition"],
-                condition_parser=values["_condition_parser"],
+                row_condition_str=values["_row_condition"],
             )
             values["_params"] = (
                 {**values["_params"], **renderer_params_args}
                 if "_params" in values and values["_params"]
                 else renderer_params_args
             )
-        elif (values["_row_condition"] and not values["_condition_parser"]) or (
-            not values["_row_condition"] and values["_condition_parser"]
-        ):
-            raise RendererConfigurationError(
-                "Only one of row_condition and condition_parser found in Expectation ",
-                "kwargs. For conditional Expectations both fields are required.",
-            )
         return values
+
+    @staticmethod
+    def _get_row_conditions_list_from_row_condition_str(
+        row_condition_str: str,
+    ) -> List[str]:
+        # divide the whole condition into smaller parts
+        row_conditions_list = re.split(r"AND|OR|NOT(?! in)|\(|\)", row_condition_str)
+        row_conditions_list = [
+            condition.strip() for condition in row_conditions_list if condition.strip()
+        ]
+        return row_conditions_list
+
+    @staticmethod
+    def _parse_row_condition_str(row_condition_str: str) -> str:
+        if not row_condition_str:
+            row_condition_str = "True"
+
+        row_condition_str = (
+            row_condition_str.replace("&", " AND ")
+            .replace(" and ", " AND ")
+            .replace("|", " OR ")
+            .replace(" or ", " OR ")
+            .replace("~", " NOT ")
+            .replace(" not ", " NOT ")
+        )
+        row_condition_str = " ".join(row_condition_str.split())
+
+        # replace tuples of values by lists of values
+        tuples_list = re.findall(r"\([^()]*,[^()]*\)", row_condition_str)
+        for value_tuple in tuples_list:
+            value_list = value_tuple.replace("(", "[").replace(")", "]")
+            row_condition_str = row_condition_str.replace(value_tuple, value_list)
+
+        return row_condition_str
+
+    @staticmethod
+    def _get_row_condition_string(row_condition_str: str) -> str:
+        row_condition_str: str = RendererConfiguration._parse_row_condition_str(
+            row_condition_str=row_condition_str
+        )
+        row_conditions_list: List[
+            str
+        ] = RendererConfiguration._get_row_conditions_list_from_row_condition_str(
+            row_condition_str=row_condition_str
+        )
+        for idx, condition in enumerate(row_conditions_list):
+            row_condition_str = row_condition_str.replace(
+                condition, f"$row_condition__{str(idx)}"
+            )
+        row_condition_str = row_condition_str.lower()
+        return f"if {row_condition_str}"
 
     @validator("template_str")
     def _set_template_str(cls, v: str, values: dict) -> str:
+        if (
+            "_row_condition" in values
+            and values["_row_condition"]
+            and "_condition_parser" in values
+            and values["_condition_parser"]
+        ):
+            row_condition_str: str = RendererConfiguration._get_row_condition_string(
+                row_condition_str=values["_row_condition"]
+            )
+            v = f"{row_condition_str}, then {v}"
+
         if "_raw_kwargs" in values and values["_raw_kwargs"]:
             v += "  "
             for evaluation_parameter_count in range(len(values["_raw_kwargs"])):
