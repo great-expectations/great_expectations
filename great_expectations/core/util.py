@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import decimal
@@ -7,14 +9,25 @@ import re
 import sys
 import uuid
 from collections import OrderedDict
-from types import ModuleType
-from typing import Any, Callable, Dict, List, Mapping, MutableMapping, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    MutableMapping,
+    Optional,
+    Tuple,
+    Union,
+)
 from urllib.parse import urlparse
 
 import dateutil.parser
 import numpy as np
 import pandas as pd
 from IPython import get_ipython
+from typing_extensions import TypeAlias
 
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.core.run_identifier import RunIdentifier
@@ -70,13 +83,20 @@ SCHEMAS = {
     },
 }
 
-pyspark: Optional[ModuleType]
 try:
     import pyspark
+    from pyspark.sql import SparkSession
+
 except ImportError:
+    pyspark = None  # type: ignore[assignment]
+    SparkSession = None  # type: ignore[assignment, misc]
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
+
+
+if TYPE_CHECKING:
+    from pyspark.sql import SparkSession  # noqa: F401
 
 
 _SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
@@ -161,7 +181,10 @@ def determine_progress_bar_method_by_environment() -> Callable:
     return tqdm
 
 
-def convert_to_json_serializable(data) -> dict:  # noqa: C901 - complexity 28
+JSONValues: TypeAlias = Union[dict, list, str, int, float, bool, None]
+
+
+def convert_to_json_serializable(data) -> JSONValues:  # noqa: C901 - complexity 28
     """
     Helper function to convert an object to one that is json serializable
 
@@ -424,7 +447,7 @@ def substitute_all_strftime_format_strings(
     elements using either the provided datetime_obj or the current datetime
     """
 
-    datetime_obj: datetime.datetime = datetime_obj or datetime.datetime.now()
+    datetime_obj = datetime_obj or datetime.datetime.now()
     if isinstance(data, dict) or isinstance(data, OrderedDict):
         return {
             k: substitute_all_strftime_format_strings(v, datetime_obj=datetime_obj)
@@ -658,30 +681,21 @@ class DBFSPath:
             raise ValueError("Path should start with either /dbfs or dbfs:")
 
 
-def sniff_s3_compression(s3_url: S3Url) -> str:
+def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
     """Attempts to get read_csv compression from s3_url"""
-    return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix)
+    return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix) if s3_url.suffix else None
 
 
 # noinspection PyPep8Naming
 def get_or_create_spark_application(
     spark_config: Optional[Dict[str, str]] = None,
     force_reuse_spark_context: bool = False,
-):
+) -> Any:
     # Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
     # Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
     # Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
     # This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
     # ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
-    try:
-        from pyspark.sql import SparkSession
-    except ImportError:
-        SparkSession = None
-        # TODO: review logging more detail here
-        logger.debug(
-            "Unable to load pyspark; install optional spark dependency for support."
-        )
-
     if spark_config is None:
         spark_config = {}
     else:
@@ -735,14 +749,6 @@ def get_or_create_spark_session(
     # Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
     # This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
     # ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
-    try:
-        from pyspark.sql import SparkSession
-    except ImportError:
-        SparkSession = None
-        # TODO: review logging more detail here
-        logger.debug(
-            "Unable to load pyspark; install optional spark dependency for support."
-        )
 
     spark_session: Optional[SparkSession]
     try:
@@ -776,7 +782,7 @@ def get_or_create_spark_session(
 
 
 def spark_restart_required(
-    current_spark_config: List[tuple], desired_spark_config: dict
+    current_spark_config: List[Tuple[str, str]], desired_spark_config: dict
 ) -> bool:
 
     # we can't change spark context config values within databricks runtimes
