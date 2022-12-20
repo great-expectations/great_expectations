@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.expectations.expectation import Expectation
     from great_expectations.expectations.metrics.metric_provider import MetricProvider
+    from great_expectations.render import RenderedAtomicContent, RenderedContent
 
 logger = logging.getLogger(__name__)
 
@@ -54,13 +55,13 @@ _registered_renderers = {}
 
 class RendererImpl(NamedTuple):
     expectation: str
-    renderer: Callable
+    renderer: Callable[..., Union[RenderedAtomicContent, RenderedContent]]
 
 
 def register_renderer(
     object_name: str,
     parent_class: Type[Union[Expectation, Metric]],
-    renderer_fn: Callable,
+    renderer_fn: Callable[..., Union[RenderedAtomicContent, RenderedContent]],
 ):
     # noinspection PyUnresolvedReferences
     renderer_name = renderer_fn._renderer_type

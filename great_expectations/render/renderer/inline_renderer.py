@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, List, Optional, Union
+from typing import TYPE_CHECKING, Callable, List, Optional, Union
 
 from typing_extensions import TypedDict
 
@@ -20,6 +20,9 @@ from great_expectations.render import (
 )
 from great_expectations.render.exceptions import InlineRendererError
 from great_expectations.render.renderer.renderer import Renderer
+
+if TYPE_CHECKING:
+    from great_expectations.render import RenderedContent
 
 logger = logging.getLogger(__name__)
 
@@ -160,12 +163,13 @@ class InlineRenderer(Renderer):
         ],
         expectation_type: str,
     ) -> RenderedAtomicContent:
-        renderer_rendered_content: RenderedAtomicContent
         renderer_impl: Optional[RendererImpl] = get_renderer_impl(
             object_name=expectation_type, renderer_type=renderer_name
         )
         if renderer_impl:
-            renderer_fn: Callable = renderer_impl.renderer
+            renderer_fn: Callable[
+                ..., Union[RenderedAtomicContent, RenderedContent]
+            ] = renderer_impl.renderer
             if isinstance(render_object, ExpectationConfiguration):
                 renderer_rendered_content = renderer_fn(configuration=render_object)
             else:
@@ -174,6 +178,10 @@ class InlineRenderer(Renderer):
             raise InlineRendererError(
                 f"renderer_name: {renderer_name} was not found in the registry for expectation_type: {expectation_type}"
             )
+
+        assert isinstance(
+            renderer_rendered_content, RenderedAtomicContent
+        ), f"The renderer: {renderer_name} for expectation: {expectation_type} should return RenderedAtomicContent."
 
         return renderer_rendered_content
 
