@@ -50,6 +50,12 @@ class RendererSchemaType(str, Enum):
 
 
 class _RendererParamsBase(BaseModel):
+    """
+    _RendererParamsBase is the base for the generic type RendererParams. It's attributes change as
+        RendererConfiguration.add_param() dynamically adds them. It also overrides the default pydantic dict behavior
+        due to the use of the reserved word schema in its attributes.
+    """
+
     class Config:
         validate_assignment = True
         arbitrary_types_allowed = True
@@ -124,6 +130,11 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         super().__init__(**values)
 
     class _RendererParamBase(BaseModel):
+        """
+        _RendererParamBase is the base for a param that is added to RendererParams. It contains the validation logic,
+            but it is dynamically renamed in order for the RendererParams attribute to have the same name as the param.
+        """
+
         renderer_schema: Dict[str, RendererSchemaType] = Field(
             ..., allow_mutation=False
         )
