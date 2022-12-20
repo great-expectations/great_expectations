@@ -467,7 +467,7 @@ data_connectors:
       {{table_name}}:
         class_name: Asset
         schema_name: {{schema_name}}
-"""'''
+"""'''  # noqa: F541 # need these placeholders
 
         return yaml_str
 

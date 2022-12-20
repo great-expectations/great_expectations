@@ -132,7 +132,7 @@ validations:
                 sample_yaml_str,
                 lint=True,
             )
-        except:
+        except Exception:
             # For any error
             self.add_markdown_cell(
                 "Sorry, we were unable to create a sample configuration. Perhaps you don't have a Datasource or Expectation Suite configured."

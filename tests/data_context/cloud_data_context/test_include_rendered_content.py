@@ -98,7 +98,6 @@ def test_cloud_backed_data_context_save_expectation_suite_include_rendered_conte
                                         }
                                     },
                                     "template": "Must have exactly $value rows.",
-                                    "header": None,
                                 },
                                 "name": "atomic.prescriptive.summary",
                                 "value_type": "StringValueType",
