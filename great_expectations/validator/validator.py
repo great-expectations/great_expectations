@@ -577,7 +577,6 @@ class Validator:
 
             if self._include_rendered_content:
                 validation_result.render()
-                validation_result.expectation_config.render()
 
             return validation_result
 
@@ -1787,7 +1786,6 @@ class Validator:
             if self._include_rendered_content:
                 for validation_result in results:
                     validation_result.render()
-                    validation_result.expectation_config.render()
             statistics = self._calc_validation_statistics(results)
 
             if only_return_failures:
