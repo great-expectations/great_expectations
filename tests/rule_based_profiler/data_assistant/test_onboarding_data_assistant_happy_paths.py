@@ -408,6 +408,7 @@ def test_sql_happy_path_onboarding_data_assistant_mixed_decimal_float_column_uni
                 "..",
                 "test_sets",
                 "taxi_yellow_tripdata_samples",
+                "samples_2021",
                 "yellow_tripdata_sample_2021.csv",
             ),
         )
