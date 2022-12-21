@@ -4,4 +4,4 @@ from great_expectations.experimental.datasources.sql_datasource import SQLDataso
 
 
 class PostgresDatasource(SQLDatasource):
-    type: Literal["postgres"] = "postgres"
+    type: Literal["postgres"] = "postgres"  # type: ignore[assignment]
