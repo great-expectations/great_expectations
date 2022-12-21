@@ -44,7 +44,7 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
 
     metric_name = "column.counts_per_days_custom"
 
-    ≈ = {"tags": ["query-based"], "contributors": ["@itaise", "@hadasm"]}
+    library_metadata = {"tags": ["query-based"], "contributors": ["@itaise", "@hadasm"]}
 
 
     @metric_value(
