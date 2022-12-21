@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import os
-import pathlib
-from typing import TYPE_CHECKING, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Optional, Tuple
 
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
