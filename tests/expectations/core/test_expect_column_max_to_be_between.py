@@ -46,5 +46,5 @@ def test_expect_column_max_to_be_between_warn_parse_strings_as_datetimes(
             parse_strings_as_datetimes=True,
         )
     assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
-        record.list[0].message
+        record.list[1].message
     )

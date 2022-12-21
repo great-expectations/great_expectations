@@ -49,7 +49,6 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
     GXCloudConfig,
-    InMemoryStoreBackendDefaults,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -7220,4 +7219,22 @@ def datasource_config_with_names() -> DatasourceConfig:
                 },
             }
         },
+    )
+
+
+@pytest.fixture
+def pandas_animals_dataframe_for_unexpected_rows_and_index():
+    return pd.DataFrame(
+        {
+            "pk_1": [0, 1, 2, 3, 4, 5],
+            "pk_2": ["zero", "one", "two", "three", "four", "five"],
+            "animals": [
+                "cat",
+                "fish",
+                "dog",
+                "giraffe",
+                "lion",
+                "zebra",
+            ],
+        }
     )

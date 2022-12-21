@@ -54,12 +54,12 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
 
         value: MetricValue
         if isinstance(values, (list, tuple)):
-            if len(values) > 0:
-                values_iterator: Iterator
-                # Components of different lengths cannot be packaged into "numpy.ndarray" type (due to undefined shape).
-                if all(isinstance(value, (list, tuple)) for value in values):
-                    values = deep_filter_properties_iterable(properties=values)
-                    if len(values) > 0:
+            if values is not None and len(values) > 0:
+                values = deep_filter_properties_iterable(properties=values)
+                if values:
+                    values_iterator: Iterator
+                    # Components of different lengths cannot be packaged into "numpy.ndarray" type (due to undefined shape).
+                    if all(isinstance(value, (list, tuple)) for value in values):
                         values_iterator = iter(values)
                         first_value_length: int = len(next(values_iterator))
                         current_value: Sized[Any]
@@ -69,9 +69,7 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
                         ):
                             return True
 
-                # Components of different types cannot be packaged into "numpy.ndarray" type (due to type mismatch).
-                values = deep_filter_properties_iterable(properties=values)
-                if len(values) > 0:
+                    # Components of different types cannot be packaged into "numpy.ndarray" type (due to type mismatch).
                     values_iterator = iter(values)
                     first_value_type: type = type(next(values_iterator))
                     current_type: type

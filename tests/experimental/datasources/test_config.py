@@ -1,18 +1,23 @@
 import functools
 import json
 import pathlib
+from pprint import pformat as pf
 from typing import Callable, List
 
+import pydantic
 import pytest
 
 from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Datasource
+from great_expectations.experimental.datasources.postgres_datasource import (
+    ColumnSplitter,
+    SqlYearMonthSplitter,
+    TableAsset,
+)
 
 try:
-    from devtools import PrettyFormat as pf
     from devtools import debug as pp
-except ImportError:
-    from pprint import pformat as pf  # type: ignore[assignment]
+except ImportError:  # type: ignore[assignment]
     from pprint import pprint as pp  # type: ignore[assignment]
 
 p = pytest.param
@@ -35,14 +40,14 @@ PG_COMPLEX_CONFIG_DICT = {
                     "table_name": "my_table",
                     "type": "table",
                 },
-                "with_splitters": {
+                "with_splitter": {
                     "column_splitter": {
                         "column_name": "my_column",
-                        "method_name": "foobar_it",
-                        "name": "my_splitter",
-                        "param_names": ["alpha", "bravo"],
+                        "method_name": "split_on_year_and_month",
+                        "name": "y_m_splitter",
+                        "param_names": ["year", "month"],
                     },
-                    "name": "with_splitters",
+                    "name": "with_splitter",
                     "table_name": "another_table",
                     "type": "table",
                 },
@@ -97,6 +102,107 @@ def test_load_config(inject_engine_lookup_double, load_method: Callable, input_)
     assert loaded.datasources
     for datasource in loaded.datasources.values():
         assert isinstance(datasource, Datasource)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ["bad_asset_config", "expected_error_loc", "expected_msg"],
+    [
+        p(
+            {"name": "missing `table_name`", "type": "table"},
+            ("datasources", "assets", "table_name"),
+            "field required",
+            id="missing `table_name`",
+        ),
+        p(
+            {
+                "name": "unknown splitter",
+                "type": "table",
+                "table_name": "pool",
+                "column_splitter": {
+                    "method_name": "not_a_valid_method_name",
+                    "column_name": "foo",
+                },
+            },
+            ("datasources", "assets", "column_splitter", "method_name"),
+            "unexpected value; permitted: 'split_on_year_and_month'",
+            id="unknown splitter method",
+        ),
+        p(
+            {
+                "name": "bad splitter param",
+                "type": "table",
+                "table_name": "pool",
+                "column_splitter": {
+                    "method_name": "split_on_year_and_month",
+                    "column_name": "foo",
+                    "param_names": ["year", "month", "INVALID"],
+                },
+            },
+            ("datasources", "assets", "column_splitter", "param_names", 2),
+            "unexpected value; permitted: 'year', 'month'",
+            id="invalid splitter param_name",
+        ),
+    ],
+)
+def test_catch_bad_asset_configs(
+    inject_engine_lookup_double,
+    bad_asset_config: dict,
+    expected_error_loc: tuple,
+    expected_msg: str,
+):
+    config: dict = {
+        "my_test_ds": {
+            "type": "postgres",
+            "name": "my_test_ds",
+            "connection_string": "my_db://",
+            "assets": {bad_asset_config["name"]: bad_asset_config},
+        }
+    }
+    print(f"  Config\n{pf(config)}\n")
+
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        GxConfig.parse_obj({"datasources": config})
+
+    print(f"\n{exc_info.typename}:{exc_info.value}")
+
+    all_errors = exc_info.value.errors()
+    assert len(all_errors) == 1, "Expected 1 error"
+    assert expected_error_loc == all_errors[0]["loc"]
+    assert expected_msg == all_errors[0]["msg"]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ["bad_column_kwargs", "expected_error_type", "expected_msg"],
+    [
+        (
+            {
+                "column_name": "flavor",
+                "method_name": "NOT_VALID",
+                "param_names": ["cherry", "strawberry"],
+            },
+            "value_error",
+            "unexpected value; permitted:",
+        )
+    ],
+)
+def test_general_column_splitter_errors(
+    inject_engine_lookup_double,
+    bad_column_kwargs: dict,
+    expected_error_type: str,
+    expected_msg: str,
+):
+
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        ColumnSplitter(**bad_column_kwargs)
+
+    print(f"\n{exc_info.typename}:{exc_info.value}")
+
+    all_errors = exc_info.value.errors()
+    assert len(all_errors) == 1, "Expected 1 error"
+    assert expected_error_type == all_errors[0]["type"]
+    assert all_errors[0]["msg"].startswith(expected_msg)
 
 
 @pytest.fixture
@@ -179,6 +285,16 @@ def test_yaml_file_config_round_trip(
     assert re_loaded
 
     assert from_yaml_gx_config == re_loaded
+
+
+def test_splitters_deserialization(
+    inject_engine_lookup_double, from_json_gx_config: GxConfig
+):
+    table_asset: TableAsset = from_json_gx_config.datasources["my_pg_ds"].assets[
+        "with_splitter"
+    ]
+    assert isinstance(table_asset.column_splitter, SqlYearMonthSplitter)
+    assert table_asset.column_splitter.method_name == "split_on_year_and_month"
 
 
 # TDD Tests for future work

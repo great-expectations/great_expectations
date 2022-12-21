@@ -161,7 +161,7 @@ def render_evaluation_parameter_string(render_func) -> Callable:
 
         # if expectation configuration has no eval params, then don't look for the values in runtime_configuration
         # isinstance check should be removed upon implementation of RenderedAtomicContent evaluation parameter support
-        if len(current_expectation_params) > 0 and not isinstance(
+        if current_expectation_params and not isinstance(
             rendered_string_template, RenderedAtomicContent
         ):
             runtime_configuration: Optional[dict] = kwargs.get("runtime_configuration")
@@ -169,8 +169,6 @@ def render_evaluation_parameter_string(render_func) -> Callable:
                 eval_params = runtime_configuration.get("evaluation_parameters", {})
                 styling = runtime_configuration.get("styling")
                 for key, val in eval_params.items():
-                    # this needs to be more complicated?
-                    # the possibility that it is a substring?
                     for param in current_expectation_params:
                         # "key in param" condition allows for eval param values to be rendered if arithmetic is present
                         if key == param or key in param:
@@ -1248,14 +1246,14 @@ class Expectation(metaclass=MetaExpectation):
         self,
         configuration: ExpectationConfiguration,
         runtime_configuration: Optional[dict] = None,
-    ) -> Union[Dict[str, Union[str, int, bool]], str]:
+    ) -> Union[Dict[str, Union[str, int, bool, List[str], None]], str]:
         default_result_format: Optional[Any] = self.default_kwarg_values.get(
             "result_format"
         )
         configuration_result_format: Union[
-            Dict[str, Union[str, int, bool]], str
+            Dict[str, Union[str, int, bool, List[str], None]], str
         ] = configuration.kwargs.get("result_format", default_result_format)
-        result_format: Union[Dict[str, Union[str, int, bool]], str]
+        result_format: Union[Dict[str, Union[str, int, bool, List[str], None]], str]
         if runtime_configuration:
             result_format = runtime_configuration.get(
                 "result_format",
@@ -1290,6 +1288,14 @@ class Expectation(metaclass=MetaExpectation):
 
         if not configuration:
             configuration = deepcopy(self.configuration)
+
+        # issue warnings if necesary
+        self._warn_if_result_format_config_in_runtime_configuration(
+            runtime_configuration=runtime_configuration,
+        )
+        self._warn_if_result_format_config_in_expectation_configuration(
+            configuration=configuration
+        )
 
         configuration.process_evaluation_parameters(
             evaluation_parameters, interactive_evaluation, data_context
@@ -1477,6 +1483,31 @@ class Expectation(metaclass=MetaExpectation):
             errors=errors,
             coverage_score=coverage_score,
         )
+
+    def _warn_if_result_format_config_in_runtime_configuration(
+        self, runtime_configuration: Union[dict, None] = None
+    ) -> None:
+        """
+        Issues warning if result_format is in runtime_configuration for Validator
+        """
+        if runtime_configuration and runtime_configuration.get("result_format"):
+            warnings.warn(
+                "`result_format` configured at the Validator-level will not be persisted. Please add the configuration to your Checkpoint config or checkpoint_run() method instead.",
+                UserWarning,
+            )
+
+    def _warn_if_result_format_config_in_expectation_configuration(
+        self, configuration: ExpectationConfiguration
+    ) -> None:
+        """
+        Issues warning if result_format is in ExpectationConfiguration
+        """
+
+        if configuration.kwargs.get("result_format"):
+            warnings.warn(
+                "`result_format` configured at the Expectation-level will not be persisted. Please add the configuration to your Checkpoint config or checkpoint_run() method instead.",
+                UserWarning,
+            )
 
     def print_diagnostic_checklist(
         self,
@@ -2766,13 +2797,20 @@ class ColumnMapExpectation(TableExpectation, ABC):
         # print(f"\n[ALEX_TEST] [EXPECTATION.ColumnMapExpectation._validate()] AVAILABLE_METRICS:\n{metrics} ; TYPE: {str(type(metrics))}")
         # TODO: <Alex>ALEX</Alex>
         result_format: Union[
-            Dict[str, Union[str, int, bool]], str
+            Dict[str, Union[int, str, bool, List[str], None]], str
         ] = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
+
+        unexpected_index_column_names = None
+        include_unexpected_rows = None
+
         if isinstance(result_format, dict):
             include_unexpected_rows = result_format.get(
                 "include_unexpected_rows", False
+            )
+            unexpected_index_column_names = result_format.get(
+                "unexpected_index_column_names", None
             )
 
         total_count: Optional[int] = metrics.get("table.row_count")
@@ -2822,6 +2860,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
             unexpected_index_list=unexpected_index_list,
             unexpected_rows=unexpected_rows,
             unexpected_index_query=unexpected_index_query,
+            unexpected_index_column_names=unexpected_index_column_names,
         )
 
 
@@ -3001,7 +3040,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         # print(f"\n[ALEX_TEST] [EXPECTATION.ColumnPairMapExpectation._validate()] AVAILABLE_METRICS:\n{metrics} ; TYPE: {str(type(metrics))}")
         # TODO: <Alex>ALEX</Alex>
         result_format: Union[
-            Dict[str, Union[str, int, bool]], str
+            Dict[str, Union[str, int, bool, List[str], None]], str
         ] = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
@@ -3278,6 +3317,8 @@ def _format_map_output(
     unexpected_list: Optional[List[Any]] = None,
     unexpected_index_list: Optional[List[int]] = None,
     unexpected_index_query: Optional[str] = None,
+    # Actually Optional[List[str]], but this is necessary to keep the typechecker happy
+    unexpected_index_column_names: Optional[Union[int, str, List[str]]] = None,
     unexpected_rows=None,
 ) -> Dict:
     """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
@@ -3331,6 +3372,11 @@ def _format_map_output(
         return_obj["result"]["partial_unexpected_list"] = unexpected_list[
             : result_format["partial_unexpected_count"]
         ]
+
+    if unexpected_index_column_names is not None:
+        return_obj["result"].update(
+            {"unexpected_index_column_names": unexpected_index_column_names}
+        )
 
     if not skip_missing:
         return_obj["result"]["missing_count"] = missing_count

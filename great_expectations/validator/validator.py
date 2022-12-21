@@ -584,7 +584,6 @@ class Validator:
 
             if self._include_rendered_content:
                 validation_result.render()
-                validation_result.expectation_config.render()
 
             return validation_result
 
@@ -1150,6 +1149,7 @@ class Validator:
                             -1
                         ):
                             # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] VALIDATION_GRAPH:FULLY_QUALIFIED_RAW_PARAMETER_NAME:\n{fully_qualified_parameter_name} ; TYPE: {str(type(fully_qualified_parameter_name))}")
+                            # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] VALIDATION_GRAPH:RAW_PARAMETER_NODE:\n{parameter_node} ; TYPE: {str(type(parameter_node))}")
                             graph = parameter_node[
                                 FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
                             ]["graph"]
@@ -1844,7 +1844,6 @@ class Validator:
             if self._include_rendered_content:
                 for validation_result in results:
                     validation_result.render()
-                    validation_result.expectation_config.render()
             statistics = self._calc_validation_statistics(results)
 
             if only_return_failures:
