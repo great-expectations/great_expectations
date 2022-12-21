@@ -54,7 +54,8 @@ class FileDataContext(SerializableDataContext):
             runtime_environment (Optional[dict]): a dictionary of config variables that override both those set in
                 config_variables.yml and the environment
         """
-        self._context_root_directory = str(context_root_dir)
+        if isinstance(context_root_dir, pathlib.Path):
+            self._context_root_directory = str(context_root_dir)
         if not project_config:
             project_config = FileDataContext._load_file_backed_project_config(
                 context_root_directory=context_root_dir,
