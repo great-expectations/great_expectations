@@ -772,10 +772,9 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> Optional[List[Union[RenderedStringTemplateContent, RenderedTableContent]]]:
+    ) -> Optional[List[Union[RenderedTableContent, CollapseContent]]]:
         if result is None:
             return None
-        print(result)
         result_dict: Optional[dict] = result.result
 
         if result_dict is None:
@@ -832,7 +831,6 @@ class Expectation(metaclass=MetaExpectation):
 
     @classmethod
     def _build_partial_unexpected_counts_table(cls, result_dict):
-        print("hello")
         table_rows = []
         # We will check to see whether we have *all* of the unexpected values
         # accounted for in our count, and include counts if we do. If we do not,
