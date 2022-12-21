@@ -150,6 +150,7 @@ def type_check(
 
     if ci:
         mypy_cache.mkdir(exist_ok=True)
+        ctx.run("pip list", echo=True, pty=True)
 
         type_check(
             ctx,
