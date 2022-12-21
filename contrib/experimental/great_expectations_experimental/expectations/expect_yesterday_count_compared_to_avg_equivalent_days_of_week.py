@@ -44,6 +44,9 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
 
     metric_name = "column.counts_per_days_custom"
 
+    ≈ = {"tags": ["query-based"], "contributors": ["@itaise", "@hadasm"]}
+
+
     @metric_value(
         engine=SqlAlchemyExecutionEngine,
         metric_fn_type=MetricFunctionTypes.AGGREGATE_VALUE,
