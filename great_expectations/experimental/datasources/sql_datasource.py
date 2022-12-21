@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from great_expectations.execution_engine import ExecutionEngine
 
 
-class PostgresDatasourceError(Exception):
+class SQLDatasourceError(Exception):
     pass
 
 
@@ -432,8 +432,8 @@ class TableAsset(DataAsset):
         return batch_list
 
 
-class PostgresDatasource(Datasource):
-    """Postgres datasource
+class SQLDatasource(Datasource):
+    """Adds a generic SQL datasource to the data context.
 
     Args:
         name: The name of this datasource
@@ -448,7 +448,7 @@ class PostgresDatasource(Datasource):
 
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
-    type: Literal["postgres"] = "postgres"
+    type: Literal["sql"] = "sql"
     connection_string: str
     assets: Dict[str, TableAsset] = {}
 
