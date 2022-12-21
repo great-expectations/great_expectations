@@ -163,6 +163,7 @@ def type_check(
             report=report,
             ci=False,
         )
+        return  # don't run twice
 
     if clear_cache:
         print(f"  Clearing {mypy_cache} ... ", end="")
