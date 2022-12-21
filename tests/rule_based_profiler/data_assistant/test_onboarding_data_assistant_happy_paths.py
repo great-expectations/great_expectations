@@ -389,8 +389,8 @@ def test_sql_happy_path_onboarding_data_assistant_null_column_quantiles_metric_v
 
 
 @pytest.mark.integration
-@pytest.mark.slow  # 25.51 seconds
-def test_sql_happy_path_onboarding_data_assistant_mixed_decimal_float_column_unique_proportion_metric_values(
+@pytest.mark.slow  # 26.57 seconds
+def test_sql_happy_path_onboarding_data_assistant_mixed_decimal_float_and_boolean_column_unique_proportion_metric_values(
     sa,
     empty_data_context,
 ) -> None:
@@ -475,6 +475,22 @@ def test_sql_happy_path_onboarding_data_assistant_mixed_decimal_float_column_uni
     )
     assert len(result.metrics_by_domain) == 49
     assert len(result.expectation_configurations) == 171
+    assert list(
+        filter(
+            lambda element: element.expectation_type
+            == "expect_column_proportion_of_unique_values_to_be_between"
+            and element.kwargs["column"] == "test_bool",
+            result.get_expectation_suite(
+                send_usage_event=False
+            ).get_column_expectations(),
+        )
+    )[0].kwargs == {
+        "column": "test_bool",
+        "min_value": 0.001002004008016032,
+        "strict_max": False,
+        "max_value": 0.5,
+        "strict_min": False,
+    }
 
 
 def load_data_into_postgres_database(sa):
