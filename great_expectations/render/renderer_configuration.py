@@ -61,6 +61,9 @@ class _RendererParamsBase(BaseModel):
         validate_assignment = True
         arbitrary_types_allowed = True
 
+    def __len__(self) -> int:
+        return len(self.__fields__)
+
     def dict(
         self,
         include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
@@ -111,7 +114,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     graph: dict = Field({}, allow_mutation=True)
     _raw_kwargs: dict = Field({}, allow_mutation=False)
     _row_condition: str = Field("", allow_mutation=False)
-    params: RendererParams = Field(..., allow_mutation=True)
+    params: RendererParams = Field(
+        default_factory=_RendererParamsBase, allow_mutation=True
+    )
 
     class Config:
         validate_assignment = True
@@ -126,10 +131,6 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 "RendererConfiguration must be passed either configuration or result."
             )
         return values
-
-    def __init__(self, **values) -> None:
-        values["params"] = _RendererParamsBase()
-        super().__init__(**values)
 
     class _RendererParamBase(BaseModel):
         """
@@ -313,7 +314,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
     @root_validator()
     def _validate_for_params(cls, values: dict) -> dict:
-        if "params" not in values:
+        if not values["params"]:
             _params: Optional[
                 Dict[str, Dict[str, Union[str, Dict[str, RendererSchemaType]]]]
             ] = values.get("_params")
@@ -392,12 +393,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
     @validator("template_str")
     def _set_template_str(cls, v: str, values: dict) -> str:
-        if (
-            "_row_condition" in values
-            and values["_row_condition"]
-            and "_condition_parser" in values
-            and values["_condition_parser"]
-        ):
+        if "_row_condition" in values and values["_row_condition"]:
             row_condition_str: str = RendererConfiguration._get_row_condition_string(
                 row_condition_str=values["_row_condition"]
             )
