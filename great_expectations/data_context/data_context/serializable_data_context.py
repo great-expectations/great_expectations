@@ -5,7 +5,7 @@ import os
 import pathlib
 import shutil
 import warnings
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from ruamel.yaml import YAML
 
@@ -32,6 +32,9 @@ yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
+if TYPE_CHECKING:
+    from great_expectations.alias_types import PathStr
+
 
 class SerializableDataContext(AbstractDataContext):
     """
@@ -54,7 +57,7 @@ class SerializableDataContext(AbstractDataContext):
 
     def __init__(
         self,
-        context_root_dir: Union[str, pathlib.Path],
+        context_root_dir: PathStr,
         runtime_environment: Optional[dict] = None,
     ) -> None:
         if isinstance(context_root_dir, pathlib.Path):
@@ -151,7 +154,7 @@ class SerializableDataContext(AbstractDataContext):
     @classmethod
     def create(
         cls,
-        project_root_dir: Union[str, pathlib.Path, None] = None,
+        project_root_dir: Optional[PathStr] = None,
         usage_statistics_enabled: bool = True,
         runtime_environment: Optional[dict] = None,
     ) -> SerializableDataContext:
@@ -206,9 +209,7 @@ class SerializableDataContext(AbstractDataContext):
         return cls(context_root_dir=gx_dir, runtime_environment=runtime_environment)
 
     @classmethod
-    def all_uncommitted_directories_exist(
-        cls, gx_dir: Union[str, pathlib.Path]
-    ) -> bool:
+    def all_uncommitted_directories_exist(cls, gx_dir: PathStr) -> bool:
         """Check if all uncommitted directories exist."""
         uncommitted_dir = os.path.join(gx_dir, cls.GX_UNCOMMITTED_DIR)
         for directory in cls.UNCOMMITTED_DIRECTORIES:
@@ -218,7 +219,7 @@ class SerializableDataContext(AbstractDataContext):
         return True
 
     @classmethod
-    def config_variables_yml_exist(cls, gx_dir: Union[str, pathlib.Path]) -> bool:
+    def config_variables_yml_exist(cls, gx_dir: PathStr) -> bool:
         """Check if all config_variables.yml exists."""
         path_to_yml = os.path.join(gx_dir, cls.GX_YML)
 
@@ -238,7 +239,7 @@ class SerializableDataContext(AbstractDataContext):
 
     @classmethod
     def write_project_template_to_disk(
-        cls, gx_dir: Union[str, pathlib.Path], usage_statistics_enabled: bool = True
+        cls, gx_dir: PathStr, usage_statistics_enabled: bool = True
     ) -> None:
         file_path = os.path.join(gx_dir, cls.GX_YML)
         with open(file_path, "w") as template:
@@ -248,7 +249,7 @@ class SerializableDataContext(AbstractDataContext):
                 template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED)
 
     @classmethod
-    def scaffold_directories(cls, base_dir: Union[str, pathlib.Path]) -> None:
+    def scaffold_directories(cls, base_dir: PathStr) -> None:
         """Safely create GE directories for a new project."""
         os.makedirs(base_dir, exist_ok=True)
         with open(os.path.join(base_dir, ".gitignore"), "w") as f:
@@ -284,7 +285,7 @@ class SerializableDataContext(AbstractDataContext):
             os.makedirs(new_directory_path, exist_ok=True)
 
     @classmethod
-    def scaffold_custom_data_docs(cls, plugins_dir: Union[str, pathlib.Path]) -> None:
+    def scaffold_custom_data_docs(cls, plugins_dir: PathStr) -> None:
         """Copy custom data docs templates"""
         styles_template = file_relative_path(
             __file__,
@@ -319,7 +320,7 @@ class SerializableDataContext(AbstractDataContext):
 
     @classmethod
     def get_ge_config_version(
-        cls, context_root_dir: Union[str, pathlib.Path, None] = None
+        cls, context_root_dir: Optional[PathStr] = None
     ) -> Optional[float]:
         yml_path = cls.find_context_yml_file(search_start_dir=context_root_dir)
         if yml_path is None:
@@ -372,7 +373,7 @@ class SerializableDataContext(AbstractDataContext):
 
     @classmethod
     def find_context_yml_file(
-        cls, search_start_dir: Union[str, pathlib.Path, None] = None
+        cls, search_start_dir: Optional[PathStr] = None
     ) -> Optional[str]:
         """Search for the yml file starting here and moving upward."""
         yml_path = None
@@ -398,14 +399,12 @@ class SerializableDataContext(AbstractDataContext):
         return yml_path
 
     @classmethod
-    def does_config_exist_on_disk(
-        cls, context_root_dir: Union[str, pathlib.Path]
-    ) -> bool:
+    def does_config_exist_on_disk(cls, context_root_dir: PathStr) -> bool:
         """Return True if the great_expectations.yml exists on disk."""
         return os.path.isfile(os.path.join(context_root_dir, cls.GX_YML))
 
     @classmethod
-    def is_project_initialized(cls, ge_dir: Union[str, pathlib.Path]) -> bool:
+    def is_project_initialized(cls, ge_dir: PathStr) -> bool:
         """
         Return True if the project is initialized.
 
@@ -425,26 +424,20 @@ class SerializableDataContext(AbstractDataContext):
         )
 
     @classmethod
-    def does_project_have_a_datasource_in_config_file(
-        cls, ge_dir: Union[str, pathlib.Path]
-    ) -> bool:
+    def does_project_have_a_datasource_in_config_file(cls, ge_dir: PathStr) -> bool:
         if not cls.does_config_exist_on_disk(ge_dir):
             return False
         return cls._does_context_have_at_least_one_datasource(ge_dir)
 
     @classmethod
-    def _does_context_have_at_least_one_datasource(
-        cls, ge_dir: Union[str, pathlib.Path]
-    ) -> bool:
+    def _does_context_have_at_least_one_datasource(cls, ge_dir: PathStr) -> bool:
         context = cls._attempt_context_instantiation(ge_dir)
         if not context:
             return False
         return len(context.list_datasources()) >= 1
 
     @classmethod
-    def _does_context_have_at_least_one_suite(
-        cls, ge_dir: Union[str, pathlib.Path]
-    ) -> bool:
+    def _does_context_have_at_least_one_suite(cls, ge_dir: PathStr) -> bool:
         context = cls._attempt_context_instantiation(ge_dir)
         if not context:
             return False
@@ -452,7 +445,7 @@ class SerializableDataContext(AbstractDataContext):
 
     @classmethod
     def _attempt_context_instantiation(
-        cls, ge_dir: Union[str, pathlib.Path]
+        cls, ge_dir: PathStr
     ) -> Optional[SerializableDataContext]:
         try:
             context = cls(ge_dir)

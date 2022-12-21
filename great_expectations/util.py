@@ -64,6 +64,7 @@ if TYPE_CHECKING:
     # needed until numpy min version 1.20
     import numpy.typing as npt
 
+    from great_expectations.alias_types import PathStr
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
@@ -1728,7 +1729,7 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
 
 def get_context(
     project_config: Optional[Union["DataContextConfig", Mapping]] = None,
-    context_root_dir: Union[str, Path, None] = None,
+    context_root_dir: Optional[PathStr] = None,
     runtime_environment: Optional[dict] = None,
     cloud_base_url: Optional[str] = None,
     cloud_access_token: Optional[str] = None,

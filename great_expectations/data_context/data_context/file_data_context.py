@@ -1,6 +1,6 @@
 import logging
 import pathlib
-from typing import Optional, Union, cast
+from typing import TYPE_CHECKING, Optional, Union, cast
 
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
@@ -22,6 +22,9 @@ from great_expectations.datasource.datasource_serializer import (
     YAMLReadyDictDatasourceConfigSerializer,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.alias_types import PathStr
+
 logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -38,7 +41,7 @@ class FileDataContext(SerializableDataContext):
 
     def __init__(
         self,
-        context_root_dir: Union[str, pathlib.Path],
+        context_root_dir: PathStr,
         project_config: Optional[DataContextConfig] = None,
         runtime_environment: Optional[dict] = None,
     ) -> None:
@@ -122,7 +125,7 @@ class FileDataContext(SerializableDataContext):
     @classmethod
     def _load_file_backed_project_config(
         cls,
-        context_root_directory: Union[str, pathlib.Path],
+        context_root_directory: PathStr,
     ) -> DataContextConfig:
         path_to_yml = pathlib.Path(context_root_directory, cls.GX_YML)
         try:

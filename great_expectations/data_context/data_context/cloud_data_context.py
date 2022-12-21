@@ -49,6 +49,7 @@ from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 if TYPE_CHECKING:
+    from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.checkpoint import Checkpoint
 
 logger = logging.getLogger(__name__)
@@ -62,7 +63,7 @@ class CloudDataContext(SerializableDataContext):
     def __init__(
         self,
         project_config: Optional[Union[DataContextConfig, Mapping]] = None,
-        context_root_dir: Union[str, pathlib.Path, None] = None,
+        context_root_dir: Optional[PathStr] = None,
         runtime_environment: Optional[dict] = None,
         cloud_base_url: Optional[str] = None,
         cloud_access_token: Optional[str] = None,
@@ -195,7 +196,7 @@ class CloudDataContext(SerializableDataContext):
 
     @classmethod
     def determine_context_root_directory(
-        cls, context_root_dir: Union[str, pathlib.Path, None]
+        cls, context_root_dir: Optional[PathStr]
     ) -> str:
         if context_root_dir is None:
             context_root_dir = os.getcwd()

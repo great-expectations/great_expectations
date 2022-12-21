@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import os
 import pathlib
-from typing import Mapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Mapping, Optional, Tuple, Union
+
+if TYPE_CHECKING:
+    from great_expectations.alias_types import PathStr
 
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
@@ -21,7 +24,7 @@ from great_expectations.data_context.types.base import DataContextConfig, GXClou
 
 def BaseDataContext(
     project_config: Union[DataContextConfig, Mapping],
-    context_root_dir: Union[str, pathlib.Path, None] = None,
+    context_root_dir: Optional[PathStr] = None,
     runtime_environment: Optional[dict] = None,
     cloud_mode: bool = False,
     cloud_config: Optional[GXCloudConfig] = None,
