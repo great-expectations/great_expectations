@@ -46,7 +46,6 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
 
     library_metadata = {"tags": ["query-based"], "contributors": ["@itaise", "@hadasm"]}
 
-
     @metric_value(
         engine=SqlAlchemyExecutionEngine,
         metric_fn_type=MetricFunctionTypes.AGGREGATE_VALUE,
@@ -68,7 +67,6 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
             .order_by(column.desc()).limit(30)
         results = sqlalchemy_engine.execute(query).fetchall()
         return results
-
 
 
 class ExpectYesterdayCountComparedToAvgEquivalentDaysOfWeek(ColumnExpectation):
