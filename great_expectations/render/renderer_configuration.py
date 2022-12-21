@@ -114,9 +114,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     graph: dict = Field({}, allow_mutation=True)
     _raw_kwargs: dict = Field({}, allow_mutation=False)
     _row_condition: str = Field("", allow_mutation=False)
-    params: RendererParams = Field(
-        default_factory=_RendererParamsBase, allow_mutation=True
-    )
+    params: RendererParams = Field(..., allow_mutation=True)
 
     class Config:
         validate_assignment = True
@@ -131,6 +129,10 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 "RendererConfiguration must be passed either configuration or result."
             )
         return values
+
+    def __init__(self, **values) -> None:
+        values["params"] = _RendererParamsBase()
+        super().__init__(**values)
 
     class _RendererParamBase(BaseModel):
         """
@@ -215,7 +217,6 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 "value": f'{key}: {value["$PARAMETER"]}',
             }
             evaluation_parameter_count += 1
-
         return renderer_params_args
 
     @root_validator()
