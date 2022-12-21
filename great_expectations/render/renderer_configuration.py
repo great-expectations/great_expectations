@@ -7,6 +7,7 @@ from numbers import Number
 from typing import (
     TYPE_CHECKING,
     Any,
+    Collection,
     Dict,
     Generic,
     Iterable,
@@ -207,7 +208,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     @staticmethod
     def _get_evaluation_parameter_params_from_raw_kwargs(
         raw_kwargs: Dict[str, Any]
-    ) -> Dict[str, Dict[str, Union[str, Dict[str, RendererSchemaType]]]]:
+    ) -> Dict[str, Dict[str, Collection[str]]]:
         evaluation_parameter_count = 0
         renderer_params_args = {}
         for key, value in raw_kwargs.items():
@@ -241,7 +242,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                     if (key, value) not in values["kwargs"].items()
                 }
                 renderer_params_args: Dict[
-                    str, Dict[str, Union[str, Dict[str, RendererSchemaType]]]
+                    str, Dict[str, Collection[str]]
                 ] = RendererConfiguration._get_evaluation_parameter_params_from_raw_kwargs(
                     raw_kwargs=values["_raw_kwargs"]
                 )
@@ -268,7 +269,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     @staticmethod
     def _get_condition_params(
         row_condition_str: str,
-    ) -> Dict[str, Dict[str, Union[str, Dict[str, RendererSchemaType]]]]:
+    ) -> Dict[str, Dict[str, Collection[str]]]:
         row_condition_str = RendererConfiguration._parse_row_condition_str(
             row_condition_str=row_condition_str
         )
@@ -302,7 +303,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         values["_row_condition"] = kwargs.get("row_condition", "")
         if values["_row_condition"]:
             renderer_params_args: Dict[
-                str, Dict[str, Union[str, Dict[str, RendererSchemaType]]]
+                str, Dict[str, Collection[str]]
             ] = RendererConfiguration._get_condition_params(
                 row_condition_str=values["_row_condition"],
             )
