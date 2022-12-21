@@ -97,7 +97,7 @@ RendererParams = TypeVar("RendererParams", bound=_RendererParamsBase)
 class RendererConfiguration(GenericModel, Generic[RendererParams]):
     """Configuration object built for each renderer."""
 
-    configuration: Union[ExpectationConfiguration, None] = Field(
+    configuration: Optional[ExpectationConfiguration] = Field(
         None, allow_mutation=False
     )
     result: Optional[ExpectationValidationResult] = Field(None, allow_mutation=False)
@@ -105,13 +105,13 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     expectation_type: str = Field("", allow_mutation=False)
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
-    params: RendererParams = Field(..., allow_mutation=True)
     template_str: str = Field("", allow_mutation=True)
     header_row: List[Dict[str, Optional[Any]]] = Field([], allow_mutation=True)
     table: List[List[Dict[str, Optional[Any]]]] = Field([], allow_mutation=True)
     graph: dict = Field({}, allow_mutation=True)
     _raw_kwargs: dict = Field({}, allow_mutation=False)
     _row_condition: str = Field("", allow_mutation=False)
+    params: RendererParams = Field(..., allow_mutation=True)
 
     class Config:
         validate_assignment = True
@@ -128,7 +128,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         return values
 
     def __init__(self, **values) -> None:
-        values["params"] = values.get("_params") or _RendererParamsBase()
+        values["params"] = _RendererParamsBase()
         super().__init__(**values)
 
     class _RendererParamBase(BaseModel):
@@ -204,20 +204,15 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     @staticmethod
     def _get_evaluation_parameter_params_from_raw_kwargs(
         raw_kwargs: Dict[str, Any]
-    ) -> Dict[str, BaseModel]:
+    ) -> Dict[str, Dict[str, Union[str, Dict[str, RendererSchemaType]]]]:
         evaluation_parameter_count = 0
-        renderer_params_args: Dict[str, BaseModel] = {}
+        renderer_params_args = {}
         for key, value in raw_kwargs.items():
             evaluation_parameter_name = f"eval_param__{evaluation_parameter_count}"
-            renderer_param: Type[
-                BaseModel
-            ] = RendererConfiguration._get_renderer_param_base_model_type(
-                name=evaluation_parameter_name
-            )
-            renderer_params_args[evaluation_parameter_name] = renderer_param(
-                schema={"type": RendererSchemaType.STRING},
-                value=f'{key}: {value["$PARAMETER"]}',
-            )
+            renderer_params_args[evaluation_parameter_name] = {
+                "schema": {"type": RendererSchemaType.STRING},
+                "value": f'{key}: {value["$PARAMETER"]}',
+            }
             evaluation_parameter_count += 1
 
         return renderer_params_args
@@ -244,7 +239,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                     if (key, value) not in values["kwargs"].items()
                 }
                 renderer_params_args: Dict[
-                    str, BaseModel
+                    str, Dict[str, Union[str, Dict[str, RendererSchemaType]]]
                 ] = RendererConfiguration._get_evaluation_parameter_params_from_raw_kwargs(
                     raw_kwargs=values["_raw_kwargs"]
                 )
@@ -271,7 +266,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     @staticmethod
     def _get_condition_params(
         row_condition_str: str,
-    ) -> Dict[str, BaseModel]:
+    ) -> Dict[str, Dict[str, Union[str, Dict[str, RendererSchemaType]]]]:
         row_condition_str = RendererConfiguration._parse_row_condition_str(
             row_condition_str=row_condition_str
         )
@@ -280,16 +275,14 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         ] = RendererConfiguration._get_row_conditions_list_from_row_condition_str(
             row_condition_str=row_condition_str
         )
-        renderer_params_args: Dict[str, BaseModel] = {}
+        renderer_params_args = {}
         for idx, condition in enumerate(row_conditions_list):
             name = f"row_condition__{str(idx)}"
             value = condition.replace(" NOT ", " not ")
-            renderer_param: Type[
-                BaseModel
-            ] = RendererConfiguration._get_renderer_param_base_model_type(name=name)
-            renderer_params_args[name] = renderer_param(
-                schema={"type", RendererSchemaType.STRING}, value=value
-            )
+            renderer_params_args[name] = {
+                "schema": {"type": RendererSchemaType.STRING},
+                "value": value,
+            }
         return renderer_params_args
 
     @root_validator()
@@ -307,7 +300,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         values["_row_condition"] = kwargs.get("row_condition", "")
         if values["_row_condition"]:
             renderer_params_args: Dict[
-                str, BaseModel
+                str, Dict[str, Union[str, Dict[str, RendererSchemaType]]]
             ] = RendererConfiguration._get_condition_params(
                 row_condition_str=values["_row_condition"],
             )
@@ -316,6 +309,34 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 if "_params" in values and values["_params"]
                 else renderer_params_args
             )
+        return values
+
+    @root_validator()
+    def _validate_for_params(cls, values: dict) -> dict:
+        if "params" not in values:
+            _params: Optional[
+                Dict[str, Dict[str, Union[str, Dict[str, RendererSchemaType]]]]
+            ] = values.get("_params")
+            if _params:
+                renderer_param_definitions: Dict[str, Any] = {}
+                for name in _params:
+                    renderer_param_type: Type[
+                        BaseModel
+                    ] = RendererConfiguration._get_renderer_param_base_model_type(
+                        name=name
+                    )
+                    renderer_param_definitions[name] = (
+                        Optional[renderer_param_type],
+                        ...,
+                    )
+                renderer_params: Type[BaseModel] = create_model(
+                    "RendererParams",
+                    **renderer_param_definitions,
+                    __base__=_RendererParamsBase,
+                )
+                values["params"] = renderer_params(**_params)
+            else:
+                values["params"] = _RendererParamsBase()
         return values
 
     @staticmethod
