@@ -31,9 +31,11 @@ _DEFAULT_TEST_MONTHS = list(range(1, 13))
 
 @contextmanager
 def _source(
-    validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None]
+    validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None], dialect: str
 ) -> PostgresDatasource:
-    execution_eng_cls = sqlachemy_execution_engine_mock_cls(validate_batch_spec)
+    execution_eng_cls = sqlachemy_execution_engine_mock_cls(
+        validate_batch_spec=validate_batch_spec, dialect=dialect
+    )
     original_override = PostgresDatasource.execution_engine_override
     try:
         PostgresDatasource.execution_engine_override = execution_eng_cls
@@ -54,7 +56,9 @@ def create_source() -> ContextManager:
 
 @pytest.mark.unit
 def test_construct_postgres_datasource(create_source):
-    with create_source(lambda _: None) as source:
+    with create_source(
+        validate_batch_spec=lambda _: None, dialect="postgresql"
+    ) as source:
         assert source.name == "my_datasource"
         assert isinstance(source.execution_engine, SqlAlchemyExecutionEngine)
         assert source.assets == {}
@@ -83,7 +87,9 @@ def assert_batch_request(
 
 @pytest.mark.unit
 def test_add_table_asset_with_splitter(create_source):
-    with create_source(lambda _: None) as source:
+    with create_source(
+        validate_batch_spec=lambda _: None, dialect="postgresql"
+    ) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter("my_column")
         assert len(source.assets) == 1
@@ -105,7 +111,9 @@ def test_add_table_asset_with_splitter(create_source):
 
 @pytest.mark.unit
 def test_add_table_asset_with_no_splitter(create_source):
-    with create_source(lambda _: None) as source:
+    with create_source(
+        validate_batch_spec=lambda _: None, dialect="postgresql"
+    ) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         assert len(source.assets) == 1
         assert asset == list(source.assets.values())[0]
@@ -132,7 +140,9 @@ def test_add_table_asset_with_no_splitter(create_source):
 
 @pytest.mark.unit
 def test_construct_table_asset_directly_with_no_splitter(create_source):
-    with create_source(lambda _: None) as source:
+    with create_source(
+        validate_batch_spec=lambda _: None, dialect="postgresql"
+    ) as source:
         asset = TableAsset(name="my_asset", table_name="my_table")
         asset._datasource = source
         assert_batch_request(asset.get_batch_request(), "my_datasource", "my_asset", {})
@@ -140,7 +150,9 @@ def test_construct_table_asset_directly_with_no_splitter(create_source):
 
 @pytest.mark.unit
 def test_construct_table_asset_directly_with_splitter(create_source):
-    with create_source(lambda _: None) as source:
+    with create_source(
+        validate_batch_spec=lambda _: None, dialect="postgresql"
+    ) as source:
         asset = TableAsset(
             name="my_asset",
             table_name="my_table",
@@ -174,7 +186,9 @@ def test_datasource_gets_batch_list_no_splitter(create_source):
             "type": "table",
         }
 
-    with create_source(validate_batch_spec) as source:
+    with create_source(
+        validate_batch_spec=validate_batch_spec, dialect="postgresql"
+    ) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         source.get_batch_list_from_batch_request(asset.get_batch_request())
 
@@ -215,7 +229,9 @@ def test_datasource_gets_batch_list_splitter_with_unspecified_batch_request_opti
     def collect_batch_spec(spec: SqlAlchemyDatasourceBatchSpec) -> None:
         batch_specs.append(spec)
 
-    with create_source(collect_batch_spec) as source:
+    with create_source(
+        validate_batch_spec=collect_batch_spec, dialect="postgresql"
+    ) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
         empty_batch_request = asset.get_batch_request()
@@ -234,7 +250,9 @@ def test_datasource_gets_batch_list_splitter_with_batch_request_options_set_to_n
     def collect_batch_spec(spec: SqlAlchemyDatasourceBatchSpec) -> None:
         batch_specs.append(spec)
 
-    with create_source(collect_batch_spec) as source:
+    with create_source(
+        validate_batch_spec=collect_batch_spec, dialect="postgresql"
+    ) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
         batch_request_with_none = asset.get_batch_request(
@@ -256,7 +274,9 @@ def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_requ
     def collect_batch_spec(spec: SqlAlchemyDatasourceBatchSpec) -> None:
         batch_specs.append(spec)
 
-    with create_source(collect_batch_spec) as source:
+    with create_source(
+        validate_batch_spec=collect_batch_spec, dialect="postgresql"
+    ) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
         batches = source.get_batch_list_from_batch_request(
@@ -295,7 +315,9 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_request_options(
             "type": "table",
         }
 
-    with create_source(validate_batch_spec) as source:
+    with create_source(
+        validate_batch_spec=validate_batch_spec, dialect="postgresql"
+    ) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
         batches = source.get_batch_list_from_batch_request(
@@ -307,7 +329,9 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_request_options(
 
 @pytest.mark.unit
 def test_datasource_gets_nonexistent_asset(create_source):
-    with create_source(lambda _: None) as source:
+    with create_source(
+        validate_batch_spec=lambda _: None, dialect="postgresql"
+    ) as source:
         with pytest.raises(LookupError):
             source.get_asset("my_asset")
 
@@ -326,7 +350,9 @@ def test_bad_batch_request_passed_into_get_batch_list_from_batch_request(
     create_source,
     batch_request_args,
 ):
-    with create_source(lambda _: None) as source:
+    with create_source(
+        validate_batch_spec=lambda _: None, dialect="postgresql"
+    ) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
 
@@ -353,7 +379,9 @@ def test_bad_batch_request_passed_into_get_batch_list_from_batch_request(
 def test_get_batch_list_from_batch_request_with_good_batch_request(
     create_source, batch_request_options
 ):
-    with create_source(lambda _: None) as source:
+    with create_source(
+        validate_batch_spec=lambda _: None, dialect="postgresql"
+    ) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
         batch_request = BatchRequest(
@@ -378,7 +406,9 @@ def test_get_batch_list_from_batch_request_with_good_batch_request(
 def test_get_batch_list_from_batch_request_with_malformed_batch_request(
     create_source, batch_request_args
 ):
-    with create_source(lambda _: None) as source:
+    with create_source(
+        validate_batch_spec=lambda _: None, dialect="postgresql"
+    ) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
         src, ast, op = batch_request_args
@@ -392,7 +422,9 @@ def test_get_batch_list_from_batch_request_with_malformed_batch_request(
 
 
 def test_get_bad_batch_request(create_source):
-    with create_source(lambda _: None) as source:
+    with create_source(
+        validate_batch_spec=lambda _: None, dialect="postgresql"
+    ) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
         with pytest.raises(BatchRequestError):
@@ -457,7 +489,9 @@ def test_get_bad_batch_request(create_source):
 )
 def test_sort_batch_list_by_metadata(sort_info, create_source):
     sort_keys, sort_values = sort_info
-    with create_source(lambda _: None) as source:
+    with create_source(
+        validate_batch_spec=lambda _: None, dialect="postgresql"
+    ) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col").add_sorters(sort_keys)
         batch_request = BatchRequest(
@@ -481,7 +515,9 @@ def test_sort_batch_list_by_metadata(sort_info, create_source):
 
 @pytest.mark.unit
 def test_sort_batch_list_by_unknown_key(create_source):
-    with create_source(lambda _: None) as source:
+    with create_source(
+        validate_batch_spec=lambda _: None, dialect="postgresql"
+    ) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col").add_sorters(
             ["yr", "month"]
@@ -521,7 +557,9 @@ def test_table_asset_sorter_parsing(order_by: list):
 
 @pytest.mark.unit
 def test_data_source_json_has_properties(create_source):
-    with create_source(lambda _: None) as source:
+    with create_source(
+        validate_batch_spec=lambda _: None, dialect="postgresql"
+    ) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col").add_sorters(
             ["year", "month"]
@@ -533,7 +571,9 @@ def test_data_source_json_has_properties(create_source):
 
 @pytest.mark.unit
 def test_data_source_str_has_properties(create_source):
-    with create_source(lambda _: None) as source:
+    with create_source(
+        validate_batch_spec=lambda _: None, dialect="postgresql"
+    ) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col").add_sorters(
             ["year", "month"]
@@ -544,7 +584,9 @@ def test_data_source_str_has_properties(create_source):
 
 @pytest.mark.unit
 def test_datasource_dict_has_properties(create_source):
-    with create_source(lambda _: None) as source:
+    with create_source(
+        validate_batch_spec=lambda _: None, dialect="postgresql"
+    ) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col").add_sorters(
             ["year", "month"]

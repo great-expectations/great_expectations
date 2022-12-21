@@ -28,7 +28,15 @@ DEFAULT_MIN_DT = datetime(2021, 1, 1, 0, 0, 0)
 DEFAULT_MAX_DT = datetime(2022, 12, 31, 0, 0, 0)
 
 
+class Dialect:
+    def __init__(self, dialect: str):
+        self.name = dialect
+
+
 class _MockConnection:
+    def __init__(self, dialect: Dialect):
+        self.dialect = dialect
+
     def execute(self, query):
         """Execute a query over a sqlalchemy engine connection.
 
@@ -44,20 +52,24 @@ class _MockConnection:
 
 
 class _MockSaEngine:
+    def __init__(self, dialect: Dialect):
+        self.dialect = dialect
+
     @contextmanager
     def connect(self):
         """A contextmanager that yields a _MockConnection"""
-        yield _MockConnection()
+        yield _MockConnection(self.dialect)
 
 
 def sqlachemy_execution_engine_mock_cls(
-    validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None]
+    validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None], dialect: str
 ):
     """Creates a mock gx sql alchemy engine class
 
     Args:
         validate_batch_spec: A hook that can be used to validate the generated the batch spec
             passed into get_batch_data_and_markers
+        dialect: A string representing the SQL Engine dialect. Examples include: postgresql, sqlite
     """
 
     class MockSqlAlchemyExecutionEngine(SqlAlchemyExecutionEngine):
@@ -65,7 +77,7 @@ def sqlachemy_execution_engine_mock_cls(
             # We should likely let the user pass in an engine. In a SqlAlchemyExecutionEngine used in
             # non-mocked code the engine property is of the type:
             # from sqlalchemy.engine import Engine as SaEngine
-            self.engine = _MockSaEngine()
+            self.engine = _MockSaEngine(dialect=Dialect(dialect))
 
         def get_batch_data_and_markers(  # type: ignore[override]
             self, batch_spec: SqlAlchemyDatasourceBatchSpec
