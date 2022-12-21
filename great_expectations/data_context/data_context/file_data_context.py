@@ -57,7 +57,8 @@ class FileDataContext(SerializableDataContext):
                 config_variables.yml and the environment
         """
         if isinstance(context_root_dir, pathlib.Path):
-            self._context_root_directory = str(context_root_dir)
+            context_root_dir = str(context_root_dir)
+        self._context_root_directory = context_root_dir
         if not project_config:
             project_config = FileDataContext._load_file_backed_project_config(
                 context_root_directory=context_root_dir,
