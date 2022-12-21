@@ -448,7 +448,7 @@ class SQLDatasource(Datasource):
 
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
-    type: Literal["sql"] = "sql"
+    type: str = "sql"
     connection_string: str
     assets: Dict[str, TableAsset] = {}
 
