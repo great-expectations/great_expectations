@@ -160,7 +160,7 @@ def type_check(
             warn_unused_ignores=True,
             daemon=daemon,
             clear_cache=clear_cache,
-            report=True,
+            report=report,
             ci=False,
         )
 
