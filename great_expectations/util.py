@@ -41,6 +41,7 @@ from typing import (
     Mapping,
     Optional,
     Set,
+    SupportsFloat,
     Tuple,
     Union,
     cast,
@@ -1513,7 +1514,7 @@ def is_nan(value: Any) -> bool:
         return True
 
 
-def convert_decimal_to_float(d: decimal.Decimal) -> float:
+def convert_decimal_to_float(d: SupportsFloat) -> float:
     """
     This method convers "decimal.Decimal" to standard "float" type.
     """
@@ -1530,7 +1531,11 @@ def convert_decimal_to_float(d: decimal.Decimal) -> float:
         )
         > 0
     )
-    if not rule_based_profiler_call and requires_lossy_conversion(d=d):
+    if (
+        not rule_based_profiler_call
+        and isinstance(d, decimal.Decimal)
+        and requires_lossy_conversion(d=d)
+    ):
         logger.warning(
             f"Using lossy conversion for decimal {d} to float object to support serialization."
         )
@@ -1720,14 +1725,14 @@ def convert_ndarray_float_to_datetime_tuple(
     return tuple(convert_ndarray_float_to_datetime_dtype(data=data).tolist())
 
 
-def is_ndarray_decimal_dtype(
+def does_ndarray_contain_decimal_dtype(
     data: "npt.NDArray",
 ) -> TypeGuard["npt.NDArray"]:
     """
     Determine whether or not all elements of 1-D "np.ndarray" argument are "decimal.Decimal" type objects.
     """
     value: Any
-    result: bool = all(isinstance(value, decimal.Decimal) for value in data)
+    result: bool = any(isinstance(value, decimal.Decimal) for value in data)
     return result
 
 

@@ -5,6 +5,7 @@ import datetime
 import decimal
 import itertools
 import logging
+import numbers
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
@@ -649,6 +650,7 @@ specified (empty "metric_name" value detected)."""
                             and is_parseable_date(value=metric_value)
                         )
                         or isinstance(metric_value, datetime.datetime)
+                        or isinstance(metric_value, numbers.Number)
                         or isinstance(metric_value, decimal.Decimal)
                         or np.issubdtype(metric_value.dtype, np.number)
                     ):
@@ -662,7 +664,7 @@ numeric-valued and datetime-valued metrics (value {metric_value} of type "{str(t
                 else:
                     batch_metric_values.append(metric_value)
 
-            metric_values_by_batch_id[batch_id] = batch_metric_values
+            metric_values_by_batch_id[batch_id] = np.asarray(batch_metric_values)
 
         attributed_resolved_metrics.metric_values_by_batch_id = (
             metric_values_by_batch_id
