@@ -144,7 +144,7 @@ def file_data_context(
     project_path.mkdir()
     context_root_dir = project_path / "great_expectations"
     context = FileDataContext(
-        project_config=data_context_config, context_root_dir=str(context_root_dir)
+        project_config=data_context_config, context_root_dir=context_root_dir
     )
     return context
 
@@ -164,7 +164,7 @@ def cloud_data_context(
         cloud_base_url=ge_cloud_config_e2e.base_url,
         cloud_access_token=ge_cloud_config_e2e.access_token,
         cloud_organization_id=ge_cloud_config_e2e.organization_id,
-        context_root_dir=str(context_root_dir),
+        context_root_dir=context_root_dir,
     )
     return cloud_data_context
 
