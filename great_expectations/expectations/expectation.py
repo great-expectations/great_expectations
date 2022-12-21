@@ -775,7 +775,7 @@ class Expectation(metaclass=MetaExpectation):
     ) -> Optional[List[Union[RenderedStringTemplateContent, RenderedTableContent]]]:
         if result is None:
             return None
-
+        print(result)
         result_dict: Optional[dict] = result.result
 
         if result_dict is None:
@@ -832,6 +832,7 @@ class Expectation(metaclass=MetaExpectation):
 
     @classmethod
     def _build_partial_unexpected_counts_table(cls, result_dict):
+        print("hello")
         table_rows = []
         # We will check to see whether we have *all* of the unexpected values
         # accounted for in our count, and include counts if we do. If we do not,
@@ -856,7 +857,7 @@ class Expectation(metaclass=MetaExpectation):
             "unexpected_index_list"
         )
 
-        unexpected_index_column_names: Optional[List[dict]] = result_dict.get(
+        unexpected_index_column_names: Optional[List[str]] = result_dict.get(
             "unexpected_index_column_names"
         )
         # breakpoint()
@@ -879,7 +880,7 @@ class Expectation(metaclass=MetaExpectation):
         # what do we want to look like in the end?
         # {"apple": {"pk_1" : [3, 4, 5], "pk_"2: ["three", "four", "five"]}}
         # find the apple
-        print("so far so goo")
+
         res = pd.DataFrame(partial_unexpected_index_list)
         for name in partial_unexpected_list:
             index_dict[name] = {}
@@ -889,10 +890,16 @@ class Expectation(metaclass=MetaExpectation):
         partial_unexpected_index_df = Expectation._convert_unexpected_indices_to_df(
             result=partial_unexpected_index_list,
             unexpected_index_column_names=unexpected_index_column_names,
+            partial_unexpected_list=partial_unexpected_list,
         )
+        # then we have set it manually
+        if (
+            partial_unexpected_index_df is not None
+            and unexpected_index_column_names is None
+        ):
+            unexpected_index_column_names = ["Index"]
 
         # TODO: and then do rendering stuff to it
-
         if partial_unexpected_counts:
             for unexpected_count_dict in partial_unexpected_counts:
                 value: Optional[Any] = unexpected_count_dict.get("value")
@@ -905,14 +912,15 @@ class Expectation(metaclass=MetaExpectation):
                     row_list.append(value)
                     row_list.append(count)
                     # table_rows.append([value, count])
-
-                    for column_name in unexpected_index_column_names:
-                        row_list.append(
-                            (
-                                partial_unexpected_index_df[[column_name]].loc[value]
-                            ).item()
-                        )
-
+                    if unexpected_index_column_names:
+                        for column_name in unexpected_index_column_names:
+                            row_list.append(
+                                (
+                                    partial_unexpected_index_df[[column_name]].loc[
+                                        value
+                                    ]
+                                ).item()
+                            )
                     table_rows.append(row_list)
 
                 elif value == "":
@@ -930,14 +938,15 @@ class Expectation(metaclass=MetaExpectation):
             header_row = ["Sampled Unexpected Values"]
             table_rows = [[row[0]] for row in table_rows]
 
-        # breakpoint()
-        # TODO turn this into
         return header_row, table_rows
 
     @classmethod
     def _convert_unexpected_indices_to_df(
-        cls, result: List[dict], unexpected_index_column_names: List[str]
-    ) -> pd.DataFrame:
+        cls,
+        result: List[dict],
+        unexpected_index_column_names: Optional[List[str]] = None,
+        partial_unexpected_list: Optional[List[Any]] = None,
+    ) -> Optional[pd.DataFrame]:
         """
 
         Args:
@@ -947,10 +956,23 @@ class Expectation(metaclass=MetaExpectation):
             pd.DataFrame that
         """
         # create dataframe but change them all to a stringj
-        df_version = pd.DataFrame(result, dtype="string")
-        domain_column_name = (
-            set(result[0].keys()).difference(set(unexpected_index_column_names)).pop()
-        )
+        if unexpected_index_column_names:
+            df_version = pd.DataFrame(result, dtype="string")
+            domain_column_name = (
+                set(result[0].keys())
+                .difference(set(unexpected_index_column_names))
+                .pop()
+            )
+        elif partial_unexpected_list:
+            df_version = pd.DataFrame(
+                list(zip(partial_unexpected_list, result)),
+                columns=["Value", "Index"],
+                dtype="string",
+            )
+            domain_column_name = "Value"
+        else:
+            # return early if we dont have any information
+            return None
         new_df = df_version.groupby(domain_column_name).agg(lambda y: y)
         return new_df
 

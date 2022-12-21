@@ -848,3 +848,32 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
     )
     for res in result.run_results.values():
         print(res["actions_results"]["update_data_docs"])
+
+
+@pytest.mark.integration
+def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_rendering(
+    in_memory_runtime_context,
+    batch_request_for_pandas_unexpected_rows_and_index,
+    reference_checkpoint_config_for_unexpected_column_names,
+    expectation_config_expect_column_values_to_be_in_set,
+):
+    dict_to_update_checkpoint: dict = {
+        "result_format": {
+            "result_format": "COMPLETE",
+            # "unexpected_index_column_names": ["pk_1", "pk_2"],
+        }
+    }
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=in_memory_runtime_context,
+        checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
+        expectations_list=[expectation_config_expect_column_values_to_be_in_set],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        expectation_suite_name="animal_names_exp",
+        batch_request=batch_request_for_pandas_unexpected_rows_and_index,
+    )
+    for res in result.run_results.values():
+        print(res["actions_results"]["update_data_docs"])

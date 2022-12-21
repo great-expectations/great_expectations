@@ -837,6 +837,7 @@ def data_context_with_connection_to_animal_names_db(
     )
     # noinspection PyProtectedMember
     context._save_project_config()
+    # breakpoint()
     return context
 
 
