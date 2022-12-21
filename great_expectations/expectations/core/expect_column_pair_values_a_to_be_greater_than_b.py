@@ -126,8 +126,6 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
             ("ignore_row_if", RendererSchemaType.STRING),
             ("mostly", RendererSchemaType.NUMBER),
             ("or_equal", RendererSchemaType.BOOLEAN),
-            ("row_condition", RendererSchemaType.STRING),
-            ("condition_parser", RendererSchemaType.STRING),
         )
         for name, schema_type in add_param_args:
             renderer_configuration.add_param(name=name, schema_type=schema_type)
@@ -154,15 +152,6 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
 
         if params.parse_strings_as_datetimes:
             template_str += " Values should be parsed as datetimes."
-
-        if params.row_condition:
-            renderer_configuration = cls._add_row_condition_params(
-                renderer_configuration=renderer_configuration
-            )
-            row_condition_str: str = cls._get_row_condition_string(
-                renderer_configuration=renderer_configuration
-            )
-            template_str = f"{row_condition_str}, then {template_str}"
 
         renderer_configuration.template_str = template_str
 
