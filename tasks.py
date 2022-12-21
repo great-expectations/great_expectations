@@ -143,10 +143,27 @@ def type_check(
     daemon=False,
     clear_cache=False,
     report=False,
+    ci=False,
 ):
     """Run mypy static type-checking on select packages."""
+    mypy_cache = pathlib.Path(".mypy_cache")
+
+    if ci:
+        mypy_cache.mkdir(exist_ok=True)
+
+        type_check(
+            ctx,
+            packages,
+            install_types=True,
+            pretty=pretty,
+            warn_unused_ignores=True,
+            daemon=daemon,
+            clear_cache=clear_cache,
+            report=True,
+            ci=False,
+        )
+
     if clear_cache:
-        mypy_cache = pathlib.Path(".mypy_cache")
         print(f"  Clearing {mypy_cache} ... ", end="")
         try:
             shutil.rmtree(mypy_cache)
