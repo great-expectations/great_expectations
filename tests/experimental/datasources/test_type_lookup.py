@@ -50,6 +50,15 @@ def test_map_key_to_value(key: ValidTypes, value: ValidTypes):
     assert d[value] == key
 
 
+def test_ok_to_add_identical_key_value():
+    d = TypeLookup()
+    key, value = "key", "value"
+    d[key] = value
+    # Neither of these should raise exceptions
+    d[key] = value
+    d[value] = key
+
+
 @pytest.mark.parametrize(
     ["initial", "kv_pair"],
     [
