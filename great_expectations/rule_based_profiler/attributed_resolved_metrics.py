@@ -1,6 +1,6 @@
 import logging
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, Iterator, List, Optional, Sized
+from typing import Dict, Iterator, List, Optional, Sized
 
 import numpy as np
 import pandas as pd
@@ -62,7 +62,7 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
                     if all(isinstance(value, (list, tuple)) for value in values):
                         values_iterator = iter(values)
                         first_value_length: int = len(next(values_iterator))
-                        current_value: Sized[Any]
+                        current_value: Sized
                         if not all(
                             len(current_value) == first_value_length
                             for current_value in values_iterator
@@ -148,11 +148,14 @@ class AttributedResolvedMetrics(SerializableDictDot):
 
     @property
     def id(self) -> str:
+        if self.metric_attributes is None:
+            return ""
+
         return self.metric_attributes.to_id()
 
     @property
     def attributed_metric_values(self) -> Optional[Dict[str, MetricValue]]:
-        if self.metric_values_by_batch_id is None:
+        if self.metric_values_by_batch_id is None or self.batch_ids is None:
             return None
 
         batch_id: str
@@ -164,12 +167,18 @@ class AttributedResolvedMetrics(SerializableDictDot):
 
     @property
     def conditioned_attributed_metric_values(self) -> Dict[str, MetricValues]:
+        if self.attributed_metric_values is None:
+            return {}
+
         return AttributedResolvedMetrics.get_conditioned_attributed_metric_values_from_attributed_metric_values(
             attributed_metric_values=self.attributed_metric_values
         )
 
     @property
     def conditioned_metric_values(self) -> MetricValues:
+        if self.attributed_metric_values is None:
+            return None
+
         return AttributedResolvedMetrics.get_conditioned_metric_values_from_attributed_metric_values(
             attributed_metric_values=self.attributed_metric_values
         )
