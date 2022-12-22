@@ -79,9 +79,6 @@ def test_db_introspection(postgresql_sqlalchemy_datasource, caplog):
     # We should be able to get kwargs without having them specifically configured based on discovery
     batch_kwargs = table_generator.build_batch_kwargs(table_name)
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceTableBatchKwargs)
-    # print(f'\n[ALEX_TEST] [WOUTPUT] WOUTPUT-ACTUAL_TABLE:\n{batch_kwargs.table} ; TYPE: {str(type(batch_kwargs.table))}')
-    # print(f'\n[ALEX_TEST] [WOUTPUT] WOUTPUT-ACTUAL_SCHEMA:\n{batch_kwargs.schema} ; TYPE: {str(type(batch_kwargs.schema))}')
-    # print(f'\n[ALEX_TEST] [WOUTPUT] WOUTPUT-EXPECTED:\n{table_name} ; TYPE: {str(type(table_name))}')
     assert batch_kwargs.table == table_name
     assert batch_kwargs.schema == "public"
 
