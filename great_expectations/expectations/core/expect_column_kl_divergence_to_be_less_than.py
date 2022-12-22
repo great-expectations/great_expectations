@@ -1102,6 +1102,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                         },
                     },
                     "graph": renderer_configuration.graph,
+                    "meta_notes": renderer_configuration.meta_notes,
                     "schema": {"type": "GraphType"},
                 }
             )
@@ -1122,6 +1123,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                     },
                     "header_row": header_row,
                     "table": table,
+                    "meta_notes": renderer_configuration.meta_notes,
                     "schema": {"type": "TableType"},
                 }
             )

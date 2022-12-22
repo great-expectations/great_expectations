@@ -12,7 +12,10 @@ from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.types import DictDot
 
 if TYPE_CHECKING:
-    from great_expectations.render.renderer_configuration import RendererTableValue
+    from great_expectations.render.renderer_configuration import (
+        MetaNotes,
+        RendererTableValue,
+    )
 
 
 class RendererPrefix(str, Enum):
@@ -630,6 +633,7 @@ class RenderedAtomicValue(DictDot):
         header_row: Optional[List[RendererTableValue]] = None,
         table: Optional[List[List[RendererTableValue]]] = None,
         graph: Optional[dict] = None,
+        meta_notes: Optional[MetaNotes] = None,
     ) -> None:
         self.schema: Optional[dict] = schema
         self.header: Optional[RenderedAtomicValue] = header
@@ -644,6 +648,8 @@ class RenderedAtomicValue(DictDot):
 
         # GraphType
         self.graph = RenderedAtomicValueGraph(graph=graph)
+
+        self.meta_notes: Optional[MetaNotes] = meta_notes
 
     def __repr__(self) -> str:
         return json.dumps(self.to_json_dict(), indent=2)
@@ -696,6 +702,8 @@ class RenderedAtomicValueSchema(Schema):
     # for GraphType
     graph = fields.Dict(required=False, allow_none=True)
 
+    meta_notes = fields.Dict(required=False, allow_none=True)
+
     @post_load
     def create_value_obj(self, data, **kwargs):
         return RenderedAtomicValue(**data)
@@ -708,6 +716,7 @@ class RenderedAtomicValueSchema(Schema):
         "header_row",
         "table",
         "graph",
+        "meta_notes",
     ]
 
     @post_dump

@@ -14,6 +14,7 @@ from great_expectations.render.renderer import (
     ProfilingResultsPageRenderer,
     ValidationResultsPageRenderer,
 )
+from great_expectations.render.renderer_configuration import MetaNotesFormat
 
 
 def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
@@ -51,7 +52,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
             expectation_suite_name="test",
             meta={
                 "notes": {
-                    "format": "string",
+                    "format": MetaNotesFormat.STRING,
                     "content": ["*alpha*", "_bravo_", "charlie"],
                 }
             },
@@ -69,7 +70,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
             expectation_suite_name="test",
-            meta={"notes": {"format": "markdown", "content": "*alpha*"}},
+            meta={"notes": {"format": MetaNotesFormat.MARKDOWN, "content": "*alpha*"}},
             data_context=context,
         )
     )
@@ -96,7 +97,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
             expectation_suite_name="test",
             meta={
                 "notes": {
-                    "format": "markdown",
+                    "format": MetaNotesFormat.MARKDOWN,
                     "content": ["*alpha*", "_bravo_", "charlie"],
                 }
             },
@@ -154,7 +155,7 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
             expectation_suite_name="test",
-            meta={"notes": {"format": "markdown", "content": ["hi"]}},
+            meta={"notes": {"format": MetaNotesFormat.MARKDOWN, "content": ["hi"]}},
             data_context=context,
         )
     )
