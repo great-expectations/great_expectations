@@ -6,6 +6,7 @@ import datetime
 import json
 import logging
 import os
+import pathlib
 import sys
 import uuid
 import warnings
@@ -106,6 +107,7 @@ from great_expectations.datasource.datasource_serializer import (
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.rule_based_profiler.config.base import (
@@ -186,6 +188,8 @@ class AbstractDataContext(ConfigPeer, ABC):
     PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND = 4
     PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND = 5
 
+    zep_config: Optional[GxConfig]
+
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT___INIT__,
     )
@@ -234,6 +238,10 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         # Build the datasources we know about and have access to
         self._init_datasources()
+
+        self.zep_config = self._load_zep_config()
+        if self.zep_config:
+            self._attach_zep_config_datasources(self.zep_config)
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies: dict = {}
@@ -3841,3 +3849,16 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
+
+    def _load_zep_config(self) -> Optional[GxConfig]:
+        # TODO: always return a `GxConfig` object even if it's empty
+        if self.root_directory:
+            zep_config_file = pathlib.Path(self.root_directory) / "zep_config.yaml"
+            if zep_config_file.exists():
+                return GxConfig.parse_yaml(zep_config_file)
+        return None
+
+    def _attach_zep_config_datasources(self, config: GxConfig):
+        for ds_name, datasource in config.datasources.items():
+            logger.info(f"Loaded '{ds_name}' from config")
+            self._attach_datasource_to_context(datasource)
