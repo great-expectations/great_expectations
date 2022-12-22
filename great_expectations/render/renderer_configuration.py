@@ -231,8 +231,8 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             expectation_configuration: ExpectationConfiguration = values[
                 "result"
             ].expectation_config
-            values["expectation_type"]: str = expectation_configuration.expectation_type
-            values["kwargs"]: dict = expectation_configuration.kwargs
+            values["expectation_type"] = expectation_configuration.expectation_type
+            values["kwargs"] = expectation_configuration.kwargs
             raw_configuration: ExpectationConfiguration = (
                 expectation_configuration.get_raw_configuration()
             )
@@ -253,8 +253,8 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                     else renderer_params_args
                 )
         else:
-            values["expectation_type"]: str = values["configuration"].expectation_type
-            values["kwargs"]: dict = values["configuration"].kwargs
+            values["expectation_type"] = values["configuration"].expectation_type
+            values["kwargs"] = values["configuration"].kwargs
         return values
 
     @root_validator()
