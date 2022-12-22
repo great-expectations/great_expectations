@@ -1,18 +1,15 @@
 from datetime import datetime, timedelta
-from typing import Dict, Optional, List
-
-from great_expectations.execution_engine.execution_engine import MetricFunctionTypes
-
-from great_expectations.expectations.metrics import ColumnAggregateMetricProvider
-
-from great_expectations.core.metric_domain_types import MetricDomainTypes
+from typing import Dict, List, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.execution_engine.execution_engine import MetricFunctionTypes
 from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.metrics import ColumnAggregateMetricProvider
 from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 
@@ -163,7 +160,7 @@ class ExpectYesterdayCountComparedToAvgEquivalentDaysOfWeek(ColumnExpectation):
         execution_engine: ExecutionEngine = None,
     ):
         date_format = "%Y-%m-%d"
-        from datetime import timedelta, datetime
+        from datetime import datetime, timedelta
 
         counts_per_days = metrics["column.counts_per_days_custom"]
         run_date: str = self.get_success_kwargs(configuration).get("run_date")
