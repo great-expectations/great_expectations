@@ -150,11 +150,8 @@ class FileDataContext(SerializableDataContext):
             raise gx_exceptions.ConfigNotFoundError()
 
         try:
-            return cast(
-                DataContextConfig,
-                DataContextConfig.from_commented_map(
-                    commented_map=config_commented_map_from_yaml
-                ),
+            return DataContextConfig.from_commented_map(
+                commented_map=config_commented_map_from_yaml
             )
         except gx_exceptions.InvalidDataContextConfigError:
             # Just to be explicit about what we intended to catch

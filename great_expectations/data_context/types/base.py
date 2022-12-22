@@ -8,7 +8,18 @@ import json
 import logging
 import uuid
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional, Set, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    MutableMapping,
+    Optional,
+    Set,
+    Type,
+    TypeVar,
+    Union,
+)
 from uuid import UUID
 
 from marshmallow import (
@@ -73,6 +84,9 @@ def object_to_yaml_str(obj):
     return output_str
 
 
+BYC = TypeVar("BYC", bound="BaseYamlConfig")
+
+
 class BaseYamlConfig(SerializableDictDot):
     _config_schema_class = None
 
@@ -86,7 +100,7 @@ class BaseYamlConfig(SerializableDictDot):
         self._commented_map = commented_map
 
     @classmethod
-    def _get_schema_instance(cls) -> Schema:
+    def _get_schema_instance(cls: Type[BYC]) -> Schema:
         if not issubclass(cls.get_schema_class(), Schema):
             raise ge_exceptions.InvalidConfigError(
                 "Invalid type: A configuration schema class needs to inherit from the Marshmallow Schema class."
@@ -111,8 +125,8 @@ class BaseYamlConfig(SerializableDictDot):
 
     @classmethod
     def from_commented_map(
-        cls, commented_map: Union[CommentedMap, Dict]
-    ) -> BaseYamlConfig:
+        cls: Type[BYC], commented_map: Union[CommentedMap, Dict]
+    ) -> BYC:
         try:
             schema_instance: Schema = cls._get_schema_instance()
             config: Union[dict, BaseYamlConfig] = schema_instance.load(commented_map)
