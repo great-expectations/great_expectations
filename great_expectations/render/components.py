@@ -6,7 +6,7 @@ from enum import Enum
 from string import Template as pTemplate
 from typing import TYPE_CHECKING, List, Optional, Union
 
-from marshmallow import INCLUDE, Schema, fields, post_dump, post_load
+from marshmallow import Schema, fields, post_dump, post_load
 
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.types import DictDot
