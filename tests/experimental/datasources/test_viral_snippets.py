@@ -1,6 +1,7 @@
 # import functools
 import logging
 import pathlib
+from pprint import pformat as pf
 
 import pytest
 from pytest import TempPathFactory
@@ -11,6 +12,7 @@ pytestmark = [pytest.mark.integration]
 from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
 from great_expectations.experimental.datasources.config import GxConfig
+from great_expectations.experimental.datasources.interfaces import DataAsset, Datasource
 
 LOGGER = logging.getLogger(__file__)
 
@@ -133,10 +135,17 @@ def test_serialize_zep_config(zep_file_context: FileDataContext):
             assert asset_name in dumped_yaml
 
 
-def test_zep_simple_validate(zep_file_context: FileDataContext):
-    # see `test_run_checkpoint_and_data_doc`
-    # sans data_doc
-    raise NotImplementedError()
+def test_zep_simple_validate_workflow(zep_file_context: FileDataContext):
+    my_datasource: Datasource = zep_file_context.datasources["my_sql_ds"]
+    my_asset: DataAsset = my_datasource.get_asset("my_asset")
+
+    batch_request = my_asset.get_batch_request({"year": 2019, "month": 1})
+    validator = zep_file_context.get_validator(batch_request=batch_request)
+    result = validator.expect_column_max_to_be_between(
+        column="passenger_count", min_value=1, max_value=12
+    )
+    print(f"  results ->\n{pf(result)}")
+    assert result["success"] == True
 
 
 @pytest.mark.xfail(reason="TypeError: cannot pickle 'module' object")
