@@ -199,7 +199,7 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
             params_with_json_schema=params_with_json_schema,
             param_key_with_list="regex_list",
         )
-        return (template_str, params_with_json_schema, styling)
+        return template_str, params_with_json_schema, None, styling
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)

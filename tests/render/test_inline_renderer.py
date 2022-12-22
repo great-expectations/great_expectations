@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List
 
 import pytest
@@ -15,6 +14,7 @@ from great_expectations.render import (
 )
 from great_expectations.render.exceptions import InlineRendererError
 from great_expectations.render.renderer.inline_renderer import InlineRenderer
+from great_expectations.render.renderer_configuration import MetaNotesFormat
 
 
 def clean_serialized_rendered_atomic_content_graphs(
@@ -608,6 +608,36 @@ def test_inline_renderer_expectation_validation_result_serialization(
                 }
             ],
             id="graph",
+        ),
+        pytest.param(
+            ExpectationConfiguration(
+                expectation_type="expect_table_row_count_to_equal",
+                kwargs={"value": 3},
+                meta={
+                    "notes": {
+                        "format": MetaNotesFormat.STRING,
+                        "content": ["This is the most important Expectation!!"],
+                    }
+                },
+            ),
+            [
+                {
+                    "value_type": "StringValueType",
+                    "name": AtomicPrescriptiveRendererType.SUMMARY,
+                    "value": {
+                        "template": "Must have exactly $value rows.",
+                        "schema": {"type": "com.superconductive.rendered.string"},
+                        "params": {
+                            "value": {"schema": {"type": "number"}, "value": 3},
+                        },
+                        "meta_notes": {
+                            "content": ["This is the most important Expectation!!"],
+                            "format": MetaNotesFormat.STRING,
+                        },
+                    },
+                }
+            ],
+            id="meta_notes",
         ),
     ],
 )
