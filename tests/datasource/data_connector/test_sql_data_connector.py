@@ -2551,4 +2551,4 @@ def test_include_schema_name_get_available_data_assets(
 
     expected_data_asset_names = ["test_ci.test_df", "test_connection.test_df"]
 
-    assert actual_data_asset_names == expected_data_asset_names
+    assert set(expected_data_asset_names).issubset(set(actual_data_asset_names))
