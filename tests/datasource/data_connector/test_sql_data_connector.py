@@ -9,6 +9,7 @@ from ruamel.yaml import YAML
 from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest, IDDict
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetSqlDataConnector,
     InferredAssetSqlDataConnector,
@@ -578,10 +579,33 @@ def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
 
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_get_batch_data_and_markers_sampling_method__limit(
+    in_memory_runtime_context,
     sampler_method_name_prefix,
+    test_cases_for_sql_data_connector_sqlite_connection_url,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    in_memory_runtime_context.datasources["my_test_datasource"] = Datasource(
+        name="my_test_datasource",
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        execution_engine={
+            "class_name": "SqlAlchemyExecutionEngine",
+            "url": test_cases_for_sql_data_connector_sqlite_connection_url,
+        },
+        data_connectors={
+            "my_sql_data_connector": {
+                "class_name": "ConfiguredAssetSqlDataConnector",
+                "assets": {
+                    "my_asset": {
+                        "table_name": "table_partitioned_by_date_column__A",
+                    },
+                },
+            },
+        },
+    )
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    in_memory_runtime_context.datasources["my_test_datasource"]._execution_engine = execution_engine  # type: ignore[union-attr]
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=SqlAlchemyDatasourceBatchSpec(
@@ -596,9 +620,20 @@ def test_get_batch_data_and_markers_sampling_method__limit(
         )
     )
 
-    batch = Batch(data=batch_data)
+    batch_definition = BatchDefinition(
+        datasource_name="my_test_datasource",
+        data_connector_name="my_sql_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+    )
 
-    validator = Validator(execution_engine, batches=[batch])
+    batch = Batch(data=batch_data, batch_definition=batch_definition)
+
+    validator = Validator(
+        execution_engine=execution_engine,
+        data_context=in_memory_runtime_context,
+        batches=[batch],
+    )
     assert len(validator.head(fetch_all=True)) == 20
 
     assert not validator.expect_column_values_to_be_in_set(
@@ -709,9 +744,32 @@ def test_get_batch_data_and_markers_sampling_method__md5(
 
 
 def test_get_batch_data_and_markers_to_make_sure_splitter_and_sampler_methods_are_optional(
+    in_memory_runtime_context,
+    test_cases_for_sql_data_connector_sqlite_connection_url,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    in_memory_runtime_context.datasources["my_test_datasource"] = Datasource(
+        name="my_test_datasource",
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        execution_engine={
+            "class_name": "SqlAlchemyExecutionEngine",
+            "url": test_cases_for_sql_data_connector_sqlite_connection_url,
+        },
+        data_connectors={
+            "my_sql_data_connector": {
+                "class_name": "ConfiguredAssetSqlDataConnector",
+                "assets": {
+                    "my_asset": {
+                        "table_name": "table_partitioned_by_date_column__A",
+                    },
+                },
+            },
+        },
+    )
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    in_memory_runtime_context.datasources["my_test_datasource"]._execution_engine = execution_engine  # type: ignore[union-attr]
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=SqlAlchemyDatasourceBatchSpec(
@@ -727,8 +785,12 @@ def test_get_batch_data_and_markers_to_make_sure_splitter_and_sampler_methods_ar
             }
         )
     )
-    execution_engine.load_batch_data("__", batch_data)
-    validator = Validator(execution_engine)
+    execution_engine.load_batch_data("_0", batch_data)
+
+    validator = Validator(
+        execution_engine=execution_engine,
+        data_context=in_memory_runtime_context,
+    )
     assert len(validator.head(fetch_all=True)) == 12
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
@@ -739,8 +801,12 @@ def test_get_batch_data_and_markers_to_make_sure_splitter_and_sampler_methods_ar
             }
         )
     )
-    execution_engine.load_batch_data("__", batch_data)
-    validator = Validator(execution_engine)
+    execution_engine.load_batch_data("_1", batch_data)
+
+    validator = Validator(
+        execution_engine=execution_engine,
+        data_context=in_memory_runtime_context,
+    )
     assert len(validator.head(fetch_all=True)) == 123
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
@@ -754,18 +820,44 @@ def test_get_batch_data_and_markers_to_make_sure_splitter_and_sampler_methods_ar
         )
     )
 
-    execution_engine.load_batch_data("__", batch_data)
-    validator = Validator(execution_engine)
+    execution_engine.load_batch_data("_2", batch_data)
+    validator = Validator(
+        execution_engine=execution_engine,
+        data_context=in_memory_runtime_context,
+    )
     assert len(validator.head(fetch_all=True)) == 123
 
 
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__limit(
+    in_memory_runtime_context,
     sampler_method_name_prefix,
+    test_cases_for_sql_data_connector_sqlite_connection_url,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
     random.seed(0)
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    in_memory_runtime_context.datasources["my_test_datasource"] = Datasource(
+        name="my_test_datasource",
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        execution_engine={
+            "class_name": "SqlAlchemyExecutionEngine",
+            "url": test_cases_for_sql_data_connector_sqlite_connection_url,
+        },
+        data_connectors={
+            "my_sql_data_connector": {
+                "class_name": "ConfiguredAssetSqlDataConnector",
+                "assets": {
+                    "my_asset": {
+                        "table_name": "table_partitioned_by_date_column__A",
+                    },
+                },
+            },
+        },
+    )
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    in_memory_runtime_context.datasources["my_test_datasource"]._execution_engine = execution_engine  # type: ignore[union-attr]
 
     my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
         name="my_sql_data_connector",
@@ -802,8 +894,12 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__limit(
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=batch_spec
     )
-    batch = Batch(data=batch_data)
-    validator = Validator(execution_engine, batches=[batch])
+    batch = Batch(data=batch_data, batch_definition=batch_definition_list[0])
+    validator = Validator(
+        execution_engine=execution_engine,
+        data_context=in_memory_runtime_context,
+        batches=[batch],
+    )
     assert len(validator.head(fetch_all=True)) == 20
     assert not validator.expect_column_values_to_be_in_set(
         "date", value_set=["2020-01-02"]
@@ -2400,7 +2496,9 @@ def test_include_schema_name_introspection(mysql_sqlalchemy_datasource):
             "name": "my_test_data_connector",
         },
         runtime_environment={
-            "execution_engine": mysql_sqlalchemy_datasource,
+            "execution_engine": SqlAlchemyExecutionEngine(
+                engine=mysql_sqlalchemy_datasource.engine
+            ),
             "datasource_name": "my_test_datasource",
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},

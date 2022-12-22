@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Union
 
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
@@ -35,7 +36,7 @@ class QueryColumn(QueryMetricProvider):
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
         runtime_configuration: dict,
-    ) -> List[sqlalchemy_engine_Row]:
+    ) -> List[dict]:
         query: Optional[str] = metric_value_kwargs.get(
             "query"
         ) or cls.default_kwarg_values.get("query")
@@ -65,7 +66,22 @@ class QueryColumn(QueryMetricProvider):
         engine: sqlalchemy_engine_Engine = execution_engine.engine
         result: List[sqlalchemy_engine_Row] = engine.execute(sa.text(query)).fetchall()
 
-        return result
+        # TODO: <Alex>ALEX</Alex>
+        # return result
+        # TODO: <Alex>ALEX</Alex>
+        # print(f'\n[ALEX_TEST] [QueryColumn._SQLALCHEMY()] RESULT:\n{result} ; TYPE: {str(type(result))}')
+        for element in result:
+            # print(f'\n[ALEX_TEST] [QueryColumn._SQLALCHEMY()] RESULT_ELEMENT:\n{element} ; TYPE: {str(type(element))}')
+            # print(f'\n[ALEX_TEST] [QueryColumn._SQLALCHEMY()] RESULT_ELEMENT._MAPPING:\n{element._mapping} ; TYPE: {str(type(element._mapping))}')
+            b = convert_to_json_serializable(data=dict(element._mapping))
+            # print(f'\n[ALEX_TEST] [QueryColumn._SQLALCHEMY()] RESULT_ELEMENT._MAPPING_JSON_SERIALIZED:\n{b} ; TYPE: {str(type(b))}')
+        # a = [convert_to_json_serializable(data=element._mapping) for element in result]
+        a = [dict(element._mapping) for element in result]
+        # print(f'\n[ALEX_TEST] [QueryColumn._SQLALCHEMY()] RESULT_ELEMENT_MAPPINGED_RETURNING:\n{a} ; TYPE: {str(type(a))}')
+        return a
+        # TODO: <Alex>ALEX</Alex>
+        # return [element._mapping for element in result]
+        # TODO: <Alex>ALEX</Alex>
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
@@ -75,7 +91,7 @@ class QueryColumn(QueryMetricProvider):
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
         runtime_configuration: dict,
-    ) -> List[pyspark_sql_Row]:
+    ) -> List[dict]:
         query: Optional[str] = metric_value_kwargs.get(
             "query"
         ) or cls.default_kwarg_values.get("query")
@@ -92,4 +108,9 @@ class QueryColumn(QueryMetricProvider):
         engine: pyspark_sql_SparkSession = execution_engine.spark
         result: List[pyspark_sql_Row] = engine.sql(query).collect()
 
-        return result
+        # TODO: <Alex>ALEX</Alex>
+        # return result
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        return [element.asDict() for element in result]
+        # TODO: <Alex>ALEX</Alex>

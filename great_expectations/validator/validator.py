@@ -1127,34 +1127,46 @@ class Validator:
                 )
                 # TODO: <Alex>ALEX</Alex>
                 # TODO: <Alex>ALEX</Alex>
-                metrics_by_domain = MetricMultiBatchValidationGraphBuilder(
-                    validator=self,
-                    metric_configurations=validation_dependencies.get_metric_configurations(),
-                ).run()
-                # TODO: <Alex>ALEX</Alex>
-                # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] ALL_VALIDATION_GRAPH_METRICS_BY_DOMAIN:\n{metrics_by_domain} ; TYPE: {str(type(metrics_by_domain))}")
-                for (
-                    domain,
-                    parameter_values_for_fully_qualified_parameter_names,
-                ) in metrics_by_domain.items():
-                    # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] VALIDATION_GRAPH:DOMAIN:\n{domain} ; TYPE: {str(type(domain))}")
-                    # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] VALIDATION_GRAPH:PARAMETER_VALUES_FOR_FULLY_QUALIFIED_PARAMETER_NAMES:\n{parameter_values_for_fully_qualified_parameter_names} ; TYPE: {str(type(parameter_values_for_fully_qualified_parameter_names))}")
+                if self._data_context is None:
+                    # Support for GX-V2 (to be deprecated soon).
+                    expectation_validation_graph = ExpectationValidationGraph(
+                        configuration=evaluated_config,
+                        graph=self._metrics_calculator.build_metric_dependency_graph(
+                            metric_configurations=validation_dependencies.get_metric_configurations(),
+                            runtime_configuration=runtime_configuration,
+                        ),
+                    )
+                else:
+                    # Support for GX-V4 (multi-Batch).
+                    metrics_by_domain = MetricMultiBatchValidationGraphBuilder(
+                        validator=self,
+                        metric_configurations=validation_dependencies.get_metric_configurations(),
+                    ).run()
+                    # TODO: <Alex>ALEX</Alex>
+                    # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] ALL_VALIDATION_GRAPH_METRICS_BY_DOMAIN:\n{metrics_by_domain} ; TYPE: {str(type(metrics_by_domain))}")
                     for (
-                        fully_qualified_parameter_name,
-                        parameter_node,
-                    ) in parameter_values_for_fully_qualified_parameter_names.items():
-                        # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] VALIDATION_GRAPH:FULLY_QUALIFIED_PARAMETER_NAME:\n{fully_qualified_parameter_name} ; TYPE: {str(type(fully_qualified_parameter_name))}")
-                        # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] VALIDATION_GRAPH:PARAMETER_NODE:\n{parameter_node} ; TYPE: {str(type(parameter_node))}")
-                        if fully_qualified_parameter_name.find(RAW_PARAMETER_KEY) != (
-                            -1
+                        domain,
+                        parameter_values_for_fully_qualified_parameter_names,
+                    ) in metrics_by_domain.items():
+                        # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] VALIDATION_GRAPH:DOMAIN:\n{domain} ; TYPE: {str(type(domain))}")
+                        # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] VALIDATION_GRAPH:PARAMETER_VALUES_FOR_FULLY_QUALIFIED_PARAMETER_NAMES:\n{parameter_values_for_fully_qualified_parameter_names} ; TYPE: {str(type(parameter_values_for_fully_qualified_parameter_names))}")
+                        for (
+                            fully_qualified_parameter_name,
+                            parameter_node,
+                        ) in (
+                            parameter_values_for_fully_qualified_parameter_names.items()
                         ):
-                            # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] VALIDATION_GRAPH:FULLY_QUALIFIED_RAW_PARAMETER_NAME:\n{fully_qualified_parameter_name} ; TYPE: {str(type(fully_qualified_parameter_name))}")
-                            # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] VALIDATION_GRAPH:RAW_PARAMETER_NODE:\n{parameter_node} ; TYPE: {str(type(parameter_node))}")
-                            graph = parameter_node[
-                                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
-                            ]["graph"]
-                            expectation_validation_graph.update(graph=graph)
-
+                            # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] VALIDATION_GRAPH:FULLY_QUALIFIED_PARAMETER_NAME:\n{fully_qualified_parameter_name} ; TYPE: {str(type(fully_qualified_parameter_name))}")
+                            # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] VALIDATION_GRAPH:PARAMETER_NODE:\n{parameter_node} ; TYPE: {str(type(parameter_node))}")
+                            if fully_qualified_parameter_name.find(
+                                RAW_PARAMETER_KEY
+                            ) != (-1):
+                                # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] VALIDATION_GRAPH:FULLY_QUALIFIED_RAW_PARAMETER_NAME:\n{fully_qualified_parameter_name} ; TYPE: {str(type(fully_qualified_parameter_name))}")
+                                # print(f"\n[ALEX_TEST] [VALIDATOR._generate_metric_dependency_subgraphs_for_each_expectation_configuration()] VALIDATION_GRAPH:RAW_PARAMETER_NODE:\n{parameter_node} ; TYPE: {str(type(parameter_node))}")
+                                graph = parameter_node[
+                                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                                ]["graph"]
+                                expectation_validation_graph.update(graph=graph)
                 # TODO: <Alex>ALEX</Alex>
                 # TODO: <Alex>ALEX</Alex>
                 # expectation_validation_graph = ExpectationValidationGraph(

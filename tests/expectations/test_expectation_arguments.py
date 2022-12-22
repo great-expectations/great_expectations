@@ -594,7 +594,12 @@ def test_result_format_configured_no_set_default_override(
                 "result_format": {"result_format": "BOOLEAN_ONLY"},
                 "include_config": True,
                 "column": "Name",
-                "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
+                # TODO: <Alex>ALEX</Alex>
+                # "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                "batch_id": "0b1b3e0a176781d54d8c2384793e2086",
+                # TODO: <Alex>ALEX</Alex>
             },
             "expectation_type": "expect_column_values_to_not_be_null",
             "meta": {"Notes": "Some notes"},
@@ -636,7 +641,12 @@ def test_result_format_configured_no_set_default_override(
                 "include_config": True,
                 "column": "Name",
                 "Notes": "Some notes",
-                "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
+                # TODO: <Alex>ALEX</Alex>
+                # "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                "batch_id": "0b1b3e0a176781d54d8c2384793e2086",
+                # TODO: <Alex>ALEX</Alex>
             },
         },
         "result": {},
@@ -739,7 +749,12 @@ def test_result_format_configured_with_set_default_override(
                 "result_format": {"result_format": "SUMMARY"},
                 "include_config": True,
                 "column": "Name",
-                "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
+                # TODO: <Alex>ALEX</Alex>
+                # "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                "batch_id": "0b1b3e0a176781d54d8c2384793e2086",
+                # TODO: <Alex>ALEX</Alex>
             },
             "meta": {"Notes": "Some notes"},
             "expectation_type": "expect_column_values_to_not_be_null",
@@ -806,7 +821,12 @@ def test_result_format_configured_with_set_default_override(
                 "include_config": True,
                 "column": "Name",
                 "Notes": "Some notes",
-                "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
+                # TODO: <Alex>ALEX</Alex>
+                # "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                "batch_id": "0b1b3e0a176781d54d8c2384793e2086",
+                # TODO: <Alex>ALEX</Alex>
             },
             "meta": {},
             "expectation_type": "expect_column_values_to_not_be_null",
