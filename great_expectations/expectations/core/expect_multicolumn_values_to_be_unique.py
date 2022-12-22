@@ -182,7 +182,7 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
             params_with_json_schema=params_with_json_schema,
             param_key_with_list="column_list",
         )
-        return (template_str, params_with_json_schema, styling)
+        return template_str, params_with_json_schema, {}, styling
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)

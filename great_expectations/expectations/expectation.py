@@ -118,6 +118,7 @@ from great_expectations.validator.validator import ValidationDependencies, Valid
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.render.renderer_configuration import MetaNotes
 
 logger = logging.getLogger(__name__)
 
@@ -438,7 +439,7 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> Tuple[str, dict, dict, Optional[dict]]:
+    ) -> Tuple[str, dict, MetaNotes, Optional[dict]]:
         """
         Template function that contains the logic that is shared by AtomicPrescriptiveRendererType.SUMMARY and
         LegacyRendererType.PRESCRIPTIVE.

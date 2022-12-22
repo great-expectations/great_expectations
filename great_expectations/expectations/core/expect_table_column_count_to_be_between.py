@@ -150,7 +150,7 @@ class ExpectTableColumnCountToBeBetween(TableExpectation):
                 "value": params.get("strict_max"),
             },
         }
-        return (template_str, params_with_json_schema, styling)
+        return template_str, params_with_json_schema, {}, styling
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)

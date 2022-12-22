@@ -4,12 +4,15 @@ import json
 from copy import deepcopy
 from enum import Enum
 from string import Template as pTemplate
-from typing import Dict, List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from marshmallow import INCLUDE, Schema, fields, post_dump, post_load
 
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.types import DictDot
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import MetaNotes
 
 
 class RendererPrefix(str, Enum):
@@ -627,7 +630,7 @@ class RenderedAtomicValue(DictDot):
         header_row: Optional[List[RenderedAtomicValue]] = None,
         table: Optional[List[List[RenderedAtomicValue]]] = None,
         graph: Optional[dict] = None,
-        meta_notes: Optional[Dict[str, Union[str, List[str]]]] = None,
+        meta_notes: Optional[MetaNotes] = None,
     ) -> None:
         self.schema: Optional[dict] = schema
         self.header: Optional[RenderedAtomicValue] = header
@@ -643,7 +646,7 @@ class RenderedAtomicValue(DictDot):
         # GraphType
         self.graph = RenderedAtomicValueGraph(graph=graph)
 
-        self.meta_notes: Optional[Dict[str, Union[str, List[str]]]] = meta_notes
+        self.meta_notes: Optional[MetaNotes] = meta_notes
 
     def __repr__(self) -> str:
         return json.dumps(self.to_json_dict(), indent=2)

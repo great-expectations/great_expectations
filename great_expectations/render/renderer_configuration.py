@@ -30,6 +30,7 @@ from pydantic import (
     validator,
 )
 from pydantic.generics import GenericModel
+from typing_extensions import TypedDict
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -98,6 +99,11 @@ class _RendererParamsBase(BaseModel):
 RendererParams = TypeVar("RendererParams", bound=_RendererParamsBase)
 
 
+class MetaNotes(TypedDict):
+    format: str
+    content: List[str]
+
+
 class RendererConfiguration(GenericModel, Generic[RendererParams]):
     """Configuration object built for each renderer."""
 
@@ -109,7 +115,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     expectation_type: str = Field("", allow_mutation=False)
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
-    meta_notes: Dict[str, List[str]] = Field({}, allow_mutation=False)
+    meta_notes: MetaNotes = Field({}, allow_mutation=False)
     template_str: str = Field("", allow_mutation=True)
     header_row: List[Dict[str, Optional[Any]]] = Field([], allow_mutation=True)
     table: List[List[Dict[str, Optional[Any]]]] = Field([], allow_mutation=True)
@@ -317,7 +323,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
     @root_validator()
     def _validate_for_meta_notes(cls, values: dict) -> dict:
-        meta_notes: Optional[Dict[str, Union[str, List[str]]]]
+        meta_notes: Optional[MetaNotes]
         if (
             "result" in values
             and values["result"] is not None
