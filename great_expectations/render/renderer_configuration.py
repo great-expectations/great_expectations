@@ -317,17 +317,15 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
     @root_validator()
     def _validate_for_meta_notes(cls, values: dict) -> dict:
-        meta_notes: Dict[str, Union[str, List[str]]]
+        meta_notes: Optional[Dict[str, Union[str, List[str]]]]
         if (
             "result" in values
             and values["result"] is not None
             and values["result"].expectation_config is not None
         ):
-            values["meta_notes"] = values["result"].expectation_config.meta.get(
-                "notes", {}
-            )
+            values["meta_notes"] = values["result"].expectation_config.meta.get("notes")
         else:
-            values["meta_notes"] = values["configuration"].meta.get("notes", {})
+            values["meta_notes"] = values["configuration"].meta.get("notes")
         return values
 
     @root_validator()

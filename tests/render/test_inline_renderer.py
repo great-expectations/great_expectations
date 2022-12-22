@@ -609,6 +609,36 @@ def test_inline_renderer_expectation_validation_result_serialization(
             ],
             id="graph",
         ),
+        pytest.param(
+            ExpectationConfiguration(
+                expectation_type="expect_table_row_count_to_equal",
+                kwargs={"value": 3},
+                meta={
+                    "notes": {
+                        "format": "string",
+                        "content": ["This is the most important Expectation!!"],
+                    }
+                },
+            ),
+            [
+                {
+                    "value_type": "StringValueType",
+                    "name": AtomicPrescriptiveRendererType.SUMMARY,
+                    "value": {
+                        "template": "Must have exactly $value rows.",
+                        "schema": {"type": "com.superconductive.rendered.string"},
+                        "params": {
+                            "value": {"schema": {"type": "number"}, "value": 3},
+                        },
+                        "meta_notes": {
+                            "content": ["This is the most important Expectation!!"],
+                            "format": "string",
+                        },
+                    },
+                }
+            ],
+            id="meta_notes",
+        ),
     ],
 )
 def test_inline_renderer_expectation_configuration_serialization(
