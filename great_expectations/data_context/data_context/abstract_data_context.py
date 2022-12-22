@@ -243,10 +243,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         # Build the datasources we know about and have access to
         self._init_datasources()
 
-        self.zep_config = self._load_zep_config()
-        if self.zep_config:
-            self._attach_zep_config_datasources(self.zep_config)
-
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies: dict = {}
 
