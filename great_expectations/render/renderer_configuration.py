@@ -115,7 +115,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     expectation_type: str = Field("", allow_mutation=False)
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
-    meta_notes: MetaNotes = Field({}, allow_mutation=False)
+    meta_notes: MetaNotes = Field(
+        MetaNotes(format="", content=[]), allow_mutation=False
+    )
     template_str: str = Field("", allow_mutation=True)
     header_row: List[Dict[str, Optional[Any]]] = Field([], allow_mutation=True)
     table: List[List[Dict[str, Optional[Any]]]] = Field([], allow_mutation=True)
