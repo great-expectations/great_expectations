@@ -4,12 +4,15 @@ import json
 from copy import deepcopy
 from enum import Enum
 from string import Template as pTemplate
-from typing import List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from marshmallow import INCLUDE, Schema, fields, post_dump, post_load
 
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.types import DictDot
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import RendererTableValue
 
 
 class RendererPrefix(str, Enum):
@@ -624,8 +627,8 @@ class RenderedAtomicValue(DictDot):
         header: Optional[RenderedAtomicValue] = None,
         template: Optional[str] = None,
         params: Optional[dict] = None,
-        header_row: Optional[List[RenderedAtomicValue]] = None,
-        table: Optional[List[List[RenderedAtomicValue]]] = None,
+        header_row: Optional[List[RendererTableValue]] = None,
+        table: Optional[List[List[RendererTableValue]]] = None,
         graph: Optional[dict] = None,
     ) -> None:
         self.schema: Optional[dict] = schema
@@ -636,8 +639,8 @@ class RenderedAtomicValue(DictDot):
         self.params: Optional[dict] = params
 
         # TableType
-        self.header_row: Optional[List[RenderedAtomicValue]] = header_row
-        self.table: Optional[List[List[RenderedAtomicValue]]] = table
+        self.header_row: Optional[List[RendererTableValue]] = header_row
+        self.table: Optional[List[List[RendererTableValue]]] = table
 
         # GraphType
         self.graph = RenderedAtomicValueGraph(graph=graph)

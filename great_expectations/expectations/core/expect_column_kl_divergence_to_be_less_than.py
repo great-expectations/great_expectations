@@ -35,6 +35,7 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
     RendererSchema,
+    RendererTableValue,
     RendererValueType,
 )
 from great_expectations.render.util import (
@@ -987,41 +988,42 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                 interval_closing_symbol = "]" if idx == (len(fractions) - 1) else ")"
                 table_rows.append(
                     [
-                        {
-                            "type": RendererValueType.STRING,
-                            "value": f"[{interval_start} - {interval_end}{interval_closing_symbol}",
-                        },
-                        {
-                            "type": RendererValueType.STRING,
-                            "value": num_to_str(fraction),
-                        },
+                        RendererTableValue(
+                            schema=RendererSchema(type=RendererValueType.STRING),
+                            value=f"[{interval_start} - {interval_end}{interval_closing_symbol}",
+                        ),
+                        RendererTableValue(
+                            schema=RendererSchema(type=RendererValueType.STRING),
+                            value=num_to_str(fraction),
+                        ),
                     ]
                 )
         else:
             values = partition_object["values"]
             table_rows = [
                 [
-                    {
-                        "schema": RendererSchema(type=RendererValueType.STRING),
-                        "value": str(value),
-                    },
-                    {
-                        "schema": RendererSchema(type=RendererValueType.STRING),
-                        "value": num_to_str(fractions[idx]),
-                    },
+                    RendererTableValue(
+                        schema=RendererSchema(type=RendererValueType.STRING),
+                        value=str(value),
+                    ),
+                    RendererTableValue(
+                        schema=RendererSchema(type=RendererValueType.STRING),
+                        value=num_to_str(fractions[idx]),
+                    ),
                 ]
                 for idx, value in enumerate(values)
             ]
 
+        interval_or_value = "Interval" if partition_object.get("bins") else "Value"
+
         header_row = [
-            {
-                "schema": RendererSchema(type=RendererValueType.STRING),
-                "value": "Interval" if partition_object.get("bins") else "Value",
-            },
-            {
-                "schema": RendererSchema(type=RendererValueType.STRING),
-                "value": "Fraction",
-            },
+            RendererTableValue(
+                schema=RendererSchema(type=RendererValueType.STRING),
+                value=interval_or_value,
+            ),
+            RendererTableValue(
+                schema=RendererSchema(type=RendererValueType.STRING), value="Fraction"
+            ),
         ]
 
         return header_row, table_rows
@@ -1069,8 +1071,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             renderer_configuration.graph, _ = cls._atomic_kl_divergence_chart_template(
                 partition_object=expected_partition_object
             )
-
-        params: RendererParams = renderer_configuration.params
 
         renderer_configuration.template_str = template_str
 

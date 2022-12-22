@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Dict, List, Optional
+from numbers import Number
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 import numpy as np
 
@@ -26,6 +27,8 @@ from great_expectations.render import (
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
+    RendererSchema,
+    RendererTableValue,
     RendererValueType,
 )
 from great_expectations.render.util import (
@@ -285,8 +288,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
-        params: RendererParams = renderer_configuration.params
-
         template_str = "quantiles must be within the following value ranges."
 
         if renderer_configuration.include_column_name:
@@ -302,18 +303,15 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         ).get("value_ranges", [])
 
         header_row = [
-            {
-                "schema": RendererSchema(type=RendererValueType.STRING),
-                "value": "Quantile",
-            },
-            {
-                "schema": RendererSchema(type=RendererValueType.STRING),
-                "value": "Min Value",
-            },
-            {
-                "schema": RendererSchema(type=RendererValueType.STRING),
-                "value": "Max Value",
-            },
+            RendererTableValue(
+                schema=RendererSchema(type=RendererValueType.STRING), value="Quantile"
+            ),
+            RendererTableValue(
+                schema=RendererSchema(type=RendererValueType.STRING), value="Min Value"
+            ),
+            RendererTableValue(
+                schema=RendererSchema(type=RendererValueType.STRING), value="Max Value"
+            ),
         ]
 
         renderer_configuration.header_row = header_row
@@ -322,28 +320,32 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         quantile_strings = {0.25: "Q1", 0.75: "Q3", 0.50: "Median"}
         for quantile, value_range in zip(quantiles, value_ranges):
             quantile_string = quantile_strings.get(quantile, f"{quantile:3.2f}")
+            value_range_lower: Union[Number, str] = (
+                value_range[0] if value_range[0] else "Any"
+            )
+            value_rage_lower_type = (
+                RendererValueType.NUMBER if value_range[0] else RendererValueType.STRING
+            )
+            value_range_upper: Union[Number, str] = (
+                value_range[1] if value_range[1] else "Any"
+            )
+            value_range_upper_type = (
+                RendererValueType.NUMBER if value_range[0] else RendererValueType.STRING
+            )
             table.append(
                 [
-                    {
-                        "value": quantile_string,
-                        "schema": RendererSchema(type=RendererValueType.STRING),
-                    },
-                    {
-                        "value": value_range[0] if value_range[0] else "Any",
-                        "schema": {
-                            "type": RendererValueType.NUMBER
-                            if value_range[0]
-                            else RendererValueType.STRING
-                        },
-                    },
-                    {
-                        "value": value_range[1] if value_range[1] else "Any",
-                        "schema": {
-                            "type": RendererValueType.NUMBER
-                            if value_range[1]
-                            else RendererValueType.STRING
-                        },
-                    },
+                    RendererTableValue(
+                        schema=RendererSchema(type=RendererValueType.STRING),
+                        value=quantile_string,
+                    ),
+                    RendererTableValue(
+                        schema=RendererSchema(type=value_rage_lower_type),
+                        value=value_range_lower,
+                    ),
+                    RendererTableValue(
+                        schema=RendererSchema(type=value_range_upper_type),
+                        value=value_range_upper,
+                    ),
                 ]
             )
 
@@ -542,24 +544,29 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         value_ranges = result.result.get("observed_value", {}).get("values", [])
 
         table_header_row = [
-            {"schema": {"type": "string"}, "value": "Quantile"},
-            {"schema": {"type": "string"}, "value": "Value"},
+            RendererTableValue(
+                schema=RendererSchema(type=RendererValueType.STRING), value="Quantile"
+            ),
+            RendererTableValue(
+                schema=RendererSchema(type=RendererValueType.STRING), value="Value"
+            ),
         ]
         table_rows = []
 
         quantile_strings = {0.25: "Q1", 0.75: "Q3", 0.50: "Median"}
 
         for idx, quantile in enumerate(quantiles):
-            quantile_string = quantile_strings.get(quantile)
+            quantile_string = quantile_strings.get(quantile) or f"{quantile:3.2f}"
             table_rows.append(
                 [
-                    {
-                        "value": quantile_string
-                        if quantile_string
-                        else f"{quantile:3.2f}",
-                        "schema": {"type": "string"},
-                    },
-                    {"value": value_ranges[idx], "schema": {"type": "number"}},
+                    RendererTableValue(
+                        schema=RendererSchema(type=RendererValueType.STRING),
+                        value=quantile_string,
+                    ),
+                    RendererTableValue(
+                        schema=RendererSchema(type=RendererValueType.NUMBER),
+                        value=value_ranges[idx],
+                    ),
                 ]
             )
 
