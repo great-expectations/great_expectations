@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from typing import Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -27,10 +28,10 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
     metric_dependencies = ("query.template_values",)
 
     query = """
-    SELECT SUM(CASE WHEN {close_date_column} != COALESCE(next_start_date, {close_date_column}) THEN 1 ELSE 0 END), 
+    SELECT SUM(CASE WHEN {close_date_column} != COALESCE(next_start_date, {close_date_column}) THEN 1 ELSE 0 END),
     COUNT(1)
-    FROM(SELECT {primary_key}, {close_date_column}, LEAD({open_date_column}) OVER(PARTITION BY {primary_key} ORDER BY 
-    {open_date_column}) AS next_start_date 
+    FROM(SELECT {primary_key}, {close_date_column}, LEAD({open_date_column}) OVER(PARTITION BY {primary_key} ORDER BY
+    {open_date_column}) AS next_start_date
     FROM {active_batch})
     """
 
@@ -66,20 +67,18 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
-
-        success = False
         threshold = configuration["kwargs"].get("threshold")
         if not threshold:
             threshold = self.default_kwarg_values["threshold"]
-        query_result = metrics.get("query.template_values")
-        holes_count, total_count = query_result[0]
+
+        metrics = convert_to_json_serializable(data=metrics)
+        holes_count, total_count = list(
+            metrics.get("query.template_values")[0].values()
+        )[0]
         error_rate = holes_count / total_count
 
-        if error_rate <= threshold:
-            success = True
-
         return {
-            "success": success,
+            "success": error_rate <= threshold,
             "result": {
                 "threshold": threshold,
                 "holes_count": holes_count,

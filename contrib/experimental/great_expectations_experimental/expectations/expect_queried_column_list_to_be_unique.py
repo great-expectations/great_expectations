@@ -1,6 +1,7 @@
 from typing import Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
@@ -66,9 +67,8 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
-
-        query_result = metrics.get("query.template_values")
-        num_of_duplicates = query_result[0][0]
+        metrics = convert_to_json_serializable(data=metrics)
+        num_of_duplicates = list(metrics.get("query.template_values")[0].values())[0]
 
         if not num_of_duplicates:
             return {
