@@ -108,6 +108,16 @@ class RendererTableValue(_RendererValueBase):
     value: Optional[Any]
 
 
+class MetaNotesFormat(str, Enum):
+    STRING = "string"
+    MARKDOWN = "markdown"
+
+
+class MetaNotes(TypedDict):
+    format: MetaNotesFormat
+    content: List[str]
+
+
 class RendererConfiguration(GenericModel, Generic[RendererParams]):
     """Configuration object built for each renderer."""
 
@@ -118,6 +128,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     runtime_configuration: Optional[dict] = Field({}, allow_mutation=False)
     expectation_type: str = Field("", allow_mutation=False)
     kwargs: dict = Field({}, allow_mutation=False)
+    meta_notes: MetaNotes = Field(
+        MetaNotes(format=MetaNotesFormat.STRING, content=[]), allow_mutation=False
+    )
     template_str: str = Field("", allow_mutation=True)
     header_row: List[RendererTableValue] = Field([], allow_mutation=True)
     table: List[List[RendererTableValue]] = Field([], allow_mutation=True)
@@ -281,7 +294,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         return values
 
     @staticmethod
-    def _get_condition_params(
+    def _get_row_condition_params(
         row_condition_str: str,
     ) -> Dict[str, Dict[str, Collection[str]]]:
         row_condition_str = RendererConfiguration._parse_row_condition_str(
@@ -318,7 +331,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         if values["_row_condition"]:
             renderer_params_args: Dict[
                 str, Dict[str, Collection[str]]
-            ] = RendererConfiguration._get_condition_params(
+            ] = RendererConfiguration._get_row_condition_params(
                 row_condition_str=values["_row_condition"],
             )
             values["_params"] = (
@@ -326,6 +339,19 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 if "_params" in values and values["_params"]
                 else renderer_params_args
             )
+        return values
+
+    @root_validator()
+    def _validate_for_meta_notes(cls, values: dict) -> dict:
+        meta_notes: Optional[MetaNotes]
+        if (
+            "result" in values
+            and values["result"] is not None
+            and values["result"].expectation_config is not None
+        ):
+            values["meta_notes"] = values["result"].expectation_config.meta.get("notes")
+        else:
+            values["meta_notes"] = values["configuration"].meta.get("notes")
         return values
 
     @root_validator()

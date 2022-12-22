@@ -362,9 +362,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> RenderedAtomicContent:
-        """
-        Rendering function that is utilized by GE Cloud Front-end
-        """
         renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
@@ -388,6 +385,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                 },
                 "header_row": header_row,
                 "table": table,
+                "meta_notes": renderer_configuration.meta_notes,
                 "schema": {"type": "TableType"},
             }
         )
