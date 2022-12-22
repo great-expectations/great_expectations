@@ -106,7 +106,11 @@ from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
     RendererSchemaType,
 )
-from great_expectations.render.util import num_to_str
+from great_expectations.render.util import (
+    build_count_and_index_table,
+    build_count_table,
+    num_to_str,
+)
 from great_expectations.self_check.util import (
     evaluate_json_test_v3_api,
     generate_expectation_tests,
@@ -781,7 +785,7 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> Optional[RenderedTableContent]:
+    ) -> Optional[List[Union[RenderedTableContent, CollapseContent]]]:
         if result is None:
             return None
 
@@ -799,30 +803,30 @@ class Expectation(metaclass=MetaExpectation):
         partial_unexpected_counts: Optional[List[dict]] = result_dict.get(
             "partial_unexpected_counts"
         )
+        # this means the result_format is COMPLETE and we have the full set of unexpected indices
+        unexpected_index_list: Optional[List[dict]] = result_dict.get(
+            "unexpected_index_list"
+        )
+        unexpected_count: Optional[int] = result_dict.get("unexpected_count")
         if partial_unexpected_counts:
             # We will check to see whether we have *all* of the unexpected values
             # accounted for in our count, and include counts if we do. If we do not,
             # we will use this as simply a better (non-repeating) source of
             # "sampled" unexpected values
             total_count = 0
-            for unexpected_count_dict in partial_unexpected_counts:
-                value: Optional[Any] = unexpected_count_dict.get("value")
-                count: Optional[int] = unexpected_count_dict.get("count")
-                if count:
-                    total_count += count
-                if value is not None and value != "":
-                    table_rows.append([value, count])
-                elif value == "":
-                    table_rows.append(["EMPTY", count])
-                else:
-                    table_rows.append(["null", count])
-
-            # Check to see if we have *all* of the unexpected values accounted for. If so,
-            # we show counts. If not, we only show "sampled" unexpected values.
-            if total_count == result_dict.get("unexpected_count"):
-                header_row = ["Unexpected Value", "Count"]
+            if unexpected_index_list:
+                header_row, table_rows = build_count_and_index_table(
+                    table_rows,
+                    partial_unexpected_counts,
+                    unexpected_index_list,
+                    result_dict,
+                    total_count,
+                    unexpected_count,
+                )
             else:
-                header_row = ["Sampled Unexpected Values", "Count"]
+                header_row, table_rows = build_count_table(
+                    table_rows, partial_unexpected_counts, total_count, unexpected_count
+                )
 
         else:
             header_row = ["Sampled Unexpected Values"]
@@ -852,8 +856,28 @@ class Expectation(metaclass=MetaExpectation):
                 },
             }
         )
-
-        return unexpected_table_content_block
+        if result_dict.get("unexpected_index_query"):
+            # how do you add a new rendererj
+            # unexpected index table is next
+            query = result_dict.get("unexpected_index_query")
+            query_info = CollapseContent(
+                **{
+                    "collapse_toggle_link": "Show query to retrieve all unexpected values...",
+                    "collapse": [
+                        RenderedStringTemplateContent(
+                            **{
+                                "content_block_type": "string_template",
+                                "string_template": {
+                                    "template": query,
+                                    "tag": "code",
+                                },
+                            }
+                        )
+                    ],
+                }
+            )
+            return [unexpected_table_content_block, query_info]
+        return [unexpected_table_content_block]
 
     @classmethod
     def _get_observed_value_from_evr(

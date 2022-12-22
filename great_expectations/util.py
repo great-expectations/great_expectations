@@ -940,17 +940,17 @@ def build_in_memory_runtime_context() -> AbstractDataContext:
         evaluation_parameter_store_name="evaluation_parameter_store",
         checkpoint_store_name="checkpoint_store",
         store_backend_defaults=InMemoryStoreBackendDefaults(),
-        data_docs_sites={
-            "local_site": {
-                "class_name": "SiteBuilder",
-                "show_how_to_buttons": True,
-                "store_backend": {
-                    "class_name": "TupleFilesystemStoreBackend",
-                    "base_directory": "/Users/work/Development/ge_sandbox_datadocs",
-                },
-                "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
-            }
-        },
+        # data_docs_sites={
+        #     "local_site": {
+        #         "class_name": "SiteBuilder",
+        #         "show_how_to_buttons": True,
+        #         "store_backend": {
+        #             "class_name": "TupleFilesystemStoreBackend",
+        #             "base_directory": "/Users/work/Development/ge_sandbox_datadocs",
+        #         },
+        #         "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+        #     }
+        # },
     )
 
     context = BaseDataContext(project_config=data_context_config)
