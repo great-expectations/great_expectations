@@ -129,7 +129,7 @@ class BaseYamlConfig(SerializableDictDot):
     ) -> BYC:
         try:
             schema_instance: Schema = cls._get_schema_instance()
-            config: Union[dict, BaseYamlConfig] = schema_instance.load(commented_map)
+            config: Union[dict, BYC] = schema_instance.load(commented_map)
             if isinstance(config, dict):
                 return cls.get_config_class()(commented_map=commented_map, **config)
 
@@ -170,7 +170,7 @@ class BaseYamlConfig(SerializableDictDot):
         return self._get_schema_validated_updated_commented_map()
 
     @classmethod
-    def get_config_class(cls):
+    def get_config_class(cls: Type) -> Type:
         raise NotImplementedError
 
     @classmethod

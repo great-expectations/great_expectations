@@ -1208,7 +1208,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             raise ValueError(f"Datasource {datasource_name} not found")
 
         if save_changes:
-            datasource_config = datasourceConfigSchema.load(datasource.config)
+            datasource_config = datasourceConfigSchema.load(
+                datasource.config  # type: ignore[union-attr] # XDatasource has no .config
+            )
             self._datasource_store.delete(datasource_config)  # type: ignore[attr-defined]
         self._cached_datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
