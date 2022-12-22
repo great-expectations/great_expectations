@@ -1,8 +1,21 @@
+import logging
 import pathlib
 import re
 import subprocess
 from dataclasses import dataclass
-from typing import List
+from typing import List, Set, Tuple
+
+from scripts.public_api_report import (
+    FileContents,
+    _default_code_absolute_paths,
+    CodeParser,
+    PublicAPIChecker,
+    Definition,
+)
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
+logger.setLevel(logging.INFO)
 
 
 @dataclass(frozen=True)
@@ -115,22 +128,56 @@ def run_pydocstyle(directory: pathlib.Path) -> List[str]:
     return raw_results.stdout.split("\n")
 
 
-def main():
+def _get_docstring_errors() -> List[DocstringError]:
+    """Get all docstring errors."""
     repo_root = pathlib.Path(__file__).parent.parent
     pydocstyle_dir = repo_root / "great_expectations/"
     pydocstyle_dir_abs = pydocstyle_dir.absolute()
     raw_errors = run_pydocstyle(pydocstyle_dir_abs)
 
-    if raw_errors:
-        errors = parse_to_docstring_errors(raw_errors=raw_errors)
+    return parse_to_docstring_errors(raw_errors=raw_errors)
 
-        for error in errors:
-            if not error.name:
-                print("Error:")
-                print(error)
 
-    else:
-        print("No errors found.")
+def _get_public_api_definitions() -> Set[Definition]:
+    """Get entities marked with the @public_api decorator."""
+    code_file_contents = FileContents.create_from_local_files(
+        _default_code_absolute_paths()
+    )
+
+    code_parser = CodeParser(file_contents=code_file_contents)
+
+    public_api_checker = PublicAPIChecker(code_parser=code_parser)
+
+    return public_api_checker.get_all_public_api_definitions()
+
+
+def _public_api_docstring_errors() -> Set[DocstringError]:
+    """Get all docstring errors for entities marked with the @public_api decorator."""
+
+    public_api_definitions = _get_public_api_definitions()
+    public_api_definition_tuples: Set[Tuple[str, str]] = {
+        (str(_repo_relative_filepath(d.filepath)), d.name)
+        for d in public_api_definitions
+    }
+
+    public_api_docstring_errors: List[DocstringError] = []
+    for docstring_error in _get_docstring_errors():
+        docstring_error_tuple: Tuple[str, str] = (
+            str(docstring_error.filepath_relative_to_repo_root),
+            docstring_error.name,
+        )
+        if docstring_error_tuple in public_api_definition_tuples:
+            public_api_docstring_errors.append(docstring_error)
+
+    return set(public_api_docstring_errors)
+
+
+def main():
+    logger.info("Generating list of public API docstring errors.")
+    errors = _public_api_docstring_errors()
+
+    for error in errors:
+        logger.error(error)
 
 
 if __name__ == "__main__":
