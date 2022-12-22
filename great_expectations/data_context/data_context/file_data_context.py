@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import logging
 import pathlib
-from typing import Optional, cast
+from typing import TYPE_CHECKING, Optional, cast
 
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
@@ -22,6 +24,9 @@ from great_expectations.datasource.datasource_serializer import (
     YAMLReadyDictDatasourceConfigSerializer,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.alias_types import PathStr
+
 logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -38,7 +43,7 @@ class FileDataContext(SerializableDataContext):
 
     def __init__(
         self,
-        context_root_dir: str,
+        context_root_dir: PathStr,
         project_config: Optional[DataContextConfig] = None,
         runtime_environment: Optional[dict] = None,
     ) -> None:
@@ -51,6 +56,8 @@ class FileDataContext(SerializableDataContext):
             runtime_environment (Optional[dict]): a dictionary of config variables that override both those set in
                 config_variables.yml and the environment
         """
+        if isinstance(context_root_dir, pathlib.Path):
+            context_root_dir = str(context_root_dir)
         self._context_root_directory = context_root_dir
         if not project_config:
             project_config = FileDataContext._load_file_backed_project_config(
@@ -122,7 +129,7 @@ class FileDataContext(SerializableDataContext):
     @classmethod
     def _load_file_backed_project_config(
         cls,
-        context_root_directory: str,
+        context_root_directory: PathStr,
     ) -> DataContextConfig:
         path_to_yml = pathlib.Path(context_root_directory, cls.GX_YML)
         try:

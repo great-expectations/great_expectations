@@ -53,6 +53,7 @@ import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
+from typing_extensions import TypeGuard
 
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
@@ -64,15 +65,11 @@ if TYPE_CHECKING:
     # needed until numpy min version 1.20
     import numpy.typing as npt
 
+    from great_expectations.alias_types import PathStr
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
     from great_expectations.data_context.types.base import DataContextConfig
-
-try:
-    from typing import TypeGuard  # type: ignore[attr-defined]
-except ImportError:
-    from typing_extensions import TypeGuard
 
 try:
     import black
@@ -1737,7 +1734,7 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
 
 def get_context(
     project_config: Optional[Union["DataContextConfig", Mapping]] = None,
-    context_root_dir: Optional[str] = None,
+    context_root_dir: Optional[PathStr] = None,
     runtime_environment: Optional[dict] = None,
     cloud_base_url: Optional[str] = None,
     cloud_access_token: Optional[str] = None,
@@ -1784,7 +1781,7 @@ def get_context(
 
     Args:
         project_config (dict or DataContextConfig): In-memory configuration for DataContext.
-        context_root_dir (str): Path to directory that contains great_expectations.yml file
+        context_root_dir (str or pathlib.Path): Path to directory that contains great_expectations.yml file
         runtime_environment (dict): A dictionary of values can be passed to a DataContext when it is instantiated.
             These values will override both values from the config variables file and
             from environment variables.
