@@ -109,6 +109,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     expectation_type: str = Field("", allow_mutation=False)
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
+    meta_notes: Dict[str, List[str]] = Field({}, allow_mutation=False)
     template_str: str = Field("", allow_mutation=True)
     header_row: List[Dict[str, Optional[Any]]] = Field([], allow_mutation=True)
     table: List[List[Dict[str, Optional[Any]]]] = Field([], allow_mutation=True)
@@ -230,8 +231,8 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             expectation_configuration: ExpectationConfiguration = values[
                 "result"
             ].expectation_config
-            values["expectation_type"] = expectation_configuration.expectation_type
-            values["kwargs"] = expectation_configuration.kwargs
+            values["expectation_type"]: str = expectation_configuration.expectation_type
+            values["kwargs"]: dict = expectation_configuration.kwargs
             raw_configuration: ExpectationConfiguration = (
                 expectation_configuration.get_raw_configuration()
             )
@@ -252,8 +253,8 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                     else renderer_params_args
                 )
         else:
-            values["expectation_type"] = values["configuration"].expectation_type
-            values["kwargs"] = values["configuration"].kwargs
+            values["expectation_type"]: str = values["configuration"].expectation_type
+            values["kwargs"]: dict = values["configuration"].kwargs
         return values
 
     @root_validator()
@@ -312,6 +313,21 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 if "_params" in values and values["_params"]
                 else renderer_params_args
             )
+        return values
+
+    @root_validator()
+    def _validate_for_meta_notes(cls, values: dict) -> dict:
+        meta_notes: Dict[str, Union[str, List[str]]]
+        if (
+            "result" in values
+            and values["result"] is not None
+            and values["result"].expectation_config is not None
+        ):
+            values["meta_notes"] = values["result"].expectation_config.meta.get(
+                "notes", {}
+            )
+        else:
+            values["meta_notes"] = values["configuration"].meta.get("notes", {})
         return values
 
     @root_validator()
