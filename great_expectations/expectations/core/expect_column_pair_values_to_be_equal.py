@@ -115,8 +115,6 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
             ("column_A", RendererSchemaType.STRING),
             ("column_B", RendererSchemaType.STRING),
             ("mostly", RendererSchemaType.NUMBER),
-            ("row_condition", RendererSchemaType.STRING),
-            ("condition_parser", RendererSchemaType.STRING),
             ("ignore_row_if", RendererSchemaType.STRING),
         )
         for name, schema_type in add_param_args:
@@ -135,15 +133,6 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
                 renderer_configuration=renderer_configuration
             )
             template_str = "Values in $column_A and $column_B must be equal, at least $mostly_pct % of the time."
-
-        if params.row_condition:
-            renderer_configuration = cls._add_row_condition_params(
-                renderer_configuration=renderer_configuration
-            )
-            row_condition_str: str = cls._get_row_condition_string(
-                renderer_configuration=renderer_configuration
-            )
-            template_str = f"{row_condition_str}, then {template_str}"
 
         renderer_configuration.template_str = template_str
 

@@ -281,8 +281,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         add_param_args = (
             ("column", RendererSchemaType.STRING),
             ("mostly", RendererSchemaType.NUMBER),
-            ("row_condition", RendererSchemaType.STRING),
-            ("condition_parser", RendererSchemaType.STRING),
         )
         for name, schema_type in add_param_args:
             renderer_configuration.add_param(name=name, schema_type=schema_type)
@@ -293,15 +291,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
-
-        if params.row_condition:
-            renderer_configuration = cls._add_row_condition_params(
-                renderer_configuration=renderer_configuration
-            )
-            row_condition_str: str = cls._get_row_condition_string(
-                renderer_configuration=renderer_configuration
-            )
-            template_str = f"{row_condition_str}, then {template_str}"
 
         renderer_configuration.template_str = template_str
 
@@ -362,9 +351,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> RenderedAtomicContent:
-        """
-        Rendering function that is utilized by GE Cloud Front-end
-        """
         renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
@@ -384,6 +370,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                 },
                 "header_row": renderer_configuration.header_row,
                 "table": renderer_configuration.table,
+                "meta_notes": renderer_configuration.meta_notes,
                 "schema": {"type": "TableType"},
             }
         )

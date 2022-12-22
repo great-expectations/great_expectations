@@ -118,6 +118,7 @@ from great_expectations.validator.validator import ValidationDependencies, Valid
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.render.renderer_configuration import MetaNotes
 
 logger = logging.getLogger(__name__)
 
@@ -151,7 +152,7 @@ def render_evaluation_parameter_string(render_func) -> Callable:
 
         # if expectation configuration has no eval params, then don't look for the values in runtime_configuration
         # isinstance check should be removed upon implementation of RenderedAtomicContent evaluation parameter support
-        if len(current_expectation_params) > 0 and not isinstance(
+        if current_expectation_params and not isinstance(
             rendered_string_template, RenderedAtomicContent
         ):
             runtime_configuration: Optional[dict] = kwargs.get("runtime_configuration")
@@ -159,8 +160,6 @@ def render_evaluation_parameter_string(render_func) -> Callable:
                 eval_params = runtime_configuration.get("evaluation_parameters", {})
                 styling = runtime_configuration.get("styling")
                 for key, val in eval_params.items():
-                    # this needs to be more complicated?
-                    # the possibility that it is a substring?
                     for param in current_expectation_params:
                         # "key in param" condition allows for eval param values to be rendered if arithmetic is present
                         if key == param or key in param:
@@ -393,6 +392,7 @@ class Expectation(metaclass=MetaExpectation):
             {
                 "template": template_str,
                 "params": renderer_configuration.params.dict(),
+                "meta_notes": renderer_configuration.meta_notes,
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
         )
@@ -439,7 +439,7 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> Tuple[str, dict, Optional[dict]]:
+    ) -> Tuple[str, dict, MetaNotes, Optional[dict]]:
         """
         Template function that contains the logic that is shared by AtomicPrescriptiveRendererType.SUMMARY and
         LegacyRendererType.PRESCRIPTIVE.
@@ -458,6 +458,7 @@ class Expectation(metaclass=MetaExpectation):
         return (
             renderer_configuration.template_str,
             renderer_configuration.params.dict(),
+            renderer_configuration.meta_notes,
             styling,
         )
 
@@ -470,7 +471,12 @@ class Expectation(metaclass=MetaExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> RenderedAtomicContent:
-        (template_str, params_with_json_schema, _) = cls._atomic_prescriptive_template(
+        (
+            template_str,
+            params_with_json_schema,
+            meta_notes,
+            _,
+        ) = cls._atomic_prescriptive_template(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
@@ -479,6 +485,7 @@ class Expectation(metaclass=MetaExpectation):
             {
                 "template": template_str,
                 "params": params_with_json_schema,
+                "meta_notes": meta_notes,
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
         )
@@ -1113,14 +1120,14 @@ class Expectation(metaclass=MetaExpectation):
         self,
         configuration: ExpectationConfiguration,
         runtime_configuration: Optional[dict] = None,
-    ) -> Union[Dict[str, Union[str, int, bool]], str]:
+    ) -> Union[Dict[str, Union[str, int, bool, List[str], None]], str]:
         default_result_format: Optional[Any] = self.default_kwarg_values.get(
             "result_format"
         )
         configuration_result_format: Union[
-            Dict[str, Union[str, int, bool]], str
+            Dict[str, Union[str, int, bool, List[str], None]], str
         ] = configuration.kwargs.get("result_format", default_result_format)
-        result_format: Union[Dict[str, Union[str, int, bool]], str]
+        result_format: Union[Dict[str, Union[str, int, bool, List[str], None]], str]
         if runtime_configuration:
             result_format = runtime_configuration.get(
                 "result_format",
@@ -1590,80 +1597,6 @@ class Expectation(metaclass=MetaExpectation):
         else:
             value_set_str = "[ ]"
         return value_set_str
-
-    @staticmethod
-    def _get_row_conditions_list_from_row_condition_str(
-        row_condition_str: str,
-    ) -> List[str]:
-        # divide the whole condition into smaller parts
-        row_conditions_list = re.split(r"AND|OR|NOT(?! in)|\(|\)", row_condition_str)
-        row_conditions_list = [
-            condition.strip() for condition in row_conditions_list if condition.strip()
-        ]
-        return row_conditions_list
-
-    @staticmethod
-    def _parse_row_condition_str(row_condition_str: str) -> str:
-        if not row_condition_str:
-            row_condition_str = "True"
-
-        row_condition_str = (
-            row_condition_str.replace("&", " AND ")
-            .replace(" and ", " AND ")
-            .replace("|", " OR ")
-            .replace(" or ", " OR ")
-            .replace("~", " NOT ")
-            .replace(" not ", " NOT ")
-        )
-        row_condition_str = " ".join(row_condition_str.split())
-
-        # replace tuples of values by lists of values
-        tuples_list = re.findall(r"\([^()]*,[^()]*\)", row_condition_str)
-        for value_tuple in tuples_list:
-            value_list = value_tuple.replace("(", "[").replace(")", "]")
-            row_condition_str = row_condition_str.replace(value_tuple, value_list)
-
-        return row_condition_str
-
-    @staticmethod
-    @param_method(param_name="row_condition")
-    def _add_row_condition_params(
-        renderer_configuration: RendererConfiguration,
-    ) -> RendererConfiguration:
-        row_condition_str: str = Expectation._parse_row_condition_str(
-            row_condition_str=renderer_configuration.params.row_condition.value
-        )
-        row_conditions_list: List[
-            str
-        ] = Expectation._get_row_conditions_list_from_row_condition_str(
-            row_condition_str=row_condition_str
-        )
-        for idx, condition in enumerate(row_conditions_list):
-            name = f"row_condition__{str(idx)}"
-            value = condition.replace(" NOT ", " not ")
-            renderer_configuration.add_param(
-                name=name, schema_type=RendererSchemaType.STRING, value=value
-            )
-
-        return renderer_configuration
-
-    @staticmethod
-    @param_method(param_name="row_condition")
-    def _get_row_condition_string(renderer_configuration: RendererConfiguration) -> str:
-        row_condition_str: str = Expectation._parse_row_condition_str(
-            row_condition_str=renderer_configuration.params.row_condition.value
-        )
-        row_conditions_list: List[
-            str
-        ] = Expectation._get_row_conditions_list_from_row_condition_str(
-            row_condition_str=row_condition_str
-        )
-        for idx, condition in enumerate(row_conditions_list):
-            row_condition_str = row_condition_str.replace(
-                condition, f"$row_condition__{str(idx)}"
-            )
-        row_condition_str = row_condition_str.lower()
-        return f"if {row_condition_str}"
 
     @staticmethod
     @param_method(param_name="mostly")
@@ -2660,13 +2593,20 @@ class ColumnMapExpectation(TableExpectation, ABC):
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         result_format: Union[
-            Dict[str, Union[str, int, bool]], str
+            Dict[str, Union[int, str, bool, List[str], None]], str
         ] = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
+
+        unexpected_index_column_names = None
+        include_unexpected_rows = None
+
         if isinstance(result_format, dict):
             include_unexpected_rows = result_format.get(
                 "include_unexpected_rows", False
+            )
+            unexpected_index_column_names = result_format.get(
+                "unexpected_index_column_names", None
             )
 
         total_count: Optional[int] = metrics.get("table.row_count")
@@ -2716,6 +2656,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
             unexpected_index_list=unexpected_index_list,
             unexpected_rows=unexpected_rows,
             unexpected_index_query=unexpected_index_query,
+            unexpected_index_column_names=unexpected_index_column_names,
         )
 
 
@@ -2891,7 +2832,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         result_format: Union[
-            Dict[str, Union[str, int, bool]], str
+            Dict[str, Union[str, int, bool, List[str], None]], str
         ] = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
@@ -3164,6 +3105,8 @@ def _format_map_output(
     unexpected_list: Optional[List[Any]] = None,
     unexpected_index_list: Optional[List[int]] = None,
     unexpected_index_query: Optional[str] = None,
+    # Actually Optional[List[str]], but this is necessary to keep the typechecker happy
+    unexpected_index_column_names: Optional[Union[int, str, List[str]]] = None,
     unexpected_rows=None,
 ) -> Dict:
     """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
@@ -3217,6 +3160,11 @@ def _format_map_output(
         return_obj["result"]["partial_unexpected_list"] = unexpected_list[
             : result_format["partial_unexpected_count"]
         ]
+
+    if unexpected_index_column_names is not None:
+        return_obj["result"].update(
+            {"unexpected_index_column_names": unexpected_index_column_names}
+        )
 
     if not skip_missing:
         return_obj["result"]["missing_count"] = missing_count

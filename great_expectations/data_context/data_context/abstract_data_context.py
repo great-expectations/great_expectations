@@ -164,12 +164,11 @@ T = TypeVar("T", dict, list, str)
 
 
 class AbstractDataContext(ConfigPeer, ABC):
-    """Base class for all DataContexts that contain all context-agnostic data
-    context operations.
+    """
+    Base class for all DataContexts that contain all context-agnostic data context operations.
 
-    The class encapsulates most store / core components and convenience
-    methods used to access them, meaning the majority of DataContext
-    functionality lives here.
+    The class encapsulates most store / core components and convenience methods used to access them, meaning the
+    majority of DataContext functionality lives here.
     """
 
     # NOTE: <DataContextRefactor> These can become a property like ExpectationsStore.__name__ or placed in a separate
@@ -191,8 +190,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         event_name=UsageStatsEvents.DATA_CONTEXT___INIT__,
     )
     def __init__(self, runtime_environment: Optional[dict] = None) -> None:
-        """Constructor for AbstractDataContext. Will handle instantiation logic
-        that is common to all DataContext objects.
+        """
+        Constructor for AbstractDataContext. Will handle instantiation logic that is common to all DataContext objects
 
         Args:
             runtime_environment (dict): a dictionary of config variables that
@@ -264,8 +263,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         return config_provider
 
     def _register_providers(self, config_provider: _ConfigurationProvider) -> None:
-        """Registers any relevant ConfigurationProvider instances to
-        self._config_provider.
+        """
+        Registers any relevant ConfigurationProvider instances to self._config_provider.
 
         Note that order matters here - if there is a namespace collision, later providers will overwrite
         the values derived from previous ones. The order of precedence is as follows:
@@ -291,12 +290,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         raise NotImplementedError
 
     def _save_project_config(self) -> None:
-        """Each DataContext will define how its project_config will be saved
-        through its internal 'variables'.
-
-        - FileDataContext : Filesystem.
-        - CloudDataContext : Cloud endpoint
-        - Ephemeral : not saved, and logging message outputted
+        """
+        Each DataContext will define how its project_config will be saved through its internal 'variables'.
+            - FileDataContext : Filesystem.
+            - CloudDataContext : Cloud endpoint
+            - Ephemeral : not saved, and logging message outputted
         """
         self.variables.save_config()
 
@@ -312,7 +310,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> None:
-        """Each DataContext will define how ExpectationSuite will be saved."""
+        """
+        Each DataContext will define how ExpectationSuite will be saved.
+        """
         if expectation_suite_name is None:
             key = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite.expectation_suite_name
@@ -355,8 +355,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @property
     def config_variables(self) -> Dict:
-        """Loads config variables into cache, by calling
-        _load_config_variables()
+        """Loads config variables into cache, by calling _load_config_variables()
 
         Returns: A dictionary containing config_variables from file or empty dictionary.
         """
@@ -366,7 +365,9 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @property
     def config(self) -> DataContextConfig:
-        """Returns current DataContext's project_config."""
+        """
+        Returns current DataContext's project_config
+        """
         # NOTE: <DataContextRefactor> _project_config is currently only defined in child classes.
         # See if this can this be also defined in AbstractDataContext as abstract property
         return self.variables.config
@@ -376,9 +377,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._config_provider
 
     @property
-    def root_directory(self) -> Optional[str]:
-        """The root directory for configuration objects in the data context;
-        the location in which ``great_expectations.yml`` is located."""
+    def root_directory(self) -> Optional[str]:  # TODO: This should be a `pathlib.Path`
+        """The root directory for configuration objects in the data context; the location in which
+        ``great_expectations.yml`` is located.
+        """
         # NOTE: <DataContextRefactor>  Why does this exist in AbstractDataContext? CloudDataContext and
         # FileDataContext both use it. Determine whether this should stay here or in child classes
         return getattr(self, "_context_root_directory", None)
@@ -398,7 +400,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @property
     def stores(self) -> dict:
-        """A single holder for all Stores in this context."""
+        """A single holder for all Stores in this context"""
         return self._stores
 
     @property
@@ -687,7 +689,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource: Union[LegacyDatasource, BaseDatasource],
         save_changes: Optional[bool] = None,
     ) -> None:
-        """Updates a DatasourceConfig that already exists in the store.
+        """
+        Updates a DatasourceConfig that already exists in the store.
 
         Args:
             datasource_config: The config object to persist using the DatasourceStore.
@@ -713,11 +716,12 @@ class AbstractDataContext(ConfigPeer, ABC):
     def get_config_with_variables_substituted(
         self, config: Optional[DataContextConfig] = None
     ) -> DataContextConfig:
-        """Substitute vars in config of form ${var} or $(var) with values found
-        in the following places, in order of precedence: ge_cloud_config (for
-        Data Contexts in GX Cloud mode), runtime_environment, environment
-        variables, config_variables, or ge_cloud_config_variable_defaults
-        (allows certain variables to be optional in GX Cloud mode)."""
+        """
+        Substitute vars in config of form ${var} or $(var) with values found in the following places,
+        in order of precedence: ge_cloud_config (for Data Contexts in GX Cloud mode), runtime_environment,
+        environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
+        be optional in GX Cloud mode).
+        """
         if not config:
             config = self._project_config
         return DataContextConfig(**self.config_provider.substitute_config(config))
@@ -726,11 +730,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         self, arg1: Any = None, arg2: Any = None, arg3: Any = None, **kwargs
     ) -> Union[Batch, DataAsset]:
         """Get exactly one batch, based on a variety of flexible input types.
-        The method `get_batch` is the main user-facing method for getting
-        batches; it supports both the new (V3) and the Legacy (V2) Datasource
-        schemas.  The version-specific implementations are contained in
-        "_get_batch_v2()" and "_get_batch_v3()", respectively, both of which
-        are in the present module.
+        The method `get_batch` is the main user-facing method for getting batches; it supports both the new (V3) and the
+        Legacy (V2) Datasource schemas.  The version-specific implementations are contained in "_get_batch_v2()" and
+        "_get_batch_v3()", respectively, both of which are in the present module.
 
         For the V3 API parameters, please refer to the signature and parameter description of method "_get_batch_v3()".
         For the Legacy usage, please refer to the signature and parameter description of the method "_get_batch_v2()".
@@ -856,10 +858,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         data_asset_type=None,
         batch_parameters=None,
     ) -> DataAsset:
-        """Build a batch of data using batch_kwargs, and return a DataAsset
-        with expectation_suite_name attached.
-
-        If
+        """Build a batch of data using batch_kwargs, and return a DataAsset with expectation_suite_name attached. If
         batch_parameters are included, they will be available as attributes of the batch.
         Args:
             batch_kwargs: the batch_kwargs to use; must include a datasource key
@@ -1007,7 +1006,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return batch_list[0]
 
     def list_stores(self) -> List[Store]:
-        """List currently-configured Stores on this context."""
+        """List currently-configured Stores on this context"""
         stores = []
         for (
             name,
@@ -1020,12 +1019,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         return stores  # type: ignore[return-value]
 
     def list_active_stores(self) -> List[Store]:
-        """List active Stores on this context.
-
-        Active stores are identified by setting the following
-        parameters: expectations_store_name, validations_store_name,
-        evaluation_parameter_store_name, checkpoint_store_name
-        profiler_store_name
+        """
+        List active Stores on this context. Active stores are identified by setting the following parameters:
+            expectations_store_name,
+            validations_store_name,
+            evaluation_parameter_store_name,
+            checkpoint_store_name
+            profiler_store_name
         """
         active_store_names: List[str] = [
             self.expectations_store_name,  # type: ignore[list-item]
@@ -1086,7 +1086,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def get_datasource(
         self, datasource_name: str = "default"
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
-        """Get the named datasource.
+        """Get the named datasource
 
         Args:
             datasource_name (str): the name of the datasource from the configuration
@@ -1124,8 +1124,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def _serialize_substitute_and_sanitize_datasource_config(
         self, serializer: AbstractConfigSerializer, datasource_config: DatasourceConfig
     ) -> dict:
-        """Serialize, then make substitutions and sanitize config (mask
-        passwords), return as dict.
+        """Serialize, then make substitutions and sanitize config (mask passwords), return as dict.
 
         Args:
             serializer: Serializer to use when converting config to dict for substitutions.
@@ -1143,8 +1142,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return masked_config
 
     def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
-        """Add a new Store to the DataContext and (for convenience) return the
-        instantiated Store object.
+        """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
 
         Args:
             store_name (str): a key for the new Store in in self._stores
@@ -1158,8 +1156,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._build_store_from_config(store_name, store_config)
 
     def list_datasources(self) -> List[dict]:
-        """List currently-configured datasources on this context. Masks
-        passwords.
+        """List currently-configured datasources on this context. Masks passwords.
 
         Returns:
             List(dict): each dictionary includes "name", "class_name", and "module_name" keys
@@ -1321,7 +1318,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> CheckpointResult:
-        """Validate against a pre-defined Checkpoint. (Experimental)
+        """
+        Validate against a pre-defined Checkpoint. (Experimental)
 
         Args:
             checkpoint_name: The name of a Checkpoint defined via the CLI or by manually creating a yml file
@@ -1371,7 +1369,9 @@ class AbstractDataContext(ConfigPeer, ABC):
     def store_evaluation_parameters(
         self, validation_results, target_store_name=None
     ) -> None:
-        """Stores ValidationResult EvaluationParameters to defined store."""
+        """
+        Stores ValidationResult EvaluationParameters to defined store
+        """
         if not self._evaluation_parameter_dependencies_compiled:
             self._compile_evaluation_parameter_dependencies()
 
@@ -1385,7 +1385,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
 
     def list_expectation_suite_names(self) -> List[str]:
-        """Lists the available expectation suite names."""
+        """
+        Lists the available expectation suite names.
+        """
         sorted_expectation_suite_names = [
             i.expectation_suite_name for i in self.list_expectation_suites()  # type: ignore[union-attr]
         ]
@@ -1435,7 +1437,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Validator:
-        """This method applies only to the new (V3) Datasource schema."""
+        """
+        This method applies only to the new (V3) Datasource schema.
+        """
 
         include_rendered_content = (
             self._determine_if_expectation_validation_result_include_rendered_content(
@@ -1619,9 +1623,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         batch_spec_passthrough: Optional[dict] = None,
         **kwargs: Optional[dict],
     ) -> List[Batch]:
-        """Get the list of zero or more batches, based on a variety of flexible
-        input types. This method applies only to the new (V3) Datasource
-        schema.
+        """Get the list of zero or more batches, based on a variety of flexible input types.
+        This method applies only to the new (V3) Datasource schema.
 
         Args:
             batch_request
@@ -1702,8 +1705,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         overwrite_existing: bool = False,
         **kwargs: Optional[dict],
     ) -> ExpectationSuite:
-        """Build a new expectation suite and save it into the data_context
-        expectation store.
+        """Build a new expectation suite and save it into the data_context expectation store.
 
         Args:
             expectation_suite_name: The name of the expectation_suite to create
@@ -1738,8 +1740,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> bool:
-        """Delete specified expectation suite from data_context expectation
-        store.
+        """Delete specified expectation suite from data_context expectation store.
 
         Args:
             expectation_suite_name: The name of the expectation_suite to create
@@ -1862,8 +1863,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         variables: Optional[dict] = None,
         rules: Optional[dict] = None,
     ) -> RuleBasedProfilerResult:
-        """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with
-        rules/variables supplied at runtime.
+        """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with rules/variables supplied at runtime.
 
         Args:
             batch_list: Explicit list of Batch objects to supply data at runtime
@@ -1901,8 +1901,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> RuleBasedProfilerResult:
-        """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with a
-        batch request supplied at runtime.
+        """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with a batch request supplied at runtime.
 
         Args:
             batch_list: Explicit list of Batch objects to supply data at runtime.
@@ -1930,8 +1929,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_validation_operator(
         self, validation_operator_name: str, validation_operator_config: dict
     ) -> ValidationOperator:
-        """Add a new ValidationOperator to the DataContext and (for
-        convenience) return the instantiated object.
+        """Add a new ValidationOperator to the DataContext and (for convenience) return the instantiated object.
 
         Args:
             validation_operator_name (str): a key for the new ValidationOperator in in self._validation_operators
@@ -1978,8 +1976,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         result_format: Optional[Union[str, dict]] = None,
         **kwargs,
     ):
-        """Run a validation operator to validate data assets and to perform the
-        business logic around validation that the operator implements.
+        """
+        Run a validation operator to validate data assets and to perform the business logic around
+        validation that the operator implements.
 
         Args:
             validation_operator_name: name of the operator, as appears in the context's config file
@@ -2041,7 +2040,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
     def list_validation_operators(self):
-        """List currently-configured Validation Operators on this context."""
+        """List currently-configured Validation Operators on this context"""
 
         validation_operators = []
         for (
@@ -2072,7 +2071,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         run_name=None,
         run_time=None,
     ):
-        """Profile a data asset.
+        """
+        Profile a data asset
 
         :param datasource_name: the name of the datasource to which the profiled data asset belongs
         :param batch_kwargs_generator_name: the name of the batch kwargs generator to use to get batches (only if batch_kwargs are not provided)
@@ -2247,8 +2247,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def add_batch_kwargs_generator(
         self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
     ):
-        """Add a batch kwargs generator to the named datasource, using the
-        provided configuration.
+        """
+        Add a batch kwargs generator to the named datasource, using the provided
+        configuration.
 
         Args:
             datasource_name: name of datasource to which to add the new batch kwargs generator
@@ -2257,6 +2258,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             **kwargs: batch kwargs generator configuration, provided as kwargs
 
         Returns:
+
         """
         datasource_obj = self.get_datasource(datasource_name)
         generator = datasource_obj.add_batch_kwargs_generator(
@@ -2267,8 +2269,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def get_available_data_asset_names(
         self, datasource_names=None, batch_kwargs_generator_names=None
     ):
-        """Inspect datasource and batch kwargs generators to provide available
-        data_asset objects.
+        """Inspect datasource and batch kwargs generators to provide available data_asset objects.
 
         Args:
             datasource_names: list of datasources for which to provide available data_asset_name objects. If None, \
@@ -2287,6 +2288,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                   }
                   ...
                 }
+
         """
         data_asset_names = {}
         if datasource_names is None:
@@ -2348,8 +2350,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         partition_id=None,
         **kwargs,
     ):
-        """Builds batch kwargs using the provided datasource, batch kwargs
-        generator, and batch_parameters.
+        """Builds batch kwargs using the provided datasource, batch kwargs generator, and batch_parameters.
 
         Args:
             datasource (str): the name of the datasource for which to build batch_kwargs
@@ -2359,6 +2360,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         Returns:
             BatchKwargs
+
         """
         if kwargs.get("name"):
             if data_asset_name:
@@ -2389,7 +2391,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         site_name: Optional[str] = None,
         only_if_exists: bool = True,
     ) -> None:
-        """A stdlib cross-platform way to open a file in a browser.
+        """
+        A stdlib cross-platform way to open a file in a browser.
 
         Args:
             resource_identifier: ExpectationSuiteIdentifier,
@@ -2419,7 +2422,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         only_if_exists=True,
         site_names: Optional[List[str]] = None,
     ) -> List[Dict[str, str]]:
-        """Get URLs for a resource for all data docs sites.
+        """
+        Get URLs for a resource for all data docs sites.
 
         This function will return URLs for any configured site even if the sites
         have not been built yet.
@@ -2493,7 +2497,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return site_builder
 
     def clean_data_docs(self, site_name=None) -> bool:
-        """Clean a given data docs site.
+        """
+        Clean a given data docs site.
 
         This removes all files from the configured Store.
 
@@ -2541,9 +2546,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     @staticmethod
     def _default_profilers_exist(directory_path: Optional[str]) -> bool:
-        """Helper method.
-
-        Do default profilers exist in directory_path?
+        """
+        Helper method. Do default profilers exist in directory_path?
         """
         if not directory_path:
             return False
@@ -2560,8 +2564,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         conf_file_section: Optional[str] = None,
         conf_file_option: Optional[str] = None,
     ) -> Optional[str]:
-        """Method to retrieve config value. Looks for config value in
-        environment_variable and config file section.
+        """
+        Method to retrieve config value.
+        Looks for config value in environment_variable and config file section
 
         Args:
             environment_variable (str): name of environment_variable to retrieve
@@ -2665,9 +2670,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def _normalize_absolute_or_relative_path(
         self, path: Optional[str]
     ) -> Optional[str]:
-        """Why does this exist in AbstractDataContext?
-
-        CloudDataContext and FileDataContext both use it
+        """
+        Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
         """
         if path is None:
             return None
@@ -2680,8 +2684,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         self, config: DataContextConfig
     ) -> DataContextConfig:
 
-        """Applies global configuration overrides for.
-
+        """
+        Applies global configuration overrides for
             - usage_statistics being enabled
             - data_context_id for usage_statistics
             - global_usage_statistics_url
@@ -2755,9 +2759,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     @staticmethod
     def _is_usage_stats_enabled() -> bool:
-        """Checks the following locations to see if usage_statistics is
-        disabled in any of the following locations:
-
+        """
+        Checks the following locations to see if usage_statistics is disabled in any of the following locations:
             - GE_USAGE_STATS, which is an environment_variable
             - GLOBAL_CONFIG_PATHS
         If GE_USAGE_STATS exists AND its value is one of the FALSEY_STRINGS, usage_statistics is disabled (return False)
@@ -2797,7 +2800,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return usage_statistics_enabled
 
     def _get_data_context_id_override(self) -> Optional[str]:
-        """Return data_context_id from environment variable.
+        """
+        Return data_context_id from environment variable.
 
         Returns:
             Optional string that represents data_context_id
@@ -2809,8 +2813,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         )
 
     def _get_usage_stats_url_override(self) -> Optional[str]:
-        """Return GE_USAGE_STATISTICS_URL from environment variable if it
-        exists.
+        """
+        Return GE_USAGE_STATISTICS_URL from environment variable if it exists
 
         Returns:
             Optional string that represents GE_USAGE_STATISTICS_URL
@@ -2887,7 +2891,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def datasources(
         self,
     ) -> Dict[str, Union[LegacyDatasource, BaseDatasource, XDatasource]]:
-        """A single holder for all Datasources in this context."""
+        """A single holder for all Datasources in this context"""
         return self._cached_datasources
 
     @property
@@ -2912,23 +2916,17 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     @abstractmethod
     def _init_datasource_store(self) -> None:
-        """Internal utility responsible for creating a DatasourceStore to
-        persist and manage a user's Datasources.
+        """Internal utility responsible for creating a DatasourceStore to persist and manage a user's Datasources.
 
-        Please note that the DatasourceStore lacks the same
-        extensibility that other analagous Stores do; a default
-        implementation is provided based on the user's environment but
-        is not customizable.
+        Please note that the DatasourceStore lacks the same extensibility that other analagous Stores do; a default
+        implementation is provided based on the user's environment but is not customizable.
         """
         raise NotImplementedError
 
     def _update_config_variables(self) -> None:
-        """Updates config_variables cache by re-calling
-        _load_config_variables().
-
-        Necessary after running methods that modify config AND could
-        contain config_variables for credentials (example is
-        add_datasource())
+        """Updates config_variables cache by re-calling _load_config_variables().
+        Necessary after running methods that modify config AND could contain config_variables for credentials
+        (example is add_datasource())
         """
         self._config_variables = self._load_config_variables()
 
@@ -2948,7 +2946,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         )
 
     def _init_datasources(self) -> None:
-        """Initialize the datasources in store."""
+        """Initialize the datasources in store"""
         config: DataContextConfig = self.config
         datasources: Dict[str, DatasourceConfig] = cast(
             Dict[str, DatasourceConfig], config.datasources
@@ -3055,8 +3053,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def _perform_substitutions_on_datasource_config(
         self, config: DatasourceConfig
     ) -> DatasourceConfig:
-        """Substitute variables in a datasource config e.g. from env vars,
-        config_vars.yml.
+        """Substitute variables in a datasource config e.g. from env vars, config_vars.yml
 
         Config must be persisted with ${VARIABLES} syntax but hydrated at time of use.
 
@@ -3085,8 +3082,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         initialize: bool,
         save_changes: bool,
     ) -> Optional[Datasource]:
-        """Perform substitutions and optionally initialize the Datasource
-        and/or store the config.
+        """Perform substitutions and optionally initialize the Datasource and/or store the config.
 
         Args:
             config: Datasource Config to initialize and/or store.
@@ -3176,6 +3172,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         Returns:
             validation_result
+
         """
         if validations_store_name is None:
             validations_store_name = self.validations_store_name
@@ -3233,7 +3230,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         if include_rendered_content:
             for expectation_validation_result in validation_result.results:
                 expectation_validation_result.render()
-                expectation_validation_result.expectation_config.render()
 
         return validation_result
 
@@ -3245,17 +3241,18 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def _store_metrics(
         self, requested_metrics, validation_results, target_store_name
     ) -> None:
-        """requested_metrics is a dictionary like this:
+        """
+        requested_metrics is a dictionary like this:
 
-        requested_metrics:
-          *: The asterisk here matches *any* expectation suite name
-             use the 'kwargs' key to request metrics that are defined by kwargs,
-             for example because they are defined only for a particular column
-             - column:
-                 Age:
-                   - expect_column_min_to_be_between.result.observed_value
-              - statistics.evaluated_expectations
-              - statistics.successful_expectations
+          requested_metrics:
+            *: The asterisk here matches *any* expectation suite name
+               use the 'kwargs' key to request metrics that are defined by kwargs,
+               for example because they are defined only for a particular column
+               - column:
+                   Age:
+                     - expect_column_min_to_be_between.result.observed_value
+                - statistics.evaluated_expectations
+                - statistics.successful_expectations
         """
         expectation_suite_name = validation_results.meta["expectation_suite_name"]
         run_id = validation_results.meta["run_id"]
@@ -3310,9 +3307,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def send_usage_message(
         self, event: str, event_payload: Optional[dict], success: Optional[bool] = None
     ) -> None:
-        """helper method to send a usage method using DataContext.
-
-        Used when sending usage events from
+        """helper method to send a usage method using DataContext. Used when sending usage events from
             classes like ExpectationSuite.
             event
         Args:
@@ -3352,16 +3347,14 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     @staticmethod
     def _determine_save_changes_flag(save_changes: Optional[bool]) -> bool:
-        """This method is meant to enable the gradual deprecation of the
-        `save_changes` boolean flag on various Datasource CRUD methods. Moving
-        forward, we will always persist changes made by these CRUD methods
-        (a.k.a. the behavior created by save_changes=True).
+        """
+        This method is meant to enable the gradual deprecation of the `save_changes` boolean
+        flag on various Datasource CRUD methods. Moving forward, we will always persist changes
+        made by these CRUD methods (a.k.a. the behavior created by save_changes=True).
 
-        As part of this effort, `save_changes` has been set to `None` as
-        a default value and will be automatically converted to `True`
-        within this method. If a user passes in a boolean value (thereby
-        bypassing the default arg of `None`), a deprecation warning will
-        be raised.
+        As part of this effort, `save_changes` has been set to `None` as a default value
+        and will be automatically converted to `True` within this method. If a user passes in a boolean
+        value (thereby bypassing the default arg of `None`), a deprecation warning will be raised.
         """
         if save_changes is not None:
             # deprecated-v0.15.32
@@ -3387,7 +3380,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         ] = "instantiated_class",
         shorten_tracebacks: bool = False,
     ):
-        """Convenience method for testing yaml configs.
+        """Convenience method for testing yaml configs
 
         test_yaml_config is a convenience method for configuring the moving
         parts of a Great Expectations deployment. It allows you to quickly
@@ -3414,22 +3407,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 rapid iteration on configs in a notebook, because it can remove
                 the need to scroll up and down a lot.
 
-        yaml_config: str,
-        name: Optional[str] = None,
-        class_name: Optional[str] = None,
-        runtime_environment: Optional[dict] = None,
-        pretty_print: bool = True,
-        return_mode: Literal[
-            "instantiated_class", "report_object"
-        ] = "instantiated_class",
-        shorten_tracebacks: bool = False,
-    ):
-
         Returns:
             The instantiated component (e.g. a Datasource)
             OR
             a json object containing metadata from the component's self_check method.
             The returned object is determined by return_mode.
+
         """
         yaml_config_validator = _YamlConfigValidator(
             data_context=self,
@@ -3676,7 +3659,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         dry_run=False,
         build_index: bool = True,
     ):
-        """Build Data Docs for your project.
+        """
+        Build Data Docs for your project.
 
         These make it simple to visualize data quality in your project. These
         include Expectations, Validations & Profiles. The are built for all
@@ -3774,7 +3758,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         dollar_sign_escape_string: str = DOLLAR_SIGN_ESCAPE_STRING,
         skip_if_substitution_variable: bool = True,
     ) -> T:
-        """Replace all `$` characters with the DOLLAR_SIGN_ESCAPE_STRING.
+        """
+        Replace all `$` characters with the DOLLAR_SIGN_ESCAPE_STRING
 
         Args:
             value: config variable value
@@ -3814,10 +3799,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         value: Any,
         skip_if_substitution_variable: bool = True,
     ) -> None:
-        r"""Save config variable value Escapes $ unless they are used in
-        substitution variables e.g. the $ characters in ${SOME_VAR} or.
-
-        $SOME_VAR are not escaped.
+        r"""Save config variable value
+        Escapes $ unless they are used in substitution variables e.g. the $ characters in ${SOME_VAR} or $SOME_VAR are not escaped
 
         Args:
             config_variable_name: name of the property
