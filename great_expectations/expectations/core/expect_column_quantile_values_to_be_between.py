@@ -524,30 +524,23 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     @classmethod
     def _atomic_diagnostic_observed_value_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
+        renderer_configuration: RendererConfiguration,
     ):
-        template_string = None
-        params_with_json_schema = None
-        table_header_row = None
-        table_rows = None
+        if (
+            renderer_configuration.result.result is None
+            or renderer_configuration.result.result.get("observed_value") is None
+        ):
+            renderer_configuration.template_str = "--"
+            return renderer_configuration
 
-        if result.result is None or result.result.get("observed_value") is None:
-            template_string = "--"
-            params_with_json_schema = {}
-            return (
-                template_string,
-                params_with_json_schema,
-                table_header_row,
-                table_rows,
-            )
+        quantiles = renderer_configuration.result.result.get("observed_value", {}).get(
+            "quantiles", []
+        )
+        value_ranges = renderer_configuration.result.result.get(
+            "observed_value", {}
+        ).get("values", [])
 
-        quantiles = result.result.get("observed_value", {}).get("quantiles", [])
-        value_ranges = result.result.get("observed_value", {}).get("values", [])
-
-        table_header_row = [
+        header_row = [
             RendererTableValue(
                 schema=RendererSchema(type=RendererValueType.STRING), value="Quantile"
             ),
@@ -555,13 +548,12 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                 schema=RendererSchema(type=RendererValueType.STRING), value="Value"
             ),
         ]
-        table_rows = []
 
+        table = []
         quantile_strings = {0.25: "Q1", 0.75: "Q3", 0.50: "Median"}
-
         for idx, quantile in enumerate(quantiles):
             quantile_string = quantile_strings.get(quantile) or f"{quantile:3.2f}"
-            table_rows.append(
+            table.append(
                 [
                     RendererTableValue(
                         schema=RendererSchema(type=RendererValueType.STRING),
@@ -574,7 +566,10 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                 ]
             )
 
-        return template_string, params_with_json_schema, table_header_row, table_rows
+        renderer_configuration.header_row = header_row
+        renderer_configuration.table = table
+
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=AtomicDiagnosticRendererType.OBSERVED_VALUE)
@@ -583,20 +578,19 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
     ):
-        (
-            template_string,
-            params_with_json_schema,
-            table_header_row,
-            table_rows,
-        ) = cls._atomic_diagnostic_observed_value_template(
-            configuration, result, runtime_configuration, **kwargs
+        renderer_configuration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            runtime_configuration=runtime_configuration,
         )
-        if template_string is not None:
+        renderer_configuration = cls._atomic_diagnostic_observed_value_template(
+            renderer_configuration=renderer_configuration,
+        )
+        if renderer_configuration.template_str:
             value_obj = renderedAtomicValueSchema.load(
                 {
-                    "template": template_string,
+                    "template": renderer_configuration.template_str,
                     "params": {},
                     "schema": {"type": "StringValueType"},
                 }
@@ -607,10 +601,14 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                 value_type="StringValueType",
             )
         else:
+            header_row = [value.dict() for value in renderer_configuration.header_row]
+            table = []
+            for row in renderer_configuration.table:
+                table.append([value.dict() for value in row])
             value_obj = renderedAtomicValueSchema.load(
                 {
-                    "header_row": table_header_row,
-                    "table": table_rows,
+                    "header_row": header_row,
+                    "table": table,
                     "schema": {"type": "TableType"},
                 }
             )

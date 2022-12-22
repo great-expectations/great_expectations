@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 import altair as alt
 import numpy as np
@@ -47,9 +47,6 @@ from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 from great_expectations.validator.validator import ValidationDependencies
-
-if TYPE_CHECKING:
-    from great_expectations.render.renderer_configuration import RendererParams
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -188,7 +185,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
     )
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -1110,6 +1107,10 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             )
             value_type = "GraphType"
         else:
+            header_row = [value.dict() for value in renderer_configuration.header_row]
+            table = []
+            for row in renderer_configuration.table:
+                table.append([value.dict() for value in row])
             value_obj = renderedAtomicValueSchema.load(
                 {
                     "header": {
@@ -1119,8 +1120,8 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                             "params": renderer_configuration.params.dict(),
                         },
                     },
-                    "header_row": renderer_configuration.header_row,
-                    "table": renderer_configuration.table,
+                    "header_row": header_row,
+                    "table": table,
                     "schema": {"type": "TableType"},
                 }
             )
@@ -1197,7 +1198,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
     ):
         observed_partition_object = result.result.get("details", {}).get(
             "observed_partition", {}
@@ -1252,7 +1252,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
     ):
         if not result.result.get("details"):
             value_obj = renderedAtomicValueSchema.load(
@@ -1276,7 +1275,9 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             distribution_table_header_row,
             distribution_table_rows,
         ) = cls._atomic_diagnostic_observed_value_template(
-            configuration, result, runtime_configuration, **kwargs
+            configuration,
+            result,
+            runtime_configuration,
         )
 
         if chart is not None:
