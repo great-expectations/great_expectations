@@ -176,6 +176,9 @@ def main():
     logger.info("Generating list of public API docstring errors. This may take a few minutes.")
     errors = _public_api_docstring_errors()
 
+    if not errors:
+        logger.info("There are no public API docstring errors.")
+
     for error in errors:
         logger.error(error)
 
