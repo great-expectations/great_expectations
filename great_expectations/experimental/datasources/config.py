@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 from pprint import pformat as pf
-from typing import Any, Dict, Optional, Type
+from typing import Dict, Optional, Type
 
 from pydantic import Field, validator
 
@@ -28,10 +28,8 @@ class GxConfig(ExperimentalBaseModel):
     # old style datasources
     name: Optional[str] = Field(None, description=_OLD_STYLE_DESCRIPTION)
     class_name: Optional[str] = Field(None, description=_OLD_STYLE_DESCRIPTION)
-    execution_engine: Optional[str] = Field(None, description=_OLD_STYLE_DESCRIPTION)
-    data_connectors: Optional[Dict[str, Any]] = Field(
-        None, description=_OLD_STYLE_DESCRIPTION
-    )
+    execution_engine: Optional[dict] = Field(None, description=_OLD_STYLE_DESCRIPTION)
+    data_connectors: Optional[dict] = Field(None, description=_OLD_STYLE_DESCRIPTION)
 
     @validator("datasources", pre=True)
     @classmethod

@@ -76,10 +76,43 @@ SIMPLE_DS_DICT = {
     "datasources": {
         "my_ds": {
             "name": "my_ds",
-            "type": "postgres",
-            "connection_string": "postgres",
+            "type": "sql",
+            "connection_string": "sqlite://",
         }
     }
+}
+
+WITH_OLD_STYLE_DS_DICT = {
+    "datasources": {
+        "my_ds": {
+            "name": "my_ds",
+            "type": "sql",
+            "connection_string": "sqlite://",
+        }
+    },
+    "name": "getting_started_datasource",
+    "class_name": "Datasource",
+    "execution_engine": {
+        "class_name": "PandasExecutionEngine",
+    },
+    "data_connectors": {
+        "default_inferred_data_connector_name": {
+            "class_name": "InferredAssetFilesystemDataConnector",
+            "base_directory": "../data/",
+            "default_regex": {
+                "group_names": ["data_asset_name"],
+                "pattern": "(.*)",
+            },
+        },
+        "default_runtime_data_connector_name": {
+            "class_name": "RuntimeDataConnector",
+            "assets": {
+                "my_runtime_asset_name": {
+                    "batch_identifiers": ["runtime_batch_identifier_name"]
+                }
+            },
+        },
+    },
 }
 
 
@@ -87,6 +120,7 @@ SIMPLE_DS_DICT = {
     ["load_method", "input_"],
     [
         p(GxConfig.parse_obj, SIMPLE_DS_DICT, id="simple pg config dict"),
+        p(GxConfig.parse_obj, WITH_OLD_STYLE_DS_DICT, id="with old style config"),
         p(GxConfig.parse_raw, json.dumps(SIMPLE_DS_DICT), id="simple pg json"),
         p(GxConfig.parse_obj, PG_COMPLEX_CONFIG_DICT, id="pg complex dict"),
         p(GxConfig.parse_raw, PG_COMPLEX_CONFIG_JSON, id="pg complex json"),
