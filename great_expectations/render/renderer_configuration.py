@@ -267,7 +267,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         return values
 
     @staticmethod
-    def _get_condition_params(
+    def _get_row_condition_params(
         row_condition_str: str,
     ) -> Dict[str, Dict[str, Collection[str]]]:
         row_condition_str = RendererConfiguration._parse_row_condition_str(
@@ -304,7 +304,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         if values["_row_condition"]:
             renderer_params_args: Dict[
                 str, Dict[str, Collection[str]]
-            ] = RendererConfiguration._get_condition_params(
+            ] = RendererConfiguration._get_row_condition_params(
                 row_condition_str=values["_row_condition"],
             )
             values["_params"] = (
