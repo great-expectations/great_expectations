@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import re
 from datetime import datetime
 from enum import Enum
 from numbers import Number
 from typing import (
     TYPE_CHECKING,
     Any,
+    Collection,
     Dict,
     Generic,
     Iterable,
@@ -60,6 +62,9 @@ class _RendererParamsBase(BaseModel):
         validate_assignment = True
         arbitrary_types_allowed = True
 
+    def __len__(self) -> int:
+        return len(self.__fields__)
+
     def dict(
         self,
         include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
@@ -96,7 +101,7 @@ RendererParams = TypeVar("RendererParams", bound=_RendererParamsBase)
 class RendererConfiguration(GenericModel, Generic[RendererParams]):
     """Configuration object built for each renderer."""
 
-    configuration: Union[ExpectationConfiguration, None] = Field(
+    configuration: Optional[ExpectationConfiguration] = Field(
         None, allow_mutation=False
     )
     result: Optional[ExpectationValidationResult] = Field(None, allow_mutation=False)
@@ -104,12 +109,13 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     expectation_type: str = Field("", allow_mutation=False)
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
-    params: RendererParams = Field(..., allow_mutation=True)
     template_str: str = Field("", allow_mutation=True)
     header_row: List[Dict[str, Optional[Any]]] = Field([], allow_mutation=True)
     table: List[List[Dict[str, Optional[Any]]]] = Field([], allow_mutation=True)
     graph: dict = Field({}, allow_mutation=True)
     _raw_kwargs: dict = Field({}, allow_mutation=False)
+    _row_condition: str = Field("", allow_mutation=False)
+    params: RendererParams = Field(..., allow_mutation=True)
 
     class Config:
         validate_assignment = True
@@ -202,33 +208,17 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     @staticmethod
     def _get_evaluation_parameter_params_from_raw_kwargs(
         raw_kwargs: Dict[str, Any]
-    ) -> _RendererParamsBase:
+    ) -> Dict[str, Dict[str, Collection[str]]]:
         evaluation_parameter_count = 0
-        renderer_params_args: Dict[str, BaseModel] = {}
-        renderer_param_definitions: Dict[str, Any] = {}
+        renderer_params_args = {}
         for key, value in raw_kwargs.items():
             evaluation_parameter_name = f"eval_param__{evaluation_parameter_count}"
-            renderer_param: Type[
-                BaseModel
-            ] = RendererConfiguration._get_renderer_param_base_model_type(
-                name=evaluation_parameter_name
-            )
-            renderer_param_definitions[evaluation_parameter_name] = (
-                Optional[renderer_param],
-                ...,
-            )
-            renderer_params_args[evaluation_parameter_name] = renderer_param(
-                schema={"type": RendererSchemaType.STRING},
-                value=f'{key}: {value["$PARAMETER"]}',
-            )
+            renderer_params_args[evaluation_parameter_name] = {
+                "schema": {"type": RendererSchemaType.STRING},
+                "value": f'{key}: {value["$PARAMETER"]}',
+            }
             evaluation_parameter_count += 1
-
-        renderer_params: Type[_RendererParamsBase] = create_model(
-            "RendererParams",
-            **renderer_param_definitions,
-            __base__=_RendererParamsBase,
-        )
-        return renderer_params(**renderer_params_args)
+        return renderer_params_args
 
     @root_validator()
     def _validate_and_set_renderer_attrs(cls, values: dict) -> dict:
@@ -251,12 +241,16 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                     for key, value in raw_configuration.kwargs.items()
                     if (key, value) not in values["kwargs"].items()
                 }
-                values[
-                    "params"
+                renderer_params_args: Dict[
+                    str, Dict[str, Collection[str]]
                 ] = RendererConfiguration._get_evaluation_parameter_params_from_raw_kwargs(
                     raw_kwargs=values["_raw_kwargs"]
                 )
-
+                values["_params"] = (
+                    {**values["_params"], **renderer_params_args}
+                    if "_params" in values and values["_params"]
+                    else renderer_params_args
+                )
         else:
             values["expectation_type"] = values["configuration"].expectation_type
             values["kwargs"] = values["configuration"].kwargs
@@ -272,8 +266,141 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             )
         return values
 
+    @staticmethod
+    def _get_condition_params(
+        row_condition_str: str,
+    ) -> Dict[str, Dict[str, Collection[str]]]:
+        row_condition_str = RendererConfiguration._parse_row_condition_str(
+            row_condition_str=row_condition_str
+        )
+        row_conditions_list: List[
+            str
+        ] = RendererConfiguration._get_row_conditions_list_from_row_condition_str(
+            row_condition_str=row_condition_str
+        )
+        renderer_params_args = {}
+        for idx, condition in enumerate(row_conditions_list):
+            name = f"row_condition__{str(idx)}"
+            value = condition.replace(" NOT ", " not ")
+            renderer_params_args[name] = {
+                "schema": {"type": RendererSchemaType.STRING},
+                "value": value,
+            }
+        return renderer_params_args
+
+    @root_validator()
+    def _validate_for_row_condition(cls, values: dict) -> dict:
+        kwargs: Dict[str, Any]
+        if (
+            "result" in values
+            and values["result"] is not None
+            and values["result"].expectation_config is not None
+        ):
+            kwargs = values["result"].expectation_config.kwargs
+        else:
+            kwargs = values["configuration"].kwargs
+
+        values["_row_condition"] = kwargs.get("row_condition", "")
+        if values["_row_condition"]:
+            renderer_params_args: Dict[
+                str, Dict[str, Collection[str]]
+            ] = RendererConfiguration._get_condition_params(
+                row_condition_str=values["_row_condition"],
+            )
+            values["_params"] = (
+                {**values["_params"], **renderer_params_args}
+                if "_params" in values and values["_params"]
+                else renderer_params_args
+            )
+        return values
+
+    @root_validator()
+    def _validate_for_params(cls, values: dict) -> dict:
+        if not values["params"]:
+            _params: Optional[
+                Dict[str, Dict[str, Union[str, Dict[str, RendererSchemaType]]]]
+            ] = values.get("_params")
+            if _params:
+                renderer_param_definitions: Dict[str, Any] = {}
+                for name in _params:
+                    renderer_param_type: Type[
+                        BaseModel
+                    ] = RendererConfiguration._get_renderer_param_base_model_type(
+                        name=name
+                    )
+                    renderer_param_definitions[name] = (
+                        Optional[renderer_param_type],
+                        ...,
+                    )
+                renderer_params: Type[BaseModel] = create_model(
+                    "RendererParams",
+                    **renderer_param_definitions,
+                    __base__=_RendererParamsBase,
+                )
+                values["params"] = renderer_params(**_params)
+            else:
+                values["params"] = _RendererParamsBase()
+        return values
+
+    @staticmethod
+    def _get_row_conditions_list_from_row_condition_str(
+        row_condition_str: str,
+    ) -> List[str]:
+        # divide the whole condition into smaller parts
+        row_conditions_list = re.split(r"AND|OR|NOT(?! in)|\(|\)", row_condition_str)
+        row_conditions_list = [
+            condition.strip() for condition in row_conditions_list if condition.strip()
+        ]
+        return row_conditions_list
+
+    @staticmethod
+    def _parse_row_condition_str(row_condition_str: str) -> str:
+        if not row_condition_str:
+            row_condition_str = "True"
+
+        row_condition_str = (
+            row_condition_str.replace("&", " AND ")
+            .replace(" and ", " AND ")
+            .replace("|", " OR ")
+            .replace(" or ", " OR ")
+            .replace("~", " NOT ")
+            .replace(" not ", " NOT ")
+        )
+        row_condition_str = " ".join(row_condition_str.split())
+
+        # replace tuples of values by lists of values
+        tuples_list = re.findall(r"\([^()]*,[^()]*\)", row_condition_str)
+        for value_tuple in tuples_list:
+            value_list = value_tuple.replace("(", "[").replace(")", "]")
+            row_condition_str = row_condition_str.replace(value_tuple, value_list)
+
+        return row_condition_str
+
+    @staticmethod
+    def _get_row_condition_string(row_condition_str: str) -> str:
+        row_condition_str = RendererConfiguration._parse_row_condition_str(
+            row_condition_str=row_condition_str
+        )
+        row_conditions_list: List[
+            str
+        ] = RendererConfiguration._get_row_conditions_list_from_row_condition_str(
+            row_condition_str=row_condition_str
+        )
+        for idx, condition in enumerate(row_conditions_list):
+            row_condition_str = row_condition_str.replace(
+                condition, f"$row_condition__{str(idx)}"
+            )
+        row_condition_str = row_condition_str.lower()
+        return f"if {row_condition_str}"
+
     @validator("template_str")
     def _set_template_str(cls, v: str, values: dict) -> str:
+        if "_row_condition" in values and values["_row_condition"]:
+            row_condition_str: str = RendererConfiguration._get_row_condition_string(
+                row_condition_str=values["_row_condition"]
+            )
+            v = f"{row_condition_str}, then {v}"
+
         if "_raw_kwargs" in values and values["_raw_kwargs"]:
             v += "  "
             for evaluation_parameter_count in range(len(values["_raw_kwargs"])):

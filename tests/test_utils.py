@@ -13,6 +13,7 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.alias_types import PathStr
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store import (
     CheckpointStore,
@@ -1023,7 +1024,7 @@ def find_strings_in_nested_obj(obj: Any, target_strings: List[str]) -> bool:
 
 
 @contextmanager
-def working_directory(directory: Union[str, Path]):
+def working_directory(directory: PathStr):
     """
     Resets working directory to cwd() after changing to 'directory' passed in as parameter.
     Reference:
