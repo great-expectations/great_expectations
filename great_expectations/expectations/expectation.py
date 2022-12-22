@@ -310,7 +310,7 @@ class Expectation(metaclass=MetaExpectation):
         "catch_exceptions": False,
         "result_format": "BASIC",
     }
-    args_keys = None
+    args_keys: Tuple[str, ...] = ()
 
     expectation_type: str
     examples: List[dict] = []
@@ -2089,8 +2089,9 @@ class TableExpectation(Expectation, ABC):
         "row_condition",
         "condition_parser",
     )
-    metric_dependencies = ()
+    metric_dependencies: Tuple[str, ...] = ()
     domain_type = MetricDomainTypes.TABLE
+    args_keys: Tuple[str, ...] = ()
 
     def get_validation_dependencies(
         self,

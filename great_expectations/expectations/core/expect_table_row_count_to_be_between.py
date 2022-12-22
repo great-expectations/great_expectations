@@ -202,19 +202,19 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
-        params: RendererParams = renderer_configuration.params
+        params = renderer_configuration.params
 
         if not params.min_value and not params.max_value:
             template_str = "May have any number of rows."
         else:
             at_least_str = "greater than or equal to"
             if params.strict_min:
-                at_least_str: str = cls._get_strict_min_string(
+                at_least_str = cls._get_strict_min_string(
                     renderer_configuration=renderer_configuration
                 )
             at_most_str = "less than or equal to"
             if params.strict_max:
-                at_most_str: str = cls._get_strict_max_string(
+                at_most_str = cls._get_strict_max_string(
                     renderer_configuration=renderer_configuration
                 )
 
@@ -245,7 +245,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs,  # type: ignore[union-attr]
             [
                 "min_value",
                 "max_value",
