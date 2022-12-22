@@ -167,7 +167,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         def _validate_param_type_matches_value(cls, values: dict) -> dict:
             param_type: RendererValueType = values["schema"]["type"]
             value: Any = values["value"]
-            if param_type is RendererValueType.STRING:
+            if param_type == RendererValueType.STRING:
                 try:
                     str(value)
                 except Exception as e:
@@ -178,16 +178,16 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 renderer_configuration_error = RendererConfigurationError(
                     f"Param type: <{param_type}> does " f"not match value: <{value}>."
                 )
-                if param_type is RendererValueType.NUMBER:
+                if param_type == RendererValueType.NUMBER:
                     if not isinstance(value, Number):
                         raise renderer_configuration_error
-                elif param_type is RendererValueType.DATE:
+                elif param_type == RendererValueType.DATE:
                     if not isinstance(value, datetime):
                         try:
                             dateutil.parser.parse(value)
                         except ParserError:
                             raise renderer_configuration_error
-                elif param_type is RendererValueType.BOOLEAN:
+                elif param_type == RendererValueType.BOOLEAN:
                     if value is not True and value is not False:
                         raise renderer_configuration_error
                 else:
