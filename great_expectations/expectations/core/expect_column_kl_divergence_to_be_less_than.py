@@ -34,7 +34,7 @@ from great_expectations.render import (
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
-    RendererParamType,
+    RendererValueType,
 )
 from great_expectations.render.util import (
     num_to_str,
@@ -989,11 +989,11 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                 table_rows.append(
                     [
                         {
-                            "type": RendererParamType.STRING,
+                            "type": RendererValueType.STRING,
                             "value": f"[{interval_start} - {interval_end}{interval_closing_symbol}",
                         },
                         {
-                            "type": RendererParamType.STRING,
+                            "type": RendererValueType.STRING,
                             "value": num_to_str(fraction),
                         },
                     ]
@@ -1003,11 +1003,11 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             table_rows = [
                 [
                     {
-                        "schema": {"type": RendererParamType.STRING},
+                        "schema": {"type": RendererValueType.STRING},
                         "value": str(value),
                     },
                     {
-                        "schema": {"type": RendererParamType.STRING},
+                        "schema": {"type": RendererValueType.STRING},
                         "value": num_to_str(fractions[idx]),
                     },
                 ]
@@ -1016,10 +1016,10 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
 
         header_row = [
             {
-                "schema": {"type": RendererParamType.STRING},
+                "schema": {"type": RendererValueType.STRING},
                 "value": "Interval" if partition_object.get("bins") else "Value",
             },
-            {"schema": {"type": RendererParamType.STRING}, "value": "Fraction"},
+            {"schema": {"type": RendererValueType.STRING}, "value": "Fraction"},
         ]
 
         return header_row, table_rows
@@ -1030,9 +1030,9 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         add_param_args = (
-            ("column", RendererParamType.STRING),
-            ("mostly", RendererParamType.NUMBER),
-            ("threshold", RendererParamType.NUMBER),
+            ("column", RendererValueType.STRING),
+            ("mostly", RendererValueType.NUMBER),
+            ("threshold", RendererValueType.NUMBER),
         )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)

@@ -26,7 +26,7 @@ from great_expectations.render import (
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
-    RendererParamType,
+    RendererValueType,
 )
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
@@ -279,8 +279,8 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         add_param_args = (
-            ("column", RendererParamType.STRING),
-            ("mostly", RendererParamType.NUMBER),
+            ("column", RendererValueType.STRING),
+            ("mostly", RendererValueType.NUMBER),
         )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
@@ -302,9 +302,9 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         ).get("value_ranges", [])
 
         header_row = [
-            {"schema": {"type": RendererParamType.STRING}, "value": "Quantile"},
-            {"schema": {"type": RendererParamType.STRING}, "value": "Min Value"},
-            {"schema": {"type": RendererParamType.STRING}, "value": "Max Value"},
+            {"schema": {"type": RendererValueType.STRING}, "value": "Quantile"},
+            {"schema": {"type": RendererValueType.STRING}, "value": "Min Value"},
+            {"schema": {"type": RendererValueType.STRING}, "value": "Max Value"},
         ]
 
         renderer_configuration.header_row = header_row
@@ -317,22 +317,22 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                 [
                     {
                         "value": quantile_string,
-                        "schema": {"type": RendererParamType.STRING},
+                        "schema": {"type": RendererValueType.STRING},
                     },
                     {
                         "value": value_range[0] if value_range[0] else "Any",
                         "schema": {
-                            "type": RendererParamType.NUMBER
+                            "type": RendererValueType.NUMBER
                             if value_range[0]
-                            else RendererParamType.STRING
+                            else RendererValueType.STRING
                         },
                     },
                     {
                         "value": value_range[1] if value_range[1] else "Any",
                         "schema": {
-                            "type": RendererParamType.NUMBER
+                            "type": RendererValueType.NUMBER
                             if value_range[1]
-                            else RendererParamType.STRING
+                            else RendererValueType.STRING
                         },
                     },
                 ]

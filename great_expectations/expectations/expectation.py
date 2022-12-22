@@ -104,7 +104,7 @@ from great_expectations.render.exceptions import RendererConfigurationError
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
-    RendererParamType,
+    RendererValueType,
 )
 from great_expectations.render.util import num_to_str
 from great_expectations.self_check.util import (
@@ -377,10 +377,10 @@ class Expectation(metaclass=MetaExpectation):
         add_param_args = (
             (
                 "expectation_type",
-                RendererParamType.STRING,
+                RendererValueType.STRING,
                 renderer_configuration.expectation_type,
             ),
-            ("kwargs", RendererParamType.STRING, renderer_configuration.kwargs),
+            ("kwargs", RendererValueType.STRING, renderer_configuration.kwargs),
         )
         for name, param_type, value in add_param_args:
             renderer_configuration.add_param(
@@ -418,10 +418,10 @@ class Expectation(metaclass=MetaExpectation):
         add_param_args = (
             (
                 "expectation_type",
-                RendererParamType.STRING,
+                RendererValueType.STRING,
                 renderer_configuration.expectation_type,
             ),
-            ("kwargs", RendererParamType.STRING, renderer_configuration.kwargs),
+            ("kwargs", RendererValueType.STRING, renderer_configuration.kwargs),
         )
         for name, param_type, value in add_param_args:
             renderer_configuration.add_param(
@@ -897,10 +897,10 @@ class Expectation(metaclass=MetaExpectation):
         add_param_args = (
             (
                 "expectation_type",
-                RendererParamType.STRING,
+                RendererValueType.STRING,
                 renderer_configuration.expectation_type,
             ),
-            ("kwargs", RendererParamType.STRING, renderer_configuration.kwargs),
+            ("kwargs", RendererValueType.STRING, renderer_configuration.kwargs),
         )
         for name, param_type, value in add_param_args:
             renderer_configuration.add_param(
@@ -1569,9 +1569,9 @@ class Expectation(metaclass=MetaExpectation):
         if len(value_set) > 0:
             for idx, value in enumerate(value_set):
                 if isinstance(value, Number):
-                    param_type = RendererParamType.NUMBER
+                    param_type = RendererValueType.NUMBER
                 else:
-                    param_type = RendererParamType.STRING
+                    param_type = RendererValueType.STRING
                 renderer_configuration.add_param(
                     name=f"v__{str(idx)}", param_type=param_type, value=value
                 )
@@ -1601,7 +1601,7 @@ class Expectation(metaclass=MetaExpectation):
         )
         renderer_configuration.add_param(
             name="mostly_pct",
-            param_type=RendererParamType.STRING,
+            param_type=RendererValueType.STRING,
             value=mostly_pct_value,
         )
         return renderer_configuration

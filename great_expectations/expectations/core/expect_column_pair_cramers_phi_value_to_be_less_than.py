@@ -17,7 +17,7 @@ from great_expectations.render import (
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
-    RendererParamType,
+    RendererValueType,
 )
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
@@ -68,8 +68,8 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         add_param_args = (
-            ("column_A", RendererParamType.STRING),
-            ("column_B", RendererParamType.STRING),
+            ("column_A", RendererValueType.STRING),
+            ("column_B", RendererValueType.STRING),
         )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)

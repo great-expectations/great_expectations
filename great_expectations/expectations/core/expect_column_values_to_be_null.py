@@ -19,7 +19,7 @@ from great_expectations.render import (
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
-    RendererParamType,
+    RendererValueType,
 )
 from great_expectations.render.util import (
     num_to_str,
@@ -102,8 +102,8 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         cls, renderer_configuration: RendererConfiguration
     ) -> RendererConfiguration:
         add_param_args = (
-            ("column", RendererParamType.STRING),
-            ("mostly", RendererParamType.NUMBER),
+            ("column", RendererValueType.STRING),
+            ("mostly", RendererValueType.NUMBER),
         )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)

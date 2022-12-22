@@ -14,7 +14,7 @@ from great_expectations.render import LegacyRendererType, RenderedStringTemplate
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
-    RendererParamType,
+    RendererValueType,
 )
 from great_expectations.render.util import ordinal, substitute_none_for_missing
 
@@ -119,8 +119,8 @@ class ExpectColumnToExist(TableExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         add_param_args = (
-            ("column", RendererParamType.STRING),
-            ("column_index", RendererParamType.NUMBER),
+            ("column", RendererValueType.STRING),
+            ("column_index", RendererValueType.NUMBER),
         )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
@@ -135,7 +135,7 @@ class ExpectColumnToExist(TableExpectation):
         else:
             renderer_configuration.add_param(
                 name="column_indexth",
-                param_type=RendererParamType.STRING,
+                param_type=RendererValueType.STRING,
                 value=ordinal(params.column_index.value),
             )
             if renderer_configuration.include_column_name:

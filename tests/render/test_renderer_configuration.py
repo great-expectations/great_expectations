@@ -9,7 +9,7 @@ from great_expectations.core import (
 )
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
-    RendererParamType,
+    RendererValueType,
 )
 
 
@@ -114,14 +114,14 @@ class NotString:
 @pytest.mark.parametrize(
     "param_type,value",
     [
-        (RendererParamType.STRING, NotString()),
-        (RendererParamType.NUMBER, "ABC"),
-        (RendererParamType.BOOLEAN, 3),
-        (RendererParamType.ARRAY, 3),
+        (RendererValueType.STRING, NotString()),
+        (RendererValueType.NUMBER, "ABC"),
+        (RendererValueType.BOOLEAN, 3),
+        (RendererValueType.ARRAY, 3),
     ],
 )
 def test_renderer_configuration_add_param_validation(
-    param_type: RendererParamType, value: Union[NotString, str, int]
+    param_type: RendererValueType, value: Union[NotString, str, int]
 ):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_table_row_count_to_equal",
@@ -133,7 +133,7 @@ def test_renderer_configuration_add_param_validation(
     with pytest.raises(ValidationError) as e:
         renderer_configuration.add_param(name="value", param_type=param_type)
 
-    if param_type is RendererParamType.STRING:
+    if param_type is RendererValueType.STRING:
         exception_message = (
             "Value was unable to be represented as a string: I'm not a string"
         )

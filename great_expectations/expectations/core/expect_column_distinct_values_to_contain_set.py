@@ -18,7 +18,7 @@ from great_expectations.render import LegacyRendererType, RenderedStringTemplate
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
-    RendererParamType,
+    RendererValueType,
 )
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
@@ -122,9 +122,9 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         add_param_args = (
-            ("column", RendererParamType.STRING),
-            ("value_set", RendererParamType.ARRAY),
-            ("parse_strings_as_datetimes", RendererParamType.BOOLEAN),
+            ("column", RendererValueType.STRING),
+            ("value_set", RendererValueType.ARRAY),
+            ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
         )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
