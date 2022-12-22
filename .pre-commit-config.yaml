@@ -30,11 +30,6 @@ repos:
     hooks:
       - id: pyupgrade
         args: ["--py3-plus"]
-  - repo: https://github.com/PyCQA/docformatter
-    rev: v1.5.1
-    hooks:
-      - id: docformatter
-        args: [ --in-place --config ./pyproject.toml ]
 # https://pre-commit.ci/
 ci:
     autofix_commit_msg: |
