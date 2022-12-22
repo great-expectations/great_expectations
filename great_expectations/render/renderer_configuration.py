@@ -103,16 +103,22 @@ RendererParams = TypeVar("RendererParams", bound=_RendererValueBase)
 
 
 class RendererTableValue(_RendererValueBase):
+    """Represents each value within a row of a header_row or a table."""
+
     renderer_schema: RendererSchema = Field(alias="schema")
     value: Optional[Any]
 
 
 class MetaNotesFormat(str, Enum):
+    """Possible formats that can be passed into MetaNotes."""
+
     STRING = "string"
     MARKDOWN = "markdown"
 
 
 class MetaNotes(TypedDict):
+    """Notes that can be added to the meta field of an Expectation."""
+
     format: MetaNotesFormat
     content: List[str]
 
@@ -158,6 +164,8 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         super().__init__(**values)
 
     class _RendererParamArgs(TypedDict):
+        """Used for building up a dictionary that is unpacked into RendererParams upon initialization."""
+
         schema: RendererSchema
         value: Any
 
