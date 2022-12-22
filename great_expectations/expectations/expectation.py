@@ -118,6 +118,7 @@ from great_expectations.validator.validator import ValidationDependencies, Valid
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.render.renderer_configuration import MetaNotes
 
 logger = logging.getLogger(__name__)
 
@@ -391,6 +392,7 @@ class Expectation(metaclass=MetaExpectation):
             {
                 "template": template_str,
                 "params": renderer_configuration.params.dict(),
+                "meta_notes": renderer_configuration.meta_notes,
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
         )
@@ -437,7 +439,7 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> Tuple[str, dict, Optional[dict]]:
+    ) -> Tuple[str, dict, MetaNotes, Optional[dict]]:
         """
         Template function that contains the logic that is shared by AtomicPrescriptiveRendererType.SUMMARY and
         LegacyRendererType.PRESCRIPTIVE.
@@ -456,6 +458,7 @@ class Expectation(metaclass=MetaExpectation):
         return (
             renderer_configuration.template_str,
             renderer_configuration.params.dict(),
+            renderer_configuration.meta_notes,
             styling,
         )
 
@@ -468,7 +471,12 @@ class Expectation(metaclass=MetaExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> RenderedAtomicContent:
-        (template_str, params_with_json_schema, _) = cls._atomic_prescriptive_template(
+        (
+            template_str,
+            params_with_json_schema,
+            meta_notes,
+            _,
+        ) = cls._atomic_prescriptive_template(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
@@ -477,6 +485,7 @@ class Expectation(metaclass=MetaExpectation):
             {
                 "template": template_str,
                 "params": params_with_json_schema,
+                "meta_notes": meta_notes,
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
         )
