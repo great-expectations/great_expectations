@@ -391,6 +391,7 @@ class Expectation(metaclass=MetaExpectation):
             {
                 "template": template_str,
                 "params": renderer_configuration.params.dict(),
+                "meta_notes": renderer_configuration.meta_notes,
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
         )
