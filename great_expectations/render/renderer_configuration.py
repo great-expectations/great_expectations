@@ -105,7 +105,7 @@ class MetaNotesFormat(str, Enum):
 
 
 class MetaNotes(TypedDict):
-    format: str
+    format: MetaNotesFormat
     content: List[str]
 
 
