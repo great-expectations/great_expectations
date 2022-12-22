@@ -41,7 +41,11 @@ class GxConfig(ExperimentalBaseModel):
 
         # TODO (kilo59): catch key errors
         for ds_name, config in v.items():
-            ds_type_name: str = config["type"]
+            ds_type_name: str = config.get("type", "")
+            if not ds_type_name:
+                LOGGER.info(f"'{ds_name}' is missing a 'type' entry")
+                continue  # missing `type` will be caught by normal field validation
+
             ds_type: Type[Datasource] = _SourceFactories.type_lookup[ds_type_name]
             LOGGER.debug(f"Instantiating '{ds_name}' as {ds_type}")
 
