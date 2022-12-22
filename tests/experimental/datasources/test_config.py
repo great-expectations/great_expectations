@@ -106,6 +106,30 @@ def test_load_config(inject_engine_lookup_double, load_method: Callable, input_)
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
+    ["config", "expected_error_loc", "expected_msg"],
+    [({}, ("datasources",), "field required")],
+)
+def test_catch_bad_top_level_config(
+    inject_engine_lookup_double,
+    config: dict,
+    expected_error_loc: tuple,
+    expected_msg: str,
+):
+    print(f"  config\n{pf(config)}\n")
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        GxConfig.parse_obj(config)
+
+    print(f"\n{exc_info.typename}:{exc_info.value}")
+    all_errors = exc_info.value.errors()
+    print(f"\nErrors dict\n{pf(all_errors)}")
+
+    assert len(all_errors) == 1, "Expected 1 error"
+    assert expected_error_loc == all_errors[0]["loc"]
+    assert expected_msg == all_errors[0]["msg"]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
     ["bad_asset_config", "expected_error_loc", "expected_msg"],
     [
         p(
