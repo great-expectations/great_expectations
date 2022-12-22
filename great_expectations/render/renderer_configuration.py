@@ -7,7 +7,6 @@ from numbers import Number
 from typing import (
     TYPE_CHECKING,
     Any,
-    Collection,
     Dict,
     Generic,
     Iterable,
@@ -146,7 +145,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         super().__init__(**values)
 
     class _RendererParamArgs(TypedDict):
-        renderer_schema: RendererSchema
+        schema: RendererSchema
         value: Any
 
     class _RendererParamBase(_RendererValueBase):
@@ -228,7 +227,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             renderer_params_args[
                 evaluation_parameter_name
             ] = RendererConfiguration._RendererParamArgs(
-                renderer_schema=RendererSchema(type=RendererValueType.STRING),
+                schema=RendererSchema(type=RendererValueType.STRING),
                 value=f'{key}: {value["$PARAMETER"]}',
             )
             evaluation_parameter_count += 1
@@ -281,9 +280,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         return values
 
     @staticmethod
-    def _get_condition_params(
+    def _get_row_condition_params(
         row_condition_str: str,
-    ) -> Dict[str, Dict[str, Collection[str]]]:
+    ) -> Dict[str, RendererConfiguration._RendererParamArgs]:
         row_condition_str = RendererConfiguration._parse_row_condition_str(
             row_condition_str=row_condition_str
         )
@@ -296,10 +295,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         for idx, condition in enumerate(row_conditions_list):
             name = f"row_condition__{str(idx)}"
             value = condition.replace(" NOT ", " not ")
-            renderer_params_args[name] = {
-                "schema": RendererSchema(type=RendererValueType.STRING),
-                "value": value,
-            }
+            renderer_params_args[name] = RendererConfiguration._RendererParamArgs(
+                schema=RendererSchema(type=RendererValueType.STRING), value=value
+            )
         return renderer_params_args
 
     @root_validator()
@@ -317,8 +315,8 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         values["_row_condition"] = kwargs.get("row_condition", "")
         if values["_row_condition"]:
             renderer_params_args: Dict[
-                str, Dict[str, Collection[str]]
-            ] = RendererConfiguration._get_condition_params(
+                str, RendererConfiguration._RendererParamArgs
+            ] = RendererConfiguration._get_row_condition_params(
                 row_condition_str=values["_row_condition"],
             )
             values["_params"] = (
