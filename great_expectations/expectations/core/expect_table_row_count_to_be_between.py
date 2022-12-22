@@ -14,7 +14,7 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
     RendererParams,
-    RendererSchemaType,
+    RendererParamType,
 )
 from great_expectations.render.util import (
     handle_strict_min_max,
@@ -194,10 +194,10 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         cls, renderer_configuration: RendererConfiguration
     ) -> RendererConfiguration:
         add_param_args = (
-            ("min_value", [RendererSchemaType.NUMBER, RendererSchemaType.DATE]),
-            ("max_value", [RendererSchemaType.NUMBER, RendererSchemaType.DATE]),
-            ("strict_min", RendererSchemaType.BOOLEAN),
-            ("strict_max", RendererSchemaType.BOOLEAN),
+            ("min_value", [RendererParamType.NUMBER, RendererParamType.DATE]),
+            ("max_value", [RendererParamType.NUMBER, RendererParamType.DATE]),
+            ("strict_min", RendererParamType.BOOLEAN),
+            ("strict_max", RendererParamType.BOOLEAN),
         )
         for name, schema_type in add_param_args:
             renderer_configuration.add_param(name=name, schema_type=schema_type)

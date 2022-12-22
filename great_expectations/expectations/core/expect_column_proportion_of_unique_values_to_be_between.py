@@ -17,7 +17,7 @@ from great_expectations.render import (
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
-    RendererSchemaType,
+    RendererParamType,
 )
 from great_expectations.render.util import (
     handle_strict_min_max,
@@ -224,9 +224,9 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         add_param_args = (
-            ("column", RendererSchemaType.STRING),
-            ("min_value", RendererSchemaType.NUMBER),
-            ("max_value", RendererSchemaType.NUMBER),
+            ("column", RendererParamType.STRING),
+            ("min_value", RendererParamType.NUMBER),
+            ("max_value", RendererParamType.NUMBER),
             ("parse_strings_as_datetimes", RendererSchemaType.BOOLEAN),
             ("strict_min", RendererSchemaType.BOOLEAN),
             ("strict_max", RendererSchemaType.BOOLEAN),

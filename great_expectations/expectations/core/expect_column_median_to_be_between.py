@@ -13,7 +13,7 @@ from great_expectations.render import LegacyRendererType, RenderedStringTemplate
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
-    RendererSchemaType,
+    RendererParamType,
 )
 from great_expectations.render.util import (
     handle_strict_min_max,
@@ -215,11 +215,11 @@ class ExpectColumnMedianToBeBetween(ColumnExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         add_param_args = (
-            ("column", RendererSchemaType.STRING),
-            ("min_value", RendererSchemaType.NUMBER),
-            ("max_value", RendererSchemaType.NUMBER),
-            ("strict_min", RendererSchemaType.BOOLEAN),
-            ("strict_max", RendererSchemaType.BOOLEAN),
+            ("column", RendererParamType.STRING),
+            ("min_value", RendererParamType.NUMBER),
+            ("max_value", RendererParamType.NUMBER),
+            ("strict_min", RendererParamType.BOOLEAN),
+            ("strict_max", RendererParamType.BOOLEAN),
         )
         for name, schema_type in add_param_args:
             renderer_configuration.add_param(name=name, schema_type=schema_type)

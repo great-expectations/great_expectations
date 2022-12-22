@@ -13,7 +13,7 @@ from great_expectations.render import LegacyRendererType, RenderedStringTemplate
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
-    RendererSchemaType,
+    RendererParamType,
 )
 from great_expectations.render.util import (
     num_to_str,
@@ -119,11 +119,11 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
         cls, renderer_configuration: RendererConfiguration
     ) -> RendererConfiguration:
         add_param_args = (
-            ("column", RendererSchemaType.STRING),
-            ("value", RendererSchemaType.NUMBER),
-            ("mostly", RendererSchemaType.NUMBER),
-            ("strict_min", RendererSchemaType.BOOLEAN),
-            ("strict_max", RendererSchemaType.BOOLEAN),
+            ("column", RendererParamType.STRING),
+            ("value", RendererParamType.NUMBER),
+            ("mostly", RendererParamType.NUMBER),
+            ("strict_min", RendererParamType.BOOLEAN),
+            ("strict_max", RendererParamType.BOOLEAN),
         )
         for name, schema_type in add_param_args:
             renderer_configuration.add_param(name=name, schema_type=schema_type)

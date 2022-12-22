@@ -104,7 +104,7 @@ from great_expectations.render.exceptions import RendererConfigurationError
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
-    RendererSchemaType,
+    RendererParamType,
 )
 from great_expectations.render.util import num_to_str
 from great_expectations.self_check.util import (
@@ -377,10 +377,10 @@ class Expectation(metaclass=MetaExpectation):
         add_param_args = (
             (
                 "expectation_type",
-                RendererSchemaType.STRING,
+                RendererParamType.STRING,
                 renderer_configuration.expectation_type,
             ),
-            ("kwargs", RendererSchemaType.STRING, renderer_configuration.kwargs),
+            ("kwargs", RendererParamType.STRING, renderer_configuration.kwargs),
         )
         for name, schema_type, value in add_param_args:
             renderer_configuration.add_param(
@@ -418,10 +418,10 @@ class Expectation(metaclass=MetaExpectation):
         add_param_args = (
             (
                 "expectation_type",
-                RendererSchemaType.STRING,
+                RendererParamType.STRING,
                 renderer_configuration.expectation_type,
             ),
-            ("kwargs", RendererSchemaType.STRING, renderer_configuration.kwargs),
+            ("kwargs", RendererParamType.STRING, renderer_configuration.kwargs),
         )
         for name, schema_type, value in add_param_args:
             renderer_configuration.add_param(
