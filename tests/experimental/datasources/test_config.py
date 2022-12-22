@@ -9,7 +9,7 @@ import pytest
 
 from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Datasource
-from great_expectations.experimental.datasources.postgres_datasource import (
+from great_expectations.experimental.datasources.sql_datasource import (
     ColumnSplitter,
     SqlYearMonthSplitter,
     TableAsset,
