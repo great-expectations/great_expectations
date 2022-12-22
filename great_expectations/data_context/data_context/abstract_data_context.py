@@ -1092,7 +1092,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def get_datasource(
         self, datasource_name: str = "default"
-    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
+    ) -> Union[LegacyDatasource, BaseDatasource, XDatasource, None]:
         """Get the named datasource
 
         Args:
