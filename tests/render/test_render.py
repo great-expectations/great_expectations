@@ -139,10 +139,12 @@ def test_render_profiling_results_column_section_renderer(titanic_profiled_evrs_
             )
 
 
+# mark JSON serializeable?
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
 def test_smoke_render_validation_results_page_renderer(titanic_profiler_evrs):
     rendered = ValidationResultsPageRenderer().render(titanic_profiler_evrs)
+    # the issue had to do with string arrays
     with open(
         file_relative_path(
             __file__, "./output/test_render_validation_results_page_renderer.json"

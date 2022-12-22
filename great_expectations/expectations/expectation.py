@@ -773,8 +773,10 @@ class Expectation(metaclass=MetaExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> Optional[List[Union[RenderedTableContent, CollapseContent]]]:
+        print("i thought this was workign")
         if result is None:
             return None
+
         result_dict: Optional[dict] = result.result
 
         if result_dict is None:
@@ -785,15 +787,32 @@ class Expectation(metaclass=MetaExpectation):
         ):
             return None
 
+        table_rows = []
+
         if result_dict.get("partial_unexpected_counts"):
             (
                 header_row,
                 table_rows,
             ) = Expectation._build_partial_unexpected_counts_table(result_dict)
+
         else:
-            (header_row, table_rows) = Expectation._build_sampled_unexpected_list_table(
-                result_dict
+            # can we output the other thing?
+            header_row = ["Sampled Unexpected Values"]
+            sampled_values_set = set()
+            partial_unexpected_list: Optional[List[Any]] = result_dict.get(
+                "partial_unexpected_list"
             )
+            if partial_unexpected_list:
+                for unexpected_value in partial_unexpected_list:
+                    if unexpected_value:
+                        string_unexpected_value = str(unexpected_value)
+                    elif unexpected_value == "":
+                        string_unexpected_value = "EMPTY"
+                    else:
+                        string_unexpected_value = "null"
+                    if string_unexpected_value not in sampled_values_set:
+                        table_rows.append([unexpected_value])
+                        sampled_values_set.add(string_unexpected_value)
 
         unexpected_table_content_block = RenderedTableContent(
             **{
@@ -805,7 +824,6 @@ class Expectation(metaclass=MetaExpectation):
                 },
             }
         )
-        # breakpoint()
         if result_dict.get("unexpected_index_query"):
             # how do you add a new rendererj
             # unexpected index table is next
@@ -830,6 +848,44 @@ class Expectation(metaclass=MetaExpectation):
         return [unexpected_table_content_block]
 
     @classmethod
+    def _partial_or_full(cls, result_dict):
+        # unexpected_counts? :
+        # this is the thing?
+        # [{'value': 1, 'count': 1}, {'value': 2, 'count': 1}, {'value': 3, 'count': 1}, {'value': 4, 'count': 1}, {'value': 5, 'count': 1}, {'value': 6, 'count': 1}, {'value': 7, 'count': 1}, {'value': 8, 'count': 1}, {'value': 9, 'count': 1}, {'value': 10, 'count': 1}, {'value': 11, 'count': 1}, {'value': 12, 'count': 1}, {'value': 13, 'count': 1}, {'value': 14, 'count': 1}, {'value': 15, 'count': 1}, {'value': 16, 'count': 1}, {'value': 17, 'count': 1}, {'value': 18, 'count': 1}, {'value': 19, 'count': 1}, {'value': 20, 'count': 1}]
+        partial_unexpected_counts: Optional[List[dict]] = result_dict.get(
+            "partial_unexpected_counts"
+        )
+        unexpected_counts: Optional[List[dict]] = result_dict.get("unexpected_counts")
+        # [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        partial_unexpected_list: Optional[List[dict]] = result_dict.get(
+            "partial_unexpected_list"
+        )
+        unexpected_list: Optional[List[dict]] = result_dict.get("unexpected_list")
+        # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+        partial_unexpected_index_list: Optional[List[dict]] = result_dict.get(
+            "partial_unexpected_index_list"
+        )
+        unexpected_index_list: Optional[List[dict]] = result_dict.get(
+            "unexpected_index_list"
+        )
+        if unexpected_counts:
+            counts = unexpected_counts
+        else:
+            counts = partial_unexpected_counts
+
+        if unexpected_list:
+            unexpected = unexpected_counts
+        else:
+            unexpected = partial_unexpected_list
+
+        if unexpected_index_list:
+            unexpected_index = unexpected_counts
+        else:
+            unexpected_index = partial_unexpected_index_list
+
+        return counts, unexpected, unexpected_index
+
+    @classmethod
     def _build_partial_unexpected_counts_table(cls, result_dict):
         table_rows = []
         # We will check to see whether we have *all* of the unexpected values
@@ -837,95 +893,63 @@ class Expectation(metaclass=MetaExpectation):
         # we will use this as simply a better (non-repeating) source of
         # "sampled" unexpected values
         total_count = 0
-        partial_unexpected_counts: Optional[List[dict]] = result_dict.get(
-            "partial_unexpected_counts"
-        )
-        # if mapped to each of the values?
-        # no that does not exist
-        # this is where we would be adding the ?
-        partial_unexpected_list: Optional[List[dict]] = result_dict.get(
-            "partial_unexpected_list"
-        )
 
-        partial_unexpected_index_list: Optional[List[dict]] = result_dict.get(
-            "partial_unexpected_index_list"
-        )
-        # this is where we are going to process the things
-        unexpected_index_list: Optional[List[dict]] = result_dict.get(
-            "unexpected_index_list"
-        )
+        (
+            unexpected_count,
+            unexpected_list,
+            unexpected_index_list,
+        ) = Expectation._partial_or_full(result_dict)
 
         unexpected_index_column_names: Optional[List[str]] = result_dict.get(
             "unexpected_index_column_names"
         )
-        # breakpoint()
-
-        is_truncated: bool = False
-        # wow this is a weird one
-        if (
-            unexpected_index_list
-            and partial_unexpected_index_list
-            and len(unexpected_index_list) > len(partial_unexpected_index_list)
-        ):
-            # this means we will be adding a ... to the end
-            is_truncated = True
-
-        # find the first index:
-        #
-        index_dict = {}
-        if not partial_unexpected_index_list:
-            return
-        # what do we want to look like in the end?
-        # {"apple": {"pk_1" : [3, 4, 5], "pk_"2: ["three", "four", "five"]}}
-        # find the apple
-
-        res = pd.DataFrame(partial_unexpected_index_list)
-        for name in partial_unexpected_list:
-            index_dict[name] = {}
-        # how do you find out the column?
-        # this is the dict that I want
+        # then we just want to make the simple table
+        # if not partial_unexpected_index_list:
+        #     return
 
         partial_unexpected_index_df = Expectation._convert_unexpected_indices_to_df(
-            result=partial_unexpected_index_list,
+            result=unexpected_index_list,
             unexpected_index_column_names=unexpected_index_column_names,
-            partial_unexpected_list=partial_unexpected_list,
+            partial_unexpected_list=unexpected_list,
         )
-        # then we have set it manually
         if (
             partial_unexpected_index_df is not None
             and unexpected_index_column_names is None
         ):
             unexpected_index_column_names = ["Index"]
 
-        # TODO: and then do rendering stuff to it
-        if partial_unexpected_counts:
-            for unexpected_count_dict in partial_unexpected_counts:
-                value: Optional[Any] = unexpected_count_dict.get("value")
+        if unexpected_count:
+            for unexpected_count_dict in unexpected_count:
+                value: Optional[Any] = str(unexpected_count_dict.get("value"))
                 count: Optional[int] = unexpected_count_dict.get("count")
-
                 if count:
                     total_count += count
                 if value is not None and value != "":
+                    # also checking that every value we add to table has an associated index
+                    # if we also have a table
                     row_list = []
-                    row_list.append(value)
-                    row_list.append(count)
-                    # table_rows.append([value, count])
                     if unexpected_index_column_names:
-                        for column_name in unexpected_index_column_names:
-                            row_list.append(
-                                (
-                                    partial_unexpected_index_df[[column_name]].loc[
-                                        value
-                                    ]
-                                ).item()
-                            )
-                    table_rows.append(row_list)
+                        # only add values that we also have indices for
+                        if value in str(unexpected_list):
+                            row_list.append(value)
+                            row_list.append(count)
+                            for column_name in unexpected_index_column_names:
+                                row_list.append(
+                                    partial_unexpected_index_df[[column_name]]
+                                    .loc[value]
+                                    .item()
+                                )
+                    else:
+                        row_list.append(value)
+                        row_list.append(count)
+                    if len(row_list) > 0:
+                        table_rows.append(row_list)
 
                 elif value == "":
                     table_rows.append(["EMPTY", count])
                 else:
                     table_rows.append(["null", count])
-        # WILLSHIN - this is the table that we will be adding things to
+
         # Check to see if we have *all* of the unexpected values accounted for. If so,
         # we show counts. If not, we only show "sampled" unexpected values.
         if total_count == result_dict.get("unexpected_count"):
@@ -933,10 +957,104 @@ class Expectation(metaclass=MetaExpectation):
             for column_name in unexpected_index_column_names:
                 header_row.append(column_name)
         else:
-            header_row = ["Sampled Unexpected Values"]
-            table_rows = [[row[0]] for row in table_rows]
+            header_row = ["Sampled Unexpected Values", "Count"]
+            for column_name in unexpected_index_column_names:
+                header_row.append(column_name)
 
         return header_row, table_rows
+
+    #
+    # @classmethod
+    # def _build_partial_unexpected_counts_table_old(cls, result_dict):
+    #     table_rows = []
+    #     # We will check to see whether we have *all* of the unexpected values
+    #     # accounted for in our count, and include counts if we do. If we do not,
+    #     # we will use this as simply a better (non-repeating) source of
+    #     # "sampled" unexpected values
+    #     total_count = 0
+    #     partial_unexpected_counts: Optional[List[dict]] = result_dict.get(
+    #         "partial_unexpected_counts"
+    #     )
+    #     # if mapped to each of the values?
+    #     # no that does not exist
+    #     # this is where we would be adding the ?
+    #     partial_unexpected_list: Optional[List[dict]] = result_dict.get(
+    #         "partial_unexpected_list"
+    #     )
+    #
+    #     partial_unexpected_index_list: Optional[List[dict]] = result_dict.get(
+    #         "partial_unexpected_index_list"
+    #     )
+    #     unexpected_index_column_names: Optional[List[str]] = result_dict.get(
+    #         "unexpected_index_column_names"
+    #     )
+    #     if not partial_unexpected_index_list:
+    #         return
+    #
+    #     partial_unexpected_index_df = Expectation._convert_unexpected_indices_to_df(
+    #         result=partial_unexpected_index_list,
+    #         unexpected_index_column_names=unexpected_index_column_names,
+    #         partial_unexpected_list=partial_unexpected_list,
+    #     )
+    #     print("this doesn't work")
+    #     print(partial_unexpected_index_df)
+    #     # then we have set it manually
+    #     if (
+    #         partial_unexpected_index_df is not None
+    #         and unexpected_index_column_names is None
+    #     ):
+    #         unexpected_index_column_names = ["Index"]
+    #
+    #     # TODO: and then do rendering stuff to it
+    #     print("partial_unexpected_index_df")
+    #     print(partial_unexpected_index_df)
+    #     print(f"partial_unexpected_counts:{partial_unexpected_counts}")
+    #
+    #     if partial_unexpected_counts:
+    #         for unexpected_count_dict in partial_unexpected_counts:
+    #             value: Optional[Any] = unexpected_count_dict.get("value")
+    #             count: Optional[int] = unexpected_count_dict.get("count")
+    #             # we add table with df
+    #             if partial_unexpected_index_df:
+    #
+    #             # just add everything
+    #             else:
+    #
+    #                 total_count += count
+    #             if value is not None and value != "":
+    #                 row_list = []
+    #                 row_list.append(value)
+    #                 row_list.append(count)
+    #                 # table_rows.append([value, count])
+    #                 if unexpected_index_column_names:
+    #                     for column_name in unexpected_index_column_names:
+    #                         row_list.append(
+    #                             (
+    #                                 partial_unexpected_index_df[[column_name]].loc[
+    #                                     value
+    #                                 ]
+    #                             ).item()
+    #                         )
+    #                 print(f"row_list: {row_list}")
+    #                 table_rows.append(row_list)
+    #
+    #             elif value == "":
+    #                 table_rows.append(["EMPTY", count])
+    #             else:
+    #                 table_rows.append(["null", count])
+    #     # WILLSHIN - this is the table that we will be adding things to
+    #     # Check to see if we have *all* of the unexpected values accounted for. If so,
+    #     # we show counts. If not, we only show "sampled" unexpected values.
+    #     if total_count == result_dict.get("unexpected_count"):
+    #         header_row = ["Unexpected Value", "Count"]
+    #         for column_name in unexpected_index_column_names:
+    #             header_row.append(column_name)
+    #     else:
+    #         print("critical p9ortion")
+    #         header_row = ["Will Sampled Unexpected Values"]
+    #         table_rows = [[row[0]] for row in table_rows]
+    #
+    #     return header_row, table_rows
 
     @classmethod
     def _convert_unexpected_indices_to_df(
@@ -955,6 +1073,7 @@ class Expectation(metaclass=MetaExpectation):
         """
         # create dataframe but change them all to a stringj
         if unexpected_index_column_names:
+            # the fact that we are joining strings is bad
             df_version = pd.DataFrame(result, dtype="string")
             domain_column_name = (
                 set(result[0].keys())
@@ -962,6 +1081,7 @@ class Expectation(metaclass=MetaExpectation):
                 .pop()
             )
         elif partial_unexpected_list:
+            # the fact that we are joining strings is bad
             df_version = pd.DataFrame(
                 list(zip(partial_unexpected_list, result)),
                 columns=["Value", "Index"],
@@ -969,13 +1089,16 @@ class Expectation(metaclass=MetaExpectation):
             )
             domain_column_name = "Value"
         else:
-            # return early if we dont have any information
             return None
-        new_df = df_version.groupby(domain_column_name).agg(lambda y: y)
+        # https://stackoverflow.com/questions/9360103/how-to-print-a-numpy-array-without-brackets
+        new_df = df_version.groupby(domain_column_name).agg(
+            lambda y: " ".join(map(str, y))
+        )
         return new_df
 
     @classmethod
     def _build_sampled_unexpected_list_table(cls, result_dict):
+        print("I am earlier")
         table_rows = []
         header_row = ["Sampled Unexpected Values"]
         sampled_values_set = set()
@@ -993,6 +1116,8 @@ class Expectation(metaclass=MetaExpectation):
                 if string_unexpected_value not in sampled_values_set:
                     table_rows.append([unexpected_value])
                     sampled_values_set.add(string_unexpected_value)
+            print("inside")
+        print("outside")
         return header_row, table_rows
 
     @classmethod

@@ -786,6 +786,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
     assert first_result_partial_list == expected_unexpected_indices_output
 
 
+# there are formats that don't work right now bacuse o
 @pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_rendering(
     data_context_with_connection_to_animal_names_db,

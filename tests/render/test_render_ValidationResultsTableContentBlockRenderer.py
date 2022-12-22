@@ -819,6 +819,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
     assert output_5 == expected_output_5
 
 
+# this one tests
 def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_success):
     evr_failed_no_result = ExpectationValidationResult(
         success=False,
@@ -1055,35 +1056,36 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
     }
 
     # test for failed evr with partial unexpected counts
-    output_5 = get_renderer_impl(
+    temp = get_renderer_impl(
         object_name=evr_failed_partial_unexpected_counts.expectation_config.expectation_type,
         renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
-    )[1](result=evr_failed_partial_unexpected_counts)
-    assert output_5.to_json_dict() == {
+    )
+    output_5 = temp[1](result=evr_failed_partial_unexpected_counts)
+    assert output_5[0].to_json_dict() == {
         "content_block_type": "table",
         "table": [
-            [1],
-            [2],
-            [3],
-            [4],
-            [5],
-            [6],
-            [7],
-            [8],
-            [9],
-            [10],
-            [11],
-            [12],
-            [13],
-            [14],
-            [15],
-            [16],
-            [17],
-            [18],
-            [19],
-            [20],
+            ["1", 1, "0"],
+            ["2", 1, "1"],
+            ["3", 1, "2"],
+            ["4", 1, "3"],
+            ["5", 1, "4"],
+            ["6", 1, "5"],
+            ["7", 1, "6"],
+            ["8", 1, "7"],
+            ["9", 1, "8"],
+            ["10", 1, "9"],
+            ["11", 1, "10"],
+            ["12", 1, "11"],
+            ["13", 1, "12"],
+            ["14", 1, "13"],
+            ["15", 1, "14"],
+            ["16", 1, "15"],
+            ["17", 1, "16"],
+            ["18", 1, "17"],
+            ["19", 1, "18"],
+            ["20", 1, "19"],
         ],
-        "header_row": ["Sampled Unexpected Values"],
+        "header_row": ["Sampled Unexpected Values", "Count", "Index"],
         "styling": {"body": {"classes": ["table-bordered", "table-sm", "mt-3"]}},
     }
 
@@ -1341,3 +1343,5 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
 
 # marker this is where we want to update
 # Tests to write:
+# Add the problematic ones here
+#
