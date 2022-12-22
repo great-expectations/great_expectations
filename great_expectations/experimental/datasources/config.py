@@ -3,9 +3,9 @@ from __future__ import annotations
 
 import logging
 from pprint import pformat as pf
-from typing import Dict, Type
+from typing import Any, Dict, Optional, Type
 
-from pydantic import validator
+from pydantic import Field, validator
 
 from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,
@@ -16,10 +16,22 @@ from great_expectations.experimental.datasources.sources import _SourceFactories
 LOGGER = logging.getLogger(__name__)
 
 
+_NEW_STYLE_DESCRIPTION = "New Style Datasources"
+_OLD_STYLE_DESCRIPTION = "Old Style Datasources"
+
+
 class GxConfig(ExperimentalBaseModel):
     """Represents the full new-style/experimental configuration file."""
 
-    datasources: Dict[str, Datasource]
+    datasources: Dict[str, Datasource] = Field(..., description=_NEW_STYLE_DESCRIPTION)
+
+    # old style datasources
+    name: Optional[str] = Field(None, description=_OLD_STYLE_DESCRIPTION)
+    class_name: Optional[str] = Field(None, description=_OLD_STYLE_DESCRIPTION)
+    execution_engine: Optional[str] = Field(None, description=_OLD_STYLE_DESCRIPTION)
+    data_connectors: Optional[Dict[str, Any]] = Field(
+        None, description=_OLD_STYLE_DESCRIPTION
+    )
 
     @validator("datasources", pre=True)
     @classmethod
