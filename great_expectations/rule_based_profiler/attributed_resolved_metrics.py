@@ -148,10 +148,7 @@ class AttributedResolvedMetrics(SerializableDictDot):
 
     @property
     def id(self) -> str:
-        if self.metric_attributes is None:
-            return ""
-
-        return self.metric_attributes.to_id()
+        return self.metric_attributes.to_id() or ""
 
     @property
     def attributed_metric_values(self) -> Optional[Dict[str, MetricValue]]:
