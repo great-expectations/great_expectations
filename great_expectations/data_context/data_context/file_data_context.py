@@ -133,10 +133,6 @@ class FileDataContext(SerializableDataContext):
         context_root_directory: PathStr,
     ) -> DataContextConfig:
         path_to_yml = pathlib.Path(context_root_directory, cls.GX_YML)
-        # path_to_zep_yaml = pathlib.Path(context_root_directory) / cls.ZEP_YAML
-        # if path_to_zep_yaml.exists():
-        #     logger.info(f"ZEP config found at {path_to_zep_yaml.absolute()}")
-
         try:
             with open(path_to_yml) as data:
                 config_commented_map_from_yaml = yaml.load(data)
