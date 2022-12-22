@@ -14,7 +14,7 @@ from great_expectations.render import LegacyRendererType, RenderedStringTemplate
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
-    RendererSchemaType,
+    RendererParamType,
 )
 from great_expectations.render.util import substitute_none_for_missing
 
@@ -111,7 +111,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         renderer_configuration.add_param(
-            name="value", schema_type=RendererSchemaType.NUMBER
+            name="value", param_type=RendererParamType.NUMBER
         )
         renderer_configuration.template_str = "Must have exactly $value rows."
         return renderer_configuration

@@ -382,9 +382,9 @@ class Expectation(metaclass=MetaExpectation):
             ),
             ("kwargs", RendererParamType.STRING, renderer_configuration.kwargs),
         )
-        for name, schema_type, value in add_param_args:
+        for name, param_type, value in add_param_args:
             renderer_configuration.add_param(
-                name=name, schema_type=schema_type, value=value
+                name=name, param_type=param_type, value=value
             )
 
         value_obj = renderedAtomicValueSchema.load(
@@ -423,9 +423,9 @@ class Expectation(metaclass=MetaExpectation):
             ),
             ("kwargs", RendererParamType.STRING, renderer_configuration.kwargs),
         )
-        for name, schema_type, value in add_param_args:
+        for name, param_type, value in add_param_args:
             renderer_configuration.add_param(
-                name=name, schema_type=schema_type, value=value
+                name=name, param_type=param_type, value=value
             )
 
         renderer_configuration.template_str = template_str
@@ -897,14 +897,14 @@ class Expectation(metaclass=MetaExpectation):
         add_param_args = (
             (
                 "expectation_type",
-                RendererSchemaType.STRING,
+                RendererParamType.STRING,
                 renderer_configuration.expectation_type,
             ),
-            ("kwargs", RendererSchemaType.STRING, renderer_configuration.kwargs),
+            ("kwargs", RendererParamType.STRING, renderer_configuration.kwargs),
         )
-        for name, schema_type, value in add_param_args:
+        for name, param_type, value in add_param_args:
             renderer_configuration.add_param(
-                name=name, schema_type=schema_type, value=value
+                name=name, param_type=param_type, value=value
             )
 
         value_obj = renderedAtomicValueSchema.load(
@@ -1569,11 +1569,11 @@ class Expectation(metaclass=MetaExpectation):
         if len(value_set) > 0:
             for idx, value in enumerate(value_set):
                 if isinstance(value, Number):
-                    schema_type = RendererSchemaType.NUMBER
+                    param_type = RendererParamType.NUMBER
                 else:
-                    schema_type = RendererSchemaType.STRING
+                    param_type = RendererParamType.STRING
                 renderer_configuration.add_param(
-                    name=f"v__{str(idx)}", schema_type=schema_type, value=value
+                    name=f"v__{str(idx)}", param_type=param_type, value=value
                 )
         return renderer_configuration
 
@@ -1601,7 +1601,7 @@ class Expectation(metaclass=MetaExpectation):
         )
         renderer_configuration.add_param(
             name="mostly_pct",
-            schema_type=RendererSchemaType.STRING,
+            param_type=RendererParamType.STRING,
             value=mostly_pct_value,
         )
         return renderer_configuration

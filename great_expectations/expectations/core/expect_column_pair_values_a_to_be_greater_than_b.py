@@ -123,12 +123,12 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
             ("column_A", RendererParamType.STRING),
             ("column_B", RendererParamType.STRING),
             ("parse_strings_as_datetimes", RendererParamType.BOOLEAN),
-            ("ignore_row_if", RendererSchemaType.STRING),
-            ("mostly", RendererSchemaType.NUMBER),
-            ("or_equal", RendererSchemaType.BOOLEAN),
+            ("ignore_row_if", RendererParamType.STRING),
+            ("mostly", RendererParamType.NUMBER),
+            ("or_equal", RendererParamType.BOOLEAN),
         )
-        for name, schema_type in add_param_args:
-            renderer_configuration.add_param(name=name, schema_type=schema_type)
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
         params: RendererParams = renderer_configuration.params
         template_str = ""

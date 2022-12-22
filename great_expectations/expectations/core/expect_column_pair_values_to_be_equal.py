@@ -113,12 +113,12 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
     ) -> RendererConfiguration:
         add_param_args = (
             ("column_A", RendererParamType.STRING),
-            ("column_B", RendererSchemaType.STRING),
-            ("mostly", RendererSchemaType.NUMBER),
-            ("ignore_row_if", RendererSchemaType.STRING),
+            ("column_B", RendererParamType.STRING),
+            ("mostly", RendererParamType.NUMBER),
+            ("ignore_row_if", RendererParamType.STRING),
         )
-        for name, schema_type in add_param_args:
-            renderer_configuration.add_param(name=name, schema_type=schema_type)
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
         params: RendererParams = renderer_configuration.params
         template_str = ""

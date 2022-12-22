@@ -227,12 +227,12 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
             ("column", RendererParamType.STRING),
             ("min_value", RendererParamType.NUMBER),
             ("max_value", RendererParamType.NUMBER),
-            ("parse_strings_as_datetimes", RendererSchemaType.BOOLEAN),
-            ("strict_min", RendererSchemaType.BOOLEAN),
-            ("strict_max", RendererSchemaType.BOOLEAN),
+            ("parse_strings_as_datetimes", RendererParamType.BOOLEAN),
+            ("strict_min", RendererParamType.BOOLEAN),
+            ("strict_max", RendererParamType.BOOLEAN),
         )
-        for name, schema_type in add_param_args:
-            renderer_configuration.add_param(name=name, schema_type=schema_type)
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
         params: RendererParams = renderer_configuration.params
 

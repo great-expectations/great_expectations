@@ -126,8 +126,8 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
             ("value_set", RendererParamType.ARRAY),
             ("parse_strings_as_datetimes", RendererParamType.BOOLEAN),
         )
-        for name, schema_type in add_param_args:
-            renderer_configuration.add_param(name=name, schema_type=schema_type)
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
         params: RendererParams = renderer_configuration.params
         template_str = ""

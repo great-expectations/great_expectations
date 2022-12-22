@@ -199,8 +199,8 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             ("strict_min", RendererParamType.BOOLEAN),
             ("strict_max", RendererParamType.BOOLEAN),
         )
-        for name, schema_type in add_param_args:
-            renderer_configuration.add_param(name=name, schema_type=schema_type)
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
         params: RendererParams = renderer_configuration.params
 
