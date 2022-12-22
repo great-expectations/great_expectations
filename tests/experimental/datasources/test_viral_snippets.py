@@ -112,5 +112,15 @@ def test_serialize_zep_config(zep_file_context: FileDataContext):
             assert asset_name in dumped_yaml
 
 
+def test_zep_simple_validate(zep_file_context: FileDataContext):
+    # see `test_run_checkpoint_and_data_doc`
+    # sans data_doc
+    pass
+
+
+def test_save_datacontext(zep_file_context: FileDataContext):
+    zep_file_context.variables.save_config()
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-vv"])
