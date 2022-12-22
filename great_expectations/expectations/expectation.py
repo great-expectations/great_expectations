@@ -799,6 +799,7 @@ class Expectation(metaclass=MetaExpectation):
         partial_unexpected_counts: Optional[List[dict]] = result_dict.get(
             "partial_unexpected_counts"
         )
+        unexpected_indices: Optional[List[dict]] = result_dict.get("unexpected_indices")
         if partial_unexpected_counts:
             # We will check to see whether we have *all* of the unexpected values
             # accounted for in our count, and include counts if we do. If we do not,
@@ -821,8 +822,11 @@ class Expectation(metaclass=MetaExpectation):
             # we show counts. If not, we only show "sampled" unexpected values.
             if total_count == result_dict.get("unexpected_count"):
                 header_row = ["Unexpected Value", "Count"]
-            else:
+            elif unexpected_indices:
                 header_row = ["Sampled Unexpected Values", "Count"]
+            else:
+                header_row = ["Sampled Unexpected Values"]
+                table_rows = [[row[0]] for row in table_rows]
 
         else:
             header_row = ["Sampled Unexpected Values"]
