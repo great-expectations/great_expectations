@@ -174,7 +174,7 @@ class AttributedResolvedMetrics(SerializableDictDot):
     @property
     def conditioned_metric_values(self) -> MetricValues:
         if self.attributed_metric_values is None:
-            return {}
+            return None
 
         return AttributedResolvedMetrics.get_conditioned_metric_values_from_attributed_metric_values(
             attributed_metric_values=self.attributed_metric_values
