@@ -188,7 +188,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND = 4
     PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND = 5
 
-    zep_config: Optional[GxConfig]
+    zep_config: GxConfig
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT___INIT__,
@@ -236,12 +236,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         # Store cached datasources but don't init them
         self._cached_datasources: dict = {}
 
+        # load zep configs if present
+        self.zep_config = self._load_zep_config()
+        self._attach_zep_config_datasources(self.zep_config)
+
         # Build the datasources we know about and have access to
         self._init_datasources()
-
-        self.zep_config = self._load_zep_config()
-        if self.zep_config:
-            self._attach_zep_config_datasources(self.zep_config)
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies: dict = {}
@@ -3850,13 +3850,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
-    def _load_zep_config(self) -> Optional[GxConfig]:
-        # TODO: always return a `GxConfig` object even if it's empty
+    def _load_zep_config(self) -> GxConfig:
         if self.root_directory:
             zep_config_yaml = pathlib.Path(self.root_directory) / "zep_config.yaml"
             if zep_config_yaml.exists():
                 return GxConfig.parse_yaml(zep_config_yaml)
-        return None
+        return GxConfig(datasources={})
 
     def _attach_zep_config_datasources(self, config: GxConfig):
         for ds_name, datasource in config.datasources.items():
