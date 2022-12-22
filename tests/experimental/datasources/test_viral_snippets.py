@@ -1,3 +1,4 @@
+import functools
 import pathlib
 
 import pytest
@@ -49,14 +50,27 @@ def zep_only_config(zep_config_dict: dict) -> GxConfig:
 
 
 @pytest.fixture
+def file_dc_config_dir_init(tmp_path: pathlib.Path) -> pathlib.Path:
+    """
+    Initialize an regular/old-style FileDataContext project config directory.
+    Removed on teardown.
+    """
+    gx_yml = tmp_path / FileDataContext.GX_DIR / FileDataContext.GX_YML
+    assert gx_yml.exists() is False
+    FileDataContext.create(tmp_path)
+    assert gx_yml.exists()
+    return gx_yml.parent
+
+
+@pytest.fixture
 def zep_yaml_config_file(
-    tmp_path: pathlib.Path, zep_only_config: GxConfig
+    file_dc_config_dir_init: pathlib.Path, zep_only_config: GxConfig
 ) -> pathlib.Path:
     """
     Dump the provided GxConfig to a temporary path. File is removed during test teardown.
     """
-    config_file_path = tmp_path / "great_expectations" / "zep_config.yaml"
-    config_file_path.parent.mkdir()
+    config_file_path = file_dc_config_dir_init / "zep_config.yml"
+    # config_file_path.parent.mkdir()
 
     assert config_file_path.exists() is False
 
@@ -76,6 +90,7 @@ def test_load_an_existing_config(
 
 
 @pytest.fixture
+@functools.lru_cache(maxsize=1)
 def zep_file_context(zep_yaml_config_file: pathlib.Path) -> FileDataContext:
     context = get_context(
         context_root_dir=zep_yaml_config_file.parent, cloud_mode=False
