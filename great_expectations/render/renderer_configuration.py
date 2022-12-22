@@ -122,12 +122,8 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
     template_str: str = Field("", allow_mutation=True)
-    header_row: List[TypedDict] = Field(
-        default_factory=RendererTableValue, allow_mutation=True
-    )
-    table: List[List[TypedDict]] = Field(
-        default_factory=RendererTableValue, allow_mutation=True
-    )
+    header_row: List[TypedDict] = Field([], allow_mutation=True)
+    table: List[List[TypedDict]] = Field([], allow_mutation=True)
     graph: dict = Field({}, allow_mutation=True)
     _raw_kwargs: dict = Field({}, allow_mutation=False)
     _row_condition: str = Field("", allow_mutation=False)
