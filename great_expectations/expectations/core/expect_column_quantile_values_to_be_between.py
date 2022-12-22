@@ -373,6 +373,10 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         renderer_configuration = cls._prescriptive_template(
             renderer_configuration=renderer_configuration
         )
+        header_row = [value.dict() for value in renderer_configuration.header_row]
+        table = []
+        for row in renderer_configuration.table:
+            table.append([value.dict() for value in row])
         value_obj = renderedAtomicValueSchema.load(
             {
                 "header": {
@@ -382,8 +386,8 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                         "params": renderer_configuration.params.dict(),
                     },
                 },
-                "header_row": renderer_configuration.header_row,
-                "table": renderer_configuration.table,
+                "header_row": header_row,
+                "table": table,
                 "schema": {"type": "TableType"},
             }
         )

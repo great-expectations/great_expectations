@@ -58,11 +58,9 @@ class RendererSchema(TypedDict):
     type: RendererValueType
 
 
-class _RendererParamsBase(BaseModel):
+class _RendererValueBase(BaseModel):
     """
-    _RendererParamsBase is the base for the generic type RendererParams. It's attributes change as
-        RendererConfiguration.add_param() dynamically adds them. It also overrides the default pydantic dict behavior
-        due to the use of the reserved word schema in its attributes.
+    _RendererValueBase is the base for renderer classes that need to override the default pydantic dict behavior.
     """
 
     class Config:
@@ -102,11 +100,16 @@ class _RendererParamsBase(BaseModel):
         )
 
 
-RendererParams = TypeVar("RendererParams", bound=_RendererParamsBase)
+RendererParams = TypeVar("RendererParams", bound=_RendererValueBase)
 
 
 class RendererTableValue(TypedDict):
     schema: RendererSchema
+    value: Optional[Any]
+
+
+class _RendererTableValue(_RendererValueBase):
+    renderer_schema: RendererSchema = Field(alias="schema")
     value: Optional[Any]
 
 
@@ -122,8 +125,8 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     kwargs: dict = Field({}, allow_mutation=False)
     include_column_name: bool = Field(True, allow_mutation=False)
     template_str: str = Field("", allow_mutation=True)
-    header_row: List[TypedDict] = Field([], allow_mutation=True)
-    table: List[List[TypedDict]] = Field([], allow_mutation=True)
+    header_row: List[_RendererTableValue] = Field([], allow_mutation=True)
+    table: List[List[_RendererTableValue]] = Field([], allow_mutation=True)
     graph: dict = Field({}, allow_mutation=True)
     _raw_kwargs: dict = Field({}, allow_mutation=False)
     _row_condition: str = Field("", allow_mutation=False)
@@ -143,8 +146,31 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             )
         return values
 
+    @validator("header_row", pre=True)
+    def _validate_header_row(
+        cls, v: List[RendererTableValue]
+    ) -> List[_RendererTableValue]:
+        return [
+            _RendererTableValue(schema=value["schema"], value=value["value"])
+            for value in v
+        ]
+
+    @validator("table", pre=True)
+    def _validate_table(
+        cls, v: List[List[RendererTableValue]]
+    ) -> List[List[_RendererTableValue]]:
+        table = []
+        for row in v:
+            table.append(
+                [
+                    _RendererTableValue(schema=value["schema"], value=value["value"])
+                    for value in row
+                ]
+            )
+        return table
+
     def __init__(self, **values) -> None:
-        values["params"] = _RendererParamsBase()
+        values["params"] = _RendererValueBase()
         super().__init__(**values)
 
     class _RendererParamArgs(TypedDict):
@@ -157,12 +183,13 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             but it is dynamically renamed in order for the RendererParams attribute to have the same name as the param.
         """
 
-        renderer_schema: RendererSchema = Field(..., allow_mutation=False)
-        value: Any = Field(..., allow_mutation=False)
+        renderer_schema: RendererSchema
+        value: Any
 
         class Config:
             validate_assignment = True
             arbitrary_types_allowed = True
+            allow_mutation = False
 
         @root_validator(pre=True)
         def _validate_param_type_matches_value(cls, values: dict) -> dict:
@@ -350,11 +377,11 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 renderer_params: Type[BaseModel] = create_model(
                     "RendererParams",
                     **renderer_param_definitions,
-                    __base__=_RendererParamsBase,
+                    __base__=_RendererValueBase,
                 )
                 values["params"] = renderer_params(**_params)
             else:
-                values["params"] = _RendererParamsBase()
+                values["params"] = _RendererValueBase()
         return values
 
     @staticmethod
