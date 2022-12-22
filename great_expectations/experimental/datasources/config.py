@@ -39,15 +39,20 @@ class GxConfig(ExperimentalBaseModel):
         LOGGER.info(f"Loading 'datasources' ->\n{pf(v, depth=2)}")
         loaded_datasources: Dict[str, Datasource] = {}
 
-        # TODO (kilo59): catch key errors
         for ds_name, config in v.items():
             ds_type_name: str = config.get("type", "")
             if not ds_type_name:
                 LOGGER.info(f"'{ds_name}' is missing a 'type' entry")
                 continue  # missing `type` will be caught by normal field validation
 
-            ds_type: Type[Datasource] = _SourceFactories.type_lookup[ds_type_name]
-            LOGGER.debug(f"Instantiating '{ds_name}' as {ds_type}")
+            try:
+                ds_type: Type[Datasource] = _SourceFactories.type_lookup[ds_type_name]
+                LOGGER.debug(f"Instantiating '{ds_name}' as {ds_type}")
+            except KeyError as type_lookup_err:
+                assert str(type_lookup_err) == ds_type_name
+                raise ValueError(
+                    f"'{ds_name}' has unsupported 'type' - {type_lookup_err}"
+                ) from type_lookup_err
 
             datasource = ds_type(**config)
             loaded_datasources[datasource.name] = datasource
