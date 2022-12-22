@@ -63,4 +63,7 @@ class GxConfig(ExperimentalBaseModel):
                 asset._datasource = datasource
 
         LOGGER.info(f"Loaded 'datasources' ->\n{repr(loaded_datasources)}")
+
+        if v and not loaded_datasources:
+            raise ValueError(f"Of {len(v)} entries, no 'datasources' could be loaded")
         return loaded_datasources
