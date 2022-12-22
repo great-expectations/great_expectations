@@ -346,10 +346,8 @@ class PublicAPIChecker:
 
     def __init__(
         self,
-        docs_example_parser: DocsExampleParser,
         code_parser: CodeParser,
     ) -> None:
-        self.docs_example_parser = docs_example_parser
         self.code_parser = code_parser
 
     def get_all_public_api_definitions(self) -> Set[Definition]:
