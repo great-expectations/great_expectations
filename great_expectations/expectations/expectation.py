@@ -798,7 +798,7 @@ class Expectation(metaclass=MetaExpectation):
             "partial_unexpected_counts"
         ):
             return None
-        table_rows = []
+        table_rows: List[Union[int, float, str]] = []
 
         partial_unexpected_counts: Optional[List[dict]] = result_dict.get(
             "partial_unexpected_counts"

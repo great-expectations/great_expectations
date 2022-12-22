@@ -340,6 +340,8 @@ def _convert_unexpected_indices_to_df(
         domain_column_name = "Value"
     else:
         return None
+    # TODO: add filtering here
+    # test the filtering
     # https://stackoverflow.com/questions/9360103/how-to-print-a-numpy-array-without-brackets
     new_df = df_version.groupby(domain_column_name).agg(lambda y: " ".join(map(str, y)))
     return new_df
