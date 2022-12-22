@@ -23,6 +23,7 @@ from great_expectations.data_context.types.base import (
 from great_expectations.datasource.datasource_serializer import (
     YAMLReadyDictDatasourceConfigSerializer,
 )
+from great_expectations.experimental.datasources.config import GxConfig
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
@@ -132,6 +133,10 @@ class FileDataContext(SerializableDataContext):
         context_root_directory: PathStr,
     ) -> DataContextConfig:
         path_to_yml = pathlib.Path(context_root_directory, cls.GX_YML)
+        # path_to_zep_yaml = pathlib.Path(context_root_directory) / cls.ZEP_YAML
+        # if path_to_zep_yaml.exists():
+        #     logger.info(f"ZEP config found at {path_to_zep_yaml.absolute()}")
+
         try:
             with open(path_to_yml) as data:
                 config_commented_map_from_yaml = yaml.load(data)
@@ -156,3 +161,13 @@ class FileDataContext(SerializableDataContext):
         except gx_exceptions.InvalidDataContextConfigError:
             # Just to be explicit about what we intended to catch
             raise
+
+    def _load_zep_config(self) -> GxConfig:
+        if not self.root_directory:
+            logger.warning("`root_directory` not set, cannot load zep config")
+        else:
+            path_to_zep_yaml = pathlib.Path(self.root_directory) / self.ZEP_YAML
+            if path_to_zep_yaml.exists():
+                return GxConfig.parse_yaml(path_to_zep_yaml)
+            logger.info(f"no zep config at {path_to_zep_yaml.absolute()}")
+        return GxConfig(datasources={})

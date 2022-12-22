@@ -6,7 +6,6 @@ import datetime
 import json
 import logging
 import os
-import pathlib
 import sys
 import uuid
 import warnings
@@ -201,6 +200,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_environment (dict): a dictionary of config variables that
                 override those set in config_variables.yml and the environment
         """
+        self.zep_config = self._load_zep_config()
+
         if runtime_environment is None:
             runtime_environment = {}
         self.runtime_environment = runtime_environment
@@ -236,10 +237,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         # Store cached datasources but don't init them
         self._cached_datasources: dict = {}
 
-        # load zep configs if present
-        self.zep_config = self._load_zep_config()
-        self._attach_zep_config_datasources(self.zep_config)
-
         # Build the datasources we know about and have access to
         self._init_datasources()
 
@@ -264,6 +261,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                     validation_operator_name,
                     validation_operator_config,
                 )
+
+        self._attach_zep_config_datasources(self.zep_config)
 
     def _init_config_provider(self) -> _ConfigurationProvider:
         config_provider = _ConfigurationProvider()
@@ -3851,13 +3850,14 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             yaml.dump(config_variables, config_variables_file)
 
     def _load_zep_config(self) -> GxConfig:
-        if self.root_directory:
-            zep_config_yaml = pathlib.Path(self.root_directory) / "zep_config.yaml"
-            if zep_config_yaml.exists():
-                return GxConfig.parse_yaml(zep_config_yaml)
+        """Called at beginning of DataContext __init__"""
+        logger.info(
+            f"{self.__class__.__name__} has not implemented `_load_zep_config()` returning empty `GxConfig`"
+        )
         return GxConfig(datasources={})
 
     def _attach_zep_config_datasources(self, config: GxConfig):
+        """Called at end of __init__"""
         for ds_name, datasource in config.datasources.items():
             logger.info(f"Loaded '{ds_name}' from ZEP config")
             self._attach_datasource_to_context(datasource)
