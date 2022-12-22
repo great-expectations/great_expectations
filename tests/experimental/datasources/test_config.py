@@ -24,7 +24,7 @@ p = pytest.param
 
 EXPERIMENTAL_DATASOURCE_TEST_DIR = pathlib.Path(__file__).parent
 
-PG_CONFIG_YAML_FILE = EXPERIMENTAL_DATASOURCE_TEST_DIR / "config.yaml"
+PG_CONFIG_YAML_FILE = EXPERIMENTAL_DATASOURCE_TEST_DIR / "zep_config.yaml"
 PG_CONFIG_YAML_STR = PG_CONFIG_YAML_FILE.read_text()
 
 # TODO: create PG_CONFIG_YAML_FILE/STR from this dict
