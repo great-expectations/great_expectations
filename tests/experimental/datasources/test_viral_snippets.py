@@ -16,27 +16,43 @@ LOGGER = logging.getLogger(__file__)
 
 
 @pytest.fixture
-def zep_config_dict() -> dict:
+def db_file() -> pathlib.Path:
+    db = pathlib.Path(
+        __file__,
+        "..",
+        "..",
+        "..",
+        "test_sets",
+        "taxi_yellow_tripdata_samples",
+        "sqlite",
+        "yellow_tripdata.db",
+    ).resolve()
+    assert db.exists()
+    return db
+
+
+@pytest.fixture
+def zep_config_dict(db_file) -> dict:
     return {
         "datasources": {
             "my_sql_ds": {
-                "connection_string": "sqlite:///:memory:",
+                "connection_string": f"sqlite:///{db_file}",
                 "name": "my_sql_ds",
                 "type": "sql",
                 "assets": {
-                    "my_table_asset": {
-                        "name": "my_table_asset",
-                        "table_name": "my_table",
+                    "my_asset": {
+                        "name": "my_asset",
+                        "table_name": "yellow_tripdata_sample_2019_01",
                         "type": "table",
                         "column_splitter": {
-                            "column_name": "my_column",
+                            "column_name": "pickup_datetime",
                             "method_name": "split_on_year_and_month",
                             "name": "y_m_splitter",
                             "param_names": ["year", "month"],
                         },
                         "order_by": [
                             {"metadata_key": "year"},
-                            {"metadata_key": "month", "reverse": True},
+                            {"metadata_key": "month"},
                         ],
                     },
                 },
