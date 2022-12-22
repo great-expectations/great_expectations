@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Dict, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Dict, Optional, Tuple
 
 import altair as alt
 import numpy as np
@@ -34,6 +34,7 @@ from great_expectations.render import (
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
+    RendererSchema,
     RendererValueType,
 )
 from great_expectations.render.util import (
@@ -42,10 +43,8 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.metrics_calculator import MetricsCalculator
-from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import ValidationDependencies
 
 if TYPE_CHECKING:
@@ -1003,11 +1002,11 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             table_rows = [
                 [
                     {
-                        "schema": {"type": RendererValueType.STRING},
+                        "schema": RendererSchema(type=RendererValueType.STRING),
                         "value": str(value),
                     },
                     {
-                        "schema": {"type": RendererValueType.STRING},
+                        "schema": RendererSchema(type=RendererValueType.STRING),
                         "value": num_to_str(fractions[idx]),
                     },
                 ]
@@ -1016,10 +1015,13 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
 
         header_row = [
             {
-                "schema": {"type": RendererValueType.STRING},
+                "schema": RendererSchema(type=RendererValueType.STRING),
                 "value": "Interval" if partition_object.get("bins") else "Value",
             },
-            {"schema": {"type": RendererValueType.STRING}, "value": "Fraction"},
+            {
+                "schema": RendererSchema(type=RendererValueType.STRING),
+                "value": "Fraction",
+            },
         ]
 
         return header_row, table_rows

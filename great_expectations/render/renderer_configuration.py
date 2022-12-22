@@ -53,7 +53,7 @@ class RendererValueType(str, Enum):
 
 
 class RendererSchema(TypedDict):
-    """Json schema for RendererParams."""
+    """Json schema for values found in renderers."""
 
     type: RendererValueType
 
