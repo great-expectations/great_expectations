@@ -17,7 +17,6 @@ LOGGER = logging.getLogger(__name__)
 
 
 _NEW_STYLE_DESCRIPTION = "New Style Datasources"
-_OLD_STYLE_DESCRIPTION = "Old Style Datasources"
 
 
 class GxConfig(ExperimentalBaseModel):
