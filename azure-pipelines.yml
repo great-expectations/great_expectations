@@ -190,12 +190,14 @@ stages:
           - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
               mkdir coverage
+              echo "sqlite version is:"
+              echo `sqlite3 --version`
               PYTEST="docker run -e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) "
               PYTEST+="-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) -e AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION) "
               PYTEST+="--network=host --mount type=bind,source=${PWD}/coverage,target=/coverage "
               # We don't run e2e because we don't want to test connections to external dependencies here.
               PYTEST+="greatexpectations/test:${DOCKER_TAG} /bin/bash -c \"pytest -m 'not e2e' "
-              PYTEST+="--random-order --postgresql --cloud "
+              PYTEST+="--random-order-bucket=module --random-order-seed=862100 --postgresql --cloud "
               # We should be able to specify --cov-report=xml:path but this doesn't work so we write to the default
               # path and then mv it.
               PYTEST+="--junitxml=/coverage/junit/test-results.xml --cov=. --cov-report=xml --cov-report=html:/coverage/htmlcov "

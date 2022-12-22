@@ -327,6 +327,33 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "Credentials or an engine are required for a SqlAlchemyExecutionEngine."
                 )
 
+            # Listen for connect events so we can add sqrt to sqlite
+            import sqlite3
+
+            print("==== BDIRKS version info ====")
+            print(f"sqlite3 version: {sqlite3.version}")
+            print(f"sqlite version: {sqlite3.sqlite_version}")
+            print("==== END version info ====")
+
+            should_add_sqrt = self.dialect_name == GXSqlDialect.SQLITE
+
+            def on_connect(dbapi_con, connection_record):
+                print("==== BDIRKS: Connecting to db ====")
+                print(f"dbapi_con: {dbapi_con}")
+                print(f"record: {connection_record}")
+                print("==== End connect ====")
+                if should_add_sqrt:
+                    dbapi_con.create_function("sqrt", 1, lambda x: math.sqrt(x))
+                    dbapi_con.create_function(
+                        "md5",
+                        2,
+                        lambda x, d: hashlib.md5(str(x).encode("utf-8")).hexdigest()[
+                            -1 * d :
+                        ],
+                    )
+
+            sa.event.listen(self.engine, "connect", on_connect)
+
         # these are two backends where temp_table_creation is not supported we set the default value to False.
         if self.dialect_name in [
             GXSqlDialect.TRINO,
@@ -386,19 +413,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self._engine_backup = self.engine
             # sqlite/mssql temp tables only persist within a connection so override the engine
             self.engine = self.engine.connect()
-            if (
-                self._engine_backup.dialect.name.lower() == GXSqlDialect.SQLITE
-                and not isinstance(self._engine_backup, sa.engine.base.Connection)
-            ):
-                raw_connection = self._engine_backup.raw_connection()
-                raw_connection.create_function("sqrt", 1, lambda x: math.sqrt(x))
-                raw_connection.create_function(
-                    "md5",
-                    2,
-                    lambda x, d: hashlib.md5(str(x).encode("utf-8")).hexdigest()[
-                        -1 * d :
-                    ],
-                )
 
         # Send a connect event to provide dialect type
         if data_context is not None and getattr(
