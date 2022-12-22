@@ -643,8 +643,8 @@ class RenderedAtomicValue(DictDot):
         self.params: Optional[dict] = params
 
         # TableType
-        self.header_row: List[RendererTableValue] = header_row or []
-        self.table: List[List[RendererTableValue]] = table or []
+        self.header_row: Optional[List[RendererTableValue]] = header_row
+        self.table: Optional[List[List[RendererTableValue]]] = table
 
         # GraphType
         self.graph = RenderedAtomicValueGraph(graph=graph)
