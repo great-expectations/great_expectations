@@ -7,6 +7,7 @@ from pytest import TempPathFactory
 pytestmark = [pytest.mark.integration]
 
 from great_expectations import get_context
+from great_expectations.data_context import FileDataContext
 from great_expectations.experimental.datasources.config import GxConfig
 
 
@@ -72,6 +73,28 @@ def test_load_an_existing_config(
     )
 
     assert context.zep_config == zep_only_config
+
+
+@pytest.fixture
+def zep_file_context(zep_yaml_config_file: pathlib.Path) -> FileDataContext:
+    context = get_context(
+        context_root_dir=zep_yaml_config_file.parent, cloud_mode=False
+    )
+    assert isinstance(context, FileDataContext)
+    return context
+
+
+def test_serialize_zep_config(zep_file_context: FileDataContext):
+    dumped_yaml: str = zep_file_context.zep_config.yaml()
+    print(f"  Dumped Config\n\n{dumped_yaml}\n")
+
+    assert zep_file_context.zep_config.datasources
+
+    for ds_name, datasource in zep_file_context.zep_config.datasources.items():
+        assert ds_name in dumped_yaml
+
+        for asset_name in datasource.assets.keys():
+            assert asset_name in dumped_yaml
 
 
 if __name__ == "__main__":
