@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List
 
 import pytest
@@ -15,6 +14,7 @@ from great_expectations.render import (
 )
 from great_expectations.render.exceptions import InlineRendererError
 from great_expectations.render.renderer.inline_renderer import InlineRenderer
+from great_expectations.render.renderer_configuration import MetaNotesFormat
 
 
 def clean_serialized_rendered_atomic_content_graphs(
@@ -615,7 +615,7 @@ def test_inline_renderer_expectation_validation_result_serialization(
                 kwargs={"value": 3},
                 meta={
                     "notes": {
-                        "format": "string",
+                        "format": MetaNotesFormat.STRING,
                         "content": ["This is the most important Expectation!!"],
                     }
                 },
@@ -632,7 +632,7 @@ def test_inline_renderer_expectation_validation_result_serialization(
                         },
                         "meta_notes": {
                             "content": ["This is the most important Expectation!!"],
-                            "format": "string",
+                            "format": MetaNotesFormat.STRING,
                         },
                     },
                 }

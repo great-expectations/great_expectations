@@ -99,6 +99,11 @@ class _RendererParamsBase(BaseModel):
 RendererParams = TypeVar("RendererParams", bound=_RendererParamsBase)
 
 
+class MetaNotesFormat(str, Enum):
+    STRING = "string"
+    MARKDOWN = "markdown"
+
+
 class MetaNotes(TypedDict):
     format: str
     content: List[str]
