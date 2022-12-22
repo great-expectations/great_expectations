@@ -22,6 +22,7 @@ from great_expectations.exceptions import (
 from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
+from great_expectations.render.renderer_configuration import MetaNotesFormat
 
 
 @pytest.fixture
@@ -148,7 +149,7 @@ def critical_suite_with_citations(empty_data_context) -> ExpectationSuite:
                 }
             ],
             "notes": {
-                "format": "markdown",
+                "format": MetaNotesFormat.MARKDOWN,
                 "content": [
                     "#### This is an _example_ suite\n\n- This suite was made by quickly glancing at 1000 rows of your data.\n- This is **not a production suite**. It is meant to show examples of expectations.\n- Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.\n"
                 ],
