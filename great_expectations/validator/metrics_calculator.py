@@ -78,9 +78,12 @@ class MetricsCalculator:
         Convenience method to run "table.head" metric.
         """
         if domain_kwargs is None:
-            domain_kwargs = {
-                "batch_id": self._execution_engine.batch_manager.active_batch_data_id,
-            }
+            domain_kwargs = {}
+
+        if domain_kwargs.get("batch_id") is None:
+            domain_kwargs[
+                "batch_id"
+            ] = self._execution_engine.batch_manager.active_batch_id
 
         data: Any = self.get_metric(
             metric=MetricConfiguration(
