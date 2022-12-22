@@ -163,6 +163,7 @@ class FileDataContext(SerializableDataContext):
             raise
 
     def _load_zep_config(self) -> GxConfig:
+        logger.info(f"{type(self).__name__} loading zep config")
         if not self.root_directory:
             logger.warning("`root_directory` not set, cannot load zep config")
         else:
