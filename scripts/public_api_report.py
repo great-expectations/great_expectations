@@ -764,7 +764,7 @@ def main():
     code_parser = CodeParser(file_contents=code_file_contents)
 
     public_api_checker = PublicAPIChecker(
-        docs_example_parser=docs_example_parser, code_parser=code_parser
+        code_parser=code_parser
     )
 
     code_reference_filter = CodeReferenceFilter(
