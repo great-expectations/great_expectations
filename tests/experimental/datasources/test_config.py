@@ -107,7 +107,21 @@ def test_load_config(inject_engine_lookup_double, load_method: Callable, input_)
 @pytest.mark.unit
 @pytest.mark.parametrize(
     ["config", "expected_error_loc", "expected_msg"],
-    [({}, ("datasources",), "field required")],
+    [
+        p({}, ("datasources",), "field required", id="no datasources"),
+        p(
+            {
+                "datasources": {
+                    "my_bad_ds_missing_type": {
+                        "name": "my_bad_ds_missing_type",
+                    }
+                }
+            },
+            ("datasources",),
+            "'my_bad_ds_missing_type' is missing a 'type' entry",
+            id="missing 'type' field",
+        ),
+    ],
 )
 def test_catch_bad_top_level_config(
     inject_engine_lookup_double,
@@ -117,7 +131,8 @@ def test_catch_bad_top_level_config(
 ):
     print(f"  config\n{pf(config)}\n")
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        GxConfig.parse_obj(config)
+        loaded = GxConfig.parse_obj(config)
+        print(f"Erroneously loaded config\n{loaded}\n")
 
     print(f"\n{exc_info.typename}:{exc_info.value}")
     all_errors = exc_info.value.errors()
