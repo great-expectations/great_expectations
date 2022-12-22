@@ -68,6 +68,7 @@ from great_expectations.datasource.new_datasource import BaseDatasource, Datasou
 from great_expectations.execution_engine.execution_engine import (
     MetricPartialFunctionTypes,
 )
+from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
@@ -3049,7 +3050,7 @@ def alice_columnar_table_single_batch(empty_data_context):
                     },
                     meta={
                         "notes": {
-                            "format": "markdown",
+                            "format": MetaNotesFormat.MARKDOWN,
                             "content": [
                                 "### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**"
                             ],
@@ -3067,7 +3068,7 @@ def alice_columnar_table_single_batch(empty_data_context):
                     },
                     meta={
                         "notes": {
-                            "format": "markdown",
+                            "format": MetaNotesFormat.MARKDOWN,
                             "content": [
                                 "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
                             ],
@@ -3088,7 +3089,7 @@ def alice_columnar_table_single_batch(empty_data_context):
                             "candidate_strings": expected_candidate_strings_dict,
                         },
                         "notes": {
-                            "format": "markdown",
+                            "format": MetaNotesFormat.MARKDOWN,
                             "content": [
                                 "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                             ],
@@ -3387,7 +3388,7 @@ def alice_columnar_table_single_batch(empty_data_context):
                         "column": "$domain.domain_kwargs.column",
                         "meta": {
                             "notes": {
-                                "format": "markdown",
+                                "format": MetaNotesFormat.MARKDOWN,
                                 "content": [
                                     "### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**"
                                 ],
@@ -3405,7 +3406,7 @@ def alice_columnar_table_single_batch(empty_data_context):
                         "column": "$domain.domain_kwargs.column",
                         "meta": {
                             "notes": {
-                                "format": "markdown",
+                                "format": MetaNotesFormat.MARKDOWN,
                                 "content": [
                                     "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
                                 ],
@@ -3424,7 +3425,7 @@ def alice_columnar_table_single_batch(empty_data_context):
                         "meta": {
                             "profiler_details": "$parameter.my_date_format.details",
                             "notes": {
-                                "format": "markdown",
+                                "format": MetaNotesFormat.MARKDOWN,
                                 "content": [
                                     "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                                 ],
@@ -4296,7 +4297,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         },
                     },
                     "notes": {
-                        "format": "markdown",
+                        "format": MetaNotesFormat.MARKDOWN,
                         "content": [
                             "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                         ],
@@ -4320,7 +4321,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         },
                     },
                     "notes": {
-                        "format": "markdown",
+                        "format": MetaNotesFormat.MARKDOWN,
                         "content": [
                             "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                         ],
@@ -4349,7 +4350,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         },
                     },
                     "notes": {
-                        "format": "markdown",
+                        "format": MetaNotesFormat.MARKDOWN,
                         "content": [
                             "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                         ],
@@ -4373,7 +4374,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         },
                     },
                     "notes": {
-                        "format": "markdown",
+                        "format": MetaNotesFormat.MARKDOWN,
                         "content": [
                             "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                         ],
@@ -4399,7 +4400,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "success_ratio": 1.0,
                     },
                     "notes": {
-                        "format": "markdown",
+                        "format": MetaNotesFormat.MARKDOWN,
                         "content": [
                             "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                         ],
@@ -4420,7 +4421,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "success_ratio": 1.0,
                     },
                     "notes": {
-                        "format": "markdown",
+                        "format": MetaNotesFormat.MARKDOWN,
                         "content": [
                             "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                         ],
@@ -4441,7 +4442,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "success_ratio": 1.0,
                     },
                     "notes": {
-                        "format": "markdown",
+                        "format": MetaNotesFormat.MARKDOWN,
                         "content": [
                             "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                         ],
@@ -4462,7 +4463,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "success_ratio": 1.0,
                     },
                     "notes": {
-                        "format": "markdown",
+                        "format": MetaNotesFormat.MARKDOWN,
                         "content": [
                             "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                         ],
@@ -4703,7 +4704,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "meta": {
                             "profiler_details": "$parameter.my_date_format.details",
                             "notes": {
-                                "format": "markdown",
+                                "format": MetaNotesFormat.MARKDOWN,
                                 "content": [
                                     "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                                 ],
@@ -4750,7 +4751,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "meta": {
                             "profiler_details": "$parameter.my_regex.details",
                             "notes": {
-                                "format": "markdown",
+                                "format": MetaNotesFormat.MARKDOWN,
                                 "content": [
                                     "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                                 ],

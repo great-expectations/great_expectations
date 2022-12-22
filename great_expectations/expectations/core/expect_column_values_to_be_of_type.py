@@ -258,7 +258,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
-        return (template_str, params_with_json_schema, styling)
+        return template_str, params_with_json_schema, None, styling
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
