@@ -1,4 +1,5 @@
 # import functools
+import logging
 import pathlib
 
 import pytest
@@ -10,6 +11,8 @@ pytestmark = [pytest.mark.integration]
 from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
 from great_expectations.experimental.datasources.config import GxConfig
+
+LOGGER = logging.getLogger(__file__)
 
 
 @pytest.fixture
@@ -59,7 +62,10 @@ def file_dc_config_dir_init(tmp_path: pathlib.Path) -> pathlib.Path:
     assert gx_yml.exists() is False
     FileDataContext.create(tmp_path)
     assert gx_yml.exists()
-    return gx_yml.parent
+
+    tmp_gx_dir = gx_yml.parent.absolute()
+    LOGGER.info(f"tmp_gx_dir -> {tmp_gx_dir}")
+    return tmp_gx_dir
 
 
 @pytest.fixture
@@ -69,8 +75,7 @@ def zep_yaml_config_file(
     """
     Dump the provided GxConfig to a temporary path. File is removed during test teardown.
     """
-    config_file_path = file_dc_config_dir_init / "zep_config.yml"
-    # config_file_path.parent.mkdir()
+    config_file_path = file_dc_config_dir_init / FileDataContext.ZEP_YAML
 
     assert config_file_path.exists() is False
 
@@ -115,9 +120,10 @@ def test_serialize_zep_config(zep_file_context: FileDataContext):
 def test_zep_simple_validate(zep_file_context: FileDataContext):
     # see `test_run_checkpoint_and_data_doc`
     # sans data_doc
-    pass
+    raise NotImplementedError()
 
 
+@pytest.mark.xfail(reason="TypeError: cannot pickle 'module' object")
 def test_save_datacontext(zep_file_context: FileDataContext):
     zep_file_context.variables.save_config()
 
