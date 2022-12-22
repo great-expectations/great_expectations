@@ -173,11 +173,13 @@ def _public_api_docstring_errors() -> Set[DocstringError]:
 
 
 def main():
-    logger.info("Generating list of public API docstring errors.")
+    logger.info("Generating list of public API docstring errors. This may take a few minutes.")
     errors = _public_api_docstring_errors()
 
     for error in errors:
         logger.error(error)
+
+    assert len(errors) == 0, "There are docstring errors to address."
 
 
 if __name__ == "__main__":
