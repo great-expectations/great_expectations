@@ -12,8 +12,8 @@ from great_expectations.expectations.expectation import (
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
+    AddParamArgs,
     RendererConfiguration,
-    RendererParams,
     RendererValueType,
 )
 from great_expectations.render.util import (
@@ -193,12 +193,12 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
     def _prescriptive_template(
         cls, renderer_configuration: RendererConfiguration
     ) -> RendererConfiguration:
-        add_param_args = (
+        add_param_args: AddParamArgs = {
             ("min_value", [RendererValueType.NUMBER, RendererValueType.DATE]),
             ("max_value", [RendererValueType.NUMBER, RendererValueType.DATE]),
             ("strict_min", RendererValueType.BOOLEAN),
             ("strict_max", RendererValueType.BOOLEAN),
-        )
+        }
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
