@@ -4,7 +4,7 @@ import decimal
 import locale
 import re
 import warnings
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 
 import pandas as pd
 
@@ -215,7 +215,7 @@ def handle_strict_min_max(params: dict) -> (str, str):
 
 
 def build_count_table(
-    partial_unexpected_counts: List[dict], unexpected_count: int
+    partial_unexpected_counts: List[dict], unexpected_count: Optional[int] = None
 ) -> Tuple[List[str], List[List[Any]]]:
     """
     Used by _diagnostic_unexpected_table_renderer() method in Expectation to render
@@ -256,7 +256,7 @@ def build_count_table(
 def build_count_and_index_table(
     partial_unexpected_counts: List[dict],
     unexpected_index_list: List[dict],
-    unexpected_count: int,
+    unexpected_count: Optional[int] = None,
     unexpected_list: Optional[List[dict]] = None,
     unexpected_index_column_names: Optional[List[str]] = None,
 ) -> Tuple[List[str], List[List[Any]]]:
