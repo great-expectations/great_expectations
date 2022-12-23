@@ -73,6 +73,34 @@ def parse_pydocstyle_errors(raw_errors: List[str]) -> List[DocstringError]:
 
     return docstring_errors
 
+def parse_darglint_errors(raw_errors: List[str]) -> List[DocstringError]:
+    """Parse raw string output of darglint to DocstringError."""
+
+    docstring_errors: List[DocstringError] = []
+    for raw_error in raw_errors:
+        if not raw_error:
+            continue
+
+        split_error = raw_error.split(":")
+        path = split_error[0]
+        name = split_error[1]
+        line_number = int(split_error[2])
+        error_code = split_error[3]
+
+        docstring_errors.append(
+            DocstringError(
+                name=name,
+                filepath_relative_to_repo_root=_repo_relative_filepath(
+                    pathlib.Path(path)
+                ),
+                error=error_code,
+                raw_error=raw_error,
+                line_number=line_number,
+            )
+        )
+
+    return docstring_errors
+
 
 def _repo_root() -> pathlib.Path:
     return pathlib.Path(__file__).parent.parent
@@ -140,9 +168,13 @@ def _get_docstring_errors() -> List[DocstringError]:
     repo_root = pathlib.Path(__file__).parent.parent
     code_dir = repo_root / "great_expectations/"
     code_dir_abs = code_dir.absolute()
-    raw_errors = run_pydocstyle(code_dir_abs)
+    pydocstyle_raw_errors = run_pydocstyle(code_dir_abs)
+    darglint_raw_errors = run_darglint(code_dir_abs)
 
-    return parse_pydocstyle_errors(raw_errors=raw_errors)
+    parsed_pydocstyle_errors = parse_pydocstyle_errors(raw_errors=pydocstyle_raw_errors)
+    parsed_darglint_errors = parse_darglint_errors(raw_errors=darglint_raw_errors)
+
+    return parsed_pydocstyle_errors + parsed_darglint_errors
 
 
 def _get_public_api_definitions() -> Set[Definition]:
@@ -198,16 +230,6 @@ def run_darglint(directory: pathlib.Path) -> List[str]:
         raise ValueError(err)
 
     return raw_results.stdout.split("\n")
-
-def _get_darglint_docstring_errors() -> List[DocstringError]:
-    """Get all docstring errors."""
-    repo_root = pathlib.Path(__file__).parent.parent
-    # TODO: Run on full codebase
-    code_dir = repo_root / "great_expectations/" / "data_context" / "data_context"
-    code_dir_abs = code_dir.absolute()
-    raw_errors = run_darglint(code_dir_abs)
-    # TODO: Parse errors
-    return raw_errors
 
 
 def main():
