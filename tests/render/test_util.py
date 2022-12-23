@@ -15,9 +15,9 @@ from great_expectations.render.util import (
     _convert_unexpected_indices_to_df,
     build_count_and_index_table,
     build_count_table,
-    filter_list_of_indices,
     num_to_str,
     resource_key_passes_run_name_filter,
+    truncate_list_of_indices,
 )
 
 
@@ -340,7 +340,7 @@ def test_convert_unexpected_indices_to_df_multiple():
     assert list(res) == unexpected_index_column_names
     assert res.iloc[0].tolist() == ["3"]
     assert res.iloc[1].tolist() == ["4"]
-    assert res.iloc[2].tolist() == ["5 6 7 8"]
+    assert res.iloc[2].tolist() == ["5, 6, 7, 8"]
 
 
 def test_convert_unexpected_indices_to_df_multiple_with_truncation():
@@ -367,7 +367,7 @@ def test_convert_unexpected_indices_to_df_multiple_with_truncation():
         partial_unexpected_counts=partial_unexpected_counts,
     )
     assert list(res) == unexpected_index_column_names
-    assert res.iloc[0].tolist() == ["0 1 2 3 4 5 6 7 8 9 ..."]
+    assert res.iloc[0].tolist() == ["0, 1, 2, 3, 4, 5, 6, 7, 8, 9, ..."]
 
 
 def test_convert_unexpected_indices_to_df_actual_values():
@@ -393,20 +393,20 @@ def test_convert_unexpected_indices_to_df_actual_values():
     assert res.iloc[2].tolist() == ["5"]
 
 
-def test_filter_list_of_indices():
+def test_truncate_list_of_indices():
     int_indices: List[Union[int, str]] = [4, 5, 6, 7]
-    result: str = filter_list_of_indices(indices=int_indices)
-    assert result == "4 5 6 7"
+    result: str = truncate_list_of_indices(indices=int_indices)
+    assert result == "4, 5, 6, 7"
 
-    result: str = filter_list_of_indices(indices=int_indices, max_index=2)
-    assert result == "4 5 ..."
+    result: str = truncate_list_of_indices(indices=int_indices, max_index=2)
+    assert result == "4, 5, ..."
 
     str_indices: List[Union[int, str]] = ["four", "five", "six", "seven"]
-    result: str = filter_list_of_indices(indices=str_indices)
-    assert result == "four five six seven"
+    result: str = truncate_list_of_indices(indices=str_indices)
+    assert result == "four, five, six, seven"
 
-    result: str = filter_list_of_indices(indices=str_indices, max_index=2)
-    assert result == "four five ..."
+    result: str = truncate_list_of_indices(indices=str_indices, max_index=2)
+    assert result == "four, five, ..."
 
 
 def test_build_count_and_index_table():

@@ -215,7 +215,7 @@ def handle_strict_min_max(params: dict) -> (str, str):
 
 
 def build_count_table(
-    partial_unexpected_counts: List[dict], unexpected_count: Optional[int] = None
+    partial_unexpected_counts: List[dict], unexpected_count: int
 ) -> Tuple[List[str], List[List[Any]]]:
     """
     Used by _diagnostic_unexpected_table_renderer() method in Expectation to render
@@ -256,7 +256,7 @@ def build_count_table(
 def build_count_and_index_table(
     partial_unexpected_counts: List[dict],
     unexpected_index_list: List[dict],
-    unexpected_count: Optional[int] = None,
+    unexpected_count: int,
     unexpected_list: Optional[List[dict]] = None,
     unexpected_index_column_names: Optional[List[str]] = None,
 ) -> Tuple[List[str], List[List[Any]]]:
@@ -405,13 +405,15 @@ def _convert_unexpected_indices_to_df(
     # https://www.geeksforgeeks.org/apply-function-to-every-row-in-a-pandas-dataframe/
     for column in unexpected_index_column_names:
         filtered_unexpected_indices[column] = filtered_unexpected_indices[column].apply(
-            lambda row: filter_list_of_indices(row)
+            lambda row: truncate_list_of_indices(row)
         )
 
     return filtered_unexpected_indices
 
 
-def filter_list_of_indices(indices: List[Union[int, str]], max_index: int = 10) -> str:
+def truncate_list_of_indices(
+    indices: List[Union[int, str]], max_index: int = 10
+) -> str:
     """
     Lambda function used to take unexpected_indices and turn into a string that can be rendered in DataDocs.
     For lists that are greater than max_index, it will truncate the list and add a "..."
@@ -427,4 +429,4 @@ def filter_list_of_indices(indices: List[Union[int, str]], max_index: int = 10) 
     if len(indices) > max_index:
         indices = indices[:max_index]
         indices.append("...")
-    return " ".join(map(str, indices))
+    return ", ".join(map(str, indices))
