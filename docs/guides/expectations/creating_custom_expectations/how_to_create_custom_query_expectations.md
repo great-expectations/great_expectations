@@ -119,7 +119,7 @@ Replace the Expectation class name
 ```
 
 with your real Expectation class name, in upper camel case:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L21
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L22
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
@@ -127,7 +127,7 @@ You can also go ahead and write a new one-line docstring, replacing
 ```
 
 with something like:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L24
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L25
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
@@ -224,7 +224,7 @@ This:
 
 Becomes something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L30-L33
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L31-L34
 ```
 
 :::warning
@@ -257,7 +257,7 @@ This tuple:
 
 Becomes:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L27
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L28
 ```
 
 <details>
