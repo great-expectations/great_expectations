@@ -446,8 +446,8 @@ class _YamlConfigValidator:
 
         checkpoint_config: Union[CheckpointConfig, dict]
 
-        checkpoint_config = CheckpointConfig.from_commented_map(commented_map=config)  # type: ignore[assignment]
-        checkpoint_config = checkpoint_config.to_json_dict()  # type: ignore[union-attr]
+        checkpoint_config = CheckpointConfig.from_commented_map(commented_map=config)
+        checkpoint_config = checkpoint_config.to_json_dict()
         checkpoint_config.update({"name": checkpoint_name})
 
         checkpoint_class_args: dict = filter_properties_dict(  # type: ignore[assignment]
@@ -615,10 +615,10 @@ class _YamlConfigValidator:
             checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
             # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
             checkpoint_config: Union[CheckpointConfig, dict]
-            checkpoint_config = CheckpointConfig.from_commented_map(  # type: ignore[assignment]
+            checkpoint_config = CheckpointConfig.from_commented_map(
                 commented_map=config
             )
-            checkpoint_config = checkpoint_config.to_json_dict()  # type: ignore[union-attr]
+            checkpoint_config = checkpoint_config.to_json_dict()
             checkpoint_config.update({"name": checkpoint_name})
             usage_stats_event_payload = anonymizer.anonymize(
                 obj=checkpoint_config, name=checkpoint_name, config=checkpoint_config  # type: ignore[arg-type]
