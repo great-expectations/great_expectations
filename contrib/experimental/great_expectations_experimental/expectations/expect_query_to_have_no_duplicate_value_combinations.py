@@ -53,11 +53,7 @@ class ExpectQueryToHaveNoDuplicateValueCombinations(QueryExpectation):
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
         query_result = metrics.get("query.multiple_columns")
-        query_result_list = []
-        for element in query_result:
-            query_result_list.append(element.values())
-
-        query_result = dict(query_result_list)
+        query_result = dict([element.values() for element in query_result])
 
         columns = configuration["kwargs"].get("columns")
         duplicates = [

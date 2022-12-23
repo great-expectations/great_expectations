@@ -91,11 +91,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         # </snippet>
         metrics = convert_to_json_serializable(data=metrics)
         query_result = metrics.get("query.column")
-        query_result_list = []
-        for element in query_result:
-            query_result_list.append(element.values())
-
-        query_result = dict(query_result_list)
+        query_result = dict([element.values() for element in query_result])
 
         value = configuration["kwargs"].get("value")
         threshold = configuration["kwargs"].get("threshold")

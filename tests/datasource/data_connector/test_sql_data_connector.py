@@ -82,7 +82,7 @@ def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_eng
     }
 
 
-def get_data_context_for_datasource(
+def get_data_context_for_datasource_and_execution_engine(
     context: AbstractDataContext,
     connection_url: str,
     sql_alchemy_execution_engine: SqlAlchemyExecutionEngine,
@@ -615,7 +615,7 @@ def test_get_batch_data_and_markers_sampling_method__limit(
 ):
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    context = get_data_context_for_datasource(
+    context = get_data_context_for_datasource_and_execution_engine(
         context=in_memory_runtime_context,
         connection_url=test_cases_for_sql_data_connector_sqlite_connection_url,
         sql_alchemy_execution_engine=execution_engine,
@@ -764,7 +764,7 @@ def test_get_batch_data_and_markers_to_make_sure_splitter_and_sampler_methods_ar
 ):
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    context = get_data_context_for_datasource(
+    context = get_data_context_for_datasource_and_execution_engine(
         context=in_memory_runtime_context,
         connection_url=test_cases_for_sql_data_connector_sqlite_connection_url,
         sql_alchemy_execution_engine=execution_engine,
@@ -837,7 +837,7 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__limit(
     random.seed(0)
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    context = get_data_context_for_datasource(
+    context = get_data_context_for_datasource_and_execution_engine(
         context=in_memory_runtime_context,
         connection_url=test_cases_for_sql_data_connector_sqlite_connection_url,
         sql_alchemy_execution_engine=execution_engine,

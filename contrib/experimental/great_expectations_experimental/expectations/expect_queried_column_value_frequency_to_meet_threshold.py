@@ -81,11 +81,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         value = configuration["kwargs"].get("value")
         threshold = configuration["kwargs"].get("threshold")
         query_result = metrics.get("query.column")
-        query_result_list = []
-        for element in query_result:
-            query_result_list.append(element.values())
-
-        query_result = dict(query_result_list)
+        query_result = dict([element.values() for element in query_result])
 
         if isinstance(value, list):
             success = all(
