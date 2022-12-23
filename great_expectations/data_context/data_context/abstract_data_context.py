@@ -187,6 +187,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND = 4
     PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND = 5
 
+    # instance attribute type annotations
     zep_config: GxConfig
 
     @usage_statistics_enabled_method(
