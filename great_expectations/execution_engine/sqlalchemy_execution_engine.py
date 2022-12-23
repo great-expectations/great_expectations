@@ -406,11 +406,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     _add_sqlite_functions(dbapi_con)
 
                 sa.event.listen(self.engine, "connect", _on_connect)
-
-                # Also immediately add the sqlite functions since there already exists an underlying
-                # sqlite3.Connection object (distinct from a sqlalchemy Connection object).
-                # I call .connection to avoid a getattr call but it is not necessary.
-                _add_sqlite_functions(self.engine.raw_connection().connection)
+                # Also immediately add the sqlite functions in case there already exists an underlying
+                # sqlite3.Connection (distinct from a sqlalchemy Connection).
+                _add_sqlite_functions(self.engine.raw_connection())
             self._engine_backup = self.engine
             # sqlite/mssql temp tables only persist within a connection so override the engine
             self.engine = self.engine.connect()
