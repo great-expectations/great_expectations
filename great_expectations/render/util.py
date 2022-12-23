@@ -278,46 +278,39 @@ def build_count_and_index_table(
     table_rows: List[List[str]] = []
     total_count: int = 0
 
-    partial_unexpected_index_df = _convert_unexpected_indices_to_df(
+    unexpected_index_df = _convert_unexpected_indices_to_df(
         unexpected_index_list=unexpected_index_list,
         unexpected_index_column_names=unexpected_index_column_names,
         unexpected_list=unexpected_list,
         partial_unexpected_counts=partial_unexpected_counts,
     )
-
     # if we are using pandas default unexpected_indices
-    if (
-        partial_unexpected_index_df is not None
-        and unexpected_index_column_names is None
-    ):
+    if unexpected_index_df is not None and unexpected_index_column_names is None:
         unexpected_index_column_names = ["Index"]
 
     for unexpected_count_dict in partial_unexpected_counts:
-        value: Optional[Any] = str(unexpected_count_dict.get("value"))
+        value: Optional[Any] = unexpected_count_dict.get("value")
         count: Optional[int] = unexpected_count_dict.get("count")
         if count:
             total_count += count
-        if value is not None and value != "":
-            row_list = []
-            if unexpected_index_column_names:
-                # only add values that we also have indices for
-                if value in str(unexpected_list):
-                    row_list.append(value)
-                    row_list.append(count)
-                    for column_name in unexpected_index_column_names:
-                        row_list.append(
-                            partial_unexpected_index_df[[column_name]].loc[value].item()
-                        )
-            else:
-                row_list.append(value)
-                row_list.append(count)
-            if len(row_list) > 0:
-                table_rows.append(row_list)
 
+        row_list: List[Union[str, int]] = []
+        if value is not None and value != "":
+            row_list.append(value)
+            row_list.append(count)
         elif value == "":
-            table_rows.append(["EMPTY", count])
+            row_list.append("EMPTY")
+            row_list.append(count)
         else:
-            table_rows.append(["null", count])
+            # this value has already been replaced in the unexpected_index_df
+            value = "null"
+            row_list.append("null")
+            row_list.append(count)
+        if unexpected_index_column_names:
+            for column_name in unexpected_index_column_names:
+                row_list.append(unexpected_index_df[[column_name]].loc[value].item())
+        if len(row_list) > 0:
+            table_rows.append(row_list)
 
     # Check to see if we have *all* of the unexpected values accounted for. If so,
     # we show counts. If not, we only show "sampled" unexpected values.
@@ -367,6 +360,9 @@ def _convert_unexpected_indices_to_df(
         unexpected_index_list_as_string: pd.DataFrame = pd.DataFrame(
             unexpected_index_list, dtype="string"
         )
+        unexpected_index_list_as_string = unexpected_index_list_as_string.fillna(
+            value="null"
+        )
         domain_column_name: str = (
             set(unexpected_index_list[0].keys())
             .difference(set(unexpected_index_column_names))
@@ -378,6 +374,9 @@ def _convert_unexpected_indices_to_df(
             list(zip(unexpected_list, unexpected_index_list)),
             columns=["Value", "Index"],
             dtype="string",
+        )
+        unexpected_index_list_as_string = unexpected_index_list_as_string.fillna(
+            value="null"
         )
         domain_column_name: str = "Value"
         unexpected_index_column_names: List[str] = ["Index"]
@@ -393,6 +392,11 @@ def _convert_unexpected_indices_to_df(
     values_we_have_counts_for: List[str] = list(
         pd.DataFrame(partial_unexpected_counts)["value"]
     )
+    # list comprehension to replace None with 'null'
+    values_we_have_counts_for = [
+        "null" if val is None else val for val in values_we_have_counts_for
+    ]
+
     filtered_unexpected_indices = all_unexpected_indices[
         all_unexpected_indices.index.isin(values_we_have_counts_for)
     ]

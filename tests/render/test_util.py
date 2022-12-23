@@ -420,41 +420,14 @@ def test_build_count_and_index_table():
         {"animals": "lion", "pk_1": 4, "pk_2": "four"},
         {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
     ]
-    result_dict = {
-        "element_count": 6,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "partial_unexpected_counts": [
-            {"count": 1, "value": "giraffe"},
-            {"count": 1, "value": "lion"},
-            {"count": 1, "value": "zebra"},
-        ],
-        "partial_unexpected_index_list": [
-            {"animals": "giraffe", "pk_1": 3, "pk_2": "three"},
-            {"animals": "lion", "pk_1": 4, "pk_2": "four"},
-            {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
-        ],
-        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_count": 3,
-        "unexpected_index_column_names": ["pk_1", "pk_2"],
-        "unexpected_index_list": [
-            {"animals": "giraffe", "pk_1": 3, "pk_2": "three"},
-            {"animals": "lion", "pk_1": 4, "pk_2": "four"},
-            {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
-        ],
-        "unexpected_index_query": "SELECT animals, pk_1, pk_2 \nFROM animal_names \nWHERE animals IS NOT NULL AND (animals NOT IN ('cat', 'fish', 'dog'))",
-        "unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_percent": 50.0,
-        "unexpected_percent_nonmissing": 50.0,
-        "unexpected_percent_total": 50.0,
-    }
     unexpected_count = 3
+    unexpected_index_column_names = ["pk_1", "pk_2"]
 
     header_row, table_rows = build_count_and_index_table(
         partial_unexpected_counts=partial_unexpected_counts,
         unexpected_index_list=unexpected_index_list,
-        result_dict=result_dict,
         unexpected_count=unexpected_count,
+        unexpected_index_column_names=unexpected_index_column_names,
     )
     assert header_row == ["Unexpected Value", "Count", "pk_1", "pk_2"]
     assert table_rows == [
@@ -475,47 +448,64 @@ def test_build_count_and_index_table_sampled():
         {"animals": "lion", "pk_1": 4, "pk_2": "four"},
         {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
     ]
-    result_dict = {
-        "element_count": 6,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "partial_unexpected_counts": [
-            {"count": 1, "value": "giraffe"},
-            {"count": 1, "value": "lion"},
-            {"count": 1, "value": "zebra"},
-        ],
-        "partial_unexpected_index_list": [
-            {"animals": "giraffe", "pk_1": 3, "pk_2": "three"},
-            {"animals": "lion", "pk_1": 4, "pk_2": "four"},
-            {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
-        ],
-        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_count": 3,
-        "unexpected_index_column_names": ["pk_1", "pk_2"],
-        "unexpected_index_list": [
-            {"animals": "giraffe", "pk_1": 3, "pk_2": "three"},
-            {"animals": "lion", "pk_1": 4, "pk_2": "four"},
-            {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
-        ],
-        "unexpected_index_query": "SELECT animals, pk_1, pk_2 \nFROM animal_names \nWHERE animals IS NOT NULL AND (animals NOT IN ('cat', 'fish', 'dog'))",
-        "unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_percent": 50.0,
-        "unexpected_percent_nonmissing": 50.0,
-        "unexpected_percent_total": 50.0,
-    }
     unexpected_count = 100
+    unexpected_index_column_names = ["pk_1", "pk_2"]
 
     header_row, table_rows = build_count_and_index_table(
         partial_unexpected_counts=partial_unexpected_counts,
         unexpected_index_list=unexpected_index_list,
-        result_dict=result_dict,
         unexpected_count=unexpected_count,
+        unexpected_index_column_names=unexpected_index_column_names,
     )
     assert header_row == ["Sampled Unexpected Values", "Count", "pk_1", "pk_2"]
     assert table_rows == [
         ["giraffe", 1, "3", "three"],
         ["lion", 1, "4", "four"],
         ["zebra", 1, "5", "five"],
+    ]
+
+
+def test_build_count_and_index_table_with_empty_string():
+    partial_unexpected_counts = [
+        {"count": 1, "value": ""},
+    ]
+    unexpected_index_list = [
+        {"animals": "", "pk_1": 5, "pk_2": "five"},
+    ]
+    unexpected_count = 100
+    unexpected_index_column_names = ["pk_1", "pk_2"]
+
+    header_row, table_rows = build_count_and_index_table(
+        partial_unexpected_counts=partial_unexpected_counts,
+        unexpected_index_list=unexpected_index_list,
+        unexpected_count=unexpected_count,
+        unexpected_index_column_names=unexpected_index_column_names,
+    )
+    assert header_row == ["Sampled Unexpected Values", "Count", "pk_1", "pk_2"]
+    assert table_rows == [
+        ["EMPTY", 1, "5", "five"],
+    ]
+
+
+def test_build_count_and_index_table_with_null():
+    partial_unexpected_counts = [
+        {"count": 1, "value": None},
+    ]
+    unexpected_index_list = [
+        {"animals": None, "pk_1": 5, "pk_2": "five"},
+    ]
+    unexpected_count = 100
+    unexpected_index_column_names = ["pk_1", "pk_2"]
+
+    header_row, table_rows = build_count_and_index_table(
+        partial_unexpected_counts=partial_unexpected_counts,
+        unexpected_index_list=unexpected_index_list,
+        unexpected_count=unexpected_count,
+        unexpected_index_column_names=unexpected_index_column_names,
+    )
+    assert header_row == ["Sampled Unexpected Values", "Count", "pk_1", "pk_2"]
+    assert table_rows == [
+        ["null", 1, "5", "five"],
     ]
 
 
@@ -549,3 +539,33 @@ def test_build_count_table_sampled():
     )
     assert header_row == ["Sampled Unexpected Values", "Count"]
     assert table_rows == [["giraffe", 3], ["lion", 2], ["zebra", 1]]
+
+
+def test_build_count_table_with_empty_string():
+    partial_unexpected_counts = [
+        {"count": 1, "value": ""},
+    ]
+    unexpected_count = 100
+
+    header_row, table_rows = build_count_table(
+        partial_unexpected_counts=partial_unexpected_counts,
+        unexpected_count=unexpected_count,
+    )
+    assert header_row == ["Sampled Unexpected Values", "Count"]
+    assert table_rows == [
+        ["EMPTY", 1],
+    ]
+
+
+def test_build_count_table_with_null():
+    partial_unexpected_counts = [
+        {"count": 1, "value": None},
+    ]
+    unexpected_count = 100
+
+    header_row, table_rows = build_count_table(
+        partial_unexpected_counts=partial_unexpected_counts,
+        unexpected_count=unexpected_count,
+    )
+    assert header_row == ["Sampled Unexpected Values", "Count"]
+    assert table_rows == [["null", 1]]
