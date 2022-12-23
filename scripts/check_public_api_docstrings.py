@@ -1,3 +1,11 @@
+"""Utilities to lint public API docstrings.
+
+Public API docstrings are those marked with the @public_api decorator.
+
+Typical usage example:
+
+  main() method provided with typical usage.
+"""
 import logging
 import pathlib
 import re
@@ -15,6 +23,11 @@ from scripts.public_api_report import (
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+
+# Example Errors
+# great_expectations/data_context/data_context/abstract_data_context.py:test_yaml_config:3399: DAR101: - class_name
+# great_expectations/data_context/data_context/abstract_data_context.py:test_yaml_config:3399: DAR101: - runtime_environment
+
 
 
 @dataclass(frozen=True)
