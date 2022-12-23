@@ -16,13 +16,13 @@ from great_expectations.experimental.datasources.sources import _SourceFactories
 LOGGER = logging.getLogger(__name__)
 
 
-_NEW_STYLE_DESCRIPTION = "New Style Datasources"
+_ZEP_STYLE_DESCRIPTION = "ZEP Experimental Datasources"
 
 
 class GxConfig(ExperimentalBaseModel):
     """Represents the full new-style/experimental configuration file."""
 
-    datasources: Dict[str, Datasource] = Field(..., description=_NEW_STYLE_DESCRIPTION)
+    datasources: Dict[str, Datasource] = Field(..., description=_ZEP_STYLE_DESCRIPTION)
 
     class Config:
         extra = Extra.ignore  # ignore any old style config keys
