@@ -397,14 +397,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                                      ],
                     )
 
-                # Add sqlite functions any future connections
+                # Add sqlite functions to any future connections.
                 def _on_connect(dbapi_con, connection_record):
                     logger.info(f"A new sqlite connection was created: {dbapi_con}, {connection_record}")
                     _add_sqlite_functions(dbapi_con)
                 sa.event.listen(self.engine, "connect", _on_connect)
 
-                # Also Immediately add the sqlite functions since there already exists an underlying
-                # sqlite3.Connection object (distinct from a sqlalchemy Connection object)
+                # Also immediately add the sqlite functions since there already exists an underlying
+                # sqlite3.Connection object (distinct from a sqlalchemy Connection object).
                 # I call .connection to avoid a getattr call but it is not necessary.
                 _add_sqlite_functions(self.engine.raw_connection().connection)
             self._engine_backup = self.engine
