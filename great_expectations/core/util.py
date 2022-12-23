@@ -9,7 +9,8 @@ import re
 import sys
 import uuid
 from collections import OrderedDict
-from typing import (
+from types import NoneType
+from typing import (  # TypeVar,
     TYPE_CHECKING,
     Any,
     Callable,
@@ -20,6 +21,7 @@ from typing import (
     Optional,
     Tuple,
     Union,
+    overload,
 )
 from urllib.parse import urlparse
 
@@ -96,6 +98,7 @@ except ImportError:
 
 
 if TYPE_CHECKING:
+    import numpy.typing as npt
     from pyspark.sql import SparkSession  # noqa: F401
 
 
@@ -181,10 +184,82 @@ def determine_progress_bar_method_by_environment() -> Callable:
     return tqdm
 
 
-JSONValues: TypeAlias = Union[dict, list, str, int, float, bool, None]
+JSONValues: TypeAlias = Union[dict, list, str, int, float, bool, NoneType]
+
+ToBool: TypeAlias = bool
+ToFloat: TypeAlias = Union[float, np.float32, np.float64]
+ToInt: TypeAlias = Union[int, np.integer, np.uint8, np.int32, np.int64]
+ToStr: TypeAlias = Union[
+    str, bytes, uuid.UUID, datetime.date, datetime.datetime, np.datetime64
+]
+
+ToList: TypeAlias = Union[list, set, tuple, npt.NDArray, pd.Index]
+ToDict: TypeAlias = Union[dict, pd.DataFrame, SerializableDictDot, SerializableDotDict]
+
+JSONConvertable: TypeAlias = Union[
+    ToDict, ToList, ToStr, ToInt, ToFloat, ToBool, ToBool
+]
 
 
-def convert_to_json_serializable(data) -> JSONValues:  # noqa: C901 - complexity 28
+# @overload
+# def convert_to_json_serializable(
+#     data: JT,
+# ) -> JT:
+#     ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToList,
+) -> list:
+    ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToDict,
+) -> dict:
+    ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToBool,
+) -> bool:
+    ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToFloat,
+) -> float:
+    ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToInt,
+) -> int:
+    ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToStr,
+) -> str:
+    ...
+
+
+# @overload
+# def convert_to_json_serializable(
+#     data: NoneType,
+# ) -> NoneType:
+#     ...
+
+
+def convert_to_json_serializable(  # noqa: C901 - complexity 28
+    data: JSONConvertable,
+) -> Union[dict, list, str, int, float, bool]:
     """
     Helper function to convert an object to one that is json serializable
 
@@ -229,7 +304,7 @@ def convert_to_json_serializable(data) -> JSONValues:  # noqa: C901 - complexity
         return new_dict
 
     if isinstance(data, (list, tuple, set)):
-        new_list = []
+        new_list: List[JSONValues] = []
         for val in data:
             new_list.append(convert_to_json_serializable(val))
 
@@ -329,10 +404,9 @@ def convert_to_json_serializable(data) -> JSONValues:  # noqa: C901 - complexity
         if isinstance(data, StructType):
             return dict(data.jsonValue())
 
-    else:
-        raise TypeError(
-            f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
-        )
+    raise TypeError(
+        f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
+    )
 
 
 def ensure_json_serializable(data):  # noqa: C901 - complexity 21
