@@ -36,6 +36,9 @@ from great_expectations.validator.validator import Validator
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource import LegacyDatasource
+    from great_expectations.experimental.datasources.interfaces import (
+        Datasource as XDatasource,
+    )
 
 
 logger = logging.getLogger(__name__)
@@ -355,10 +358,10 @@ def load_checkpoint(  # type: ignore[return] # sys.exit if no checkpoint
 
 def select_datasource(
     context: AbstractDataContext, datasource_name: Optional[str] = None
-) -> Union[BaseDatasource, LegacyDatasource, None]:
+) -> Union[BaseDatasource, LegacyDatasource, XDatasource, None]:
     """Select a datasource interactively."""
     # TODO consolidate all the myriad CLI tests into this
-    data_source: Union[BaseDatasource, LegacyDatasource, None] = None
+    data_source: Union[BaseDatasource, LegacyDatasource, XDatasource, None] = None
 
     if datasource_name is None:
         data_sources: List[BaseDatasource] = cast(
