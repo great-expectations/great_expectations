@@ -419,7 +419,7 @@ Replace the Expectation class name
 ```
 
 with your real Expectation class name, in upper camel case:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L21
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L22
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
@@ -427,7 +427,7 @@ You can also go ahead and write a new one-line docstring, replacing
 ```
 
 with something like:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L24
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L25
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
@@ -524,7 +524,7 @@ This:
 
 Becomes something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L30-L35
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L31-L36
 ```
 
 :::warning
@@ -560,7 +560,7 @@ This tuple:
 
 Becomes:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L27
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L28
 ```
 
 <details>
