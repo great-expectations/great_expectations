@@ -1116,6 +1116,8 @@ class DataAsset:
         """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
         and file_lines_map_expectation).
 
+        # how do you not do the warnings here?
+
         Expectations support four result_formats: BOOLEAN_ONLY, BASIC, SUMMARY, and COMPLETE.
         In each case, the object returned has a different set of populated fields.
         See :ref:`result_format` for more information.

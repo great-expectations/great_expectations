@@ -1119,6 +1119,7 @@ class ExpectationConfiguration(SerializableDictDot):
         }
 
     def get_domain_kwargs(self) -> dict:
+        # kwarg_look up
         expectation_kwargs_dict = self.kwarg_lookup_dict.get(
             self.expectation_type, None
         )
@@ -1153,6 +1154,7 @@ class ExpectationConfiguration(SerializableDictDot):
         return domain_kwargs
 
     def get_success_kwargs(self) -> dict:
+        # kwarg look_up
         expectation_kwargs_dict = self.kwarg_lookup_dict.get(
             self.expectation_type, None
         )
@@ -1184,6 +1186,7 @@ class ExpectationConfiguration(SerializableDictDot):
         return success_kwargs
 
     def get_runtime_kwargs(self, runtime_configuration: Optional[dict] = None) -> dict:
+        # kwarg look up
         expectation_kwargs_dict = self.kwarg_lookup_dict.get(
             self.expectation_type, None
         )

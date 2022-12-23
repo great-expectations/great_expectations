@@ -155,6 +155,7 @@ def test_ValidationResultsTableContentBlockRenderer_render(
     assert json.dumps(validation_results_table.to_json_dict()).count("$icon") == 6
 
 
+@pytest.mark.filterwarnings("ignore")
 def test_ValidationResultsTableContentBlockRenderer_get_custom_columns(evr_success):
     assert (
         ValidationResultsTableContentBlockRenderer._get_custom_columns([evr_success])
@@ -176,6 +177,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_custom_columns(evr_succe
     ) == ["doesntmatterone", "doesntmattertwo"]
 
 
+@pytest.mark.filterwarnings("ignore")
 def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_success):
     content_block_fn = ValidationResultsTableContentBlockRenderer._get_content_block_fn(
         "expect_table_row_count_to_be_between"
@@ -510,6 +512,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn_with_v2
     assert content_block_fn_output == content_block_fn_expected_output
 
 
+@pytest.mark.filterwarnings("ignore")
 def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_success):
     evr_no_result_key = ExpectationValidationResult(
         success=True,
@@ -608,6 +611,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
     assert output_5 == "0"
 
 
+@pytest.mark.filterwarnings("ignore")
 def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
     evr_success, evr_failed
 ):
@@ -766,6 +770,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
     assert output_5 == expected_output_5
 
 
+@pytest.mark.filterwarnings("ignore")
 def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_success):
     evr_failed_no_result = ExpectationValidationResult(
         success=False,
@@ -1035,6 +1040,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
     }
 
 
+@pytest.mark.filterwarnings("ignore")
 def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
     evr_failed_with_exception, evr_success, evr_failed
 ):
