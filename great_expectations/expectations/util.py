@@ -1,7 +1,5 @@
 import warnings
-from typing import Any, Callable, List, Optional
-
-import pandas as pd
+from typing import Callable
 
 from great_expectations.expectations.expectation import (
     add_values_with_json_schema_from_list_in_params as add_values_with_json_schema_from_list_in_params_expectation,
