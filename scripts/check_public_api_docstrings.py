@@ -6,11 +6,11 @@ from dataclasses import dataclass
 from typing import List, Set, Tuple
 
 from scripts.public_api_report import (
-    FileContents,
-    _default_code_absolute_paths,
     CodeParser,
-    PublicAPIChecker,
     Definition,
+    FileContents,
+    PublicAPIChecker,
+    _default_code_absolute_paths,
 )
 
 logger = logging.getLogger(__name__)
@@ -172,7 +172,9 @@ def _public_api_docstring_errors() -> Set[DocstringError]:
 
 
 def main():
-    logger.info("Generating list of public API docstring errors. This may take a few minutes.")
+    logger.info(
+        "Generating list of public API docstring errors. This may take a few minutes."
+    )
     errors = _public_api_docstring_errors()
 
     if not errors:

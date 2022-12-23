@@ -15,7 +15,7 @@ import shutil
 
 import invoke
 
-from scripts import check_type_hint_coverage, check_public_api_docstrings
+from scripts import check_public_api_docstrings, check_type_hint_coverage
 
 try:
     from tests.integration.usage_statistics import usage_stats_utils

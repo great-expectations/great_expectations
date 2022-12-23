@@ -272,9 +272,7 @@ class TestCodeParser:
 def public_api_checker(
     docs_example_parser: DocsExampleParser, code_parser: CodeParser
 ) -> PublicAPIChecker:
-    return PublicAPIChecker(
-        code_parser=code_parser
-    )
+    return PublicAPIChecker(code_parser=code_parser)
 
 
 class TestPublicAPIChecker:
