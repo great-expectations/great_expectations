@@ -15,7 +15,7 @@ import shutil
 
 import invoke
 
-from scripts import check_type_hint_coverage
+from scripts import check_public_api_docstrings, check_type_hint_coverage
 
 try:
     from tests.integration.usage_statistics import usage_stats_utils
@@ -107,6 +107,17 @@ def hooks(ctx, all_files=False, diff=False, sync=False):
         print("  Re-installing hooks ...")
         ctx.run(" ".join(["pre-commit", "uninstall"]), echo=True)
         ctx.run(" ".join(["pre-commit", "install"]), echo=True)
+
+
+@invoke.task(aliases=["docstring"])
+def docstrings(ctx):
+    """Check public API docstrings."""
+    try:
+        check_public_api_docstrings.main()
+    except AssertionError as err:
+        raise invoke.Exit(
+            message=f"{err}\n\n  See {check_public_api_docstrings.__file__}", code=1
+        )
 
 
 @invoke.task(aliases=["type-cov"])  # type: ignore

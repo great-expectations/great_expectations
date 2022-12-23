@@ -272,9 +272,7 @@ class TestCodeParser:
 def public_api_checker(
     docs_example_parser: DocsExampleParser, code_parser: CodeParser
 ) -> PublicAPIChecker:
-    return PublicAPIChecker(
-        docs_example_parser=docs_example_parser, code_parser=code_parser
-    )
+    return PublicAPIChecker(code_parser=code_parser)
 
 
 class TestPublicAPIChecker:
@@ -750,7 +748,7 @@ class TestCodeReferenceFilter:
         }
 
     @pytest.mark.integration
-    def test_filter_definitions_include_by_file_and_name_already_excluded(
+    def test_filter_definitions_include_by_file_and_name_already_excluded_not_used_in_docs_example(
         self,
         code_reference_filter_with_include_by_file_and_name_not_used_in_docs_example_exclude_file: CodeReferenceFilter,
     ):
