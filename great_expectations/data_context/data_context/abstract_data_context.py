@@ -1093,7 +1093,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def get_datasource(
         self, datasource_name: str = "default"
-    ) -> Union[LegacyDatasource, BaseDatasource, XDatasource, None]:
+    ) -> Union[LegacyDatasource, BaseDatasource, XDatasource]:
         """Get the named datasource
 
         Args:
@@ -1121,8 +1121,8 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
         datasource_config = datasourceConfigSchema.load(substituted_config)
-        datasource: Optional[
-            Union[LegacyDatasource, BaseDatasource]
+        datasource: Union[
+            LegacyDatasource, BaseDatasource
         ] = self._instantiate_datasource_from_config(
             raw_config=raw_config, substituted_config=substituted_config
         )
