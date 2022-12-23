@@ -4,7 +4,7 @@ import decimal
 import locale
 import re
 import warnings
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 
@@ -214,11 +214,24 @@ def handle_strict_min_max(params: dict) -> (str, str):
     return at_least_str, at_most_str
 
 
-# add rendering helpers here
-#
 def build_count_table(
-    table_rows, partial_unexpected_counts, total_count, unexpected_count
-):
+    partial_unexpected_counts: List[dict], unexpected_count: int
+) -> Tuple[List[str], List[List[Any]]]:
+    """
+    Used by _diagnostic_unexpected_table_renderer() method in Expectation to render
+    Unexpected Counts table.
+
+    Args:
+        partial_unexpected_counts: list of dictionaries containing unexpected values and counts
+        unexpected_count: total number of unexpected values. Used to build the header
+
+    Returns:
+        List of strings that will be rendered into DataDocs
+
+    """
+    table_rows: List[List[str]] = []
+    total_count: int = 0
+
     for unexpected_count_dict in partial_unexpected_counts:
         value: Optional[Any] = unexpected_count_dict.get("value")
         count: Optional[int] = unexpected_count_dict.get("count")
@@ -232,37 +245,47 @@ def build_count_table(
             table_rows.append(["null", count])
 
     # Check to see if we have *all* of the unexpected values accounted for. If so,
-    # we show counts. If not, we only show "sampled" unexpected values.
+    # we show counts. If not then we show Sampled Unexpected Values
     if total_count == unexpected_count:
         header_row = ["Unexpected Value", "Count"]
     else:
         header_row = ["Sampled Unexpected Values", "Count"]
-
     return header_row, table_rows
 
 
 def build_count_and_index_table(
-    table_rows,
-    partial_unexpected_counts,
-    unexpected_index_list,
-    result_dict,
-    total_count,
-    unexpected_count,
-):
-    # We will check to see whether we have *all* of the unexpected values
-    # accounted for in our count, and include counts if we do. If we do not,
-    # we will use this as simply a better (non-repeating) source of
-    # "sampled" unexpected values
-    unexpected_list: Optional[List[dict]] = result_dict.get("unexpected_list")
-    unexpected_index_column_names: Optional[List[str]] = result_dict.get(
-        "unexpected_index_column_names"
-    )
+    partial_unexpected_counts: List[dict],
+    unexpected_index_list: List[dict],
+    unexpected_count: int,
+    unexpected_list: Optional[List[dict]] = None,
+    unexpected_index_column_names: Optional[List[str]] = None,
+) -> Tuple[List[str], List[List[Any]]]:
+    """
+    Used by _diagnostic_unexpected_table_renderer() method in Expectation to render
+    Unexpected Counts and Indices table for ID/PK.
+
+    Args:
+         partial_unexpected_counts: list of dictionaries containing unexpected values and counts
+         unexpected_index_list: list of dictionaries containing unexpected indices and their values
+         unexpected_count: how many total unexpected values are there?
+         unexpected_list: optional list of all unexpected values. Used default Pandas unexpected
+             indices (without define id/pk columns)
+         unexpected_count: total number of unexpected values. Used to build the header.
+    Returns:
+        List of strings that will be rendered into DataDocs
+
+    """
+    table_rows: List[List[str]] = []
+    total_count: int = 0
 
     partial_unexpected_index_df = _convert_unexpected_indices_to_df(
-        result=unexpected_index_list,
+        unexpected_index_list=unexpected_index_list,
         unexpected_index_column_names=unexpected_index_column_names,
-        partial_unexpected_list=unexpected_list,
+        unexpected_list=unexpected_list,
+        partial_unexpected_counts=partial_unexpected_counts,
     )
+
+    # if we are using pandas default unexpected_indices
     if (
         partial_unexpected_index_df is not None
         and unexpected_index_column_names is None
@@ -275,8 +298,6 @@ def build_count_and_index_table(
         if count:
             total_count += count
         if value is not None and value != "":
-            # also checking that every value we add to table has an associated index
-            # if we also have a table
             row_list = []
             if unexpected_index_column_names:
                 # only add values that we also have indices for
@@ -300,7 +321,6 @@ def build_count_and_index_table(
 
     # Check to see if we have *all* of the unexpected values accounted for. If so,
     # we show counts. If not, we only show "sampled" unexpected values.
-    print(f"hello this is column name: {unexpected_index_column_names}")
     if total_count == unexpected_count:
         header_row = ["Unexpected Value", "Count"]
         for column_name in unexpected_index_column_names:
@@ -313,35 +333,94 @@ def build_count_and_index_table(
 
 
 def _convert_unexpected_indices_to_df(
-    result: List[dict],
+    unexpected_index_list: List[Union[dict, int]],
+    partial_unexpected_counts: List[dict],
     unexpected_index_column_names: Optional[List[str]] = None,
-    partial_unexpected_list: Optional[List[Any]] = None,
+    unexpected_list: Optional[List[Any]] = None,
 ) -> Optional[pd.DataFrame]:
     """
+    Helper method to convert the list of unexpected indices into a DataFrame that can be used to
+    display unexpected indices. domain_column (the column the Expectation is run on) is used
+    as the index for the DataFrame, and the columns are the unexpected_index_column_names, or a default
+    value in the case of Pandas, which provides default indices.
+
+    In cases where the number of indices is too great (max 10 by default), the remaining values are
+    truncated and the column contains "..." in their place.
+
+                pk_1
+    giraffe     3
+    lion        4
+    zebra       5 6 8 ...
+
     Args:
-        result ():
+
+        unexpected_index_list : all unexpected values and indices
+        partial_unexpected_counts : counts for unexpected values (max 20 by default)
+        unexpected_index_column_names:  in the case of defining ID/PK columns
+        unexpected_list: if we are using default Pandas output.
+
     Returns:
-        pd.DataFrame that
+        pd.DataFrame that contains indices for unexpected values
     """
-    # create dataframe but change them all to a stringj
     if unexpected_index_column_names:
-        # the fact that we are joining strings is bad
-        df_version = pd.DataFrame(result, dtype="string")
-        domain_column_name = (
-            set(result[0].keys()).difference(set(unexpected_index_column_names)).pop()
+        # if we have defined unexpected_index_column_names for ID/PK
+        unexpected_index_list_as_string: pd.DataFrame = pd.DataFrame(
+            unexpected_index_list, dtype="string"
         )
-    elif partial_unexpected_list:
-        # the fact that we are joining strings is bad
-        df_version = pd.DataFrame(
-            list(zip(partial_unexpected_list, result)),
+        domain_column_name: str = (
+            set(unexpected_index_list[0].keys())
+            .difference(set(unexpected_index_column_names))
+            .pop()
+        )
+    elif unexpected_list:
+        # if we are using default Pandas unexpected indices
+        unexpected_index_list_as_string = pd.DataFrame(
+            list(zip(unexpected_list, unexpected_index_list)),
             columns=["Value", "Index"],
             dtype="string",
         )
-        domain_column_name = "Value"
+        domain_column_name: str = "Value"
+        unexpected_index_column_names: List[str] = ["Index"]
     else:
         return None
-    # TODO: add filtering here
-    # test the filtering
-    # https://stackoverflow.com/questions/9360103/how-to-print-a-numpy-array-without-brackets
-    new_df = df_version.groupby(domain_column_name).agg(lambda y: " ".join(map(str, y)))
-    return new_df
+
+    # unexpected indices are joined as list
+    all_unexpected_indices: pd.DataFrame = unexpected_index_list_as_string.groupby(
+        domain_column_name
+    ).agg(lambda y: list(y))
+
+    # filter all_unexpected_indices according to partial_unexpected_counts, since it has a maximum of 20 values by default
+    values_we_have_counts_for: List[str] = list(
+        pd.DataFrame(partial_unexpected_counts)["value"]
+    )
+    filtered_unexpected_indices = all_unexpected_indices[
+        all_unexpected_indices.index.isin(values_we_have_counts_for)
+    ]
+
+    # applying function to every row in Pandas
+    # https://www.geeksforgeeks.org/apply-function-to-every-row-in-a-pandas-dataframe/
+    for column in unexpected_index_column_names:
+        filtered_unexpected_indices[column] = filtered_unexpected_indices[column].apply(
+            lambda row: filter_list_of_indices(row)
+        )
+
+    return filtered_unexpected_indices
+
+
+def filter_list_of_indices(indices: List[Union[int, str]], max_index: int = 10) -> str:
+    """
+    Lambda function used to take unexpected_indices and turn into a string that can be rendered in DataDocs.
+    For lists that are greater than max_index, it will truncate the list and add a "..."
+
+    Args:
+        indices: indices to show
+        max_index: Maximum number of indices to display before showing "..." in the column
+
+    Returns:
+        string of indices that are joined using ` `
+
+    """
+    if len(indices) > max_index:
+        indices = indices[:max_index]
+        indices.append("...")
+    return " ".join(map(str, indices))

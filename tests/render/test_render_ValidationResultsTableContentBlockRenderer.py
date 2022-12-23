@@ -1098,3 +1098,188 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
             },
         },
     }
+
+
+def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_id_pk_no_pandas(
+    evr_success,
+):
+    evr_failed_no_result = ExpectationValidationResult(
+        success=False,
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "batch_id": "cb8e223838fcdb055f6cccad2af592ae",
+                "column": "animals",
+                "value_set": ["cat", "fish", "dog"],
+            },
+            meta={},
+        ),
+        result={
+            "element_count": 6,
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "partial_unexpected_counts": [
+                {"count": 1, "value": "giraffe"},
+                {"count": 1, "value": "lion"},
+                {"count": 1, "value": "zebra"},
+            ],
+            "partial_unexpected_index_list": [3, 4, 5],
+            "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+            "unexpected_count": 3,
+            "unexpected_index_list": [3, 4, 5],
+            "unexpected_list": ["giraffe", "lion", "zebra"],
+            "unexpected_percent": 50.0,
+            "unexpected_percent_nonmissing": 50.0,
+            "unexpected_percent_total": 50.0,
+        },
+        exception_info={
+            "exception_message": None,
+            "exception_traceback": None,
+            "raised_exception": False,
+        },
+    )
+    renderer = get_renderer_impl(
+        object_name=evr_failed_no_result.expectation_config.expectation_type,
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
+    )[1](result=evr_failed_no_result)
+    assert renderer[0].to_json_dict() == {
+        "content_block_type": "table",
+        "styling": {"body": {"classes": ["table-bordered", "table-sm", "mt-3"]}},
+        "table": [["giraffe", 1, "3"], ["lion", 1, "4"], ["zebra", 1, "5"]],
+        "header_row": ["Unexpected Value", "Count", "Index"],
+    }
+
+
+def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_id_pk_pandas_with_keys(
+    evr_success,
+):
+    # case 1:
+    evr_failed_no_result = ExpectationValidationResult(
+        success=False,
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "batch_id": "cb8e223838fcdb055f6cccad2af592ae",
+                "column": "animals",
+                "value_set": ["cat", "fish", "dog"],
+            },
+            meta={},
+        ),
+        exception_info={
+            "exception_message": None,
+            "exception_traceback": None,
+            "raised_exception": False,
+        },
+        result={
+            "element_count": 6,
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "partial_unexpected_counts": [
+                {"count": 1, "value": "giraffe"},
+                {"count": 1, "value": "lion"},
+                {"count": 1, "value": "zebra"},
+            ],
+            "partial_unexpected_index_list": [3, 4, 5],
+            "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+            "unexpected_count": 3,
+            "unexpected_index_list": [3, 4, 5],
+            "unexpected_list": ["giraffe", "lion", "zebra"],
+            "unexpected_percent": 50.0,
+            "unexpected_percent_nonmissing": 50.0,
+            "unexpected_percent_total": 50.0,
+        },
+    )
+    output_4 = get_renderer_impl(
+        object_name=evr_failed_no_result.expectation_config.expectation_type,
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
+    )[1](result=evr_failed_no_result)
+    assert output_4[0].to_json_dict() == {
+        "content_block_type": "table",
+        "header_row": ["Unexpected Value", "Count", "Index"],
+        "styling": {"body": {"classes": ["table-bordered", "table-sm", "mt-3"]}},
+        "table": [["giraffe", 1, "3"], ["lion", 1, "4"], ["zebra", 1, "5"]],
+    }
+
+
+def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_id_pk_sql_with_keys(
+    evr_success,
+):
+    # case 1:
+    evr_failed_no_result = ExpectationValidationResult(
+        success=False,
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "batch_id": "cb8e223838fcdb055f6cccad2af592ae",
+                "column": "animals",
+                "value_set": ["cat", "fish", "dog"],
+            },
+            meta={},
+        ),
+        exception_info={
+            "exception_message": None,
+            "exception_traceback": None,
+            "raised_exception": False,
+        },
+        result={
+            "element_count": 6,
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "partial_unexpected_counts": [
+                {"count": 1, "value": "giraffe"},
+                {"count": 1, "value": "lion"},
+                {"count": 1, "value": "zebra"},
+            ],
+            "partial_unexpected_index_list": [
+                {"animals": "giraffe", "pk_1": 3, "pk_2": "three"},
+                {"animals": "lion", "pk_1": 4, "pk_2": "four"},
+                {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
+            ],
+            "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+            "unexpected_count": 3,
+            "unexpected_index_column_names": ["pk_1", "pk_2"],
+            "unexpected_index_list": [
+                {"animals": "giraffe", "pk_1": 3, "pk_2": "three"},
+                {"animals": "lion", "pk_1": 4, "pk_2": "four"},
+                {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
+            ],
+            "unexpected_index_query": "SELECT animals, pk_1, pk_2 \nFROM animal_names \nWHERE animals IS NOT NULL AND (animals NOT IN ('cat', 'fish', 'dog'))",
+            "unexpected_list": ["giraffe", "lion", "zebra"],
+            "unexpected_percent": 50.0,
+            "unexpected_percent_nonmissing": 50.0,
+            "unexpected_percent_total": 50.0,
+        },
+    )
+
+    output_4 = get_renderer_impl(
+        object_name=evr_failed_no_result.expectation_config.expectation_type,
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
+    )[1](result=evr_failed_no_result)
+    assert output_4[0].to_json_dict() == {
+        "content_block_type": "table",
+        "header_row": ["Unexpected Value", "Count", "pk_1", "pk_2"],
+        "styling": {"body": {"classes": ["table-bordered", "table-sm", "mt-3"]}},
+        "table": [
+            ["giraffe", 1, "3", "three"],
+            ["lion", 1, "4", "four"],
+            ["zebra", 1, "5", "five"],
+        ],
+    }
+    assert output_4[1].to_json_dict() == {
+        "collapse": [
+            {
+                "content_block_type": "string_template",
+                "string_template": {
+                    "tag": "code",
+                    "template": "SELECT animals, pk_1, pk_2 \n"
+                    "FROM animal_names \n"
+                    "WHERE animals IS NOT NULL AND "
+                    "(animals NOT IN ('cat', "
+                    "'fish', 'dog'))",
+                },
+            }
+        ],
+        "collapse_toggle_link": "Show query to retrieve all unexpected values...",
+        "content_block_type": "collapse",
+        "inline_link": False,
+    }

@@ -813,19 +813,22 @@ class Expectation(metaclass=MetaExpectation):
             # accounted for in our count, and include counts if we do. If we do not,
             # we will use this as simply a better (non-repeating) source of
             # "sampled" unexpected values
-            total_count = 0
+            unexpected_list: Optional[List[dict]] = result_dict.get("unexpected_list")
+            unexpected_index_column_names: Optional[List[str]] = result_dict.get(
+                "unexpected_index_column_names"
+            )
             if unexpected_index_list:
                 header_row, table_rows = build_count_and_index_table(
-                    table_rows,
-                    partial_unexpected_counts,
-                    unexpected_index_list,
-                    result_dict,
-                    total_count,
-                    unexpected_count,
+                    partial_unexpected_counts=partial_unexpected_counts,
+                    unexpected_index_list=unexpected_index_list,
+                    unexpected_count=unexpected_count,
+                    unexpected_list=unexpected_list,
+                    unexpected_index_column_names=unexpected_index_column_names,
                 )
             else:
                 header_row, table_rows = build_count_table(
-                    table_rows, partial_unexpected_counts, total_count, unexpected_count
+                    partial_unexpected_counts=partial_unexpected_counts,
+                    unexpected_count=unexpected_count,
                 )
 
         else:
@@ -857,8 +860,6 @@ class Expectation(metaclass=MetaExpectation):
             }
         )
         if result_dict.get("unexpected_index_query"):
-            # how do you add a new rendererj
-            # unexpected index table is next
             query = result_dict.get("unexpected_index_query")
             query_info = CollapseContent(
                 **{
