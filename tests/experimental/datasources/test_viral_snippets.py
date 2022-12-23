@@ -136,10 +136,12 @@ def test_serialize_zep_config(zep_file_context: FileDataContext):
 
 
 def test_zep_simple_validate_workflow(zep_file_context: FileDataContext):
-    my_datasource: Datasource = zep_file_context.get_datasource("my_sql_ds")
-    my_asset: DataAsset = my_datasource.get_asset("my_asset")
+    batch_request = (
+        zep_file_context.get_datasource("my_sql_ds")
+        .get_asset("my_asset")
+        .get_batch_request({"year": 2019, "month": 1})
+    )
 
-    batch_request = my_asset.get_batch_request({"year": 2019, "month": 1})
     validator = zep_file_context.get_validator(batch_request=batch_request)
     result = validator.expect_column_max_to_be_between(
         column="passenger_count", min_value=1, max_value=12
