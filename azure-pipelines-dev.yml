@@ -123,6 +123,13 @@ stages:
       - bash: python scripts/check_docstring_coverage.py
         name: DocstringChecker
 
+    - job: docstring_linter
+      steps:
+      - script: |
+        pip install $(grep -E '^(pydocstyle)' reqs/requirements-dev-lite.txt)
+        invoke docstrings
+        name: DocstringLinter
+
     - job: unused_import_checker
       steps:
       - script: |
