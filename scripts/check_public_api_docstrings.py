@@ -142,14 +142,13 @@ def _parse_name(raw_error_path: str) -> str:
     return name
 
 
-def run_pydocstyle(directory: pathlib.Path) -> List[str]:
+def run_pydocstyle(paths: List[pathlib.Path]) -> List[str]:
     """Run pydocstyle to identify issues with docstrings."""
 
+    logger.debug("Running pydocstyle")
+    cmds = ["pydocstyle"] + [str(p) for p in paths]
     raw_results: subprocess.CompletedProcess = subprocess.run(
-        [
-            "pydocstyle",
-            directory,
-        ],
+        cmds,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         universal_newlines=True,
@@ -160,16 +159,16 @@ def run_pydocstyle(directory: pathlib.Path) -> List[str]:
     if err:
         raise ValueError(err)
 
+    logger.debug("Finished running pydocstyle")
     return raw_results.stdout.split("\n")
 
 
 def _get_docstring_errors() -> List[DocstringError]:
     """Get all docstring errors."""
-    repo_root = pathlib.Path(__file__).parent.parent
-    code_dir = repo_root / "great_expectations/"
-    code_dir_abs = code_dir.absolute()
-    pydocstyle_raw_errors = run_pydocstyle(code_dir_abs)
-    darglint_raw_errors = run_darglint(code_dir_abs)
+
+    filepaths_containing_public_api_entities = [pathlib.Path(d.filepath).resolve() for d in _get_public_api_definitions()]
+    pydocstyle_raw_errors = run_pydocstyle(paths=filepaths_containing_public_api_entities)
+    darglint_raw_errors = run_darglint(paths=filepaths_containing_public_api_entities)
 
     parsed_pydocstyle_errors = parse_pydocstyle_errors(raw_errors=pydocstyle_raw_errors)
     parsed_darglint_errors = parse_darglint_errors(raw_errors=darglint_raw_errors)
@@ -193,14 +192,19 @@ def _get_public_api_definitions() -> Set[Definition]:
 def _public_api_docstring_errors() -> Set[DocstringError]:
     """Get all docstring errors for entities marked with the @public_api decorator."""
 
+    logger.debug("Getting public api definitions.")
     public_api_definitions = _get_public_api_definitions()
     public_api_definition_tuples: Set[Tuple[str, str]] = {
         (str(_repo_relative_filepath(d.filepath)), d.name)
         for d in public_api_definitions
     }
 
+    logger.debug("Getting docstring errors.")
     public_api_docstring_errors: List[DocstringError] = []
-    for docstring_error in _get_docstring_errors():
+    docstring_errors = _get_docstring_errors()
+
+    logger.debug("Getting docstring errors applicable to public api.")
+    for docstring_error in docstring_errors:
         docstring_error_tuple: Tuple[str, str] = (
             str(docstring_error.filepath_relative_to_repo_root),
             docstring_error.name,
@@ -211,14 +215,13 @@ def _public_api_docstring_errors() -> Set[DocstringError]:
     return set(public_api_docstring_errors)
 
 
-def run_darglint(directory: pathlib.Path) -> List[str]:
+def run_darglint(paths: List[pathlib.Path]) -> List[str]:
     """Run darglint to identify issues with docstrings."""
 
+    logger.debug("Running darglint")
+    cmds = ["darglint"] + [str(p) for p in paths]
     raw_results: subprocess.CompletedProcess = subprocess.run(
-        [
-            "darglint",
-            directory,
-        ],
+        cmds,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         universal_newlines=True,
@@ -228,6 +231,8 @@ def run_darglint(directory: pathlib.Path) -> List[str]:
     err: str = raw_results.stderr
     if err:
         raise ValueError(err)
+
+    logger.debug("Finished running darglint")
 
     return raw_results.stdout.split("\n")
 
@@ -241,7 +246,7 @@ def main():
     if not errors:
         logger.info("There are no public API docstring errors.")
 
-    errors_str = "\n".join([e.raw_error for e in errors])
+    errors_str = f"\n----- {len(errors)} errors found -----\n" + "\n".join([e.raw_error for e in errors]) + "\n----- END -----\n"
 
     logger.error(errors_str)
 
