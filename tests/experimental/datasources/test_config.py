@@ -82,7 +82,7 @@ SIMPLE_DS_DICT = {
     }
 }
 
-WITH_OLD_STYLE_DS_DICT = {
+COMBINED_ZEP_AND_OLD_STYLE_CFG_DICT = {
     "datasources": {
         "my_ds": {
             "name": "my_ds",
@@ -120,7 +120,11 @@ WITH_OLD_STYLE_DS_DICT = {
     ["load_method", "input_"],
     [
         p(GxConfig.parse_obj, SIMPLE_DS_DICT, id="simple pg config dict"),
-        p(GxConfig.parse_obj, WITH_OLD_STYLE_DS_DICT, id="with old style config"),
+        p(
+            GxConfig.parse_obj,
+            COMBINED_ZEP_AND_OLD_STYLE_CFG_DICT,
+            id="zep + old style config",
+        ),
         p(GxConfig.parse_raw, json.dumps(SIMPLE_DS_DICT), id="simple pg json"),
         p(GxConfig.parse_obj, PG_COMPLEX_CONFIG_DICT, id="pg complex dict"),
         p(GxConfig.parse_raw, PG_COMPLEX_CONFIG_JSON, id="pg complex json"),
