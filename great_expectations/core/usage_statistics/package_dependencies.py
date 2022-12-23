@@ -90,7 +90,6 @@ class GXDependencies:
             "openpyxl",
             "pre-commit",
             "psycopg2-binary",
-            "pydantic",  # dev dependency because of mypy plugin
             "pyarrow",
             "pyathena",
             "pyfakefs",
