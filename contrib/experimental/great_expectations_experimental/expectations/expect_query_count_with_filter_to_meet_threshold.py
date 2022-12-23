@@ -7,6 +7,7 @@ For detailed instructions on how to use it, please see:
 from typing import Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -14,10 +15,6 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     QueryExpectation,
-)
-from great_expectations.expectations.metrics.import_manager import (
-    pyspark_sql_Row,
-    sqlalchemy_engine_Row,
 )
 
 
@@ -68,16 +65,12 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
-
-        query_result: Union[sqlalchemy_engine_Row, pyspark_sql_Row] = metrics.get(
-            "query.template_dict"
-        )
+        metrics = convert_to_json_serializable(data=metrics)
+        count: int = list(metrics.get("query.template_values")[0].values())[0]
         threshold: Union[float, int] = configuration["kwargs"].get("threshold")
-        count: int = query_result[0][0]
-        success: bool = count >= threshold
 
         return {
-            "success": success,
+            "success": count >= threshold,
             "result": {"observed_value": count},
         }
 
