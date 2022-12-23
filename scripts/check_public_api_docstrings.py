@@ -24,11 +24,6 @@ from scripts.public_api_report import (
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-# Example Errors
-# great_expectations/data_context/data_context/abstract_data_context.py:test_yaml_config:3399: DAR101: - class_name
-# great_expectations/data_context/data_context/abstract_data_context.py:test_yaml_config:3399: DAR101: - runtime_environment
-
-
 
 @dataclass(frozen=True)
 class DocstringError:
@@ -38,8 +33,7 @@ class DocstringError:
         name: name of the class, method, function - empty if module
         filepath_relative_to_repo_root: location of error
         error: stripped string of error
-        raw_error_first_line: raw string of error first line
-        raw_error_second_line: raw string of error second line
+        raw_error: raw string of error
         line_number: line number of error within file
 
     """
@@ -47,12 +41,14 @@ class DocstringError:
     name: str
     filepath_relative_to_repo_root: pathlib.Path
     error: str
-    raw_error_first_line: str
-    raw_error_second_line: str
+    raw_error: str
     line_number: int
 
+    def __str__(self):
+        return self.raw_error
 
-def parse_to_docstring_errors(raw_errors: List[str]) -> List[DocstringError]:
+
+def parse_pydocstyle_errors(raw_errors: List[str]) -> List[DocstringError]:
     """Parse raw string output of pydocstyle to DocstringError."""
 
     docstring_errors: List[DocstringError] = []
@@ -70,8 +66,7 @@ def parse_to_docstring_errors(raw_errors: List[str]) -> List[DocstringError]:
                         pathlib.Path(_parse_filepath(raw_error_path=raw_error_path))
                     ),
                     error=raw_error_error.strip(),
-                    raw_error_first_line=raw_error_path,
-                    raw_error_second_line=raw_error_error,
+                    raw_error="\n".join([raw_error_path, raw_error_error]),
                     line_number=_parse_line_number(raw_error_path),
                 )
             )
@@ -143,11 +138,11 @@ def run_pydocstyle(directory: pathlib.Path) -> List[str]:
 def _get_docstring_errors() -> List[DocstringError]:
     """Get all docstring errors."""
     repo_root = pathlib.Path(__file__).parent.parent
-    pydocstyle_dir = repo_root / "great_expectations/"
-    pydocstyle_dir_abs = pydocstyle_dir.absolute()
-    raw_errors = run_pydocstyle(pydocstyle_dir_abs)
+    code_dir = repo_root / "great_expectations/"
+    code_dir_abs = code_dir.absolute()
+    raw_errors = run_pydocstyle(code_dir_abs)
 
-    return parse_to_docstring_errors(raw_errors=raw_errors)
+    return parse_pydocstyle_errors(raw_errors=raw_errors)
 
 
 def _get_public_api_definitions() -> Set[Definition]:
@@ -184,6 +179,37 @@ def _public_api_docstring_errors() -> Set[DocstringError]:
     return set(public_api_docstring_errors)
 
 
+def run_darglint(directory: pathlib.Path) -> List[str]:
+    """Run darglint to identify issues with docstrings."""
+
+    raw_results: subprocess.CompletedProcess = subprocess.run(
+        [
+            "darglint",
+            directory,
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        universal_newlines=True,
+    )
+
+    # Check to make sure `darglint` actually ran
+    err: str = raw_results.stderr
+    if err:
+        raise ValueError(err)
+
+    return raw_results.stdout.split("\n")
+
+def _get_darglint_docstring_errors() -> List[DocstringError]:
+    """Get all docstring errors."""
+    repo_root = pathlib.Path(__file__).parent.parent
+    # TODO: Run on full codebase
+    code_dir = repo_root / "great_expectations/" / "data_context" / "data_context"
+    code_dir_abs = code_dir.absolute()
+    raw_errors = run_darglint(code_dir_abs)
+    # TODO: Parse errors
+    return raw_errors
+
+
 def main():
     logger.info(
         "Generating list of public API docstring errors. This may take a few minutes."
@@ -193,8 +219,9 @@ def main():
     if not errors:
         logger.info("There are no public API docstring errors.")
 
-    for error in errors:
-        logger.error(error)
+    errors_str = "\n".join([e.raw_error for e in errors])
+
+    logger.error(errors_str)
 
     assert len(errors) == 0, "There are docstring errors to address."
 
