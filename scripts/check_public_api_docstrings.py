@@ -73,6 +73,7 @@ def parse_pydocstyle_errors(raw_errors: List[str]) -> List[DocstringError]:
 
     return docstring_errors
 
+
 def parse_darglint_errors(raw_errors: List[str]) -> List[DocstringError]:
     """Parse raw string output of darglint to DocstringError."""
 
@@ -166,8 +167,12 @@ def run_pydocstyle(paths: List[pathlib.Path]) -> List[str]:
 def _get_docstring_errors() -> List[DocstringError]:
     """Get all docstring errors."""
 
-    filepaths_containing_public_api_entities = [pathlib.Path(d.filepath).resolve() for d in _get_public_api_definitions()]
-    pydocstyle_raw_errors = run_pydocstyle(paths=filepaths_containing_public_api_entities)
+    filepaths_containing_public_api_entities = [
+        pathlib.Path(d.filepath).resolve() for d in _get_public_api_definitions()
+    ]
+    pydocstyle_raw_errors = run_pydocstyle(
+        paths=filepaths_containing_public_api_entities
+    )
     darglint_raw_errors = run_darglint(paths=filepaths_containing_public_api_entities)
 
     parsed_pydocstyle_errors = parse_pydocstyle_errors(raw_errors=pydocstyle_raw_errors)
@@ -246,7 +251,11 @@ def main():
     if not errors:
         logger.info("There are no public API docstring errors.")
 
-    errors_str = f"\n----- {len(errors)} errors found -----\n" + "\n".join([e.raw_error for e in errors]) + "\n----- END -----\n"
+    errors_str = (
+        f"\n----- {len(errors)} errors found -----\n"
+        + "\n".join([e.raw_error for e in errors])
+        + "\n----- END -----\n"
+    )
 
     logger.error(errors_str)
 
