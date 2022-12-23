@@ -51,7 +51,6 @@ class TableHead(TableMetricProvider):
         selectable, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
-        df = None
         table_name = getattr(selectable, "name", None)
         if (
             isinstance(table_name, sa.sql.elements._anonymous_label)

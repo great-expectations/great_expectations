@@ -62,20 +62,22 @@ class BatchDefinition(SerializableDictDot):
         self._batch_spec_passthrough = batch_spec_passthrough
 
     def to_json_dict(self) -> dict:
-        return convert_to_json_serializable(
-            {
-                "datasource_name": self.datasource_name,
-                "data_connector_name": self.data_connector_name,
-                "data_asset_name": self.data_asset_name,
-                "batch_identifiers": self.batch_identifiers,
-            }
-        )
+        fields_dict: dict = {
+            "datasource_name": self._datasource_name,
+            "data_connector_name": self._data_connector_name,
+            "data_asset_name": self._data_asset_name,
+            "batch_identifiers": self._batch_identifiers,
+        }
+        if self._batch_spec_passthrough:
+            fields_dict["batch_spec_passthrough"] = self._batch_spec_passthrough
+
+        return convert_to_json_serializable(data=fields_dict)
 
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
             "datasource_name": self._datasource_name,
             "data_connector_name": self._data_connector_name,
-            "data_asset_name": self.data_asset_name,
+            "data_asset_name": self._data_asset_name,
             "batch_identifiers": self._batch_identifiers,
         }
         return str(doc_fields_dict)
