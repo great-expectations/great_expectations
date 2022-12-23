@@ -14,8 +14,7 @@ from scripts.public_api_report import (
 )
 
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 
 @dataclass(frozen=True)
