@@ -126,8 +126,8 @@ stages:
     - job: docstring_linter
       steps:
       - script: |
-        pip install $(grep -E '^(pydocstyle)' reqs/requirements-dev-lite.txt)
-        invoke docstrings
+          pip install $(grep -E '^(pydocstyle)' reqs/requirements-dev-lite.txt)
+          invoke docstrings
         name: DocstringLinter
 
     - job: unused_import_checker

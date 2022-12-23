@@ -110,8 +110,8 @@ stages:
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - script: |
-        pip install $(grep -E '^(pydocstyle)' reqs/requirements-dev-lite.txt)
-        invoke docstrings
+          pip install $(grep -E '^(pydocstyle)' reqs/requirements-dev-lite.txt)
+          invoke docstrings
         name: DocstringLinter
 
     - job: unused_import_checker
