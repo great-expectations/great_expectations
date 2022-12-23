@@ -55,11 +55,11 @@ from dataclasses import dataclass
 from typing import List, Optional, Set, Union, cast
 
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 # Removed from imports due to circular import issues
 PUBLIC_API_DECORATOR_NAME = "public_api"
+
 
 @dataclass(frozen=True)
 class Definition:
