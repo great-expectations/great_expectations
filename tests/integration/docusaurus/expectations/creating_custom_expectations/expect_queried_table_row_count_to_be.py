@@ -85,8 +85,8 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
             "success": success,
             "result": {"observed_value": query_result},
         }
-        # </snippet>
 
+    # </snippet>
     # <snippet name="expect_queried_table_row_count_to_be.py examples">
     examples = [
         {
