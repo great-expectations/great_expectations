@@ -250,16 +250,15 @@ def main():
 
     if not errors:
         logger.info("There are no public API docstring errors.")
+    else:
+        errors_str = (
+            f"\n----- {len(errors)} errors found -----\n"
+            + "\n".join([e.raw_error for e in errors])
+            + "\n----- END -----\n"
+        )
+        logger.error(errors_str)
 
-    errors_str = (
-        f"\n----- {len(errors)} errors found -----\n"
-        + "\n".join([e.raw_error for e in errors])
-        + "\n----- END -----\n"
-    )
-
-    logger.error(errors_str)
-
-    assert len(errors) == 0, "There are docstring errors to address."
+    assert len(errors) == 0, f"There are {len(errors)} docstring errors to address."
 
 
 if __name__ == "__main__":
