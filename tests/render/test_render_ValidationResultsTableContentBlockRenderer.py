@@ -973,7 +973,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
         object_name=evr_failed_partial_unexpected_list.expectation_config.expectation_type,
         renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_failed_partial_unexpected_list)
-    assert output_4.to_json_dict() == {
+    assert output_4[0].to_json_dict() == {
         "content_block_type": "table",
         "table": [
             [1],
@@ -1006,7 +1006,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
         object_name=evr_failed_partial_unexpected_counts.expectation_config.expectation_type,
         renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_failed_partial_unexpected_counts)
-    assert output_5.to_json_dict() == {
+    assert output_5[0].to_json_dict() == {
         "content_block_type": "table",
         "header_row": ["Sampled Unexpected Values", "Count"],
         "styling": {"body": {"classes": ["table-bordered", "table-sm", "mt-3"]}},
