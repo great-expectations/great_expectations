@@ -686,7 +686,7 @@ class RenderedAtomicValueGraph(DictDot):
 
 class RenderedAtomicValueSchema(Schema):
     class Meta:
-        unknown = INCLUDE  # type: ignore[valid-type]
+        unknown = INCLUDE
 
     schema = fields.Dict(required=False, allow_none=True)
     header = fields.Dict(required=False, allow_none=True)
