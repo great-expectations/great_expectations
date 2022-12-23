@@ -7,6 +7,7 @@ For detailed information on QueryExpectations, please see:
 from typing import Any, Dict, Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -88,10 +89,16 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
         # </snippet>
+        metrics = convert_to_json_serializable(data=metrics)
+        query_result = metrics.get("query.column")
+        query_result_list = []
+        for element in query_result:
+            query_result_list.append(element.values())
+
+        query_result = dict(query_result_list)
+
         value = configuration["kwargs"].get("value")
         threshold = configuration["kwargs"].get("threshold")
-        query_result = metrics.get("query.column")
-        query_result = dict(query_result)
 
         if isinstance(value, list):
             success = all(
