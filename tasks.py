@@ -116,7 +116,8 @@ def docstrings(ctx):
         check_public_api_docstrings.main()
     except AssertionError as err:
         raise invoke.Exit(
-            message=f"{err}\n\n  See {check_public_api_docstrings.__file__}", code=1
+            message=f"{err}\n\nGenerated with {check_public_api_docstrings.__file__}",
+            code=1,
         )
 
 
