@@ -174,5 +174,5 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine(
     # Build a SqlAlchemyDataset using that database
     return SqlAlchemyExecutionEngine(
         name="test_sql_execution_engine",
-        engine=conn,
+        engine=engine,
     )
