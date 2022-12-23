@@ -807,7 +807,7 @@ class Expectation(metaclass=MetaExpectation):
         unexpected_index_list: Optional[List[dict]] = result_dict.get(
             "unexpected_index_list"
         )
-        unexpected_count: Optional[int] = result_dict.get("unexpected_count")
+        unexpected_count: int = result_dict["unexpected_count"]
         if partial_unexpected_counts:
             # We will check to see whether we have *all* of the unexpected values
             # accounted for in our count, and include counts if we do. If we do not,
