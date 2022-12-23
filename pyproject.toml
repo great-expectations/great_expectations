@@ -96,8 +96,6 @@ exclude = [
     'expectations/metrics/column_aggregate_metrics/column_', # 21
     'expectations/metrics/map_metric_provider\.py',  # 57
     'expectations/metrics/metric_provider\.py',  # 12
-    'expectations/metrics/query_metrics/query_column_pair\.py', # 9
-    'expectations/metrics/query_metrics/query_column\.py', # 7
     'expectations/metrics/util\.py', # 11
     'expectations/regex_based_column_map_expectation\.py',  # 3
     'expectations/registry\.py',  # 19
