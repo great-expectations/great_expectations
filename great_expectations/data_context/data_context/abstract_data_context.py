@@ -377,7 +377,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._config_provider
 
     @property
-    def root_directory(self) -> Optional[str]:
+    def root_directory(self) -> Optional[str]:  # TODO: This should be a `pathlib.Path`
         """The root directory for configuration objects in the data context; the location in which
         ``great_expectations.yml`` is located.
         """
@@ -3230,7 +3230,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         if include_rendered_content:
             for expectation_validation_result in validation_result.results:
                 expectation_validation_result.render()
-                expectation_validation_result.expectation_config.render()
 
         return validation_result
 

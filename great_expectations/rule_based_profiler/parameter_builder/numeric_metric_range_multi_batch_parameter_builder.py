@@ -54,11 +54,10 @@ from great_expectations.rule_based_profiler.parameter_container import (
 from great_expectations.types.attributes import Attributes
 from great_expectations.util import (
     convert_ndarray_decimal_to_float_dtype,
+    does_ndarray_contain_decimal_dtype,
     is_ndarray_datetime_dtype,
-    is_ndarray_decimal_dtype,
     is_numeric,
 )
-from great_expectations.validator.computed_metric import MetricValue
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
@@ -99,6 +98,10 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
     RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS: set = {
         "lower_bound",
         "upper_bound",
+    }
+
+    METRIC_NAMES_EXEMPT_FROM_VALUE_ROUNDING: set = {
+        "column.unique_proportion",
     }
 
     exclude_field_names: Set[
@@ -361,7 +364,11 @@ detected.
         ]
 
         round_decimals: int
-        if integer_semantic_domain_type(domain=domain):
+        if (
+            self.metric_name
+            not in NumericMetricRangeMultiBatchParameterBuilder.METRIC_NAMES_EXEMPT_FROM_VALUE_ROUNDING
+            and integer_semantic_domain_type(domain=domain)
+        ):
             round_decimals = 0
         else:
             round_decimals = self._get_round_decimals_using_heuristics(
@@ -600,7 +607,6 @@ detected.
         for metric_value_idx in metric_value_vector_indices:
             # Obtain "N"-element-long vector of samples for each element of multi-dimensional metric.
             metric_value_vector = metric_values[metric_value_idx]
-            metric_value: MetricValue
             if not datetime_detected and np.all(
                 np.isclose(metric_value_vector, metric_value_vector[0])
             ):
@@ -706,7 +712,7 @@ detected.
         metric_value_vector: np.ndarray
         for metric_value_idx in metric_value_vector_indices:
             metric_value_vector = metric_values[metric_value_idx]
-            if not is_ndarray_decimal_dtype(data=metric_value_vector):
+            if not does_ndarray_contain_decimal_dtype(data=metric_value_vector):
                 return False
 
         return True

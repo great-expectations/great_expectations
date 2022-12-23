@@ -15,6 +15,7 @@ from great_expectations.exceptions import ProfilerError
 from great_expectations.profile.basic_suite_builder_profiler import (
     BasicSuiteBuilderProfiler,
 )
+from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.self_check.util import (
     expectationSuiteValidationResultSchema,
     get_dataset,
@@ -429,7 +430,7 @@ def test_BasicSuiteBuilderProfiler_with_context(filesystem_csv_data_context):
     }
 
     assert expectation_suite.meta["notes"] == {
-        "format": "markdown",
+        "format": MetaNotesFormat.MARKDOWN,
         "content": [
             """#### This is an _example_ suite
 
@@ -491,7 +492,7 @@ def test_context_profiler(filesystem_csv_data_context):
     assert "batch_kwargs" in expectation_suite.meta["BasicSuiteBuilderProfiler"]
 
     assert expectation_suite.meta["notes"] == {
-        "format": "markdown",
+        "format": MetaNotesFormat.MARKDOWN,
         "content": [
             """#### This is an _example_ suite
 

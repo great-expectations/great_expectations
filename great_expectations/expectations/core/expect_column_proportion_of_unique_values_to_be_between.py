@@ -228,8 +228,6 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
             ("min_value", RendererSchemaType.NUMBER),
             ("max_value", RendererSchemaType.NUMBER),
             ("parse_strings_as_datetimes", RendererSchemaType.BOOLEAN),
-            ("row_condition", RendererSchemaType.STRING),
-            ("condition_parser", RendererSchemaType.STRING),
             ("strict_min", RendererSchemaType.BOOLEAN),
             ("strict_max", RendererSchemaType.BOOLEAN),
         )
@@ -269,15 +267,6 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
-
-        if params.row_condition:
-            renderer_configuration = cls._add_row_condition_params(
-                renderer_configuration=renderer_configuration
-            )
-            row_condition_str: str = cls._get_row_condition_string(
-                renderer_configuration=renderer_configuration
-            )
-            template_str = f"{row_condition_str}, then {template_str}"
 
         renderer_configuration.template_str = template_str
 

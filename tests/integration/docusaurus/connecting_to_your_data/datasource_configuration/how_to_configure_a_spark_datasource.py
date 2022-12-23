@@ -868,7 +868,7 @@ def section_12_add_your_new_datasource_to_your_datacontext():
             datasource_name
             in data_context.list_datasources()[0]["data_connectors"].keys()
         ), f"{datasource_name} not in {data_context.list_datasources()}"
-        data_context.delete_datasource(name="my_datasource_name")
+        data_context.delete_datasource(datasource_name="my_datasource_name")
 
 
 validate_universal_config_elements()
