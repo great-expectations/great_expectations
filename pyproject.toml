@@ -202,5 +202,5 @@ testpaths = "tests"
 mock_use_standalone_module = false
 # https://docs.pytest.org/en/7.1.x/how-to/logging.html#how-to-manage-logging
 # uncomment to adjust captured log levels
-# WARNING some tests cli v012 tests may fail if this is altered
+# WARNING some cli v012 tests may fail if this is altered
 # log_level = "info"
