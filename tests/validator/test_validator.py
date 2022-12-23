@@ -27,7 +27,7 @@ from great_expectations.datasource.data_connector.batch_filter import (
 )
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
-from great_expectations.render import RenderedAtomicContent
+from great_expectations.render import RenderedAtomicContent, RenderedAtomicValue
 from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import Validator
 
@@ -311,17 +311,19 @@ def multi_batch_taxi_validator_ge_cloud_mode(
 
 
 @mock.patch(
-    "great_expectations.data_context.data_context.BaseDataContext.save_expectation_suite"
+    "great_expectations.data_context.data_context.AbstractDataContext.save_expectation_suite"
 )
 @mock.patch(
-    "great_expectations.data_context.data_context.BaseDataContext.get_expectation_suite"
+    "great_expectations.data_context.data_context.AbstractDataContext.get_expectation_suite"
 )
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@mock.patch("great_expectations.validator.validator.Validator.cloud_mode")
 @pytest.mark.cloud
 @pytest.mark.integration
 def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
+    mock_cloud_mode,
     mock_emit,
     mock_context_get_suite,
     mock_context_save_suite,
@@ -334,7 +336,8 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     :param mock_context_get_suite: Under normal circumstances, this would be ExpectationSuite object returned from GX Cloud
     :param mock_context_save_suite: Under normal circumstances, this would trigger post or patch to GX Cloud
     """
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
+
     mock_suite = ExpectationSuite(
         expectation_suite_name="validating_taxi_data",
         expectations=[
@@ -342,32 +345,35 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
                 expectation_type="expect_column_values_to_be_between",
                 kwargs={"column": "passenger_count", "min_value": 0, "max_value": 99},
                 meta={"notes": "This is an expectation."},
-                ge_cloud_id=UUID("0faf94a9-f53a-41fb-8e94-32f218d4a774"),
+                ge_cloud_id="0faf94a9-f53a-41fb-8e94-32f218d4a774",
             ),
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_between",
                 kwargs={"column": "trip_distance", "min_value": 11, "max_value": 22},
                 meta={"notes": "This is an expectation."},
-                ge_cloud_id=UUID("3e8eee33-b425-4b36-a831-6e9dd31ad5af"),
+                ge_cloud_id="3e8eee33-b425-4b36-a831-6e9dd31ad5af",
             ),
         ],
         data_context=context,
         meta={"notes": "This is an expectation suite."},
     )
-    mock_context_save_suite.return_value = True
     mock_context_get_suite.return_value = mock_suite
+    mock_cloud_mode.return_value = True
+    mock_context_save_suite.return_value = True
+
     multi_batch_taxi_validator_ge_cloud_mode.expect_column_values_to_be_between(
         column="trip_distance", min_value=11, max_value=22
     )
     multi_batch_taxi_validator_ge_cloud_mode.save_expectation_suite()
-    assert (
+
+    expected = mock_suite.to_json_dict()
+    actual = (
         multi_batch_taxi_validator_ge_cloud_mode.get_expectation_suite().to_json_dict()
-        == mock_suite.to_json_dict()
     )
+    assert expected == actual
 
     # add_expectation() will not send usage_statistics event when called from a Validator
     assert mock_emit.call_count == 0
-    assert mock_emit.call_args_list == []
 
 
 @pytest.mark.integration
@@ -980,55 +986,112 @@ def test_validator_include_rendered_content(
     assert len(validation_result.rendered_content) == 1
     assert isinstance(validation_result.rendered_content[0], RenderedAtomicContent)
 
-
-@pytest.mark.integration
-def test_validator_include_rendered_content_evaluation_parameters(
-    yellow_trip_pandas_data_context,
-):
-    context: DataContext = yellow_trip_pandas_data_context
-    batch_request: BatchRequest = BatchRequest(
-        datasource_name="taxi_pandas",
-        data_connector_name="monthly",
-        data_asset_name="my_reports",
+    # test evaluation parameters render
+    validator_include_rendered_content.set_evaluation_parameter(
+        "upstream_column_min", 1
     )
-    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
-
-    validator: Validator = context.get_validator(
-        batch_request=batch_request,
-        expectation_suite=suite,
-        include_rendered_content=True,
+    validator_include_rendered_content.set_evaluation_parameter(
+        "upstream_column_max", 8
     )
-
-    validator.set_evaluation_parameter("upstream_row_count", 10000)
 
     validation_result: ExpectationValidationResult = (
-        validator.expect_table_row_count_to_equal(
-            value={"$PARAMETER": "upstream_row_count"},
+        validator_include_rendered_content.expect_column_max_to_be_between(
+            column="passenger_count",
+            min_value={"$PARAMETER": "upstream_column_min"},
+            max_value={"$PARAMETER": "upstream_column_max"},
             result_format={"result_format": "BOOLEAN_ONLY"},
         )
     )
 
-    assert (
-        validation_result.expectation_config.rendered_content[0].value.params["value"][
-            "value"
-        ]
-        == 10000
+    expected_expectation_validation_result_rendered_content = RenderedAtomicContent(
+        name="atomic.diagnostic.observed_value",
+        value=RenderedAtomicValue(
+            schema={"type": "com.superconductive.rendered.string"},
+            params={},
+            template="6",
+        ),
+        value_type="StringValueType",
     )
 
-    validator.set_evaluation_parameter("upstream_row_count", 8000)
+    assert (
+        expected_expectation_validation_result_rendered_content
+        in validation_result.rendered_content
+    )
 
+    expected_expectation_configuration_rendered_content = RenderedAtomicContent(
+        name="atomic.prescriptive.summary",
+        value=RenderedAtomicValue(
+            schema={"type": "com.superconductive.rendered.string"},
+            params={
+                "column": {"schema": {"type": "string"}, "value": "passenger_count"},
+                "min_value": {"schema": {"type": "number"}, "value": 1},
+                "max_value": {"schema": {"type": "number"}, "value": 8},
+                "eval_param__0": {
+                    "schema": {"type": "string"},
+                    "value": "min_value: upstream_column_min",
+                },
+                "eval_param__1": {
+                    "schema": {"type": "string"},
+                    "value": "max_value: upstream_column_max",
+                },
+            },
+            template="$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.   $eval_param__0, $eval_param__1",
+        ),
+        value_type="StringValueType",
+    )
+
+    assert (
+        expected_expectation_configuration_rendered_content
+        in validation_result.expectation_config.rendered_content
+    )
+
+    # test conditional expectations render
     validation_result: ExpectationValidationResult = (
-        validator.expect_table_row_count_to_equal(
-            value={"$PARAMETER": "upstream_row_count"},
-            result_format={"result_format": "BOOLEAN_ONLY"},
+        validator_include_rendered_content.expect_column_min_to_be_between(
+            column="trip_distance",
+            min_value=0,
+            max_value=100,
+            condition_parser="pandas",
+            row_condition="passenger_count>0",
         )
     )
 
+    expected_expectation_validation_result_rendered_content = RenderedAtomicContent(
+        name="atomic.diagnostic.observed_value",
+        value=RenderedAtomicValue(
+            schema={"type": "com.superconductive.rendered.string"},
+            params={},
+            template="0",
+        ),
+        value_type="StringValueType",
+    )
+
     assert (
-        validation_result.expectation_config.rendered_content[0].value.params["value"][
-            "value"
-        ]
-        == 8000
+        expected_expectation_validation_result_rendered_content
+        in validation_result.rendered_content
+    )
+
+    expected_expectation_configuration_rendered_content = RenderedAtomicContent(
+        name="atomic.prescriptive.summary",
+        value=RenderedAtomicValue(
+            schema={"type": "com.superconductive.rendered.string"},
+            params={
+                "column": {"schema": {"type": "string"}, "value": "trip_distance"},
+                "min_value": {"schema": {"type": "number"}, "value": 0},
+                "max_value": {"schema": {"type": "number"}, "value": 100},
+                "row_condition__0": {
+                    "schema": {"type": "string"},
+                    "value": "passenger_count>0",
+                },
+            },
+            template="if $row_condition__0, then $column minimum value must be greater than or equal to $min_value and less than or equal to $max_value.",
+        ),
+        value_type="StringValueType",
+    )
+
+    assert (
+        expected_expectation_configuration_rendered_content
+        in validation_result.expectation_config.rendered_content
     )
 
 

@@ -41,6 +41,7 @@ from typing import (
     Mapping,
     Optional,
     Set,
+    SupportsFloat,
     Tuple,
     Union,
     cast,
@@ -52,26 +53,13 @@ import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
+from typing_extensions import TypeGuard
 
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
-
-if TYPE_CHECKING:
-    # needed until numpy min version 1.20
-    import numpy.typing as npt
-
-    from great_expectations.data_context.data_context.abstract_data_context import (
-        AbstractDataContext,
-    )
-    from great_expectations.data_context.types.base import DataContextConfig
-
-try:
-    from typing import TypeGuard  # type: ignore[attr-defined]
-except ImportError:
-    from typing_extensions import TypeGuard
 
 try:
     import black
@@ -100,6 +88,16 @@ except ImportError:
     reflection = None
     Table = None
     Select = None
+
+if TYPE_CHECKING:
+    # needed until numpy min version 1.20
+    import numpy.typing as npt
+
+    from great_expectations.alias_types import PathStr
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+    from great_expectations.data_context.types.base import DataContextConfig
 
 
 p1 = re.compile(r"(.)([A-Z][a-z]+)")
@@ -1502,7 +1500,7 @@ def is_nan(value: Any) -> bool:
         return True
 
 
-def convert_decimal_to_float(d: decimal.Decimal) -> float:
+def convert_decimal_to_float(d: SupportsFloat) -> float:
     """
     This method convers "decimal.Decimal" to standard "float" type.
     """
@@ -1519,7 +1517,11 @@ def convert_decimal_to_float(d: decimal.Decimal) -> float:
         )
         > 0
     )
-    if not rule_based_profiler_call and requires_lossy_conversion(d=d):
+    if (
+        not rule_based_profiler_call
+        and isinstance(d, decimal.Decimal)
+        and requires_lossy_conversion(d=d)
+    ):
         logger.warning(
             f"Using lossy conversion for decimal {d} to float object to support serialization."
         )
@@ -1709,14 +1711,14 @@ def convert_ndarray_float_to_datetime_tuple(
     return tuple(convert_ndarray_float_to_datetime_dtype(data=data).tolist())
 
 
-def is_ndarray_decimal_dtype(
-    data: "npt.NDArray",
-) -> TypeGuard["npt.NDArray"]:
+def does_ndarray_contain_decimal_dtype(
+    data: npt.NDArray,
+) -> TypeGuard[npt.NDArray]:
     """
     Determine whether or not all elements of 1-D "np.ndarray" argument are "decimal.Decimal" type objects.
     """
     value: Any
-    result: bool = all(isinstance(value, decimal.Decimal) for value in data)
+    result: bool = any(isinstance(value, decimal.Decimal) for value in data)
     return result
 
 
@@ -1732,7 +1734,7 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
 
 def get_context(
     project_config: Optional[Union["DataContextConfig", Mapping]] = None,
-    context_root_dir: Optional[str] = None,
+    context_root_dir: Optional[PathStr] = None,
     runtime_environment: Optional[dict] = None,
     cloud_base_url: Optional[str] = None,
     cloud_access_token: Optional[str] = None,
@@ -1779,7 +1781,7 @@ def get_context(
 
     Args:
         project_config (dict or DataContextConfig): In-memory configuration for DataContext.
-        context_root_dir (str): Path to directory that contains great_expectations.yml file
+        context_root_dir (str or pathlib.Path): Path to directory that contains great_expectations.yml file
         runtime_environment (dict): A dictionary of values can be passed to a DataContext when it is instantiated.
             These values will override both values from the config variables file and
             from environment variables.
@@ -2029,13 +2031,13 @@ def pandas_series_between_inclusive(
 
 
 def numpy_quantile(
-    a: np.ndarray, q: float, method: str, axis: Optional[int] = None
-) -> Union[np.float64, np.ndarray]:
+    a: npt.NDArray, q: float, method: str, axis: Optional[int] = None
+) -> Union[np.float64, npt.NDArray]:
     """
     As of NumPy 1.21.0, the 'interpolation' arg in quantile() has been renamed to `method`.
     Source: https://numpy.org/doc/stable/reference/generated/numpy.quantile.html
     """
-    quantile: np.ndarray
+    quantile: npt.NDArray
     if version.parse(np.__version__) >= version.parse("1.22.0"):
         quantile = np.quantile(
             a=a,
@@ -2044,7 +2046,7 @@ def numpy_quantile(
             method=method,
         )
     else:
-        quantile = np.quantile(
+        quantile = np.quantile(  # type: ignore[call-overload]
             a=a,
             q=q,
             axis=axis,

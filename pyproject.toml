@@ -51,18 +51,12 @@ exclude = [
     'checkpoint/configurator\.py', # 2
     'checkpoint/types/checkpoint_result\.py',  # 34
     'checkpoint/util\.py',  # 5
-    'cli/batch_request\.py',  # 11
     'cli/checkpoint\.py',  # 9
     'cli/cli\.py',  # 10
     'cli/datasource\.py',  # 12
-    'cli/project\.py',  # 5
-    'cli/python_subprocess\.py', # 6
-    'cli/store\.py',  # 2
     'cli/suite\.py',  # 24
-    'cli/toolkit\.py',  # 27
     'cli/upgrade_helpers/upgrade_helper_v11\.py',  # 59
     'cli/upgrade_helpers/upgrade_helper_v13\.py',  # 17
-    'cli/util\.py',  # 1
     'core/batch\.py', # 29
     'core/expectation_configuration\.py', # 21
     'core/expectation_diagnostics', # 20
@@ -82,7 +76,6 @@ exclude = [
     'core/usage_statistics/anonymizers/store_backend_anonymizer\.py', # 5
     'core/usage_statistics/anonymizers/validation_operator_anonymizer\.py',  # 5
     'core/usage_statistics/usage_statistics\.py', # 19
-    'core/usage_statistics/util\.py', # 2
     'core/util\.py', # 18
     'dataset/sparkdf_dataset\.py', # 3
     'dataset/sqlalchemy_dataset\.py', # 16
@@ -129,7 +122,6 @@ exclude = [
     'render/renderer/v3/suite_profile_notebook_renderer\.py',  # 4
     'render/util\.py',  # 2
     'render/view/view\.py',  # 11
-    'rule_based_profiler/attributed_resolved_metrics\.py',  # 4
     'rule_based_profiler/builder\.py',  # 4
     'rule_based_profiler/config/base\.py',  # 13
     'rule_based_profiler/data_assistant_result/data_assistant_result\.py',  # 71
@@ -179,6 +171,9 @@ init_typed = true
 warn_required_dynamic_aliases = true
 warn_untyped_fields = true
 
+[tool.pydocstyle]
+convention = "google"
+
 [tool.pytest.ini_options]
 filterwarnings = [
     # This warning is common during testing where we intentionally use a COMPLETE format even in cases that would
@@ -189,6 +184,8 @@ filterwarnings = [
     "ignore:Using or importing the ABCs:DeprecationWarning:moto.cloudformation.parsing",
     # This deprecation warning comes from getsentry/responses, a mocking utility for requests. It is a dependency in moto.
     "ignore:stream argument is deprecated. Use stream parameter in request directly:DeprecationWarning",
+    # We likely won't be updating to `marhsmallow` 4, these errors should be filtered out
+    "error::marshmallow.warnings.RemovedInMarshmallow4Warning"
 ]
 junit_family="xunit2"
 markers = [

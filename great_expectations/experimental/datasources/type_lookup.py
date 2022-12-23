@@ -67,6 +67,9 @@ class TypeLookup(
         super().pop(value, None)
 
     def __setitem__(self, key: ValidTypes, value: ValidTypes):
+        if key in self and value in self and self[key] == value and self[value] == key:
+            # This key, value pair has already been registered so we return
+            return
         if key is None:
             raise TypeLookupError(f"`NoneType` for {value} is not allowed - bad key")
         if value is None:

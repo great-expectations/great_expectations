@@ -145,8 +145,6 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         add_param_args = (
             ("column", RendererSchemaType.STRING),
             ("value_set", RendererSchemaType.ARRAY),
-            ("row_condition", RendererSchemaType.STRING),
-            ("condition_parser", RendererSchemaType.STRING),
         )
         for name, schema_type in add_param_args:
             renderer_configuration.add_param(name=name, schema_type=schema_type)
@@ -174,15 +172,6 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                 template_str = (
                     f"distinct values must belong to this set: {value_set_str}."
                 )
-
-        if params.row_condition:
-            renderer_configuration = cls._add_row_condition_params(
-                renderer_configuration=renderer_configuration
-            )
-            row_condition_str: str = cls._get_row_condition_string(
-                renderer_configuration=renderer_configuration
-            )
-            template_str = f"{row_condition_str}, then {template_str}"
 
         renderer_configuration.template_str = template_str
 

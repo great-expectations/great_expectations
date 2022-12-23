@@ -15,7 +15,7 @@ import shutil
 
 import invoke
 
-from scripts import check_type_hint_coverage
+from scripts import check_public_api_docstrings, check_type_hint_coverage
 
 try:
     from tests.integration.usage_statistics import usage_stats_utils
@@ -109,6 +109,17 @@ def hooks(ctx, all_files=False, diff=False, sync=False):
         ctx.run(" ".join(["pre-commit", "install"]), echo=True)
 
 
+@invoke.task(aliases=["docstring"])
+def docstrings(ctx):
+    """Check public API docstrings."""
+    try:
+        check_public_api_docstrings.main()
+    except AssertionError as err:
+        raise invoke.Exit(
+            message=f"{err}\n\n  See {check_public_api_docstrings.__file__}", code=1
+        )
+
+
 @invoke.task(aliases=["type-cov"])  # type: ignore
 def type_coverage(ctx):
     """
@@ -143,10 +154,29 @@ def type_check(
     daemon=False,
     clear_cache=False,
     report=False,
+    ci=False,
 ):
     """Run mypy static type-checking on select packages."""
+    mypy_cache = pathlib.Path(".mypy_cache")
+
+    if ci:
+        mypy_cache.mkdir(exist_ok=True)
+        print(f"  mypy cache {mypy_cache.absolute()}")
+
+        type_check(
+            ctx,
+            packages,
+            install_types=True,
+            pretty=pretty,
+            warn_unused_ignores=True,
+            daemon=daemon,
+            clear_cache=clear_cache,
+            report=report,
+            ci=False,
+        )
+        return  # don't run twice
+
     if clear_cache:
-        mypy_cache = pathlib.Path(".mypy_cache")
         print(f"  Clearing {mypy_cache} ... ", end="")
         try:
             shutil.rmtree(mypy_cache)
