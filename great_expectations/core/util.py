@@ -42,7 +42,7 @@ from great_expectations.util import convert_decimal_to_float
 try:
     from pyspark.sql.types import StructType
 except ImportError:
-    StructType = None  # type: ignore[assignment, misc]
+    StructType = None
 
 logger = logging.getLogger(__name__)
 
@@ -88,8 +88,8 @@ try:
     from pyspark.sql import SparkSession
 
 except ImportError:
-    pyspark = None  # type: ignore[assignment]
-    SparkSession = None  # type: ignore[assignment, misc]
+    pyspark = None
+    SparkSession = None
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
