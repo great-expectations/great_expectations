@@ -66,22 +66,7 @@ class QueryColumn(QueryMetricProvider):
         engine: sqlalchemy_engine_Engine = execution_engine.engine
         result: List[sqlalchemy_engine_Row] = engine.execute(sa.text(query)).fetchall()
 
-        # TODO: <Alex>ALEX</Alex>
-        # return result
-        # TODO: <Alex>ALEX</Alex>
-        # print(f'\n[ALEX_TEST] [QueryColumn._SQLALCHEMY()] RESULT:\n{result} ; TYPE: {str(type(result))}')
-        for element in result:
-            # print(f'\n[ALEX_TEST] [QueryColumn._SQLALCHEMY()] RESULT_ELEMENT:\n{element} ; TYPE: {str(type(element))}')
-            # print(f'\n[ALEX_TEST] [QueryColumn._SQLALCHEMY()] RESULT_ELEMENT._MAPPING:\n{element._mapping} ; TYPE: {str(type(element._mapping))}')
-            b = convert_to_json_serializable(data=dict(element._mapping))
-            # print(f'\n[ALEX_TEST] [QueryColumn._SQLALCHEMY()] RESULT_ELEMENT._MAPPING_JSON_SERIALIZED:\n{b} ; TYPE: {str(type(b))}')
-        # a = [convert_to_json_serializable(data=element._mapping) for element in result]
-        a = [dict(element._mapping) for element in result]
-        # print(f'\n[ALEX_TEST] [QueryColumn._SQLALCHEMY()] RESULT_ELEMENT_MAPPINGED_RETURNING:\n{a} ; TYPE: {str(type(a))}')
-        return a
-        # TODO: <Alex>ALEX</Alex>
-        # return [element._mapping for element in result]
-        # TODO: <Alex>ALEX</Alex>
+        return [dict(element._mapping) for element in result]
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
@@ -108,9 +93,4 @@ class QueryColumn(QueryMetricProvider):
         engine: pyspark_sql_SparkSession = execution_engine.spark
         result: List[pyspark_sql_Row] = engine.sql(query).collect()
 
-        # TODO: <Alex>ALEX</Alex>
-        # return result
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
         return [element.asDict() for element in result]
-        # TODO: <Alex>ALEX</Alex>

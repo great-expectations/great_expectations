@@ -61,12 +61,7 @@ class QueryTable(QueryMetricProvider):
         engine: sqlalchemy_engine_Engine = execution_engine.engine
         result: List[sqlalchemy_engine_Row] = engine.execute(sa.text(query)).fetchall()
 
-        # TODO: <Alex>ALEX</Alex>
-        # return result
-        a = [dict(element._mapping) for element in result]
-        # print(f'\n[ALEX_TEST] [QueryTable._SQLALCHEMY()] RESULT_ELEMENT_MAPPINGED_RETURNING:\n{a} ; TYPE: {str(type(a))}')
-        return a
-        # TODO: <Alex>ALEX</Alex>
+        return [dict(element._mapping) for element in result]
         # </snippet>
 
     @metric_value(engine=SparkDFExecutionEngine)
@@ -93,9 +88,4 @@ class QueryTable(QueryMetricProvider):
         engine: pyspark_sql_SparkSession = execution_engine.spark
         result: List[pyspark_sql_Row] = engine.sql(query).collect()
 
-        # TODO: <Alex>ALEX</Alex>
-        # return result
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
         return [element.asDict() for element in result]
-        # TODO: <Alex>ALEX</Alex>

@@ -36,7 +36,7 @@ class QueryColumnPair(QueryMetricProvider):
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
         runtime_configuration: dict,
-    ) -> List[sqlalchemy_engine_Row]:
+    ) -> List[dict]:
         query: Optional[str] = metric_value_kwargs.get(
             "query"
         ) or cls.default_kwarg_values.get("query")
@@ -74,7 +74,7 @@ class QueryColumnPair(QueryMetricProvider):
         engine: sqlalchemy_engine_Engine = execution_engine.engine
         result: List[sqlalchemy_engine_Row] = engine.execute(sa.text(query)).fetchall()
 
-        return result
+        return [dict(element._mapping) for element in result]
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
@@ -84,7 +84,7 @@ class QueryColumnPair(QueryMetricProvider):
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
         runtime_configuration: dict,
-    ) -> List[pyspark_sql_Row]:
+    ) -> List[dict]:
         query: Optional[str] = metric_value_kwargs.get(
             "query"
         ) or cls.default_kwarg_values.get("query")
@@ -104,4 +104,4 @@ class QueryColumnPair(QueryMetricProvider):
         engine: pyspark_sql_SparkSession = execution_engine.spark
         result: List[pyspark_sql_Row] = engine.sql(query).collect()
 
-        return result
+        return [element.asDict() for element in result]

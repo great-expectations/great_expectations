@@ -15,10 +15,6 @@ from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     QueryExpectation,
 )
-from great_expectations.expectations.metrics.import_manager import (
-    pyspark_sql_Row,
-    sqlalchemy_engine_Row,
-)
 
 
 class ExpectQueriedColumnPairValuesToHaveDiff(QueryExpectation):
@@ -73,9 +69,12 @@ class ExpectQueriedColumnPairValuesToHaveDiff(QueryExpectation):
     ) -> Union[ExpectationValidationResult, dict]:
         diff: Union[float, int] = configuration["kwargs"].get("diff")
         mostly: str = configuration["kwargs"].get("mostly")
-        query_result: Union[sqlalchemy_engine_Row, pyspark_sql_Row] = metrics.get(
-            "query.column_pair"
-        )
+        query_result = metrics.get("query.column_pair")
+        query_result_list = []
+        for element in query_result:
+            query_result_list.append(element.values())
+
+        query_result = dict(query_result_list)
 
         success = (
             sum([(abs(x[0]) == diff) for x in query_result]) / len(query_result)

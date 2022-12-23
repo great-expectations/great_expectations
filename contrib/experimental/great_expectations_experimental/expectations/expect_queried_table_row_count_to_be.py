@@ -7,11 +7,7 @@ For detailed information on QueryExpectations, please see:
 from typing import Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-
-# TODO: <Alex>ALEX</Alex>
 from great_expectations.core.util import convert_to_json_serializable
-
-# TODO: <Alex>ALEX</Alex>
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -69,44 +65,9 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
-        # TODO: <Alex>ALEX</Alex>
-        # print(f"\n[ALEX_TEST] [ExpectQueriedTableRowCountToBe._validate()] AVAILABLE_METRICS:\n{metrics} ; TYPE: {str(type(metrics))}")
         metrics = convert_to_json_serializable(data=metrics)
-        # print(f"\n[ALEX_TEST] [ExpectQueriedTableRowCountToBe._validate()] AVAILABLE_METRICS-JSON_SERIALIZED:\n{metrics} ; TYPE: {str(type(metrics))}")
-        # TODO: <Alex>ALEX</Alex>
-        query_result = metrics.get("query.table")
-        # print(f'\n[ALEX_TEST] [ExpectQueriedTableRowCountToBe._VALIDATE()] QUERY_RESULT-0:\n{query_result} ; TYPE: {str(type(query_result))}')
-        query_result = query_result[0]
-        # print(f'\n[ALEX_TEST] [ExpectQueriedTableRowCountToBe._VALIDATE()] QUERY_RESULT-1:\n{query_result} ; TYPE: {str(type(query_result))}')
-        # query_result = metrics.get("query.table")[0][0]
         query_result = list(metrics.get("query.table")[0].values())[0]
-        # print(f'\n[ALEX_TEST] [ExpectQueriedTableRowCountToBe._VALIDATE()] QUERY_RESULT-2:\n{query_result} ; TYPE: {str(type(query_result))}')
         value = configuration["kwargs"].get("value")
-        # TODO: <Alex>ALEX</Alex>
-        # for element in query_result:
-        #     print(f'\n[ALEX_TEST] [ExpectQueriedTableRowCountToBe._VALIDATE()] QUERY_RESULT_ELEMENT:\n{element} ; TYPE: {str(type(element))}')
-        #     print(f'\n[ALEX_TEST] [ExpectQueriedTableRowCountToBe._VALIDATE()] QUERY_RESULT_ELEMENT_MAPPING:\n{element._mapping} ; TYPE: {str(type(element._mapping))}')
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # query_result = dict(query_result)
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # query_result_list = []
-        # for element in query_result:
-        #     print(f'\n[ALEX_TEST] [ExpectQueriedTableRowCountToBe._VALIDATE()] QUERY_RESULT_ELEMENT:\n{element} ; TYPE: {str(type(element))}')
-        #     print(f'\n[ALEX_TEST] [ExpectQueriedTableRowCountToBe._VALIDATE()] QUERY_RESULT_ELEMENT.VALUES:\n{element.values()} ; TYPE: {str(type(element.values()))}')
-        #     query_result_list.append(element.values())
-        # print(f'\n[ALEX_TEST] [ExpectQueriedTableRowCountToBe._VALIDATE()] QUERY_RESULT-1:\n{query_result_list} ; TYPE: {str(type(query_result))}')
-        # query_result = dict(query_result_list)
-        # TODO: <Alex>ALEX</Alex>
-        # print(f'\n[ALEX_TEST] [ExpectQueriedTableRowCountToBe._VALIDATE()] QUERY_RESULT-2:\n{query_result} ; TYPE: {str(type(query_result))}')
-        # TODO: <Alex>ALEX</Alex>
-        # query_result = {
-        #     element[0][0]: element[0][1]
-        #     for element in query_result
-        # }
-        # TODO: <Alex>ALEX</Alex>
 
         success = query_result == value
 

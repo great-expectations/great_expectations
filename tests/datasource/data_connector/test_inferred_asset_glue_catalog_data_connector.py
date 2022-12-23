@@ -198,7 +198,6 @@ def test_get_batch_data_and_metadata_with_partitions(
     execution_engine = (
         test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     )
-    # TODO: <Alex>ALEX</Alex>
     in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
         name="FAKE_Datasource_NAME",
         # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
@@ -234,29 +233,6 @@ def test_get_batch_data_and_metadata_with_partitions(
     validator = Validator(
         execution_engine, batches=[batch], data_context=in_memory_runtime_context
     )
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    # my_data_connector = InferredAssetAWSGlueDataCatalogDataConnector(
-    #     name="my_data_connector",
-    #     datasource_name="FAKE_Datasource_NAME",
-    #     execution_engine=test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
-    #     catalog_id="catalog_A",
-    #     data_asset_name_prefix="prefix__",
-    #     data_asset_name_suffix="__suffix",
-    # )
-    # batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
-    #     batch_definition=BatchDefinition(
-    #         datasource_name="FAKE_Datasource_NAME",
-    #         data_connector_name="my_data_connector",
-    #         data_asset_name="prefix__db_test.tb_titanic_with_partitions__suffix",
-    #         batch_identifiers=IDDict({"PClass": "1st", "SexCode": "0"}),
-    #     )
-    # )
-    #
-    # batch = Batch(data=batch_data)
-    #
-    # validator = Validator(execution_engine, batches=[batch])
-    # TODO: <Alex>ALEX</Alex>
 
     assert validator.expect_column_values_to_be_in_set("PClass", ["1st"]).success
     assert validator.expect_column_values_to_be_in_set("SexCode", ["0"]).success
