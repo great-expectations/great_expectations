@@ -391,14 +391,17 @@ def test_sql_happy_path_onboarding_data_assistant_null_column_quantiles_metric_v
 @pytest.mark.integration
 @pytest.mark.slow  # 26.57 seconds
 def test_sql_happy_path_onboarding_data_assistant_mixed_decimal_float_and_boolean_column_unique_proportion_metric_values(
-    sa,
     empty_data_context,
+    test_backends,
+    sa,
 ) -> None:
-    context: DataContext = empty_data_context
+    if "postgresql" not in test_backends:
+        pytest.skip("testing data assistant in sql requires postgres backend")
 
-    postgresql_engine: sa.engine.base.Engine = sa.create_engine(CONNECTION_STRING)
+    context: DataContext = empty_data_context
+    postgresql_engine: sa.engine.Engine = sa.create_engine(CONNECTION_STRING)
     # noinspection PyUnusedLocal
-    conn: sa.engine.base.Connection = postgresql_engine.connect()
+    conn: sa.engine.Connection = postgresql_engine.connect()
 
     table_name = "sampled_yellow_tripdata_test"
 
