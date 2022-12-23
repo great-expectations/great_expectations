@@ -114,7 +114,7 @@ stages:
     - job: static_type_check
       steps:
       - script: |
-          pip install --requirement reqs/requirements-dev-contrib.txt
+          pip install --requirement requirements-types.txt
           invoke type-check --ci --pretty
         name: StaticTypeCheck
 

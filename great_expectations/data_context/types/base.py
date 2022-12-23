@@ -1640,7 +1640,7 @@ class DataContextConfigSchema(Schema):
                 data.pop(key)
         return data
 
-    def handle_error(self, exc, data, **kwargs) -> None:
+    def handle_error(self, exc, data, **kwargs) -> None:  # type: ignore[override]
         """Log and raise our custom exception when (de)serialization fails."""
         if (
             exc
