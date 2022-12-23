@@ -176,7 +176,7 @@ stages:
               eval ${CMD}
             displayName: 'Build python $(python.version) image'
             env:
-              BRANCH_NAME: $(Build.SourceBranchName)
+              BRANCH_NAME: $(Build.SourceBranch)
 
           - bash: |
               docker login -u ${DOCKER_USER} -p ${DOCKER_TOKEN}
