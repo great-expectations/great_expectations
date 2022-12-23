@@ -126,7 +126,7 @@ stages:
     - job: docstring_linter
       steps:
       - script: |
-          pip install $(grep -E '^(pydocstyle)' reqs/requirements-dev-lite.txt)
+          pip install --requirement reqs/requirements-dev-test.txt
           invoke docstrings
         name: DocstringLinter
 
