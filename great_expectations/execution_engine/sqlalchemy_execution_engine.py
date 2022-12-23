@@ -383,24 +383,28 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             GXSqlDialect.SNOWFLAKE,
             GXSqlDialect.MYSQL,
         ]:
-            if (
-                self.engine.dialect.name.lower() == GXSqlDialect.SQLITE
-            ):
+            if self.engine.dialect.name.lower() == GXSqlDialect.SQLITE:
+
                 def _add_sqlite_functions(connection):
-                    logger.info(f"Adding custom sqlite functions to connection {connection}")
+                    logger.info(
+                        f"Adding custom sqlite functions to connection {connection}"
+                    )
                     connection.create_function("sqrt", 1, lambda x: math.sqrt(x))
                     connection.create_function(
                         "md5",
                         2,
                         lambda x, d: hashlib.md5(str(x).encode("utf-8")).hexdigest()[
-                                     -1 * d:
-                                     ],
+                            -1 * d :
+                        ],
                     )
 
                 # Add sqlite functions to any future connections.
                 def _on_connect(dbapi_con, connection_record):
-                    logger.info(f"A new sqlite connection was created: {dbapi_con}, {connection_record}")
+                    logger.info(
+                        f"A new sqlite connection was created: {dbapi_con}, {connection_record}"
+                    )
                     _add_sqlite_functions(dbapi_con)
+
                 sa.event.listen(self.engine, "connect", _on_connect)
 
                 # Also immediately add the sqlite functions since there already exists an underlying
@@ -410,7 +414,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self._engine_backup = self.engine
             # sqlite/mssql temp tables only persist within a connection so override the engine
             self.engine = self.engine.connect()
-
 
         # Send a connect event to provide dialect type
         if data_context is not None and getattr(
