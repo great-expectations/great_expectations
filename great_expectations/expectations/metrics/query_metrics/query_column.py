@@ -45,22 +45,22 @@ class QueryColumn(QueryMetricProvider):
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
 
-        column: str = metric_value_kwargs.get("column")
+        column: Optional[str] = metric_value_kwargs.get("column")
         if isinstance(selectable, sa.Table):
-            query = query.format(col=column, active_batch=selectable)
+            query = query.format(col=column, active_batch=selectable)  # type: ignore[union-attr] # could be none
         elif isinstance(
             selectable, get_sqlalchemy_subquery_type()
         ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active bacth as a Subquery; sectioning the active batch off w/ parentheses ensures flow of operations doesn't break
-            query = query.format(col=column, active_batch=f"({selectable})")
+            query = query.format(col=column, active_batch=f"({selectable})")  # type: ignore[union-attr] # could be none
         elif isinstance(
             selectable, sa.sql.Select
         ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation & aliasing when formatting the parameterized query
-            query = query.format(
+            query = query.format(  # type: ignore[union-attr] # could be none
                 col=column,
                 active_batch=f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',
             )
         else:
-            query = query.format(col=column, active_batch=f"({selectable})")
+            query = query.format(col=column, active_batch=f"({selectable})")  # type: ignore[union-attr] # could be none
 
         engine: sqlalchemy_engine_Engine = execution_engine.engine
         result: List[sqlalchemy_engine_Row] = engine.execute(sa.text(query)).fetchall()
@@ -86,8 +86,8 @@ class QueryColumn(QueryMetricProvider):
         )
 
         df.createOrReplaceTempView("tmp_view")
-        column: str = metric_value_kwargs.get("column")
-        query = query.format(col=column, active_batch="tmp_view")
+        column: Optional[str] = metric_value_kwargs.get("column")
+        query = query.format(col=column, active_batch="tmp_view")  # type: ignore[union-attr] # could be none
 
         engine: pyspark_sql_SparkSession = execution_engine.spark
         result: List[pyspark_sql_Row] = engine.sql(query).collect()

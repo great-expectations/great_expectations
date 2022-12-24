@@ -57,8 +57,6 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
 
     def _validate(
         self,

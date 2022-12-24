@@ -8,6 +8,7 @@ from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest, IDDict
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import (
@@ -79,6 +80,34 @@ def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_eng
         #     },
         # },
     }
+
+
+def get_data_context_for_datasource_and_execution_engine(
+    context: AbstractDataContext,
+    connection_url: str,
+    sql_alchemy_execution_engine: SqlAlchemyExecutionEngine,
+) -> AbstractDataContext:
+    context.datasources["my_test_datasource"] = Datasource(
+        name="my_test_datasource",
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        execution_engine={
+            "class_name": "SqlAlchemyExecutionEngine",
+            "url": connection_url,
+        },
+        data_connectors={
+            "my_sql_data_connector": {
+                "class_name": "ConfiguredAssetSqlDataConnector",
+                "assets": {
+                    "my_asset": {
+                        "table_name": "table_partitioned_by_date_column__A",
+                    },
+                },
+            },
+        },
+    )
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    context.datasources["my_test_datasource"]._execution_engine = sql_alchemy_execution_engine  # type: ignore[union-attr]
+    return context
 
 
 @pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
@@ -586,26 +615,11 @@ def test_get_batch_data_and_markers_sampling_method__limit(
 ):
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    in_memory_runtime_context.datasources["my_test_datasource"] = Datasource(
-        name="my_test_datasource",
-        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
-        execution_engine={
-            "class_name": "SqlAlchemyExecutionEngine",
-            "url": test_cases_for_sql_data_connector_sqlite_connection_url,
-        },
-        data_connectors={
-            "my_sql_data_connector": {
-                "class_name": "ConfiguredAssetSqlDataConnector",
-                "assets": {
-                    "my_asset": {
-                        "table_name": "table_partitioned_by_date_column__A",
-                    },
-                },
-            },
-        },
+    context = get_data_context_for_datasource_and_execution_engine(
+        context=in_memory_runtime_context,
+        connection_url=test_cases_for_sql_data_connector_sqlite_connection_url,
+        sql_alchemy_execution_engine=execution_engine,
     )
-    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    in_memory_runtime_context.datasources["my_test_datasource"]._execution_engine = execution_engine  # type: ignore[union-attr]
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=SqlAlchemyDatasourceBatchSpec(
@@ -631,7 +645,7 @@ def test_get_batch_data_and_markers_sampling_method__limit(
 
     validator = Validator(
         execution_engine=execution_engine,
-        data_context=in_memory_runtime_context,
+        data_context=context,
         batches=[batch],
     )
     assert len(validator.head(fetch_all=True)) == 20
@@ -750,26 +764,11 @@ def test_get_batch_data_and_markers_to_make_sure_splitter_and_sampler_methods_ar
 ):
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    in_memory_runtime_context.datasources["my_test_datasource"] = Datasource(
-        name="my_test_datasource",
-        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
-        execution_engine={
-            "class_name": "SqlAlchemyExecutionEngine",
-            "url": test_cases_for_sql_data_connector_sqlite_connection_url,
-        },
-        data_connectors={
-            "my_sql_data_connector": {
-                "class_name": "ConfiguredAssetSqlDataConnector",
-                "assets": {
-                    "my_asset": {
-                        "table_name": "table_partitioned_by_date_column__A",
-                    },
-                },
-            },
-        },
+    context = get_data_context_for_datasource_and_execution_engine(
+        context=in_memory_runtime_context,
+        connection_url=test_cases_for_sql_data_connector_sqlite_connection_url,
+        sql_alchemy_execution_engine=execution_engine,
     )
-    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    in_memory_runtime_context.datasources["my_test_datasource"]._execution_engine = execution_engine  # type: ignore[union-attr]
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=SqlAlchemyDatasourceBatchSpec(
@@ -805,7 +804,7 @@ def test_get_batch_data_and_markers_to_make_sure_splitter_and_sampler_methods_ar
 
     validator = Validator(
         execution_engine=execution_engine,
-        data_context=in_memory_runtime_context,
+        data_context=context,
     )
     assert len(validator.head(fetch_all=True)) == 123
 
@@ -823,7 +822,7 @@ def test_get_batch_data_and_markers_to_make_sure_splitter_and_sampler_methods_ar
     execution_engine.load_batch_data("_2", batch_data)
     validator = Validator(
         execution_engine=execution_engine,
-        data_context=in_memory_runtime_context,
+        data_context=context,
     )
     assert len(validator.head(fetch_all=True)) == 123
 
@@ -838,26 +837,11 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__limit(
     random.seed(0)
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    in_memory_runtime_context.datasources["my_test_datasource"] = Datasource(
-        name="my_test_datasource",
-        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
-        execution_engine={
-            "class_name": "SqlAlchemyExecutionEngine",
-            "url": test_cases_for_sql_data_connector_sqlite_connection_url,
-        },
-        data_connectors={
-            "my_sql_data_connector": {
-                "class_name": "ConfiguredAssetSqlDataConnector",
-                "assets": {
-                    "my_asset": {
-                        "table_name": "table_partitioned_by_date_column__A",
-                    },
-                },
-            },
-        },
+    context = get_data_context_for_datasource_and_execution_engine(
+        context=in_memory_runtime_context,
+        connection_url=test_cases_for_sql_data_connector_sqlite_connection_url,
+        sql_alchemy_execution_engine=execution_engine,
     )
-    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    in_memory_runtime_context.datasources["my_test_datasource"]._execution_engine = execution_engine  # type: ignore[union-attr]
 
     my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
         name="my_sql_data_connector",
@@ -897,7 +881,7 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__limit(
     batch = Batch(data=batch_data, batch_definition=batch_definition_list[0])
     validator = Validator(
         execution_engine=execution_engine,
-        data_context=in_memory_runtime_context,
+        data_context=context,
         batches=[batch],
     )
     assert len(validator.head(fetch_all=True)) == 20
@@ -2510,6 +2494,7 @@ def test_include_schema_name_introspection(mysql_sqlalchemy_datasource):
         if table["type"] == "table"
     ]
 
+    # noinspection PyUnresolvedReferences
     introspected_schemas: Set[str] = {
         table.get("schema_name") for table in introspected_tables
     }

@@ -46,28 +46,28 @@ class QueryColumnPair(QueryMetricProvider):
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
 
-        column_A: str = metric_value_kwargs.get("column_A")
-        column_B: str = metric_value_kwargs.get("column_B")
+        column_A: Optional[str] = metric_value_kwargs.get("column_A")
+        column_B: Optional[str] = metric_value_kwargs.get("column_B")
         if isinstance(selectable, sa.Table):
-            query = query.format(
+            query = query.format(  # type: ignore[union-attr] # could be none
                 column_A=column_A, column_B=column_B, active_batch=selectable
             )
         elif isinstance(
             selectable, get_sqlalchemy_subquery_type()
         ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active bacth as a Subquery; sectioning the active batch off w/ parentheses ensures flow of operations doesn't break
-            query = query.format(
+            query = query.format(  # type: ignore[union-attr] # could be none
                 column_A=column_A, column_B=column_B, active_batch=f"({selectable})"
             )
         elif isinstance(
             selectable, sa.sql.Select
         ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation & aliasing when formatting the parameterized query
-            query = query.format(
+            query = query.format(  # type: ignore[union-attr] # could be none
                 column_A=column_A,
                 column_B=column_B,
                 active_batch=f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',
             )
         else:
-            query = query.format(
+            query = query.format(  # type: ignore[union-attr] # could be none
                 column_A=column_A, column_B=column_B, active_batch=f"({selectable})"
             )
 
@@ -95,9 +95,9 @@ class QueryColumnPair(QueryMetricProvider):
         )
 
         df.createOrReplaceTempView("tmp_view")
-        column_A: str = metric_value_kwargs.get("column_A")
-        column_B: str = metric_value_kwargs.get("column_B")
-        query = query.format(
+        column_A: Optional[str] = metric_value_kwargs.get("column_A")
+        column_B: Optional[str] = metric_value_kwargs.get("column_B")
+        query = query.format(  # type: ignore[union-attr] # could be none
             column_A=column_A, column_B=column_B, active_batch="tmp_view"
         )
 
