@@ -1041,10 +1041,11 @@ class Validator:
         result: ExpectationValidationResult
         for configuration in processed_configurations:
             try:
-                if 'result_format' in configuration.kwargs:
-                    result_format_dict = configuration.kwargs['result_format']
-                    runtime_configuration = self._get_runtime_configuration(catch_exceptions=True,
-                                                                            result_format=result_format_dict)
+                if "result_format" in configuration.kwargs:
+                    result_format_dict = configuration.kwargs["result_format"]
+                    runtime_configuration = self._get_runtime_configuration(
+                        catch_exceptions=True, result_format=result_format_dict
+                    )
 
                 result = configuration.metrics_validate(
                     metrics=resolved_metrics,
