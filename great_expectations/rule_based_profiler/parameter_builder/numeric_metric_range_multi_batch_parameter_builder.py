@@ -100,6 +100,10 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         "upper_bound",
     }
 
+    METRIC_NAMES_EXEMPT_FROM_VALUE_ROUNDING: set = {
+        "column.unique_proportion",
+    }
+
     exclude_field_names: Set[
         str
     ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
@@ -360,7 +364,11 @@ detected.
         ]
 
         round_decimals: int
-        if integer_semantic_domain_type(domain=domain):
+        if (
+            self.metric_name
+            not in NumericMetricRangeMultiBatchParameterBuilder.METRIC_NAMES_EXEMPT_FROM_VALUE_ROUNDING
+            and integer_semantic_domain_type(domain=domain)
+        ):
             round_decimals = 0
         else:
             round_decimals = self._get_round_decimals_using_heuristics(

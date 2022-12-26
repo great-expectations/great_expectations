@@ -70,7 +70,6 @@ class ExpectQueriedColumnToHaveNDistinctValuesWithCondition(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
-
         template_dict = self.validate_template_dict(configuration)
         query_result = metrics.get("query.template_values")
         actual_num_of_distinct_values = len(query_result)

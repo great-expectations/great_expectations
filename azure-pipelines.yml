@@ -96,7 +96,7 @@ stages:
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - script: |
-          pip install $(grep -E '^(invoke|mypy|pydantic)' reqs/requirements-dev-contrib.txt)
+          pip install --requirement requirements-types.txt
           invoke type-check --ci --pretty
         name: StaticTypeCheck
 
@@ -105,6 +105,14 @@ stages:
       steps:
       - bash: python scripts/check_docstring_coverage.py
         name: DocstringChecker
+
+    - job: docstring_linter
+      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+      steps:
+      - script: |
+          pip install --requirement reqs/requirements-dev-test.txt
+          invoke docstrings
+        name: DocstringLinter
 
     - job: unused_import_checker
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))

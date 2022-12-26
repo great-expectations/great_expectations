@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from typing import TYPE_CHECKING, Optional, cast
+from typing import TYPE_CHECKING, Optional
 
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
@@ -23,6 +23,7 @@ from great_expectations.data_context.types.base import (
 from great_expectations.datasource.datasource_serializer import (
     YAMLReadyDictDatasourceConfigSerializer,
 )
+from great_expectations.experimental.datasources.config import GxConfig
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
@@ -150,12 +151,20 @@ class FileDataContext(SerializableDataContext):
             raise gx_exceptions.ConfigNotFoundError()
 
         try:
-            return cast(
-                DataContextConfig,
-                DataContextConfig.from_commented_map(
-                    commented_map=config_commented_map_from_yaml
-                ),
+            return DataContextConfig.from_commented_map(
+                commented_map=config_commented_map_from_yaml
             )
         except gx_exceptions.InvalidDataContextConfigError:
             # Just to be explicit about what we intended to catch
             raise
+
+    def _load_zep_config(self) -> GxConfig:
+        logger.info(f"{type(self).__name__} loading zep config")
+        if not self.root_directory:
+            logger.warning("`root_directory` not set, cannot load zep config")
+        else:
+            path_to_zep_yaml = pathlib.Path(self.root_directory) / self.ZEP_YAML
+            if path_to_zep_yaml.exists():
+                return GxConfig.parse_yaml(path_to_zep_yaml)
+            logger.info(f"no zep config at {path_to_zep_yaml.absolute()}")
+        return GxConfig(datasources={})

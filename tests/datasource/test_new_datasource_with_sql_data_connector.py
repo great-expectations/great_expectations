@@ -891,7 +891,7 @@ def test_batch_request_sql_with_schema(
         "runtime_parameters": {"query": "SELECT * FROM main.table_2"},
         "batch_identifiers": {
             "pipeline_stage_name": "core_processing",
-            "airflow_run_id": 1234567890,
+            "airflow_run_id": 1234567891,
         },
     }
     validator = context.get_validator(

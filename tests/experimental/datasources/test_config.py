@@ -24,7 +24,7 @@ p = pytest.param
 
 EXPERIMENTAL_DATASOURCE_TEST_DIR = pathlib.Path(__file__).parent
 
-PG_CONFIG_YAML_FILE = EXPERIMENTAL_DATASOURCE_TEST_DIR / "config.yaml"
+PG_CONFIG_YAML_FILE = EXPERIMENTAL_DATASOURCE_TEST_DIR / "zep_config.yaml"
 PG_CONFIG_YAML_STR = PG_CONFIG_YAML_FILE.read_text()
 
 # TODO: create PG_CONFIG_YAML_FILE/STR from this dict
@@ -76,10 +76,43 @@ SIMPLE_DS_DICT = {
     "datasources": {
         "my_ds": {
             "name": "my_ds",
-            "type": "postgres",
-            "connection_string": "postgres",
+            "type": "sql",
+            "connection_string": "sqlite://",
         }
     }
+}
+
+COMBINED_ZEP_AND_OLD_STYLE_CFG_DICT = {
+    "datasources": {
+        "my_ds": {
+            "name": "my_ds",
+            "type": "sql",
+            "connection_string": "sqlite://",
+        }
+    },
+    "name": "getting_started_datasource",
+    "class_name": "Datasource",
+    "execution_engine": {
+        "class_name": "PandasExecutionEngine",
+    },
+    "data_connectors": {
+        "default_inferred_data_connector_name": {
+            "class_name": "InferredAssetFilesystemDataConnector",
+            "base_directory": "../data/",
+            "default_regex": {
+                "group_names": ["data_asset_name"],
+                "pattern": "(.*)",
+            },
+        },
+        "default_runtime_data_connector_name": {
+            "class_name": "RuntimeDataConnector",
+            "assets": {
+                "my_runtime_asset_name": {
+                    "batch_identifiers": ["runtime_batch_identifier_name"]
+                }
+            },
+        },
+    },
 }
 
 
@@ -87,6 +120,11 @@ SIMPLE_DS_DICT = {
     ["load_method", "input_"],
     [
         p(GxConfig.parse_obj, SIMPLE_DS_DICT, id="simple pg config dict"),
+        p(
+            GxConfig.parse_obj,
+            COMBINED_ZEP_AND_OLD_STYLE_CFG_DICT,
+            id="zep + old style config",
+        ),
         p(GxConfig.parse_raw, json.dumps(SIMPLE_DS_DICT), id="simple pg json"),
         p(GxConfig.parse_obj, PG_COMPLEX_CONFIG_DICT, id="pg complex dict"),
         p(GxConfig.parse_raw, PG_COMPLEX_CONFIG_JSON, id="pg complex json"),
@@ -102,6 +140,45 @@ def test_load_config(inject_engine_lookup_double, load_method: Callable, input_)
     assert loaded.datasources
     for datasource in loaded.datasources.values():
         assert isinstance(datasource, Datasource)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ["config", "expected_error_loc", "expected_msg"],
+    [
+        p({}, ("datasources",), "field required", id="no datasources"),
+        p(
+            {
+                "datasources": {
+                    "my_bad_ds_missing_type": {
+                        "name": "my_bad_ds_missing_type",
+                    }
+                }
+            },
+            ("datasources",),
+            "'my_bad_ds_missing_type' is missing a 'type' entry",
+            id="missing 'type' field",
+        ),
+    ],
+)
+def test_catch_bad_top_level_config(
+    inject_engine_lookup_double,
+    config: dict,
+    expected_error_loc: tuple,
+    expected_msg: str,
+):
+    print(f"  config\n{pf(config)}\n")
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        loaded = GxConfig.parse_obj(config)
+        print(f"Erroneously loaded config\n{loaded}\n")
+
+    print(f"\n{exc_info.typename}:{exc_info.value}")
+    all_errors = exc_info.value.errors()
+    print(f"\nErrors dict\n{pf(all_errors)}")
+
+    assert len(all_errors) == 1, "Expected 1 error"
+    assert expected_error_loc == all_errors[0]["loc"]
+    assert expected_msg == all_errors[0]["msg"]
 
 
 @pytest.mark.unit
