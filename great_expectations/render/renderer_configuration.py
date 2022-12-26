@@ -12,6 +12,7 @@ from typing import (
     Iterable,
     List,
     Optional,
+    Tuple,
     Type,
     TypeVar,
     Union,
@@ -29,7 +30,7 @@ from pydantic import (
     validator,
 )
 from pydantic.generics import GenericModel
-from typing_extensions import TypedDict
+from typing_extensions import TypeAlias, TypedDict
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -101,6 +102,9 @@ class _RendererValueBase(BaseModel):
 
 RendererParams = TypeVar("RendererParams", bound=_RendererValueBase)
 
+RendererValueTypes: TypeAlias = Union[RendererValueType, List[RendererValueType]]
+
+AddParamArgs: TypeAlias = Tuple[str, RendererValueTypes]
 
 class RendererTableValue(_RendererValueBase):
     """Represents each value within a row of a header_row or a table."""
@@ -482,16 +486,16 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     def add_param(
         self,
         name: str,
-        param_type: Union[RendererValueType, List[RendererValueType]],
+        param_type: RendererValueTypes,
         value: Optional[Any] = None,
     ) -> None:
         """Adds a param that can be substituted into a template string during rendering.
 
         Attributes:
             name (str): A name for the attribute to be added to this RendererConfiguration instance.
-            param_type (list of, or single, RendererValueType or string): The possible types for the value being
-                substituted. If more than one param_type is passed, inference based on param value will be performed,
-                and the first param_type to match the value will be selected.
+            param_type (one or more RendererValueTypes): The possible types for the value being substituted. If more
+                than one param_type is passed, inference based on param value will be performed, and the first
+                param_type to match the value will be selected.
                     One of:
                      - array
                      - boolean

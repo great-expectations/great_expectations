@@ -114,7 +114,7 @@ stages:
     - job: static_type_check
       steps:
       - script: |
-          pip install --requirement reqs/requirements-dev-contrib.txt
+          pip install --requirement requirements-types.txt
           invoke type-check --ci --pretty
         name: StaticTypeCheck
 
@@ -122,6 +122,13 @@ stages:
       steps:
       - bash: python scripts/check_docstring_coverage.py
         name: DocstringChecker
+
+    - job: docstring_linter
+      steps:
+      - script: |
+          pip install --requirement reqs/requirements-dev-test.txt
+          invoke docstrings
+        name: DocstringLinter
 
     - job: unused_import_checker
       steps:

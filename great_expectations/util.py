@@ -61,16 +61,6 @@ from great_expectations.exceptions import (
     PluginModuleNotFoundError,
 )
 
-if TYPE_CHECKING:
-    # needed until numpy min version 1.20
-    import numpy.typing as npt
-
-    from great_expectations.alias_types import PathStr
-    from great_expectations.data_context.data_context.abstract_data_context import (
-        AbstractDataContext,
-    )
-    from great_expectations.data_context.types.base import DataContextConfig
-
 try:
     import black
 except ImportError:
@@ -98,6 +88,16 @@ except ImportError:
     reflection = None
     Table = None
     Select = None
+
+if TYPE_CHECKING:
+    # needed until numpy min version 1.20
+    import numpy.typing as npt
+
+    from great_expectations.alias_types import PathStr
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+    from great_expectations.data_context.types.base import DataContextConfig
 
 
 p1 = re.compile(r"(.)([A-Z][a-z]+)")
@@ -1712,8 +1712,8 @@ def convert_ndarray_float_to_datetime_tuple(
 
 
 def does_ndarray_contain_decimal_dtype(
-    data: "npt.NDArray",
-) -> TypeGuard["npt.NDArray"]:
+    data: npt.NDArray,
+) -> TypeGuard[npt.NDArray]:
     """
     Determine whether or not all elements of 1-D "np.ndarray" argument are "decimal.Decimal" type objects.
     """
@@ -2031,13 +2031,13 @@ def pandas_series_between_inclusive(
 
 
 def numpy_quantile(
-    a: np.ndarray, q: float, method: str, axis: Optional[int] = None
-) -> Union[np.float64, np.ndarray]:
+    a: npt.NDArray, q: float, method: str, axis: Optional[int] = None
+) -> Union[np.float64, npt.NDArray]:
     """
     As of NumPy 1.21.0, the 'interpolation' arg in quantile() has been renamed to `method`.
     Source: https://numpy.org/doc/stable/reference/generated/numpy.quantile.html
     """
-    quantile: np.ndarray
+    quantile: npt.NDArray
     if version.parse(np.__version__) >= version.parse("1.22.0"):
         quantile = np.quantile(
             a=a,
@@ -2046,7 +2046,7 @@ def numpy_quantile(
             method=method,
         )
     else:
-        quantile = np.quantile(
+        quantile = np.quantile(  # type: ignore[call-overload]
             a=a,
             q=q,
             axis=axis,
