@@ -106,6 +106,7 @@ RendererValueTypes: TypeAlias = Union[RendererValueType, List[RendererValueType]
 
 AddParamArgs: TypeAlias = Tuple[str, RendererValueTypes]
 
+
 class RendererTableValue(_RendererValueBase):
     """Represents each value within a row of a header_row or a table."""
 
