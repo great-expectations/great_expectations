@@ -1047,9 +1047,12 @@ class Validator:
                         catch_exceptions=True, result_format=result_format_dict
                     )
                 elif "result_format" not in configuration.kwargs:
-                    defaul_result_format = Validator.DEFAULT_RUNTIME_CONFIGURATION['result_format']
+                    defaul_result_format = Validator.DEFAULT_RUNTIME_CONFIGURATION[
+                        "result_format"
+                    ]
                     runtime_configuration = self._get_runtime_configuration(
-                        catch_exceptions=True, result_format=defaul_result_format)
+                        catch_exceptions=True, result_format=defaul_result_format
+                    )
 
                 result = configuration.metrics_validate(
                     metrics=resolved_metrics,
