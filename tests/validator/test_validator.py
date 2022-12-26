@@ -725,6 +725,7 @@ def test_graph_validate(in_memory_runtime_context, basic_datasource):
         )
     ]
 
+
 @pytest.mark.integration
 def test_graph_validate_with_two_expectaions_and_result_format(in_memory_runtime_context, basic_datasource):
     in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
