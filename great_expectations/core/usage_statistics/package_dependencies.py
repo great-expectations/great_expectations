@@ -71,6 +71,7 @@ class GXDependencies:
             "azure-storage-blob",
             "black",
             "boto3",
+            "darglint",
             "docstring-parser",
             "feather-format",
             "flake8",
@@ -134,6 +135,7 @@ class GXDependencies:
         "pytest-random-order",
         "pyupgrade",
         # requirements-dev-lite.txt:
+        "darglint",
         "flask",
         "freezegun",
         "mistune",

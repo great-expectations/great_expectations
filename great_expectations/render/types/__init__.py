@@ -52,6 +52,9 @@ from great_expectations.render import RenderedTableContent as RenderedTableConte
 from great_expectations.render import RenderedTabsContent as RenderedTabsContentRender
 from great_expectations.render import TextContent as TextContentRender
 from great_expectations.render import ValueListContent as ValueListContentRender
+from great_expectations.render.renderer_configuration import (
+    RendererTableValue as RendererTableValueRender,
+)
 
 
 # TODO: Remove this entire module for release 0.18.0
@@ -125,8 +128,8 @@ class RenderedAtomicValue(RenderedAtomicValueRender):
         header: Optional[RenderedAtomicValueRender] = None,
         template: Optional[str] = None,
         params: Optional[dict] = None,
-        header_row: Optional[List[RenderedAtomicValueRender]] = None,
-        table: Optional[List[List[RenderedAtomicValueRender]]] = None,
+        header_row: Optional[List[RendererTableValueRender]] = None,
+        table: Optional[List[List[RendererTableValueRender]]] = None,
         graph: Optional[dict] = None,
     ):
         warnings.warn(

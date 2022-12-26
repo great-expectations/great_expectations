@@ -105,9 +105,13 @@ from great_expectations.render.exceptions import RendererConfigurationError
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
-    RendererSchemaType,
+    RendererValueType,
 )
-from great_expectations.render.util import num_to_str
+from great_expectations.render.util import (
+    build_count_and_index_table,
+    build_count_table,
+    num_to_str,
+)
 from great_expectations.self_check.util import (
     evaluate_json_test_v3_api,
     generate_expectation_tests,
@@ -311,7 +315,7 @@ class Expectation(metaclass=MetaExpectation):
         "catch_exceptions": False,
         "result_format": "BASIC",
     }
-    args_keys = None
+    args_keys: Tuple[str, ...] = ()
 
     expectation_type: str
     examples: List[dict] = []
@@ -379,14 +383,14 @@ class Expectation(metaclass=MetaExpectation):
         add_param_args = (
             (
                 "expectation_type",
-                RendererSchemaType.STRING,
+                RendererValueType.STRING,
                 renderer_configuration.expectation_type,
             ),
-            ("kwargs", RendererSchemaType.STRING, renderer_configuration.kwargs),
+            ("kwargs", RendererValueType.STRING, renderer_configuration.kwargs),
         )
-        for name, schema_type, value in add_param_args:
+        for name, param_type, value in add_param_args:
             renderer_configuration.add_param(
-                name=name, schema_type=schema_type, value=value
+                name=name, param_type=param_type, value=value
             )
 
         value_obj = renderedAtomicValueSchema.load(
@@ -421,14 +425,14 @@ class Expectation(metaclass=MetaExpectation):
         add_param_args = (
             (
                 "expectation_type",
-                RendererSchemaType.STRING,
+                RendererValueType.STRING,
                 renderer_configuration.expectation_type,
             ),
-            ("kwargs", RendererSchemaType.STRING, renderer_configuration.kwargs),
+            ("kwargs", RendererValueType.STRING, renderer_configuration.kwargs),
         )
-        for name, schema_type, value in add_param_args:
+        for name, param_type, value in add_param_args:
             renderer_configuration.add_param(
-                name=name, schema_type=schema_type, value=value
+                name=name, param_type=param_type, value=value
             )
 
         renderer_configuration.template_str = template_str
@@ -782,7 +786,7 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> Optional[RenderedTableContent]:
+    ) -> Optional[List[Union[RenderedTableContent, CollapseContent]]]:
         if result is None:
             return None
 
@@ -795,35 +799,38 @@ class Expectation(metaclass=MetaExpectation):
             "partial_unexpected_counts"
         ):
             return None
-        table_rows = []
+        table_rows: List[Any] = []
 
         partial_unexpected_counts: Optional[List[dict]] = result_dict.get(
             "partial_unexpected_counts"
         )
+        # this means the result_format is COMPLETE and we have the full set of unexpected indices
+        unexpected_index_list: Optional[List[dict]] = result_dict.get(
+            "unexpected_index_list"
+        )
+        unexpected_count: int = result_dict["unexpected_count"]
         if partial_unexpected_counts:
             # We will check to see whether we have *all* of the unexpected values
             # accounted for in our count, and include counts if we do. If we do not,
             # we will use this as simply a better (non-repeating) source of
             # "sampled" unexpected values
-            total_count = 0
-            for unexpected_count_dict in partial_unexpected_counts:
-                value: Optional[Any] = unexpected_count_dict.get("value")
-                count: Optional[int] = unexpected_count_dict.get("count")
-                if count:
-                    total_count += count
-                if value is not None and value != "":
-                    table_rows.append([value, count])
-                elif value == "":
-                    table_rows.append(["EMPTY", count])
-                else:
-                    table_rows.append(["null", count])
-
-            # Check to see if we have *all* of the unexpected values accounted for. If so,
-            # we show counts. If not, we only show "sampled" unexpected values.
-            if total_count == result_dict.get("unexpected_count"):
-                header_row = ["Unexpected Value", "Count"]
+            unexpected_list: Optional[List[dict]] = result_dict.get("unexpected_list")
+            unexpected_index_column_names: Optional[List[str]] = result_dict.get(
+                "unexpected_index_column_names"
+            )
+            if unexpected_index_list:
+                header_row, table_rows = build_count_and_index_table(
+                    partial_unexpected_counts=partial_unexpected_counts,
+                    unexpected_index_list=unexpected_index_list,
+                    unexpected_count=unexpected_count,
+                    unexpected_list=unexpected_list,
+                    unexpected_index_column_names=unexpected_index_column_names,
+                )
             else:
-                header_row = ["Sampled Unexpected Values", "Count"]
+                header_row, table_rows = build_count_table(
+                    partial_unexpected_counts=partial_unexpected_counts,
+                    unexpected_count=unexpected_count,
+                )
 
         else:
             header_row = ["Sampled Unexpected Values"]
@@ -853,8 +860,26 @@ class Expectation(metaclass=MetaExpectation):
                 },
             }
         )
-
-        return unexpected_table_content_block
+        if result_dict.get("unexpected_index_query"):
+            query = result_dict.get("unexpected_index_query")
+            query_info = CollapseContent(
+                **{
+                    "collapse_toggle_link": "Show query to retrieve all unexpected values...",
+                    "collapse": [
+                        RenderedStringTemplateContent(
+                            **{
+                                "content_block_type": "string_template",
+                                "string_template": {
+                                    "template": query,
+                                    "tag": "code",
+                                },
+                            }
+                        )
+                    ],
+                }
+            )
+            return [unexpected_table_content_block, query_info]
+        return [unexpected_table_content_block]
 
     @classmethod
     def _get_observed_value_from_evr(
@@ -905,14 +930,14 @@ class Expectation(metaclass=MetaExpectation):
         add_param_args = (
             (
                 "expectation_type",
-                RendererSchemaType.STRING,
+                RendererValueType.STRING,
                 renderer_configuration.expectation_type,
             ),
-            ("kwargs", RendererSchemaType.STRING, renderer_configuration.kwargs),
+            ("kwargs", RendererValueType.STRING, renderer_configuration.kwargs),
         )
-        for name, schema_type, value in add_param_args:
+        for name, param_type, value in add_param_args:
             renderer_configuration.add_param(
-                name=name, schema_type=schema_type, value=value
+                name=name, param_type=param_type, value=value
             )
 
         value_obj = renderedAtomicValueSchema.load(
@@ -1577,11 +1602,11 @@ class Expectation(metaclass=MetaExpectation):
         if len(value_set) > 0:
             for idx, value in enumerate(value_set):
                 if isinstance(value, Number):
-                    schema_type = RendererSchemaType.NUMBER
+                    param_type = RendererValueType.NUMBER
                 else:
-                    schema_type = RendererSchemaType.STRING
+                    param_type = RendererValueType.STRING
                 renderer_configuration.add_param(
-                    name=f"v__{str(idx)}", schema_type=schema_type, value=value
+                    name=f"v__{str(idx)}", param_type=param_type, value=value
                 )
         return renderer_configuration
 
@@ -1609,7 +1634,7 @@ class Expectation(metaclass=MetaExpectation):
         )
         renderer_configuration.add_param(
             name="mostly_pct",
-            schema_type=RendererSchemaType.STRING,
+            param_type=RendererValueType.STRING,
             value=mostly_pct_value,
         )
         return renderer_configuration
@@ -2088,8 +2113,9 @@ class TableExpectation(Expectation, ABC):
         "row_condition",
         "condition_parser",
     )
-    metric_dependencies = ()
+    metric_dependencies: Tuple[str, ...] = ()
     domain_type = MetricDomainTypes.TABLE
+    args_keys: Tuple[str, ...] = ()
 
     def get_validation_dependencies(
         self,
