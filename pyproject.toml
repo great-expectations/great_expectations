@@ -96,8 +96,6 @@ exclude = [
     'expectations/metrics/column_aggregate_metrics/column_', # 21
     'expectations/metrics/map_metric_provider\.py',  # 57
     'expectations/metrics/metric_provider\.py',  # 12
-    'expectations/metrics/query_metrics/query_column_pair\.py', # 9
-    'expectations/metrics/query_metrics/query_column\.py', # 7
     'expectations/metrics/util\.py', # 11
     'expectations/regex_based_column_map_expectation\.py',  # 3
     'expectations/registry\.py',  # 19
@@ -171,6 +169,12 @@ init_typed = true
 warn_required_dynamic_aliases = true
 warn_untyped_fields = true
 
+[tool.pydocstyle]
+convention = "google"
+
+[tool.darglint]
+docstring_style = "google"
+
 [tool.pytest.ini_options]
 filterwarnings = [
     # This warning is common during testing where we intentionally use a COMPLETE format even in cases that would
@@ -200,3 +204,7 @@ testpaths = "tests"
 # use `pytest-mock` drop-in replacement for `unittest.mock`
 # https://pytest-mock.readthedocs.io/en/latest/configuration.html#use-standalone-mock-package
 mock_use_standalone_module = false
+# https://docs.pytest.org/en/7.1.x/how-to/logging.html#how-to-manage-logging
+# uncomment to adjust captured log levels
+# WARNING some cli v012 tests may fail if this is altered
+# log_level = "info"

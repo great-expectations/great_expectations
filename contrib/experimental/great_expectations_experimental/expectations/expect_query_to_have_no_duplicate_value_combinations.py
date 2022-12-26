@@ -13,10 +13,6 @@ from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     QueryExpectation,
 )
-from great_expectations.expectations.metrics.import_manager import (
-    pyspark_sql_Row,
-    sqlalchemy_engine_Row,
-)
 
 
 class ExpectQueryToHaveNoDuplicateValueCombinations(QueryExpectation):
@@ -56,18 +52,16 @@ class ExpectQueryToHaveNoDuplicateValueCombinations(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
+        query_result = metrics.get("query.multiple_columns")
+        query_result = dict([element.values() for element in query_result])
 
-        query_result: Union[sqlalchemy_engine_Row, pyspark_sql_Row] = metrics.get(
-            "query.multiple_columns"
-        )
-        success: bool = query_result == []
         columns = configuration["kwargs"].get("columns")
         duplicates = [
             dict(zip(columns + ["no_occurrences"], row)) for row in query_result
         ]
 
         return {
-            "success": success,
+            "success": not query_result,
             "result": {"observed_value": duplicates},
         }
 

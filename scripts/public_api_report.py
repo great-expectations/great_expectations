@@ -54,11 +54,11 @@ import pathlib
 from dataclasses import dataclass
 from typing import List, Optional, Set, Union, cast
 
-from great_expectations.core._docs_decorators import public_api
-
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.INFO)
+logging.basicConfig(level=logging.INFO)
+
+# Removed from imports due to circular import issues
+PUBLIC_API_DECORATOR_NAME = "public_api"
 
 
 @dataclass(frozen=True)
@@ -346,10 +346,8 @@ class PublicAPIChecker:
 
     def __init__(
         self,
-        docs_example_parser: DocsExampleParser,
         code_parser: CodeParser,
     ) -> None:
-        self.docs_example_parser = docs_example_parser
         self.code_parser = code_parser
 
     def get_all_public_api_definitions(self) -> Set[Definition]:
@@ -372,7 +370,7 @@ class PublicAPIChecker:
             ast_definition=definition.ast_definition
         )
 
-        if public_api.__name__ in found_decorators:
+        if PUBLIC_API_DECORATOR_NAME in found_decorators:
             result = True
 
         return result
@@ -765,9 +763,7 @@ def main():
 
     code_parser = CodeParser(file_contents=code_file_contents)
 
-    public_api_checker = PublicAPIChecker(
-        docs_example_parser=docs_example_parser, code_parser=code_parser
-    )
+    public_api_checker = PublicAPIChecker(code_parser=code_parser)
 
     code_reference_filter = CodeReferenceFilter(
         repo_root=_repo_root(),

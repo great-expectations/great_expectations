@@ -159,7 +159,7 @@ At runtime, you would get a Validator from the Data Context by first defining a 
 
 Next, you would pass that request into `context.get_validator`:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L94-L98
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L93-L98
 ```
 
 ### Additional Notes
