@@ -9,7 +9,7 @@ from great_expectations.core import (
 )
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
-    RendererSchemaType,
+    RendererValueType,
 )
 
 
@@ -112,16 +112,16 @@ class NotString:
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "schema_type,value",
+    "param_type,value",
     [
-        (RendererSchemaType.STRING, NotString()),
-        (RendererSchemaType.NUMBER, "ABC"),
-        (RendererSchemaType.BOOLEAN, 3),
-        (RendererSchemaType.ARRAY, 3),
+        (RendererValueType.STRING, NotString()),
+        (RendererValueType.NUMBER, "ABC"),
+        (RendererValueType.BOOLEAN, 3),
+        (RendererValueType.ARRAY, 3),
     ],
 )
 def test_renderer_configuration_add_param_validation(
-    schema_type: RendererSchemaType, value: Union[NotString, str, int]
+    param_type: RendererValueType, value: Union[NotString, str, int]
 ):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_table_row_count_to_equal",
@@ -131,15 +131,15 @@ def test_renderer_configuration_add_param_validation(
         configuration=expectation_configuration
     )
     with pytest.raises(ValidationError) as e:
-        renderer_configuration.add_param(name="value", schema_type=schema_type)
+        renderer_configuration.add_param(name="value", param_type=param_type)
 
-    if schema_type is RendererSchemaType.STRING:
+    if param_type is RendererValueType.STRING:
         exception_message = (
             "Value was unable to be represented as a string: I'm not a string"
         )
     else:
         exception_message = (
-            f"Param schema_type: <{schema_type}> does not match value: <{value}>."
+            f"Param type: <{param_type}> does not match value: <{value}>."
         )
     assert any(
         str(error_wrapper_exc) == exception_message
