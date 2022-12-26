@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -193,7 +193,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
     def _prescriptive_template(
         cls, renderer_configuration: RendererConfiguration
     ) -> RendererConfiguration:
-        add_param_args: Set[AddParamArgs] = {
+        add_param_args: List[AddParamArgs] = {
             ("min_value", [RendererValueType.NUMBER, RendererValueType.DATE]),
             ("max_value", [RendererValueType.NUMBER, RendererValueType.DATE]),
             ("strict_min", RendererValueType.BOOLEAN),
