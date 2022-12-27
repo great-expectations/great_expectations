@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Dict, Optional, Set, Tuple, Union
+from typing import Dict, Optional, Tuple
 
 import altair as alt
 import numpy as np
@@ -34,7 +34,9 @@ from great_expectations.render import (
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
-    RendererSchemaType,
+    RendererSchema,
+    RendererTableValue,
+    RendererValueType,
 )
 from great_expectations.render.util import (
     num_to_str,
@@ -42,14 +44,9 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.metrics_calculator import MetricsCalculator
-from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import ValidationDependencies
-
-if TYPE_CHECKING:
-    from great_expectations.render.renderer_configuration import RendererParams
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -188,7 +185,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
     )
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -988,38 +985,42 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                 interval_closing_symbol = "]" if idx == (len(fractions) - 1) else ")"
                 table_rows.append(
                     [
-                        {
-                            "type": RendererSchemaType.STRING,
-                            "value": f"[{interval_start} - {interval_end}{interval_closing_symbol}",
-                        },
-                        {
-                            "type": RendererSchemaType.STRING,
-                            "value": num_to_str(fraction),
-                        },
+                        RendererTableValue(
+                            schema=RendererSchema(type=RendererValueType.STRING),
+                            value=f"[{interval_start} - {interval_end}{interval_closing_symbol}",
+                        ),
+                        RendererTableValue(
+                            schema=RendererSchema(type=RendererValueType.STRING),
+                            value=num_to_str(fraction),
+                        ),
                     ]
                 )
         else:
             values = partition_object["values"]
             table_rows = [
                 [
-                    {
-                        "schema": {"type": RendererSchemaType.STRING},
-                        "value": str(value),
-                    },
-                    {
-                        "schema": {"type": RendererSchemaType.STRING},
-                        "value": num_to_str(fractions[idx]),
-                    },
+                    RendererTableValue(
+                        schema=RendererSchema(type=RendererValueType.STRING),
+                        value=str(value),
+                    ),
+                    RendererTableValue(
+                        schema=RendererSchema(type=RendererValueType.STRING),
+                        value=num_to_str(fractions[idx]),
+                    ),
                 ]
                 for idx, value in enumerate(values)
             ]
 
+        interval_or_value = "Interval" if partition_object.get("bins") else "Value"
+
         header_row = [
-            {
-                "schema": {"type": RendererSchemaType.STRING},
-                "value": "Interval" if partition_object.get("bins") else "Value",
-            },
-            {"schema": {"type": RendererSchemaType.STRING}, "value": "Fraction"},
+            RendererTableValue(
+                schema=RendererSchema(type=RendererValueType.STRING),
+                value=interval_or_value,
+            ),
+            RendererTableValue(
+                schema=RendererSchema(type=RendererValueType.STRING), value="Fraction"
+            ),
         ]
 
         return header_row, table_rows
@@ -1030,12 +1031,12 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         add_param_args = (
-            ("column", RendererSchemaType.STRING),
-            ("mostly", RendererSchemaType.NUMBER),
-            ("threshold", RendererSchemaType.NUMBER),
+            ("column", RendererValueType.STRING),
+            ("mostly", RendererValueType.NUMBER),
+            ("threshold", RendererValueType.NUMBER),
         )
-        for name, schema_type in add_param_args:
-            renderer_configuration.add_param(name=name, schema_type=schema_type)
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
         expected_partition_object = renderer_configuration.kwargs.get(
             "partition_object", {}
@@ -1067,8 +1068,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             renderer_configuration.graph, _ = cls._atomic_kl_divergence_chart_template(
                 partition_object=expected_partition_object
             )
-
-        params: RendererParams = renderer_configuration.params
 
         renderer_configuration.template_str = template_str
 
@@ -1103,11 +1102,16 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                         },
                     },
                     "graph": renderer_configuration.graph,
+                    "meta_notes": renderer_configuration.meta_notes,
                     "schema": {"type": "GraphType"},
                 }
             )
             value_type = "GraphType"
         else:
+            header_row = [value.dict() for value in renderer_configuration.header_row]
+            table = []
+            for row in renderer_configuration.table:
+                table.append([value.dict() for value in row])
             value_obj = renderedAtomicValueSchema.load(
                 {
                     "header": {
@@ -1117,8 +1121,9 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                             "params": renderer_configuration.params.dict(),
                         },
                     },
-                    "header_row": renderer_configuration.header_row,
-                    "table": renderer_configuration.table,
+                    "header_row": header_row,
+                    "table": table,
+                    "meta_notes": renderer_configuration.meta_notes,
                     "schema": {"type": "TableType"},
                 }
             )
@@ -1195,7 +1200,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
     ):
         observed_partition_object = result.result.get("details", {}).get(
             "observed_partition", {}
@@ -1250,7 +1254,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs,
     ):
         if not result.result.get("details"):
             value_obj = renderedAtomicValueSchema.load(
@@ -1274,7 +1277,9 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             distribution_table_header_row,
             distribution_table_rows,
         ) = cls._atomic_diagnostic_observed_value_template(
-            configuration, result, runtime_configuration, **kwargs
+            configuration,
+            result,
+            runtime_configuration,
         )
 
         if chart is not None:
