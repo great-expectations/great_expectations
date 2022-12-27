@@ -7,6 +7,9 @@ from click.testing import CliRunner
 
 from great_expectations import DataContext
 from great_expectations.cli.v012 import cli
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
@@ -62,7 +65,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
 
     assert "Great Expectations is now set up." in stdout
 
-    context = DataContext(os.path.join(root_dir, DataContext.GE_DIR))
+    context = DataContext(os.path.join(root_dir, FileDataContext.GX_DIR))
     uncommitted_dir = os.path.join(context.root_directory, "uncommitted")
     shutil.rmtree(uncommitted_dir)
     assert not os.path.isdir(uncommitted_dir)
@@ -197,9 +200,9 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
 
         assert result.exit_code == 1
 
-        ge_dir = os.path.join(root_dir, DataContext.GE_DIR)
+        ge_dir = os.path.join(root_dir, FileDataContext.GX_DIR)
         assert os.path.isdir(ge_dir)
-        config_path = os.path.join(ge_dir, DataContext.GE_YML)
+        config_path = os.path.join(ge_dir, FileDataContext.GX_YML)
         assert os.path.isfile(config_path)
 
         config = yaml.load(open(config_path))
@@ -216,7 +219,7 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
         }
 
         config_path = os.path.join(
-            ge_dir, DataContext.GE_UNCOMMITTED_DIR, "config_variables.yml"
+            ge_dir, FileDataContext.GX_UNCOMMITTED_DIR, "config_variables.yml"
         )
         config = yaml.load(open(config_path))
         assert config["my_db"] == {

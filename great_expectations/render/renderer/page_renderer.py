@@ -12,10 +12,9 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
-from great_expectations.render import LegacyDiagnosticRendererType
-from great_expectations.render.renderer.renderer import Renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
     CollapseContent,
+    LegacyDiagnosticRendererType,
     RenderedComponentContent,
     RenderedDocumentContent,
     RenderedHeaderContent,
@@ -25,6 +24,7 @@ from great_expectations.render.types import (
     RenderedTableContent,
     TextContent,
 )
+from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.util import num_to_str
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
@@ -186,7 +186,7 @@ class ValidationResultsPageRenderer(Renderer):
                 if self._data_context is not None
                 else None
             )
-        except:
+        except Exception:
             suite_meta = None
         meta_properties_to_render = self._get_meta_properties_notes(suite_meta)
         for evr in validation_results.results:
@@ -934,7 +934,7 @@ class ProfilingResultsPageRenderer(Renderer):
                 class_name=column_section_renderer["class_name"],
             )
 
-    def render(self, validation_results):
+    def render(self, validation_results):  # noqa: C901 - 16
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
             try:

@@ -14,6 +14,7 @@ from great_expectations.core.batch import (
     batch_request_contains_batch_data,
 )
 from great_expectations.core.config_peer import ConfigPeer
+from great_expectations.core.domain import Domain
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
@@ -26,13 +27,11 @@ from great_expectations.core.util import (
     determine_progress_bar_method_by_environment,
     nested_update,
 )
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
-from great_expectations.data_context.types.refs import GeCloudResourceRef
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
@@ -45,7 +44,6 @@ from great_expectations.rule_based_profiler.config.base import (
     expectationConfigurationBuilderConfigSchema,
     parameterBuilderConfigSchema,
 )
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
 )
@@ -76,7 +74,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     build_parameter_container_for_variables,
 )
 from great_expectations.rule_based_profiler.rule import Rule, RuleOutput
-from great_expectations.rule_based_profiler.rule_state import RuleState
+from great_expectations.rule_based_profiler.rule.rule_state import RuleState
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
@@ -1139,17 +1137,22 @@ class BaseRuleBasedProfiler(ConfigPeer):
             },
         )
 
-        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
-        if data_context.ge_cloud_mode:
-            key = GeCloudIdentifier(resource_type=GeCloudRESTResource.PROFILER)
+        key: Union[GXCloudIdentifier, ConfigurationIdentifier]
+
+        from great_expectations.data_context.data_context.cloud_data_context import (
+            CloudDataContext,
+        )
+
+        if isinstance(data_context, CloudDataContext):
+            key = GXCloudIdentifier(resource_type=GXCloudRESTResource.PROFILER)
         else:
             key = ConfigurationIdentifier(
                 configuration_key=config.name,
             )
 
         response = profiler_store.set(key=key, value=config)
-        if isinstance(response, GeCloudResourceRef):
-            new_profiler.ge_cloud_id = response.ge_cloud_id
+        if isinstance(response, GXCloudResourceRef):
+            new_profiler.ge_cloud_id = response.cloud_id
 
         return new_profiler
 
@@ -1190,10 +1193,10 @@ class BaseRuleBasedProfiler(ConfigPeer):
             ge_cloud_id
         ), "Must provide either name or ge_cloud_id (but not both)"
 
-        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+        key: Union[GXCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
-            key = GeCloudIdentifier(
-                resource_type=GeCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
+            key = GXCloudIdentifier(
+                resource_type=GXCloudRESTResource.PROFILER, cloud_id=ge_cloud_id
             )
         else:
             key = ConfigurationIdentifier(
@@ -1202,7 +1205,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         try:
             profiler_config: RuleBasedProfilerConfig = profiler_store.get(key=key)
         except ge_exceptions.InvalidKeyError as exc_ik:
-            id: Union[GeCloudIdentifier, ConfigurationIdentifier] = (
+            id: Union[GXCloudIdentifier, ConfigurationIdentifier] = (
                 key.configuration_key
                 if isinstance(key, ConfigurationIdentifier)
                 else key
@@ -1240,10 +1243,10 @@ class BaseRuleBasedProfiler(ConfigPeer):
             ge_cloud_id
         ), "Must provide either name or ge_cloud_id (but not both)"
 
-        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+        key: Union[GXCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
-            key = GeCloudIdentifier(
-                resource_type=GeCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
+            key = GXCloudIdentifier(
+                resource_type=GXCloudRESTResource.PROFILER, cloud_id=ge_cloud_id
             )
         else:
             key = ConfigurationIdentifier(configuration_key=name)
@@ -1263,7 +1266,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     @staticmethod
     def list_profilers(
         profiler_store: ProfilerStore,
-        ge_cloud_mode: bool,
+        ge_cloud_mode: bool = False,
     ) -> List[str]:
         if ge_cloud_mode:
             return profiler_store.list_keys()

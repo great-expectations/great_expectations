@@ -42,7 +42,7 @@ class ColumnValuesToBeValidCrc32(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidCrc32(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid CRC32 format."""
+    """Expect column values to be hashes that match valid CRC32 format."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -94,7 +94,7 @@ class ExpectColumnValuesToBeValidCrc32(ColumnMapExpectation):
     default_kwarg_values = {}
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that

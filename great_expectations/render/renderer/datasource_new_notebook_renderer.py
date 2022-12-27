@@ -1,9 +1,10 @@
+from __future__ import annotations
+
 import logging
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import nbformat
 
-from great_expectations import DataContext
 from great_expectations.datasource.types import DatasourceTypes
 from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
 
@@ -11,6 +12,11 @@ try:
     import black
 except ImportError:
     black = None
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +50,7 @@ Give your datasource a unique name:"""
 
     def __init__(
         self,
-        context: DataContext,
+        context: AbstractDataContext,
         datasource_type: DatasourceTypes,
         datasource_yaml: str,
         datasource_name: str = "my_datasource",
@@ -64,9 +70,9 @@ Give your datasource a unique name:"""
 Use this notebook to configure a new {self.datasource_type.value} Datasource and add it to your project."""
         )
         self.add_code_cell(
-            """import great_expectations as ge
+            """import great_expectations as gx
 from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource, check_if_datasource_name_exists
-context = ge.get_context()""",
+context = gx.get_context()""",
         )
 
     def _add_docs_cell(self) -> None:

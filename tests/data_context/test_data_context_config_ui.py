@@ -4,8 +4,10 @@ from typing import Dict, Optional
 
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.data_context import BaseDataContext
+from great_expectations.data_context.data_context.serializable_data_context import (
+    SerializableDataContext,
+)
 from great_expectations.data_context.types.base import (
     BaseStoreBackendDefaults,
     DatabaseStoreBackendDefaults,
@@ -161,7 +163,12 @@ def test_DataContextConfig_with_BaseStoreBackendDefaults_and_simple_defaults(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
 def test_DataContextConfig_with_S3StoreBackendDefaults(
@@ -262,7 +269,12 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
 def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
@@ -385,7 +397,12 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
 def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaults(
@@ -447,7 +464,12 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
 def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaults_no_root_directory(
@@ -491,7 +513,12 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
 def test_DataContextConfig_with_GCSStoreBackendDefaults(
@@ -605,7 +632,12 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
 def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
@@ -738,7 +770,12 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
 def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
@@ -874,7 +911,12 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
 def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameters(
@@ -1049,7 +1091,12 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
 def test_override_general_defaults(
@@ -1312,7 +1359,12 @@ def test_override_general_defaults(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
 @pytest.mark.slow  # 1.81s
@@ -1420,7 +1472,12 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
     data_context = BaseDataContext(project_config=data_context_config)
     assert (
@@ -1484,4 +1541,9 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )

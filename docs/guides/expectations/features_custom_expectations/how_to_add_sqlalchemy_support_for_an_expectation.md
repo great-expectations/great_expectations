@@ -108,7 +108,7 @@ specifying the type of value we're computing (`AGGREGATE_VALUE`) and the domain 
 ```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L46-L58
 ```
 
-The decorated method takes in a valid [Execution Engine](../../../reference/execution_engine.md) and relevant key word arguments,
+The decorated method takes in a valid <TechnicalTag tag="execution_engine" text="Execution Engine"/> and relevant key word arguments,
 and will return a computed value.
 
 To do this, we need to access our Compute Domain directly:

@@ -9,6 +9,7 @@ import sys
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
+import pkg_resources
 import pytest
 
 from assets.scripts.build_gallery import execute_shell_command
@@ -163,6 +164,20 @@ local_tests = [
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/samples_2020",
+    ),
+    IntegrationTestFixture(
+        name="how_to_configure_a_spark_datasource",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/samples_2020",
+    ),
+    IntegrationTestFixture(
+        name="how_to_configure_a_sql_datasource",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
+        util_script="tests/test_utils.py",
+        extra_backend_dependencies=BackendDependencies.SQLALCHEMY,
     ),
     IntegrationTestFixture(
         name="how_to_configure_a_runtimedataconnector",
@@ -338,17 +353,9 @@ local_tests = [
         extra_backend_dependencies=BackendDependencies.SPARK,
     ),
     IntegrationTestFixture(
-        name="how_to_use_great_expectations_in_aws_glue_yaml",
-        user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns_great_expectations.yaml",
-    ),
-    IntegrationTestFixture(
         name="how_to_use_great_expectations_in_aws_emr_serverless",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py",
         extra_backend_dependencies=BackendDependencies.SPARK,
-    ),
-    IntegrationTestFixture(
-        name="how_to_use_great_expectations_in_aws_emr_serverless_yaml",
-        user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns_great_expectations.yaml",
     ),
 ]
 
@@ -1846,8 +1853,10 @@ def _execute_integration_test(
     try:
         base_dir = file_relative_path(__file__, "../../")
         os.chdir(base_dir)
-        # Ensure GE is installed in our environment
-        execute_shell_command("pip install .")
+        # Ensure GX is installed in our environment
+        installed_packages = [pkg.key for pkg in pkg_resources.working_set]
+        if "great-expectations" not in installed_packages:
+            execute_shell_command("pip install .")
         os.chdir(tmp_path)
 
         #

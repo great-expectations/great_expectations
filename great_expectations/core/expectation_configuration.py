@@ -987,22 +987,20 @@ class ExpectationConfiguration(SerializableDictDot):
         interactive_evaluation: bool = True,
         data_context: Optional[DataContext] = None,
     ) -> None:
-        if self._raw_kwargs is not None:
+        if not self._raw_kwargs:
+            evaluation_args, _ = build_evaluation_parameters(
+                expectation_args=self._kwargs,
+                evaluation_parameters=evaluation_parameters,
+                interactive_evaluation=interactive_evaluation,
+                data_context=data_context,
+            )
+
+            self._raw_kwargs = self._kwargs
+            self._kwargs = evaluation_args
+        else:
             logger.debug(
                 "evaluation_parameters have already been built on this expectation"
             )
-
-        (evaluation_args, substituted_parameters,) = build_evaluation_parameters(
-            self._kwargs,
-            evaluation_parameters,
-            interactive_evaluation,
-            data_context,
-        )
-
-        self._raw_kwargs = self._kwargs
-        self._kwargs = evaluation_args
-        if len(substituted_parameters) > 0:
-            self.meta["substituted_parameters"] = substituted_parameters
 
     def get_raw_configuration(self) -> ExpectationConfiguration:
         # return configuration without substituted evaluation parameters
@@ -1388,6 +1386,7 @@ class ExpectationConfiguration(SerializableDictDot):
         runtime_configuration=None,
     ):
         expectation_impl: Expectation = self._get_expectation_impl()
+        # noinspection PyCallingNonCallable
         return expectation_impl(self).validate(
             validator=validator,
             runtime_configuration=runtime_configuration,
@@ -1396,11 +1395,12 @@ class ExpectationConfiguration(SerializableDictDot):
     def metrics_validate(
         self,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
         **kwargs: dict,
     ):
         expectation_impl: Expectation = self._get_expectation_impl()
+        # noinspection PyCallingNonCallable
         return expectation_impl(self).metrics_validate(
             metrics=metrics,
             runtime_configuration=runtime_configuration,

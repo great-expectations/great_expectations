@@ -10,8 +10,8 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Unio
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.domain import Domain
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.estimators.bootstrap_numeric_range_estimator import (
     BootstrapNumericRangeEstimator,
 )
@@ -39,7 +39,6 @@ from great_expectations.rule_based_profiler.helpers.util import (
     integer_semantic_domain_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
-    MetricValue,
     MetricValues,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
@@ -55,8 +54,8 @@ from great_expectations.rule_based_profiler.parameter_container import (
 from great_expectations.types.attributes import Attributes
 from great_expectations.util import (
     convert_ndarray_decimal_to_float_dtype,
+    does_ndarray_contain_decimal_dtype,
     is_ndarray_datetime_dtype,
-    is_ndarray_decimal_dtype,
     is_numeric,
 )
 
@@ -99,6 +98,10 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
     RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS: set = {
         "lower_bound",
         "upper_bound",
+    }
+
+    METRIC_NAMES_EXEMPT_FROM_VALUE_ROUNDING: set = {
+        "column.unique_proportion",
     }
 
     exclude_field_names: Set[
@@ -361,7 +364,11 @@ detected.
         ]
 
         round_decimals: int
-        if integer_semantic_domain_type(domain=domain):
+        if (
+            self.metric_name
+            not in NumericMetricRangeMultiBatchParameterBuilder.METRIC_NAMES_EXEMPT_FROM_VALUE_ROUNDING
+            and integer_semantic_domain_type(domain=domain)
+        ):
             round_decimals = 0
         else:
             round_decimals = self._get_round_decimals_using_heuristics(
@@ -600,7 +607,6 @@ detected.
         for metric_value_idx in metric_value_vector_indices:
             # Obtain "N"-element-long vector of samples for each element of multi-dimensional metric.
             metric_value_vector = metric_values[metric_value_idx]
-            metric_value: MetricValue
             if not datetime_detected and np.all(
                 np.isclose(metric_value_vector, metric_value_vector[0])
             ):
@@ -706,7 +712,7 @@ detected.
         metric_value_vector: np.ndarray
         for metric_value_idx in metric_value_vector_indices:
             metric_value_vector = metric_values[metric_value_idx]
-            if not is_ndarray_decimal_dtype(data=metric_value_vector):
+            if not does_ndarray_contain_decimal_dtype(data=metric_value_vector):
                 return False
 
         return True

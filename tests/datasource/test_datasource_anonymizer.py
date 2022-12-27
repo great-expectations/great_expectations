@@ -147,7 +147,7 @@ def test_anonymize_datasource_info_v2_api_custom_subclass(
 ):
     """
     What does this test and why?
-    We should be able to discern the GE parent class for a custom type and construct
+    We should be able to discern the GX parent class for a custom type and construct
     a useful usage stats event message.
     Custom v2 API Datasources should continue to be supported.
     """

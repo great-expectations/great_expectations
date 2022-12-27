@@ -1,7 +1,6 @@
 import datetime
 import json
 import os
-from collections import OrderedDict
 from unittest.mock import patch
 
 import boto3
@@ -20,7 +19,6 @@ from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
 from great_expectations.data_context.store import (
-    GeCloudStoreBackend,
     InMemoryStoreBackend,
     StoreBackend,
     TupleAzureBlobStoreBackend,
@@ -28,16 +26,10 @@ from great_expectations.data_context.store import (
     TupleGCSStoreBackend,
     TupleS3StoreBackend,
 )
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
 from great_expectations.data_context.store.inline_store_backend import (
     InlineStoreBackend,
 )
-from great_expectations.data_context.types.base import (
-    CheckpointConfig,
-    DataContextConfig,
-)
+from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -1463,10 +1455,10 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
 @pytest.mark.integration
 def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> None:
     path_to_great_expectations_yml: str = os.path.join(
-        empty_data_context.root_directory, empty_data_context.GE_YML
+        empty_data_context.root_directory, empty_data_context.GX_YML
     )
 
-    # 1. Set simple string config value and confirm it persists in the GE.yml
+    # 1. Set simple string config value and confirm it persists in the GX.yml
 
     inline_store_backend: InlineStoreBackend = InlineStoreBackend(
         data_context=empty_data_context,
@@ -1489,7 +1481,7 @@ def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> N
 
     assert config_commented_map_from_yaml["config_version"] == new_config_version
 
-    # 2. Set nested dictionary config value and confirm it persists in the GE.yml
+    # 2. Set nested dictionary config value and confirm it persists in the GX.yml
 
     inline_store_backend = InlineStoreBackend(
         data_context=empty_data_context,

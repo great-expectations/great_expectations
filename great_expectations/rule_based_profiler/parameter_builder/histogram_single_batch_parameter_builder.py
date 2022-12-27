@@ -5,13 +5,12 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Set
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.domain import Domain
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.metric_computation_result import MetricValue
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricSingleBatchParameterBuilder,
 )
@@ -24,6 +23,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 from great_expectations.types.attributes import Attributes
+from great_expectations.validator.computed_metric import MetricValue
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (

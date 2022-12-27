@@ -1,8 +1,8 @@
 
-Checking project...[0m
+Checking project...
 
 ================================================================================
-[0m
+
 ++=====================================================++
 || UpgradeHelperV13: Upgrade Overview (V2-API Version) ||
 ++=====================================================++
@@ -38,19 +38,18 @@ Please consult the V3 API migration guide to learn more about the automated upgr
 
 Would you like to proceed with the project upgrade? [Y/n]: 
 
-Upgrading project...[0m
+Upgrading project...
 
 ================================================================================
-[0m
-[36m++================++
-|| Upgrade Report ||
-++================++[0m
 
-[32mYour project was successfully upgraded to be compatible with Great Expectations V3 API.
+++================++
+|| Upgrade Report ||
+++================++
+
+Your project was successfully upgraded to be compatible with Great Expectations V3 API.
 The config_version of your great_expectations.yml has been automatically incremented to 3.0.
 
 A log detailing the upgrade can be found here:
 
-    - GE_PROJECT_DIR/uncommitted/logs/project_upgrades/UpgradeHelperV13_20210119T132639.000000Z.json[0m[0m
-[32mYour project is up-to-date - no further upgrade is necessary.
-[0m[0m
+    - GX_PROJECT_DIR/uncommitted/logs/project_upgrades/UpgradeHelperV13_20210119T132639.000000Z.json
+Your project is up-to-date - no further upgrade is necessary.

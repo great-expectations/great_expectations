@@ -1,13 +1,19 @@
-from typing import Dict
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict
 
 import nbformat
 
-from great_expectations import DataContext
 from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
 
 
 class CheckpointNewNotebookRenderer(BaseNotebookRenderer):
-    def __init__(self, context: DataContext, checkpoint_name: str) -> None:
+    def __init__(self, context: AbstractDataContext, checkpoint_name: str) -> None:
         super().__init__(context=context)
         self.context = context
         self.checkpoint_name = checkpoint_name
@@ -46,11 +52,11 @@ Use this notebook to configure a new Checkpoint and add it to your project:
     def _add_imports(self) -> None:
         self.add_code_cell(
             """from ruamel.yaml import YAML
-import great_expectations as ge
+import great_expectations as gx
 from pprint import pprint
 
 yaml = YAML()
-context = ge.get_context()
+context = gx.get_context()
 """,
             lint=True,
         )
@@ -126,7 +132,7 @@ validations:
                 sample_yaml_str,
                 lint=True,
             )
-        except:
+        except Exception:
             # For any error
             self.add_markdown_cell(
                 "Sorry, we were unable to create a sample configuration. Perhaps you don't have a Datasource or Expectation Suite configured."

@@ -6,29 +6,21 @@ For detailed instructions on how to use it, please see:
 
 from typing import Dict, Optional
 
-import pandas as pd
-
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import TableExpectation
-from great_expectations.expectations.metrics.metric_provider import (
-    MetricConfiguration,
-    MetricDomainTypes,
-    metric_value,
-)
+from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
-
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 # <snippet>
 # This class defines a Metric to support your Expectation.
+
+
 class TableColumnsUnique(TableMetricProvider):
 
     # This is the id string that will be used to reference your Metric.
@@ -149,7 +141,7 @@ class ExpectTableColumnsToBeUnique(TableExpectation):
     default_kwarg_values = {"strict": True}
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that

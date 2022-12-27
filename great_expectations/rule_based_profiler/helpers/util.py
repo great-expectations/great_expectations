@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import datetime
+import hashlib
 import itertools
 import logging
 import re
@@ -22,11 +23,11 @@ from great_expectations.core.batch import (
     RuntimeBatchRequest,
     materialize_batch_request,
 )
-from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain import (
+from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     SemanticDomainTypes,
 )
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
     NUM_HISTOGRAM_BINS,
     NumericRangeEstimationResult,
@@ -47,6 +48,7 @@ from great_expectations.util import (
     convert_ndarray_to_datetime_dtype_best_effort,
     numpy_quantile,
 )
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
@@ -155,10 +157,18 @@ def get_batch_ids(
 
     batch_ids: List[str] = [batch.id for batch in batch_list]
 
-    if limit is not None:
-        batch_ids = batch_ids[0:limit]
-
     num_batch_ids: int = len(batch_ids)
+
+    if limit is not None:
+        # No need to verify that type of "limit" is "integer", because static type checking already ascertains this.
+        if not (0 <= limit <= num_batch_ids):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""{__name__}.get_batch_ids() allows integer limit values between 0 and {num_batch_ids} \
+({limit} was requested).
+"""
+            )
+        batch_ids = batch_ids[-limit:]
+
     if num_batch_ids == 0:
         raise ge_exceptions.ProfilerExecutionError(
             message=f"""{__name__}.get_batch_ids() must return at least one batch_id ({num_batch_ids} were retrieved).
@@ -309,7 +319,7 @@ def get_parameter_value(
 def get_resolved_metrics_by_key(
     validator: Validator,
     metric_configurations_by_key: Dict[str, List[MetricConfiguration]],
-) -> Dict[str, Dict[Tuple[str, str, str], Any]]:
+) -> Dict[str, Dict[Tuple[str, str, str], MetricValue]]:
     """
     Compute (resolve) metrics for every column name supplied on input.
 
@@ -322,7 +332,7 @@ def get_resolved_metrics_by_key(
 
     Returns:
         Dictionary of the form {
-            "my_key": Dict[Tuple[str, str, str], Any],
+            "my_key": Dict[Tuple[str, str, str], MetricValue],
         }
     """
     key: str
@@ -331,7 +341,9 @@ def get_resolved_metrics_by_key(
 
     # Step 1: Gather "MetricConfiguration" objects corresponding to all possible key values/combinations.
     # and compute all metric values (resolve "MetricConfiguration" objects ) using a single method call.
-    resolved_metrics: Dict[Tuple[str, str, str], Any] = validator.compute_metrics(
+    resolved_metrics: Dict[
+        Tuple[str, str, str], MetricValue
+    ] = validator.compute_metrics(
         metric_configurations=[
             metric_configuration
             for key, metric_configurations_for_key in metric_configurations_by_key.items()
@@ -386,7 +398,7 @@ def get_resolved_metrics_by_key(
         )
     ]
 
-    resolved_metrics_by_key: Dict[str, Dict[Tuple[str, str, str], Any]] = {
+    resolved_metrics_by_key: Dict[str, Dict[Tuple[str, str, str], MetricValue]] = {
         key: {
             metric_configuration.id: resolved_metrics[metric_configuration.id]
             for metric_configuration in metric_configurations_by_key[key]
@@ -980,7 +992,7 @@ def get_validator_with_expectation_suite(
 
 
 def get_or_create_expectation_suite(
-    data_context: AbstractDataContext,
+    data_context: Optional[AbstractDataContext],
     expectation_suite: Optional[ExpectationSuite] = None,
     expectation_suite_name: Optional[str] = None,
     component_name: Optional[str] = None,
@@ -1039,8 +1051,28 @@ def get_or_create_expectation_suite(
     return expectation_suite
 
 
-def sanitize_parameter_name(name: str) -> str:
+def sanitize_parameter_name(
+    name: str,
+    suffix: Optional[str] = None,
+) -> str:
     """
-    This method provides display-friendly version of "name" argument.
+    This method provides display-friendly version of "name" argument (with optional "suffix" argument).
+
+    In most situations, "suffix" is not needed.  However, in certain use cases, "name" argument is same among different
+    calling structures, whereby "name" can be disambiguated by addition of distinguishing "suffix" argument.  Using
+    list of "MetricConfiguration" objects as example, "metric_name" and "metric_domain_kwargs" are commonly same among
+    them, while "metric_value_kwargs" are different (i.e., calculating values of same metric with different parameters).
+    In this case, supplying "MetricConfiguration.metric_domain_kwargs_id" as "suffix" makes sanitized names unique.
+
+    Args:
+        name: string-valued "name" argument to be sanitized
+        suffix: additional component (i.e., "suffix") argument to be appended to "name" and sanitized together
+
+    Returns:
+        string-valued sanitized concatenation of "name" and MD5-digest of "suffix" arguments.
     """
+    if suffix:
+        suffix = hashlib.md5(suffix.encode("utf-8")).hexdigest()
+        name = f"{name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{suffix}"
+
     return name.replace(FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER, "_")

@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import sys
-from typing import Optional, Tuple
+from typing import TYPE_CHECKING, Optional, Tuple
 
 import click
 
@@ -12,7 +14,10 @@ from great_expectations.cli.toolkit import load_data_context_with_error_handling
 from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
-from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
+from great_expectations.data_context.types.base import CURRENT_GX_CONFIG_VERSION
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
 
 
 @click.group()
@@ -66,24 +71,26 @@ def project_upgrade(ctx: click.Context) -> None:
         sys.exit(1)
 
 
-def do_config_check(target_directory: str) -> Tuple[bool, str, Optional[DataContext]]:
+def do_config_check(
+    target_directory: Optional[str],
+) -> Tuple[bool, str, Optional[AbstractDataContext]]:
     is_config_ok: bool = True
     upgrade_message: str = ""
-    context: Optional[DataContext]
+    context: Optional[AbstractDataContext]
     try:
         context = DataContext(context_root_dir=target_directory)
-        ge_config_version: int = context.get_config().config_version
-        if int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
+        ge_config_version: int = context.get_config().config_version  # type: ignore[union-attr] # could be dict, str
+        if int(ge_config_version) < CURRENT_GX_CONFIG_VERSION:
             is_config_ok = False
             upgrade_message = f"""The config_version of your great_expectations.yml -- {float(ge_config_version)} -- is outdated.
 Please consult the V3 API migration guide https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and
-upgrade your Great Expectations configuration to version {float(CURRENT_GE_CONFIG_VERSION)} in order to take advantage of the latest capabilities.
+upgrade your Great Expectations configuration to version {float(CURRENT_GX_CONFIG_VERSION)} in order to take advantage of the latest capabilities.
 """
             context = None
-        elif int(ge_config_version) > CURRENT_GE_CONFIG_VERSION:
+        elif int(ge_config_version) > CURRENT_GX_CONFIG_VERSION:
             raise ge_exceptions.UnsupportedConfigVersionError(
                 f"""Invalid config version ({ge_config_version}).\n    The maximum valid version is \
-{CURRENT_GE_CONFIG_VERSION}.
+{CURRENT_GX_CONFIG_VERSION}.
 """
             )
         else:

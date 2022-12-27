@@ -8,6 +8,7 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.profile.base import Profiler
+from great_expectations.render.renderer_configuration import MetaNotesFormat
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +68,9 @@ class JsonSchemaProfiler(Profiler):
         validator.check_schema(schema)
         return True
 
-    def _profile(self, schema: Dict, suite_name: str = None) -> ExpectationSuite:
+    def _profile(
+        self, schema: Dict, suite_name: Optional[str] = None
+    ) -> ExpectationSuite:
         if not suite_name:
             raise ValueError("Please provide a suite name when using this profiler.")
         expectations = []
@@ -108,7 +111,7 @@ class JsonSchemaProfiler(Profiler):
         if description:
             meta = {
                 "notes": {
-                    "format": "markdown",
+                    "format": MetaNotesFormat.MARKDOWN,
                     "content": [f"### Description:\n{description}"],
                 }
             }
@@ -171,7 +174,7 @@ class JsonSchemaProfiler(Profiler):
         if description:
             meta = {
                 "notes": {
-                    "format": "markdown",
+                    "format": MetaNotesFormat.MARKDOWN,
                     "content": [f"### Description:\n{description}"],
                 }
             }

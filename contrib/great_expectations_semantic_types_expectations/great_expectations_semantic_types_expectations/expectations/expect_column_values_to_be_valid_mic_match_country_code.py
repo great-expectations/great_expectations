@@ -41,7 +41,7 @@ class ColumnValuesToBeValidMicMatchCountryCode(ColumnMapMetricProvider):
     condition_value_keys = ("country_code",)
 
     url = "https://www.iso20022.org/sites/default/files/ISO10383_MIC/ISO10383_MIC.csv"
-    df = pd.read_csv(url)
+    df = pd.read_csv(url, encoding="cp1250")
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
@@ -63,7 +63,7 @@ class ColumnValuesToBeValidMicMatchCountryCode(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidMicMatchCountryCode(ColumnMapExpectation):
-    """Expect the provided MIC (Market Identifier Code) according to country which code (ISO3166) passed in the parameters"""
+    """Expect the provided MIC (Market Identifier Code) according to country which code (ISO3166) passed in the parameters."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

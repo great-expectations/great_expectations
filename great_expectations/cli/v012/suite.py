@@ -87,7 +87,7 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs) -> None:
     )
 
 
-def _suite_edit(
+def _suite_edit(  # noqa: C901 - 22
     suite,
     datasource,
     directory,
@@ -111,7 +111,7 @@ def _suite_edit(
                 batch_kwargs = json.loads(batch_kwargs_json)
                 if datasource:
                     batch_kwargs["datasource"] = datasource
-                _batch = toolkit.load_batch(context, suite, batch_kwargs)
+                _ = toolkit.load_batch(context, suite, batch_kwargs)
             except json_parse_exception as je:
                 cli_message(
                     "<red>Please check that your batch_kwargs are valid JSON.\n{}</red>".format(
@@ -553,6 +553,6 @@ def suite_list(directory):
 def _get_notebook_path(context, notebook_name):
     return os.path.abspath(
         os.path.join(
-            context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name
+            context.root_directory, context.GX_EDIT_NOTEBOOK_DIR, notebook_name
         )
     )

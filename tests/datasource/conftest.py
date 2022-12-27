@@ -141,7 +141,7 @@ def basic_sparkdf_datasource(test_backends):
 
 
 @pytest.fixture
-def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
+def test_cases_for_sql_data_connector_sqlite_connection_url(sa):
     if sa is None:
         raise ValueError("SQL Database tests require sqlalchemy to be installed.")
 
@@ -150,16 +150,29 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
         os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
     )
 
-    engine: sa.engine.Engine = sa.create_engine(get_sqlite_connection_url(db_file_path))
-    conn: sa.engine.Connection = engine.connect()
+    return get_sqlite_connection_url(db_file_path)
+
+
+@pytest.fixture
+def test_cases_for_sql_data_connector_sqlite_execution_engine(
+    sa, test_cases_for_sql_data_connector_sqlite_connection_url
+):
+    if sa is None:
+        raise ValueError("SQL Database tests require sqlalchemy to be installed.")
+
+    engine: sa.engine.Engine = sa.create_engine(
+        test_cases_for_sql_data_connector_sqlite_connection_url
+    )
     raw_connection = engine.raw_connection()
     raw_connection.create_function("sqrt", 1, lambda x: math.sqrt(x))
     raw_connection.create_function(
         "md5", 2, lambda x, d: hashlib.md5(str(x).encode("utf-8")).hexdigest()[-1 * d :]
     )
 
+    conn: sa.engine.Connection = engine.connect()
+
     # Build a SqlAlchemyDataset using that database
     return SqlAlchemyExecutionEngine(
         name="test_sql_execution_engine",
-        engine=conn,
+        engine=engine,
     )

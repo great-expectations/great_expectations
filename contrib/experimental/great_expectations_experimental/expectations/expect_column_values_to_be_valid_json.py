@@ -54,7 +54,7 @@ class ColumnValuesToBeValidJson(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidJson(ColumnMapExpectation):
-    """This expectation checks if the column values are valid json"""
+    """Expect column values to be valid json."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -100,7 +100,7 @@ class ExpectColumnValuesToBeValidJson(ColumnMapExpectation):
     default_kwarg_values = {}
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that

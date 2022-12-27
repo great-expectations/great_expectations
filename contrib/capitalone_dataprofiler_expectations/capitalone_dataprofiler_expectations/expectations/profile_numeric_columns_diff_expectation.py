@@ -31,18 +31,19 @@ class ProfileNumericColumnsDiffExpectation(TableExpectation):
         ), "ProfileNumericColumnsDiffExpectation must be configured using profile_metric, and cannot have metric_dependencies declared."
         # convenient name for updates
 
-        metric_dependencies = dependencies["metrics"]
-
         metric_kwargs = get_metric_kwargs(
             metric_name=f"{self.profile_metric}",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
 
-        metric_dependencies[f"{self.profile_metric}"] = MetricConfiguration(
-            f"{self.profile_metric}",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        dependencies.set_metric_configuration(
+            metric_name=f"{self.profile_metric}",
+            metric_configuration=MetricConfiguration(
+                metric_name=f"{self.profile_metric}",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
         )
 
         return dependencies

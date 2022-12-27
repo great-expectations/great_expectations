@@ -8,7 +8,7 @@ from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
-from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+from tests.cli.utils import assert_no_logging_messages_or_tracebacks, escape_ansi
 
 
 @mock.patch(
@@ -75,13 +75,13 @@ def test_cli_datasource_list_on_project_with_one_datasource(
         catch_exceptions=False,
     )
 
-    expected_output = """Using v3 (Batch Request) API\x1b[0m
-1 Datasource found:[0m
-[0m
- - [36mname:[0m my_datasource[0m
-   [36mclass_name:[0m Datasource[0m
+    expected_output = """Using v3 (Batch Request) API
+1 Datasource found:
+
+ - name: my_datasource
+   class_name: Datasource
 """.strip()
-    stdout = result.stdout.strip()
+    stdout = escape_ansi(result.stdout).strip()
     assert stdout == expected_output
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -143,7 +143,7 @@ def test_cli_datasource_new(
 
     assert result.exit_code == 0
 
-    uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
+    uncommitted_dir = os.path.join(root_dir, context.GX_UNCOMMITTED_DIR)
     expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
     assert os.path.isfile(expected_notebook)
     mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])
@@ -260,7 +260,7 @@ def test_cli_datasource_new_no_jupyter_writes_notebook(
 
     assert result.exit_code == 0
 
-    uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
+    uncommitted_dir = os.path.join(root_dir, context.GX_UNCOMMITTED_DIR)
     expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
     assert os.path.isfile(expected_notebook)
     assert mock_subprocess.call_count == 0
@@ -324,7 +324,7 @@ def test_cli_datasource_new_with_name_param(
 
     assert result.exit_code == 0
 
-    uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
+    uncommitted_dir = os.path.join(root_dir, context.GX_UNCOMMITTED_DIR)
     expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
     assert os.path.isfile(expected_notebook)
     mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])
@@ -406,7 +406,7 @@ def test_cli_datasource_new_from_misc_directory(
 
     assert result.exit_code == 0
 
-    uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
+    uncommitted_dir = os.path.join(root_dir, context.GX_UNCOMMITTED_DIR)
     expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
     assert os.path.isfile(expected_notebook)
     mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])

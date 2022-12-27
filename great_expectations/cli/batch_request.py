@@ -1,16 +1,11 @@
 import logging
 import re
-from typing import Any, Dict, List, Optional, Union, cast
-
-from great_expectations.util import get_sqlalchemy_inspector
-
-try:
-    from typing import Final
-except ImportError:
-    # Fallback for python < 3.8
-    from typing_extensions import Final
+from typing import Any, Dict, List, Optional, Union
 
 import click
+from typing_extensions import Final
+
+from great_expectations.util import get_sqlalchemy_inspector
 
 try:
     from pybigquery.parse_url import parse_url as parse_bigquery_url
@@ -24,7 +19,7 @@ from great_expectations.datasource import (
     SimpleSqlalchemyDatasource,
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
@@ -48,7 +43,7 @@ DEFAULT_DATA_CONNECTOR_NAMES: Final[List[str]] = [
 def get_batch_request(
     datasource: BaseDatasource,
     additional_batch_request_args: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Union[str, Dict[str, Any]]]:
+) -> Dict[str, Union[str, int, Dict[str, Any]]]:
     """
     This method manages the interaction with user necessary to obtain batch_request for a batch of a data asset.
 
@@ -76,7 +71,7 @@ def get_batch_request(
 
     batch_request: Dict[str, Union[str, int, Dict[str, Any]]] = {
         "datasource_name": datasource.name,
-        "data_connector_name": data_connector_name,
+        "data_connector_name": data_connector_name,  # type: ignore[dict-item] # name could be None
     }
 
     data_asset_name: Optional[str]
@@ -85,16 +80,16 @@ def get_batch_request(
         msg_prompt_enter_data_asset_name: str = f'\nWhich data asset (accessible by data connector "{data_connector_name}") would you like to use?\n'
         data_asset_name = _get_data_asset_name_from_data_connector(
             datasource=datasource,
-            data_connector_name=data_connector_name,
+            data_connector_name=data_connector_name,  # type: ignore[arg-type] # could be none
             msg_prompt_enter_data_asset_name=msg_prompt_enter_data_asset_name,
         )
     elif isinstance(datasource, SimpleSqlalchemyDatasource):
-        msg_prompt_enter_data_asset_name: str = (
+        msg_prompt_enter_data_asset_name = (
             "\nWhich table would you like to use? (Choose one)\n"
         )
         data_asset_name = _get_data_asset_name_for_simple_sqlalchemy_datasource(
             datasource=datasource,
-            data_connector_name=data_connector_name,
+            data_connector_name=data_connector_name,  # type: ignore[arg-type] # could be none
             msg_prompt_enter_data_asset_name=msg_prompt_enter_data_asset_name,
         )
     else:
@@ -104,7 +99,7 @@ def get_batch_request(
 
     batch_request.update(
         {
-            "data_asset_name": data_asset_name,
+            "data_asset_name": data_asset_name,  # type: ignore[dict-item] # could be none
         }
     )
 
@@ -113,9 +108,11 @@ def get_batch_request(
     ):
         batch_request.update(additional_batch_request_args)
 
-    batch_spec_passthrough: Dict[str, Union[str, Dict[str, Any]]] = batch_request.get(
+    batch_spec_passthrough: Optional[
+        Dict[str, Union[str, Dict[str, Any]]]
+    ] = batch_request.get(
         "batch_spec_passthrough"
-    )
+    )  # type: ignore[assignment] # can't guarantee shape of 'batch_spec_passthrough'
     if batch_spec_passthrough is None:
         batch_spec_passthrough = {}
 
@@ -384,21 +381,19 @@ Would you like to continue?"""
                 )
 
     if (
-        datasource.execution_engine.engine.dialect.name.lower() == GESqlDialect.BIGQUERY
+        datasource.execution_engine.engine.dialect.name.lower() == GXSqlDialect.BIGQUERY
         and parse_bigquery_url is not None
     ):
         # bigquery table needs to contain the project id if it differs from the credentials project
         if len(data_asset_name.split(".")) < 3:
-            project_id, _, _, _, _, _ = parse_bigquery_url(datasource.engine.url)
+            project_id, _, _, _, _, _ = parse_bigquery_url(datasource.engine.url)  # type: ignore[attr-defined]
             data_asset_name = f"{project_id}.{data_asset_name}"
 
     return data_asset_name
 
 
 def _get_default_schema(datasource: SimpleSqlalchemyDatasource) -> str:
-    execution_engine: SqlAlchemyExecutionEngine = cast(
-        SqlAlchemyExecutionEngine, datasource.execution_engine
-    )
+    execution_engine: SqlAlchemyExecutionEngine = datasource.execution_engine
     inspector: Inspector = get_sqlalchemy_inspector(execution_engine.engine)
     return inspector.default_schema_name
 
@@ -412,6 +407,7 @@ def _check_default_data_connectors(
     ):
         # return the default_inferred_asset_data_connector
         return DEFAULT_DATA_CONNECTOR_NAMES[1]
+    return None
 
 
 def _get_batch_spec_passthrough(
@@ -424,9 +420,7 @@ def _get_batch_spec_passthrough(
     elif isinstance(datasource, SimpleSqlalchemyDatasource):
         # Some backends require named temporary table parameters.  We specifically elicit those and add them
         # where appropriate.
-        execution_engine: SqlAlchemyExecutionEngine = cast(
-            SqlAlchemyExecutionEngine, datasource.execution_engine
-        )
+        _: SqlAlchemyExecutionEngine = datasource.execution_engine
     else:
         raise ge_exceptions.DataContextError(
             "Datasource {:s} of unsupported type {:s} was encountered.".format(

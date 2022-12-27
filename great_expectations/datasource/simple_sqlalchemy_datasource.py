@@ -1,10 +1,18 @@
+from __future__ import annotations
+
 import copy
 import logging
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations.datasource.data_connector.configured_asset_sql_data_connector import (
     ConfiguredAssetSqlDataConnector,
 )
 from great_expectations.datasource.new_datasource import BaseDatasource
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Engine as SaEngine
+
+    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -21,16 +29,18 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
     potentially useful for demonstration purposes, and should be maintained, even though it violates abstractions.
     """
 
+    execution_engine: SqlAlchemyExecutionEngine
+
     def __init__(
         self,
         name: str,
-        connection_string: str = None,
-        url: str = None,
-        credentials: dict = None,
-        engine=None,  # sqlalchemy.engine.Engine
-        introspection: dict = None,
-        tables: dict = None,
-        **kwargs
+        connection_string: Optional[str] = None,
+        url: Optional[str] = None,
+        credentials: Optional[dict] = None,
+        engine: Optional[SaEngine] = None,  # sqlalchemy.engine.Engine
+        introspection: Optional[dict] = None,
+        tables: Optional[dict] = None,
+        **kwargs,
     ) -> None:
         introspection = introspection or {}
         tables = tables or {}
@@ -71,7 +81,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
                     "class_name": "InferredAssetSqlDataConnector",
                     "name": name,
                 },
-                **config
+                **config,
             )
             self._build_data_connector_from_config(
                 name=name,

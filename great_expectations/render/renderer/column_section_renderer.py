@@ -10,12 +10,8 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.expectations.registry import get_renderer_impl
-from great_expectations.render import LegacyDescriptiveRendererType
-from great_expectations.render.renderer.content_block import (
-    ExceptionListContentBlockRenderer,
-)
-from great_expectations.render.renderer.renderer import Renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
+    LegacyDescriptiveRendererType,
     RenderedBulletListContent,
     RenderedHeaderContent,
     RenderedSectionContent,
@@ -23,6 +19,10 @@ from great_expectations.render.types import (
     RenderedTableContent,
     TextContent,
 )
+from great_expectations.render.renderer.content_block import (
+    ExceptionListContentBlockRenderer,
+)
+from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.util import load_class, verify_dynamic_loading_support
 
 logger = logging.getLogger(__name__)

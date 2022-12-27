@@ -1,6 +1,6 @@
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from tests.test_utils import load_data_into_test_database
 
@@ -14,7 +14,7 @@ load_data_into_test_database(
 )
 
 # <snippet>
-context = ge.get_context()
+context = gx.get_context()
 # </snippet>
 
 # <snippet>
@@ -54,7 +54,7 @@ context.add_datasource(**datasource_config)
 batch_request = RuntimeBatchRequest(
     datasource_name="my_trino_datasource",
     data_connector_name="default_runtime_data_connector_name",
-    data_asset_name="schema.taxi_data",  # this can be anything that identifies this data
+    data_asset_name="default_name",  # this can be anything that identifies this data
     runtime_parameters={"query": "SELECT * from taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )
@@ -68,7 +68,7 @@ validator = context.get_validator(
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 
 # Here is a BatchRequest naming a table
 batch_request = BatchRequest(
@@ -85,7 +85,7 @@ validator = context.get_validator(
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_trino_datasource"]
 assert "schema.taxi_data" in set(
     context.get_available_data_asset_names()["my_trino_datasource"][

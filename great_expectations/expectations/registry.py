@@ -4,10 +4,10 @@ import logging
 import warnings
 from typing import (
     TYPE_CHECKING,
-    Any,
     Callable,
     Dict,
     List,
+    NamedTuple,
     Optional,
     Tuple,
     Type,
@@ -22,6 +22,7 @@ from great_expectations.render import (
     AtomicPrescriptiveRendererType,
     AtomicRendererType,
 )
+from great_expectations.validator.computed_metric import MetricValue
 
 if TYPE_CHECKING:
     from great_expectations.core import ExpectationConfiguration
@@ -32,6 +33,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.expectations.expectation import Expectation
     from great_expectations.expectations.metrics.metric_provider import MetricProvider
+    from great_expectations.render import RenderedAtomicContent, RenderedContent
 
 logger = logging.getLogger(__name__)
 
@@ -51,10 +53,15 @@ _registered_renderers = {}
 """
 
 
+class RendererImpl(NamedTuple):
+    expectation: str
+    renderer: Callable[..., Union[RenderedAtomicContent, RenderedContent]]
+
+
 def register_renderer(
     object_name: str,
     parent_class: Type[Union[Expectation, Metric]],
-    renderer_fn: Callable,
+    renderer_fn: Callable[..., Union[RenderedAtomicContent, RenderedContent]],
 ):
     # noinspection PyUnresolvedReferences
     renderer_name = renderer_fn._renderer_type
@@ -103,25 +110,27 @@ def get_renderer_names(expectation_or_metric_type: str) -> List[str]:
     return list(_registered_renderers.get(expectation_or_metric_type, {}).keys())
 
 
-def get_renderer_names_with_renderer_type(
+def get_renderer_names_with_renderer_types(
     expectation_or_metric_type: str,
-    renderer_type: AtomicRendererType,
+    renderer_types: List[AtomicRendererType],
 ) -> List[Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]]:
     """Gets renderer names of a given type, for a given Expectation or Metric.
 
     Args:
         expectation_or_metric_type: The type of an Expectation or Metric for which to get renderer names.
-        renderer_type: The type of the renderers for which to return names.
+        renderer_types: The type of the renderers for which to return names.
 
     Returns:
-        A list of renderer names for the given prefix and Expectation or Metric.
+        A list of renderer names for the given prefixes and Expectation or Metric.
     """
     return [
         renderer_name
         for renderer_name in get_renderer_names(
             expectation_or_metric_type=expectation_or_metric_type
         )
-        if renderer_name.startswith(renderer_type)
+        if any(
+            renderer_name.startswith(renderer_type) for renderer_type in renderer_types
+        )
     ]
 
 
@@ -129,8 +138,16 @@ def get_renderer_impls(object_name: str) -> List[str]:
     return list(_registered_renderers.get(object_name, {}).values())
 
 
-def get_renderer_impl(object_name, renderer_type):
-    return _registered_renderers.get(object_name, {}).get(renderer_type)
+def get_renderer_impl(object_name: str, renderer_type: str) -> Optional[RendererImpl]:
+    renderer_tuple: Optional[tuple] = _registered_renderers.get(object_name, {}).get(
+        renderer_type
+    )
+    renderer_impl: Optional[RendererImpl] = None
+    if renderer_tuple:
+        renderer_impl = RendererImpl(
+            expectation=renderer_tuple[0], renderer=renderer_tuple[1]
+        )
+    return renderer_impl
 
 
 def register_expectation(expectation: Type[Expectation]) -> None:
@@ -268,7 +285,7 @@ def get_metric_kwargs(
     metric_name: str,
     configuration: Optional[ExpectationConfiguration] = None,
     runtime_configuration: Optional[dict] = None,
-) -> Dict:
+) -> dict:
     try:
         metric_definition = _registered_metrics.get(metric_name)
         if metric_definition is None:
@@ -315,7 +332,7 @@ def get_metric_kwargs(
 
 
 def get_domain_metrics_dict_by_name(
-    metrics: Dict[Tuple[str, str, str], Any], metric_domain_kwargs: IDDict
+    metrics: Dict[Tuple[str, str, str], MetricValue], metric_domain_kwargs: IDDict
 ):
     return {
         metric_edge_key_id_tuple[0]: metric_value
@@ -346,7 +363,7 @@ def get_expectation_impl(expectation_name: str):
 
 
 def list_registered_expectation_implementations(
-    expectation_root: Type[Expectation] = None,
+    expectation_root: Optional[Type[Expectation]] = None,
 ) -> List[str]:
     registered_expectation_implementations = []
     for (

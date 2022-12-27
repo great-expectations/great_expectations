@@ -29,7 +29,7 @@ from great_expectations.cli import cli
 
 
 def _run_notebook(context: DataContext) -> None:
-    uncommitted_dir = os.path.join(context.root_directory, context.GE_UNCOMMITTED_DIR)
+    uncommitted_dir = os.path.join(context.root_directory, context.GX_UNCOMMITTED_DIR)
     expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
     with open(expected_notebook) as f:
         nb = nbformat.read(f, as_version=4)

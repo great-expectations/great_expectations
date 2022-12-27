@@ -2,7 +2,7 @@ import os
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.datasource.new_datasource import Datasource
 
 config_variables_yaml = """
@@ -70,9 +70,9 @@ try:
             os.environ[key] = value
 
     # get context and set config variables in config_variables.yml
-    context = ge.get_context()
+    context = gx.get_context()
     context_config_variables_relative_file_path = os.path.join(
-        context.GE_UNCOMMITTED_DIR, "config_variables.yml"
+        context.GX_UNCOMMITTED_DIR, "config_variables.yml"
     )
     assert (
         yaml.safe_load(config_variables_file_path)["config_variables_file_path"]

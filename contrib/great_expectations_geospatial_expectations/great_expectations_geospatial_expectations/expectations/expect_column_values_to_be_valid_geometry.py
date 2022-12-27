@@ -52,7 +52,8 @@ class ColumnValuesToBeValidGeometry(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidGeometry(ColumnMapExpectation):
     """Expect values in this column to be valid geometry types (Polygon, LineString, etc.).
-    See https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoSeries.is_valid.html
+
+    See https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoSeries.is_valid.html \
     for more information.
     """
 

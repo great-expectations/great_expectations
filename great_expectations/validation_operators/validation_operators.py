@@ -12,12 +12,10 @@ from great_expectations.core.batch import Batch
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -238,6 +236,16 @@ class ActionListValidationOperator(ValidationOperator):
             self.actions[action_config["name"]] = new_action
 
     @property
+    def _using_cloud_context(self) -> bool:
+        # Chetan - 20221216 - This is a temporary property to encapsulate any Cloud leakage
+        # Upon refactoring this class to decouple Cloud-specific branches, this should be removed
+        from great_expectations.data_context.data_context.cloud_data_context import (
+            CloudDataContext,
+        )
+
+        return isinstance(self.data_context, CloudDataContext)
+
+    @property
     def validation_operator_config(self) -> dict:
         if self._validation_operator_config is None:
             self._validation_operator_config = {
@@ -288,7 +296,7 @@ class ActionListValidationOperator(ValidationOperator):
         run_time=None,
         catch_exceptions=None,
         result_format=None,
-        checkpoint_identifier=None,
+        checkpoint_identifier: Optional[GXCloudIdentifier] = None,
         checkpoint_name: Optional[str] = None,
         validation_id: Optional[str] = None,
     ) -> ValidationOperatorResult:
@@ -372,13 +380,13 @@ class ActionListValidationOperator(ValidationOperator):
 
             run_results = {}
             for batch, async_batch_validation_result in batch_and_async_result_tuples:
-                if self.data_context.ge_cloud_mode:
-                    expectation_suite_identifier = GeCloudIdentifier(
-                        resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
-                        ge_cloud_id=batch._expectation_suite.ge_cloud_id,
+                if self._using_cloud_context:
+                    expectation_suite_identifier = GXCloudIdentifier(
+                        resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
+                        cloud_id=batch._expectation_suite.ge_cloud_id,
                     )
-                    validation_result_id = GeCloudIdentifier(
-                        resource_type=GeCloudRESTResource.VALIDATION_RESULT
+                    validation_result_id = GXCloudIdentifier(
+                        resource_type=GXCloudRESTResource.VALIDATION_RESULT
                     )
                 else:
                     expectation_suite_identifier = ExpectationSuiteIdentifier(
@@ -393,7 +401,7 @@ class ActionListValidationOperator(ValidationOperator):
                 validation_result = async_batch_validation_result.result()
                 validation_result.meta["validation_id"] = validation_id
                 validation_result.meta["checkpoint_id"] = (
-                    checkpoint_identifier.ge_cloud_id if checkpoint_identifier else None
+                    checkpoint_identifier.cloud_id if checkpoint_identifier else None
                 )
 
                 batch_actions_results = self._run_actions(

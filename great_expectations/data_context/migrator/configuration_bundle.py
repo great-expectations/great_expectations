@@ -1,6 +1,7 @@
 """TODO: Add docstring"""
+from __future__ import annotations
 
-from typing import Dict, List, cast
+from typing import TYPE_CHECKING, Dict, List, cast
 
 from marshmallow import Schema, fields, post_dump
 
@@ -13,9 +14,6 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResultSchema,
 )
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context.data_context.base_data_context import (
-    BaseDataContext,
-)
 from great_expectations.data_context.data_context_variables import DataContextVariables
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
@@ -30,9 +28,14 @@ from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
 
 class ConfigurationBundle:
-    def __init__(self, context: BaseDataContext) -> None:
+    def __init__(self, context: AbstractDataContext) -> None:
 
         self._context = context
         self._context_id = context.data_context_id
@@ -100,7 +103,7 @@ class ConfigurationBundle:
         # to all Data Contexts.
         datasource_configs: List[DatasourceConfig] = []
         for datasource_name in datasource_names:
-            datasource_config = self._context._datasource_store.retrieve_by_name(
+            datasource_config = self._context._datasource_store.retrieve_by_name(  # type: ignore[attr-defined]
                 datasource_name=datasource_name
             )
             datasource_config.name = datasource_name
@@ -126,7 +129,7 @@ class ConfigurationBundle:
             )
 
         return [
-            round_trip_profiler_config(self._context.get_profiler(name).config)
+            round_trip_profiler_config(self._context.get_profiler(name).config)  # type: ignore[arg-type]
             for name in self._context.list_profilers()
         ]
 

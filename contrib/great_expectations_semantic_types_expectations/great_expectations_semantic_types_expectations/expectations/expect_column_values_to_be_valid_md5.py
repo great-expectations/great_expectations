@@ -42,7 +42,7 @@ class ColumnValuesToBeValidMd5(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidMd5(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid MD5 format."""
+    """Expect column values to be valid MD5 hashes."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

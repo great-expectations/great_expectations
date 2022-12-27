@@ -2,9 +2,9 @@ import os
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 
-context = ge.get_context()
+context = gx.get_context()
 
 yaml = yaml.YAML(typ="safe")
 

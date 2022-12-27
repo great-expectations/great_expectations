@@ -4,7 +4,6 @@ import copy
 import datetime
 import json
 import logging
-import os
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 from uuid import UUID
 
@@ -37,20 +36,14 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     get_checkpoint_run_usage_statistics,
     usage_statistics_enabled_method,
 )
-from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointValidationConfig,
 )
-from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-    substitute_all_config_variables,
-)
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.util import (
     deep_filter_properties_iterable,
     filter_properties_dict,
@@ -62,7 +55,7 @@ from great_expectations.validation_operators.types.validation_operator_result im
 from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import AbstractDataContext, DataContext
+    from great_expectations.data_context import AbstractDataContext
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +69,7 @@ class BaseCheckpoint(ConfigPeer):
     def __init__(
         self,
         checkpoint_config: CheckpointConfig,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
     ) -> None:
         from great_expectations.data_context.data_context.abstract_data_context import (
             AbstractDataContext,
@@ -127,6 +120,10 @@ class BaseCheckpoint(ConfigPeer):
         run_time = run_time or datetime.datetime.now()
         runtime_configuration = runtime_configuration or {}
         result_format = result_format or runtime_configuration.get("result_format")
+        _result_format_types = (type(None), str, dict)
+        assert isinstance(
+            result_format, _result_format_types
+        ), f"result_format should be of type - {' '.join(str(t) for t in _result_format_types)}"
 
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
         validations = get_validations_with_batch_request_as_dict(
@@ -161,9 +158,7 @@ class BaseCheckpoint(ConfigPeer):
             )
 
         if run_name is None and run_name_template is not None:
-            run_name = get_datetime_string_from_strftime_format(
-                format_str=run_name_template, datetime_obj=run_time
-            )
+            run_name = run_time.strftime(run_name_template)
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 
@@ -278,7 +273,7 @@ class BaseCheckpoint(ConfigPeer):
         else:
             substituted_config = copy.deepcopy(source_config)
 
-        if self.data_context.ge_cloud_mode:
+        if self._using_cloud_context:
             return substituted_config
 
         return self._substitute_config_variables(config=substituted_config)
@@ -295,29 +290,13 @@ class BaseCheckpoint(ConfigPeer):
             source_config=source_config, runtime_kwargs=runtime_kwargs
         )
 
-        if self.data_context.ge_cloud_mode:
+        if self._using_cloud_context:
             return substituted_config
 
         return self._substitute_config_variables(config=substituted_config)
 
     def _substitute_config_variables(self, config: dict) -> dict:
-        substituted_config_variables = substitute_all_config_variables(
-            self.data_context.config_variables,
-            dict(os.environ),
-            self.data_context.DOLLAR_SIGN_ESCAPE_STRING,
-        )
-
-        substitutions = {
-            **substituted_config_variables,
-            **dict(os.environ),
-            **self.data_context.runtime_environment,
-        }
-
-        return substitute_all_config_variables(
-            data=config,
-            replace_variables_dict=substitutions,
-            dollar_sign_escape_string=self.data_context.DOLLAR_SIGN_ESCAPE_STRING,
-        )
+        return self.data_context.config_provider.substitute_config(config)
 
     def _run_validation(
         self,
@@ -359,15 +338,11 @@ class BaseCheckpoint(ConfigPeer):
 
             validator: Validator = self.data_context.get_validator(
                 batch_request=batch_request,
-                expectation_suite_name=(
-                    expectation_suite_name
-                    if not self.data_context.ge_cloud_mode
-                    else None
-                ),
+                expectation_suite_name=expectation_suite_name
+                if not self._using_cloud_context
+                else None,
                 expectation_suite_ge_cloud_id=(
-                    expectation_suite_ge_cloud_id
-                    if self.data_context.ge_cloud_mode
-                    else None
+                    expectation_suite_ge_cloud_id if self._using_cloud_context else None
                 ),
                 include_rendered_content=include_rendered_content,
             )
@@ -396,10 +371,10 @@ class BaseCheckpoint(ConfigPeer):
                 )
             )
             checkpoint_identifier = None
-            if self.data_context.ge_cloud_mode:
-                checkpoint_identifier = GeCloudIdentifier(
-                    resource_type=GeCloudRESTResource.CHECKPOINT,
-                    ge_cloud_id=str(self.ge_cloud_id),
+            if self._using_cloud_context:
+                checkpoint_identifier = GXCloudIdentifier(
+                    resource_type=GXCloudRESTResource.CHECKPOINT,
+                    cloud_id=str(self.ge_cloud_id),
                 )
 
             operator_run_kwargs = {}
@@ -430,7 +405,7 @@ class BaseCheckpoint(ConfigPeer):
         ) as e:
             raise ge_exceptions.CheckpointError(
                 f"Exception occurred while running validation[{idx}] of Checkpoint '{self.name}': {e.message}."
-            )
+            ) from e
 
     def self_check(self, pretty_print=True) -> dict:
         # Provide visibility into parameters that Checkpoint was instantiated with.
@@ -520,8 +495,18 @@ is run), with each validation having its own defined "action_list" attribute.
             return None
 
     @property
-    def data_context(self) -> DataContext:
+    def data_context(self) -> AbstractDataContext:
         return self._data_context
+
+    @property
+    def _using_cloud_context(self) -> bool:
+        # Chetan - 20221216 - This is a temporary property to encapsulate any Cloud leakage
+        # Upon refactoring this class to decouple Cloud-specific branches, this should be removed
+        from great_expectations.data_context.data_context.cloud_data_context import (
+            CloudDataContext,
+        )
+
+        return isinstance(self.data_context, CloudDataContext)
 
     def __repr__(self) -> str:
         return str(self.get_config())
