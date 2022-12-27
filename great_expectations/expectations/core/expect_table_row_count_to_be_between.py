@@ -194,8 +194,8 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         cls, renderer_configuration: RendererConfiguration
     ) -> RendererConfiguration:
         add_param_args: List[AddParamArgs] = [
-            ("min_value", [RendererValueType.NUMBER, RendererValueType.DATE]),
-            ("max_value", [RendererValueType.NUMBER, RendererValueType.DATE]),
+            ("min_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
+            ("max_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
             ("strict_min", RendererValueType.BOOLEAN),
             ("strict_max", RendererValueType.BOOLEAN),
         ]

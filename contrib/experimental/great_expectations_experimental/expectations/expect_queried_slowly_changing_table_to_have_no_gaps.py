@@ -72,10 +72,12 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
             threshold = self.default_kwarg_values["threshold"]
 
         metrics = convert_to_json_serializable(data=metrics)
+        holes_count: int
+        total_count: int
         holes_count, total_count = list(
             metrics.get("query.template_values")[0].values()
-        )[0]
-        error_rate = holes_count / total_count
+        )
+        error_rate = float(holes_count) / total_count
 
         return {
             "success": error_rate <= threshold,
