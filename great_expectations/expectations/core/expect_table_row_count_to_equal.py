@@ -14,7 +14,7 @@ from great_expectations.render import LegacyRendererType, RenderedStringTemplate
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
-    RendererSchemaType,
+    RendererValueType,
 )
 from great_expectations.render.util import substitute_none_for_missing
 
@@ -90,7 +90,11 @@ class ExpectTableRowCountToEqual(TableExpectation):
         # Setting up a configuration
         super().validate_configuration(configuration)
 
-        value = configuration.kwargs.get("value")
+        value: Optional[int] = (
+            configuration.kwargs.get("value")
+            if configuration and configuration.kwargs
+            else None
+        )
 
         try:
             assert value is not None, "An expected row count must be provided"
@@ -111,7 +115,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         renderer_configuration.add_param(
-            name="value", schema_type=RendererSchemaType.NUMBER
+            name="value", param_type=RendererValueType.NUMBER
         )
         renderer_configuration.template_str = "Must have exactly $value rows."
         return renderer_configuration
@@ -125,7 +129,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[RenderedStringTemplateContent]:
-        renderer_configuration = RendererConfiguration(
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
