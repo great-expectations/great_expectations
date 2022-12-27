@@ -177,10 +177,6 @@ def test_run_checkpoint_and_data_doc(empty_data_context, include_rendered_conten
     assert "ge-failed-icon" not in data_doc_index
 
 
-@pytest.mark.skipif(
-    sys.version_info < (3, 8),
-    reason="Our custom sqlite sqrt function requires python 3.8+",
-)
 @pytest.mark.integration
 @pytest.mark.slow
 def test_run_data_assistant_and_checkpoint(empty_data_context):
@@ -220,10 +216,6 @@ def test_run_data_assistant_and_checkpoint(empty_data_context):
     )
 
 
-@pytest.mark.skipif(
-    sys.version_info < (3, 8),
-    reason="Our custom sqlite sqrt function requires python 3.8+",
-)
 @pytest.mark.integration
 @pytest.mark.slow
 def test_run_multibatch_data_assistant_and_checkpoint(empty_data_context):

@@ -153,7 +153,9 @@ class _YamlConfigValidator:
 
         Args:
             yaml_config: A string containing the yaml config to be tested
-            name: (Optional) A string containing the name of the component to instantiate
+            name: Optional name of the component to instantiate
+            class_name: Optional, overridden if provided in the config
+            runtime_environment: Optional override for config items
             pretty_print: Determines whether to print human-readable output
             return_mode: Determines what type of object test_yaml_config will return.
                 Valid modes are "instantiated_class" and "report_object"
@@ -446,8 +448,8 @@ class _YamlConfigValidator:
 
         checkpoint_config: Union[CheckpointConfig, dict]
 
-        checkpoint_config = CheckpointConfig.from_commented_map(commented_map=config)  # type: ignore[assignment]
-        checkpoint_config = checkpoint_config.to_json_dict()  # type: ignore[union-attr]
+        checkpoint_config = CheckpointConfig.from_commented_map(commented_map=config)
+        checkpoint_config = checkpoint_config.to_json_dict()
         checkpoint_config.update({"name": checkpoint_name})
 
         checkpoint_class_args: dict = filter_properties_dict(  # type: ignore[assignment]
@@ -615,10 +617,10 @@ class _YamlConfigValidator:
             checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
             # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
             checkpoint_config: Union[CheckpointConfig, dict]
-            checkpoint_config = CheckpointConfig.from_commented_map(  # type: ignore[assignment]
+            checkpoint_config = CheckpointConfig.from_commented_map(
                 commented_map=config
             )
-            checkpoint_config = checkpoint_config.to_json_dict()  # type: ignore[union-attr]
+            checkpoint_config = checkpoint_config.to_json_dict()
             checkpoint_config.update({"name": checkpoint_name})
             usage_stats_event_payload = anonymizer.anonymize(
                 obj=checkpoint_config, name=checkpoint_name, config=checkpoint_config  # type: ignore[arg-type]

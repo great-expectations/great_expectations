@@ -84,9 +84,6 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(configuration.kwargs, ["other_table_name"])
         template_str = "Row count must equal the row count of table $other_table_name."
@@ -97,7 +94,7 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
                 "value": params.get("other_table_name"),
             },
         }
-        return (template_str, params_with_json_schema, styling)
+        return template_str, params_with_json_schema, None, styling
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
@@ -110,9 +107,6 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(configuration.kwargs, ["other_table_name"])
         template_str = "Row count must equal the row count of table $other_table_name."
