@@ -130,7 +130,7 @@ class MetaNotes(TypedDict):
 
 class RendererConfiguration(GenericModel, Generic[RendererParams]):
     """
-    Configuration object built for each renderer. Operations are performed strictly on this object at the renderer
+    Configuration object built for each renderer. Operations to be performed strictly on this object at the renderer
         implementation-level.
     """
 
