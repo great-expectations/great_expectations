@@ -1,5 +1,5 @@
 ---
-title: Integrations And How-Tos
+title: Integrations and how-tos
 ---
 
 ## Overview

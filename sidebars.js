@@ -284,7 +284,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Integrations And How-Tos',
+      label: 'Integrations and how-tos',
       link: { type: 'doc', id: 'deployment_patterns/integrations_and_howtos_overview' },
       items: [
         'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
