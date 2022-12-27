@@ -285,7 +285,7 @@ module.exports = {
     {
       type: 'category',
       label: 'Integrations And How-Tos',
-      link: { type: 'doc', id: 'deployment_patterns/reference_architecture_overview' },
+      link: { type: 'doc', id: 'deployment_patterns/integrations_and_howtos_overview' },
       items: [
         'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
