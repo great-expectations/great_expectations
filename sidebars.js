@@ -284,7 +284,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Reference Architectures',
+      label: 'Integrations And How-Tos',
       link: { type: 'doc', id: 'deployment_patterns/reference_architecture_overview' },
       items: [
         'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
