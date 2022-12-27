@@ -839,11 +839,19 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_complete_o
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
     first_result_full_list = evrs[0]["results"][0]["result"]["unexpected_index_list"]
-    assert first_result_full_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    assert first_result_full_list == [
+        {"animals": "giraffe", "pk_1": 3},
+        {"animals": "lion", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+    ]
     first_result_partial_list = evrs[0]["results"][0]["result"][
         "partial_unexpected_index_list"
     ]
-    assert first_result_partial_list == [{"pk_1": 3}, {"pk_1": 4}, {"pk_1": 5}]
+    assert first_result_partial_list == [
+        {"animals": "giraffe", "pk_1": 3},
+        {"animals": "lion", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+    ]
 
 
 # @pytest.mark.integration
