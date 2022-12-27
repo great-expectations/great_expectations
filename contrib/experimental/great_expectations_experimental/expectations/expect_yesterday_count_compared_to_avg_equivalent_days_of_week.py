@@ -35,7 +35,13 @@ def generate_data_sample(n_appearances: dict):
 
 
 class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
-    """Metric that calculate daily counts"""
+    """
+    This metric expects daily counts of the given column, to be close to the average counts calculated 4 weeks back,
+    respective to the specific day of the week.
+    The expectation fails if the difference in percentage ((current - average) / average) is more than the threshold
+    given by user (default value is 25%). The threshold parameter should be given in fraction and not percent,
+    i.e. for 25% define threshold = 0.25
+    """
 
     metric_name = "column.counts_per_days_custom"
 
@@ -204,8 +210,6 @@ class ExpectYesterdayCountComparedToAvgEquivalentDaysOfWeek(ColumnExpectation):
         else:
             msg = (
                 f"The diff between yesterday's count ({yesterday_count}) and the avg. count ({diff_percentage:.0%}) "
-                f""
-                f""
                 f"is below threshold"
             )
             success = True
