@@ -115,7 +115,7 @@ class RendererTableValue(_RendererValueBase):
 
 
 class MetaNotesFormat(str, Enum):
-    """Possible formats that can be passed into MetaNotes."""
+    """Possible formats that can be rendered via MetaNotes."""
 
     STRING = "string"
     MARKDOWN = "markdown"
