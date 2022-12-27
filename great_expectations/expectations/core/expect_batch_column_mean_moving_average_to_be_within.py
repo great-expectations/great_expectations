@@ -18,10 +18,7 @@ from great_expectations.render import (
     RenderedStringTemplateContent,
 )
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.renderer_configuration import (
-    RendererConfiguration,
-    RendererSchemaType,
-)
+from great_expectations.render.renderer_configuration import RendererConfiguration
 from great_expectations.render.util import (
     handle_strict_min_max,
     parse_row_condition_string_pandas_engine,
