@@ -90,7 +90,11 @@ class ExpectTableRowCountToEqual(TableExpectation):
         # Setting up a configuration
         super().validate_configuration(configuration)
 
-        value = configuration.kwargs.get("value")
+        value: Optional[int] = (
+            configuration.kwargs.get("value")
+            if configuration and configuration.kwargs
+            else None
+        )
 
         try:
             assert value is not None, "An expected row count must be provided"
@@ -125,7 +129,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[RenderedStringTemplateContent]:
-        renderer_configuration = RendererConfiguration(
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
