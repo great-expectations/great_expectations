@@ -105,7 +105,7 @@ from great_expectations.render.exceptions import RendererConfigurationError
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
-    RendererSchemaType,
+    RendererValueType,
 )
 from great_expectations.render.util import (
     build_count_and_index_table,
@@ -324,7 +324,7 @@ class Expectation(metaclass=MetaExpectation):
         "catch_exceptions": False,
         "result_format": "BASIC",
     }
-    args_keys = None
+    args_keys: Tuple[str, ...] = ()
 
     expectation_type: str
     examples: List[dict] = []
@@ -392,14 +392,14 @@ class Expectation(metaclass=MetaExpectation):
         add_param_args = (
             (
                 "expectation_type",
-                RendererSchemaType.STRING,
+                RendererValueType.STRING,
                 renderer_configuration.expectation_type,
             ),
-            ("kwargs", RendererSchemaType.STRING, renderer_configuration.kwargs),
+            ("kwargs", RendererValueType.STRING, renderer_configuration.kwargs),
         )
-        for name, schema_type, value in add_param_args:
+        for name, param_type, value in add_param_args:
             renderer_configuration.add_param(
-                name=name, schema_type=schema_type, value=value
+                name=name, param_type=param_type, value=value
             )
 
         value_obj = renderedAtomicValueSchema.load(
@@ -434,14 +434,14 @@ class Expectation(metaclass=MetaExpectation):
         add_param_args = (
             (
                 "expectation_type",
-                RendererSchemaType.STRING,
+                RendererValueType.STRING,
                 renderer_configuration.expectation_type,
             ),
-            ("kwargs", RendererSchemaType.STRING, renderer_configuration.kwargs),
+            ("kwargs", RendererValueType.STRING, renderer_configuration.kwargs),
         )
-        for name, schema_type, value in add_param_args:
+        for name, param_type, value in add_param_args:
             renderer_configuration.add_param(
-                name=name, schema_type=schema_type, value=value
+                name=name, param_type=param_type, value=value
             )
 
         renderer_configuration.template_str = template_str
@@ -939,14 +939,14 @@ class Expectation(metaclass=MetaExpectation):
         add_param_args = (
             (
                 "expectation_type",
-                RendererSchemaType.STRING,
+                RendererValueType.STRING,
                 renderer_configuration.expectation_type,
             ),
-            ("kwargs", RendererSchemaType.STRING, renderer_configuration.kwargs),
+            ("kwargs", RendererValueType.STRING, renderer_configuration.kwargs),
         )
-        for name, schema_type, value in add_param_args:
+        for name, param_type, value in add_param_args:
             renderer_configuration.add_param(
-                name=name, schema_type=schema_type, value=value
+                name=name, param_type=param_type, value=value
             )
 
         value_obj = renderedAtomicValueSchema.load(
@@ -1745,11 +1745,11 @@ class Expectation(metaclass=MetaExpectation):
         if len(value_set) > 0:
             for idx, value in enumerate(value_set):
                 if isinstance(value, Number):
-                    schema_type = RendererSchemaType.NUMBER
+                    param_type = RendererValueType.NUMBER
                 else:
-                    schema_type = RendererSchemaType.STRING
+                    param_type = RendererValueType.STRING
                 renderer_configuration.add_param(
-                    name=f"v__{str(idx)}", schema_type=schema_type, value=value
+                    name=f"v__{str(idx)}", param_type=param_type, value=value
                 )
         return renderer_configuration
 
@@ -1777,7 +1777,7 @@ class Expectation(metaclass=MetaExpectation):
         )
         renderer_configuration.add_param(
             name="mostly_pct",
-            schema_type=RendererSchemaType.STRING,
+            param_type=RendererValueType.STRING,
             value=mostly_pct_value,
         )
         return renderer_configuration
@@ -2256,8 +2256,9 @@ class TableExpectation(Expectation, ABC):
         "row_condition",
         "condition_parser",
     )
-    metric_dependencies = ()
+    metric_dependencies: Tuple[str, ...] = ()
     domain_type = MetricDomainTypes.TABLE
+    args_keys: Tuple[str, ...] = ()
 
     def get_validation_dependencies(
         self,

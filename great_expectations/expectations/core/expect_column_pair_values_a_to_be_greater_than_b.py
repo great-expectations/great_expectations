@@ -13,7 +13,7 @@ from great_expectations.render import LegacyRendererType, RenderedStringTemplate
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
-    RendererSchemaType,
+    RendererValueType,
 )
 from great_expectations.render.util import (
     num_to_str,
@@ -120,15 +120,15 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         add_param_args = (
-            ("column_A", RendererSchemaType.STRING),
-            ("column_B", RendererSchemaType.STRING),
-            ("parse_strings_as_datetimes", RendererSchemaType.BOOLEAN),
-            ("ignore_row_if", RendererSchemaType.STRING),
-            ("mostly", RendererSchemaType.NUMBER),
-            ("or_equal", RendererSchemaType.BOOLEAN),
+            ("column_A", RendererValueType.STRING),
+            ("column_B", RendererValueType.STRING),
+            ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
+            ("ignore_row_if", RendererValueType.STRING),
+            ("mostly", RendererValueType.NUMBER),
+            ("or_equal", RendererValueType.BOOLEAN),
         )
-        for name, schema_type in add_param_args:
-            renderer_configuration.add_param(name=name, schema_type=schema_type)
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
         params: RendererParams = renderer_configuration.params
         template_str = ""

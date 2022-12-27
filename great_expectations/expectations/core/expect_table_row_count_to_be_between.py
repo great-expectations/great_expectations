@@ -12,9 +12,9 @@ from great_expectations.expectations.expectation import (
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
+    AddParamArgs,
     RendererConfiguration,
-    RendererParams,
-    RendererSchemaType,
+    RendererValueType,
 )
 from great_expectations.render.util import (
     handle_strict_min_max,
@@ -193,28 +193,28 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
     def _prescriptive_template(
         cls, renderer_configuration: RendererConfiguration
     ) -> RendererConfiguration:
-        add_param_args = (
-            ("min_value", [RendererSchemaType.NUMBER, RendererSchemaType.DATE]),
-            ("max_value", [RendererSchemaType.NUMBER, RendererSchemaType.DATE]),
-            ("strict_min", RendererSchemaType.BOOLEAN),
-            ("strict_max", RendererSchemaType.BOOLEAN),
-        )
-        for name, schema_type in add_param_args:
-            renderer_configuration.add_param(name=name, schema_type=schema_type)
+        add_param_args: List[AddParamArgs] = [
+            ("min_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
+            ("max_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
+            ("strict_min", RendererValueType.BOOLEAN),
+            ("strict_max", RendererValueType.BOOLEAN),
+        ]
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
-        params: RendererParams = renderer_configuration.params
+        params = renderer_configuration.params
 
         if not params.min_value and not params.max_value:
             template_str = "May have any number of rows."
         else:
             at_least_str = "greater than or equal to"
             if params.strict_min:
-                at_least_str: str = cls._get_strict_min_string(
+                at_least_str = cls._get_strict_min_string(
                     renderer_configuration=renderer_configuration
                 )
             at_most_str = "less than or equal to"
             if params.strict_max:
-                at_most_str: str = cls._get_strict_max_string(
+                at_most_str = cls._get_strict_max_string(
                     renderer_configuration=renderer_configuration
                 )
 
@@ -245,7 +245,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs,  # type: ignore[union-attr]
             [
                 "min_value",
                 "max_value",

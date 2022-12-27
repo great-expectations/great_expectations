@@ -6,13 +6,16 @@ from enum import Enum
 from string import Template as pTemplate
 from typing import TYPE_CHECKING, List, Optional, Union
 
-from marshmallow import INCLUDE, Schema, fields, post_dump, post_load
+from marshmallow import Schema, fields, post_dump, post_load
 
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.types import DictDot
 
 if TYPE_CHECKING:
-    from great_expectations.render.renderer_configuration import MetaNotes
+    from great_expectations.render.renderer_configuration import (
+        MetaNotes,
+        RendererTableValue,
+    )
 
 
 class RendererPrefix(str, Enum):
@@ -627,8 +630,8 @@ class RenderedAtomicValue(DictDot):
         header: Optional[RenderedAtomicValue] = None,
         template: Optional[str] = None,
         params: Optional[dict] = None,
-        header_row: Optional[List[RenderedAtomicValue]] = None,
-        table: Optional[List[List[RenderedAtomicValue]]] = None,
+        header_row: Optional[List[RendererTableValue]] = None,
+        table: Optional[List[List[RendererTableValue]]] = None,
         graph: Optional[dict] = None,
         meta_notes: Optional[MetaNotes] = None,
     ) -> None:
@@ -640,8 +643,8 @@ class RenderedAtomicValue(DictDot):
         self.params: Optional[dict] = params
 
         # TableType
-        self.header_row: Optional[List[RenderedAtomicValue]] = header_row
-        self.table: Optional[List[List[RenderedAtomicValue]]] = table
+        self.header_row: Optional[List[RendererTableValue]] = header_row
+        self.table: Optional[List[List[RendererTableValue]]] = table
 
         # GraphType
         self.graph = RenderedAtomicValueGraph(graph=graph)
@@ -685,9 +688,6 @@ class RenderedAtomicValueGraph(DictDot):
 
 
 class RenderedAtomicValueSchema(Schema):
-    class Meta:
-        unknown = INCLUDE
-
     schema = fields.Dict(required=False, allow_none=True)
     header = fields.Dict(required=False, allow_none=True)
 
@@ -764,9 +764,6 @@ class RenderedAtomicContent(RenderedContent):
 
 
 class RenderedAtomicContentSchema(Schema):
-    class Meta:
-        unknown: INCLUDE  # type: ignore[valid-type]
-
     name = fields.String(required=False, allow_none=True)
     value = fields.Nested(RenderedAtomicValueSchema(), required=True, allow_none=False)
     value_type = fields.String(required=True, allow_none=False)
