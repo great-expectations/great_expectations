@@ -1,6 +1,7 @@
 from typing import Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
@@ -61,16 +62,11 @@ class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
-        success = False
-
-        query_result = metrics.get("query.template_values")
-        num_of_missing_rows = query_result[0][0]
-
-        if num_of_missing_rows == 0:
-            success = True
+        metrics = convert_to_json_serializable(data=metrics)
+        num_of_missing_rows = list(metrics.get("query.template_values")[0].values())[0]
 
         return {
-            "success": success,
+            "success": num_of_missing_rows == 0,
             "result": {
                 "Rows with IDs in first table missing in second table": num_of_missing_rows
             },

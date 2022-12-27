@@ -21,7 +21,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import DataContext
+    from great_expectations.data_context.data_context.file_data_context import (
+        FileDataContext,
+    )
     from great_expectations.data_context.store import DataContextStore
 
 
@@ -302,7 +304,7 @@ class EphemeralDataContextVariables(DataContextVariables):
 
 @dataclass(repr=False)
 class FileDataContextVariables(DataContextVariables):
-    data_context: Optional["DataContext"] = None
+    data_context: Optional[FileDataContext] = None
 
     def __post_init__(self) -> None:
         # Chetan - 20220607 - Although the above argument is not truly optional, we are

@@ -144,7 +144,7 @@ def file_data_context(
     project_path.mkdir()
     context_root_dir = project_path / "great_expectations"
     context = FileDataContext(
-        project_config=data_context_config, context_root_dir=str(context_root_dir)
+        project_config=data_context_config, context_root_dir=context_root_dir
     )
     return context
 
@@ -164,7 +164,7 @@ def cloud_data_context(
         cloud_base_url=ge_cloud_config_e2e.base_url,
         cloud_access_token=ge_cloud_config_e2e.access_token,
         cloud_organization_id=ge_cloud_config_e2e.organization_id,
-        context_root_dir=str(context_root_dir),
+        context_root_dir=context_root_dir,
     )
     return cloud_data_context
 
@@ -606,7 +606,9 @@ def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
 
 @pytest.mark.e2e
 @pytest.mark.cloud
-@mock.patch("great_expectations.data_context.DataContext._save_project_config")
+@mock.patch(
+    "great_expectations.data_context.data_context.serializable_data_context.SerializableDataContext._save_project_config"
+)
 @pytest.mark.xfail(
     strict=False,
     reason="GX Cloud E2E tests are failing due to env vars not being consistently recognized by Docker; x-failing for purposes of 0.15.22 release",

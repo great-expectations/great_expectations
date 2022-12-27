@@ -15,11 +15,7 @@ from great_expectations.core import (
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
@@ -28,15 +24,9 @@ from great_expectations.expectations.expectation import (
     TableExpectation,
     render_evaluation_parameter_string,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
-)
-from great_expectations.expectations.registry import (
-    _registered_expectations,
-    _registered_metrics,
-    _registered_renderers,
 )
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
@@ -459,7 +449,9 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
         "meta": None,
     }
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ):
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.

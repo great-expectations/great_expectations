@@ -8,13 +8,17 @@ import textwrap
 
 import click
 
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
+
 try:
     from sqlalchemy_bigquery.parse_url import parse_url as parse_bigquery_url
 except (ImportError, ModuleNotFoundError):
     parse_bigquery_url = None
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations import DataContext, rtd_url_ge_version
+from great_expectations import rtd_url_ge_version
 from great_expectations.cli.v012 import toolkit
 from great_expectations.cli.v012.cli_messages import NO_DATASOURCES_FOUND
 from great_expectations.cli.v012.docs import build_docs
@@ -452,7 +456,10 @@ Great Expectations will now add a new Datasource '{:s}' to your deployment, by a
     return datasource_name
 
 
-def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
+def _add_sqlalchemy_datasource(  # noqa: C901 - 21
+    context,
+    prompt_for_datasource_name=True,
+):
 
     msg_success_database = (
         "\n<green>Great Expectations connected to your database!</green>"
@@ -606,7 +613,7 @@ After you connect to the datasource, run great_expectations init to continue.
 
 """.format(
                         datasource_name,
-                        DataContext.GX_YML,
+                        FileDataContext.GX_YML,
                         context.get_config()["config_variables_file_path"],
                         rtd_url_ge_version,
                         selected_database.value.lower(),
@@ -1075,7 +1082,7 @@ def get_batch_kwargs(
     return (datasource_name, batch_kwargs_generator_name, data_asset_name, batch_kwargs)
 
 
-def _get_batch_kwargs_from_generator_or_from_file_path(
+def _get_batch_kwargs_from_generator_or_from_file_path(  # noqa: C901 - 26
     context,
     datasource_name,
     batch_kwargs_generator_name=None,
@@ -1227,7 +1234,7 @@ We could not determine the format of the file. What is it?
                             "\nDoes this file contain a header row?", default=True
                         )
                         batch_kwargs["reader_options"] = {"header": header_row}
-                    batch = datasource.get_batch(batch_kwargs=batch_kwargs)
+                    _ = datasource.get_batch(batch_kwargs=batch_kwargs)
                     break
         else:
             try:
@@ -1243,7 +1250,7 @@ We could not determine the format of the file. What is it?
                         "\nDoes this file contain a header row?", default=True
                     )
                     batch_kwargs["reader_options"] = {"header": header_row}
-                batch = datasource.get_batch(batch_kwargs=batch_kwargs)
+                _ = datasource.get_batch(batch_kwargs=batch_kwargs)
                 break
             except Exception as e:
                 file_load_error_message = """
@@ -1560,7 +1567,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
         while not do_exit:
             if (
                 profiling_results["error"]["code"]
-                == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
+                == FileDataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
             ):
                 cli_message(
                     msg_some_data_assets_not_found.format(
@@ -1569,7 +1576,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 )
             elif (
                 profiling_results["error"]["code"]
-                == DataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS
+                == FileDataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS
             ):
                 cli_message(
                     msg_too_many_data_assets.format(
@@ -1578,13 +1585,13 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 )
             elif (
                 profiling_results["error"]["code"]
-                == DataContext.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND
+                == FileDataContext.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND
             ):
                 cli_message(msg_error_multiple_generators_found.format(datasource_name))
                 sys.exit(1)
             elif (
                 profiling_results["error"]["code"]
-                == DataContext.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND
+                == FileDataContext.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND
             ):
                 cli_message(msg_error_no_generators_found.format(datasource_name))
                 sys.exit(1)

@@ -559,13 +559,6 @@ class Validator:
                     # Add a "success" object to the config
                     stored_config.success_on_last_run = validation_result.success
 
-                # NOTE: <DataContextRefactor> Indirect way to checking whether _data_context is a ExplorerDataContext
-                if self._data_context is not None and hasattr(
-                    self._data_context, "update_return_obj"
-                ):
-                    validation_result = self._data_context.update_return_obj(
-                        self, validation_result
-                    )
             except Exception as err:
                 if basic_runtime_configuration.get("catch_exceptions"):
                     exception_traceback = traceback.format_exc()
@@ -584,7 +577,6 @@ class Validator:
 
             if self._include_rendered_content:
                 validation_result.render()
-                validation_result.expectation_config.render()
 
             return validation_result
 
@@ -1344,9 +1336,11 @@ class Validator:
         """
         Wrapper around cloud_mode property of associated Data Context
         """
-        if self._data_context:
-            return self._data_context.cloud_mode
-        return False
+        from great_expectations.data_context.data_context.cloud_data_context import (
+            CloudDataContext,
+        )
+
+        return isinstance(self._data_context, CloudDataContext)
 
     @property
     def ge_cloud_mode(self) -> bool:
@@ -1792,7 +1786,6 @@ class Validator:
             if self._include_rendered_content:
                 for validation_result in results:
                     validation_result.render()
-                    validation_result.expectation_config.render()
             statistics = self._calc_validation_statistics(results)
 
             if only_return_failures:
@@ -1878,7 +1871,7 @@ class Validator:
             parameter_value (any): The value to be used
         """
         self._expectation_suite.evaluation_parameters.update(
-            {parameter_name: parameter_value}
+            {parameter_name: convert_to_json_serializable(parameter_value)}
         )
 
     def add_citation(

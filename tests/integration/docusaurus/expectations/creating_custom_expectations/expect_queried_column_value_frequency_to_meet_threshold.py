@@ -4,9 +4,10 @@ For detailed information on QueryExpectations, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
 """
 
-from typing import Any, Dict, Optional, Union
+from typing import Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -57,7 +58,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
     }
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration)
         value = configuration["kwargs"].get("value")
@@ -88,10 +89,12 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
         # </snippet>
+        metrics = convert_to_json_serializable(data=metrics)
+        query_result = metrics.get("query.column")
+        query_result = dict([element.values() for element in query_result])
+
         value = configuration["kwargs"].get("value")
         threshold = configuration["kwargs"].get("threshold")
-        query_result = metrics.get("query.column")
-        query_result = dict(query_result)
 
         if isinstance(value, list):
             success = all(

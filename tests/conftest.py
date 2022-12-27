@@ -49,7 +49,6 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
     GXCloudConfig,
-    InMemoryStoreBackendDefaults,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -69,6 +68,7 @@ from great_expectations.datasource.new_datasource import BaseDatasource, Datasou
 from great_expectations.execution_engine.execution_engine import (
     MetricPartialFunctionTypes,
 )
+from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
@@ -776,7 +776,7 @@ def empty_data_context(
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path = str(project_path)
-    context = gx.data_context.DataContext.create(project_path)
+    context = gx.data_context.FileDataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
@@ -810,7 +810,7 @@ def data_context_with_connection_to_animal_names_db(
     project_path = tmp_path / "test_configuration"
     project_path.mkdir()
     project_path = str(project_path)
-    context = gx.data_context.DataContext.create(project_path)
+    context = gx.data_context.FileDataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
@@ -1429,7 +1429,7 @@ def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS", raising=False)
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
-    context = gx.data_context.DataContext.create(project_path)
+    context = gx.data_context.FileDataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
@@ -1698,7 +1698,7 @@ def site_builder_data_context_with_html_store_titanic_random(
         os.path.join(filesystem_csv_3, "f2.csv"),
         str(os.path.join(project_dir, "data", "random", "f2.csv")),
     )
-    gx.data_context.DataContext.create(project_dir)
+    gx.data_context.FileDataContext.create(project_dir)
     shutil.copy(
         file_relative_path(
             __file__, "./test_fixtures/great_expectations_site_builder.yml"
@@ -1769,7 +1769,7 @@ def site_builder_data_context_v013_with_html_store_titanic_random(
         os.path.join(filesystem_csv_3, "f2.csv"),
         str(os.path.join(project_dir, "data", "random", "f2.csv")),
     )
-    gx.data_context.DataContext.create(project_dir)
+    gx.data_context.FileDataContext.create(project_dir)
     shutil.copy(
         file_relative_path(
             __file__, "./test_fixtures/great_expectations_v013_site_builder.yml"
@@ -2645,9 +2645,9 @@ def empty_data_context_in_cloud_mode(
         return ge_cloud_config
 
     with mock.patch(
-        "great_expectations.data_context.DataContext._save_project_config"
+        "great_expectations.data_context.data_context.serializable_data_context.SerializableDataContext._save_project_config"
     ), mock.patch(
-        "great_expectations.data_context.data_context.CloudDataContext.retrieve_data_context_config_from_cloud",
+        "great_expectations.data_context.data_context.cloud_data_context.CloudDataContext.retrieve_data_context_config_from_cloud",
         autospec=True,
         side_effect=mocked_config,
     ), mock.patch(
@@ -3050,7 +3050,7 @@ def alice_columnar_table_single_batch(empty_data_context):
                     },
                     meta={
                         "notes": {
-                            "format": "markdown",
+                            "format": MetaNotesFormat.MARKDOWN,
                             "content": [
                                 "### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**"
                             ],
@@ -3068,7 +3068,7 @@ def alice_columnar_table_single_batch(empty_data_context):
                     },
                     meta={
                         "notes": {
-                            "format": "markdown",
+                            "format": MetaNotesFormat.MARKDOWN,
                             "content": [
                                 "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
                             ],
@@ -3089,7 +3089,7 @@ def alice_columnar_table_single_batch(empty_data_context):
                             "candidate_strings": expected_candidate_strings_dict,
                         },
                         "notes": {
-                            "format": "markdown",
+                            "format": MetaNotesFormat.MARKDOWN,
                             "content": [
                                 "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                             ],
@@ -3388,7 +3388,7 @@ def alice_columnar_table_single_batch(empty_data_context):
                         "column": "$domain.domain_kwargs.column",
                         "meta": {
                             "notes": {
-                                "format": "markdown",
+                                "format": MetaNotesFormat.MARKDOWN,
                                 "content": [
                                     "### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**"
                                 ],
@@ -3406,7 +3406,7 @@ def alice_columnar_table_single_batch(empty_data_context):
                         "column": "$domain.domain_kwargs.column",
                         "meta": {
                             "notes": {
-                                "format": "markdown",
+                                "format": MetaNotesFormat.MARKDOWN,
                                 "content": [
                                     "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
                                 ],
@@ -3425,7 +3425,7 @@ def alice_columnar_table_single_batch(empty_data_context):
                         "meta": {
                             "profiler_details": "$parameter.my_date_format.details",
                             "notes": {
-                                "format": "markdown",
+                                "format": MetaNotesFormat.MARKDOWN,
                                 "content": [
                                     "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                                 ],
@@ -3511,7 +3511,7 @@ def alice_columnar_table_single_batch_context(
     # We need our salt to be consistent between runs to ensure idempotent anonymized values
     # <WILL> 20220630 - this is part of the DataContext Refactor and will be removed
     # (ie. adjusted to be context._usage_statistics_handler)
-    context._data_context._usage_statistics_handler = UsageStatisticsHandler(
+    context._usage_statistics_handler = UsageStatisticsHandler(
         context, "00000000-0000-0000-0000-00000000a004", "N/A"
     )
     monkeypatch.chdir(context.root_directory)
@@ -4297,7 +4297,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         },
                     },
                     "notes": {
-                        "format": "markdown",
+                        "format": MetaNotesFormat.MARKDOWN,
                         "content": [
                             "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                         ],
@@ -4321,7 +4321,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         },
                     },
                     "notes": {
-                        "format": "markdown",
+                        "format": MetaNotesFormat.MARKDOWN,
                         "content": [
                             "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                         ],
@@ -4350,7 +4350,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         },
                     },
                     "notes": {
-                        "format": "markdown",
+                        "format": MetaNotesFormat.MARKDOWN,
                         "content": [
                             "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                         ],
@@ -4374,7 +4374,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         },
                     },
                     "notes": {
-                        "format": "markdown",
+                        "format": MetaNotesFormat.MARKDOWN,
                         "content": [
                             "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                         ],
@@ -4400,7 +4400,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "success_ratio": 1.0,
                     },
                     "notes": {
-                        "format": "markdown",
+                        "format": MetaNotesFormat.MARKDOWN,
                         "content": [
                             "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                         ],
@@ -4421,7 +4421,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "success_ratio": 1.0,
                     },
                     "notes": {
-                        "format": "markdown",
+                        "format": MetaNotesFormat.MARKDOWN,
                         "content": [
                             "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                         ],
@@ -4442,7 +4442,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "success_ratio": 1.0,
                     },
                     "notes": {
-                        "format": "markdown",
+                        "format": MetaNotesFormat.MARKDOWN,
                         "content": [
                             "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                         ],
@@ -4463,7 +4463,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "success_ratio": 1.0,
                     },
                     "notes": {
-                        "format": "markdown",
+                        "format": MetaNotesFormat.MARKDOWN,
                         "content": [
                             "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                         ],
@@ -4704,7 +4704,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "meta": {
                             "profiler_details": "$parameter.my_date_format.details",
                             "notes": {
-                                "format": "markdown",
+                                "format": MetaNotesFormat.MARKDOWN,
                                 "content": [
                                     "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                                 ],
@@ -4751,7 +4751,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "meta": {
                             "profiler_details": "$parameter.my_regex.details",
                             "notes": {
-                                "format": "markdown",
+                                "format": MetaNotesFormat.MARKDOWN,
                                 "content": [
                                     "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                                 ],
@@ -7220,4 +7220,22 @@ def datasource_config_with_names() -> DatasourceConfig:
                 },
             }
         },
+    )
+
+
+@pytest.fixture
+def pandas_animals_dataframe_for_unexpected_rows_and_index():
+    return pd.DataFrame(
+        {
+            "pk_1": [0, 1, 2, 3, 4, 5],
+            "pk_2": ["zero", "one", "two", "three", "four", "five"],
+            "animals": [
+                "cat",
+                "fish",
+                "dog",
+                "giraffe",
+                "lion",
+                "zebra",
+            ],
+        }
     )

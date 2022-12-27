@@ -20,14 +20,14 @@ This will work to get the URLs for any type of Data Docs site setup, e.g. S3 or 
 
 First, within the `_run` method of your custom Validation Action, instantiate an empty `dict` to hold your sites:
 
-```python file=../../../../great_expectations/checkpoint/actions.py#L1083
+```python name="great_expectations/checkpoint/actions.py empty dict"
 ```
 
 ### 2. Acquire
 
 Next, call `get_docs_sites_urls` to get the urls for all the suites processed by this Checkpoint:
 
-```python file=../../../../great_expectations/checkpoint/actions.py#L1090-L1093
+```python name="great_expectations/checkpoint/actions.py get_docs_sites_urls"
 ```
 
 
@@ -35,7 +35,7 @@ Next, call `get_docs_sites_urls` to get the urls for all the suites processed by
 
 The above step returns a list of dictionaries containing the relevant information. Now, we need to iterate through the entries to build the object we want:
 
-```python file=../../../../great_expectations/checkpoint/actions.py#L1097-L1098
+```python name="great_expectations/checkpoint/actions.py iterate"
 ```
 
 ### 4. Utilize
