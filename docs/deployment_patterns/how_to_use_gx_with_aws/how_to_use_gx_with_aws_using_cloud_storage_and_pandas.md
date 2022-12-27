@@ -286,7 +286,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 ## Part 3: Create Expectations
 
-### 3.1: Prepare a Batch Request, Empty Expectation Suite, and Validator
+### 3.1: Prepare a Batch Request, empty Expectation Suite, and Validator
 
 <PrepareABatchRequestAndValidatorForCreatingExpectations />
 
