@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 import logging
+import pathlib
 from pprint import pformat as pf
-from typing import Dict, Type
+from typing import TYPE_CHECKING, Dict, List, Type, Union
 
-from pydantic import Extra, Field, validator
+from pydantic import Extra, Field, ValidationError, validator
 
 from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,
@@ -13,10 +14,20 @@ from great_expectations.experimental.datasources.experimental_base_model import 
 from great_expectations.experimental.datasources.interfaces import Datasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
 
+if TYPE_CHECKING:
+    from pydantic.error_wrappers import ErrorDict as PydanticErrorDict
+
+
 LOGGER = logging.getLogger(__name__)
 
 
 _ZEP_STYLE_DESCRIPTION = "ZEP Experimental Datasources"
+
+_MISSING_XDATASOURCES_ERRORS: PydanticErrorDict = {
+    "loc": ("xdatasources",),
+    "msg": "field required",
+    "type": "value_error.missing",
+}
 
 
 class GxConfig(ExperimentalBaseModel):
@@ -65,3 +76,28 @@ class GxConfig(ExperimentalBaseModel):
         if v and not loaded_datasources:
             raise ValueError(f"Of {len(v)} entries, no 'datasources' could be loaded")
         return loaded_datasources
+
+    @classmethod
+    def parse_yaml(
+        cls: Type[GxConfig], f: Union[pathlib.Path, str], _allow_empty: bool = False
+    ) -> GxConfig:
+        """TODO: explain this & add note about removing it."""
+        if _allow_empty:
+            try:
+                super().parse_yaml(f)
+            except ValidationError as validation_err:
+                errors_list: List[PydanticErrorDict] = validation_err.errors()
+                LOGGER.info(
+                    f"{cls.__name__}.parse_yaml() failed with errors - {errors_list}"
+                )
+                if errors_list == [_MISSING_XDATASOURCES_ERRORS]:
+                    LOGGER.warning(
+                        f"{cls.__name__}.parse_yaml() returning empty `xdatasources`"
+                    )
+                    return cls(xdatasources={})
+                else:
+                    LOGGER.warning(
+                        "`_allow_empty` does not prevent unrelated validation errors"
+                    )
+                    raise
+        return super().parse_yaml(f)
