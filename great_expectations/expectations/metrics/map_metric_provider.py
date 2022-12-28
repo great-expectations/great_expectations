@@ -1783,7 +1783,7 @@ def _pandas_map_condition_index(
 
     column_name: Union[str, quoted_name]
 
-    expectation_domain_column_name: str = domain_kwargs["column"]
+    expectation_domain_column_name: str = domain_kwargs.get("column")
 
     # one named index
     if df.index.name is not None:

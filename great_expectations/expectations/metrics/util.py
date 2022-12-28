@@ -1077,6 +1077,11 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(
     Returns:
         List of Dicts that contain ID/PK values
     """
+    if not expectation_domain_column_name:
+        raise ge_exceptions.MetricResolutionError(
+            message=f"Error: The domain column is currently set to None. Please check your configuration.",
+            failed_metrics=["unexpected_index_list"],
+        )
     index_names: List[str] = df.index.names
     unexpected_index_list: List[Dict[str, Any]] = list()
     unexpected_indices: List[Union[int, str]] = list(df.index)
@@ -1089,7 +1094,7 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(
         for column_name in unexpected_index_column_names:
             if column_name not in index_names:
                 raise ge_exceptions.MetricResolutionError(
-                    message=f"Error: The column {column_name} does not exist in the named indices.",
+                    message=f"Error: The column {column_name} does not exist in the named indices. Please check your configuration",
                     failed_metrics=["unexpected_index_list"],
                 )
             tuple_index = index_names.index(column_name, 0)
