@@ -167,4 +167,4 @@ class FileDataContext(SerializableDataContext):
             if path_to_zep_yaml.exists():
                 return GxConfig.parse_yaml(path_to_zep_yaml)
             logger.info(f"no zep config at {path_to_zep_yaml.absolute()}")
-        return GxConfig(datasources={})
+        return GxConfig(xdatasources={})

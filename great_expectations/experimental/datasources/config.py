@@ -22,17 +22,16 @@ _ZEP_STYLE_DESCRIPTION = "ZEP Experimental Datasources"
 class GxConfig(ExperimentalBaseModel):
     """Represents the full new-style/experimental configuration file."""
 
-    datasources: Dict[str, Datasource] = Field(
-        ..., alias="zep_datasources", description=_ZEP_STYLE_DESCRIPTION
-    )
+    xdatasources: Dict[str, Datasource] = Field(..., description=_ZEP_STYLE_DESCRIPTION)
+
+    @property
+    def datasources(self) -> Dict[str, Datasource]:
+        return self.xdatasources
 
     class Config:
         extra = Extra.ignore  # ignore any old style config keys
-        allow_population_by_field_name = (
-            True  # allow loading field from `datasources` or `zep_datasources`
-        )
 
-    @validator("datasources", pre=True)
+    @validator("xdatasources", pre=True)
     @classmethod
     def _load_datasource_subtype(cls, v: Dict[str, dict]):
         LOGGER.info(f"Loading 'datasources' ->\n{pf(v, depth=2)}")
@@ -66,10 +65,3 @@ class GxConfig(ExperimentalBaseModel):
         if v and not loaded_datasources:
             raise ValueError(f"Of {len(v)} entries, no 'datasources' could be loaded")
         return loaded_datasources
-
-    def json(self, by_alias=True, **kwargs) -> str:
-        """
-        Change default `.json()` behavior to dump `datasources` field as `zep_datasources`.
-        Only needed to avoid duplicate key with regular config files.
-        """
-        return super().json(by_alias=by_alias, **kwargs)

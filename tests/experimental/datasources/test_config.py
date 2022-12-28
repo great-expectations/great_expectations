@@ -30,7 +30,7 @@ PG_CONFIG_YAML_STR = PG_CONFIG_YAML_FILE.read_text()
 
 # TODO: create PG_CONFIG_YAML_FILE/STR from this dict
 PG_COMPLEX_CONFIG_DICT = {
-    "datasources": {
+    "xdatasources": {
         "my_pg_ds": {
             "connection_string": "postgres://foo.bar",
             "name": "my_pg_ds",
@@ -74,7 +74,7 @@ PG_COMPLEX_CONFIG_DICT = {
 PG_COMPLEX_CONFIG_JSON = json.dumps(PG_COMPLEX_CONFIG_DICT)
 
 SIMPLE_DS_DICT = {
-    "datasources": {
+    "xdatasources": {
         "my_ds": {
             "name": "my_ds",
             "type": "sql",
@@ -84,7 +84,7 @@ SIMPLE_DS_DICT = {
 }
 
 COMBINED_ZEP_AND_OLD_STYLE_CFG_DICT = {
-    "datasources": {
+    "xdatasources": {
         "my_ds": {
             "name": "my_ds",
             "type": "sql",
@@ -147,16 +147,16 @@ def test_load_config(inject_engine_lookup_double, load_method: Callable, input_)
 @pytest.mark.parametrize(
     ["config", "expected_error_loc", "expected_msg"],
     [
-        p({}, ("zep_datasources",), "field required", id="no datasources"),
+        p({}, ("xdatasources",), "field required", id="no datasources"),
         p(
             {
-                "zep_datasources": {
+                "xdatasources": {
                     "my_bad_ds_missing_type": {
                         "name": "my_bad_ds_missing_type",
                     }
                 }
             },
-            ("zep_datasources",),
+            ("xdatasources",),
             "'my_bad_ds_missing_type' is missing a 'type' entry",
             id="missing 'type' field",
         ),
@@ -188,7 +188,7 @@ def test_catch_bad_top_level_config(
     [
         p(
             {"name": "missing `table_name`", "type": "table"},
-            ("zep_datasources", "assets", "table_name"),
+            ("xdatasources", "assets", "table_name"),
             "field required",
             id="missing `table_name`",
         ),
@@ -202,7 +202,7 @@ def test_catch_bad_top_level_config(
                     "column_name": "foo",
                 },
             },
-            ("zep_datasources", "assets", "column_splitter", "method_name"),
+            ("xdatasources", "assets", "column_splitter", "method_name"),
             "unexpected value; permitted: 'split_on_year_and_month'",
             id="unknown splitter method",
         ),
@@ -217,7 +217,7 @@ def test_catch_bad_top_level_config(
                     "param_names": ["year", "month", "INVALID"],
                 },
             },
-            ("zep_datasources", "assets", "column_splitter", "param_names", 2),
+            ("xdatasources", "assets", "column_splitter", "param_names", 2),
             "unexpected value; permitted: 'year', 'month'",
             id="invalid splitter param_name",
         ),
@@ -240,7 +240,7 @@ def test_catch_bad_asset_configs(
     print(f"  Config\n{pf(config)}\n")
 
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        GxConfig.parse_obj({"datasources": config})
+        GxConfig.parse_obj({"xdatasources": config})
 
     print(f"\n{exc_info.typename}:{exc_info.value}")
 
@@ -396,7 +396,7 @@ def test_custom_sorter_serialization(
     dumped: str = from_json_gx_config.json(indent=2)
     print(f"  Dumped JSON ->\n\n{dumped}\n")
 
-    expected_sorter_strings: List[str] = PG_COMPLEX_CONFIG_DICT["datasources"][
+    expected_sorter_strings: List[str] = PG_COMPLEX_CONFIG_DICT["xdatasources"][
         "my_pg_ds"
     ]["assets"]["with_dslish_sorters"]["order_by"]
 
