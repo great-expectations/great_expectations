@@ -7,6 +7,7 @@ from pprint import pformat as pf
 from typing import TYPE_CHECKING, Dict, List, Type, Union
 
 from pydantic import Extra, Field, ValidationError, validator
+from typing_extensions import Final
 
 from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,
@@ -21,13 +22,15 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-_ZEP_STYLE_DESCRIPTION = "ZEP Experimental Datasources"
+_ZEP_STYLE_DESCRIPTION: Final[str] = "ZEP Experimental Datasources"
 
-_MISSING_XDATASOURCES_ERRORS: PydanticErrorDict = {
-    "loc": ("xdatasources",),
-    "msg": "field required",
-    "type": "value_error.missing",
-}
+_MISSING_XDATASOURCES_ERRORS: Final[List[PydanticErrorDict]] = [
+    {
+        "loc": ("xdatasources",),
+        "msg": "field required",
+        "type": "value_error.missing",
+    }
+]
 
 
 class GxConfig(ExperimentalBaseModel):
@@ -90,7 +93,7 @@ class GxConfig(ExperimentalBaseModel):
                 LOGGER.info(
                     f"{cls.__name__}.parse_yaml() failed with errors - {errors_list}"
                 )
-                if errors_list == [_MISSING_XDATASOURCES_ERRORS]:
+                if errors_list == _MISSING_XDATASOURCES_ERRORS:
                     LOGGER.warning(
                         f"{cls.__name__}.parse_yaml() returning empty `xdatasources`"
                     )
