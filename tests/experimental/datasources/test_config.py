@@ -147,16 +147,16 @@ def test_load_config(inject_engine_lookup_double, load_method: Callable, input_)
 @pytest.mark.parametrize(
     ["config", "expected_error_loc", "expected_msg"],
     [
-        p({}, ("datasources",), "field required", id="no datasources"),
+        p({}, ("zep_datasources",), "field required", id="no datasources"),
         p(
             {
-                "datasources": {
+                "zep_datasources": {
                     "my_bad_ds_missing_type": {
                         "name": "my_bad_ds_missing_type",
                     }
                 }
             },
-            ("datasources",),
+            ("zep_datasources",),
             "'my_bad_ds_missing_type' is missing a 'type' entry",
             id="missing 'type' field",
         ),
@@ -188,7 +188,7 @@ def test_catch_bad_top_level_config(
     [
         p(
             {"name": "missing `table_name`", "type": "table"},
-            ("datasources", "assets", "table_name"),
+            ("zep_datasources", "assets", "table_name"),
             "field required",
             id="missing `table_name`",
         ),
@@ -202,7 +202,7 @@ def test_catch_bad_top_level_config(
                     "column_name": "foo",
                 },
             },
-            ("datasources", "assets", "column_splitter", "method_name"),
+            ("zep_datasources", "assets", "column_splitter", "method_name"),
             "unexpected value; permitted: 'split_on_year_and_month'",
             id="unknown splitter method",
         ),
@@ -217,7 +217,7 @@ def test_catch_bad_top_level_config(
                     "param_names": ["year", "month", "INVALID"],
                 },
             },
-            ("datasources", "assets", "column_splitter", "param_names", 2),
+            ("zep_datasources", "assets", "column_splitter", "param_names", 2),
             "unexpected value; permitted: 'year', 'month'",
             id="invalid splitter param_name",
         ),
