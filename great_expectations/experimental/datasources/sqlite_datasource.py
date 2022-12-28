@@ -19,6 +19,7 @@ from great_expectations.experimental.datasources.sql_datasource import (
     ColumnSplitter,
     DatetimeRange,
     SQLDatasource,
+    SQLDatasourceError,
     TableAsset,
     _query_for_year_and_month,
 )
@@ -33,7 +34,7 @@ class SqliteTableAsset(TableAsset):
     def add_year_and_month_splitter(
         self,
         column_name: str,
-    ) -> TableAsset:
+    ) -> SqliteTableAsset:
         """Associates a year month splitter with this sqlite table data asset
 
         Args:
@@ -59,8 +60,14 @@ class SqliteYearMonthSplitter(ColumnSplitter):
         """Query sqlite database to get the years and months to split over.
 
         Args:
-            table_asset: A TableAsset over which we want to split the data.
+            table_asset: A SqliteTableAsset over which we want to split the data.
         """
+        if not isinstance(table_asset, SqliteTableAsset):
+            raise SQLDatasourceError(
+                "Table asset passed to SqliteYearMonthSplitter is not a SqliteTableAsset. It is "
+                f"{table_asset}"
+            )
+
         return _query_for_year_and_month(
             table_asset, self.column_name, _get_sqlite_datetime_range
         )
@@ -90,7 +97,7 @@ class SqliteDatasource(SQLDatasource):
         name: str,
         table_name: str,
         order_by: Optional[BatchSortersDefinition] = None,
-    ) -> TableAsset:
+    ) -> SqliteTableAsset:
         """Adds a sqlite table asset to this sqlite datasource.
 
         Args:
@@ -99,7 +106,7 @@ class SqliteDatasource(SQLDatasource):
             order_by: A list of BatchSorters or BatchSorter strings.
 
         Returns:
-            The TableAsset that is added to the datasource.
+            The SqliteTableAsset that is added to the datasource.
         """
         asset = SqliteTableAsset(
             name=name,
