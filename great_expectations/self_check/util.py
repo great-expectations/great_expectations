@@ -2517,9 +2517,6 @@ def generate_expectation_tests(  # noqa: C901 - 43
                         context=context,
                     )
             except Exception as e:
-                _error(
-                    f"PROBLEM with get_test_validator_with_data in backend {c} for {expectation_type} {repr(e)[:300]}"
-                )
                 # # Adding these print statements for build_gallery.py's console output
                 # print("\n\n[[ Problem calling get_test_validator_with_data ]]")
                 # print(f"expectation_type -> {expectation_type}")
@@ -2571,6 +2568,9 @@ def generate_expectation_tests(  # noqa: C901 - 43
                         # )
                         # print(pd.DataFrame(d.get("data_alt")))
                         # print()
+                        _error(
+                            f"PROBLEM with get_test_validator_with_data in backend {c} for {expectation_type} from data AND data_alt {repr(e)[:300]}"
+                        )
                         parametrized_tests.append(
                             {
                                 "expectation_type": expectation_type,
@@ -2583,8 +2583,13 @@ def generate_expectation_tests(  # noqa: C901 - 43
                         continue
                     else:
                         # print("\n[[ The alternate data worked!! ]]\n")
-                        pass
+                        _debug(
+                            f"Needed to use data_alt for backend {c}, but it worked for {expectation_type}"
+                        )
                 else:
+                    _error(
+                        f"PROBLEM with get_test_validator_with_data in backend {c} for {expectation_type} from data (no data_alt to try) {repr(e)[:300]}"
+                    )
                     parametrized_tests.append(
                         {
                             "expectation_type": expectation_type,
