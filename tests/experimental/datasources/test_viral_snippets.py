@@ -96,7 +96,7 @@ def zep_yaml_config_file(
 
     Append ZEP config to default config file
     """
-    config_file_path = file_dc_config_dir_init / FileDataContext.ZEP_YAML
+    config_file_path = file_dc_config_dir_init / FileDataContext.GX_YML
 
     assert config_file_path.exists() is True
 

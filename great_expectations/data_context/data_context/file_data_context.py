@@ -163,7 +163,7 @@ class FileDataContext(SerializableDataContext):
         if not self.root_directory:
             logger.warning("`root_directory` not set, cannot load zep config")
         else:
-            path_to_zep_yaml = pathlib.Path(self.root_directory) / self.ZEP_YAML
+            path_to_zep_yaml = pathlib.Path(self.root_directory) / self.GX_YML
             if path_to_zep_yaml.exists():
                 return GxConfig.parse_yaml(path_to_zep_yaml)
             logger.info(f"no zep config at {path_to_zep_yaml.absolute()}")
