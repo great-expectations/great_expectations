@@ -36,7 +36,7 @@ def db_file() -> pathlib.Path:
 @pytest.fixture
 def zep_config_dict(db_file) -> dict:
     return {
-        "datasources": {
+        "xdatasources": {
             "my_sql_ds": {
                 "connection_string": f"sqlite:///{db_file}",
                 "name": "my_sql_ds",
