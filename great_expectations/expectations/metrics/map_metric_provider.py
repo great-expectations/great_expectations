@@ -1783,79 +1783,58 @@ def _pandas_map_condition_index(
 
     column_name: Union[str, quoted_name]
 
-    unexpected_index_list: Optional[List[Dict[str, Any]]] = []
     expectation_domain_column_name: str = domain_kwargs["column"]
 
-    # if we have defined unexpected_index_column_names
-    if "unexpected_index_column_names" in result_format:
-        unexpected_index_column_names: List[str] = result_format[
+    # one named index
+    if df.index.name is not None:
+        unexpected_index_column_names: List[str] = result_format.get(
+            "unexpected_index_column_names", [df.index.name]
+        )
+        unexpected_index_list: Optional[
+            List[Dict[str, Any]]
+        ] = get_unexpected_indices_for_single_pandas_named_index(
+            df,
+            expectation_domain_column_name,
+            unexpected_index_column_names,
+        )
+    # multiple named indices
+    elif df.index.names[0] is not None:
+        unexpected_index_column_names: List[str] = result_format.get(
+            "unexpected_index_column_names", list(df.index.names)
+        )
+        unexpected_index_list: Optional[
+            List[Dict[str, Any]]
+        ] = get_unexpected_indices_for_multiple_pandas_named_indices(
+            df,
+            expectation_domain_column_name,
+            unexpected_index_column_names,
+        )
+    # named columns
+    elif result_format.get("unexpected_index_column_names"):
+        unexpected_index_column_names: List[str] = result_format.get(
             "unexpected_index_column_names"
-        ]
-        if df.index.name is not None:
-            unexpected_index_list = (
-                get_unexpected_indices_for_single_pandas_named_index(
-                    df,
-                    unexpected_index_list,
-                    expectation_domain_column_name,
-                    unexpected_index_column_names,
+        )
+        unexpected_index_list: Optional[List[Dict[str, Any]]] = []
+        unexpected_indices: List[Union[int, str]] = list(df.index)
+        for index in unexpected_indices:
+            primary_key_dict: Dict[str, Any] = dict()
+            primary_key_dict[expectation_domain_column_name] = df.at[
+                index, expectation_domain_column_name
+            ]
+            for column_name in unexpected_index_column_names:
+                column_name = get_dbms_compatible_column_names(
+                    column_names=column_name,
+                    batch_columns_list=metrics["table.columns"],
+                    execution_engine=execution_engine,
+                    error_message_template='Error: The unexpected_index_column "{column_name:s}" does not exist in Dataframe. Please check your configuration and try again.',
                 )
-            )
-        elif df.index.names[0] is not None:
-            unexpected_index_list = (
-                get_unexpected_indices_for_multiple_pandas_named_indices(
-                    df,
-                    unexpected_index_list,
-                    expectation_domain_column_name,
-                    unexpected_index_column_names,
-                )
-            )
-        else:
-            unexpected_indices: List[Union[int, str]] = list(df.index)
-            for index in unexpected_indices:
-                primary_key_dict: Dict[str, Any] = dict()
-                primary_key_dict[expectation_domain_column_name] = df.at[
-                    index, expectation_domain_column_name
-                ]
-                for column_name in unexpected_index_column_names:
-                    column_name = get_dbms_compatible_column_names(
-                        column_names=column_name,
-                        batch_columns_list=metrics["table.columns"],
-                        execution_engine=execution_engine,
-                        error_message_template='Error: The unexpected_index_column "{column_name:s}" does not exist in Dataframe. Please check your configuration and try again.',
-                    )
-                    # add the actual unexpected value
-                    primary_key_dict[column_name] = df.at[index, column_name]
-                unexpected_index_list.append(primary_key_dict)
+                primary_key_dict[column_name] = df.at[index, column_name]
+            unexpected_index_list.append(primary_key_dict)
+    # or just the default indices
     else:
-        if df.index.name:
-            unexpected_index_column_names: List[str] = [df.index.name]
-            unexpected_index_list = (
-                get_unexpected_indices_for_single_pandas_named_index(
-                    df,
-                    unexpected_index_list,
-                    expectation_domain_column_name,
-                    unexpected_index_column_names,
-                )
-            )
-        elif hasattr(df.index, "names"):
-            unexpected_index_column_names: List[str] = list(df.index.names)
-            unexpected_index_list = (
-                get_unexpected_indices_for_multiple_pandas_named_indices(
-                    df,
-                    unexpected_index_list,
-                    expectation_domain_column_name,
-                    unexpected_index_column_names,
-                )
-            )
+        unexpected_index_list = list(df.index)
 
-        else:
-            unexpected_index_list = list(df.index)
-
-    # do the formatting
     if result_format["result_format"] == "COMPLETE":
-        # how does this affect named indices when it comes to printing them out?
-        # i could technically build it out here
-        # TODO: see if i can take care of the rendering here
         return unexpected_index_list
     return unexpected_index_list[: result_format["partial_unexpected_count"]]
 

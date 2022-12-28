@@ -1063,33 +1063,35 @@ def get_sqlalchemy_source_table_and_schema(
 
 def get_unexpected_indices_for_multiple_pandas_named_indices(
     df: pd.DataFrame,
-    unexpected_index_list: [List[Dict[str, Any]]],
     expectation_domain_column_name: str,
     unexpected_index_column_names: List[str],
-):
+) -> List[Dict[str, Any]]:
     """
     Builds unexpected_index list for Pandas Dataframe in situation where the named
     columns is also a named index. This method handles the case when there are multiple named indices.
     Args:
-        df ():
-        unexpected_index_list ():
-        expectation_domain_column_name ():
-        unexpected_index_column_names ():
+        df: reference to Pandas dataframe
+        expectation_domain_column_name: column that Expectation is being run for
+        unexpected_index_column_names: column_names for indices, either named index or unexpected_index_columns
 
     Returns:
-
+        List of Dicts that contain ID/PK values
     """
     index_names: List[str] = df.index.names
-    unexpected_indices: Tuple[Union[int, str]] = list(df.index)
+    unexpected_index_list: List[Dict[str, Any]] = list()
+    unexpected_indices: List[Union[int, str]] = list(df.index)
     for index in unexpected_indices:
-        primary_key_dict: Dict[str, Any] = {}
+        primary_key_dict: Dict[str, Any] = dict()
+        # domain column first
         primary_key_dict[expectation_domain_column_name] = df.at[
             index, expectation_domain_column_name
         ]
         for column_name in unexpected_index_column_names:
             if column_name not in index_names:
-                raise ge_exceptions.MetricResolutionError("Hi will this is not good")
-            # tumple index
+                raise ge_exceptions.MetricResolutionError(
+                    message=f"Error: The column {column_name} does not exist in the named indices.",
+                    failed_metrics=["unexpected_index_list"],
+                )
             tuple_index = index_names.index(column_name, 0)
             primary_key_dict[column_name] = index[tuple_index]
         unexpected_index_list.append(primary_key_dict)
@@ -1098,7 +1100,6 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(
 
 def get_unexpected_indices_for_single_pandas_named_index(
     df: pd.DataFrame,
-    unexpected_index_list: [List[Dict[str, Any]]],
     expectation_domain_column_name: str,
     unexpected_index_column_names: List[str],
 ) -> List[Dict[str, Any]]:
@@ -1106,15 +1107,17 @@ def get_unexpected_indices_for_single_pandas_named_index(
     Builds unexpected_index list for Pandas Dataframe in situation where the named
     columns is also a named index. This method handles the case when there is a single named index.
     Args:
-        df (DataFrame with indices):
-        unexpected_index_list (): value to return
-        expectation_domain_column_name ():
-        unexpected_index_column_names ():
+        df: reference to Pandas dataframe
+        expectation_domain_column_name: column that Expectation is being run on.
+        unexpected_index_column_names: column_names for indices, either named index or unexpected_index_columns
 
     Returns:
+        List of Dicts that contain ID/PK values
 
     """
     unexpected_index_values_by_named_index: List[Union[int, str]] = list(df.index)
+    unexpected_index_list: List[Dict[str, Any]] = list()
+
     for index in unexpected_index_values_by_named_index:
         primary_key_dict: Dict[str, Any] = dict()
         # domain column first
