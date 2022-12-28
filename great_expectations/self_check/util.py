@@ -2823,9 +2823,9 @@ def evaluate_json_test_v3_api(
     :return: Tuple(ExpectationValidationResult, error_message, stack_trace). asserts correctness of results.
     """
     if debug_logger is not None:
-        _debug = lambda x: debug_logger.debug(f"(evaluate_json_test_v3_api) {x}")
+        _debug = lambda x: debug_logger.debug(f"(evaluate_json_test_v3_api) {x}")  # type: ignore[union-attr] # noqa: E731
     else:
-        _debug = lambda x: x
+        _debug = lambda x: x  # type: ignore[union-attr] # noqa: E731
 
     expectation_suite = ExpectationSuite(
         "json_test_suite", data_context=validator._data_context
