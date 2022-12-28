@@ -1597,6 +1597,11 @@ class DataContextConfigSchema(Schema):
         required=False,
         allow_none=True,
     )
+    zep_datasources = fields.Dict(
+        required=False,
+        allow_none=True,
+        load_only=True,
+    )
     expectations_store_name = fields.Str()
     validations_store_name = fields.Str()
     evaluation_parameter_store_name = fields.Str()
@@ -1628,7 +1633,8 @@ class DataContextConfigSchema(Schema):
     REMOVE_KEYS_IF_NONE = [
         "concurrency",  # 0.13.33
         "progress_bars",  # 0.13.49
-        "include_rendered_content",  # 0.15.19
+        "include_rendered_content",  # 0.15.19,
+        "zep_datasources",
     ]
 
     # noinspection PyUnusedLocal
@@ -2314,6 +2320,7 @@ class DataContextConfig(BaseYamlConfig):
                 Dict[str, Dict[str, Union[Dict[str, str], str, dict]]],
             ]
         ] = None,
+        zep_datasources: Optional[dict] = None,
         expectations_store_name: Optional[str] = None,
         validations_store_name: Optional[str] = None,
         evaluation_parameter_store_name: Optional[str] = None,
@@ -2332,6 +2339,9 @@ class DataContextConfig(BaseYamlConfig):
         progress_bars: Optional[ProgressBarsConfig] = None,
         include_rendered_content: Optional[IncludeRenderedContentConfig] = None,
     ) -> None:
+        if zep_datasources:
+            logger.warning("`zep_datasources` are an experimental feature")
+
         # Set defaults
         if config_version is None:
             config_version = DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value
