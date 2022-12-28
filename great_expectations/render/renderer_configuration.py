@@ -47,7 +47,7 @@ class RendererValueType(str, Enum):
 
     ARRAY = "array"
     BOOLEAN = "boolean"
-    DATE = "date"
+    DATETIME = "datetime"
     NUMBER = "number"
     STRING = "string"
 
@@ -209,7 +209,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 if param_type == RendererValueType.NUMBER:
                     if not isinstance(value, Number):
                         raise renderer_configuration_error
-                elif param_type == RendererValueType.DATE:
+                elif param_type == RendererValueType.DATETIME:
                     if not isinstance(value, datetime):
                         try:
                             dateutil.parser.parse(value)
