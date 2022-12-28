@@ -2772,8 +2772,13 @@ def _spark_map_condition_query(
     metric_value_kwargs: Dict,
     metrics: Dict[str, Any],
     **kwargs,
-) -> List[Dict[str, Any]]:
-    return
+) -> str:
+    (
+        unexpected_condition,
+        _,
+        _,
+    ) = metrics.get("unexpected_condition", (None, None, None))
+    return str(unexpected_condition)
 
 
 def _spark_column_pair_map_condition_values(
