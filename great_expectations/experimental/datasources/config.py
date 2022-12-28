@@ -84,7 +84,13 @@ class GxConfig(ExperimentalBaseModel):
     def parse_yaml(
         cls: Type[GxConfig], f: Union[pathlib.Path, str], _allow_empty: bool = False
     ) -> GxConfig:
-        """TODO: explain this & add note about removing it."""
+        """
+        Overriding base method to allow an empty/missing `xdatasources` field.
+        Other validation errors will still result in an error.
+
+        TODO (kilo59) 122822: remove this as soon as it's no longer needed. Such as when
+        we use a new `config_version` instead of `xdatasources` key.
+        """
         if _allow_empty:
             try:
                 super().parse_yaml(f)
