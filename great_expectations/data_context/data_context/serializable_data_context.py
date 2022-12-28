@@ -5,7 +5,7 @@ import os
 import pathlib
 import shutil
 import warnings
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Optional, Union
 
 from ruamel.yaml import YAML
 
@@ -50,9 +50,9 @@ class SerializableDataContext(AbstractDataContext):
         DataContextConfigDefaults.PROFILERS_BASE_DIRECTORY.value,
         GX_UNCOMMITTED_DIR,
     ]
-    GX_DIR = "great_expectations"
-    GX_YML = "great_expectations.yml"
-    ZEP_YAML: pathlib.Path = pathlib.Path("zep_config.yaml")
+    GX_DIR: ClassVar[pathlib.Path] = pathlib.Path("great_expectations")
+    GX_YML: ClassVar[pathlib.Path] = pathlib.Path("great_expectations.yml")
+    ZEP_YAML: ClassVar[pathlib.Path] = pathlib.Path("zep_config.yaml")
     GX_EDIT_NOTEBOOK_DIR = GX_UNCOMMITTED_DIR
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
 
