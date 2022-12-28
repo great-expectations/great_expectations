@@ -215,8 +215,8 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
     ) -> RendererConfiguration:
         add_param_args = (
             ("column", RendererValueType.STRING),
-            ("min_value", RendererValueType.NUMBER),
-            ("max_value", RendererValueType.NUMBER),
+            ("min_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
+            ("max_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
             ("mostly", RendererValueType.NUMBER),
             ("strict_min", RendererValueType.BOOLEAN),
             ("strict_max", RendererValueType.BOOLEAN),
