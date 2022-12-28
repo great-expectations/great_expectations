@@ -1,9 +1,10 @@
 import logging
 import re
 import warnings
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
+import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 
@@ -1058,3 +1059,70 @@ def get_sqlalchemy_source_table_and_schema(
         )
     else:
         return engine.batch_manager.active_batch_data.selectable
+
+
+def get_unexpected_indices_for_multiple_pandas_named_indices(
+    df: pd.DataFrame,
+    unexpected_index_list: [List[Dict[str, Any]]],
+    expectation_domain_column_name: str,
+    unexpected_index_column_names: List[str],
+):
+    """
+    Builds unexpected_index list for Pandas Dataframe in situation where the named
+    columns is also a named index. This method handles the case when there are multiple named indices.
+    Args:
+        df ():
+        unexpected_index_list ():
+        expectation_domain_column_name ():
+        unexpected_index_column_names ():
+
+    Returns:
+
+    """
+    index_names: List[str] = df.index.names
+    unexpected_indices: Tuple[Union[int, str]] = list(df.index)
+    for index in unexpected_indices:
+        primary_key_dict: Dict[str, Any] = {}
+        primary_key_dict[expectation_domain_column_name] = df.at[
+            index, expectation_domain_column_name
+        ]
+        for column_name in unexpected_index_column_names:
+            if column_name not in index_names:
+                raise ge_exceptions.MetricResolutionError("Hi will this is not good")
+            # tumple index
+            tuple_index = index_names.index(column_name, 0)
+            primary_key_dict[column_name] = index[tuple_index]
+        unexpected_index_list.append(primary_key_dict)
+    return unexpected_index_list
+
+
+def get_unexpected_indices_for_single_pandas_named_index(
+    df: pd.DataFrame,
+    unexpected_index_list: [List[Dict[str, Any]]],
+    expectation_domain_column_name: str,
+    unexpected_index_column_names: List[str],
+) -> List[Dict[str, Any]]:
+    """
+    Builds unexpected_index list for Pandas Dataframe in situation where the named
+    columns is also a named index. This method handles the case when there is a single named index.
+    Args:
+        df (DataFrame with indices):
+        unexpected_index_list (): value to return
+        expectation_domain_column_name ():
+        unexpected_index_column_names ():
+
+    Returns:
+
+    """
+    unexpected_index_values_by_named_index: List[Union[int, str]] = list(df.index)
+    for index in unexpected_index_values_by_named_index:
+        primary_key_dict: Dict[str, Any] = dict()
+        # domain column first
+        primary_key_dict[expectation_domain_column_name] = df.at[
+            index, expectation_domain_column_name
+        ]
+        for column_name in unexpected_index_column_names:
+            if column_name == df.index.name:
+                primary_key_dict[column_name] = index
+        unexpected_index_list.append(primary_key_dict)
+    return unexpected_index_list
