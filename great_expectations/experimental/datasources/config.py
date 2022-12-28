@@ -94,7 +94,7 @@ class GxConfig(ExperimentalBaseModel):
                     f"{cls.__name__}.parse_yaml() failed with errors - {errors_list}"
                 )
                 if errors_list == _MISSING_XDATASOURCES_ERRORS:
-                    LOGGER.warning(
+                    LOGGER.info(
                         f"{cls.__name__}.parse_yaml() returning empty `xdatasources`"
                     )
                     return cls(xdatasources={})
