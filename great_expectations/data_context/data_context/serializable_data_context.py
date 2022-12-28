@@ -52,7 +52,7 @@ class SerializableDataContext(AbstractDataContext):
     ]
     GX_DIR: ClassVar[pathlib.Path] = pathlib.Path("great_expectations")
     GX_YML: ClassVar[pathlib.Path] = pathlib.Path("great_expectations.yml")
-    ZEP_YAML: ClassVar[pathlib.Path] = pathlib.Path("zep_config.yaml")
+    ZEP_YAML: ClassVar[pathlib.Path] = pathlib.Path("great_expectations.yml")
     GX_EDIT_NOTEBOOK_DIR = GX_UNCOMMITTED_DIR
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
 
