@@ -4,6 +4,7 @@ from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
+from pyspark.sql.utils import AnalysisException
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
@@ -2710,10 +2711,7 @@ def _spark_map_condition_index(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition", (None, None, None))
-    # breakpoint()
-
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    result_format: dict = metric_value_kwargs["result_format"]
     # this is the list of columns?
     domain_column = domain_kwargs["column"]
     df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
@@ -2723,9 +2721,6 @@ def _spark_map_condition_index(
 (_spark_column_map_condition_values).
 """
         )
-    # this is where you want tod o this?
-    # why do we handle things differently?
-    # let's try to
     column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
     column_name = get_dbms_compatible_column_names(
@@ -2735,100 +2730,39 @@ def _spark_map_condition_index(
     )
 
     result_format = metric_value_kwargs["result_format"]
-    print(f"unexpected_condition: {unexpected_condition}")
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
     # does it give the default columns?
-
-    print(f"Hi: {filtered}")
-    print(domain_column)
-
-    column_name: Union[str, quoted_name]
-    # breakpoint()
+    unexpected_index_list: Optional[List[Dict[str, Any]]] = []
 
     if "unexpected_index_column_names" in result_format:
-        unexpected_index_list: Optional[List[Dict[str, Any]]] = []
+        # breakpoint()
         unexpected_index_column_names: List[str] = result_format[
             "unexpected_index_column_names"
         ]
-        # column the expectation is being run on
-        expectation_domain_column_name: str = domain_kwargs["column"]
-
-        # this is where we are
-
-        # if we have an index column then we can use it
-        if hasattr(filtered, "index"):
-            print("I have an index and should use it")
-        else:
-            print("I dont have an idex")
-        # then we can do teh same thing that we did before, and have a default value out
-        # TODO: make sure that the named index can come out here
-        # breakpoint()
-        if hasattr(filtered, "index"):
-            unexpected_indices: List[int] = list(filtered.index)
-
-            print("i dont work yet")
-            # TODO this doesn't work yet.
-            # We can also have unexpected_column_names with index too
-            for index in unexpected_indices:
-                primary_key_dict: Dict[str, Any] = {}
-                # translation needed
-                primary_key_dict[expectation_domain_column_name] = df.at[
-                    index, expectation_domain_column_name
-                ]
-                for column_name in unexpected_index_column_names:
-                    column_name = get_dbms_compatible_column_names(
-                        column_names=column_name,
-                        batch_columns_list=metrics["table.columns"],
-                        execution_engine=execution_engine,
-                        error_message_template='Error: The unexpected_index_column "{column_name:s}" does not exist in Dataframe. Please check your configuration and try again.',
+        columns_to_keep: List[str] = [
+            column for column in unexpected_index_column_names
+        ]
+        columns_to_keep.append(domain_column)
+        for row in filtered.collect():
+            dict_to_add: dict = {}
+            for col_name in columns_to_keep:
+                if col_name not in row:
+                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                        f"Error: The unexpected_index_column '{col_name}' does not exist in Spark DataFrame. Please check your configuration and try again."
                     )
-                    # add the actual unexpected value
-                    # translation needed
-                    primary_key_dict[column_name] = df.at[index, column_name]
+                dict_to_add[col_name] = row[col_name]
 
-                unexpected_index_list.append(primary_key_dict)
-
-        elif unexpected_index_column_names:
-            print("feeelin pretty good")
-
-            # just get the columns and domain column and then return that
-            # we want to add domain, and the unexpected_column_names
-            columns_to_keep: List[str] = [
-                column for column in unexpected_index_column_names
-            ]
-            columns_to_keep.append(domain_column)
-            # filter the columns
-            filtered = filtered.select(columns_to_keep)
-            print("feeelin pretty good")
-            print(filtered.show())
-            # go through them one by one and add to the thing
-
-            for row in filtered.collect():
-                print(f"row : {row}")
-                print(f"row col : {row.animals}")
-                dict_to_add: dict = {}
-                for col_name in columns_to_keep:
-                    # breakpoint()
-                    dict_to_add[col_name] = row[col_name]
-                    print(dict_to_add)
-                unexpected_index_list.append(dict_to_add)
-            print(f"unexpected_index_list {unexpected_index_list}")
-        else:
-            # i cant help you
-            return "I "
-
-        if result_format["result_format"] == "COMPLETE":
-            return unexpected_index_list
-
-        return unexpected_index_list[: result_format["partial_unexpected_count"]]
+            unexpected_index_list.append(dict_to_add)
     else:
-        if result_format["result_format"] == "COMPLETE":
-            return list(df.index)
-
-        return list(df.index[: result_format["partial_unexpected_count"]])
+        raise ge_exceptions.MetricResolutionError(
+            "indices cannot be returned without column names"
+        )
+    if result_format["result_format"] == "COMPLETE":
+        return unexpected_index_list
+    return unexpected_index_list[: result_format["partial_unexpected_count"]]
 
 
 def _spark_map_condition_query(
