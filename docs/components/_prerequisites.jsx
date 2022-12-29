@@ -1,6 +1,5 @@
 import React from 'react'
 import Admonition from '@theme/Admonition'
-import data from '../term_tags/terms.json'
 
 /**
  * A flexible Prerequisites admonition block.
