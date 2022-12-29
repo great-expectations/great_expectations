@@ -12,6 +12,7 @@ from great_expectations.experimental.datasources.interfaces import DataAsset
 
 if TYPE_CHECKING:
     import sqlalchemy
+
     # The SqliteConnectionString type is defined this way because mypy can't handle
     # constraint types. See: https://github.com/pydantic/pydantic/issues/156
     # which suggests the solution here:
