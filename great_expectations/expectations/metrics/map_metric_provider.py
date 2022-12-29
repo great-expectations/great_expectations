@@ -2411,6 +2411,13 @@ def _sqlalchemy_map_condition_query(
     domain_kwargs: dict = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     result_format: dict = metric_value_kwargs["result_format"]
 
+    # check flag - we will only return query if we set return_unexpected_index_query = True
+    return_unexpected_index_query: Union[bool, None] = result_format.get(
+        "return_unexpected_index_query"
+    )
+    if not return_unexpected_index_query:
+        return
+
     column_selector: List[sa.Column] = [sa.column(domain_kwargs["column"])]
     all_table_columns: List[str] = metrics.get("table.columns")
     unexpected_index_column_names: List[str] = result_format.get(
