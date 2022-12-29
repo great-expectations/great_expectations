@@ -12,6 +12,13 @@ from great_expectations.experimental.datasources.interfaces import DataAsset
 
 if TYPE_CHECKING:
     import sqlalchemy
+    # The SqliteConnectionString type is defined this way because mypy can't handle
+    # constraint types. See: https://github.com/pydantic/pydantic/issues/156
+    # which suggests the solution here:
+    # https://github.com/pydantic/pydantic/issues/975#issuecomment-551147305
+    SqliteConnectionString = str
+else:
+    SqliteConnectionString = constr(regex=r"^sqlite")
 
 from typing_extensions import Literal
 
@@ -90,7 +97,7 @@ class SqliteDatasource(SQLDatasource):
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
     type: Literal["sqlite"] = "sqlite"  # type: ignore[assignment]
-    connection_string: constr(regex=r"^sqlite")
+    connection_string: SqliteConnectionString
     assets: Dict[str, SqliteTableAsset] = {}  # type: ignore[assignment]
 
     def add_table_asset(
