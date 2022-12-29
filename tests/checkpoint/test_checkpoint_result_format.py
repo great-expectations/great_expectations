@@ -904,11 +904,12 @@ def test_pandas_result_format_in_checkpoint_named_index_one_index_column_wrong_c
             checkpoint_name="my_checkpoint",
             expectation_suite_name="animal_names_exp",
             batch_request=batch_request,
+            runtime_configuration={"catch_exceptions": False},
         )
     assert e.value.message == (
         "Exception occurred while running validation[0] of Checkpoint "
-        "'my_checkpoint': Error: The unexpected_index_column: \"i_dont_exist\" in "
-        "does not exist in SQL Table. Please check your configuration and try again.."
+        "'my_checkpoint': Error: The column pk_2 does not exist in the named indices. "
+        "Please check your configuration."
     )
 
 
