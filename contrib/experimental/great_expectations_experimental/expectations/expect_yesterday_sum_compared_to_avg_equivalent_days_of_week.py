@@ -72,11 +72,7 @@ class ExpectYesterdaySumComparedToAvgEquivalentDaysOfWeek(QueryExpectation):
                         DAYS_AGO[FOUR_PREVIOUS_WEEKS[3]]: 3,
                     }
                 ),
-                "summed_column_a": generate_data_sample(
-                    {
-                        1: 15
-                    }
-                ),
+                "summed_column_a": generate_data_sample({1: 15}),
                 "date_column_b": generate_data_sample(
                     {
                         TODAY: 2,
@@ -86,26 +82,10 @@ class ExpectYesterdaySumComparedToAvgEquivalentDaysOfWeek(QueryExpectation):
                         DAYS_AGO[FOUR_PREVIOUS_WEEKS[3]]: 3,
                     }
                 ),
-                "summed_column_b": generate_data_sample(
-                    {
-                        1: 15
-                    }
-                ),
-                "summed_column_zero_avg": generate_data_sample(
-                    {
-                        1: 3,
-                        0: 12
-                    }),
-                "summed_column_zero_current": generate_data_sample(
-                    {
-                        1: 3,
-                        0: 12
-                    }),
-                "summed_column_zero_both": generate_data_sample(
-                    {
-                        1: 3,
-                        0: 12
-                    })
+                "summed_column_b": generate_data_sample({1: 15}),
+                "summed_column_zero_avg": generate_data_sample({1: 3, 0: 12}),
+                "summed_column_zero_current": generate_data_sample({1: 3, 0: 12}),
+                "summed_column_zero_both": generate_data_sample({1: 3, 0: 12}),
             },
             # "column_b": [today, yesterday, yesterday, two_days_ago]},
             "tests": [
@@ -116,10 +96,10 @@ class ExpectYesterdaySumComparedToAvgEquivalentDaysOfWeek(QueryExpectation):
                     "in": {
                         "template_dict": {
                             "summed_column": "summed_column_a",
-                            "date_column": "date_column_a"
+                            "date_column": "date_column_a",
                         },
                         "run_date": TODAY_STR,
-                        "threshold": default_kwarg_values["threshold"]
+                        "threshold": default_kwarg_values["threshold"],
                     },
                     "out": {"success": True},
                     "only_for": ["sqlite"],
@@ -131,10 +111,10 @@ class ExpectYesterdaySumComparedToAvgEquivalentDaysOfWeek(QueryExpectation):
                     "in": {
                         "template_dict": {
                             "summed_column": "summed_column_b",
-                            "date_column": "date_column_b"
+                            "date_column": "date_column_b",
                         },
                         "run_date": TODAY_STR,
-                        "threshold": default_kwarg_values["threshold"]
+                        "threshold": default_kwarg_values["threshold"],
                     },
                     "out": {"success": False},
                 },
@@ -145,10 +125,10 @@ class ExpectYesterdaySumComparedToAvgEquivalentDaysOfWeek(QueryExpectation):
                     "in": {
                         "template_dict": {
                             "summed_column": "summed_column_zero_avg",
-                            "date_column": "date_column_a"
+                            "date_column": "date_column_a",
                         },
                         "run_date": TODAY_STR,
-                        "threshold": default_kwarg_values["threshold"]
+                        "threshold": default_kwarg_values["threshold"],
                     },
                     "out": {"success": False},
                 },
@@ -159,10 +139,10 @@ class ExpectYesterdaySumComparedToAvgEquivalentDaysOfWeek(QueryExpectation):
                     "in": {
                         "template_dict": {
                             "summed_column": "summed_column_zero_current",
-                            "date_column": "date_column_a"
+                            "date_column": "date_column_a",
                         },
                         "run_date": TODAY_STR,
-                        "threshold": default_kwarg_values["threshold"]
+                        "threshold": default_kwarg_values["threshold"],
                     },
                     "out": {"success": False},
                 },
@@ -173,10 +153,10 @@ class ExpectYesterdaySumComparedToAvgEquivalentDaysOfWeek(QueryExpectation):
                     "in": {
                         "template_dict": {
                             "summed_column": "summed_column_zero_both",
-                            "date_column": "date_column_a"
+                            "date_column": "date_column_a",
                         },
                         "run_date": TODAY_STR,
-                        "threshold": default_kwarg_values["threshold"]
+                        "threshold": default_kwarg_values["threshold"],
                     },
                     "out": {"success": False},
                 },
@@ -192,12 +172,7 @@ class ExpectYesterdaySumComparedToAvgEquivalentDaysOfWeek(QueryExpectation):
 
     metric_dependencies = ("query.template_values",)
 
-    success_keys = (
-        "template_dict",
-        "threshold",
-        "query",
-        "run_date"
-    )
+    success_keys = ("template_dict", "threshold", "query", "run_date")
 
     domain_keys = (
         "template_dict",
@@ -207,21 +182,23 @@ class ExpectYesterdaySumComparedToAvgEquivalentDaysOfWeek(QueryExpectation):
     library_metadata = {"tags": ["query-based"], "contributors": ["@itaise", "@hadasm"]}
 
     def validate_configuration(
-            self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
         # Setting up a configuration
         super().validate_configuration(configuration)
 
     def _validate(
-            self,
-            configuration: ExpectationConfiguration,
-            metrics: Dict,
-            runtime_configuration: dict = None,
-            execution_engine: ExecutionEngine = None,
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: Dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
     ):
 
         run_date: str = self.get_success_kwargs(configuration).get("run_date")
-        threshold: float = float(self.get_success_kwargs(configuration).get("threshold"))
+        threshold: float = float(
+            self.get_success_kwargs(configuration).get("threshold")
+        )
 
         result_dict = get_results_dict(metrics)
 
@@ -248,7 +225,9 @@ def get_results_dict(metrics: dict) -> dict:
     metrics = convert_to_json_serializable(data=metrics)
     result_list = metrics.get("query.template_values")
     result_dict = {}
-    result_dict.update({i['date_column']: i['column_sum_over_date'] for i in result_list})
+    result_dict.update(
+        {i["date_column"]: i["column_sum_over_date"] for i in result_list}
+    )
     return result_dict
 
 
@@ -258,8 +237,12 @@ def average_if_nonempty(list_: list):
 
 def get_diff_fraction(yesterday_sum: int, result_dict: dict):
     equivalent_previous_days: List[date] = [DAYS_AGO[i] for i in FOUR_PREVIOUS_WEEKS]
-    equivalent_previous_days_str: List[str] = [datetime.strftime(i, date_format) for i in equivalent_previous_days]
-    previous_days_sums: List[int] = [result_dict[equiv_day] for equiv_day in equivalent_previous_days_str]
+    equivalent_previous_days_str: List[str] = [
+        datetime.strftime(i, date_format) for i in equivalent_previous_days
+    ]
+    previous_days_sums: List[int] = [
+        result_dict[equiv_day] for equiv_day in equivalent_previous_days_str
+    ]
 
     avg_equivalent_previous_days_sum = average_if_nonempty(previous_days_sums)
     absolute_diff = abs(yesterday_sum - avg_equivalent_previous_days_sum)
