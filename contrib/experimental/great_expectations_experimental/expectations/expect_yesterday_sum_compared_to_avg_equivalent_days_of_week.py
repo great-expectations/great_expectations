@@ -1,11 +1,9 @@
-from datetime import datetime, timedelta, date
+from datetime import date, datetime, timedelta
 from typing import Dict, List, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-)
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import QueryExpectation
 
 TODAY: date = datetime(year=2022, month=8, day=10).date()
