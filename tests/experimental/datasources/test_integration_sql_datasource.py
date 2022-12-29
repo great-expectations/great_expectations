@@ -42,9 +42,7 @@ def test_run_checkpoint_and_data_doc(empty_data_context, include_rendered_conten
         context.variables.include_rendered_content.globally = True
 
     # Add sqlalchemy datasource.
-    # The current method is called `add_postgres` it really should be `add_sql`.
-    # See https://superconductive.atlassian.net/browse/GREAT-1400
-    datasource = context.sources.add_postgres(
+    datasource = context.sources.add_sqlite(
         name="test_datasource",
         connection_string=f"sqlite:///{db_file}",
     )
@@ -262,9 +260,7 @@ def configure_and_run_data_assistant_checkpoint(
 ):
     db_file = file_relative_path(__file__, sqlite_db_file_relative_path)
     # Add sqlalchemy datasource.
-    # The current method is called `add_postgres` it really should be `add_sql`.
-    # See https://superconductive.atlassian.net/browse/GREAT-1400
-    datasource = context.sources.add_postgres(
+    datasource = context.sources.add_sqlite(
         name="test_datasource",
         connection_string=f"sqlite:///{db_file}",
     )
