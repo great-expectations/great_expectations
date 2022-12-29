@@ -1121,12 +1121,6 @@ class Validator:
 
             try:
                 # TODO: <Alex>ALEX</Alex>
-                expectation_validation_graph = ExpectationValidationGraph(
-                    configuration=evaluated_config,
-                    graph=ValidationGraph(execution_engine=self._execution_engine),
-                )
-                # TODO: <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX</Alex>
                 if self._data_context is None:
                     # Support for GX-V2 (to be deprecated soon).
                     expectation_validation_graph = ExpectationValidationGraph(
@@ -1138,6 +1132,12 @@ class Validator:
                     )
                 else:
                     # Support for GX-V4 (multi-Batch).
+                    # TODO: <Alex>ALEX</Alex>
+                    expectation_validation_graph = ExpectationValidationGraph(
+                        configuration=evaluated_config,
+                        graph=ValidationGraph(execution_engine=self._execution_engine),
+                    )
+                    # TODO: <Alex>ALEX</Alex>
                     metrics_by_domain = MetricMultiBatchValidationGraphBuilder(
                         validator=self,
                         metric_configurations=validation_dependencies.get_metric_configurations(),
