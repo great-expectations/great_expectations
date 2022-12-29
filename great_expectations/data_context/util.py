@@ -3,6 +3,7 @@ import inspect
 import logging
 import os
 import warnings
+from pprint import pformat as pf
 from typing import TYPE_CHECKING, Any, Optional
 from urllib.parse import urlparse
 
@@ -35,7 +36,8 @@ def instantiate_class_from_config(
     if config_defaults is None:
         config_defaults = {}
 
-    config = copy.deepcopy(config)
+    print(f"# BEGIN config {type(config)} ->\n{pf(config)}\n# END CONFIG")
+    config = copy.deepcopy(config)  # TypeError trying to pickle `module`
 
     module_name = config.pop("module_name", None)
     if module_name is None:
