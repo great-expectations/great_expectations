@@ -12,7 +12,9 @@ def test_connection_string_starts_with_sqlite():
     # when it creates the database engine.
     db_file = file_relative_path(
         __file__,
-        pathlib.Path("../../test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db")
+        pathlib.Path(
+            "../../test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db"
+        ),
     )
     name = "sqlite_datasource"
     connection_string = f"sqlite:///{db_file}"
@@ -23,6 +25,7 @@ def test_connection_string_starts_with_sqlite():
     assert datasource.name == name
     assert datasource.connection_string == connection_string
 
+
 def test_connection_string_that_does_not_start_with_sqlite():
     name = "sqlite_datasource"
     connection_string = "stuff+sqlite:///path/to/database/file.db"
@@ -31,4 +34,3 @@ def test_connection_string_that_does_not_start_with_sqlite():
             name=name,
             connection_string=connection_string,
         )
-

@@ -4,7 +4,8 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List, Optional, Type
 
 import pydantic
-from pydantic import dataclasses as pydantic_dc, constr
+from pydantic import constr
+from pydantic import dataclasses as pydantic_dc
 from typing_extensions import ClassVar
 
 from great_expectations.experimental.datasources.interfaces import DataAsset
@@ -89,7 +90,7 @@ class SqliteDatasource(SQLDatasource):
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
     type: Literal["sqlite"] = "sqlite"  # type: ignore[assignment]
-    connection_string: constr(regex=r'^sqlite')
+    connection_string: constr(regex=r"^sqlite")
     assets: Dict[str, SqliteTableAsset] = {}  # type: ignore[assignment]
 
     def add_table_asset(
