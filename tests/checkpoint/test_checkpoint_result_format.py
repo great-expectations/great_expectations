@@ -857,7 +857,59 @@ def test_pandas_result_format_in_checkpoint_named_index_one_index_column(
         {"animals": "lion", "pk_2": "four"},
         {"animals": "zebra", "pk_2": "five"},
     ]
-    # what happens to query
+
+
+@pytest.mark.integration
+def test_pandas_result_format_in_checkpoint_named_index_one_index_column_wrong_column(
+    in_memory_runtime_context,
+    pandas_animals_dataframe_for_unexpected_rows_and_index,
+    reference_checkpoint_config_for_unexpected_column_names,
+    expectation_config_expect_column_values_to_be_in_set,
+    expected_unexpected_indices_output,
+):
+    """
+    What does this test?
+        - DataFrame being passed into Checkpoint has named index 'pk_1', which doesn't match the unexpected_index_column_name
+    """
+    dict_to_update_checkpoint: dict = {
+        "result_format": {
+            "result_format": "COMPLETE",
+            "unexpected_index_column_names": ["pk_2"],  # I am not the index column
+        }
+    }
+    # build our own BatchRequest
+    dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
+    # setting named index
+    updated_dataframe: pd.DataFrame = dataframe.set_index("pk_1")
+
+    batch_request: dict = {
+        "datasource_name": "pandas_datasource",
+        "data_connector_name": "runtime_data_connector",
+        "data_asset_name": "IN_MEMORY_DATA_ASSET",
+        "runtime_parameters": {
+            "batch_data": updated_dataframe,
+        },
+        "batch_identifiers": {
+            "id_key_0": 1234567890,
+        },
+    }
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=in_memory_runtime_context,
+        checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
+        expectations_list=[expectation_config_expect_column_values_to_be_in_set],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+    with pytest.raises(CheckpointError) as e:
+        result: CheckpointResult = context.run_checkpoint(
+            checkpoint_name="my_checkpoint",
+            expectation_suite_name="animal_names_exp",
+            batch_request=batch_request,
+        )
+    assert e.value.message == (
+        "Exception occurred while running validation[0] of Checkpoint "
+        "'my_checkpoint': Error: The unexpected_index_column: \"i_dont_exist\" in "
+        "does not exist in SQL Table. Please check your configuration and try again.."
+    )
 
 
 @pytest.mark.integration
@@ -1200,3 +1252,41 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column_set(
         {"animals": "lion", "pk_1": 4, "pk_2": "four"},
         {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
     ]
+
+
+@pytest.mark.integration
+def test_pandas_result_format_in_checkpoint_one_expectation_complete_output(
+    in_memory_runtime_context,
+    batch_request_for_pandas_unexpected_rows_and_index,
+    reference_checkpoint_config_for_unexpected_column_names,
+    expectation_config_expect_column_values_to_be_in_set,
+    expected_unexpected_indices_output,
+):
+    """ """
+    dict_to_update_checkpoint: dict = {
+        "result_format": {
+            "result_format": "COMPLETE",
+        }
+    }
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=in_memory_runtime_context,
+        checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
+        expectations_list=[expectation_config_expect_column_values_to_be_in_set],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        expectation_suite_name="animal_names_exp",
+        batch_request=batch_request_for_pandas_unexpected_rows_and_index,
+    )
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+
+    first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
+        "unexpected_index_list"
+    ]
+    assert first_result_full_list == [3, 4, 5]
+    first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
+        "partial_unexpected_index_list"
+    ]
+    assert first_result_partial_list == [3, 4, 5]

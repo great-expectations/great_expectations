@@ -1132,5 +1132,10 @@ def get_unexpected_indices_for_single_pandas_named_index(
         for column_name in unexpected_index_column_names:
             if column_name == df.index.name:
                 primary_key_dict[column_name] = index
+            else:
+                raise ge_exceptions.MetricResolutionError(
+                    message=f"Error: The column {column_name} does not exist in the named indices. Please check your configuration",
+                    failed_metrics=["unexpected_index_list"],
+                )
         unexpected_index_list.append(primary_key_dict)
     return unexpected_index_list
