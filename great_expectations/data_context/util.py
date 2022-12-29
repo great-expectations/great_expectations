@@ -2,6 +2,7 @@ import copy
 import inspect
 import logging
 import os
+import pickle
 import warnings
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Any, Optional
@@ -24,6 +25,33 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def pickle_trick(obj, max_depth=10):
+    output = {}
+
+    if max_depth <= 0:
+        return output
+
+    try:
+        pickle.dumps(obj)
+    except (pickle.PicklingError, TypeError) as e:
+        failing_children = []
+
+        if hasattr(obj, "__dict__"):
+            for k, v in obj.__dict__.items():
+                result = pickle_trick(v, max_depth=max_depth - 1)
+                if result:
+                    failing_children.append(result)
+
+        output = {
+            "fail": obj,
+            "err": e,
+            "depth": max_depth,
+            "failing_children": failing_children,
+        }
+
+    return output
+
+
 # TODO: Rename config to constructor_kwargs and config_defaults -> constructor_kwarg_default
 # TODO: Improve error messages in this method. Since so much of our workflow is config-driven, this will be a *super* important part of DX.
 def instantiate_class_from_config(
@@ -36,7 +64,13 @@ def instantiate_class_from_config(
     if config_defaults is None:
         config_defaults = {}
 
-    print(f"# BEGIN config {type(config)} ->\n{pf(config)}\n# END CONFIG")
+    # print(f"# BEGIN config {type(config)} ->\n{pf(config)}\n# END CONFIG")
+    dc = config.get("data_context")
+    print(f"DataContext {type(dc)}:\n=======================\n{dc})")
+    if dc:
+        print(pf(dir(dc)))
+        print(pickle_trick(dc.zep_config))
+
     config = copy.deepcopy(config)  # TypeError trying to pickle `module`
 
     module_name = config.pop("module_name", None)
