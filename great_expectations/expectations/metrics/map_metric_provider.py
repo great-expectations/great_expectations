@@ -2411,7 +2411,7 @@ def _sqlalchemy_map_condition_query(
     domain_kwargs: dict = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     result_format: dict = metric_value_kwargs["result_format"]
 
-    # We will not return if return_unexpected_index_query = False
+    # We will not return map_condition_query if return_unexpected_index_query = False
     return_unexpected_index_query: Union[bool, None] = result_format.get(
         "return_unexpected_index_query"
     )

@@ -247,6 +247,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
         - unexpected_index_column defined in Checkpoint only.
         - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
         - 1 Expectations added to suite
+        - return_unexpected_index_query flag set to True
     """
 
     dict_to_update_checkpoint: dict = {
@@ -302,7 +303,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
         - unexpected_index_column defined in Checkpoint only.
         - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
         - 1 Expectations added to suite
-        - testing unexpected_index_query flag
+        - return_unexpected_index_query flag set to False
     """
 
     dict_to_update_checkpoint: dict = {
