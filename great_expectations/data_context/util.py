@@ -25,7 +25,11 @@ logger = logging.getLogger(__name__)
 
 # TODO: Rename config to constructor_kwargs and config_defaults -> constructor_kwarg_default
 # TODO: Improve error messages in this method. Since so much of our workflow is config-driven, this will be a *super* important part of DX.
-def instantiate_class_from_config(config, runtime_environment, config_defaults=None):
+def instantiate_class_from_config(
+    config: dict,
+    runtime_environment: Optional[dict],
+    config_defaults: Optional[dict] = None,
+) -> Any:
     """Build a GX class from configuration dictionaries."""
 
     if config_defaults is None:
@@ -77,7 +81,7 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
     if runtime_environment is not None:
         # If there are additional kwargs available in the runtime_environment requested by a
         # class to be instantiated, provide them
-        argspec = inspect.getfullargspec(class_.__init__)[0][1:]
+        argspec = inspect.getfullargspec(class_.__init__)[0][1:]  # type: ignore[misc]
 
         missing_args = set(argspec) - set(config_with_defaults.keys())
         config_with_defaults.update(

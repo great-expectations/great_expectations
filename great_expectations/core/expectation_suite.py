@@ -983,7 +983,7 @@ class ExpectationSuite(SerializableDictDot):
             }
             module_name = "great_expectations.render.renderer.inline_renderer"
             inline_renderer = instantiate_class_from_config(
-                config=inline_renderer_config,
+                config=inline_renderer_config,  # type: ignore[arg-type] # is TypeDict
                 runtime_environment={},
                 config_defaults={"module_name": module_name},
             )

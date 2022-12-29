@@ -2542,7 +2542,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         site_config = sites.get(site_name)
 
         site_builder = instantiate_class_from_config(
-            config=site_config,
+            config=site_config,  # type: ignore[arg-type] # could be none
             runtime_environment={
                 "data_context": self,
                 "root_directory": self.root_directory,
