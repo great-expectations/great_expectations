@@ -1,4 +1,4 @@
-datasources:
+xdatasources:
   my_pg_ds:
     type: postgres
     name: my_pg_ds
