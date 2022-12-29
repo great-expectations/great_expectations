@@ -160,6 +160,7 @@ def test_zep_simple_validate_workflow(zep_file_context: FileDataContext):
 
 
 # @pytest.mark.xfail(reason="TypeError: cannot pickle 'module' object")
+@pytest.mark.unit
 def test_save_datacontext(zep_file_context: FileDataContext):
     zep_file_context.variables.save_config()
 
