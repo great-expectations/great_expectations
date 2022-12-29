@@ -1004,6 +1004,9 @@ class ExecutionEngineConfigSchema(Schema):
     boto3_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
+    connect_args = fields.Dict(
+        keys=fields.Str(), values=fields.Dict(), required=False, allow_none=True
+    )
     azure_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
