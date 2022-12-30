@@ -7,6 +7,7 @@ from datetime import datetime
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
+    Callable,
     Dict,
     List,
     NamedTuple,
@@ -51,7 +52,7 @@ class ColumnSplitter:
     method_name: str
     param_names: Sequence[str]
 
-    def param_defaults(self, data_asset: DataAsset) -> Dict[str, List]:
+    def param_defaults(self, table_asset: TableAsset) -> Dict[str, List]:
         raise NotImplementedError
 
     @pydantic.validator("method_name")
@@ -86,63 +87,52 @@ class SqlYearMonthSplitter(ColumnSplitter):
         default_factory=lambda: ["year", "month"]
     )
 
-    def param_defaults(self, data_asset: DataAsset) -> Dict[str, List]:
-        """Query the database to get the years and months to split over.
+    def param_defaults(self, table_asset: TableAsset) -> Dict[str, List]:
+        """Query sql database to get the years and months to split over.
 
         Args:
-            data_asset: A TableAsset over which we want to split the data.
+            table_asset: A TableAsset over which we want to split the data.
         """
-        # This column splitter is only relevant to SQL data assets so we do some assertions
-        # to validate this.
-        from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-
-        assert isinstance(data_asset, TableAsset), "data_asset must be a TableAsset"
-        assert isinstance(
-            data_asset.datasource.execution_engine, SqlAlchemyExecutionEngine
+        return _query_for_year_and_month(
+            table_asset, self.column_name, _get_sql_datetime_range
         )
-        with data_asset.datasource.execution_engine.engine.connect() as conn:
-            datetimes: DatetimeRange = (
-                (
-                    _get_sqlite_datetime_range(
-                        conn,
-                        table_name=data_asset.table_name,
-                        col_name=self.column_name,
-                    )
-                )
-                if conn.dialect.name == "sqlite"
-                else (
-                    _get_sql_datetime_range(
-                        conn,
-                        table_name=data_asset.table_name,
-                        col_name=self.column_name,
-                    )
-                )
-            )
-        year: List[int] = list(range(datetimes.min.year, datetimes.max.year + 1))
-        month: List[int]
-        if datetimes.min.year == datetimes.max.year:
-            month = list(range(datetimes.min.month, datetimes.max.month + 1))
-        else:
-            month = list(range(1, 13))
-        return {"year": year, "month": month}
 
 
-# In _get_sql*, we opt to use a raw string instead of sqlalchemy.text because we don't
-# need any of the features for these queries:
-# https://docs.sqlalchemy.org/en/14/core/sqlelement.html#sqlalchemy.sql.expression.text
+def _query_for_year_and_month(
+    table_asset: TableAsset,
+    column_name: str,
+    query_datetime_range: Callable[
+        [sqlalchemy.engine.base.Connection, str, str], DatetimeRange
+    ],
+) -> Dict[str, List]:
+    # We should make an assertion about the execution_engine earlier. Right now it is assigned to
+    # after construction. We may be able to use a hook in a property setter.
+    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+
+    assert isinstance(
+        table_asset.datasource.execution_engine, SqlAlchemyExecutionEngine
+    )
+
+    with table_asset.datasource.execution_engine.engine.connect() as conn:
+        datetimes: DatetimeRange = query_datetime_range(
+            conn,
+            table_asset.table_name,
+            column_name,
+        )
+    year: List[int] = list(range(datetimes.min.year, datetimes.max.year + 1))
+    month: List[int]
+    if datetimes.min.year == datetimes.max.year:
+        month = list(range(datetimes.min.month, datetimes.max.month + 1))
+    else:
+        month = list(range(1, 13))
+    return {"year": year, "month": month}
+
+
 def _get_sql_datetime_range(
     conn: sqlalchemy.engine.base.Connection, table_name: str, col_name: str
 ) -> DatetimeRange:
     q = f"select min({col_name}), max({col_name}) from {table_name}"
     min_max_dt = list(conn.execute(q))[0]
-    return DatetimeRange(min=min_max_dt[0], max=min_max_dt[1])
-
-
-def _get_sqlite_datetime_range(
-    conn: sqlalchemy.engine.base.Connection, table_name: str, col_name: str
-) -> DatetimeRange:
-    q = f"select STRFTIME('%Y%m%d', min({col_name})), STRFTIME('%Y%m%d', max({col_name})) from {table_name}"
-    min_max_dt = [datetime.strptime(dt, "%Y%m%d") for dt in list(conn.execute(q))[0]]
     return DatetimeRange(min=min_max_dt[0], max=min_max_dt[1])
 
 
@@ -488,7 +478,7 @@ class SQLDatasource(Datasource):
 
     def get_asset(self, asset_name: str) -> TableAsset:
         """Returns the TableAsset referred to by name"""
-        return super().get_asset(asset_name)  # type: ignore[return-value] # value is subclass
+        return super().get_asset(asset_name)
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest

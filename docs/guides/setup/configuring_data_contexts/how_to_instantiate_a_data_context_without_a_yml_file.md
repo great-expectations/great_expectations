@@ -10,10 +10,6 @@ This guide will help you instantiate a <TechnicalTag tag="data_context" text="Da
 
 </Prerequisites>
 
-:::note
-- See also our companion video for this guide: [Data Contexts In Code](https://youtu.be/4VMOYpjHNhM).
-:::
-
 ## Steps
 
 ### 1. **Create a DataContextConfig**

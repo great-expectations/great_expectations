@@ -43,14 +43,14 @@ RAW_PARAMETER_KEY: str = (
     f"{PARAMETER_KEY}{RAW_SUFFIX}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
 )
 
-FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: str = "value"
 FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: str = "attributed_value"
 FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: str = "details"
+FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: str = "value"
 
 RESERVED_TERMINAL_LITERALS: Set[str] = {
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
 }
 
 attribute_naming_pattern = Word(alphas, alphanums + "_.") + ZeroOrMore(
@@ -677,9 +677,12 @@ def _get_parameter_name_parts_up_to_including_reserved_literal(
     if not (set(attribute_name_as_list) & RESERVED_TERMINAL_LITERALS):
         return attribute_name_as_list
 
+    # TODO: <Alex>12/29/2022: Lexicographical order avoids collisions between regular keys and reserved literals.</Alex>
+    reserved_terminal_literals: List[str] = list(sorted(RESERVED_TERMINAL_LITERALS))
+
     idx: Optional[int] = None
     key: str
-    for key in RESERVED_TERMINAL_LITERALS:
+    for key in reserved_terminal_literals:
         try:
             idx = attribute_name_as_list.index(key)
             break
