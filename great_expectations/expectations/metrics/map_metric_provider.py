@@ -4,6 +4,7 @@ from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
+import pandas as pd
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
@@ -34,10 +35,9 @@ from great_expectations.expectations.metrics.util import (
     Insert,
     Label,
     Select,
+    compute_unexpected_pandas_indices,
     get_dbms_compatible_column_names,
     get_sqlalchemy_source_table_and_schema,
-    get_unexpected_indices_for_multiple_pandas_named_indices,
-    get_unexpected_indices_for_single_pandas_named_index,
     sql_statement_with_post_compile_to_string,
     verify_column_names_exist,
 )
@@ -1747,7 +1747,9 @@ def _pandas_map_condition_index(
     with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
+    domain_records_df: pd.DataFrame = execution_engine.get_domain_records(
+        domain_kwargs=domain_kwargs
+    )
 
     if "column" in accessor_domain_kwargs:
         column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
@@ -1767,7 +1769,9 @@ def _pandas_map_condition_index(
             "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
         )
         if filter_column_isnull:
-            df = df[df[column_name].notnull()]
+            domain_records_df = domain_records_df[
+                domain_records_df[column_name].notnull()
+            ]
 
     elif "column_list" in accessor_domain_kwargs:
         column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
@@ -1778,61 +1782,18 @@ def _pandas_map_condition_index(
         )
 
     result_format = metric_value_kwargs["result_format"]
+    domain_records_df = domain_records_df[boolean_mapped_unexpected_values]
+    expectation_domain_column_name: Union[str, None] = domain_kwargs.get("column")
 
-    df = df[boolean_mapped_unexpected_values]
-
-    column_name: Union[str, quoted_name]
-
-    expectation_domain_column_name: str = domain_kwargs.get("column")
-
-    # one named index
-    if df.index.name is not None:
-        unexpected_index_column_names: List[str] = result_format.get(
-            "unexpected_index_column_names", [df.index.name]
-        )
-        unexpected_index_list: Optional[
-            List[Dict[str, Any]]
-        ] = get_unexpected_indices_for_single_pandas_named_index(
-            df,
-            expectation_domain_column_name,
-            unexpected_index_column_names,
-        )
-    # multiple named indices
-    elif df.index.names[0] is not None:
-        unexpected_index_column_names: List[str] = result_format.get(
-            "unexpected_index_column_names", list(df.index.names)
-        )
-        unexpected_index_list: Optional[
-            List[Dict[str, Any]]
-        ] = get_unexpected_indices_for_multiple_pandas_named_indices(
-            df,
-            expectation_domain_column_name,
-            unexpected_index_column_names,
-        )
-    # named columns
-    elif result_format.get("unexpected_index_column_names"):
-        unexpected_index_column_names: List[str] = result_format.get(
-            "unexpected_index_column_names"
-        )
-        unexpected_index_list: Optional[List[Dict[str, Any]]] = []
-        unexpected_indices: List[Union[int, str]] = list(df.index)
-        for index in unexpected_indices:
-            primary_key_dict: Dict[str, Any] = dict()
-            primary_key_dict[expectation_domain_column_name] = df.at[
-                index, expectation_domain_column_name
-            ]
-            for column_name in unexpected_index_column_names:
-                column_name = get_dbms_compatible_column_names(
-                    column_names=column_name,
-                    batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
-                    error_message_template='Error: The unexpected_index_column "{column_name:s}" does not exist in Dataframe. Please check your configuration and try again.',
-                )
-                primary_key_dict[column_name] = df.at[index, column_name]
-            unexpected_index_list.append(primary_key_dict)
-    # or just the default indices
-    else:
-        unexpected_index_list = list(df.index)
+    unexpected_index_list: Union[
+        List[int], List[Dict[str, Any]]
+    ] = compute_unexpected_pandas_indices(
+        domain_records_df=domain_records_df,
+        result_format=result_format,
+        execution_engine=execution_engine,
+        metrics=metrics,
+        expectation_domain_column_name=expectation_domain_column_name,
+    )
 
     if result_format["result_format"] == "COMPLETE":
         return unexpected_index_list

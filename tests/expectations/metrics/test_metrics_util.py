@@ -194,6 +194,24 @@ def test_get_unexpected_indices_for_single_pandas_named_index(
 
 
 @pytest.mark.unit
+def test_get_unexpected_indices_for_multiple_pandas_named_indices(
+    pandas_animals_dataframe_for_unexpected_rows_and_index,
+    unexpected_index_list_two_index_columns,
+):
+    dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
+    updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1", "pk_2"])
+    expectation_domain_column_name = "animals"
+    unexpected_index_column_names = list(updated_dataframe.index.names)
+
+    unexpected_index_list = get_unexpected_indices_for_multiple_pandas_named_indices(
+        df=updated_dataframe,
+        expectation_domain_column_name=expectation_domain_column_name,
+        unexpected_index_column_names=unexpected_index_column_names,
+    )
+    assert unexpected_index_list == unexpected_index_list_two_index_columns
+
+
+@pytest.mark.unit
 def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpected_index_columns(
     pandas_animals_dataframe_for_unexpected_rows_and_index,
     unexpected_index_list_two_index_columns,
@@ -267,21 +285,3 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
         "Error: The domain column is currently set to None. Please check your "
         "configuration."
     )
-
-
-@pytest.mark.unit
-def test_get_unexpected_indices_for_multiple_pandas_named_indices(
-    pandas_animals_dataframe_for_unexpected_rows_and_index,
-    unexpected_index_list_two_index_columns,
-):
-    dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
-    updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1", "pk_2"])
-    expectation_domain_column_name = "animals"
-    unexpected_index_column_names = list(updated_dataframe.index.names)
-
-    unexpected_index_list = get_unexpected_indices_for_multiple_pandas_named_indices(
-        df=updated_dataframe,
-        expectation_domain_column_name=expectation_domain_column_name,
-        unexpected_index_column_names=unexpected_index_column_names,
-    )
-    assert unexpected_index_list == unexpected_index_list_two_index_columns
