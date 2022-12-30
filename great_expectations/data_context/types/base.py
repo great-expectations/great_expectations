@@ -947,6 +947,7 @@ class ExecutionEngineConfig(DictDot):
         azure_options=None,
         gcs_options=None,
         credentials_info=None,
+        connect_args=None,
         **kwargs,
     ) -> None:
         self._class_name = class_name
@@ -969,6 +970,8 @@ class ExecutionEngineConfig(DictDot):
             self.gcs_options = gcs_options
         if credentials_info is not None:
             self.credentials_info = credentials_info
+        if connect_args is not None:
+            self.connect_args = connect_args
         for k, v in kwargs.items():
             setattr(self, k, v)
 
