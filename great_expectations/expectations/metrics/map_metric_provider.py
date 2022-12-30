@@ -2826,31 +2826,6 @@ def _spark_column_pair_map_condition_values(
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
     with all of the available "domain_kwargs" keys.
     """
-    unexpected_condition_as_string: str = str(unexpected_condition)
-    unexpected_condition_filtered: str = unexpected_condition_as_string.replace(
-        "Column<'(", ""
-    ).replace(")'>", "")
-    return f"df.filter(F.expr({unexpected_condition_filtered}))"
-
-
-def _spark_column_pair_map_condition_values(
-    cls,
-    execution_engine: SparkDFExecutionEngine,
-    metric_domain_kwargs: dict,
-    metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
-    **kwargs,
-):
-    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
-    (
-        unexpected_condition,
-        compute_domain_kwargs,
-        accessor_domain_kwargs,
-    ) = metrics["unexpected_condition"]
-    """
-    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
-    with all of the available "domain_kwargs" keys.
-    """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
