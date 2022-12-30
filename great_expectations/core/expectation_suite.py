@@ -642,7 +642,8 @@ class ExpectationSuite(SerializableDictDot):
         match_type: str = "domain",
         overwrite_existing: bool = True,
     ) -> List[ExpectationConfiguration]:
-        """
+        """Upsert a list of ExpectationConfigurations into this ExpectationSuite.
+        
         Args:
             expectation_configurations: The List of candidate new/modifed "ExpectationConfiguration" objects for Suite.
             send_usage_event: Whether to send a usage_statistics event. When called through ExpectationSuite class'
