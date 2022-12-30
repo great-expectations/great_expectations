@@ -1753,6 +1753,7 @@ class Expectation(metaclass=MetaExpectation):
                 expectation_type=exp_test["expectation_type"],
                 test=exp_test["test"],
                 raise_exception=False,
+                debug_logger=debug_logger,
             )
             _end = time.time()
             _duration = _end - _start
