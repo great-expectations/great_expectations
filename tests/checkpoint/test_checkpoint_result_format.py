@@ -256,6 +256,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
     ]
     assert unexpected_index_query == expected_sql_query_output
 
+
 @pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_with_query(
     data_context_with_connection_to_animal_names_db,
@@ -415,7 +416,6 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
     assert unexpected_index_query == expected_sql_query_output
 
 
-
 @pytest.mark.integration
 def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_limit_1(
     data_context_with_connection_to_animal_names_db,
@@ -460,7 +460,6 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
         "unexpected_index_query"
     ]
     assert unexpected_index_query == expected_sql_query_output
-
 
 
 @pytest.mark.integration
@@ -1234,6 +1233,113 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
         "unexpected_index_query"
     ]
     assert unexpected_index_query == expected_spark_query_output
+
+
+@pytest.mark.integration
+def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_with_query(
+    in_memory_runtime_context,
+    batch_request_for_spark_unexpected_rows_and_index,
+    reference_checkpoint_config_for_unexpected_column_names,
+    expectation_config_expect_column_values_to_be_in_set,
+    expected_unexpected_indices_output,
+    expected_spark_query_output,
+):
+    """
+    What does this test?
+        - unexpected_index_column not defined in Checkpoint config, but passed in at run_checkpoint.
+        - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
+        - 1 Expectations added to suite
+    """
+    # intentionally empty, since we are updating at run_checkpoint()
+    dict_to_update_checkpoint: dict = {}
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=in_memory_runtime_context,
+        checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
+        expectations_list=[expectation_config_expect_column_values_to_be_in_set],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+    result_format: dict = {
+        "result_format": "COMPLETE",
+        "unexpected_index_column_names": ["pk_1"],
+        "return_unexpected_index_query": True,
+    }
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        expectation_suite_name="animal_names_exp",
+        batch_request=batch_request_for_spark_unexpected_rows_and_index,
+        result_format=result_format,
+    )
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+
+    index_column_names: List[str] = evrs[0]["results"][0]["result"][
+        "unexpected_index_column_names"
+    ]
+    assert index_column_names == ["pk_1"]
+
+    first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
+        "unexpected_index_list"
+    ]
+    assert first_result_full_list == expected_unexpected_indices_output
+    first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
+        "partial_unexpected_index_list"
+    ]
+    assert first_result_partial_list == expected_unexpected_indices_output
+
+    unexpected_index_query = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_query"
+    )
+    assert unexpected_index_query == expected_spark_query_output
+
+
+@pytest.mark.integration
+def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_no_query(
+    in_memory_runtime_context,
+    batch_request_for_spark_unexpected_rows_and_index,
+    reference_checkpoint_config_for_unexpected_column_names,
+    expectation_config_expect_column_values_to_be_in_set,
+    expected_unexpected_indices_output,
+):
+    """
+    What does this test?
+        - unexpected_index_column not defined in Checkpoint config, but passed in at run_checkpoint.
+        - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
+        - 1 Expectations added to suite
+    """
+    # intentionally empty, since we are updating at run_checkpoint()
+    dict_to_update_checkpoint: dict = {}
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=in_memory_runtime_context,
+        checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
+        expectations_list=[expectation_config_expect_column_values_to_be_in_set],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+    result_format: dict = {
+        "result_format": "COMPLETE",
+        "unexpected_index_column_names": ["pk_1"],
+        "return_unexpected_index_query": False,
+    }
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        expectation_suite_name="animal_names_exp",
+        batch_request=batch_request_for_spark_unexpected_rows_and_index,
+        result_format=result_format,
+    )
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+
+    index_column_names: List[str] = evrs[0]["results"][0]["result"][
+        "unexpected_index_column_names"
+    ]
+    assert index_column_names == ["pk_1"]
+
+    first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
+        "unexpected_index_list"
+    ]
+    assert first_result_full_list == expected_unexpected_indices_output
+    first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
+        "partial_unexpected_index_list"
+    ]
+    assert first_result_partial_list == expected_unexpected_indices_output
+    assert evrs[0]["results"][0]["result"].get("unexpected_index_query") is None
 
 
 @pytest.mark.integration

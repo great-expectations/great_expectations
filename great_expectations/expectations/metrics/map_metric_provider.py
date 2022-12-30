@@ -2714,7 +2714,8 @@ def _spark_map_condition_index(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition", (None, None, None))
-    if not unexpected_condition:
+
+    if unexpected_condition is None:
         return None
 
     if "column" not in accessor_domain_kwargs:
@@ -2738,7 +2739,7 @@ def _spark_map_condition_index(
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
-    filtered = data.filter(F.col("__unexpected") is True).drop(F.col("__unexpected"))
+    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
     unexpected_index_list: Optional[List[Dict[str, Any]]] = []
 
     unexpected_index_column_names: List[str] = result_format[
@@ -2748,7 +2749,6 @@ def _spark_map_condition_index(
     columns_to_keep.append(domain_column)
 
     # check that column name is in row
-    breakpoint()
     for col_name in columns_to_keep:
         if col_name not in filtered.columns:
             raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
@@ -2773,7 +2773,7 @@ def _spark_map_condition_query(
     metric_value_kwargs: Dict,
     metrics: Dict[str, Any],
     **kwargs,
-) -> str:
+) -> Union[str, None]:
     """
     Returns query that will return all rows which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation.
@@ -2785,9 +2785,14 @@ def _spark_map_condition_query(
         df.filter(F.expr( [unexpected_condition] ))
 
     """
-    # TODO: flag for output, and also test
-    # TODO: check that this can actually be rendered
-    """ """
+    result_format: dict = metric_value_kwargs["result_format"]
+    # We will not return map_condition_query if return_unexpected_index_query = False
+    return_unexpected_index_query: bool = result_format.get(
+        "return_unexpected_index_query"
+    )
+    if return_unexpected_index_query is False:
+        return None
+
     (
         unexpected_condition,
         _,
