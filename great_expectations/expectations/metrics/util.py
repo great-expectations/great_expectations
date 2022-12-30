@@ -1087,11 +1087,16 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(
     domain_records_df_index_names: List[str] = domain_records_df.index.names
     unexpected_indices: List[Union[int, str]] = list(domain_records_df.index)
 
+    tuple_index: Dict[str, int] = dict()
     for column_name in unexpected_index_column_names:
         if column_name not in domain_records_df_index_names:
             raise ge_exceptions.MetricResolutionError(
                 message=f"Error: The column {column_name} does not exist in the named indices. Please check your configuration",
                 failed_metrics=["unexpected_index_list"],
+            )
+        else:
+            tuple_index[column_name] = domain_records_df_index_names.index(
+                column_name, 0
             )
 
     unexpected_index_list: List[Dict[str, Any]] = list()
@@ -1103,8 +1108,7 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(
             index, expectation_domain_column_name
         ]
         for column_name in unexpected_index_column_names:
-            tuple_index = domain_records_df_index_names.index(column_name, 0)
-            primary_key_dict[column_name] = index[tuple_index]
+            primary_key_dict[column_name] = index[tuple_index[column_name]]
         unexpected_index_list.append(primary_key_dict)
     return unexpected_index_list
 
@@ -1130,13 +1134,12 @@ def get_unexpected_indices_for_single_pandas_named_index(
         domain_records_df.index
     )
     unexpected_index_list: List[Dict[str, Any]] = list()
-
     if not (
         len(unexpected_index_column_names) == 1
         and unexpected_index_column_names[0] == domain_records_df.index.name
     ):
         raise ge_exceptions.MetricResolutionError(
-            message=f"Error: The column {unexpected_index_column_names[0]} does not exist in the named indices. Please check your configuration",
+            message=f"Error: The column {unexpected_index_column_names[0] if unexpected_index_column_names else '<no column specified>'} does not exist in the named indices. Please check your configuration",
             failed_metrics=["unexpected_index_list"],
         )
 
