@@ -29,7 +29,3 @@ from .html_site_store import HtmlSiteStore  # isort:skip
 from .datasource_store import DatasourceStore  # isort:skip
 from .profiler_store import ProfilerStore  # isort:skip
 from .data_context_store import DataContextStore  # isort:skip
-
-# TODO: <Alex>ALEX</Alex>
-# from .batch_metric_store import BatchMetricStore  # isort:skip
-# TODO: <Alex>ALEX</Alex>

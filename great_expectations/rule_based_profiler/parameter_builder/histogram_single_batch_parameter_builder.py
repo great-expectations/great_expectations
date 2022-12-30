@@ -144,9 +144,8 @@ elements.
 """
             )
 
-        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX -- extra subscripting in compliance with multi-Batch metrics.</Alex>
         bins = bins[0]
-        # print(f'\n[ALEX_TEST] [WOUTPUT] BINS-0:\n{bins} ; TYPE: {str(type(bins))}')
         # TODO: <Alex>ALEX</Alex>
         if not np.issubdtype(bins.dtype, np.number):
             raise ge_exceptions.ProfilerExecutionError(
@@ -209,7 +208,7 @@ elements.
             parameters=parameters,
         )
 
-        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX -- extra subscripting in compliance with multi-Batch metrics.</Alex>
         weights: np.ndarray = np.asarray(
             parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY][0]
         ) / (

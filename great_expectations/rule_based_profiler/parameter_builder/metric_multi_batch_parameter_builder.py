@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
-import numpy as np
-
 from great_expectations.core.domain import Domain
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
@@ -157,68 +155,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         )
         details: MetricComputationDetails = metric_computation_result.details
 
-        # Obtain reduce_scalar_metric from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        reduce_scalar_metric: bool = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self.reduce_scalar_metric,
-            expected_return_type=bool,
-            variables=variables,
-            parameters=parameters,
-        )
-
-        # print(f'\n[ALEX_TEST] [MetricMultiBatchParameterBuilder._build_parameters()] PARAMETER_NAME:\n{self.name} ; TYPE: {str(type(self.name))}')
-        # print(f'\n[ALEX_TEST] [MetricMultiBatchParameterBuilder._build_parameters()] METRIC_NAME:\n{self.metric_name} ; TYPE: {str(type(self.metric_name))}')
-        # print(f'\n[ALEX_TEST] [MetricMultiBatchParameterBuilder._build_parameters()] REDUCE_SCALAR_METRIC:\n{reduce_scalar_metric} ; TYPE: {str(type(reduce_scalar_metric))}')
-        # print(f'\n[ALEX_TEST] [MetricMultiBatchParameterBuilder._build_parameters()] METRIC_COMPUTATION_RESULT.ATTRIBUTED_RESOLVED_METRICS:\n{metric_computation_result.attributed_resolved_metrics} ; TYPE: {str(type(metric_computation_result.attributed_resolved_metrics))}')
-        # print(f'\n[ALEX_TEST] [MetricMultiBatchParameterBuilder._build_parameters()] NUM_METRIC_COMPUTATION_RESULT.ATTRIBUTED_RESOLVED_METRICS:\n{len(metric_computation_result.attributed_resolved_metrics)} ; TYPE: {str(type(len(metric_computation_result.attributed_resolved_metrics)))}')
-        # TODO: <Alex>ALEX</Alex>
         if len(metric_computation_result.attributed_resolved_metrics) == 1:
-            # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
-            # print(f'\n[ALEX_TEST] [MetricMultiBatchParameterBuilder._build_parameters()] METRIC_COMPUTATION_RESULT.ATTRIBUTED_RESOLVED_METRICS[0].CONDITIONED_METRIC_VALUES:\n{metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values} ; TYPE: {str(type(metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values))}')
-            # TODO: <Alex>ALEX</Alex>
-            if (
-                reduce_scalar_metric
-                and isinstance(
-                    metric_computation_result.attributed_resolved_metrics[
-                        0
-                    ].conditioned_metric_values,
-                    np.ndarray,
-                )
-                # TODO: <Alex>ALEX</Alex>
-                # and metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values.ndim > 1
-                # and metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values.shape[1] == 1
-                # TODO: <Alex>ALEX</Alex>
-            ):
-                # print(f'\n[ALEX_TEST] [MetricMultiBatchParameterBuilder._build_parameters()] METRIC_COMPUTATION_RESULT.ATTRIBUTED_RESOLVED_METRICS[0].CONDITIONED_METRIC_VALUES.NDIM:\n{metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values.ndim} ; TYPE: {str(type(metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values.ndim))}')
-                # print(f'\n[ALEX_TEST] [MetricMultiBatchParameterBuilder._build_parameters()] METRIC_COMPUTATION_RESULT.ATTRIBUTED_RESOLVED_METRICS[0].CONDITIONED_METRIC_VALUES.SHAPE:\n{metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values.shape} ; TYPE: {str(type(metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values.shape))}')
-                # print(f'\n[ALEX_TEST] [MetricMultiBatchParameterBuilder._build_parameters()] METRIC_COMPUTATION_RESULT.ATTRIBUTED_RESOLVED_METRICS[0].CONDITIONED_METRIC_VALUES.SHAPE[0]:\n{metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values.shape[0]} ; TYPE: {str(type(metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values.shape[0]))}')
-                # print(f'\n[ALEX_TEST] [MetricMultiBatchParameterBuilder._build_parameters()] METRIC_COMPUTATION_RESULT.ATTRIBUTED_RESOLVED_METRICS[0].CONDITIONED_METRIC_VALUES.SHAPE[1]:\n{metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values.shape[1]} ; TYPE: {str(type(metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values.shape[1]))}')
-                # TODO: <Alex>ALEX</Alex>
-                a = metric_computation_result.attributed_resolved_metrics[
-                    0
-                ].conditioned_metric_values[:, 0]
-                b = metric_computation_result.attributed_resolved_metrics[
-                    0
-                ].conditioned_attributed_metric_values
-                # print(f'\n[ALEX_TEST] [MetricMultiBatchParameterBuilder._build_parameters()] VALUE_REDUCED_REGULAR:\n{a} ; TYPE: {str(type(a))}')
-                # print(f'\n[ALEX_TEST] [MetricMultiBatchParameterBuilder._build_parameters()] VALUE_REDUCED_ATTRIBUTED:\n{b} ; TYPE: {str(type(b))}')
-                # TODO: <Alex>ALEX</Alex>
-                # return Attributes(
-                #     {
-                #         FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values[:, 0],
-                #         FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[0].conditioned_attributed_metric_values,
-                #         FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
-                #     }
-                # )
-                # TODO: <Alex>ALEX</Alex>
-            # TODO: <Alex>ALEX</Alex>
-
-            # TODO: <Alex>ALEX</Alex>
-            # a = 'column_pair_values_equal_unexpected_values'
-            # if self.name == a:
-            #     print(f'\n[ALEX_TEST] [*************************************MetricMultiBatchParameterBuilder._build_parameters()] {FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}:\n{metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values} ; TYPE: {str(type(metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values))}')
-            #     print(f'\n[ALEX_TEST] [*************************************MetricMultiBatchParameterBuilder._build_parameters()] {FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY}:\n{metric_computation_result.attributed_resolved_metrics[0].conditioned_attributed_metric_values} ; TYPE: {str(type(metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values))}')
-            # TODO: <Alex>ALEX</Alex>
             return Attributes(
                 {
                     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
@@ -230,7 +167,6 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
                     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
                 }
             )
-        # TODO: <Alex>ALEX</Alex>
 
         return Attributes(
             {

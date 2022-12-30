@@ -315,12 +315,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         for rule in pbar_method(
             effective_rules,
             desc="Generating Expectations:",
-            # TODO: <Alex>ALEX</Alex>
-            # disable=disable,
-            # TODO: <Alex>ALEX</Alex>
-            # TODO: <Alex>ALEX</Alex>
-            disable=True,
-            # TODO: <Alex>ALEX</Alex>
+            disable=disable,
             position=0,
             leave=True,
             bar_format="{desc:25}{percentage:3.0f}%|{bar}{r_bar}",

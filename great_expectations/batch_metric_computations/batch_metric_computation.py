@@ -7,9 +7,6 @@ from typing import Any, Dict, Optional
 from marshmallow import INCLUDE, Schema, fields, post_load
 from ruamel.yaml.comments import CommentedMap
 
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.core.util import ensure_json_serializable
-# TODO: <Alex>ALEX</Alex>
 from great_expectations.types.attributes import Attributes
 
 logger = logging.getLogger(__name__)
@@ -67,9 +64,6 @@ class BatchMetricComputation(Attributes):
             "value": value,
             "details": details,
         }
-        # TODO: <Alex>ALEX</Alex>
-        # ensure_json_serializable(data=fields)
-        # TODO: <Alex>ALEX</Alex>
         super().__init__(fields)
 
     def to_dict(self) -> dict:

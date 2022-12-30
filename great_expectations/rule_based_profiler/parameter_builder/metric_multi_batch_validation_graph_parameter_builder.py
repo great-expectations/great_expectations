@@ -18,10 +18,6 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.types.attributes import Attributes
 
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.validator.validation_graph import ValidationGraph
-# TODO: <Alex>ALEX</Alex>
-
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
@@ -113,20 +109,9 @@ class MetricMultiBatchValidationGraphParameterBuilder(ParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        # print(f"\n[ALEX_TEST] [MetricMultiBatchValidationGraphParameterBuilder._build_parameters()] METRIC_COMPUTATION_RESULT:\n{metric_computation_result} ; TYPE: {str(type(metric_computation_result))}")
         details: MetricComputationDetails = metric_computation_result.details
-        # TODO: <Alex>ALEX</Alex>
-        # graph: ValidationGraph = details["graph"]
-        # print(f"\n[ALEX_TEST] [MetricMultiBatchValidationGraphParameterBuilder._build_parameters()] METRIC_COMPUTATION_RESULT.GRAPH:\n{graph} ; TYPE: {str(type(graph))}")
-        # TODO: <Alex>ALEX</Alex>
-        # print(f"\n[ALEX_TEST] [MetricMultiBatchValidationGraphParameterBuilder._build_parameters()] METRIC_COMPUTATION_RESULT.DETAILS:\n{details} ; TYPE: {str(type(details))}")
-        # print(f'\n[ALEX_TEST] [MetricMultiBatchValidationGraphParameterBuilder._build_parameters()] METRIC_COMPUTATION_RESULT.ATTRIBUTED_RESOLVED_METRICS:\n{metric_computation_result.attributed_resolved_metrics} ; TYPE: {str(type(metric_computation_result.attributed_resolved_metrics))} ; LEN: {len(metric_computation_result.attributed_resolved_metrics)}')
         return Attributes(
             {
-                # TODO: <Alex>ALEX</Alex>
-                # FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_computation_result.attributed_resolved_metrics,
-                # FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: metric_computation_result.attributed_resolved_metrics,
-                # TODO: <Alex>ALEX</Alex>
                 FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
             }
         )

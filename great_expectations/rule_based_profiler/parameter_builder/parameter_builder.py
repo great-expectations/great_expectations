@@ -186,13 +186,11 @@ class ParameterBuilder(ABC, Builder):
                     data=parameter_computation_result
                 ),
             }
-            # print(f"\n[ALEX_TEST] [PARAMETER_BUILDER.build_parameters()] PARAMETER_VALUES-0:\n{parameter_values} ; TYPE: {str(type(parameter_values))}")
 
             build_parameter_container(
                 parameter_container=parameters[domain.id],
                 parameter_values=parameter_values,
             )
-            # print(f"\n[ALEX_TEST] [PARAMETER_BUILDER.build_parameters()] PARAMETER_VALUES-1:\n{parameters[domain.id]} ; TYPE: {str(type(parameters[domain.id]))}")
 
     def resolve_evaluation_dependencies(
         self,
@@ -472,15 +470,7 @@ specified (empty "metric_name" value detected)."""
                 runtime_configuration=None,
             )
         )
-        # TODO: <Alex>ALEX</Alex>
-        # print(f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] GRAPH:\n{graph} ; TYPE: {str(type(graph))}")
-        # TODO: <Alex>ALEX</Alex>
-        # print(f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] GRAPH.EDGES:\n{graph.edges} ; TYPE: {str(type(graph.edges))}")
-        # print(f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] GRAPH.EDGE_IDS:\n{graph.edge_ids} ; TYPE: {str(type(graph.edge_ids))}")
-        # TODO: <Alex>ALEX</Alex>
 
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
         # Obtain result_format from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         result_format = get_parameter_value_and_validate_return_type(
             domain=domain,
@@ -489,7 +479,6 @@ specified (empty "metric_name" value detected)."""
             variables=variables,
             parameters=parameters,
         )
-        # TODO: <Alex>ALEX</Alex>
         if isinstance(result_format, str):
             try:
                 result_format = MetricsComputationResultFormat(result_format.lower())
@@ -505,8 +494,6 @@ specified (empty "metric_name" value detected)."""
 is not supported).
 """
             )
-        # TODO: <Alex>ALEX</Alex>
-        # print(f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] MULTI_BATCH_COMPUTATION_RESULT_FORMAT:\n{result_format} ; TYPE: {str(type(result_format))}")
 
         details: dict = {
             "metric_configuration": {
@@ -528,15 +515,10 @@ is not supported).
             )
 
         if result_format == MetricsComputationResultFormat.VALIDATION_GRAPH:
-            # Build and return result to receiver (contains "ValidationGraph" only).
-            # TODO: <Alex>ALEX</Alex>
+            # Step-5: Build and return result to receiver (contains "ValidationGraph" only).
             details["graph"] = graph
-            # TODO: <Alex>ALEX</Alex>
             return MetricComputationResult(
-                # TODO: <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX-CAN-attributed_resolved_metrics-BE_OMITTED?</Alex>
                 attributed_resolved_metrics=None,
-                # TODO: <Alex>ALEX</Alex>
                 details=details,
             )
 
@@ -553,9 +535,8 @@ is not supported).
             runtime_configuration=None,
             min_graph_edges_pbar_enable=0,
         )
-        # print(f"\n[ALEX_TEST] [PARAMETER_BUILDER.get_metrics()] RESOLVED_METRICS:\n{resolved_metrics} ; TYPE: {str(type(resolved_metrics))}")
 
-        # Step-5: Map resolved metrics to their attributes for identification and recovery by receiver.
+        # Step-6: Map resolved metrics to their attributes for identification and recovery by receiver.
 
         attributed_resolved_metrics_map: Dict[str, AttributedResolvedMetrics] = {}
 
@@ -580,11 +561,6 @@ is not supported).
 
             if metric_configuration.id in resolved_metrics:
                 resolved_metric_value = resolved_metrics[metric_configuration.id]
-                # TODO: <Alex>ALEX</Alex>
-                # a = 'column_pair_values.equal.unexpected_values'
-                # if metric_configuration.metric_name == a:
-                #     print(f'\n[ALEX_TEST] [@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@PARAMETER_BUILDER.get_metrics()] {a}:\n{resolved_metric_value} ; TYPE: {str(type(resolved_metric_value))}')
-                # TODO: <Alex>ALEX</Alex>
                 attributed_resolved_metrics.add_resolved_metric(
                     batch_id=metric_configuration.metric_domain_kwargs["batch_id"],
                     value=resolved_metric_value,
@@ -595,52 +571,12 @@ is not supported).
                 )
                 continue
 
-        # TODO: <Alex>ALEX</Alex>
-        # Step-6: Convert scalar metric values to vectors to enable uniformity of processing in subsequent operations.
-        # TODO: <Alex>ALEX</Alex>
-
         metric_attributes_id: str
-        # TODO: <Alex>ALEX</Alex>
-        # for (
-        #     metric_attributes_id,
-        #     attributed_resolved_metrics,
-        # ) in attributed_resolved_metrics_map.items():
-        #     if (
-        #         isinstance(
-        #             attributed_resolved_metrics.conditioned_metric_values,
-        #             np.ndarray,
-        #         )
-        #         and attributed_resolved_metrics.conditioned_metric_values.ndim == 1
-        #     ):
-        #         attributed_resolved_metrics.metric_values_by_batch_id = {
-        #             batch_id: [resolved_metric_value]
-        #             for batch_id, resolved_metric_value in attributed_resolved_metrics.attributed_metric_values.items()
-        #         }
-        #         attributed_resolved_metrics_map[
-        #             metric_attributes_id
-        #         ] = attributed_resolved_metrics
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
         for (
             metric_attributes_id,
             attributed_resolved_metrics,
         ) in attributed_resolved_metrics_map.items():
-            if (
-                # TODO: <Alex>ALEX</Alex>
-                # True
-                # TODO: <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX</Alex>
-                attributed_resolved_metrics.conditioned_metric_values
-                is not None
-                # TODO: <Alex>ALEX</Alex>
-                # isinstance(
-                #     attributed_resolved_metrics.conditioned_metric_values,
-                #     np.ndarray,
-                # )
-                # TODO: <Alex>ALEX</Alex>
-                # and attributed_resolved_metrics.conditioned_metric_values.ndim == 1
-                # TODO: <Alex>ALEX</Alex>
-            ):
+            if attributed_resolved_metrics.conditioned_metric_values is not None:
                 attributed_resolved_metrics.metric_values_by_batch_id = {
                     batch_id: [resolved_metric_value]
                     for batch_id, resolved_metric_value in attributed_resolved_metrics.attributed_metric_values.items()
@@ -648,7 +584,6 @@ is not supported).
                 attributed_resolved_metrics_map[
                     metric_attributes_id
                 ] = attributed_resolved_metrics
-        # TODO: <Alex>ALEX</Alex>
 
         # Step-7: Apply numeric/hygiene flags (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
 

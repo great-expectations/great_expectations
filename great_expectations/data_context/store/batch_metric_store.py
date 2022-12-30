@@ -74,9 +74,6 @@ class BatchMetricStore(Store):
 
     def remove_key(self, key) -> None:
         # TODO: <Alex>ALEX</Alex>
-        # return self.store_backend.remove_key(key)
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
         pass
         # TODO: <Alex>ALEX</Alex>
 

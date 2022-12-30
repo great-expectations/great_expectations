@@ -271,14 +271,13 @@ class ExecutionEngine(ABC):
 
         self._batch_manager = BatchManager(execution_engine=self)
 
-        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX -- temporary here (for demonstration purposes); ultimately, "MetricsService" will route requests to "MetricsStore" and "ExecutionEngine" as appropriate.</Alex>
         self._batch_metric_store: BatchMetricStore = BatchMetricStore(
             store_name="alex_test_0",
             store_backend={
                 "class_name": "InMemoryStoreBackend",
             },
         )
-        # print(f'\n[ALEX_TEST] [EXECUTION_ENGINE.__INIT__()] INSTANTIATED_BATCH_METRIC_STORE:\n{self._batch_metric_store} ; TYPE: {str(type(self._batch_metric_store))}')
         # TODO: <Alex>ALEX</Alex>
 
         if batch_data_dict is None:
@@ -367,7 +366,6 @@ class ExecutionEngine(ABC):
         Returns:
             resolved_metrics (Dict): a dictionary with the values for the metrics that have just been resolved.
         """
-        # print(f'\n[ALEX_TEST-WOUTPUT] [EXECUTION_ENGINE.resolve_metrics()] RESOLVE_METRICS()-IS_CALLED_WITH_NUM_METRICS_TO_RESOLVE:\n{len(metrics_to_resolve)} ; TYPE: {str(type(len(metrics_to_resolve)))}')
         if not metrics_to_resolve:
             return metrics or {}
 
@@ -383,21 +381,18 @@ class ExecutionEngine(ABC):
             metrics=metrics,
             runtime_configuration=runtime_configuration,
         )
-        # print(f'\n[ALEX_TEST] [EXECUTION_ENGINE.resolve_metrics()] RESOLVED_METRICS-0:\n{resolved_metrics} ; TYPE: {str(type(resolved_metrics))}')
         newly_computed_metrics: Dict[
             Tuple[str, str, str], MetricValue
         ] = self._process_direct_and_bundled_metric_computation_configurations(
             metric_fn_direct_configurations=metric_fn_direct_configurations,
             metric_fn_bundle_configurations=metric_fn_bundle_configurations,
         )
-        # print(f'\n[ALEX_TEST-WOUTPUT] [EXECUTION_ENGINE.resolve_metrics()] METRICS_WHICH_HAD_TO_BE_NEWLY_COMPUTED_METRICS:\n{newly_computed_metrics} ; TYPE: {str(type(newly_computed_metrics))} ; NUM_METRICS_WHICH_HAD_TO_BE_NEWLY_COMPUTED_METRICS: {len(newly_computed_metrics)}')
         self._persist_newly_computed_metrics_into_batch_metric_store(
             metrics=newly_computed_metrics,
             metric_fn_direct_configurations=metric_fn_direct_configurations,
             metric_fn_bundle_configurations=metric_fn_bundle_configurations,
         )
         resolved_metrics.update(newly_computed_metrics)
-        # print(f'\n[ALEX_TEST] [EXECUTION_ENGINE.resolve_metrics()] RESOLVED_METRICS-1:\n{resolved_metrics} ; TYPE: {str(type(resolved_metrics))}')
         return resolved_metrics
 
     def resolve_metric_bundle(
@@ -516,11 +511,9 @@ class ExecutionEngine(ABC):
         Returns:
             Tuple with two elements: directly-computable and bundled "MetricComputationConfiguration" objects
         """
-        # print(f'\n[ALEX_TEST] [EXECUTION_ENGINE._build_direct_and_bundled_metric_computation_configurations()] NUM_METRICS_TO_RESOLVE-0:\n{len(metrics_to_resolve)} ; TYPE: {str(type(len(metrics_to_resolve)))}')
         retrieved_metrics: Dict[
             Tuple[str, str, str], MetricValue
         ] = self._query_batch_metric_store(metrics_to_resolve=metrics_to_resolve)
-        # print(f'\n[ALEX_TEST-WOUTPUT] [EXECUTION_ENGINE._build_direct_and_bundled_metric_computation_configurations()] RETRIEVED_METRICS_FROM_BATCH_METRIC_STORE:\n{retrieved_metrics} ; TYPE: {str(type(retrieved_metrics))} ; NUM_RETRIEVED_METRICS_FROM_BATCH_METRIC_STORE: {len(retrieved_metrics)}')
 
         metric_to_resolve: MetricConfiguration
 
@@ -530,7 +523,6 @@ class ExecutionEngine(ABC):
                 metrics_to_resolve,
             )
         )
-        # print(f'\n[ALEX_TEST-WOUTPUT] [EXECUTION_ENGINE._build_direct_and_bundled_metric_computation_configurations()] NUM_METRICS_STILL_NEEDED_TO_GET_RESOLVED_THAT_ARE_NOT_IN_BATCH_METRIC_STORE-1:\n{len(metrics_to_resolve)} ; TYPE: {str(type(len(metrics_to_resolve)))}')
 
         metric_fn_direct_configurations: List[MetricComputationConfiguration] = []
         metric_fn_bundle_configurations: List[MetricComputationConfiguration] = []
@@ -554,7 +546,6 @@ class ExecutionEngine(ABC):
         compute_domain_kwargs: dict
         accessor_domain_kwargs: dict
         for metric_to_resolve in metrics_to_resolve:
-            # print(f'\n[ALEX_TEST] [EXECUTION_ENGINE._build_direct_and_bundled_metric_computation_configurations()] ORGANIZING_METRIC_TO_RESOLVE:\n{metric_to_resolve} ; TYPE: {str(type(metric_to_resolve))}')
             resolved_metric_dependencies_by_metric_name = (
                 self._get_computed_metric_evaluation_dependencies_by_metric_name(
                     metric_to_resolve=metric_to_resolve,
@@ -634,7 +625,6 @@ class ExecutionEngine(ABC):
     ) -> Dict[Tuple[str, str, str], MetricValue]:
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
-        # print(f'\n[ALEX_TEST] [EXECUTION_ENGINE._query_batch_metric_store()] NUM_METRICS_TO_RESOLVE:\n{len(metrics_to_resolve)} ; TYPE: {str(type(len(metrics_to_resolve)))}')
         metric_configuration: MetricConfiguration
         batch_id: str
         key: BatchMetricIdentifier
@@ -653,11 +643,7 @@ class ExecutionEngine(ABC):
                 )
             )
             try:
-                # print(f'\n[ALEX_TEST] [EXECUTION_ENGINE._query_batch_metric_store()] QUERY_BATCH_METRIC_COMPUTATION_FOR_KEY:\n{key} ; TYPE: {str(type(key))}')
                 res = self._batch_metric_store.get(key=key)
-                # TODO: <Alex>ALEX</Alex>
-                # print(f'\n[ALEX_TEST] [EXECUTION_ENGINE._query_batch_metric_store()] OBTAINED_RESULT_FOR_METRIC_NAME-{metric_configuration.metric_name}-RES:\n{res} ; TYPE: {str(type(res))}')
-                # TODO: <Alex>ALEX</Alex>
                 resolved_metrics[metric_configuration.id] = res.value
             except ge_exceptions.InvalidKeyError as exc_ik:
                 # TODO: <Alex>ALEX</Alex>
@@ -665,14 +651,12 @@ class ExecutionEngine(ABC):
                     f'Non-existent BatchMetricComputation record named "{key.batch_metric_key}".\n\nDetails: {exc_ik}'
                 )
                 # TODO: <Alex>ALEX</Alex>
-                # print(f'\n[ALEX_TEST-WOUTPUT] [EXECUTION_ENGINE._query_batch_metric_store()] NON-EXISTENT BatchMetricComputation RECORD NAMED "{key.batch_metric_key}".\n\nDetails: {exc_ik}')
             except ValidationError as exc_ve:
                 # TODO: <Alex>ALEX</Alex>
                 print(
                     f"Invalid BatchMetricComputation record; validation error: {exc_ve}"
                 )
                 # TODO: <Alex>ALEX</Alex>
-                # print(f'\n[ALEX_TEST-WOUTPUT] [EXECUTION_ENGINE._query_batch_metric_store()] INVALID BatchMetricComputation RECORD; VALIDATION ERROR: {exc_ve}')
 
         return resolved_metrics
 
@@ -812,8 +796,6 @@ class ExecutionEngine(ABC):
                 value=metrics[metric_computation_configuration.metric_configuration.id],
             )
             self._batch_metric_store.set(key=key, value=batch_metric_computation)
-            # print(f'\n[ALEX_TEST] [EXECUTION_ENGINE._persist_newly_computed_metrics_into_batch_metric_store()] STORED_BATCH_METRIC_COMPUTATION_KEY:\n{key} ; TYPE: {str(type(key))}')
-            # print(f'\n[ALEX_TEST] [EXECUTION_ENGINE._persist_newly_computed_metrics_into_batch_metric_store()] STORED_BATCH_METRIC_COMPUTATION_VALUE:\n{batch_metric_computation} ; TYPE: {str(type(batch_metric_computation))}')
 
     def _split_domain_kwargs(
         self,

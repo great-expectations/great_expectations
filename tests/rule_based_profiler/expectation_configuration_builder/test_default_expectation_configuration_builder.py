@@ -198,8 +198,6 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
         domain=domain,
         parameters=parameters,
     )
-    # print(f'\n[ALEX_TEST] [WOUTPUT] PARAMETER_VALUE:\n{parameter_value} ; TYPE: {str(type(parameter_value))}')
-    # print(f'\n[ALEX_TEST] [WOUTPUT] PARAMETER_VALUE.VALUE:\n{parameter_value.value} ; TYPE: {str(type(parameter_value.value))}')
 
     condition: Optional[str] = None
     max_user_id: int = 999999999999
@@ -331,12 +329,8 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
         domain=domain,
         parameters=parameters,
     )
-    # print(f'\n[ALEX_TEST] [WOUTPUT] PARAMETER_VALUE:\n{parameter_value} ; TYPE: {str(type(parameter_value))}')
-    # print(f'\n[ALEX_TEST] [WOUTPUT] PARAMETER_VALUE.VALUE:\n{parameter_value.value} ; TYPE: {str(type(parameter_value.value))}')
-    # print(f'\n[ALEX_TEST] [WOUTPUT] PARAMETER_VALUE.VALUE[0]:\n{parameter_value.value[0]} ; TYPE: {str(type(parameter_value.value[0]))}')
-    # print(f'\n[ALEX_TEST] [WOUTPUT] PARAMETER_VALUE.VALUE[0][0]:\n{parameter_value.value[0][0]} ; TYPE: {str(type(parameter_value.value[0][0]))}')
 
-    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX -- extra subscripting in compliance with multi-Batch metrics.</Alex>
     condition: str = "$parameter.my_min_user_id.value[0][0]>0"
     # TODO: <Alex>ALEX</Alex>
     max_user_id: int = 999999999999
@@ -344,7 +338,7 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
-        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX -- extra subscripting in compliance with multi-Batch metrics.</Alex>
         min_value=parameter_value.value[0][0],
         # TODO: <Alex>ALEX</Alex>
         max_value=max_user_id,
@@ -406,12 +400,8 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
         domain=domain,
         parameters=parameters,
     )
-    # print(f'\n[ALEX_TEST] [WOUTPUT] PARAMETER_VALUE:\n{parameter_value} ; TYPE: {str(type(parameter_value))}')
-    # print(f'\n[ALEX_TEST] [WOUTPUT] PARAMETER_VALUE.VALUE:\n{parameter_value.value} ; TYPE: {str(type(parameter_value.value))}')
-    # print(f'\n[ALEX_TEST] [WOUTPUT] PARAMETER_VALUE.VALUE[0]:\n{parameter_value.value[0]} ; TYPE: {str(type(parameter_value.value[0]))}')
-    # print(f'\n[ALEX_TEST] [WOUTPUT] PARAMETER_VALUE.VALUE[0][0]:\n{parameter_value.value[0][0]} ; TYPE: {str(type(parameter_value.value[0][0]))}')
 
-    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX -- extra subscripting in compliance with multi-Batch metrics.</Alex>
     condition: str = "$parameter.my_min_user_id.value[0][0]<0"
     # TODO: <Alex>ALEX</Alex>
     max_user_id: int = 999999999999
@@ -419,7 +409,7 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
-        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX -- extra subscripting in compliance with multi-Batch metrics.</Alex>
         min_value=parameter_value.value[0][0],
         # TODO: <Alex>ALEX</Alex>
         max_value=max_user_id,

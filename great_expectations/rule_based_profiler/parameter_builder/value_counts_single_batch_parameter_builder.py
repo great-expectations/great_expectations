@@ -145,23 +145,14 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
             parameters=parameters,
         )
 
-        # print(f'\n[ALEX_TEST] [ValueCountsSingleBatchParameterBuilder._build_parameters()] COLUMN_VALUE_COUNTS_PARAMETER_NODE:\n{column_value_counts_parameter_node} ; TYPE: {str(type(column_value_counts_parameter_node))}')
-        # print(f'\n[ALEX_TEST] [ValueCountsSingleBatchParameterBuilder._build_parameters()] COLUMN_VALUE_COUNTS_PARAMETER_NODE.VALUE:\n{column_value_counts_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]} ; TYPE: {str(type(column_value_counts_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]))}')
-        # print(f'\n[ALEX_TEST] [ValueCountsSingleBatchParameterBuilder._build_parameters()] COLUMN_VALUE_COUNTS_PARAMETER_NODE.VALUE[0]:\n{column_value_counts_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY][0]} ; TYPE: {str(type(column_value_counts_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY][0]))}')
-        # TODO: <Alex>ALEX</Alex>
-        # values: list = list(
-        #     column_value_counts_parameter_node[
-        #         FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-        #     ].index
-        # )
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX -- extra subscripting in compliance with multi-Batch metrics.</Alex>
         values: list = list(
             column_value_counts_parameter_node[
                 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
             ][0].index
         )
         # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX -- extra subscripting in compliance with multi-Batch metrics.</Alex>
         weights: np.ndarray = np.asarray(
             column_value_counts_parameter_node[
                 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
@@ -172,6 +163,7 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
             ][0]
             + NP_EPSILON
         )
+        # TODO: <Alex>ALEX</Alex>
 
         partition_object: dict = {
             "values": values,
