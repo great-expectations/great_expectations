@@ -2694,7 +2694,7 @@ def _spark_map_condition_rows(
 
 def _spark_map_condition_index(
     cls,
-    execution_engine: PandasExecutionEngine,
+    execution_engine: SparkDFExecutionEngine,
     metric_domain_kwargs: Dict,
     metric_value_kwargs: Dict,
     metrics: Dict[str, Any],
@@ -2711,6 +2711,10 @@ def _spark_map_condition_index(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition", (None, None, None))
+
+    # Pandas
+    # Sql
+
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     # this is the list of columns?
     domain_column = domain_kwargs["column"]
@@ -2778,7 +2782,18 @@ def _spark_map_condition_query(
         _,
         _,
     ) = metrics.get("unexpected_condition", (None, None, None))
-    return str(unexpected_condition)
+    # parse the string
+    #
+    temp = str(unexpected_condition)
+    yes = temp.replace("Column<'(", "")
+    final_string = yes.replace(")'>", "")
+
+    instructions: str = f"""
+    from pyspark.sql import functions as F
+    intermediate_df = df.withColumn("__unexpected", F.expr({final_string}))
+    filtered_df = intermediate_df.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+    """
+    return instructions
 
 
 def _spark_column_pair_map_condition_values(

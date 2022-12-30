@@ -7242,53 +7242,9 @@ def pandas_animals_dataframe_for_unexpected_rows_and_index():
 
 
 @pytest.fixture
-def spark_dataframe_for_unexpected_rows_pandas_dataframe(
-    spark_session,
-) -> "pyspark.pandas.dataframe.DataFrame":  # noqa: F821
-    # there should be a pandas implementation
-    # https://sparkbyexamples.com/pyspark/pandas-api-on-apache-spark-pyspark/
-    # https://spark.apache.org/docs/latest/api/python/reference/pyspark.pandas/api/pyspark.pandas.DataFrame.set_index.html
-    test_df: "pyspark.pandas.dataframe.DataFrame" = spark_session.DataFrame(
-        {
-            "pk_1": [0, 1, 2, 3, 4, 5],
-            "pk_2": ["zero", "one", "two", "three", "four", "five"],
-            "animals": [
-                "cat",
-                "fish",
-                "dog",
-                "giraffe",
-                "lion",
-                "zebra",
-            ],
-        },
-        columns=["pk_1", "pk_2", "animals"],
-    )
-    # df: pd.DataFrame = pd.DataFrame(
-    #     {
-    #         "pk_1": [0, 1, 2, 3, 4, 5],
-    #         "pk_2": ["zero", "one", "two", "three", "four", "five"],
-    #         "animals": [
-    #             "cat",
-    #             "fish",
-    #             "dog",
-    #             "giraffe",
-    #             "lion",
-    #             "zebra",
-    #         ],
-    #     }
-    # )spark.sql.dataframe.DataFrame" = spark_session.createDataFrame(
-    #     #     data=df
-    #     # )  # noqa: F821
-    #     return test_df
-    # test_df: "py
-
-
-#
-@pytest.fixture
 def spark_dataframe_for_unexpected_rows_sql_dataframe(
     spark_session,
 ) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821
-    # sets index as Pk_1
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],

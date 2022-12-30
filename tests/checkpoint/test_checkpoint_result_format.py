@@ -156,7 +156,15 @@ WHERE animals IS NOT NULL AND (animals NOT IN ('cat', 'fish', 'dog'))"
 
 @pytest.fixture
 def expected_spark_query_output() -> str:
-    return "Column<'((animals IS NOT NULL) AND (NOT (animals IN (cat, fish, dog))))'>"
+    return (
+        "\n"
+        "    from pyspark.sql import functions as F\n"
+        '    intermediate_df = df.withColumn("__unexpected", F.expr((animals IS NOT '
+        "NULL) AND (NOT (animals IN (cat, fish, dog)))))\n"
+        '    filtered_df = intermediate_df.filter(F.col("__unexpected") == '
+        'True).drop(F.col("__unexpected"))\n'
+        "    "
+    )
 
 
 def _add_expectations_and_checkpoint(
@@ -326,7 +334,7 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
     )
     result_format: dict = {
-        "result_format": "SUMMARY",
+        "result_format": "COMPLETE",
         "partial_unexpected_count": 1,
         "unexpected_index_column_names": ["pk_1"],
     }
@@ -493,10 +501,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_outp
         "partial_unexpected_index_list"
     ]
     assert first_result_partial_list == expected_unexpected_indices_output
-    unexpected_index_query: str = evrs[0]["results"][0]["result"][
-        "unexpected_index_query"
-    ]
-    assert unexpected_index_query == expected_sql_query_output
 
 
 @pytest.mark.integration
@@ -543,10 +547,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_basic_output
         "partial_unexpected_index_list"
     )
     assert not first_result_partial_list
-    unexpected_index_query: str = evrs[0]["results"][0]["result"][
-        "unexpected_index_query"
-    ]
-    assert unexpected_index_query == expected_sql_query_output
 
 
 # pandas
@@ -1279,10 +1279,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_ou
         "partial_unexpected_index_list"
     ]
     assert first_result_partial_list == expected_unexpected_indices_output
-    unexpected_index_query: str = evrs[0]["results"][0]["result"][
-        "unexpected_index_query"
-    ]
-    assert unexpected_index_query == expected_spark_query_output
+    # no query for summary
 
 
 @pytest.mark.integration
@@ -1332,7 +1329,3 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_basic_outp
         "partial_unexpected_index_list"
     )
     assert not first_result_partial_list
-    unexpected_index_query: str = evrs[0]["results"][0]["result"][
-        "unexpected_index_query"
-    ]
-    assert unexpected_index_query == expected_spark_query_output
