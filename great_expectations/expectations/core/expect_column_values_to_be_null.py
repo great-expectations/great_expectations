@@ -5,6 +5,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.expectation_configuration import parse_result_format
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -228,6 +229,10 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        # TODO: <Alex>ALEX</Alex>
+        metrics = convert_to_json_serializable(data=metrics)
+        # print(f"\n[ALEX_TEST] [EXPECTATION.ExpectColumnValuesToBeNull._validate()] AVAILABLE_METRICS:\n{metrics} ; TYPE: {str(type(metrics))}")
+        # TODO: <Alex>ALEX</Alex>
         result_format = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )

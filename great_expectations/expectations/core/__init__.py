@@ -1,3 +1,12 @@
+# TODO: <Alex>ALEX</Alex>
+from .expect_batch_column_mean_moving_average_to_be_within import (
+    ExpectBatchColumnMeanMovingAverageToBeWithin,
+)
+from .expect_batch_table_row_count_to_be_increasing import (
+    ExpectBatchTableRowCountToBeIncreasing,
+)
+
+# TODO: <Alex>ALEX</Alex>
 from .expect_column_distinct_values_to_be_in_set import (
     ExpectColumnDistinctValuesToBeInSet,
 )

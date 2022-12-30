@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABCMeta, abstractmethod
 from inspect import isabstract
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
@@ -32,6 +34,7 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     HistogramSingleBatchParameterBuilder,
     MeanUnexpectedMapMetricMultiBatchParameterBuilder,
     MetricMultiBatchParameterBuilder,
+    MetricMultiBatchValidationGraphParameterBuilder,
     MetricSingleBatchParameterBuilder,
     NumericMetricRangeMultiBatchParameterBuilder,
     ParameterBuilder,
@@ -53,9 +56,6 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
     RuleBasedProfiler,
 )
 from great_expectations.util import camel_to_snake, measure_execution_time
-from great_expectations.validator.validator import Validator
-
-# noinspection PyMethodParameters
 
 
 class MetaDataAssistant(ABCMeta):
@@ -272,6 +272,28 @@ class DataAssistant(metaclass=MetaDataAssistant):
             )
 
         @staticmethod
+        def build_metric_multi_batch_validation_graph_parameter_builder(
+            metric_name: str,
+            suffix: Optional[str] = None,
+            metric_domain_kwargs: Optional[
+                Union[str, dict]
+            ] = DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs: Optional[Union[str, dict]] = None,
+        ) -> ParameterBuilder:
+            """
+            This method instantiates "MetricMultiBatchValidationGraphParameterBuilder" with specific arguments.
+            """
+            name: str = sanitize_parameter_name(name=metric_name, suffix=suffix)
+            return MetricMultiBatchValidationGraphParameterBuilder(
+                name=name,
+                metric_name=metric_name,
+                metric_domain_kwargs=metric_domain_kwargs,
+                metric_value_kwargs=metric_value_kwargs,
+                evaluation_parameter_builder_configs=None,
+                data_context=None,
+            )
+
+        @staticmethod
         def build_metric_multi_batch_parameter_builder(
             metric_name: str,
             suffix: Optional[str] = None,
@@ -458,7 +480,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
     def __init__(
         self,
         name: str,
-        validator: Optional[Validator],
+        validator: Optional["Validator"],  # noqa: F821
     ) -> None:
         """
         DataAssistant subclasses guide "RuleBasedProfiler" to contain Rule configurations to embody profiling behaviors,

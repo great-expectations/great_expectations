@@ -202,6 +202,12 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        # TODO: <Alex>ALEX</Alex>
+        # print(f'\n[ALEX_TEST] [ExpectTableRowCountToEqualOtherTable._VALIDATE()] PROVIDED_METRICS-0:\n{metrics} ; TYPE: {str(type(metrics))}')
+        # TODO: <Alex>ALEX</Alex>
+        # metrics = convert_to_json_serializable(data=metrics)
+        # print(f'\n[ALEX_TEST] [ExpectTableRowCountToEqualOtherTable._VALIDATE()] PROVIDED_METRICS-1:\n{metrics} ; TYPE: {str(type(metrics))}')
+        # TODO: <Alex>ALEX</Alex>
         table_row_count_self = metrics["table.row_count.self"]
         table_row_count_other = metrics["table.row_count.other"]
 

@@ -119,10 +119,24 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
         table_columns_names_multi_batch_value: MetricValues = parameter_node[
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
         ]
+        # print(f'\n[ALEX_TEST] [MeanTableColumnsSetMatchMultiBatchParameterBuilder._build_parameters()] TABLE_COLUMNS_NAMES_MULTI_BATCH_VALUE:\n{table_columns_names_multi_batch_value} ; TYPE: {str(type(table_columns_names_multi_batch_value))}')
+        # print(f'\n[ALEX_TEST] [MeanTableColumnsSetMatchMultiBatchParameterBuilder._build_parameters()] TABLE_COLUMNS_NAMES_MULTI_BATCH_VALUE.NDIM:\n{table_columns_names_multi_batch_value.ndim} ; TYPE: {str(type(table_columns_names_multi_batch_value.ndim))}')
+        # print(f'\n[ALEX_TEST] [MeanTableColumnsSetMatchMultiBatchParameterBuilder._build_parameters()] TABLE_COLUMNS_NAMES_MULTI_BATCH_VALUE.SHAPE:\n{table_columns_names_multi_batch_value.shape} ; TYPE: {str(type(table_columns_names_multi_batch_value.shape))}')
 
         one_batch_table_columns_names_value: MetricValue
+        # TODO: <Alex>ALEX</Alex>
+        # for one_batch_table_columns_names_value in table_columns_names_multi_batch_value:
+        #     print(f'\n[ALEX_TEST] [MeanTableColumnsSetMatchMultiBatchParameterBuilder._build_parameters()] ONE_BATCH_TABLE_COLUMNS_NAMES_VALUE:\n{one_batch_table_columns_names_value} ; TYPE: {str(type(one_batch_table_columns_names_value))}')
+        #     print(f'\n[ALEX_TEST] [MeanTableColumnsSetMatchMultiBatchParameterBuilder._build_parameters()] ONE_BATCH_TABLE_COLUMNS_NAMES_VALUE.NDIM:\n{one_batch_table_columns_names_value.ndim} ; TYPE: {str(type(one_batch_table_columns_names_value.ndim))}')
+        #     print(f'\n[ALEX_TEST] [MeanTableColumnsSetMatchMultiBatchParameterBuilder._build_parameters()] ONE_BATCH_TABLE_COLUMNS_NAMES_VALUE.SHAPE:\n{one_batch_table_columns_names_value.shape} ; TYPE: {str(type(one_batch_table_columns_names_value.shape))}')
+        # TODO: <Alex>ALEX</Alex>
         multi_batch_table_columns_names_sets_as_list: List[Set[str]] = [
-            set(one_batch_table_columns_names_value)
+            # TODO: <Alex>ALEX</Alex>
+            # set(one_batch_table_columns_names_value)
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            set(one_batch_table_columns_names_value[0])
+            # TODO: <Alex>ALEX</Alex>
             for one_batch_table_columns_names_value in table_columns_names_multi_batch_value
         ]
 

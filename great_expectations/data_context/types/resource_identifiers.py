@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import logging
 import warnings
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Tuple, Union, cast
 from uuid import UUID
 
 from dateutil.parser import parse
@@ -11,6 +13,7 @@ from marshmallow import Schema, fields, post_load
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import BatchKwargs, IDDict
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import DataContextError, InvalidDataContextKeyError
 
 if TYPE_CHECKING:
@@ -396,8 +399,111 @@ class ConfigurationIdentifierSchema(Schema):
         return ConfigurationIdentifier(**data)
 
 
+class BatchMetricIdentifier(DataContextKey):
+    def __init__(
+        self,
+        batch_metric_key: Tuple[
+            Optional[Union[str, tuple, dict, UUID]],
+            Optional[str],
+            Optional[Union[str, tuple, dict, UUID]],
+            Optional[Union[str, tuple, dict, UUID]],
+        ],
+    ) -> None:
+        super().__init__()
+        conditioned_batch_metric_key: List[Union[str, UUID]] = []
+        element: Optional[Union[str, tuple, dict, UUID]]
+        for element in batch_metric_key:
+            if isinstance(element, UUID):
+                conditioned_batch_metric_key.append(str(element))
+            elif isinstance(element, (type(None), tuple, dict)):
+                conditioned_batch_metric_key.append(
+                    hashlib.md5(
+                        json.dumps(
+                            convert_to_json_serializable(data=element), sort_keys=True
+                        ).encode("utf-8")
+                    ).hexdigest()
+                )
+            else:
+                conditioned_batch_metric_key.append(element)
+
+        batch_metric_key = tuple(conditioned_batch_metric_key)
+
+        batch_metric_key = cast(
+            Tuple[
+                Optional[Union[str, UUID]],
+                Optional[str],
+                Optional[Union[str, UUID]],
+                Optional[Union[str, UUID]],
+            ],
+            batch_metric_key,
+        )
+        if any(not isinstance(element, str) for element in batch_metric_key):
+            types_detected: str = (
+                f"{[type(element).__name__ for element in batch_metric_key]}"
+            )
+            raise InvalidDataContextKeyError(
+                f"batch_metric_key tuple elements must be of string type; {types_detected} detected"
+            )
+
+        self._batch_metric_key = batch_metric_key
+
+    @property
+    def batch_metric_key(
+        self,
+    ) -> Tuple[
+        Optional[Union[str, UUID]],
+        Optional[str],
+        Optional[Union[str, UUID]],
+        Optional[Union[str, UUID]],
+    ]:
+        return self._batch_metric_key
+
+    def to_tuple(
+        self,
+    ) -> Tuple[
+        Optional[Union[str, UUID]],
+        Optional[str],
+        Optional[Union[str, UUID]],
+        Optional[Union[str, UUID]],
+    ]:
+        return self._batch_metric_key
+
+    def to_fixed_length_tuple(self) -> tuple:
+        # noinspection PyRedundantParentheses
+        return (self._batch_metric_key,)
+
+    @classmethod
+    def from_tuple(
+        cls,
+        value: Tuple[
+            Optional[Union[str, UUID]],
+            Optional[str],
+            Optional[Union[str, UUID]],
+            Optional[Union[str, UUID]],
+        ],
+    ) -> BatchMetricIdentifier:
+        return cls(batch_metric_key=value)
+
+    @classmethod
+    def from_fixed_length_tuple(cls, value: tuple) -> BatchMetricIdentifier:
+        return cls(batch_metric_key=value[0])
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}::{self._batch_metric_key}"
+
+
+class BatchMetricIdentifierSchema(Schema):
+    batch_metric_key = fields.Str()
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_batch_metric_identifier(self, data, **kwargs):
+        return BatchMetricIdentifier(**data)
+
+
 expectationSuiteIdentifierSchema = ExpectationSuiteIdentifierSchema()
 validationResultIdentifierSchema = ValidationResultIdentifierSchema()
 runIdentifierSchema = RunIdentifierSchema()
 batchIdentifierSchema = BatchIdentifierSchema()
 configurationIdentifierSchema = ConfigurationIdentifierSchema()
+batchMetricIdentifierSchema = BatchMetricIdentifierSchema()

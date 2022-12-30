@@ -323,12 +323,12 @@ def test_alice_profiler_user_workflow_single_batch(
                             {
                                 "parent_class": "DefaultExpectationConfigurationBuilder",
                                 "anonymized_expectation_type": "49e0013b377d4c7d9604d73fd672aa63",
-                                "anonymized_condition": "5191ecaeb23644e402e68b1c641b1342",
+                                "anonymized_condition": "ef23fb6147ec6f8281534a051338c85a",
                             },
                             {
                                 "parent_class": "DefaultExpectationConfigurationBuilder",
                                 "anonymized_expectation_type": "5a4993ff394c8cf957dbe7964798f5a5",
-                                "anonymized_condition": "a7f49ffeced7b75c9e0d958e9d010ddd",
+                                "anonymized_condition": "8f7c53c7a7e8d7dd24a94f9723fea360",
                             },
                         ],
                     },
@@ -1090,7 +1090,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
                             "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                             "expectation_type": "expect_column_values_to_be_between",
                             "column": "$domain.domain_kwargs.column",
-                            "min_value": "$parameter.my_min_estimator.value[0]",
+                            "min_value": "$parameter.my_min_estimator.value[0][0]",
                             "mostly": "$variables.mostly",
                             "strict_min": "$variables.strict_min",
                             "meta": {
@@ -1224,7 +1224,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
                             "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                             "expectation_type": "expect_column_values_to_be_between",
                             "column": "$domain.domain_kwargs.column",
-                            "min_value": "$parameter.my_min_estimator.value[0]",
+                            "min_value": "$parameter.my_min_estimator.value[0][0]",
                             "mostly": "$variables.mostly",
                             "strict_min": "$variables.strict_min",
                             "meta": {
@@ -1343,7 +1343,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
                             "class_name": "DefaultExpectationConfigurationBuilder",
                             "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                             "column": "$domain.domain_kwargs.column",
-                            "min_value": "$parameter.my_min_estimator.value[0]",
+                            "min_value": "$parameter.my_min_estimator.value[0][0]",
                             "mostly": "$variables.mostly",
                             "strict_min": "$variables.strict_min",
                             "meta": {
@@ -1485,7 +1485,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
                             "class_name": "DefaultExpectationConfigurationBuilder",
                             "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                             "column": "$domain.domain_kwargs.column",
-                            "min_value": "$parameter.my_min_estimator.value[0]",
+                            "min_value": "$parameter.my_min_estimator.value[0][0]",
                             "mostly": "$variables.mostly",
                             "strict_min": "$variables.strict_min",
                             "meta": {

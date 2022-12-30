@@ -370,6 +370,12 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        # TODO: <Alex>ALEX</Alex>
+        # print(f'\n[ALEX_TEST] [ExpectColumnKlDivergenceToBeLessThan._VALIDATE()] PROVIDED_METRICS-0:\n{metrics} ; TYPE: {str(type(metrics))}')
+        # metrics = convert_to_json_serializable(data=metrics)
+        # TODO: <Alex>ALEX</Alex>
+        # print(f'\n[ALEX_TEST] [ExpectColumnKlDivergenceToBeLessThan._VALIDATE()] PROVIDED_METRICS-1:\n{metrics} ; TYPE: {str(type(metrics))}')
+        # TODO: <Alex>ALEX</Alex>
         bucketize_data = configuration.kwargs.get(
             "bucketize_data", self.default_kwarg_values["bucketize_data"]
         )

@@ -1397,15 +1397,30 @@ class ExpectationConfiguration(SerializableDictDot):
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
+        # TODO: <Alex>ALEX</Alex>
+        validator: Optional[Validator] = None,
+        # TODO: <Alex>ALEX</Alex>
         **kwargs: dict,
     ):
         expectation_impl: Expectation = self._get_expectation_impl()
         # noinspection PyCallingNonCallable
+        # TODO: <Alex>ALEX</Alex>
         return expectation_impl(self).metrics_validate(
             metrics=metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,
+            # TODO: <Alex>ALEX</Alex>
+            validator=validator,
+            # TODO: <Alex>ALEX</Alex>
         )
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # return expectation_impl.metrics_validate(
+        #     metrics=metrics,
+        #     runtime_configuration=runtime_configuration,
+        #     execution_engine=execution_engine,
+        # )
+        # TODO: <Alex>ALEX</Alex>
 
     def get_domain_type(self) -> MetricDomainTypes:
         """Return "domain_type" of this expectation."""
