@@ -2412,7 +2412,7 @@ def _sqlalchemy_map_condition_query(
     result_format: dict = metric_value_kwargs["result_format"]
 
     # We will not return map_condition_query if return_unexpected_index_query = False
-    return_unexpected_index_query: Union[bool, None] = result_format.get(
+    return_unexpected_index_query: bool = result_format.get(
         "return_unexpected_index_query"
     )
     if return_unexpected_index_query is False:
