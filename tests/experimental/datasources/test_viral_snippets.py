@@ -4,7 +4,6 @@ import pathlib
 from pprint import pformat as pf
 
 import pytest
-from pytest import TempPathFactory
 
 # apply markers to entire test module
 pytestmark = [pytest.mark.integration]
@@ -163,8 +162,33 @@ def test_zep_simple_validate_workflow(zep_file_context: FileDataContext):
 
 
 @pytest.mark.unit
-def test_save_datacontext(zep_file_context: FileDataContext):
+def test_save_datacontext_does_not_break(zep_file_context: FileDataContext):
+    print(zep_file_context.variables)
     zep_file_context.variables.save_config()
+
+
+@pytest.mark.unit
+def test_save_datacontext_persists_zep_config(
+    file_dc_config_dir_init: pathlib.Path, zep_only_config: GxConfig
+):
+    config_file = file_dc_config_dir_init / FileDataContext.GX_YML
+
+    initial_yaml = config_file.read_text()
+    print(f"  initial\n============================\n{initial_yaml}")
+    for ds_name in zep_only_config.datasources:
+        assert ds_name not in initial_yaml
+
+    context: FileDataContext = get_context(
+        context_root_dir=config_file.parent, cloud_mode=False
+    )
+
+    context.zep_config = zep_only_config
+    context.variables.save_config()
+
+    final_yaml = config_file.read_text()
+    print(f"  final\n============================\n{final_yaml}")
+    for ds_name in zep_only_config.datasources:
+        assert ds_name in final_yaml
 
 
 if __name__ == "__main__":
