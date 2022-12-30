@@ -34,6 +34,9 @@ def pickle_trick(obj, max_depth=10):
 
     try:
         pickle.dumps(obj)
+    except AttributeError as e:
+        logger.error(f"{e.__class__.__name__}:{e} -> {type(obj)} {obj.__name__}")
+        raise e
     except (pickle.PicklingError, TypeError) as e:
         failing_children = []
 
@@ -65,11 +68,18 @@ def instantiate_class_from_config(
     if config_defaults is None:
         config_defaults = {}
 
-    config = copy.deepcopy(config)  # TypeError trying to pickle `module`
+    dc = config.get("data_context")
+    if dc:
+        # TODO: either make the `execution_engine_type` pickleable or fix `__deepcopy__` methods to prevent the
+        # pickle fallback
+        # x = dc.zep_config.xdatasources["my_sql_ds"].assets["my_asset"]._datasource
+        # x = dc.zep_config.xdatasources["my_sql_ds"]._execution_engine
+        x = dc.zep_config.xdatasources["my_sql_ds"].execution_engine_type
+        print(type(dc.zep_config), dc.zep_config)
+        print(type(x), x)
+        print(pickle_trick(x))
 
-    # dc = config.get("data_context")
-    # if dc:
-    #     print(type(dc.zep_config), dc.zep_config)
+    config = copy.deepcopy(config)  # TypeError trying to pickle `module`
 
     module_name = config.pop("module_name", None)
     if module_name is None:

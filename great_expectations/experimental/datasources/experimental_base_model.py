@@ -91,7 +91,7 @@ class ExperimentalBaseModel(pydantic.BaseModel):
                     # v,
                 )
 
-        copy = self.copy(deep=True)
+        copy = self.copy(deep=True)  # 'Works' if `deep=False`
         memo[id(copy)] = copy
 
         print(f" return __deepcopy__ {self.__class__.__name__}")
