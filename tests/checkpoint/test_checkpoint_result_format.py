@@ -263,7 +263,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
     reference_sql_checkpoint_config_for_unexpected_column_names,
     expectation_config_expect_column_values_to_be_in_set,
     expected_unexpected_indices_output,
-    unexpected_index_query_output,
+    expected_sql_query_output,
 ):
     """
     What does this test?
@@ -310,7 +310,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
     unexpected_index_query: str = evrs[0]["results"][0]["result"][
         "unexpected_index_query"
     ]
-    assert unexpected_index_query == unexpected_index_query_output
+    assert unexpected_index_query == expected_sql_query_output
 
 
 @pytest.mark.integration
@@ -319,7 +319,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
     reference_sql_checkpoint_config_for_unexpected_column_names,
     expectation_config_expect_column_values_to_be_in_set,
     expected_unexpected_indices_output,
-    unexpected_index_query_output,
 ):
     """
     What does this test?
@@ -505,7 +504,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_two_expectation_complete_out
     expectation_config_expect_column_values_to_not_be_in_set,
     expected_unexpected_indices_output,
     expected_sql_query_output,
-    unexpected_index_query_output,
 ):
     """
     What does this test?
