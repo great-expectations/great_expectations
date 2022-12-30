@@ -34,6 +34,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
+    from great_expectations.validator.validator import Validator
 
 
 class NumericRangeEstimatorType(Enum):
@@ -228,7 +229,7 @@ class DataAssistantRunner:
                 validator=None,
             )
         else:
-            validator: "Validator" = get_validator_with_expectation_suite(  # noqa: F821
+            validator: Validator = get_validator_with_expectation_suite(
                 data_context=self._data_context,
                 batch_list=None,
                 batch_request=batch_request,

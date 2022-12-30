@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
 from inspect import isabstract
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.domain import Domain, SemanticDomainTypes
@@ -57,6 +57,9 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
 )
 from great_expectations.util import camel_to_snake, measure_execution_time
 
+if TYPE_CHECKING:
+    from great_expectations.validator.validator import Validator
+
 
 class MetaDataAssistant(ABCMeta):
     """
@@ -65,6 +68,7 @@ class MetaDataAssistant(ABCMeta):
     Any class inheriting from DataAssistant will be registered by snake-casing the name of the class.
     """
 
+    # noinspection PyMethodParameters
     def __new__(cls, clsname, bases, attrs):
         """
         Instantiate class as part of descentants calling "__init__()" and register its type in "DataAssistant" registry.
@@ -480,7 +484,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
     def __init__(
         self,
         name: str,
-        validator: Optional["Validator"],  # noqa: F821
+        validator: Optional[Validator],
     ) -> None:
         """
         DataAssistant subclasses guide "RuleBasedProfiler" to contain Rule configurations to embody profiling behaviors,
