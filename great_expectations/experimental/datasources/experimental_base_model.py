@@ -70,4 +70,4 @@ class ExperimentalBaseModel(pydantic.BaseModel):
 
     def __deepcopy__(self, memo):
         print(f"__deepcopy__ {self.__class__.__name__} {memo}")
-        pass
+        return self.copy(deep=True)

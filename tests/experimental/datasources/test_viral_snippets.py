@@ -107,7 +107,7 @@ def zep_yaml_config_file(
     for ds_name in zep_only_config.datasources.keys():
         assert ds_name in yaml_string
 
-    print(f"  Config File Text\n-----------\n{config_file_path.read_text()}")
+    LOGGER.info(f"  Config File Text\n-----------\n{config_file_path.read_text()}")
     return config_file_path
 
 
@@ -159,7 +159,6 @@ def test_zep_simple_validate_workflow(zep_file_context: FileDataContext):
     assert result["success"] == True
 
 
-# @pytest.mark.xfail(reason="TypeError: cannot pickle 'module' object")
 @pytest.mark.unit
 def test_save_datacontext(zep_file_context: FileDataContext):
     zep_file_context.variables.save_config()

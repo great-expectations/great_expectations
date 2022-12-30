@@ -4,7 +4,8 @@ import logging
 import os
 import pickle
 import warnings
-from pprint import pformat as pf
+
+# from pprint import pformat as pf
 from typing import TYPE_CHECKING, Any, Optional
 from urllib.parse import urlparse
 
@@ -64,20 +65,20 @@ def instantiate_class_from_config(
     if config_defaults is None:
         config_defaults = {}
 
-    config_copy = copy.deepcopy(config)  # TypeError trying to pickle `module`
+    config = copy.deepcopy(config)  # TypeError trying to pickle `module`
 
-    dc = config.get("data_context")
-    if dc:
-        print(type(dc.zep_config), dc.zep_config)
+    # dc = config.get("data_context")
+    # if dc:
+    #     print(type(dc.zep_config), dc.zep_config)
 
-    module_name = config_copy.pop("module_name", None)
+    module_name = config.pop("module_name", None)
     if module_name is None:
         try:
             module_name = config_defaults.pop("module_name")
         except KeyError:
             raise KeyError(
                 "Neither config : {} nor config_defaults : {} contains a module_name key.".format(
-                    config_copy,
+                    config,
                     config_defaults,
                 )
             )
