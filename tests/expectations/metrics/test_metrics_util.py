@@ -168,7 +168,7 @@ def test_get_unexpected_indices_for_single_pandas_named_index_named_unexpected_i
     unexpected_index_column_names: List[str] = ["pk_1"]
 
     unexpected_index_list = get_unexpected_indices_for_single_pandas_named_index(
-        df=updated_dataframe,
+        domain_records_df=updated_dataframe,
         expectation_domain_column_name=expectation_domain_column_name,
         unexpected_index_column_names=unexpected_index_column_names,
     )
@@ -186,7 +186,7 @@ def test_get_unexpected_indices_for_single_pandas_named_index(
     unexpected_index_column_names = [updated_dataframe.index.name]
 
     unexpected_index_list = get_unexpected_indices_for_single_pandas_named_index(
-        df=updated_dataframe,
+        domain_records_df=updated_dataframe,
         expectation_domain_column_name=expectation_domain_column_name,
         unexpected_index_column_names=unexpected_index_column_names,
     )
@@ -204,7 +204,7 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices(
     unexpected_index_column_names = list(updated_dataframe.index.names)
 
     unexpected_index_list = get_unexpected_indices_for_multiple_pandas_named_indices(
-        df=updated_dataframe,
+        domain_records_df=updated_dataframe,
         expectation_domain_column_name=expectation_domain_column_name,
         unexpected_index_column_names=unexpected_index_column_names,
     )
@@ -222,7 +222,7 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
     unexpected_index_column_names = ["pk_1", "pk_2"]
 
     unexpected_index_list = get_unexpected_indices_for_multiple_pandas_named_indices(
-        df=updated_dataframe,
+        domain_records_df=updated_dataframe,
         expectation_domain_column_name=expectation_domain_column_name,
         unexpected_index_column_names=unexpected_index_column_names,
     )
@@ -240,7 +240,7 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
     unexpected_index_column_names = ["pk_1"]
 
     unexpected_index_list = get_unexpected_indices_for_multiple_pandas_named_indices(
-        df=updated_dataframe,
+        domain_records_df=updated_dataframe,
         expectation_domain_column_name=expectation_domain_column_name,
         unexpected_index_column_names=unexpected_index_column_names,
     )
@@ -257,7 +257,7 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
     unexpected_index_column_names = ["i_dont_exist"]
     with pytest.raises(MetricResolutionError) as e:
         get_unexpected_indices_for_multiple_pandas_named_indices(
-            df=updated_dataframe,
+            domain_records_df=updated_dataframe,
             expectation_domain_column_name=expectation_domain_column_name,
             unexpected_index_column_names=unexpected_index_column_names,
         )
@@ -277,7 +277,7 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
     unexpected_index_column_names = ["pk_1"]
     with pytest.raises(MetricResolutionError) as e:
         get_unexpected_indices_for_multiple_pandas_named_indices(
-            df=updated_dataframe,
+            domain_records_df=updated_dataframe,
             expectation_domain_column_name=expectation_domain_column_name,
             unexpected_index_column_names=unexpected_index_column_names,
         )
