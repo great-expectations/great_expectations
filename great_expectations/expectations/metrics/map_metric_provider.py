@@ -4,7 +4,6 @@ from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
-from pyspark.sql.utils import AnalysisException
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
@@ -2627,21 +2626,21 @@ def _spark_column_map_condition_value_counts(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
-    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
-
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
 (_spark_column_map_condition_value_counts).
 """
         )
-
     column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
-
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
         execution_engine=execution_engine,
+    )
+
+    df: "pyspark.sql.dataframe.DataFrame" = execution_engine.get_domain_records(
+        domain_kwargs=compute_domain_kwargs
     )
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
@@ -2695,10 +2694,11 @@ def _spark_map_condition_index(
     metric_value_kwargs: Dict,
     metrics: Dict[str, Any],
     **kwargs,
-) -> List[Dict[str, Any]]:
+) -> Union[List[Dict[str, Any]], None]:
     """
     Returns indices of the metric values which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation.
+
     Requires `unexpected_index_column_names` to be part of `result_format` dict to specify primary_key columns
     to return.
     """
@@ -2707,59 +2707,53 @@ def _spark_map_condition_index(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition", (None, None, None))
+    if not unexpected_condition:
+        return None
 
-    # Pandas
-    # Sql
-
-    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    # this is the list of columns?
-    domain_column = domain_kwargs["column"]
-    df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
 (_spark_column_map_condition_values).
 """
         )
-    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
+    domain_column = domain_kwargs["column"]
 
-    column_name = get_dbms_compatible_column_names(
-        column_names=column_name,
-        batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
+    df: "pyspark.sql.dataframe.DataFrame" = execution_engine.get_domain_records(
+        domain_kwargs=domain_kwargs
     )
 
     result_format = metric_value_kwargs["result_format"]
+    if not result_format.get("unexpected_index_column_names"):
+        raise ge_exceptions.MetricResolutionError(
+            "unexpected_indices cannot be returned without 'unexpected_index_column_names'. Please check your configuration."
+        )
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
-    # does it give the default columns?
+    filtered = data.filter(F.col("__unexpected") is True).drop(F.col("__unexpected"))
     unexpected_index_list: Optional[List[Dict[str, Any]]] = []
 
-    if "unexpected_index_column_names" in result_format:
-        # breakpoint()
-        unexpected_index_column_names: List[str] = result_format[
-            "unexpected_index_column_names"
-        ]
-        columns_to_keep: List[str] = [
-            column for column in unexpected_index_column_names
-        ]
-        columns_to_keep.append(domain_column)
-        for row in filtered.collect():
-            dict_to_add: dict = {}
-            for col_name in columns_to_keep:
-                if col_name not in row:
-                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
-                        f"Error: The unexpected_index_column '{col_name}' does not exist in Spark DataFrame. Please check your configuration and try again."
-                    )
-                dict_to_add[col_name] = row[col_name]
+    unexpected_index_column_names: List[str] = result_format[
+        "unexpected_index_column_names"
+    ]
+    columns_to_keep: List[str] = [column for column in unexpected_index_column_names]
+    columns_to_keep.append(domain_column)
 
-            unexpected_index_list.append(dict_to_add)
-    else:
-        raise ge_exceptions.MetricResolutionError(
-            "indices cannot be returned without column names"
-        )
+    # check that column name is in row
+    breakpoint()
+    for col_name in columns_to_keep:
+        if col_name not in filtered.columns:
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                f"Error: The unexpected_index_column '{col_name}' does not exist in Spark DataFrame. Please check your configuration and try again."
+            )
+
+    for row in filtered.collect():
+        dict_to_add: dict = {}
+        for col_name in columns_to_keep:
+            dict_to_add[col_name] = row[col_name]
+        unexpected_index_list.append(dict_to_add)
+
     if result_format["result_format"] == "COMPLETE":
         return unexpected_index_list
     return unexpected_index_list[: result_format["partial_unexpected_count"]]
@@ -2773,15 +2767,53 @@ def _spark_map_condition_query(
     metrics: Dict[str, Any],
     **kwargs,
 ) -> str:
+    """
+    Returns query that will return all rows which do not meet an expected Expectation condition for instances
+    of ColumnMapExpectation.
+
+    Converts unexpected_condition into a string that can be rendered in DataDocs
+
+    Output will look like:
+
+        df.filter(F.expr( [unexpected_condition] ))
+
+    """
+    # TODO: flag for output, and also test
+    # TODO: check that this can actually be rendered
     """ """
-    # unexpected condition is a string that comes as an F.column object.
-    # Format typically is wrapped in Column<> syntax.
-    # Column<'[unexpected_expression]'>
     (
         unexpected_condition,
         _,
         _,
     ) = metrics.get("unexpected_condition", (None, None, None))
+
+    # unexpected_condition is an F.column object, meaning the str representation is wrapped in Column<> syntax.
+    # like Column<'[unexpected_expression]'>
+    unexpected_condition_as_string: str = str(unexpected_condition)
+    unexpected_condition_filtered: str = unexpected_condition_as_string.replace(
+        "Column<'(", ""
+    ).replace(")'>", "")
+    return f"df.filter(F.expr({unexpected_condition_filtered}))"
+
+
+def _spark_column_pair_map_condition_values(
+    cls,
+    execution_engine: SparkDFExecutionEngine,
+    metric_domain_kwargs: dict,
+    metric_value_kwargs: dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+    (
+        unexpected_condition,
+        compute_domain_kwargs,
+        accessor_domain_kwargs,
+    ) = metrics["unexpected_condition"]
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
     unexpected_condition_as_string: str = str(unexpected_condition)
     unexpected_condition_filtered: str = unexpected_condition_as_string.replace(
         "Column<'(", ""

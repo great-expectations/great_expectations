@@ -120,10 +120,10 @@ def batch_request_for_pandas_unexpected_rows_and_index(
 
 @pytest.fixture()
 def batch_request_for_spark_unexpected_rows_and_index(
-    spark_dataframe_for_unexpected_rows_sql_dataframe,
+    spark_dataframe_for_unexpected_rows_with_index,
 ) -> dict:
     dataframe: "pyspark.sql.dataframe.DataFrame" = (
-        spark_dataframe_for_unexpected_rows_sql_dataframe
+        spark_dataframe_for_unexpected_rows_with_index
     )
     return {
         "datasource_name": "spark_datasource",
@@ -1048,6 +1048,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_complete_o
         checkpoint_name="my_checkpoint",
         expectation_suite_name="animal_names_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index,
+        runtime_configuration={"catch_exceptions": False},
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
     first_result_full_list = evrs[0]["results"][0]["result"]["unexpected_index_list"]
