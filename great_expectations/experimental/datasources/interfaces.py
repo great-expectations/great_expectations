@@ -156,7 +156,7 @@ class DataAsset(ExperimentalBaseModel):
         self._sort_batches(batch_list)
         return batch_list
 
-    def _batch_from_fully_specified_batch_request(self, request: BatchRequest):
+    def _batch_from_fully_specified_batch_request(self, request: BatchRequest) -> Batch:
         """Returns a Batch object from a fully specified batch request
 
         Args:

@@ -4,6 +4,7 @@ import copy
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Type, cast
 
 import pydantic
+from pydantic import Field
 from pydantic import dataclasses as pydantic_dc
 from typing_extensions import ClassVar, Literal
 
@@ -11,6 +12,7 @@ from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.experimental.datasources.interfaces import (
     Batch,
     BatchRequest,
+    BatchSorter,
     BatchSortersDefinition,
     ColumnSplitter,
     DataAsset,
@@ -88,6 +90,7 @@ class TableAsset(DataAsset):
     # Overridden inherited instance fields
     type: Literal["table"] = "table"
     column_splitter: Optional[SqlYearMonthSplitter] = None
+    order_by: List[BatchSorter] = Field(default_factory=list)
     # Instance fields
     table_name: str
 
@@ -108,7 +111,7 @@ class TableAsset(DataAsset):
         )
         return self
 
-    def _batch_from_fully_specified_batch_request(self, request: BatchRequest):
+    def _batch_from_fully_specified_batch_request(self, request: BatchRequest) -> Batch:
         """Returns a Batch object from a fully specified batch request
 
         Args:
