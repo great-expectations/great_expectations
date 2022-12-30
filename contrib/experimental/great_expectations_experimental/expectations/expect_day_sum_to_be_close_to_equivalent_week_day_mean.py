@@ -30,7 +30,7 @@ def generate_data_sample(n_appearances: dict):
     return data
 
 
-class ExpectYesterdaySumComparedToAvgEquivalentDaysOfWeek(QueryExpectation):
+class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
     """
     This metric expects daily sums of the given column, to be close to the average sums calculated 4 weeks back,
     respective to the specific day of the week.
@@ -248,4 +248,4 @@ def get_diff_fraction(yesterday_sum: int, result_dict: dict):
 
 
 if __name__ == "__main__":
-    ExpectYesterdaySumComparedToAvgEquivalentDaysOfWeek().print_diagnostic_checklist()
+    ExpectDaySumToBeCloseToEquivalentWeekDayMean().print_diagnostic_checklist()
