@@ -1290,6 +1290,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
         - unexpected_index_column not defined in Checkpoint config, but passed in at run_checkpoint.
         - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
         - 1 Expectations added to suite
+        - return_unexpected_index_query set to True
     """
     # intentionally empty, since we are updating at run_checkpoint()
     dict_to_update_checkpoint: dict = {}
@@ -1345,6 +1346,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
         - unexpected_index_column not defined in Checkpoint config, but passed in at run_checkpoint.
         - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
         - 1 Expectations added to suite
+        - return_unexpected_index_query set to False
     """
     # intentionally empty, since we are updating at run_checkpoint()
     dict_to_update_checkpoint: dict = {}
@@ -1389,7 +1391,6 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
     batch_request_for_spark_unexpected_rows_and_index,
     reference_checkpoint_config_for_unexpected_column_names,
     expectation_config_expect_column_values_to_be_in_set,
-    expected_spark_query_output,
 ):
     """
     What does this test?
@@ -1497,7 +1498,6 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_ou
     reference_checkpoint_config_for_unexpected_column_names,
     expectation_config_expect_column_values_to_be_in_set,
     expected_unexpected_indices_output,
-    expected_spark_query_output,
 ):
     """
     What does this test?
@@ -1538,7 +1538,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_ou
         "partial_unexpected_index_list"
     ]
     assert first_result_partial_list == expected_unexpected_indices_output
-    # no query for summary
+    assert evrs[0]["results"][0]["result"].get("unexpected_index_query") is None
 
 
 @pytest.mark.integration
@@ -1547,7 +1547,6 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_basic_outp
     batch_request_for_spark_unexpected_rows_and_index,
     reference_checkpoint_config_for_unexpected_column_names,
     expectation_config_expect_column_values_to_be_in_set,
-    expected_spark_query_output,
 ):
     """
     What does this test?
@@ -1588,3 +1587,4 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_basic_outp
         "partial_unexpected_index_list"
     )
     assert not first_result_partial_list
+    assert evrs[0]["results"][0]["result"].get("unexpected_index_query") is None
