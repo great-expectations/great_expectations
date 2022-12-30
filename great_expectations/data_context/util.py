@@ -64,23 +64,20 @@ def instantiate_class_from_config(
     if config_defaults is None:
         config_defaults = {}
 
-    # print(f"# BEGIN config {type(config)} ->\n{pf(config)}\n# END CONFIG")
+    config_copy = copy.deepcopy(config)  # TypeError trying to pickle `module`
+
     dc = config.get("data_context")
-    print(f"DataContext {type(dc)}:\n=======================\n{dc})")
     if dc:
-        print(pf(dir(dc)))
-        print(pickle_trick(dc.zep_config))
+        print(type(dc.zep_config), dc.zep_config)
 
-    config = copy.deepcopy(config)  # TypeError trying to pickle `module`
-
-    module_name = config.pop("module_name", None)
+    module_name = config_copy.pop("module_name", None)
     if module_name is None:
         try:
             module_name = config_defaults.pop("module_name")
         except KeyError:
             raise KeyError(
                 "Neither config : {} nor config_defaults : {} contains a module_name key.".format(
-                    config,
+                    config_copy,
                     config_defaults,
                 )
             )
