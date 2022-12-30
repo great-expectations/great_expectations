@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 import logging
 import pathlib
+
+# from copy import deepcopy
 from io import StringIO
 from pprint import pformat as pf
 from typing import Type, TypeVar, Union, overload
@@ -22,9 +24,13 @@ yaml.default_flow_style = False
 _Self = TypeVar("_Self", bound="ExperimentalBaseModel")
 
 
+DEEP_COPY_CALLS = 0
+
+
 class ExperimentalBaseModel(pydantic.BaseModel):
     class Config:
         extra = pydantic.Extra.forbid
+        # copy_on_model_validation = "deep"
 
     @classmethod
     def parse_yaml(cls: Type[_Self], f: Union[pathlib.Path, str]) -> _Self:
@@ -69,5 +75,24 @@ class ExperimentalBaseModel(pydantic.BaseModel):
         return self.copy(deep=False)
 
     def __deepcopy__(self, memo):
-        print(f"__deepcopy__ {self.__class__.__name__} {memo}")
-        return self.copy(deep=True)
+        global DEEP_COPY_CALLS
+        DEEP_COPY_CALLS += 1
+        if DEEP_COPY_CALLS < 40:
+            print(
+                f"{DEEP_COPY_CALLS} __deepcopy__ {self.__class__.__name__}  \tmemo:{len(memo)}"
+            )
+            # print(list(memo.keys()))
+            for i, (k, v) in enumerate(memo.items()):
+                print(
+                    "\t",
+                    i,
+                    k,
+                    type(v),
+                    # v,
+                )
+
+        copy = self.copy(deep=True)
+        memo[id(copy)] = copy
+
+        print(f" return __deepcopy__ {self.__class__.__name__}")
+        return copy
