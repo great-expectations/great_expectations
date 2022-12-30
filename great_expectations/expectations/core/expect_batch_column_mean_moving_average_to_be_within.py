@@ -1,3 +1,4 @@
+# TODO: <Alex>ALEX -- Remove unused imports after final implementation (including configuration validation and rendering) is completed.</Alex>
 import itertools
 from typing import TYPE_CHECKING, Dict, List, Optional
 
@@ -320,26 +321,19 @@ class ExpectBatchColumnMeanMovingAverageToBeWithin(ColumnExpectation):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        # print(f'\n[ALEX_TEST] [ExpectBatchColumnMeanMovingAverageToBeWithin._validate()] PROVIDED_METRICS:\n{metrics} ; TYPE: {str(type(metrics))}')
         window_size: int = self.get_success_kwargs().get("window_size")
-        # print(f'\n[ALEX_TEST] [ExpectBatchColumnMeanMovingAverageToBeWithin._validate()] WINDOW_SIZE:\n{window_size} ; TYPE: {str(type(window_size))}')
         num_std_devs: int = self.get_success_kwargs().get("num_std_devs")
-        # print(f'\n[ALEX_TEST] [ExpectBatchColumnMeanMovingAverageToBeWithin._validate()] NUM_STD_DEVS:\n{num_std_devs} ; TYPE: {str(type(num_std_devs))}')
         mode: str = self.get_success_kwargs().get("mode")
-        # print(f'\n[ALEX_TEST] [ExpectBatchColumnMeanMovingAverageToBeWithin._validate()] MODE:\n{mode} ; TYPE: {str(type(mode))}')
 
         multi_batch_column_mean_values: List[float] = [
             element[0] for element in metrics.get("column.mean").values()
         ]
-        # print(f'\n[ALEX_TEST] [ExpectBatchColumnMeanMovingAverageToBeWithin._validate()] MULTI_BATCH_COLUMN_MEAN_VALUES:\n{multi_batch_column_mean_values} ; TYPE: {str(type(multi_batch_column_mean_values))} ; NUM_MULTI_BATCH_COLUMN_MEAN_VALUES: {len(multi_batch_column_mean_values)}')
         multi_batch_column_standard_deviation_values: List[float] = [
             element[0] for element in metrics.get("column.standard_deviation").values()
         ]
-        # print(f'\n[ALEX_TEST] [ExpectBatchColumnMeanMovingAverageToBeWithin._validate()] MULTI_BATCH_COLUMN_STANDARD_DEVIATION_VALUES:\n{multi_batch_column_standard_deviation_values} ; TYPE: {str(type(multi_batch_column_standard_deviation_values))} ; NUM_MULTI_BATCH_COLUMN_STANDARD_DEVIATION_VALUES: {len(multi_batch_column_standard_deviation_values)}')
         max_amplitude: float = (
             num_std_devs * multi_batch_column_standard_deviation_values[-1]
         )
-        # print(f'\n[ALEX_TEST] [ExpectBatchColumnMeanMovingAverageToBeWithin._validate()] MAX_AMPLITUDE:\n{max_amplitude} ; TYPE: {str(type(max_amplitude))}')
 
         moving_average_values: np.ndarray = (
             np.convolve(
@@ -347,18 +341,15 @@ class ExpectBatchColumnMeanMovingAverageToBeWithin(ColumnExpectation):
             )
             / window_size
         )
-        # print(f'\n[ALEX_TEST] [ExpectBatchColumnMeanMovingAverageToBeWithin._validate()] MOVING_AVERAGE_VALUES:\n{moving_average_values} ; TYPE: {str(type(moving_average_values))} ; NUM_MOVING_AVERAGE_VALUES: {len(moving_average_values)}')
 
         a: float
         b: float
         deltas: np.ndarray = np.asarray(
             [a - b for a, b in itertools.combinations(moving_average_values, 2)]
         )
-        # print(f'\n[ALEX_TEST] [ExpectBatchColumnMeanMovingAverageToBeWithin._validate()] MOVING_AVERAGE_VALUES_COMBINATIONS_DELTAS:\n{deltas} ; TYPE: {str(type(deltas))} ; NUM_MOVING_AVERAGE_VALUES_COMBINATIONS_DELTAS: {len(deltas)}')
         success: bool = np.logical_and(
             deltas >= (-max_amplitude), deltas <= max_amplitude
         ).all()
-        # print(f'\n[ALEX_TEST] [ExpectBatchColumnMeanMovingAverageToBeWithin._validate()] MOVING_AVERAGE_VALUES_COMBINATIONS_DELTAS_SUCCESS:\n{success} ; TYPE: {str(type(success))}')
 
         return {
             "success": success,

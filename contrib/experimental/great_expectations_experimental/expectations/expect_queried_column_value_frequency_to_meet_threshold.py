@@ -7,10 +7,6 @@ For detailed information on QueryExpectations, please see:
 from typing import Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.core.util import convert_to_json_serializable
-# TODO: <Alex>ALEX</Alex>
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
