@@ -40,7 +40,6 @@ from great_expectations.rule_based_profiler.rule import Rule
 
 if TYPE_CHECKING:
     from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
-    from great_expectations.validator.validator import Validator
 
 
 class OnboardingDataAssistant(DataAssistant):
@@ -69,7 +68,7 @@ class OnboardingDataAssistant(DataAssistant):
     def __init__(
         self,
         name: str,
-        validator: Validator,
+        validator: "Validator",  # noqa: F821
     ) -> None:
         super().__init__(
             name=name,

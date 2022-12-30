@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from great_expectations.core import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -15,9 +15,6 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
-if TYPE_CHECKING:
-    from great_expectations.validator.validator import Validator
-
 
 class MetricMultiBatchValuesCalculator:
     """
@@ -26,7 +23,7 @@ class MetricMultiBatchValuesCalculator:
 
     def __init__(
         self,
-        validator: Validator,
+        validator: "Validator",  # noqa: F821
         metric_configurations: List[MetricConfiguration],
     ) -> None:
         self._metric_configurations = metric_configurations
