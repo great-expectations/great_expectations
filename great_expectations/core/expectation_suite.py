@@ -562,7 +562,7 @@ class ExpectationSuite(SerializableDictDot):
         """
         This is a private method for adding expectations that allows for usage_events to be suppressed when
         Expectations are added through internal processing (ie. while building profilers, rendering or validation). It
-        takes in send_usage_event boolean.  If successful, upserts ExpectationConfigurations into this ExpectationSuite.
+        takes in send_usage_event boolean.  If successful, upserts ExpectationConfiguration into this ExpectationSuite.
 
         Args:
             expectation_configuration: The ExpectationConfiguration to add or update
@@ -681,7 +681,7 @@ class ExpectationSuite(SerializableDictDot):
         match_type: str = "domain",
         overwrite_existing: bool = True,
     ) -> ExpectationConfiguration:
-        """Upsert specified ExpectationConfigurations into this ExpectationSuite.
+        """Upsert specified ExpectationConfiguration into this ExpectationSuite.
 
         Args:
             expectation_configuration: The ExpectationConfiguration to add or update
