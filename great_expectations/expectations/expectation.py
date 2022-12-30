@@ -2629,7 +2629,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
                     configuration=configuration,
                     runtime_configuration=runtime_configuration,
                 )
-                # we are still registering this TODO still remains to add to Pandas
                 validation_dependencies.set_metric_configuration(
                     metric_name=f"{self.map_metric}.unexpected_index_query",
                     metric_configuration=MetricConfiguration(

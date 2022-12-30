@@ -695,10 +695,9 @@ def test_include_unexpected_rows_without_explicit_result_format_raises_error(
 
 
 # Spark
-# already here
 def test_spark_single_column_complete_result_format(
     in_memory_runtime_context,
-    spark_dataframe_for_unexpected_rows_sql_dataframe,
+    spark_dataframe_for_unexpected_rows_with_index,
 ):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -719,7 +718,7 @@ def test_spark_single_column_complete_result_format(
         batch_spec_passthrough=None,
     )
     batch = Batch(
-        data=spark_dataframe_for_unexpected_rows_sql_dataframe,
+        data=spark_dataframe_for_unexpected_rows_with_index,
         batch_definition=batch_definition,
     )
     engine = SparkDFExecutionEngine()
@@ -749,11 +748,9 @@ def test_spark_single_column_complete_result_format(
     }
 
 
-# already here
-# TODO: see if we can raise an error.
 def test_spark_single_column_summary_result_format(
     in_memory_runtime_context,
-    spark_dataframe_for_unexpected_rows_sql_dataframe,
+    spark_dataframe_for_unexpected_rows_with_index,
 ):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -774,7 +771,7 @@ def test_spark_single_column_summary_result_format(
         batch_spec_passthrough=None,
     )
     batch = Batch(
-        data=spark_dataframe_for_unexpected_rows_sql_dataframe,
+        data=spark_dataframe_for_unexpected_rows_with_index,
         batch_definition=batch_definition,
     )
     engine = SparkDFExecutionEngine()

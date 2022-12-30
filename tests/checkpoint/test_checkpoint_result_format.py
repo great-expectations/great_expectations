@@ -156,15 +156,7 @@ WHERE animals IS NOT NULL AND (animals NOT IN ('cat', 'fish', 'dog'))"
 
 @pytest.fixture
 def expected_spark_query_output() -> str:
-    return (
-        "\n"
-        "    from pyspark.sql import functions as F\n"
-        '    intermediate_df = df.withColumn("__unexpected", F.expr((animals IS NOT '
-        "NULL) AND (NOT (animals IN (cat, fish, dog)))))\n"
-        '    filtered_df = intermediate_df.filter(F.col("__unexpected") == '
-        'True).drop(F.col("__unexpected"))\n'
-        "    "
-    )
+    return "df.filter(F.expr((animals IS NOT NULL) AND (NOT (animals IN (cat, fish, dog)))))"
 
 
 def _add_expectations_and_checkpoint(

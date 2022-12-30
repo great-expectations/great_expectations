@@ -7242,7 +7242,7 @@ def pandas_animals_dataframe_for_unexpected_rows_and_index():
 
 
 @pytest.fixture
-def spark_dataframe_for_unexpected_rows_sql_dataframe(
+def spark_dataframe_for_unexpected_rows_with_index(
     spark_session,
 ) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821
     df: pd.DataFrame = pd.DataFrame(

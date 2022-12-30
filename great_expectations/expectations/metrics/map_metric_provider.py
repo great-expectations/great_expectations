@@ -497,7 +497,6 @@ def column_condition_partial(
                     _compute_domain_kwargs=compute_domain_kwargs,
                     _accessor_domain_kwargs=accessor_domain_kwargs,
                 )
-                # this is where we do the Spark unexpected_condition
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", True)
                 )
@@ -509,9 +508,6 @@ def column_condition_partial(
                             )
                         )
                     unexpected_condition = ~expected_condition
-                    # print("hello will this is unexpected_condition")
-                    # this can just be printed
-                    # print(unexpected_condition)
                 else:
                     if filter_column_isnull:
                         unexpected_condition = column.isNotNull() & ~expected_condition
@@ -2777,23 +2773,20 @@ def _spark_map_condition_query(
     metrics: Dict[str, Any],
     **kwargs,
 ) -> str:
+    """ """
+    # unexpected condition is a string that comes as an F.column object.
+    # Format typically is wrapped in Column<> syntax.
+    # Column<'[unexpected_expression]'>
     (
         unexpected_condition,
         _,
         _,
     ) = metrics.get("unexpected_condition", (None, None, None))
-    # parse the string
-    #
-    temp = str(unexpected_condition)
-    yes = temp.replace("Column<'(", "")
-    final_string = yes.replace(")'>", "")
-
-    instructions: str = f"""
-    from pyspark.sql import functions as F
-    intermediate_df = df.withColumn("__unexpected", F.expr({final_string}))
-    filtered_df = intermediate_df.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
-    """
-    return instructions
+    unexpected_condition_as_string: str = str(unexpected_condition)
+    unexpected_condition_filtered: str = unexpected_condition_as_string.replace(
+        "Column<'(", ""
+    ).replace(")'>", "")
+    return f"df.filter(F.expr({unexpected_condition_filtered}))"
 
 
 def _spark_column_pair_map_condition_values(
