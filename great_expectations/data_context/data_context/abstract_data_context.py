@@ -41,6 +41,7 @@ from great_expectations.core.batch import (
     IDDict,
     get_batch_request_from_acceptable_arguments,
 )
+from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.config_provider import (
     _ConfigurationProvider,
     _ConfigurationVariablesConfigurationProvider,
@@ -105,6 +106,8 @@ from great_expectations.datasource.datasource_serializer import (
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.experimental.datasources.config import GxConfig
+from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfig,
@@ -161,7 +164,7 @@ yaml = YAMLHandler()
 T = TypeVar("T", dict, list, str)
 
 
-class AbstractDataContext(ABC):
+class AbstractDataContext(ConfigPeer, ABC):
     """
     Base class for all DataContexts that contain all context-agnostic data context operations.
 
@@ -184,6 +187,12 @@ class AbstractDataContext(ABC):
     PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND = 4
     PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND = 5
 
+    # instance attribute type annotations
+    zep_config: GxConfig
+
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT___INIT__,
+    )
     def __init__(self, runtime_environment: Optional[dict] = None) -> None:
         """
         Constructor for AbstractDataContext. Will handle instantiation logic that is common to all DataContext objects
@@ -192,6 +201,8 @@ class AbstractDataContext(ABC):
             runtime_environment (dict): a dictionary of config variables that
                 override those set in config_variables.yml and the environment
         """
+        self.zep_config = self._load_zep_config()
+
         if runtime_environment is None:
             runtime_environment = {}
         self.runtime_environment = runtime_environment
@@ -235,8 +246,24 @@ class AbstractDataContext(ABC):
 
         self._assistants = DataAssistantDispatcher(data_context=self)
 
+        self._sources: _SourceFactories = _SourceFactories(self)
+
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         self.validation_operators: dict = {}
+        if (
+            "validation_operators" in self.get_config().commented_map  # type: ignore[union-attr]
+            and self.config.validation_operators
+        ):
+            for (
+                validation_operator_name,
+                validation_operator_config,
+            ) in self.config.validation_operators.items():
+                self.add_validation_operator(
+                    validation_operator_name,
+                    validation_operator_config,
+                )
+
+        self._attach_zep_config_datasources(self.zep_config)
 
     def _init_config_provider(self) -> _ConfigurationProvider:
         config_provider = _ConfigurationProvider()
@@ -358,7 +385,7 @@ class AbstractDataContext(ABC):
         return self._config_provider
 
     @property
-    def root_directory(self) -> Optional[str]:
+    def root_directory(self) -> Optional[str]:  # TODO: This should be a `pathlib.Path`
         """The root directory for configuration objects in the data context; the location in which
         ``great_expectations.yml`` is located.
         """
@@ -547,6 +574,19 @@ class AbstractDataContext(ABC):
     @property
     def assistants(self) -> DataAssistantDispatcher:
         return self._assistants
+
+    @property
+    def sources(self) -> _SourceFactories:
+        return self._sources
+
+    def _attach_datasource_to_context(self, datasource: XDatasource):
+        # We currently don't allow one to overwrite a datasource with this internal method
+        if datasource.name in self.datasources:
+            raise ge_exceptions.DataContextError(
+                f"Can not write the experimental datasource {datasource.name} because a datasource of that "
+                "name already exists in the data context."
+            )
+        self.datasources[datasource.name] = datasource
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
@@ -1053,7 +1093,7 @@ class AbstractDataContext(ABC):
 
     def get_datasource(
         self, datasource_name: str = "default"
-    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
+    ) -> Union[LegacyDatasource, BaseDatasource, XDatasource]:
         """Get the named datasource
 
         Args:
@@ -1081,8 +1121,8 @@ class AbstractDataContext(ABC):
 
         # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
         datasource_config = datasourceConfigSchema.load(substituted_config)
-        datasource: Optional[
-            Union[LegacyDatasource, BaseDatasource]
+        datasource: Union[
+            LegacyDatasource, BaseDatasource
         ] = self._instantiate_datasource_from_config(
             raw_config=raw_config, substituted_config=substituted_config
         )
@@ -1169,7 +1209,9 @@ class AbstractDataContext(ABC):
             raise ValueError(f"Datasource {datasource_name} not found")
 
         if save_changes:
-            datasource_config = datasourceConfigSchema.load(datasource.config)
+            datasource_config = datasourceConfigSchema.load(
+                datasource.config  # type: ignore[union-attr] # XDatasource has no .config
+            )
             self._datasource_store.delete(datasource_config)  # type: ignore[attr-defined]
         self._cached_datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
@@ -3198,7 +3240,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         if include_rendered_content:
             for expectation_validation_result in validation_result.results:
                 expectation_validation_result.render()
-                expectation_validation_result.expectation_config.render()
 
         return validation_result
 
@@ -3349,7 +3390,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         ] = "instantiated_class",
         shorten_tracebacks: bool = False,
     ):
-        """Convenience method for testing yaml configs
+        """Convenience method for testing yaml configs.
 
         test_yaml_config is a convenience method for configuring the moving
         parts of a Great Expectations deployment. It allows you to quickly
@@ -3367,7 +3408,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         Args:
             yaml_config: A string containing the yaml config to be tested
-            name: (Optional) A string containing the name of the component to instantiate
+            name: Optional name of the component to instantiate
+            class_name: Optional, overridden if provided in the config
+            runtime_environment: Optional override for config items
             pretty_print: Determines whether to print human-readable output
             return_mode: Determines what type of object test_yaml_config will return.
                 Valid modes are "instantiated_class" and "report_object"
@@ -3810,3 +3853,16 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
+
+    def _load_zep_config(self) -> GxConfig:
+        """Called at beginning of DataContext __init__"""
+        logger.info(
+            f"{self.__class__.__name__} has not implemented `_load_zep_config()` returning empty `GxConfig`"
+        )
+        return GxConfig(xdatasources={})
+
+    def _attach_zep_config_datasources(self, config: GxConfig):
+        """Called at end of __init__"""
+        for ds_name, datasource in config.datasources.items():
+            logger.info(f"Loaded '{ds_name}' from ZEP config")
+            self._attach_datasource_to_context(datasource)

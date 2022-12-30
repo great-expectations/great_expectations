@@ -72,7 +72,7 @@ stages:
             displayName: 'Use Python 3.7'
 
           - script: |
-              pip install isort[requirements]==5.10.1 flake8==5.0.4 black==22.3.0 pyupgrade==2.7.2 invoke==1.7.1
+              pip install $(grep -E '^(black|invoke|isort|flake8|pyupgrade)' reqs/requirements-dev-contrib.txt)
               EXIT_STATUS=0
               invoke fmt --check || EXIT_STATUS=$?
               invoke lint || EXIT_STATUS=$?
@@ -88,7 +88,7 @@ stages:
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - script: |
-          pip install --requirement reqs/requirements-dev-contrib.txt
+          pip install $(grep -E '^(invoke|mypy|pytest-cov)' reqs/requirements-dev-contrib.txt)
           invoke type-coverage
         name: TypeHintChecker
 
@@ -96,8 +96,8 @@ stages:
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - script: |
-          pip install --requirement reqs/requirements-dev-contrib.txt
-          invoke type-check --install-types --warn-unused-ignores --pretty
+          pip install --requirement requirements-types.txt
+          invoke type-check --ci --pretty
         name: StaticTypeCheck
 
     - job: docstring_checker
@@ -106,11 +106,19 @@ stages:
       - bash: python scripts/check_docstring_coverage.py
         name: DocstringChecker
 
+    - job: docstring_linter
+      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+      steps:
+      - script: |
+          pip install --requirement reqs/requirements-dev-test.txt
+          invoke docstrings
+        name: DocstringLinter
+
     - job: unused_import_checker
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - script: |
-          pip install --requirement reqs/requirements-dev-contrib.txt
+          pip install $(grep -E '^(flake8)' reqs/requirements-dev-contrib.txt)
           # https://www.flake8rules.com/rules/F401.html - Prunes the dgtest graph to improve accuracy
           flake8 --select F401 great_expectations tests
         name: UnusedImportChecker
@@ -124,11 +132,22 @@ stages:
       - job: make_suffix
         steps:
           - bash: |
+              # Create a docker allowed image name from the branch name
+              eval `python - <<EOF
+              import os
+              import re
+              branch_name = os.environ["BRANCH_NAME"]
+              new_name = re.sub('[^a-zA-Z0-9_\-\.]', '-', branch_name)
+              print(f'export "IMAGE_BRANCH"="{new_name}"')
+              EOF`
+
               EPOCH=`date +%s`
-              SUFFIX="develop_${EPOCH}_${RANDOM}"
+              SUFFIX="${IMAGE_BRANCH}_${EPOCH}_${RANDOM}"
               echo "Generated image suffix: ${SUFFIX}"
               echo "##vso[task.setvariable variable=IMAGE_SUFFIX;isOutput=true]${SUFFIX}"
             name: suffix
+            env:
+              BRANCH_NAME: $(Build.SourceBranchName)
 
       - job: build_push
         dependsOn: make_suffix
@@ -147,15 +166,18 @@ stages:
         steps:
           - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              BRANCH_NAME="${FULL_BRANCH_NAME/#refs\/heads\/}"
               # We repull the develop branch. We could build the local branch that is already present but we should
               # prune it's depth since we don't need the git history.
               CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${DOCKER_TAG} "
               CMD+="--target test --build-arg PYTHON_VERSION=$(python.version) "
               CMD+="--build-arg GE_USAGE_STATISTICS_URL=\"$(GE_USAGE_STATISTICS_URL)\" "
-              CMD+="--build-arg SOURCE=github --build-arg BRANCH=develop ."
+              CMD+="--build-arg SOURCE=github --build-arg BRANCH=\"${BRANCH_NAME}\" ."
               echo ${CMD}
               eval ${CMD}
             displayName: 'Build python $(python.version) image'
+            env:
+              FULL_BRANCH_NAME: $(Build.SourceBranch)
 
           - bash: |
               docker login -u ${DOCKER_USER} -p ${DOCKER_TOKEN}
@@ -532,16 +554,10 @@ stages:
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
           - script: |
-              pip install \
-                --requirement reqs/requirements-dev-test.txt \
-                --requirement reqs/requirements-dev-sqlalchemy.txt \
-                --constraint constraints-dev.txt
-              pip install --requirement requirements.txt
-              pip install .
+              pip install --constraint constraints-dev.txt ".[test, mssql]" pytest-azurepipelines
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines pytest-random-order
               pytest tests/test_definitions tests/expectations \
                 --mssql \
                 --napoleon-docstrings \
@@ -571,8 +587,7 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install twine
-              pip install wheel
+              pip install twine wheel
               git config --global user.email "team@greatexpectations.io"
               git config --global user.name "Great Expectations"
             displayName: 'Prepare packaging'

@@ -22,6 +22,9 @@ from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.data_context import DataContext
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.types.base import CURRENT_GX_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -219,7 +222,7 @@ Great Expectations will store these expectations in a new Expectation Suite '{:s
 def _raise_profiling_errors(profiling_results) -> None:
     if (
         profiling_results["error"]["code"]
-        == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
+        == FileDataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
     ):
         raise ge_exceptions.DataContextError(
             """Some of the data assets you specified were not found: {:s}
@@ -443,8 +446,8 @@ def load_data_context_with_error_handling(
                 context = DataContext(context_root_dir=directory)
         return context
     except ge_exceptions.UnsupportedConfigVersionError as err:
-        directory = directory or DataContext.find_context_root_dir()
-        ge_config_version = DataContext.get_ge_config_version(
+        directory = directory or FileDataContext.find_context_root_dir()
+        ge_config_version = FileDataContext.get_ge_config_version(
             context_root_dir=directory
         )
         upgrade_helper_class = (
@@ -550,7 +553,7 @@ def upgrade_project_up_to_one_version_increment(
         return False, False
     target_ge_config_version = int(ge_config_version) + 1
     # set version temporarily to CURRENT_GX_CONFIG_VERSION to get functional DataContext
-    DataContext.set_ge_config_version(
+    FileDataContext.set_ge_config_version(
         config_version=CURRENT_GX_CONFIG_VERSION,
         context_root_dir=context_root_dir,
     )
@@ -579,27 +582,27 @@ def upgrade_project_up_to_one_version_increment(
         cli_message(upgrade_report)
         if exception_occurred:
             # restore version number to current number
-            DataContext.set_ge_config_version(
+            FileDataContext.set_ge_config_version(
                 ge_config_version, context_root_dir, validate_config_version=False
             )
             # display report to user
             return False, True
         # set config version to target version
         if increment_version:
-            DataContext.set_ge_config_version(
+            FileDataContext.set_ge_config_version(
                 target_ge_config_version,
                 context_root_dir,
                 validate_config_version=False,
             )
             return True, False
         # restore version number to current number
-        DataContext.set_ge_config_version(
+        FileDataContext.set_ge_config_version(
             ge_config_version, context_root_dir, validate_config_version=False
         )
         return False, False
 
     # restore version number to current number
-    DataContext.set_ge_config_version(
+    FileDataContext.set_ge_config_version(
         ge_config_version, context_root_dir, validate_config_version=False
     )
     cli_message(continuation_message)

@@ -1,9 +1,10 @@
+from __future__ import annotations
+
 import logging
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import nbformat
 
-from great_expectations import DataContext
 from great_expectations.datasource.types import DatasourceTypes
 from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
 
@@ -11,6 +12,11 @@ try:
     import black
 except ImportError:
     black = None
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +50,7 @@ Give your datasource a unique name:"""
 
     def __init__(
         self,
-        context: DataContext,
+        context: AbstractDataContext,
         datasource_type: DatasourceTypes,
         datasource_yaml: str,
         datasource_name: str = "my_datasource",

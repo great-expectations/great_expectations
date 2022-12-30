@@ -229,7 +229,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
     )
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -352,7 +352,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
-        return (template_str, params_with_json_schema, styling)
+        return template_str, params_with_json_schema, None, styling
 
     # NOTE: This method is a pretty good example of good usage of `params`.
     @classmethod

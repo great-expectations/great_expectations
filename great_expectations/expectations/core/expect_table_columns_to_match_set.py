@@ -212,7 +212,7 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
                 "value": params.get("exact_match"),
             },
         }
-        return (template_str, params_with_json_schema, styling)
+        return template_str, params_with_json_schema, None, styling
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)

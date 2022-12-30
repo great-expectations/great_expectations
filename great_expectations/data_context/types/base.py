@@ -7,7 +7,19 @@ import itertools
 import json
 import logging
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional, Set, Union
+import warnings
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    MutableMapping,
+    Optional,
+    Set,
+    Type,
+    TypeVar,
+    Union,
+)
 from uuid import UUID
 
 from marshmallow import (
@@ -21,6 +33,7 @@ from marshmallow import (
     validates_schema,
 )
 from marshmallow.validate import OneOf
+from marshmallow.warnings import RemovedInMarshmallow4Warning
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
@@ -59,12 +72,19 @@ DEFAULT_USAGE_STATISTICS_URL = (
 )
 
 
+# NOTE 121822: (kilo59) likely won't moving to marshmallow v4 so we don't care about this
+warnings.simplefilter(action="ignore", category=RemovedInMarshmallow4Warning)
+
+
 def object_to_yaml_str(obj):
     output_str: str
     with StringIO() as string_stream:
         yaml.dump(obj, string_stream)
         output_str = string_stream.getvalue()
     return output_str
+
+
+BYC = TypeVar("BYC", bound="BaseYamlConfig")
 
 
 class BaseYamlConfig(SerializableDictDot):
@@ -80,7 +100,7 @@ class BaseYamlConfig(SerializableDictDot):
         self._commented_map = commented_map
 
     @classmethod
-    def _get_schema_instance(cls) -> Schema:
+    def _get_schema_instance(cls: Type[BYC]) -> Schema:
         if not issubclass(cls.get_schema_class(), Schema):
             raise ge_exceptions.InvalidConfigError(
                 "Invalid type: A configuration schema class needs to inherit from the Marshmallow Schema class."
@@ -105,11 +125,11 @@ class BaseYamlConfig(SerializableDictDot):
 
     @classmethod
     def from_commented_map(
-        cls, commented_map: Union[CommentedMap, Dict]
-    ) -> BaseYamlConfig:
+        cls: Type[BYC], commented_map: Union[CommentedMap, Dict]
+    ) -> BYC:
         try:
             schema_instance: Schema = cls._get_schema_instance()
-            config: Union[dict, BaseYamlConfig] = schema_instance.load(commented_map)
+            config: Union[dict, BYC] = schema_instance.load(commented_map)
             if isinstance(config, dict):
                 return cls.get_config_class()(commented_map=commented_map, **config)
 
@@ -150,7 +170,7 @@ class BaseYamlConfig(SerializableDictDot):
         return self._get_schema_validated_updated_commented_map()
 
     @classmethod
-    def get_config_class(cls):
+    def get_config_class(cls: Type) -> Type:
         raise NotImplementedError
 
     @classmethod
@@ -927,6 +947,7 @@ class ExecutionEngineConfig(DictDot):
         azure_options=None,
         gcs_options=None,
         credentials_info=None,
+        connect_args=None,
         **kwargs,
     ) -> None:
         self._class_name = class_name
@@ -949,6 +970,8 @@ class ExecutionEngineConfig(DictDot):
             self.gcs_options = gcs_options
         if credentials_info is not None:
             self.credentials_info = credentials_info
+        if connect_args is not None:
+            self.connect_args = connect_args
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -976,13 +999,16 @@ class ExecutionEngineConfigSchema(Schema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        load_default="great_expectations.execution_engine",
+        missing="great_expectations.execution_engine",
     )
     connection_string = fields.String(required=False, allow_none=True)
     credentials = fields.Raw(required=False, allow_none=True)
     spark_config = fields.Raw(required=False, allow_none=True)
     boto3_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
+    connect_args = fields.Dict(
+        keys=fields.Str(), values=fields.Dict(), required=False, allow_none=True
     )
     azure_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
@@ -1577,6 +1603,11 @@ class DataContextConfigSchema(Schema):
         required=False,
         allow_none=True,
     )
+    xdatasources = fields.Dict(
+        required=False,
+        allow_none=True,
+        load_only=True,
+    )
     expectations_store_name = fields.Str()
     validations_store_name = fields.Str()
     evaluation_parameter_store_name = fields.Str()
@@ -1608,7 +1639,8 @@ class DataContextConfigSchema(Schema):
     REMOVE_KEYS_IF_NONE = [
         "concurrency",  # 0.13.33
         "progress_bars",  # 0.13.49
-        "include_rendered_content",  # 0.15.19
+        "include_rendered_content",  # 0.15.19,
+        "xdatasources",
     ]
 
     # noinspection PyUnusedLocal
@@ -1620,7 +1652,7 @@ class DataContextConfigSchema(Schema):
                 data.pop(key)
         return data
 
-    def handle_error(self, exc, data, **kwargs) -> None:
+    def handle_error(self, exc, data, **kwargs) -> None:  # type: ignore[override]
         """Log and raise our custom exception when (de)serialization fails."""
         if (
             exc
@@ -2294,6 +2326,7 @@ class DataContextConfig(BaseYamlConfig):
                 Dict[str, Dict[str, Union[Dict[str, str], str, dict]]],
             ]
         ] = None,
+        xdatasources: Optional[dict] = None,
         expectations_store_name: Optional[str] = None,
         validations_store_name: Optional[str] = None,
         evaluation_parameter_store_name: Optional[str] = None,
@@ -2312,6 +2345,9 @@ class DataContextConfig(BaseYamlConfig):
         progress_bars: Optional[ProgressBarsConfig] = None,
         include_rendered_content: Optional[IncludeRenderedContentConfig] = None,
     ) -> None:
+        if xdatasources:
+            logger.warning("`xdatasources` are an experimental feature")
+
         # Set defaults
         if config_version is None:
             config_version = DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value

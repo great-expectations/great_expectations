@@ -13,7 +13,9 @@ class ExpectColumnValuesAsStringToBePositiveInteger(ExpectColumnValuesToMatchReg
         "regex": "^\\d+$",
     }
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ):
         super().validate_configuration(configuration)
         assert "regex" not in configuration.kwargs, "regex cannot be altered"
 

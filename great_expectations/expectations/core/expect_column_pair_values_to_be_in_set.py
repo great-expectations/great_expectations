@@ -15,7 +15,7 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
 
     For example:
     ::
-        >>> d = {'fruit': ['appple','apple','apple','banana','banana'], 
+        >>> d = {'fruit': ['appple','apple','apple','banana','banana'],
                 'color': ['red','green','yellow','yellow','red']}
         >>> my_df = pd.DataFrame(data=d)
         >>> my_df.expect_column_pair_values_to_be_in_set(
@@ -113,8 +113,9 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
     )
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        """Ensures that both column_A and column_B have been provided."""
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration

@@ -50,7 +50,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
     }
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration)
         value = configuration["kwargs"].get("value")
@@ -78,11 +78,10 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
-
         value = configuration["kwargs"].get("value")
         threshold = configuration["kwargs"].get("threshold")
         query_result = metrics.get("query.column")
-        query_result = dict(query_result)
+        query_result = dict([element.values() for element in query_result])
 
         if isinstance(value, list):
             success = all(

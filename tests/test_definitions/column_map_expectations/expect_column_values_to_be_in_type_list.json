@@ -111,6 +111,23 @@
           "b": "BOOLEAN",
           "s": "VARCHAR",
           "s1": "VARCHAR"
+        },
+        "snowflake": {
+          "x": "NUMBER",
+          "y": "DOUBLE",
+          "z": "STRING",
+          "n": "STRING",
+          "s": "STRING",
+          "s1": "STRING"
+        },
+        "redshift": {
+          "x": "INTEGER",
+          "y": "DOUBLE_PRECISION",
+          "z": "VARCHAR",
+          "n": "VARCHAR",
+          "b": "BOOLEAN",
+          "s": "VARCHAR",
+          "s1": "VARCHAR"
         }
       },
       "tests": [
@@ -145,7 +162,8 @@
           },
           "only_for": [
             "sqlalchemy"
-          ]
+          ],
+          "suppress_test_for": ["snowflake"]
         },
         {
           "title": "positive_test_spark_integer_column",

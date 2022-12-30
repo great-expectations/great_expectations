@@ -11,6 +11,11 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    AddParamArgs,
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import (
     handle_strict_min_max,
     substitute_none_for_missing,
@@ -167,7 +172,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
     )
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -185,60 +190,44 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
-    def _atomic_prescriptive_template(
-        cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            [
-                "min_value",
-                "max_value",
-                "strict_min",
-                "strict_max",
-            ],
-        )
-        # format params
-        params_with_json_schema = {
-            "min_value": {
-                "schema": {"type": "number"},
-                "value": params.get("min_value"),
-            },
-            "max_value": {
-                "schema": {"type": "number"},
-                "value": params.get("max_value"),
-            },
-            "strict_min": {
-                "schema": {"type": "boolean"},
-                "value": params.get("strict_min"),
-            },
-            "strict_max": {
-                "schema": {"type": "boolean"},
-                "value": params.get("strict_max"),
-            },
-        }
+    def _prescriptive_template(
+        cls, renderer_configuration: RendererConfiguration
+    ) -> RendererConfiguration:
+        add_param_args: List[AddParamArgs] = [
+            ("min_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
+            ("max_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
+            ("strict_min", RendererValueType.BOOLEAN),
+            ("strict_max", RendererValueType.BOOLEAN),
+        ]
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
-        if params["min_value"] is None and params["max_value"] is None:
+        params = renderer_configuration.params
+
+        if not params.min_value and not params.max_value:
             template_str = "May have any number of rows."
         else:
-            at_least_str, at_most_str = handle_strict_min_max(params)
+            at_least_str = "greater than or equal to"
+            if params.strict_min:
+                at_least_str = cls._get_strict_min_string(
+                    renderer_configuration=renderer_configuration
+                )
+            at_most_str = "less than or equal to"
+            if params.strict_max:
+                at_most_str = cls._get_strict_max_string(
+                    renderer_configuration=renderer_configuration
+                )
 
-            if params["min_value"] is not None and params["max_value"] is not None:
+            if params.min_value and params.max_value:
                 template_str = f"Must have {at_least_str} $min_value and {at_most_str} $max_value rows."
-            elif params["min_value"] is None:
+            elif not params.min_value:
                 template_str = f"Must have {at_most_str} $max_value rows."
-            elif params["max_value"] is None:
+            else:
                 template_str = f"Must have {at_least_str} $min_value rows."
 
-        return (template_str, params_with_json_schema, styling)
+        renderer_configuration.template_str = template_str
+
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
@@ -256,7 +245,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs,  # type: ignore[union-attr]
             [
                 "min_value",
                 "max_value",
