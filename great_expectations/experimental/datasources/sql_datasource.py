@@ -90,7 +90,6 @@ class TableAsset(DataAsset):
     # Overridden inherited instance fields
     type: Literal["table"] = "table"
     column_splitter: Optional[SqlYearMonthSplitter] = None
-    order_by: List[BatchSorter] = Field(default_factory=list)
     # Instance fields
     table_name: str
 
