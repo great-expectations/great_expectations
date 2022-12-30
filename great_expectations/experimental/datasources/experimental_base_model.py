@@ -64,3 +64,10 @@ class ExperimentalBaseModel(pydantic.BaseModel):
 
     def __str__(self):
         return self.yaml()
+
+    def __copy__(self):
+        return self.copy(deep=False)
+
+    def __deepcopy__(self, memo):
+        print(f"__deepcopy__ {self.__class__.__name__} {memo}")
+        pass
