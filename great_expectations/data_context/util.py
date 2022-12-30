@@ -68,16 +68,16 @@ def instantiate_class_from_config(
     if config_defaults is None:
         config_defaults = {}
 
-    dc = config.get("data_context")
-    if dc:
-        # TODO: either make the `execution_engine_type` pickleable or fix `__deepcopy__` methods to prevent the
-        # pickle fallback
-        # x = dc.zep_config.xdatasources["my_sql_ds"].assets["my_asset"]._datasource
-        # x = dc.zep_config.xdatasources["my_sql_ds"]._execution_engine
-        x = dc.zep_config.xdatasources["my_sql_ds"].execution_engine_type
-        print(type(dc.zep_config), dc.zep_config)
-        print(type(x), x)
-        print(pickle_trick(x))
+    # dc = config.get("data_context")
+    # if dc:
+    #     # TODO: either make the `execution_engine_type` pickleable or fix `__deepcopy__` methods to prevent the
+    #     # pickle fallback
+    #     # x = dc.zep_config.xdatasources["my_sql_ds"].assets["my_asset"]._datasource
+    #     # x = dc.zep_config.xdatasources["my_sql_ds"]._execution_engine
+    #     x = dc.zep_config.xdatasources["my_sql_ds"].execution_engine_type
+    #     print(type(dc.zep_config), dc.zep_config)
+    #     print(type(x), x)
+    #     print(pickle_trick(x))
 
     config = copy.deepcopy(config)  # TypeError trying to pickle `module`
 
