@@ -161,7 +161,7 @@ def test_zep_simple_validate_workflow(zep_file_context: FileDataContext):
 @pytest.mark.unit
 def test_save_datacontext_does_not_break(zep_file_context: FileDataContext):
     print(zep_file_context.variables)
-    zep_file_context.variables.save_config()
+    zep_file_context._save_project_config()
 
 
 @pytest.mark.unit
@@ -180,12 +180,20 @@ def test_save_datacontext_persists_zep_config(
     )
 
     context.zep_config = zep_only_config
-    context.variables.save_config()
+    context._save_project_config()
 
     final_yaml = config_file.read_text()
     print(f"  final\n============================\n{final_yaml}")
     for ds_name in zep_only_config.datasources:
         assert ds_name in final_yaml
+
+    for i, (iline, fline) in enumerate(
+        zip(initial_yaml.lstrip().splitlines(), final_yaml.splitlines())
+    ):
+        print(i, iline)
+        if i in {10}:
+            continue
+        assert iline == fline
 
 
 if __name__ == "__main__":
