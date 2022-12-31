@@ -196,7 +196,7 @@ ToStr: TypeAlias = Union[
     str, bytes, uuid.UUID, datetime.date, datetime.datetime, np.datetime64
 ]
 
-ToList: TypeAlias = Union[list, set, tuple, npt.NDArray, pd.Index]
+ToList: TypeAlias = Union[list, set, tuple, "npt.NDArray", pd.Index]
 ToDict: TypeAlias = Union[
     dict, CommentedMap, pd.DataFrame, SerializableDictDot, SerializableDotDict
 ]
