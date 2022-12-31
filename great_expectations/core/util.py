@@ -9,8 +9,7 @@ import re
 import sys
 import uuid
 from collections import OrderedDict
-from types import NoneType
-from typing import (  # TypeVar,
+from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
@@ -100,6 +99,7 @@ except ImportError:
 if TYPE_CHECKING:
     import numpy.typing as npt
     from pyspark.sql import SparkSession  # noqa: F401
+    from ruamel.yaml.comments import CommentedMap
 
 
 _SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
@@ -184,7 +184,7 @@ def determine_progress_bar_method_by_environment() -> Callable:
     return tqdm
 
 
-JSONValues: TypeAlias = Union[dict, list, str, int, float, bool, NoneType]
+JSONValues: TypeAlias = Union[dict, list, str, int, float, bool, None]
 
 ToBool: TypeAlias = bool
 ToFloat: TypeAlias = Union[float, np.float32, np.float64]
@@ -194,10 +194,12 @@ ToStr: TypeAlias = Union[
 ]
 
 ToList: TypeAlias = Union[list, set, tuple, npt.NDArray, pd.Index]
-ToDict: TypeAlias = Union[dict, pd.DataFrame, SerializableDictDot, SerializableDotDict]
+ToDict: TypeAlias = Union[
+    dict, CommentedMap, pd.DataFrame, SerializableDictDot, SerializableDotDict
+]
 
 JSONConvertable: TypeAlias = Union[
-    ToDict, ToList, ToStr, ToInt, ToFloat, ToBool, ToBool
+    ToDict, ToList, ToStr, ToInt, ToFloat, ToBool, ToBool, None
 ]
 
 
@@ -250,16 +252,16 @@ def convert_to_json_serializable(
     ...
 
 
-# @overload
-# def convert_to_json_serializable(
-#     data: NoneType,
-# ) -> NoneType:
-#     ...
+@overload
+def convert_to_json_serializable(
+    data: None,
+) -> None:
+    ...
 
 
 def convert_to_json_serializable(  # noqa: C901 - complexity 28
     data: JSONConvertable,
-) -> Union[dict, list, str, int, float, bool]:
+) -> JSONValues:
     """
     Helper function to convert an object to one that is json serializable
 
