@@ -12,7 +12,6 @@ pytestmark = [pytest.mark.integration]
 from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
 from great_expectations.experimental.datasources.config import GxConfig
-from great_expectations.experimental.datasources.interfaces import DataAsset, Datasource
 
 LOGGER = logging.getLogger(__file__)
 
@@ -122,7 +121,7 @@ def test_load_an_existing_config(
 
 
 @pytest.fixture
-# @functools.lru_cache(maxsize=1)
+@functools.lru_cache(maxsize=1)
 def zep_file_context(zep_yaml_config_file: pathlib.Path) -> FileDataContext:
     context = get_context(
         context_root_dir=zep_yaml_config_file.parent, cloud_mode=False
