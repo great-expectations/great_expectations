@@ -1,3 +1,4 @@
+import difflib
 import functools
 import logging
 import pathlib
@@ -171,7 +172,6 @@ def test_save_datacontext_persists_zep_config(
     config_file = file_dc_config_dir_init / FileDataContext.GX_YML
 
     initial_yaml = config_file.read_text()
-    print(f"  initial\n============================\n{initial_yaml}")
     for ds_name in zep_only_config.datasources:
         assert ds_name not in initial_yaml
 
@@ -183,17 +183,12 @@ def test_save_datacontext_persists_zep_config(
     context._save_project_config()
 
     final_yaml = config_file.read_text()
-    print(f"  final\n============================\n{final_yaml}")
+    diff = difflib.ndiff(initial_yaml.splitlines(), final_yaml.splitlines())
+
+    print("\n".join(diff))
+
     for ds_name in zep_only_config.datasources:
         assert ds_name in final_yaml
-
-    for i, (iline, fline) in enumerate(
-        zip(initial_yaml.lstrip().splitlines(), final_yaml.splitlines())
-    ):
-        print(i, iline)
-        if i in {10}:
-            continue
-        assert iline == fline
 
 
 if __name__ == "__main__":
