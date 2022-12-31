@@ -2,7 +2,6 @@ import copy
 import inspect
 import logging
 import os
-import pickle
 import warnings
 
 # from pprint import pformat as pf
@@ -26,36 +25,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def pickle_trick(obj, max_depth=10):
-    output = {}
-
-    if max_depth <= 0:
-        return output
-
-    try:
-        pickle.dumps(obj)
-    except AttributeError as e:
-        logger.error(f"{e.__class__.__name__}:{e} -> {type(obj)} {obj.__name__}")
-        raise e
-    except (pickle.PicklingError, TypeError) as e:
-        failing_children = []
-
-        if hasattr(obj, "__dict__"):
-            for k, v in obj.__dict__.items():
-                result = pickle_trick(v, max_depth=max_depth - 1)
-                if result:
-                    failing_children.append(result)
-
-        output = {
-            "fail": obj,
-            "err": e,
-            "depth": max_depth,
-            "failing_children": failing_children,
-        }
-
-    return output
-
-
 # TODO: Rename config to constructor_kwargs and config_defaults -> constructor_kwarg_default
 # TODO: Improve error messages in this method. Since so much of our workflow is config-driven, this will be a *super* important part of DX.
 def instantiate_class_from_config(
@@ -68,18 +37,7 @@ def instantiate_class_from_config(
     if config_defaults is None:
         config_defaults = {}
 
-    # dc = config.get("data_context")
-    # if dc:
-    #     # TODO: either make the `execution_engine_type` pickleable or fix `__deepcopy__` methods to prevent the
-    #     # pickle fallback
-    #     # x = dc.zep_config.xdatasources["my_sql_ds"].assets["my_asset"]._datasource
-    #     # x = dc.zep_config.xdatasources["my_sql_ds"]._execution_engine
-    #     x = dc.zep_config.xdatasources["my_sql_ds"].execution_engine_type
-    #     print(type(dc.zep_config), dc.zep_config)
-    #     print(type(x), x)
-    #     print(pickle_trick(x))
-
-    config = copy.deepcopy(config)  # TypeError trying to pickle `module`
+    config = copy.deepcopy(config)
 
     module_name = config.pop("module_name", None)
     if module_name is None:

@@ -3,8 +3,6 @@ from __future__ import annotations
 import json
 import logging
 import pathlib
-
-# from copy import deepcopy
 from io import StringIO
 from pprint import pformat as pf
 from typing import Type, TypeVar, Union, overload
@@ -22,9 +20,6 @@ yaml.default_flow_style = False
 # TODO (kilo59): replace this with `typing_extensions.Self` once mypy supports it
 # Taken from this SO answer https://stackoverflow.com/a/72182814/6304433
 _Self = TypeVar("_Self", bound="ExperimentalBaseModel")
-
-
-DEEP_COPY_CALLS = 0
 
 
 class ExperimentalBaseModel(pydantic.BaseModel):
@@ -75,24 +70,9 @@ class ExperimentalBaseModel(pydantic.BaseModel):
         return self.copy(deep=False)
 
     def __deepcopy__(self, memo):
-        global DEEP_COPY_CALLS
-        DEEP_COPY_CALLS += 1
-        if DEEP_COPY_CALLS < 40:
-            print(
-                f"{DEEP_COPY_CALLS} __deepcopy__ {self.__class__.__name__}  \tmemo:{len(memo)}"
-            )
-            # print(list(memo.keys()))
-            for i, (k, v) in enumerate(memo.items()):
-                print(
-                    "\t",
-                    i,
-                    k,
-                    type(v),
-                    # v,
-                )
-
-        copy = self.copy(deep=False)  # 'Works' if `deep=False`
+        print(f"__deepcopy__ {self.__class__.__name__}  \tmemo:{len(memo)}")
+        # TODO: raise warning an filter in instantiate_class_from_config
+        copy = self.copy(deep=False)
         memo[id(copy)] = copy
-
         print(f" return __deepcopy__ {self.__class__.__name__}")
         return copy

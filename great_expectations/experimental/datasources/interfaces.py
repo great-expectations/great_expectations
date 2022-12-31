@@ -17,7 +17,6 @@ from typing import (
 )
 
 import pydantic
-from pydantic.main import Undefined, _object_setattr
 from typing_extensions import ClassVar, TypeAlias
 
 from great_expectations.experimental.datasources.experimental_base_model import (
@@ -168,24 +167,6 @@ class Datasource(
             raise LookupError(
                 f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
             ) from exc
-
-    def __getstate__(self) -> dict[Any, Any]:
-        private_attrs = (
-            (k, getattr(self, k, Undefined)) for k in self.__private_attributes__
-        )
-        return {
-            "__dict__": self.__dict__,
-            "__fields_set__": self.__fields_set__,
-            "__private_attribute_values__": {
-                k: v for k, v in private_attrs if v is not Undefined
-            },
-        }
-
-    def __setstate__(self, state: dict[Any, Any]) -> None:
-        _object_setattr(self, "__dict__", state["__dict__"])
-        _object_setattr(self, "__fields_set__", state["__fields_set__"])
-        for name, value in state.get("__private_attribute_values__", {}).items():
-            _object_setattr(self, name, value)
 
 
 class Batch:
