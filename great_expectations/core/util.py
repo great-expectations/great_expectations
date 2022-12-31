@@ -19,6 +19,7 @@ from typing import (
     MutableMapping,
     Optional,
     Tuple,
+    TypeVar,
     Union,
     overload,
 )
@@ -104,13 +105,15 @@ if TYPE_CHECKING:
 
 _SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
 
+M = TypeVar("M", bound=MutableMapping)
+
 
 def nested_update(
-    d: MutableMapping,
+    d: M,
     u: Mapping,
     dedup: bool = False,
     concat_lists: bool = True,
-) -> MutableMapping:
+) -> M:
     """
     Update d with items from u, recursively and joining elements. By default, list values are
     concatenated without de-duplication. If concat_lists is set to False, lists in u (new dict)
