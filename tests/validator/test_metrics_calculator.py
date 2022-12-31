@@ -15,7 +15,7 @@ from great_expectations.validator.validator import Validator
 
 @pytest.fixture
 def integer_and_datetime_sample_dataset() -> dict:
-    week_idx: int
+    week_idx: int  # noqa: F842
     return {
         "a": [
             0,
@@ -84,8 +84,8 @@ def test_column_partition_metric(
     n_bins = 10
 
     increment: Union[float, datetime.timedelta]
-    idx: int
-    element: Union[float, pd.Timestamp]
+    idx: int  # noqa: F842
+    element: Union[float, pd.Timestamp]  # noqa: F842
 
     desired_metric = MetricConfiguration(
         metric_name="column.partition",

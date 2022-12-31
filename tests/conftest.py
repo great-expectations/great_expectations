@@ -243,7 +243,7 @@ def build_test_backends_list_v2_api(metafunc):
         "pandas": "PandasDataset",
         "spark": "SparkDFDataset",
     }
-    backend_name: str
+    backend_name: str  # noqa: F842
     """
     In order to get the support for the "trino" SQLAlchemy dialect as well as receive the benefits of other latest
     capabilities, users are encouraged to upgrade their Great Expectations installation to the latest version.
@@ -375,7 +375,7 @@ def sa(test_backends):
 
 @pytest.mark.order(index=2)
 @pytest.fixture
-def spark_session(test_backends):
+def spark_session(test_backends) -> SparkSession:
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
@@ -6769,7 +6769,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
     num_files: int = len(file_name_list)
 
     random_state: np.random.Generator = RANDOM_STATE
-    rnd_num_sample: np.float64
+    rnd_num_sample: np.float64  # noqa: F842
     output_file_lenths: List[int] = [
         round(rnd_num_sample)
         for rnd_num_sample in random_state.normal(
@@ -6777,7 +6777,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
         )
     ]
 
-    idx: int
+    idx: int  # noqa: F842
     file_name: str
 
     output_file_name_length_map: Dict[str, int] = {

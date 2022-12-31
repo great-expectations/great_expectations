@@ -545,7 +545,7 @@ class TestEqDunder:
         assert different_but_equivalent_suite != suite_with_single_expectation
 
 
-#### Below this line are mainly existing tests and fixtures that we are in the process of cleaning up
+# ### Below this line are mainly existing tests and fixtures that we are in the process of cleaning up
 
 
 @pytest.fixture
@@ -800,7 +800,7 @@ def test_get_citations_not_sorted(baseline_suite):
 def test_get_citations_sorted(baseline_suite):
     assert "citations" not in baseline_suite.meta
 
-    dt: datetime.datetime
+    dt: datetime.datetime  # noqa: F842
 
     baseline_suite.add_citation("first", citation_date="2000-01-01")
     baseline_suite.add_citation("third", citation_date="2000-01-03")

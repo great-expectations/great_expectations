@@ -269,8 +269,8 @@ def find_code_in_notebook(
     ):
         return None
 
-    idx: int
-    cell: dict
+    idx: int  # noqa: F842
+    cell: dict  # noqa: F842
 
     indices: List[int] = [
         idx
