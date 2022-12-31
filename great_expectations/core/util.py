@@ -190,8 +190,8 @@ def determine_progress_bar_method_by_environment() -> Callable:
 JSONValues: TypeAlias = Union[dict, list, str, int, float, bool, None]
 
 ToBool: TypeAlias = bool
-ToFloat: TypeAlias = Union[float, np.float32, np.float64]
-ToInt: TypeAlias = Union[int, np.integer, np.uint8, np.int32, np.int64]
+ToFloat: TypeAlias = Union[float, np.floating]
+ToInt: TypeAlias = Union[int, np.integer]
 ToStr: TypeAlias = Union[
     str, bytes, uuid.UUID, datetime.date, datetime.datetime, np.datetime64
 ]
