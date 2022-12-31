@@ -110,7 +110,6 @@ def zep_yaml_config_file(
     return config_file_path
 
 
-@pytest.mark.skip
 def test_load_an_existing_config(
     zep_yaml_config_file: pathlib.Path, zep_only_config: GxConfig
 ):
@@ -131,7 +130,6 @@ def zep_file_context(zep_yaml_config_file: pathlib.Path) -> FileDataContext:
     return context
 
 
-@pytest.mark.skip
 def test_serialize_zep_config(zep_file_context: FileDataContext):
     dumped_yaml: str = zep_file_context.zep_config.yaml()
     print(f"  Dumped Config\n\n{dumped_yaml}\n")
@@ -145,7 +143,6 @@ def test_serialize_zep_config(zep_file_context: FileDataContext):
             assert asset_name in dumped_yaml
 
 
-@pytest.mark.skip
 def test_zep_simple_validate_workflow(zep_file_context: FileDataContext):
     batch_request = (
         zep_file_context.get_datasource("my_sql_ds")
