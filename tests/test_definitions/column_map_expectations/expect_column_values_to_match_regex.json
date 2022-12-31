@@ -15,6 +15,7 @@
         "column_name with space": "StringType"
       }
     },
+    "suppress_test_for": ["snowflake"],
     "tests": [
     {
       "title": "negative_test_insufficient_mostly_and_one_non_matching_value",
