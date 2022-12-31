@@ -5,6 +5,7 @@ import os
 import pathlib
 import shutil
 import warnings
+from pprint import pformat as pf
 from typing import TYPE_CHECKING, ClassVar, Optional, Union
 
 from ruamel.yaml import YAML
@@ -87,6 +88,12 @@ class SerializableDataContext(AbstractDataContext):
         try:
             with open(config_filepath, "w") as outfile:
                 self.config.to_yaml(outfile)
+            if self.zep_config.datasources:
+                logger.warning(f"Saving ZEP config to {config_filepath}")
+                with open(config_filepath, "r+") as io_file:
+                    yaml_dict = yaml.load(io_file)
+                    yaml.dump({**yaml_dict, **self.zep_config._json_dict()}, io_file)
+
         except PermissionError as e:
             logger.warning(f"Could not save project config to disk: {e}")
 
