@@ -196,7 +196,7 @@ ToStr: TypeAlias = Union[
     str, bytes, uuid.UUID, datetime.date, datetime.datetime, np.datetime64
 ]
 
-ToList: TypeAlias = Union[list, set, tuple, "npt.NDArray", pd.Index]
+ToList: TypeAlias = Union[list, set, tuple, "npt.NDArray", pd.Index, pd.Series]
 ToDict: TypeAlias = Union[
     dict, CommentedMap, pd.DataFrame, SerializableDictDot, SerializableDotDict
 ]
@@ -208,15 +208,15 @@ JSONConvertable: TypeAlias = Union[
 
 @overload
 def convert_to_json_serializable(  # type: ignore[misc]
-    data: ToList,
-) -> list:
+    data: ToDict,
+) -> dict:
     ...
 
 
 @overload
 def convert_to_json_serializable(  # type: ignore[misc]
-    data: ToDict,
-) -> dict:
+    data: ToList,
+) -> list:
     ...
 
 
