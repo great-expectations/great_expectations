@@ -206,22 +206,15 @@ JSONConvertable: TypeAlias = Union[
 ]
 
 
-# @overload
-# def convert_to_json_serializable(
-#     data: JT,
-# ) -> JT:
-#     ...
-
-
 @overload
-def convert_to_json_serializable(
+def convert_to_json_serializable(  # type: ignore[misc]
     data: ToList,
 ) -> list:
     ...
 
 
 @overload
-def convert_to_json_serializable(
+def convert_to_json_serializable(  # type: ignore[misc]
     data: ToDict,
 ) -> dict:
     ...
