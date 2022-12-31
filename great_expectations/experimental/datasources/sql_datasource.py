@@ -4,12 +4,14 @@ import copy
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Type, cast
 
 import pydantic
-from pydantic import Field
 from pydantic import dataclasses as pydantic_dc
 from typing_extensions import ClassVar, Literal
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.experimental.datasources.interfaces import (
+
+# The noqa: F401 is to import BatchSorter. This is necessary for pydantic because
+# TableAsset inherits but doesn't override the `order_by` field.
+from great_expectations.experimental.datasources.interfaces import (  # noqa: F401
     Batch,
     BatchRequest,
     BatchSorter,
