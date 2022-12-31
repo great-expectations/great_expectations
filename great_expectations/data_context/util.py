@@ -1,11 +1,11 @@
+from __future__ import annotations
+
 import copy
 import inspect
 import logging
 import os
 import warnings
-
-# from pprint import pformat as pf
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Mapping, Optional
 from urllib.parse import urlparse
 
 import pyparsing as pp
@@ -20,6 +20,7 @@ except ImportError:
     sa = None
 
 if TYPE_CHECKING:
+    from great_expectations.alias_types import PathStr
     from great_expectations.data_context.store import Store
 
 logger = logging.getLogger(__name__)
@@ -115,7 +116,7 @@ def build_store_from_config(
     store_config: Optional[dict] = None,
     module_name: str = "great_expectations.data_context.store",
     runtime_environment: Optional[dict] = None,
-) -> Optional["Store"]:
+) -> Optional[Store]:
     if store_config is None or module_name is None:
         return None
 
@@ -143,13 +144,13 @@ def build_store_from_config(
     return new_store
 
 
-def format_dict_for_error_message(dict_):
+def format_dict_for_error_message(dict_: Mapping) -> str:
     # TODO : Tidy this up a bit. Indentation isn't fully consistent.
 
     return "\n\t".join("\t\t".join((str(key), str(dict_[key]))) for key in dict_)
 
 
-def file_relative_path(dunderfile, relative_path):
+def file_relative_path(dunderfile: PathStr, relative_path: PathStr) -> str:
     """
     This function is useful when one needs to load a file that is
     relative to the position of the current file. (Such as when
