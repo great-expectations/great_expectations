@@ -342,11 +342,11 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 28
         return bool(data)
 
     if np.issubdtype(type(data), np.integer) or np.issubdtype(type(data), np.uint):
-        return int(data)
+        return int(data)  # type: ignore[arg-type] # could be None
 
     if np.issubdtype(type(data), np.floating):
         # Note: Use np.floating to avoid FutureWarning from numpy
-        return float(round(data, sys.float_info.dig))
+        return float(round(data, sys.float_info.dig))  # type: ignore[arg-type] # could be None
 
     # Note: This clause has to come after checking for np.ndarray or we get:
     #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`
