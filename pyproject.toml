@@ -138,7 +138,6 @@ exclude = [
     'rule_based_profiler/helpers/simple_semantic_type_filter\.py',  # 7
     'rule_based_profiler/helpers/util\.py',  # 53
     'rule_based_profiler/parameter_builder/histogram_single_batch_parameter_builder\.py',  # 7
-    'rule_based_profiler/parameter_builder/mean_table_columns_set_match_multi_batch_parameter_builder\.py',  # 2
     'rule_based_profiler/parameter_builder/mean_unexpected_map_metric_multi_batch_parameter_builder\.py',  # 19
     'rule_based_profiler/parameter_builder/metric_multi_batch_parameter_builder\.py',  # 15
     'rule_based_profiler/parameter_builder/numeric_metric_range_multi_batch_parameter_builder\.py',  # 27

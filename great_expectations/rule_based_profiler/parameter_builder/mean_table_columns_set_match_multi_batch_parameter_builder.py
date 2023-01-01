@@ -9,9 +9,6 @@ from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.metric_computation_result import (
-    MetricValues,
-)
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
 )
@@ -27,6 +24,9 @@ from great_expectations.validator.computed_metric import MetricValue
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
+    )
+    from great_expectations.rule_based_profiler.metric_computation_result import (
+        MetricValues,
     )
 
 
@@ -122,8 +122,8 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
 
         one_batch_table_columns_names_value: MetricValue
         multi_batch_table_columns_names_sets_as_list: List[Set[str]] = [
-            set(one_batch_table_columns_names_value)
-            for one_batch_table_columns_names_value in table_columns_names_multi_batch_value
+            set({one_batch_table_columns_names_value})  # type: ignore[arg-type] # could be dict
+            for one_batch_table_columns_names_value in table_columns_names_multi_batch_value  # type: ignore[union-attr] # not all iterable
         ]
 
         multi_batch_table_columns_names_as_set: Set[str] = set().union(
