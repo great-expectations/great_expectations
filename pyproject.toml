@@ -125,11 +125,8 @@ exclude = [
     'rule_based_profiler/data_assistant_result/plot_components\.py', # 12
     'rule_based_profiler/data_assistant/data_assistant\.py',  # 15
     'rule_based_profiler/domain_builder/categorical_column_domain_builder\.py',  # 18
-    'rule_based_profiler/domain_builder/column_domain_builder\.py',
-    'rule_based_profiler/domain_builder/column_pair_domain_builder\.py',  # 4
-    'rule_based_profiler/domain_builder/domain_builder\.py',  # 5
+    # 'rule_based_profiler/domain_builder/column_domain_builder\.py',
     'rule_based_profiler/domain_builder/map_metric_column_domain_builder\.py',  # 8
-    'rule_based_profiler/domain_builder/multi_column_domain_builder\.py',  # 4
     'rule_based_profiler/estimators/bootstrap_numeric_range_estimator\.py',  # 8
     'rule_based_profiler/estimators/kde_numeric_range_estimator\.py',  # 7
     'rule_based_profiler/estimators/quantiles_numeric_range_estimator\.py',  # 5

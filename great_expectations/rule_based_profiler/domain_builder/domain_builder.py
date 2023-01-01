@@ -114,21 +114,20 @@ class DomainBuilder(ABC, Builder):
                     },
                 )
             ]
-            for batch_id in batch_ids
+            for batch_id in batch_ids  # type: ignore[union-attr] # could be None
         }
 
         resolved_metrics_by_batch_id: Dict[
             str, Dict[Tuple[str, str, str], MetricValue]
         ] = get_resolved_metrics_by_key(
-            validator=validator,
+            validator=validator,  # type: ignore[arg-type] # could be None
             metric_configurations_by_key=metric_configurations_by_batch_id,
         )
 
-        batch_id: str
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
         metric_value: Any
         table_row_count_lists_by_batch_id: Dict[str, List[int]] = {
-            batch_id: [metric_value for metric_value in resolved_metrics.values()]
+            batch_id: [metric_value for metric_value in resolved_metrics.values()]  # type: ignore[misc] # incompatible values
             for batch_id, resolved_metrics in resolved_metrics_by_batch_id.items()
         }
         table_row_counts_by_batch_id: Dict[str, int] = {

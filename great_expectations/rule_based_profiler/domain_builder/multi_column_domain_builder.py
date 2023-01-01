@@ -76,9 +76,9 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
         Returns:
             List of domains that match the desired tolerance limits.
         """
-        batch_ids: List[str] = self.get_batch_ids(variables=variables)
+        batch_ids: List[str] = self.get_batch_ids(variables=variables)  # type: ignore[assignment] # could None
 
-        validator: Validator = self.get_validator(variables=variables)
+        validator: Validator = self.get_validator(variables=variables)  # type: ignore[assignment] # could be None
 
         effective_column_names: List[str] = self.get_effective_column_names(
             batch_ids=batch_ids,
@@ -93,7 +93,7 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
 
         column_name: str
         semantic_types_by_column_name: Dict[str, SemanticDomainTypes] = {
-            column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[
+            column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[  # type: ignore[union-attr] # could be None
                 column_name
             ]
             for column_name in effective_column_names
