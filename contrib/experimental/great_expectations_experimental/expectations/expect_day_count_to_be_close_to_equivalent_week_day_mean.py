@@ -12,7 +12,6 @@ from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics import ColumnAggregateMetricProvider
 from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from datetime import datetime, timedelta
 
 TODAY: datetime = datetime(year=2022, month=8, day=10)
 TODAY_STR: str = datetime.strftime(TODAY, "%Y-%m-%d")
@@ -57,12 +56,12 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
         domain_type=MetricDomainTypes.COLUMN,
     )
     def _sqlalchemy(
-            cls,
-            execution_engine: SqlAlchemyExecutionEngine,
-            metric_domain_kwargs,
-            metric_value_kwargs,
-            metrics,
-            runtime_configuration,
+        cls,
+        execution_engine: SqlAlchemyExecutionEngine,
+        metric_domain_kwargs,
+        metric_value_kwargs,
+        metrics,
+        runtime_configuration,
     ):
         (
             selectable,
@@ -122,7 +121,7 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
                         DAYS_AGO[7]: 4,
                         DAYS_AGO[14]: 4,
                         DAYS_AGO[21]: 4,
-                        DAYS_AGO[28]: 3
+                        DAYS_AGO[28]: 3,
                     }
                 ),
                 "column_past_mean_zero": generate_data_sample(
@@ -133,7 +132,7 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
                         DAYS_AGO[21]: 0,
                         DAYS_AGO[28]: 0,
                     }
-                )
+                ),
             },
             # "column_b": [today, yesterday, yesterday, two_days_ago]},
             "tests": [
@@ -177,7 +176,7 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
                         "run_date": TODAY_STR,
                     },
                     "out": {"success": False},
-                }
+                },
             ],
             "test_backends": [
                 {
@@ -195,17 +194,17 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
     )
 
     def validate_configuration(
-            self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
         # Setting up a configuration
         super().validate_configuration(configuration)
 
     def _validate(
-            self,
-            configuration: ExpectationConfiguration,
-            metrics: Dict,
-            runtime_configuration: dict = None,
-            execution_engine: ExecutionEngine = None,
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: Dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
     ):
 
         run_date: str = self.get_success_kwargs(configuration).get("run_date")
@@ -235,8 +234,12 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
 
 
 def get_counts_per_day_as_dict(metrics: dict, run_date: str) -> dict:
-    equivalent_previous_days: List[datetime] = [DAYS_AGO[i] for i in FOUR_PREVIOUS_WEEKS]
-    equivalent_previous_days_str: List[str] = [datetime.strftime(i, date_format) for i in equivalent_previous_days]
+    equivalent_previous_days: List[datetime] = [
+        DAYS_AGO[i] for i in FOUR_PREVIOUS_WEEKS
+    ]
+    equivalent_previous_days_str: List[str] = [
+        datetime.strftime(i, date_format) for i in equivalent_previous_days
+    ]
     all_days_list = equivalent_previous_days_str + [run_date]
 
     counts_per_days = metrics["column.counts_per_days_custom"]
@@ -255,11 +258,16 @@ def get_diff_fraction(run_date_count: int, day_counts_dict: dict) -> float:
     difference relative to the average).
     Added +1 to both nuemrator and denominator, to account for cases when previous average is 0.
     """
-    equivalent_previous_days: List[datetime] = [DAYS_AGO[i] for i in FOUR_PREVIOUS_WEEKS]
-    equivalent_previous_days_str: List[str] = [datetime.strftime(i, date_format) for i in equivalent_previous_days]
+    equivalent_previous_days: List[datetime] = [
+        DAYS_AGO[i] for i in FOUR_PREVIOUS_WEEKS
+    ]
+    equivalent_previous_days_str: List[str] = [
+        datetime.strftime(i, date_format) for i in equivalent_previous_days
+    ]
 
-    previous_days_counts: List[int] = [day_counts_dict[i] for i in day_counts_dict if
-                                       i in equivalent_previous_days_str]
+    previous_days_counts: List[int] = [
+        day_counts_dict[i] for i in day_counts_dict if i in equivalent_previous_days_str
+    ]
 
     avg_equivalent_previous_days_count = average_if_nonempty(previous_days_counts)
 
