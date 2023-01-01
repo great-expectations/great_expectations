@@ -392,8 +392,8 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in suite.expectations:
         kwargs: dict = expectation_configuration.kwargs
-        key: str  # noqa: F842
-        value: Any  # noqa: F842
+        key: str
+        value: Any
         kwargs = {
             key: sorted(value) if isinstance(value, (list, set, tuple)) else value
             for key, value in kwargs.items()
@@ -851,8 +851,8 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in suite.expectations:
         kwargs: dict = expectation_configuration.kwargs
-        key: str  # noqa: F842
-        value: Any  # noqa: F842
+        key: str
+        value: Any
         kwargs = {
             key: sorted(value) if isinstance(value, (list, set, tuple)) else value
             for key, value in kwargs.items()

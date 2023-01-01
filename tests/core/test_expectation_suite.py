@@ -800,7 +800,7 @@ def test_get_citations_not_sorted(baseline_suite):
 def test_get_citations_sorted(baseline_suite):
     assert "citations" not in baseline_suite.meta
 
-    dt: datetime.datetime  # noqa: F842
+    dt: datetime.datetime
 
     baseline_suite.add_citation("first", citation_date="2000-01-01")
     baseline_suite.add_citation("third", citation_date="2000-01-03")

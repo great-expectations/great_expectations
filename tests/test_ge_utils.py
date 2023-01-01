@@ -46,7 +46,7 @@ def file_data_asset(tmp_path):
 
 @pytest.fixture
 def datetime_array():
-    week_idx: int  # noqa: F842
+    week_idx: int
     return [
         datetime.datetime(2021, 1, 1, 0, 0, 0) + datetime.timedelta(days=(week_idx * 7))
         for week_idx in range(4)
@@ -55,7 +55,7 @@ def datetime_array():
 
 @pytest.fixture
 def datetime_string_array():
-    week_idx: int  # noqa: F842
+    week_idx: int
     return [
         (
             datetime.datetime(2021, 1, 1, 0, 0, 0)
@@ -67,7 +67,7 @@ def datetime_string_array():
 
 @pytest.fixture
 def numeric_array():
-    idx: int  # noqa: F842
+    idx: int
     return [idx for idx in range(4)]
 
 
@@ -819,7 +819,7 @@ def test_convert_ndarray_datetime_to_float_dtype_utc_timezone(
     datetime_string_array,
     numeric_array,
 ):
-    element: Any  # noqa: F842
+    element: Any
     assert convert_ndarray_datetime_to_float_dtype_utc_timezone(
         data=datetime_array
     ).tolist() == [
@@ -844,7 +844,7 @@ def test_convert_ndarray_datetime_to_float_dtype_utc_timezone(
 def test_convert_ndarray_float_to_datetime_tuple(
     datetime_array,
 ):
-    element: Any  # noqa: F842
+    element: Any
     assert convert_ndarray_float_to_datetime_tuple(
         data=[
             element.replace(tzinfo=datetime.timezone.utc).timestamp()

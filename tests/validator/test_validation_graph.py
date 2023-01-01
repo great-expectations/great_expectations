@@ -343,7 +343,7 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true():
             as placeholder).  This makes "ValidationGraph.resolve()" -- method under test -- evaluate every
             "MetricConfiguration" of parsed "ValidationGraph" successfully, except "failed" "MetricConfiguration".
             """
-            metric_configuration: MetricConfiguration  # noqa: F842
+            metric_configuration: MetricConfiguration
             if failed_metric_configuration.id in [
                 metric_configuration.id for metric_configuration in metrics_to_resolve
             ]:
