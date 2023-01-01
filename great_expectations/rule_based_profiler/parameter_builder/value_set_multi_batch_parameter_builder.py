@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import itertools
-from typing import TYPE_CHECKING, Any, Collection, Dict, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Collection, Dict, List, Optional, Set, TypeVar, Union
 
 import numpy as np
 
@@ -31,6 +31,8 @@ from great_expectations.types.attributes import Attributes
 from great_expectations.util import is_ndarray_datetime_dtype
 
 if TYPE_CHECKING:
+    from _typeshed import SupportsRichComparison
+
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
@@ -136,8 +138,8 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         )
         details: dict = parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]
 
-        unique_values: Set[Any] = _get_unique_values_from_nested_collection_of_sets(
-            collection=metric_values
+        unique_values: Set = _get_unique_values_from_nested_collection_of_sets(
+            collection=metric_values  # type: ignore[arg-type] # could be None
         )
 
         unique_values_as_array: np.ndarray = np.asarray(unique_values)
@@ -160,9 +162,12 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         )
 
 
+V = TypeVar("V")
+
+
 def _get_unique_values_from_nested_collection_of_sets(
-    collection: Collection[Collection[Set[Any]]],
-) -> Set[Any]:
+    collection: Collection[Collection[Set[V]]],
+) -> Set[V]:
     """Get unique values from a collection of sets e.g. a list of sets.
 
     Args:
@@ -173,10 +178,10 @@ def _get_unique_values_from_nested_collection_of_sets(
         Single flattened set containing unique values.
     """
 
-    flattened: Union[List[Set[Any]], Set[Any]] = list(
+    flattened: Union[List[Set[V]], Set[V]] = list(
         itertools.chain.from_iterable(collection)
     )
-    element: Any
+    element: V
     if all(isinstance(element, set) for element in flattened):
         flattened = set().union(*flattened)
 
@@ -185,8 +190,8 @@ def _get_unique_values_from_nested_collection_of_sets(
     reliance on "np.ndarray", "None" gets converted to "numpy.Inf", whereas "numpy.Inf == numpy.Inf" returns False,
     resulting in numerous "None" elements in final set.  For this reason, all "None" elements must be filtered out.
     """
-    unique_values: Set[Any] = set(
-        sorted(
+    unique_values: Set[V] = set(
+        sorted(  # type: ignore[type-var,arg-type] # lambda destroys type info?
             filter(
                 lambda element: not (
                     (element is None)
