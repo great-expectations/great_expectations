@@ -39,9 +39,9 @@ class Builder(SerializableDictDot):
         Args:
             data_context: AbstractDataContext associated with this Builder
         """
-        self._batch_list = None
-        self._batch_request = None
-        self._data_context = data_context
+        self._batch_list: List[Batch] = []
+        self._batch_request: Union[BatchRequestBase, dict, None] = None
+        self._data_context: Optional[AbstractDataContext] = data_context
 
     """
     Full getter/setter accessors for "batch_request" and "batch_list" are for configuring Builder dynamically.
@@ -56,7 +56,7 @@ class Builder(SerializableDictDot):
         self._batch_list = value
 
     @property
-    def batch_request(self) -> Optional[Union[BatchRequestBase, dict]]:
+    def batch_request(self) -> Union[BatchRequestBase, dict, None]:
         return self._batch_request
 
     @batch_request.setter
