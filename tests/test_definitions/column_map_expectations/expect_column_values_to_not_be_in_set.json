@@ -126,7 +126,7 @@
         "out": {
           "success": true
         },
-        "suppress_test_for": ["spark"]
+        "suppress_test_for": ["spark_v2_api"]
       },
       {
         "title": "value_error_spark_cannot_support_values_set_is_null",
@@ -139,7 +139,7 @@
         "out": {
           "traceback_substring": "expect_column_values_to_not_be_in_set cannot support a None in the value_set in spark"
         },
-        "only_for": ["spark"]
+        "only_for": ["spark_v2_api"]
       },
       {
         "title": "raise_typeerror_when_values_set_is_missing",

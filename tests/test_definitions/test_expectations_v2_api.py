@@ -189,6 +189,8 @@ def pytest_generate_tests(metafunc):
                             elif isinstance(data_asset, SparkDFDataset):
                                 if "spark" in only_for:
                                     generate_test = True
+                                elif "spark_v2_api" in only_for:
+                                    generate_test = True
 
                         if not generate_test:
                             continue
@@ -264,6 +266,10 @@ def pytest_generate_tests(metafunc):
                                 )
                                 or (
                                     "spark" in suppress_test_for
+                                    and isinstance(data_asset, SparkDFDataset)
+                                )
+                                or (
+                                    "spark_v2_api" in suppress_test_for
                                     and isinstance(data_asset, SparkDFDataset)
                                 )
                             ):

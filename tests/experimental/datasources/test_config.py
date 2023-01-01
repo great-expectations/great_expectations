@@ -32,7 +32,7 @@ PG_CONFIG_YAML_STR = PG_CONFIG_YAML_FILE.read_text()
 PG_COMPLEX_CONFIG_DICT = {
     "xdatasources": {
         "my_pg_ds": {
-            "connection_string": "postgres://foo.bar",
+            "connection_string": "postgresql://userName:@hostname/dbName",
             "name": "my_pg_ds",
             "type": "postgres",
             "assets": {
@@ -233,7 +233,7 @@ def test_catch_bad_asset_configs(
         "my_test_ds": {
             "type": "postgres",
             "name": "my_test_ds",
-            "connection_string": "my_db://",
+            "connection_string": "postgres://userName:@hostname/dbName",
             "assets": {bad_asset_config["name"]: bad_asset_config},
         }
     }
