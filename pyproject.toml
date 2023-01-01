@@ -149,7 +149,6 @@ exclude = [
     'rule_based_profiler/parameter_builder/partition_parameter_builder\.py',  # 9
     'rule_based_profiler/parameter_builder/regex_pattern_string_parameter_builder\.py',  # 21
     'rule_based_profiler/parameter_builder/simple_date_format_string_parameter_builder\.py',  # 20
-    'rule_based_profiler/parameter_builder/value_counts_single_batch_parameter_builder\.py',  # 3
     'rule_based_profiler/parameter_container\.py',  # 7
     'rule_based_profiler/rule_based_profiler\.py',  # 40
     'validation_operators/types/validation_operator_result\.py', # 35
