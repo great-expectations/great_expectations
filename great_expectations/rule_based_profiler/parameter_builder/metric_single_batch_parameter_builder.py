@@ -69,7 +69,7 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         """
         super().__init__(
             name=name,
-            metric_name=metric_name,
+            metric_name=metric_name,  # type: ignore[arg-type] # could be None
             metric_domain_kwargs=metric_domain_kwargs,
             metric_value_kwargs=metric_value_kwargs,
             single_batch_mode=True,
