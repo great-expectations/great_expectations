@@ -120,7 +120,6 @@ exclude = [
     'render/renderer/v3/suite_profile_notebook_renderer\.py',  # 4
     'render/util\.py',  # 2
     'render/view/view\.py',  # 11
-    'rule_based_profiler/builder\.py',  # 4
     'rule_based_profiler/config/base\.py',  # 13
     'rule_based_profiler/data_assistant_result/data_assistant_result\.py',  # 71
     'rule_based_profiler/data_assistant_result/plot_components\.py', # 12
@@ -132,7 +131,6 @@ exclude = [
     'rule_based_profiler/domain_builder/map_metric_column_domain_builder\.py',  # 8
     'rule_based_profiler/domain_builder/multi_column_domain_builder\.py',  # 4
     'rule_based_profiler/estimators/bootstrap_numeric_range_estimator\.py',  # 8
-    'rule_based_profiler/estimators/exact_numeric_range_estimator\.py',  # 3
     'rule_based_profiler/estimators/kde_numeric_range_estimator\.py',  # 7
     'rule_based_profiler/estimators/quantiles_numeric_range_estimator\.py',  # 5
     'rule_based_profiler/expectation_configuration_builder',  # 13
@@ -143,7 +141,6 @@ exclude = [
     'rule_based_profiler/parameter_builder/mean_table_columns_set_match_multi_batch_parameter_builder\.py',  # 2
     'rule_based_profiler/parameter_builder/mean_unexpected_map_metric_multi_batch_parameter_builder\.py',  # 19
     'rule_based_profiler/parameter_builder/metric_multi_batch_parameter_builder\.py',  # 15
-    'rule_based_profiler/parameter_builder/metric_single_batch_parameter_builder\.py',  # 3
     'rule_based_profiler/parameter_builder/numeric_metric_range_multi_batch_parameter_builder\.py',  # 27
     'rule_based_profiler/parameter_builder/parameter_builder\.py',  # 40
     'rule_based_profiler/parameter_builder/partition_parameter_builder\.py',  # 9
