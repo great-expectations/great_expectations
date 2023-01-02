@@ -120,7 +120,6 @@ exclude = [
     'render/renderer/v3/suite_profile_notebook_renderer\.py',  # 4
     'render/util\.py',  # 2
     'render/view/view\.py',  # 11
-    'rule_based_profiler/config/base\.py',  # 13
     'rule_based_profiler/data_assistant_result/data_assistant_result\.py',  # 71
     'rule_based_profiler/data_assistant_result/plot_components\.py', # 12
     'rule_based_profiler/data_assistant/data_assistant\.py',  # 15
