@@ -1252,3 +1252,337 @@ def test_validator_result_format_config_from_expectation(
         "`result_format` configured at the Validator-level will not be persisted."
         in str(config_warning.list[0].message)
     )
+
+
+@pytest.mark.integration
+def test_graph_validate_with_two_expectaions_and_diff_result_format(
+    in_memory_runtime_context, basic_datasource
+):
+    in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
+    df = pd.DataFrame(
+        [
+            "A",
+            "B",
+            "B",
+            "C",
+            "C",
+            "C",
+            "D",
+            "D",
+            "D",
+            "D",
+            "E",
+            "E",
+            "E",
+            "E",
+            "E",
+            "F",
+            "F",
+            "F",
+            "F",
+            "F",
+            "F",
+            "G",
+            "G",
+            "G",
+            "G",
+            "G",
+            "G",
+            "G",
+            "H",
+            "H",
+            "H",
+            "H",
+            "H",
+            "H",
+            "H",
+            "H",
+        ],
+        columns=["var"],
+    )
+
+    batch = basic_datasource.get_single_batch_from_batch_request(
+        RuntimeBatchRequest(
+            **{
+                "datasource_name": "my_datasource",
+                "data_connector_name": "test_runtime_data_connector",
+                "data_asset_name": "IN_MEMORY_DATA_ASSET",
+                "runtime_parameters": {
+                    "batch_data": df,
+                },
+                "batch_identifiers": {
+                    "pipeline_stage_name": 0,
+                    "airflow_run_id": 0,
+                    "custom_key_0": 0,
+                },
+            }
+        )
+    )
+
+    expectation_configuration_expect_column_distinct_values_to_equal_set = (
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_null",
+            kwargs={
+                "column": "var",
+            },
+        )
+    )
+
+    expectation_configuration_expect_column_values_to_be_in_set = (
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "column": "var",
+                "value_set": ["B", "C", "D", "F", "G", "H"],
+                "result_format": {"result_format": "COMPLETE"},
+            },
+        )
+    )
+    result = Validator(
+        execution_engine=basic_datasource.execution_engine,
+        data_context=in_memory_runtime_context,
+        batches=[batch],
+    ).graph_validate(
+        configurations=[
+            expectation_configuration_expect_column_distinct_values_to_equal_set,
+            expectation_configuration_expect_column_values_to_be_in_set,
+        ]
+    )
+
+    assert result == [
+        ExpectationValidationResult(
+            success=False,
+            expectation_config=ExpectationConfiguration(
+                "expect_column_values_to_be_null",
+                kwargs={
+                    "column": "var",
+                },
+            ),
+            meta={},
+            result={
+                "element_count": 36,
+                "unexpected_count": 36,
+                "unexpected_percent": 100.0,
+                "partial_unexpected_list": [
+                    "A",
+                    "B",
+                    "B",
+                    "C",
+                    "C",
+                    "C",
+                    "D",
+                    "D",
+                    "D",
+                    "D",
+                    "E",
+                    "E",
+                    "E",
+                    "E",
+                    "E",
+                    "F",
+                    "F",
+                    "F",
+                    "F",
+                    "F",
+                ],
+            },
+            exception_info=None,
+        ),
+        ExpectationValidationResult(
+            success=False,
+            expectation_config=ExpectationConfiguration(
+                "expect_column_values_to_be_in_set",
+                kwargs={
+                    "column": "var",
+                    "value_set": ["B", "C", "D", "F", "G", "H"],
+                    "result_format": {"result_format": "COMPLETE"},
+                },
+            ),
+            meta={},
+            result={
+                "element_count": 36,
+                "unexpected_count": 6,
+                "unexpected_percent": 16.666666666666664,
+                "partial_unexpected_list": ["A", "E", "E", "E", "E", "E"],
+                "missing_count": 0,
+                "missing_percent": 0.0,
+                "unexpected_percent_total": 16.666666666666664,
+                "unexpected_percent_nonmissing": 16.666666666666664,
+                "partial_unexpected_index_list": [0, 10, 11, 12, 13, 14],
+                "partial_unexpected_counts": [
+                    {"value": "E", "count": 5},
+                    {"value": "A", "count": 1},
+                ],
+                "unexpected_list": ["A", "E", "E", "E", "E", "E"],
+                "unexpected_index_list": [0, 10, 11, 12, 13, 14],
+            },
+            exception_info=None,
+        ),
+    ]
+
+
+@pytest.mark.integration
+def test_graph_validate_with_two_expectaions_and_first_result_format_complet(
+    in_memory_runtime_context, basic_datasource
+):
+    in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
+    df = pd.DataFrame(
+        [
+            "A",
+            "B",
+            "B",
+            "C",
+            "C",
+            "C",
+            "D",
+            "D",
+            "D",
+            "D",
+            "E",
+            "E",
+            "E",
+            "E",
+            "E",
+            "F",
+            "F",
+            "F",
+            "F",
+            "F",
+            "F",
+            "G",
+            "G",
+            "G",
+            "G",
+            "G",
+            "G",
+            "G",
+            "H",
+            "H",
+            "H",
+            "H",
+            "H",
+            "H",
+            "H",
+            "H",
+        ],
+        columns=["var"],
+    )
+
+    batch = basic_datasource.get_single_batch_from_batch_request(
+        RuntimeBatchRequest(
+            **{
+                "datasource_name": "my_datasource",
+                "data_connector_name": "test_runtime_data_connector",
+                "data_asset_name": "IN_MEMORY_DATA_ASSET",
+                "runtime_parameters": {
+                    "batch_data": df,
+                },
+                "batch_identifiers": {
+                    "pipeline_stage_name": 0,
+                    "airflow_run_id": 0,
+                    "custom_key_0": 0,
+                },
+            }
+        )
+    )
+
+    expectation_configuration_expect_column_distinct_values_to_equal_set = (
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_null",
+            kwargs={
+                "column": "var",
+            },
+        )
+    )
+
+    expectation_configuration_expect_column_values_to_be_in_set = (
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "column": "var",
+                "value_set": ["B", "C", "D", "F", "G", "H"],
+                "result_format": {"result_format": "COMPLETE"},
+            },
+        )
+    )
+    result = Validator(
+        execution_engine=basic_datasource.execution_engine,
+        data_context=in_memory_runtime_context,
+        batches=[batch],
+    ).graph_validate(
+        configurations=[
+            expectation_configuration_expect_column_values_to_be_in_set,
+            expectation_configuration_expect_column_distinct_values_to_equal_set,
+        ]
+    )
+
+    assert result == [
+        ExpectationValidationResult(
+            success=False,
+            expectation_config=ExpectationConfiguration(
+                "expect_column_values_to_be_in_set",
+                kwargs={
+                    "column": "var",
+                    "value_set": ["B", "C", "D", "F", "G", "H"],
+                    "result_format": {"result_format": "COMPLETE"},
+                },
+            ),
+            meta={},
+            result={
+                "element_count": 36,
+                "unexpected_count": 6,
+                "unexpected_percent": 16.666666666666664,
+                "partial_unexpected_list": ["A", "E", "E", "E", "E", "E"],
+                "missing_count": 0,
+                "missing_percent": 0.0,
+                "unexpected_percent_total": 16.666666666666664,
+                "unexpected_percent_nonmissing": 16.666666666666664,
+                "partial_unexpected_index_list": [0, 10, 11, 12, 13, 14],
+                "partial_unexpected_counts": [
+                    {"value": "E", "count": 5},
+                    {"value": "A", "count": 1},
+                ],
+                "unexpected_list": ["A", "E", "E", "E", "E", "E"],
+                "unexpected_index_list": [0, 10, 11, 12, 13, 14],
+            },
+            exception_info=None,
+        ),
+        ExpectationValidationResult(
+            success=False,
+            expectation_config=ExpectationConfiguration(
+                "expect_column_values_to_be_null",
+                kwargs={
+                    "column": "var",
+                },
+            ),
+            meta={},
+            result={
+                "element_count": 36,
+                "unexpected_count": 36,
+                "unexpected_percent": 100.0,
+                "partial_unexpected_list": [
+                    "A",
+                    "B",
+                    "B",
+                    "C",
+                    "C",
+                    "C",
+                    "D",
+                    "D",
+                    "D",
+                    "D",
+                    "E",
+                    "E",
+                    "E",
+                    "E",
+                    "E",
+                    "F",
+                    "F",
+                    "F",
+                    "F",
+                    "F",
+                ],
+            },
+            exception_info=None,
+        ),
+    ]
