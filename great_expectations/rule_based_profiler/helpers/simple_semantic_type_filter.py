@@ -8,10 +8,11 @@ from typing import (
     Optional,
     Sequence,
     Type,
-    TypeGuard,
     TypeVar,
     Union,
 )
+
+from typing_extensions import TypeGuard
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.domain import (
