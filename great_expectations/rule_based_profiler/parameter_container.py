@@ -142,7 +142,7 @@ class ParameterNode(SerializableDotDict):
     """
 
     def to_dict(self) -> dict:
-        return convert_parameter_node_to_dictionary(source=dict(self))
+        return convert_parameter_node_to_dictionary(source=dict(self))  # type: ignore[return-value] # could be None
 
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=self.to_dict())
@@ -471,9 +471,9 @@ def get_parameter_value_by_fully_qualified_parameter_name(
     parameter_container: ParameterContainer
 
     if fully_qualified_parameter_name.startswith(VARIABLES_PREFIX):
-        parameter_container = variables
+        parameter_container = variables  # type: ignore[assignment] # could be None
     else:
-        parameter_container = parameters[domain.id]
+        parameter_container = parameters[domain.id]  # type: ignore[index,union-attr] # `parameters` & `domain` could be None
 
     fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
 
@@ -526,7 +526,7 @@ def _get_parameter_value_from_parameter_container(
             parent_parameter_node = return_value
 
             attribute_value_reference = parsed_attribute_name[0]
-            return_value = return_value[attribute_value_reference]
+            return_value = return_value[attribute_value_reference]  # type: ignore[index] # could be None
 
             parsed_attribute_name = parsed_attribute_name[1:]
 
@@ -540,7 +540,7 @@ def _get_parameter_value_from_parameter_container(
 """
         )
 
-    if attribute_value_reference not in parent_parameter_node:
+    if attribute_value_reference not in parent_parameter_node:  # type: ignore[operator] # could be None
         raise KeyError(
             f"""Unable to find value for parameter name "{fully_qualified_parameter_name}": Part \
 "{parameter_name_part}" of fully-qualified parameter name does not exist.
@@ -588,7 +588,7 @@ def get_fully_qualified_parameter_names(
         )
 
     if parameters is not None:
-        parameter_container: ParameterContainer = parameters[domain.id]
+        parameter_container: ParameterContainer = parameters[domain.id]  # type: ignore[union-attr] # could be None
 
         if not (
             parameter_container is None or parameter_container.parameter_nodes is None
