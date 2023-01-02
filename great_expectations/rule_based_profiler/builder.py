@@ -39,7 +39,7 @@ class Builder(SerializableDictDot):
         Args:
             data_context: AbstractDataContext associated with this Builder
         """
-        self._batch_list: List[Batch] = []
+        self._batch_list: Optional[List[Batch]] = None
         self._batch_request: Union[BatchRequestBase, dict, None] = None
         self._data_context: Optional[AbstractDataContext] = data_context
 
