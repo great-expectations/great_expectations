@@ -1,16 +1,6 @@
 from __future__ import annotations
 
-from typing import (
-    TYPE_CHECKING,
-    Iterable,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Iterable, List, Optional, Set, Tuple, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.domain import Domain, SemanticDomainTypes
@@ -34,8 +24,6 @@ if TYPE_CHECKING:
         AbstractDataContext,
     )
     from great_expectations.validator.validator import Validator
-
-PVT = TypeVar("PVT")
 
 
 class ColumnDomainBuilder(DomainBuilder):
