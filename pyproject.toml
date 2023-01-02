@@ -129,7 +129,6 @@ exclude = [
     'rule_based_profiler/estimators/kde_numeric_range_estimator\.py',  # 7
     'rule_based_profiler/expectation_configuration_builder',  # 13
     'rule_based_profiler/helpers/cardinality_checker\.py',  # 9
-    'rule_based_profiler/helpers/simple_semantic_type_filter\.py',  # 7
     'rule_based_profiler/helpers/util\.py',  # 46
     'rule_based_profiler/parameter_builder/histogram_single_batch_parameter_builder\.py',  # 7
     'rule_based_profiler/parameter_builder/mean_unexpected_map_metric_multi_batch_parameter_builder\.py',  # 19
