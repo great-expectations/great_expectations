@@ -1,7 +1,17 @@
 from __future__ import annotations
 
 import itertools
-from typing import TYPE_CHECKING, Collection, Dict, List, Optional, Set, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    ClassVar,
+    Collection,
+    Dict,
+    List,
+    Optional,
+    Set,
+    TypeVar,
+    Union,
+)
 
 import numpy as np
 
@@ -55,8 +65,8 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         2. This ParameterBuilder filters null values out from the unique value_set.
     """
 
-    exclude_field_names: Set[
-        str
+    exclude_field_names: ClassVar[
+        Set[str]
     ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
         "metric_name",
         "single_batch_mode",

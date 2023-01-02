@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Any, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Any, ClassVar, List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -25,7 +25,7 @@ class Builder(SerializableDictDot):
     A Builder provides methods to serialize any builder object of a rule generically.
     """
 
-    exclude_field_names: Set[str] = {
+    exclude_field_names: ClassVar[Set[str]] = {
         "batch_list",
         "batch_request",
         "data_context",

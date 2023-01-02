@@ -1,6 +1,16 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, List, Optional, Set, Tuple, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    ClassVar,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+    cast,
+)
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.domain import Domain, SemanticDomainTypes
@@ -27,7 +37,7 @@ if TYPE_CHECKING:
 
 
 class ColumnDomainBuilder(DomainBuilder):
-    exclude_field_names: Set[str] = DomainBuilder.exclude_field_names | {
+    exclude_field_names: ClassVar[Set[str]] = DomainBuilder.exclude_field_names | {
         "semantic_type_filter",
     }
 

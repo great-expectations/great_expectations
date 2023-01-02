@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional, Set, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.domain import (
@@ -26,7 +26,9 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
     This DomainBuilder uses relative tolerance of specified map metric to identify domains.
     """
 
-    exclude_field_names: Set[str] = ColumnDomainBuilder.exclude_field_names | {
+    exclude_field_names: ClassVar[
+        Set[str]
+    ] = ColumnDomainBuilder.exclude_field_names | {
         "exclude_column_names",
         "include_column_name_suffixes",
         "exclude_column_name_suffixes",
