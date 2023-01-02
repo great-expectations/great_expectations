@@ -31,8 +31,6 @@ from great_expectations.types.attributes import Attributes
 from great_expectations.util import is_ndarray_datetime_dtype
 
 if TYPE_CHECKING:
-    from _typeshed import SupportsRichComparison
-
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
