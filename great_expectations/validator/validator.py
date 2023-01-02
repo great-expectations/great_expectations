@@ -1041,23 +1041,12 @@ class Validator:
         result: ExpectationValidationResult
         for configuration in processed_configurations:
             try:
-                if "result_format" in configuration.kwargs:
-                    result_format_dict = configuration.kwargs["result_format"]
-                    runtime_configuration = self._get_runtime_configuration(
-                        catch_exceptions=True, result_format=result_format_dict
-                    )
-                elif "result_format" not in configuration.kwargs:
-                    defaul_result_format = Validator.DEFAULT_RUNTIME_CONFIGURATION[
-                        "result_format"
-                    ]
-                    runtime_configuration = self._get_runtime_configuration(
-                        catch_exceptions=True, result_format=defaul_result_format
-                    )
+                runtime_configuration_default = copy.deepcopy(runtime_configuration)
 
                 result = configuration.metrics_validate(
                     metrics=resolved_metrics,
                     execution_engine=self._execution_engine,
-                    runtime_configuration=runtime_configuration,
+                    runtime_configuration=runtime_configuration_default,
                 )
                 evrs.append(result)
             except Exception as err:
