@@ -109,7 +109,7 @@ ExpectColumnPairValuesToMatchSomeCriteria().print_diagnostic_checklist()
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py#L147
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py#L146
 ```
 
 Later, you can go back and write a more thorough docstring.

@@ -53,6 +53,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration)
+        configuration = configuration or self.configuration
         value = configuration["kwargs"].get("value")
         threshold = configuration["kwargs"].get("threshold")
 

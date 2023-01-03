@@ -431,7 +431,7 @@ with something like:
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L116
+```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L115
 ```
 
 with this one:
