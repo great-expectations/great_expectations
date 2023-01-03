@@ -2,18 +2,18 @@ import logging
 from typing import Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.computed_metrics.computed_metric import (
+    ComputedMetric,
+    computedMetricSchema,
+)
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import InMemoryStoreBackend
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.types.resource_identifiers import (
+    ComputedMetricIdentifier,
     GXCloudIdentifier,
-    MetricIdentifier,
 )
 from great_expectations.data_context.util import load_class
-from great_expectations.metric_computations.metric_computation import (
-    MetricComputation,
-    metricComputationSchema,
-)
 from great_expectations.util import (
     filter_properties_dict,
     verify_dynamic_loading_support,
@@ -22,13 +22,13 @@ from great_expectations.util import (
 logger = logging.getLogger(__name__)
 
 
-class MetricsStore(Store):
+class ComputedMetricsStore(Store):
 
     """
-    Batch-Metric Store (BMS) provides a way to store Marshmallow Schema validated BMS computation records.
+    ComputedMetricsStore provides a way to store Marshmallow Schema validated computed metric records.
     """
 
-    _key_class = MetricIdentifier
+    _key_class = ComputedMetricIdentifier
 
     def __init__(
         self,
@@ -76,11 +76,11 @@ class MetricsStore(Store):
         pass
         # TODO: <Alex>ALEX</Alex>
 
-    def serialize(self, value: MetricComputation) -> dict:
-        return metricComputationSchema.dump(value)
+    def serialize(self, value: ComputedMetric) -> dict:
+        return computedMetricSchema.dump(value)
 
-    def deserialize(self, value: dict) -> MetricComputation:
-        return metricComputationSchema.load(value)
+    def deserialize(self, value: dict) -> ComputedMetric:
+        return computedMetricSchema.load(value)
 
     @property
     def config(self) -> dict:
@@ -126,12 +126,12 @@ class MetricsStore(Store):
     def determine_key(
         name: Optional[str],
         ge_cloud_id: Optional[str] = None,
-    ) -> Union[GXCloudIdentifier, MetricIdentifier]:
+    ) -> Union[GXCloudIdentifier, ComputedMetricIdentifier]:
         assert bool(name) ^ bool(
             ge_cloud_id
         ), "Must provide either name or ge_cloud_id."
 
-        key: Union[GXCloudIdentifier, MetricIdentifier]
+        key: Union[GXCloudIdentifier, ComputedMetricIdentifier]
         if ge_cloud_id:
             key = GXCloudIdentifier(
                 resource_type=GXCloudRESTResource.CHECKPOINT, ge_cloud_id=ge_cloud_id

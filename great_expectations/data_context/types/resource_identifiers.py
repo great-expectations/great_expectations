@@ -10,11 +10,11 @@ from uuid import UUID
 from dateutil.parser import parse
 from marshmallow import Schema, fields, post_load
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import BatchKwargs, IDDict
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.exceptions import DataContextError, InvalidDataContextKeyError
 
 if TYPE_CHECKING:
     from great_expectations.data_context.cloud_constants import GXCloudRESTResource
@@ -26,7 +26,7 @@ class ExpectationSuiteIdentifier(DataContextKey):
     def __init__(self, expectation_suite_name: str) -> None:
         super().__init__()
         if not isinstance(expectation_suite_name, str):
-            raise InvalidDataContextKeyError(
+            raise ge_exceptions.InvalidDataContextKeyError(
                 f"expectation_suite_name must be a string, not {type(expectation_suite_name).__name__}"
             )
         self._expectation_suite_name = expectation_suite_name
@@ -191,7 +191,7 @@ class ValidationResultIdentifier(DataContextKey):
         elif isinstance(batch_kwargs, dict):
             batch_identifier = IDDict(batch_kwargs).to_id()
         else:
-            raise DataContextError(
+            raise ge_exceptions.DataContextError(
                 "Unable to construct ValidationResultIdentifier from provided object."
             )
         return cls(
@@ -200,6 +200,175 @@ class ValidationResultIdentifier(DataContextKey):
             ),
             run_id=validation_result.meta.get("run_id"),
             batch_identifier=batch_identifier,
+        )
+
+
+class MetricIdentifier(DataContextKey):
+    """A MetricIdentifier serves as a key to store and retrieve Metrics."""
+
+    def __init__(self, metric_name, metric_kwargs_id) -> None:
+        self._metric_name = metric_name
+        self._metric_kwargs_id = metric_kwargs_id
+
+    @property
+    def metric_name(self):
+        return self._metric_name
+
+    @property
+    def metric_kwargs_id(self):
+        return self._metric_kwargs_id
+
+    def to_fixed_length_tuple(self):
+        return self.to_tuple()
+
+    def to_tuple(self):
+        if self._metric_kwargs_id is None:
+            tuple_metric_kwargs_id = "__"
+        else:
+            tuple_metric_kwargs_id = self._metric_kwargs_id
+        return tuple(
+            (self.metric_name, tuple_metric_kwargs_id)
+        )  # We use the placeholder in to_tuple
+
+    @classmethod
+    def from_fixed_length_tuple(cls, tuple_):
+        return cls.from_tuple(tuple_)
+
+    @classmethod
+    def from_tuple(cls, tuple_):
+        if tuple_[-1] == "__":
+            return cls(*tuple_[:-1], None)
+        return cls(*tuple_)
+
+
+class ValidationMetricIdentifier(MetricIdentifier):
+    def __init__(
+        self,
+        run_id,
+        data_asset_name,
+        expectation_suite_identifier,
+        metric_name,
+        metric_kwargs_id,
+    ) -> None:
+        super().__init__(metric_name, metric_kwargs_id)
+        if not isinstance(expectation_suite_identifier, ExpectationSuiteIdentifier):
+            expectation_suite_identifier = ExpectationSuiteIdentifier(
+                expectation_suite_name=expectation_suite_identifier
+            )
+
+        if isinstance(run_id, str):
+            # deprecated-v0.11.0
+            warnings.warn(
+                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
+                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
+                "and run_time (both optional).",
+                DeprecationWarning,
+            )
+            try:
+                run_time = parse(run_id)
+            except (ValueError, TypeError):
+                run_time = None
+            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
+        elif isinstance(run_id, dict):
+            run_id = RunIdentifier(**run_id)
+        elif run_id is None:
+            run_id = RunIdentifier()
+        elif not isinstance(run_id, RunIdentifier):
+            run_id = RunIdentifier(run_name=str(run_id))
+
+        self._run_id = run_id
+        self._data_asset_name = data_asset_name
+        self._expectation_suite_identifier = expectation_suite_identifier
+
+    @property
+    def run_id(self):
+        return self._run_id
+
+    @property
+    def data_asset_name(self):
+        return self._data_asset_name
+
+    @property
+    def expectation_suite_identifier(self):
+        return self._expectation_suite_identifier
+
+    def to_tuple(self):
+        if self.data_asset_name is None:
+            tuple_data_asset_name = "__"
+        else:
+            tuple_data_asset_name = self.data_asset_name
+        return tuple(
+            list(self.run_id.to_tuple())
+            + [tuple_data_asset_name]
+            + list(self.expectation_suite_identifier.to_tuple())
+            + [self.metric_name, self.metric_kwargs_id or "__"]
+        )
+
+    def to_fixed_length_tuple(self):
+        if self.data_asset_name is None:
+            tuple_data_asset_name = "__"
+        else:
+            tuple_data_asset_name = self.data_asset_name
+        return tuple(
+            list(self.run_id.to_tuple())
+            + [tuple_data_asset_name]
+            + list(self.expectation_suite_identifier.to_fixed_length_tuple())
+            + [self.metric_name, self.metric_kwargs_id or "__"]
+        )
+
+    def to_evaluation_parameter_urn(self):
+        if self._metric_kwargs_id is None:
+            return "urn:great_expectations:validations:" + ":".join(
+                list(self.expectation_suite_identifier.to_fixed_length_tuple())
+                + [self.metric_name]
+            )
+        else:
+            return "urn:great_expectations:validations:" + ":".join(
+                list(self.expectation_suite_identifier.to_fixed_length_tuple())
+                + [self.metric_name, self._metric_kwargs_id]
+            )
+
+    @classmethod
+    def from_tuple(cls, tuple_):
+        if len(tuple_) < 6:
+            raise ge_exceptions.GreatExpectationsError(
+                "ValidationMetricIdentifier tuple must have at least six components."
+            )
+        if tuple_[2] == "__":
+            tuple_data_asset_name = None
+        else:
+            tuple_data_asset_name = tuple_[2]
+        metric_id = MetricIdentifier.from_tuple(tuple_[-2:])
+        return cls(
+            run_id=RunIdentifier.from_tuple((tuple_[0], tuple_[1])),
+            data_asset_name=tuple_data_asset_name,
+            expectation_suite_identifier=ExpectationSuiteIdentifier.from_tuple(
+                tuple_[3:-2]
+            ),
+            metric_name=metric_id.metric_name,
+            metric_kwargs_id=metric_id.metric_kwargs_id,
+        )
+
+    @classmethod
+    def from_fixed_length_tuple(cls, tuple_):
+        if len(tuple_) != 6:
+            raise ge_exceptions.GreatExpectationsError(
+                "ValidationMetricIdentifier fixed length tuple must have exactly six "
+                "components."
+            )
+        if tuple_[2] == "__":
+            tuple_data_asset_name = None
+        else:
+            tuple_data_asset_name = tuple_[2]
+        metric_id = MetricIdentifier.from_tuple(tuple_[-2:])
+        return cls(
+            run_id=RunIdentifier.from_fixed_length_tuple((tuple_[0], tuple_[1])),
+            data_asset_name=tuple_data_asset_name,
+            expectation_suite_identifier=ExpectationSuiteIdentifier.from_fixed_length_tuple(
+                tuple((tuple_[3],))
+            ),
+            metric_name=metric_id.metric_name,
+            metric_kwargs_id=metric_id.metric_kwargs_id,
         )
 
 
@@ -321,7 +490,7 @@ class SiteSectionIdentifier(DataContextKey):
                     **resource_identifier
                 )
         else:
-            raise InvalidDataContextKeyError(
+            raise ge_exceptions.InvalidDataContextKeyError(
                 "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"
             )
 
@@ -352,7 +521,7 @@ class SiteSectionIdentifier(DataContextKey):
                 resource_identifier=ExpectationSuiteIdentifier.from_tuple(tuple_[1:]),
             )
         else:
-            raise InvalidDataContextKeyError(
+            raise ge_exceptions.InvalidDataContextKeyError(
                 "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"
             )
 
@@ -363,7 +532,7 @@ class ConfigurationIdentifier(DataContextKey):
         if isinstance(configuration_key, UUID):
             configuration_key = str(configuration_key)
         if not isinstance(configuration_key, str):
-            raise InvalidDataContextKeyError(
+            raise ge_exceptions.InvalidDataContextKeyError(
                 f"configuration_key must be a string, not {type(configuration_key).__name__}"
             )
         self._configuration_key = configuration_key
@@ -399,7 +568,7 @@ class ConfigurationIdentifierSchema(Schema):
         return ConfigurationIdentifier(**data)
 
 
-class MetricIdentifier(DataContextKey):
+class ComputedMetricIdentifier(DataContextKey):
     def __init__(
         self,
         metric_key: Tuple[
@@ -441,7 +610,7 @@ class MetricIdentifier(DataContextKey):
             types_detected: str = (
                 f"{[type(element).__name__ for element in metric_key]}"
             )
-            raise InvalidDataContextKeyError(
+            raise ge_exceptions.InvalidDataContextKeyError(
                 f"metric_key tuple elements must be of string type; {types_detected} detected"
             )
 
@@ -481,24 +650,24 @@ class MetricIdentifier(DataContextKey):
             Optional[Union[str, UUID]],
             Optional[Union[str, UUID]],
         ],
-    ) -> MetricIdentifier:
+    ) -> ComputedMetricIdentifier:
         return cls(metric_key=value)
 
     @classmethod
-    def from_fixed_length_tuple(cls, value: tuple) -> MetricIdentifier:
+    def from_fixed_length_tuple(cls, value: tuple) -> ComputedMetricIdentifier:
         return cls(metric_key=value[0])
 
     def __repr__(self):
         return f"{self.__class__.__name__}::{self._metric_key}"
 
 
-class MetricIdentifierSchema(Schema):
+class ComputedMetricIdentifierSchema(Schema):
     metric_key = fields.Str()
 
     # noinspection PyUnusedLocal
     @post_load
     def make_metric_identifier(self, data, **kwargs):
-        return MetricIdentifier(**data)
+        return ComputedMetricIdentifier(**data)
 
 
 expectationSuiteIdentifierSchema = ExpectationSuiteIdentifierSchema()
@@ -506,4 +675,4 @@ validationResultIdentifierSchema = ValidationResultIdentifierSchema()
 runIdentifierSchema = RunIdentifierSchema()
 batchIdentifierSchema = BatchIdentifierSchema()
 configurationIdentifierSchema = ConfigurationIdentifierSchema()
-metricIdentifierSchema = MetricIdentifierSchema()
+computedMetricsIdentifierSchema = ComputedMetricIdentifierSchema()

@@ -1,6 +1,6 @@
 import logging
 
-from great_expectations.metric_computations.util import pluralize, underscore
+from great_expectations.computed_metric.util import pluralize, underscore
 
 logger = logging.getLogger(__name__)
 

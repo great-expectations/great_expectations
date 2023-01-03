@@ -1,4 +1,4 @@
-"""Create "metric_computations" table.
+"""Create "computed_metrics" table.
 
 Revision ID: 9dccb6701dd6
 Revises:
@@ -30,7 +30,7 @@ depends_on = None
 
 def upgrade() -> None:
     op.create_table(
-        "metric_computations",
+        "computed_metrics",
         sa.Column(
             "id",
             sa.Integer(),
@@ -136,40 +136,40 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(
-        op.f("idx_metric_computations_batch_uuid"),
-        table_name="metric_computations",
+        op.f("idx_computed_metrics_batch_uuid"),
+        table_name="computed_metrics",
         columns=[
             "batch_uuid",
         ],
         unique=False,
     )
     op.create_index(
-        op.f("idx_metric_computations_metric_name"),
-        table_name="metric_computations",
+        op.f("idx_computed_metrics_metric_name"),
+        table_name="computed_metrics",
         columns=[
             "metric_name",
         ],
         unique=False,
     )
     op.create_index(
-        op.f("idx_metric_computations_metric_domain_kwargs_uuid"),
-        table_name="metric_computations",
+        op.f("idx_computed_metrics_metric_domain_kwargs_uuid"),
+        table_name="computed_metrics",
         columns=[
             "metric_domain_kwargs_uuid",
         ],
         unique=False,
     )
     op.create_index(
-        op.f("idx_metric_computations_metric_value_kwargs_uuid"),
-        table_name="metric_computations",
+        op.f("idx_computed_metrics_metric_value_kwargs_uuid"),
+        table_name="computed_metrics",
         columns=[
             "metric_value_kwargs_uuid",
         ],
         unique=False,
     )
     op.create_index(
-        op.f("idx_metric_computations_batch_uuid_metric_configuration_uuid"),
-        table_name="metric_computations",
+        op.f("idx_computed_metrics_batch_uuid_metric_configuration_uuid"),
+        table_name="computed_metrics",
         columns=[
             "batch_uuid",
             "metric_name",
@@ -181,4 +181,4 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_table("metric_computations")
+    op.drop_table("computed_metrics")

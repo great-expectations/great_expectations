@@ -12,14 +12,11 @@ except ImportError:
     logger.debug("No SqlAlchemy module available.")
     sa = None
 
-from great_expectations.metric_computations.db.models.base import (
-    AccountMixin,
-    ArchiveMixin,
-)
-from great_expectations.metric_computations.db.models.base import (
+from great_expectations.computed_metric.db.models.base import AccountMixin, ArchiveMixin
+from great_expectations.computed_metric.db.models.base import (
     Base as SqlAlchemyModelBase,
 )
-from great_expectations.metric_computations.db.models.base import (
+from great_expectations.computed_metric.db.models.base import (
     PrimaryKeyMixin,
     SoftDeleteMixin,
     TimestampsMixin,
@@ -40,7 +37,7 @@ class SqlAlchemyMetricComputationModel(
     AccountMixin,
 ):
     """
-    SQLAlchemy model for each row in "metric_computations" table.
+    SQLAlchemy model for each row in "computed_metric" table.
     """
 
     datasource_name = (

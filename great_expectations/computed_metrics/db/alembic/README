@@ -1,0 +1,7 @@
+Generic single-database configuration.
+
+
+alembic --config great_expectations/computed_metrics/db/alembic.ini revision --message 'Create "computed_metrics" table.'
+alembic --config great_expectations/computed_metrics/db/alembic.ini upgrade head --sql
+alembic --config great_expectations/computed_metrics/db/alembic.ini current --verbose
+alembic --config great_expectations/computed_metrics/db/alembic.ini history --verbose
