@@ -402,9 +402,11 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 28
         if isinstance(data, StructType):
             return dict(data.jsonValue())
 
-    raise TypeError(
-        f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
-    )
+    else:
+        raise TypeError(
+            f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
+        )
+    return None
 
 
 def ensure_json_serializable(data):  # noqa: C901 - complexity 21
