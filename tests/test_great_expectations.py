@@ -72,7 +72,7 @@ class CustomPandasDataset(PandasDataset):
         not_null = self[column].notnull()
 
         result = self[column][not_null] == 1
-        unexpected_values = list(self[column][not_null][result == False])
+        unexpected_values = list(self[column][not_null][result == False])  # noqa: E712
 
         if mostly:
             # Prevent division-by-zero errors
@@ -90,7 +90,9 @@ class CustomPandasDataset(PandasDataset):
                 "success": percent_equaling_1 >= mostly,
                 "result": {
                     "unexpected_list": unexpected_values[:20],
-                    "unexpected_index_list": list(self.index[result == False])[:20],
+                    "unexpected_index_list": list(
+                        self.index[result == False]  # noqa: E712
+                    )[:20],
                 },
             }
         else:
@@ -98,7 +100,9 @@ class CustomPandasDataset(PandasDataset):
                 "success": len(unexpected_values) == 0,
                 "result": {
                     "unexpected_list": unexpected_values[:20],
-                    "unexpected_index_list": list(self.index[result == False])[:20],
+                    "unexpected_index_list": list(
+                        self.index[result == False]  # noqa: E712
+                    )[:20],
                 },
             }
 
@@ -440,7 +444,7 @@ def test_stats_mixed_expectations():
 class TestIO(unittest.TestCase):
     def test_read_csv(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = gx.read_csv(
+        _ = gx.read_csv(
             script_path + "/test_sets/Titanic.csv",
         )
 

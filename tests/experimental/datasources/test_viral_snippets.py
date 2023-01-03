@@ -4,7 +4,6 @@ import pathlib
 from pprint import pformat as pf
 
 import pytest
-from pytest import TempPathFactory
 
 # apply markers to entire test module
 pytestmark = [pytest.mark.integration]
@@ -12,7 +11,6 @@ pytestmark = [pytest.mark.integration]
 from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
 from great_expectations.experimental.datasources.config import GxConfig
-from great_expectations.experimental.datasources.interfaces import DataAsset, Datasource
 
 LOGGER = logging.getLogger(__file__)
 
@@ -156,7 +154,7 @@ def test_zep_simple_validate_workflow(zep_file_context: FileDataContext):
         column="passenger_count", min_value=1, max_value=12
     )
     print(f"  results ->\n{pf(result)}")
-    assert result["success"] == True
+    assert result["success"] is True
 
 
 @pytest.mark.xfail(reason="TypeError: cannot pickle 'module' object")
