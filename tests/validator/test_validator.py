@@ -414,7 +414,7 @@ def test_validator_with_bad_batchrequest(
     )
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
         # noinspection PyUnusedLocal
-        validator_multi_batch: Validator = context.get_validator(
+        _: Validator = context.get_validator(
             batch_request=multi_batch_request, expectation_suite=suite
         )
 
@@ -659,7 +659,7 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
 
     with pytest.raises(ValueError) as ve:
         # noinspection PyUnusedLocal
-        validator: Validator = context.get_validator(
+        _: Validator = context.get_validator(
             batch_request=jan_feb_batch_request,
             batch_request_list=[jan_batch_request, feb_batch_request],
             expectation_suite=suite,
@@ -886,7 +886,7 @@ def test_graph_validate_with_bad_config_catch_exceptions_false(
         )
     ) as eee:
         # noinspection PyUnusedLocal
-        result = Validator(
+        _ = Validator(
             execution_engine=basic_datasource.execution_engine,
             data_context=in_memory_runtime_context,
             batches=[batch],
@@ -1216,12 +1216,10 @@ def test_validator_result_format_config_from_validator(
     )
 
     with pytest.warns(UserWarning) as config_warning:
-        result: ExpectationValidationResult = (
-            validator.expect_column_values_to_be_in_set(
-                column="animals",
-                value_set=["cat", "fish", "dog"],
-                result_format=result_format_config,
-            )
+        _: ExpectationValidationResult = validator.expect_column_values_to_be_in_set(
+            column="animals",
+            value_set=["cat", "fish", "dog"],
+            result_format=result_format_config,
         )
 
     assert (
@@ -1244,7 +1242,7 @@ def test_validator_result_format_config_from_expectation(
         context=data_context_with_connection_to_animal_names_db,
     )
     with pytest.warns(UserWarning) as config_warning:
-        result: ExpectationValidationResult = expectation.validate(
+        _: ExpectationValidationResult = expectation.validate(
             validator=validator, runtime_configuration=runtime_configuration
         )
 
