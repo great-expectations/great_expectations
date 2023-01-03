@@ -2,6 +2,7 @@ import logging
 import os
 import random
 import string
+from typing import List
 from unittest import mock
 
 import pandas as pd
@@ -454,7 +455,7 @@ def test__validate_semantic_types_dict(cardinality_validator):
         )
     assert e.value.args[0] == (
         "Column col_few is specified in both the semantic_types_dict and the list of ignored columns. Please remove "
-        f"one of these entries to proceed."
+        "one of these entries to proceed."
     )
 
 
@@ -486,9 +487,9 @@ def test_build_suite_no_config(
     ]
 
     # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call]
+    expected_events: List[mock._Call]
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call]
+    actual_events: List[mock._Call]
 
     expected_events = [
         mock.call(
@@ -595,9 +596,9 @@ def test_build_suite_with_config_and_no_semantic_types_dict(
     ]
 
     # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call]
+    expected_events: List[mock._Call]
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call]
+    actual_events: List[mock._Call]
 
     expected_events = [
         mock.call(
@@ -676,9 +677,9 @@ def test_build_suite_with_semantic_types_dict(
     assert mock_emit.call_count == 1
 
     # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call]
+    expected_events: List[mock._Call]
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call]
+    actual_events: List[mock._Call]
 
     expected_events = [
         mock.call(
@@ -734,9 +735,9 @@ def test_build_suite_when_suite_already_exists(
     assert mock_emit.call_count == 2
 
     # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call]
+    expected_events: List[mock._Call]
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call]
+    actual_events: List[mock._Call]
 
     expected_events = [
         mock.call(
@@ -793,7 +794,7 @@ def test_primary_or_compound_key_not_found_in_columns(cardinality_validator):
     # key includes a non-existent column, should fail
     with pytest.raises(ValueError) as e:
         # noinspection PyUnusedLocal
-        bad_key_profiler = UserConfigurableProfiler(
+        bad_key_profiler = UserConfigurableProfiler(  # noqa: F841
             cardinality_validator,
             primary_or_compound_key=["col_unique", "col_that_does_not_exist"],
         )

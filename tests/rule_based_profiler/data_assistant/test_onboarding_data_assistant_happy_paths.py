@@ -358,8 +358,7 @@ def test_sql_happy_path_onboarding_data_assistant_null_column_quantiles_metric_v
         ),
     )
 
-    # This actually works with any SQLAlchemy-compatible backend; the naming will reflect this as part of near-term fix.
-    datasource = context.sources.add_postgres(
+    datasource = context.sources.add_sqlite(
         name="test_datasource",
         connection_string=f"sqlite:///{db_file}",
     )

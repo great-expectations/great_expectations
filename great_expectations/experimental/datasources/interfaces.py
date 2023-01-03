@@ -3,7 +3,18 @@ from __future__ import annotations
 import dataclasses
 import logging
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Set, Type
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Generic,
+    List,
+    Mapping,
+    Optional,
+    Set,
+    Type,
+    TypeVar,
+)
 
 import pydantic
 from typing_extensions import ClassVar, TypeAlias
@@ -63,7 +74,12 @@ class DataAsset(ExperimentalBaseModel):
         raise NotImplementedError
 
 
-class Datasource(ExperimentalBaseModel, metaclass=MetaDatasource):
+DataAssetType = TypeVar("DataAssetType", bound=DataAsset)
+
+
+class Datasource(
+    ExperimentalBaseModel, Generic[DataAssetType], metaclass=MetaDatasource
+):
     # class attrs
     asset_types: ClassVar[List[Type[DataAsset]]] = []
     # Datasource instance attrs but these will be fed into the `execution_engine` constructor
@@ -80,7 +96,7 @@ class Datasource(ExperimentalBaseModel, metaclass=MetaDatasource):
     # instance attrs
     type: str
     name: str
-    assets: Mapping[str, DataAsset] = {}
+    assets: Mapping[str, DataAssetType] = {}
     _execution_engine: ExecutionEngine = pydantic.PrivateAttr()
 
     def __init__(self, **kwargs):
@@ -103,12 +119,14 @@ class Datasource(ExperimentalBaseModel, metaclass=MetaDatasource):
     @classmethod
     def _load_asset_subtype(cls, v: Dict[str, dict]):
         LOGGER.info(f"Loading 'assets' ->\n{pf(v, depth=3)}")
-        loaded_assets: Dict[str, DataAsset] = {}
+        loaded_assets: Dict[str, DataAssetType] = {}
 
         # TODO (kilo59): catch key errors
         for asset_name, config in v.items():
             asset_type_name: str = config["type"]
-            asset_type: Type[DataAsset] = _SourceFactories.type_lookup[asset_type_name]
+            asset_type: Type[DataAssetType] = _SourceFactories.type_lookup[
+                asset_type_name
+            ]
             LOGGER.debug(f"Instantiating '{asset_type_name}' as {asset_type}")
             loaded_assets[asset_name] = asset_type(**config)
 
@@ -140,7 +158,7 @@ class Datasource(ExperimentalBaseModel, metaclass=MetaDatasource):
             f"{self.__class__.__name__} must implement `.get_batch_list_from_batch_request()`"
         )
 
-    def get_asset(self, asset_name: str) -> DataAsset:
+    def get_asset(self, asset_name: str) -> DataAssetType:
         """Returns the DataAsset referred to by name"""
         # This default implementation will be used if protocol is inherited
         try:

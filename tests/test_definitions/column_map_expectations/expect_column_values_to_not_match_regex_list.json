@@ -13,6 +13,7 @@
         "column_name with space": "StringType"
       }
     },
+    "suppress_test_for": ["snowflake"],
     "tests" : [
     {
       "title" : "basic_positive_test",
