@@ -32,6 +32,7 @@ from IPython import get_ipython
 from typing_extensions import TypeAlias
 
 from great_expectations import exceptions as ge_exceptions
+from great_expectations.alias_types import JSONValues
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.types import SerializableDictDot
@@ -44,7 +45,7 @@ from great_expectations.util import convert_decimal_to_float
 try:
     from pyspark.sql.types import StructType
 except ImportError:
-    StructType = None
+    StructType = None  # type: ignore[assignment, misc]
 
 logger = logging.getLogger(__name__)
 
@@ -90,8 +91,8 @@ try:
     from pyspark.sql import SparkSession
 
 except ImportError:
-    pyspark = None
-    SparkSession = None
+    pyspark = None  # type: ignore[assignment]
+    SparkSession = None  # type: ignore[assignment, misc]
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
@@ -186,8 +187,6 @@ def determine_progress_bar_method_by_environment() -> Callable:
         return tqdm_notebook
     return tqdm
 
-
-JSONValues: TypeAlias = Union[dict, list, str, int, float, bool, None]
 
 ToBool: TypeAlias = bool
 ToFloat: TypeAlias = Union[float, np.floating]
