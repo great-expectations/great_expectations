@@ -19,7 +19,6 @@ schedules:
     - develop
   always: true # As this is run once a day, we always want to run it (regardless of whether or not changes have occurred)
 
-# The pipeline is run under two primary conditions: if merging into main or as scheduled by the above cron job.
 variables:
   isScheduled: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.Reason'], 'Schedule'))]
   isManual: $[eq(variables['Build.Reason'], 'Manual')]
