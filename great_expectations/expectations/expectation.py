@@ -2581,35 +2581,9 @@ class ColumnMapExpectation(TableExpectation, ABC):
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
             )
-        if isinstance(execution_engine, SqlAlchemyExecutionEngine):
-            if "unexpected_index_column_names" in validation_dependencies.result_format:
-                metric_kwargs = get_metric_kwargs(
-                    f"{self.map_metric}.unexpected_index_list",
-                    configuration=configuration,
-                    runtime_configuration=runtime_configuration,
-                )
-                validation_dependencies.set_metric_configuration(
-                    metric_name=f"{self.map_metric}.unexpected_index_list",
-                    metric_configuration=MetricConfiguration(
-                        metric_name=f"{self.map_metric}.unexpected_index_list",
-                        metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                        metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-                    ),
-                )
-                metric_kwargs = get_metric_kwargs(
-                    f"{self.map_metric}.unexpected_index_query",
-                    configuration=configuration,
-                    runtime_configuration=runtime_configuration,
-                )
-                validation_dependencies.set_metric_configuration(
-                    metric_name=f"{self.map_metric}.unexpected_index_query",
-                    metric_configuration=MetricConfiguration(
-                        metric_name=f"{self.map_metric}.unexpected_index_query",
-                        metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                        metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-                    ),
-                )
-        if isinstance(execution_engine, SparkDFExecutionEngine):
+        if isinstance(
+            execution_engine, (SparkDFExecutionEngine, SqlAlchemyExecutionEngine)
+        ):
             if "unexpected_index_column_names" in validation_dependencies.result_format:
                 metric_kwargs = get_metric_kwargs(
                     f"{self.map_metric}.unexpected_index_list",
