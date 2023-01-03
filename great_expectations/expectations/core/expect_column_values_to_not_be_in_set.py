@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -16,6 +16,7 @@ from great_expectations.expectations.expectation import (
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
+    AddParamArgs,
     RendererConfiguration,
     RendererValueType,
 )
@@ -24,9 +25,6 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.render.renderer_configuration import RendererParams
 
 
 class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
@@ -143,16 +141,16 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args = (
+        add_param_args: List[AddParamArgs] = [
             ("column", RendererValueType.STRING),
             ("value_set", RendererValueType.ARRAY),
             ("mostly", RendererValueType.NUMBER),
             ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
-        )
+        ]
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
-        params: RendererParams = renderer_configuration.params
+        params = renderer_configuration.params
         template_str = ""
 
         if params.value_set:

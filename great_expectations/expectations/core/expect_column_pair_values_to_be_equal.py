@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import List, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -12,6 +12,7 @@ from great_expectations.expectations.expectation import (
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
+    AddParamArgs,
     RendererConfiguration,
     RendererValueType,
 )
@@ -20,9 +21,6 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.render.renderer_configuration import RendererParams
 
 
 class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
@@ -111,16 +109,16 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args = (
+        add_param_args: List[AddParamArgs] = [
             ("column_A", RendererValueType.STRING),
             ("column_B", RendererValueType.STRING),
             ("mostly", RendererValueType.NUMBER),
             ("ignore_row_if", RendererValueType.STRING),
-        )
+        ]
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
-        params: RendererParams = renderer_configuration.params
+        params = renderer_configuration.params
         template_str = ""
 
         if not params.column_A or not params.column_B:

@@ -14,7 +14,6 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     AddParamArgs,
     RendererConfiguration,
-    RendererParams,
     RendererValueType,
 )
 from great_expectations.render.util import (
