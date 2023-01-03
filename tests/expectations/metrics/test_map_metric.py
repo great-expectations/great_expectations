@@ -23,7 +23,10 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.execution_engine import (
     MetricPartialFunctionTypes,
 )
-from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
+from great_expectations.expectations.core import (
+    ExpectColumnValueLengthsToEqual,
+    ExpectColumnValuesToBeInSet,
+)
 from great_expectations.expectations.metrics import (
     ColumnMax,
     ColumnValuesNonNull,
@@ -131,6 +134,7 @@ def expected_evr_without_unexpected_rows():
             "partial_unexpected_list": ["giraffe", "lion", "zebra"],
             "unexpected_count": 3,
             "unexpected_index_list": [3, 4, 5],
+            "unexpected_index_query": [3, 4, 5],
             "unexpected_list": ["giraffe", "lion", "zebra"],
             "unexpected_percent": 50.0,
             "unexpected_percent_nonmissing": 50.0,
@@ -547,6 +551,7 @@ def test_pandas_unexpected_rows_complete_result_format(
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
         "unexpected_index_list": [3, 4, 5],
+        "unexpected_index_query": [3, 4, 5],
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
@@ -622,6 +627,7 @@ def test_pandas_default_complete_result_format(
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
         "unexpected_index_list": [3, 4, 5],
+        "unexpected_index_query": [3, 4, 5],
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
