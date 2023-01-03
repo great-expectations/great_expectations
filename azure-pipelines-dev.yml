@@ -115,8 +115,8 @@ stages:
       steps:
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: 3.8
-        displayName: 'Use Python 3.8'
+          versionSpec: 3.7
+        displayName: 'Use Python 3.7'
       - script: |
           pip install --requirement requirements-types.txt
           invoke type-check --ci --pretty
@@ -216,7 +216,7 @@ stages:
               invoke tests --ci --cloud --timeout=3.0
 
             displayName: 'Unit Tests'
-            condition: $(run_unit_tests)
+            condition: $${{ variables['run_unit_tests'] }}
             env:
               GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
