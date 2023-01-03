@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import locale
@@ -8,7 +10,7 @@ import random
 import shutil
 import warnings
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 from unittest import mock
 
 import numpy as np
@@ -91,6 +93,9 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
     RANDOM_STATE,
 )
 
+if TYPE_CHECKING:
+    from pyspark.sql import SparkSession
+
 yaml = YAML()
 ###
 #
@@ -107,13 +112,7 @@ logger = logging.getLogger(__name__)
 @pytest.fixture(scope="module")
 def spark_warehouse_session(tmp_path_factory):
     # Note this fixture will configure spark to use in-memory metastore
-    try:
-        pyspark = pytest.importorskip("pyspark")
-        # noinspection PyPep8Naming
-        from pyspark.sql import SparkSession
-    except ImportError:
-        pyspark = None
-        SparkSession = None
+    pyspark = pytest.importorskip("pyspark")  # noqa: F841
 
     spark_warehouse_path: str = str(tmp_path_factory.mktemp("spark-warehouse"))
     spark: SparkSession = get_or_create_spark_application(
@@ -376,13 +375,13 @@ def sa(test_backends):
 
 @pytest.mark.order(index=2)
 @pytest.fixture
-def spark_session(test_backends):
+def spark_session(test_backends) -> SparkSession:
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
     try:
-        import pyspark
-        from pyspark.sql import SparkSession
+        import pyspark  # noqa: F401
+        from pyspark.sql import SparkSession  # noqa: F401
 
         return get_or_create_spark_application(
             spark_config={
@@ -456,8 +455,8 @@ def spark_session_v012(test_backends):
         pytest.skip("No spark backend selected.")
 
     try:
-        import pyspark
-        from pyspark.sql import SparkSession
+        import pyspark  # noqa: F401
+        from pyspark.sql import SparkSession  # noqa: F401
 
         return get_or_create_spark_application(
             spark_config={
@@ -832,7 +831,7 @@ def data_context_with_connection_to_animal_names_db(
                         class_name: Asset
     """
     # noinspection PyUnusedLocal
-    datasource: Datasource = context.test_yaml_config(
+    _: Datasource = context.test_yaml_config(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
     # noinspection PyProtectedMember
@@ -943,7 +942,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     """
 
     # noinspection PyUnusedLocal
-    datasource: Datasource = context.test_yaml_config(
+    _: Datasource = context.test_yaml_config(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
     # noinspection PyProtectedMember
@@ -980,7 +979,7 @@ def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_e
     """
 
     # noinspection PyUnusedLocal
-    datasource: BaseDatasource = context.add_datasource(
+    _: BaseDatasource = context.add_datasource(
         "my_additional_datasource", **yaml.load(datasource_config)
     )
 
@@ -1039,7 +1038,7 @@ def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_co
         """
 
         # noinspection PyUnusedLocal
-        datasource: BaseDatasource = context.add_datasource(
+        _: BaseDatasource = context.add_datasource(
             "my_sqlite_db_datasource", **yaml.load(datasource_config)
         )
 
@@ -1610,7 +1609,7 @@ def titanic_spark_db(tmp_path_factory, spark_warehouse_session):
 @pytest.fixture
 def titanic_sqlite_db(sa):
     try:
-        import sqlalchemy as sa
+        import sqlalchemy as sa  # noqa: F401
         from sqlalchemy import create_engine
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
@@ -1624,7 +1623,7 @@ def titanic_sqlite_db(sa):
 @pytest.fixture
 def titanic_sqlite_db_connection_string(sa):
     try:
-        import sqlalchemy as sa
+        import sqlalchemy as sa  # noqa: F401
         from sqlalchemy import create_engine
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
@@ -1663,7 +1662,7 @@ def titanic_expectation_suite(empty_data_context_stats_enabled):
 def empty_sqlite_db(sa):
     """An empty in-memory sqlite db that always gets run."""
     try:
-        import sqlalchemy as sa
+        import sqlalchemy as sa  # noqa: F401
         from sqlalchemy import create_engine
 
         engine = create_engine("sqlite://")
@@ -2719,7 +2718,7 @@ def cloud_data_context_with_datasource_pandas_engine(
 ):
     context: CloudDataContext = empty_cloud_data_context
     config = yaml.load(
-        f"""
+        """
     class_name: Datasource
     execution_engine:
         class_name: PandasExecutionEngine

@@ -7,6 +7,7 @@ from typing import Callable, List
 import pydantic
 import pytest
 
+from great_expectations.data_context import FileDataContext
 from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Datasource
 from great_expectations.experimental.datasources.sql_datasource import (
@@ -24,14 +25,14 @@ p = pytest.param
 
 EXPERIMENTAL_DATASOURCE_TEST_DIR = pathlib.Path(__file__).parent
 
-PG_CONFIG_YAML_FILE = EXPERIMENTAL_DATASOURCE_TEST_DIR / "zep_config.yaml"
+PG_CONFIG_YAML_FILE = EXPERIMENTAL_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
 PG_CONFIG_YAML_STR = PG_CONFIG_YAML_FILE.read_text()
 
 # TODO: create PG_CONFIG_YAML_FILE/STR from this dict
 PG_COMPLEX_CONFIG_DICT = {
-    "datasources": {
+    "xdatasources": {
         "my_pg_ds": {
-            "connection_string": "postgres://foo.bar",
+            "connection_string": "postgresql://userName:@hostname/dbName",
             "name": "my_pg_ds",
             "type": "postgres",
             "assets": {
@@ -73,7 +74,7 @@ PG_COMPLEX_CONFIG_DICT = {
 PG_COMPLEX_CONFIG_JSON = json.dumps(PG_COMPLEX_CONFIG_DICT)
 
 SIMPLE_DS_DICT = {
-    "datasources": {
+    "xdatasources": {
         "my_ds": {
             "name": "my_ds",
             "type": "sql",
@@ -83,7 +84,7 @@ SIMPLE_DS_DICT = {
 }
 
 COMBINED_ZEP_AND_OLD_STYLE_CFG_DICT = {
-    "datasources": {
+    "xdatasources": {
         "my_ds": {
             "name": "my_ds",
             "type": "sql",
@@ -146,16 +147,16 @@ def test_load_config(inject_engine_lookup_double, load_method: Callable, input_)
 @pytest.mark.parametrize(
     ["config", "expected_error_loc", "expected_msg"],
     [
-        p({}, ("datasources",), "field required", id="no datasources"),
+        p({}, ("xdatasources",), "field required", id="no datasources"),
         p(
             {
-                "datasources": {
+                "xdatasources": {
                     "my_bad_ds_missing_type": {
                         "name": "my_bad_ds_missing_type",
                     }
                 }
             },
-            ("datasources",),
+            ("xdatasources",),
             "'my_bad_ds_missing_type' is missing a 'type' entry",
             id="missing 'type' field",
         ),
@@ -187,7 +188,7 @@ def test_catch_bad_top_level_config(
     [
         p(
             {"name": "missing `table_name`", "type": "table"},
-            ("datasources", "assets", "table_name"),
+            ("xdatasources", "assets", "table_name"),
             "field required",
             id="missing `table_name`",
         ),
@@ -201,7 +202,7 @@ def test_catch_bad_top_level_config(
                     "column_name": "foo",
                 },
             },
-            ("datasources", "assets", "column_splitter", "method_name"),
+            ("xdatasources", "assets", "column_splitter", "method_name"),
             "unexpected value; permitted: 'split_on_year_and_month'",
             id="unknown splitter method",
         ),
@@ -216,7 +217,7 @@ def test_catch_bad_top_level_config(
                     "param_names": ["year", "month", "INVALID"],
                 },
             },
-            ("datasources", "assets", "column_splitter", "param_names", 2),
+            ("xdatasources", "assets", "column_splitter", "param_names", 2),
             "unexpected value; permitted: 'year', 'month'",
             id="invalid splitter param_name",
         ),
@@ -232,14 +233,14 @@ def test_catch_bad_asset_configs(
         "my_test_ds": {
             "type": "postgres",
             "name": "my_test_ds",
-            "connection_string": "my_db://",
+            "connection_string": "postgres://userName:@hostname/dbName",
             "assets": {bad_asset_config["name"]: bad_asset_config},
         }
     }
     print(f"  Config\n{pf(config)}\n")
 
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        GxConfig.parse_obj({"datasources": config})
+        GxConfig.parse_obj({"xdatasources": config})
 
     print(f"\n{exc_info.typename}:{exc_info.value}")
 
@@ -395,7 +396,7 @@ def test_custom_sorter_serialization(
     dumped: str = from_json_gx_config.json(indent=2)
     print(f"  Dumped JSON ->\n\n{dumped}\n")
 
-    expected_sorter_strings: List[str] = PG_COMPLEX_CONFIG_DICT["datasources"][
+    expected_sorter_strings: List[str] = PG_COMPLEX_CONFIG_DICT["xdatasources"][
         "my_pg_ds"
     ]["assets"]["with_dslish_sorters"]["order_by"]
 

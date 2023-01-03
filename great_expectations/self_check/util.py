@@ -2517,9 +2517,6 @@ def generate_expectation_tests(  # noqa: C901 - 43
                         context=context,
                     )
             except Exception as e:
-                _error(
-                    f"PROBLEM with get_test_validator_with_data in backend {c} for {expectation_type} {repr(e)[:300]}"
-                )
                 # # Adding these print statements for build_gallery.py's console output
                 # print("\n\n[[ Problem calling get_test_validator_with_data ]]")
                 # print(f"expectation_type -> {expectation_type}")
@@ -2571,6 +2568,9 @@ def generate_expectation_tests(  # noqa: C901 - 43
                         # )
                         # print(pd.DataFrame(d.get("data_alt")))
                         # print()
+                        _error(
+                            f"PROBLEM with get_test_validator_with_data in backend {c} for {expectation_type} from data AND data_alt {repr(e)[:300]}"
+                        )
                         parametrized_tests.append(
                             {
                                 "expectation_type": expectation_type,
@@ -2583,8 +2583,13 @@ def generate_expectation_tests(  # noqa: C901 - 43
                         continue
                     else:
                         # print("\n[[ The alternate data worked!! ]]\n")
-                        pass
+                        _debug(
+                            f"Needed to use data_alt for backend {c}, but it worked for {expectation_type}"
+                        )
                 else:
+                    _error(
+                        f"PROBLEM with get_test_validator_with_data in backend {c} for {expectation_type} from data (no data_alt to try) {repr(e)[:300]}"
+                    )
                     parametrized_tests.append(
                         {
                             "expectation_type": expectation_type,
@@ -2796,7 +2801,9 @@ def evaluate_json_test_v2_api(data_asset, expectation_type, test) -> None:
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
 
-def evaluate_json_test_v3_api(validator, expectation_type, test, raise_exception=True):
+def evaluate_json_test_v3_api(
+    validator, expectation_type, test, raise_exception=True, debug_logger=None
+):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
@@ -2817,8 +2824,16 @@ def evaluate_json_test_v3_api(validator, expectation_type, test, raise_exception
               - details
               - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
     :param raise_exception: (bool) If False, capture any failed AssertionError from the call to check_json_test_result and return with validation_result
+    :param debug_logger: logger instance or None
     :return: Tuple(ExpectationValidationResult, error_message, stack_trace). asserts correctness of results.
     """
+    if debug_logger is not None:
+        _debug = lambda x: debug_logger.debug(  # noqa: E731
+            f"(evaluate_json_test_v3_api) {x}"
+        )
+    else:
+        _debug = lambda x: x  # noqa: E731
+
     expectation_suite = ExpectationSuite(
         "json_test_suite", data_context=validator._data_context
     )
@@ -2884,6 +2899,9 @@ def evaluate_json_test_v3_api(validator, expectation_type, test, raise_exception
                 data_asset=validator.execution_engine.batch_manager.active_batch_data,
             )
         except Exception as e:
+            _debug(
+                f"RESULT: {result['result']}  |  CONFIG: {result['expectation_config']}"
+            )
             if raise_exception:
                 raise
             error_message = str(e)

@@ -4,7 +4,6 @@ import pathlib
 from pprint import pformat as pf
 
 import pytest
-from pytest import TempPathFactory
 
 # apply markers to entire test module
 pytestmark = [pytest.mark.integration]
@@ -12,7 +11,6 @@ pytestmark = [pytest.mark.integration]
 from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
 from great_expectations.experimental.datasources.config import GxConfig
-from great_expectations.experimental.datasources.interfaces import DataAsset, Datasource
 
 LOGGER = logging.getLogger(__file__)
 
@@ -36,7 +34,7 @@ def db_file() -> pathlib.Path:
 @pytest.fixture
 def zep_config_dict(db_file) -> dict:
     return {
-        "datasources": {
+        "xdatasources": {
             "my_sql_ds": {
                 "connection_string": f"sqlite:///{db_file}",
                 "name": "my_sql_ds",
@@ -65,6 +63,7 @@ def zep_config_dict(db_file) -> dict:
 
 @pytest.fixture
 def zep_only_config(zep_config_dict: dict) -> GxConfig:
+    """Creates a ZEP `GxConfig` object and ensures it contains at least one `Datasource`"""
     zep_config = GxConfig.parse_obj(zep_config_dict)
     assert zep_config.datasources
     return zep_config
@@ -92,13 +91,21 @@ def zep_yaml_config_file(
 ) -> pathlib.Path:
     """
     Dump the provided GxConfig to a temporary path. File is removed during test teardown.
+
+    Append ZEP config to default config file
     """
-    config_file_path = file_dc_config_dir_init / FileDataContext.ZEP_YAML
+    config_file_path = file_dc_config_dir_init / FileDataContext.GX_YML
 
-    assert config_file_path.exists() is False
-
-    zep_only_config.yaml(config_file_path)
     assert config_file_path.exists() is True
+
+    with open(config_file_path, mode="a") as f_append:
+        yaml_string = "\n# ZEP\n" + zep_only_config.yaml()
+        f_append.write(yaml_string)
+
+    for ds_name in zep_only_config.datasources.keys():
+        assert ds_name in yaml_string
+
+    print(f"  Config File Text\n-----------\n{config_file_path.read_text()}")
     return config_file_path
 
 
@@ -147,7 +154,7 @@ def test_zep_simple_validate_workflow(zep_file_context: FileDataContext):
         column="passenger_count", min_value=1, max_value=12
     )
     print(f"  results ->\n{pf(result)}")
-    assert result["success"] == True
+    assert result["success"] is True
 
 
 @pytest.mark.xfail(reason="TypeError: cannot pickle 'module' object")
