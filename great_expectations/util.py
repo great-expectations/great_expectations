@@ -53,7 +53,7 @@ import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
-from typing_extensions import TypeGuard
+from typing_extensions import Literal, TypeGuard
 
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
@@ -1738,6 +1738,15 @@ def get_context(
     project_config: Optional[Union[DataContextConfig, Mapping]] = ...,
     context_root_dir: PathStr = ...,
     runtime_environment: Optional[dict] = ...,
+    cloud_base_url: None = ...,
+    cloud_access_token: None = ...,
+    cloud_organization_id: None = ...,
+    cloud_mode: Optional[Literal[False]] = ...,
+    # <GX_RENAME> Deprecated as of 0.15.37
+    ge_cloud_base_url: None = ...,
+    ge_cloud_access_token: None = ...,
+    ge_cloud_organization_id: None = ...,
+    ge_cloud_mode: Optional[Literal[False]] = ...,
 ) -> FileDataContext:
     ...
 
