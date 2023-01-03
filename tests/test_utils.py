@@ -1,6 +1,5 @@
 import logging
 import os
-import pathlib
 import uuid
 import warnings
 from contextlib import contextmanager
@@ -51,6 +50,7 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 yaml_handler = YAMLHandler()
+
 
 # Taken from the following stackoverflow:
 # https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
@@ -666,7 +666,7 @@ def load_data_into_test_database(
                 connection=connection,
             )
             return return_value
-        except SQLAlchemyError as e:
+        except SQLAlchemyError:
             error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
             logger.error(error_message)
             raise ge_exceptions.DatabaseConnectionError(error_message)
@@ -696,7 +696,7 @@ def load_data_into_test_database(
                 method=to_sql_method,
             )
             return return_value
-        except SQLAlchemyError as e:
+        except SQLAlchemyError:
             error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
             logger.error(error_message)
             raise ge_exceptions.DatabaseConnectionError(error_message)
@@ -858,7 +858,7 @@ def check_athena_table_count(
         connection = engine.connect()
         result = connection.execute(sa.text(f"SHOW TABLES in {db_name}")).fetchall()
         return len(result) == expected_table_count
-    except SQLAlchemyError as e:
+    except SQLAlchemyError:
         error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
         logger.error(error_message)
         raise ge_exceptions.DatabaseConnectionError(error_message)
