@@ -1,5 +1,5 @@
 from numbers import Number
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 
@@ -26,6 +26,7 @@ from great_expectations.render import (
 )
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
+    AddParamArgs,
     RendererConfiguration,
     RendererSchema,
     RendererTableValue,
@@ -49,9 +50,6 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.util import isclose
 from great_expectations.validator.validator import ValidationDependencies
-
-if TYPE_CHECKING:
-    from great_expectations.render.renderer_configuration import RendererParams
 
 
 class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
@@ -281,10 +279,10 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args = (
+        add_param_args: List[AddParamArgs] = [
             ("column", RendererValueType.STRING),
             ("mostly", RendererValueType.NUMBER),
-        )
+        ]
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
