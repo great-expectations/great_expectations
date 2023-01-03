@@ -76,6 +76,7 @@ def test_requirements_files():
 
     assert (
         req_set_dict["requirements.txt"]
+        | req_set_dict["requirements-ms.txt"]
         | req_set_dict["requirements-dev-contrib.txt"]
         | req_set_dict["requirements-dev-test.txt"]
         | req_set_dict["requirements-dev-sqlalchemy.txt"]
@@ -88,6 +89,7 @@ def test_requirements_files():
 
     assert req_set_dict["requirements-dev.txt"] - (
         req_set_dict["requirements.txt"]
+        | req_set_dict["requirements-ms.txt"]
         | req_set_dict["requirements-dev-lite.txt"]
         | req_set_dict["requirements-dev-contrib.txt"]
         | req_set_dict["requirements-dev-test.txt"]

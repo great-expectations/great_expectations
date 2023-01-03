@@ -13,9 +13,9 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-class BatchMetricComputation(Attributes):
+class MetricComputation(Attributes):
     """
-    Implements representation for single instance (e.g., as row in database table) of "Batch Metric Computation" record.
+    Implements representation for single instance (e.g., as row in database table) of "MetricComputation" record.
     """
 
     # noinspection PyShadowingBuiltins
@@ -67,11 +67,11 @@ class BatchMetricComputation(Attributes):
         super().__init__(fields)
 
     def to_dict(self) -> dict:
-        this_serialized: CommentedMap = batchMetricComputationSchema.dump(self)
+        this_serialized: CommentedMap = metricComputationSchema.dump(self)
         return dict(this_serialized)
 
 
-class BatchMetricComputationSchema(Schema):
+class MetricComputationSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
@@ -113,8 +113,8 @@ class BatchMetricComputationSchema(Schema):
 
     # noinspection PyUnusedLocal
     @post_load
-    def make_batch_metric_computations(self, data: dict, **kwargs):
-        return BatchMetricComputation(**data)
+    def make_metric_computation(self, data: dict, **kwargs):
+        return MetricComputation(**data)
 
 
-batchMetricComputationSchema = BatchMetricComputationSchema()
+metricComputationSchema = MetricComputationSchema()

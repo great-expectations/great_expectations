@@ -2,18 +2,18 @@ import logging
 from typing import Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.batch_metric_computations.batch_metric_computation import (
-    BatchMetricComputation,
-    BatchMetricComputationSchema,
-)
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import InMemoryStoreBackend
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.types.resource_identifiers import (
-    BatchMetricIdentifier,
     GXCloudIdentifier,
+    MetricIdentifier,
 )
 from great_expectations.data_context.util import load_class
+from great_expectations.metric_computations.metric_computation import (
+    MetricComputation,
+    metricComputationSchema,
+)
 from great_expectations.util import (
     filter_properties_dict,
     verify_dynamic_loading_support,
@@ -22,13 +22,13 @@ from great_expectations.util import (
 logger = logging.getLogger(__name__)
 
 
-class BatchMetricStore(Store):
+class MetricsStore(Store):
 
     """
     Batch-Metric Store (BMS) provides a way to store Marshmallow Schema validated BMS computation records.
     """
 
-    _key_class = BatchMetricIdentifier
+    _key_class = MetricIdentifier
 
     def __init__(
         self,
@@ -36,7 +36,6 @@ class BatchMetricStore(Store):
         store_backend: Optional[dict] = None,
         runtime_environment: Optional[dict] = None,
     ) -> None:
-        self._batchMetricComputationSchema = BatchMetricComputationSchema()
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
                 "module_name", "great_expectations.data_context.store"
@@ -77,11 +76,11 @@ class BatchMetricStore(Store):
         pass
         # TODO: <Alex>ALEX</Alex>
 
-    def serialize(self, value: BatchMetricComputation) -> dict:
-        return self._batchMetricComputationSchema.dump(value)
+    def serialize(self, value: MetricComputation) -> dict:
+        return metricComputationSchema.dump(value)
 
-    def deserialize(self, value: dict) -> BatchMetricComputation:
-        return self._batchMetricComputationSchema.load(value)
+    def deserialize(self, value: dict) -> MetricComputation:
+        return metricComputationSchema.load(value)
 
     @property
     def config(self) -> dict:
@@ -96,7 +95,7 @@ class BatchMetricStore(Store):
     #         print("Checking for existing keys...")
     #
     #     report_object["keys"] = sorted(
-    #         key.batch_metric_computation_key for key in self.list_keys()  # type: ignore[attr-defined]
+    #         key.metric_computation_key for key in self.list_keys()  # type: ignore[attr-defined]
     #     )
     #
     #     report_object["len_keys"] = len(report_object["keys"])
@@ -127,17 +126,17 @@ class BatchMetricStore(Store):
     def determine_key(
         name: Optional[str],
         ge_cloud_id: Optional[str] = None,
-    ) -> Union[GXCloudIdentifier, BatchMetricIdentifier]:
+    ) -> Union[GXCloudIdentifier, MetricIdentifier]:
         assert bool(name) ^ bool(
             ge_cloud_id
         ), "Must provide either name or ge_cloud_id."
 
-        key: Union[GXCloudIdentifier, BatchMetricIdentifier]
+        key: Union[GXCloudIdentifier, MetricIdentifier]
         if ge_cloud_id:
             key = GXCloudIdentifier(
                 resource_type=GXCloudRESTResource.CHECKPOINT, ge_cloud_id=ge_cloud_id
             )
         else:
-            key = BatchMetricIdentifier(batch_metric_key=name)  # type: ignore[arg-type]
+            key = MetricIdentifier(metric_key=name)  # type: ignore[arg-type]
 
         return key

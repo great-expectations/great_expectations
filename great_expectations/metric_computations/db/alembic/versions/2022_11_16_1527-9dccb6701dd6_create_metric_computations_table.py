@@ -1,4 +1,4 @@
-"""Create "batch_metric_computations" table.
+"""Create "metric_computations" table.
 
 Revision ID: 9dccb6701dd6
 Revises:
@@ -30,7 +30,7 @@ depends_on = None
 
 def upgrade() -> None:
     op.create_table(
-        "batch_metric_computations",
+        "metric_computations",
         sa.Column(
             "id",
             sa.Integer(),
@@ -136,40 +136,40 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(
-        op.f("idx_batch_metric_computations_batch_uuid"),
-        table_name="batch_metric_computations",
+        op.f("idx_metric_computations_batch_uuid"),
+        table_name="metric_computations",
         columns=[
             "batch_uuid",
         ],
         unique=False,
     )
     op.create_index(
-        op.f("idx_batch_metric_computations_metric_name"),
-        table_name="batch_metric_computations",
+        op.f("idx_metric_computations_metric_name"),
+        table_name="metric_computations",
         columns=[
             "metric_name",
         ],
         unique=False,
     )
     op.create_index(
-        op.f("idx_batch_metric_computations_metric_domain_kwargs_uuid"),
-        table_name="batch_metric_computations",
+        op.f("idx_metric_computations_metric_domain_kwargs_uuid"),
+        table_name="metric_computations",
         columns=[
             "metric_domain_kwargs_uuid",
         ],
         unique=False,
     )
     op.create_index(
-        op.f("idx_batch_metric_computations_metric_value_kwargs_uuid"),
-        table_name="batch_metric_computations",
+        op.f("idx_metric_computations_metric_value_kwargs_uuid"),
+        table_name="metric_computations",
         columns=[
             "metric_value_kwargs_uuid",
         ],
         unique=False,
     )
     op.create_index(
-        op.f("idx_batch_metric_computations_batch_uuid_metric_configuration_uuid"),
-        table_name="batch_metric_computations",
+        op.f("idx_metric_computations_batch_uuid_metric_configuration_uuid"),
+        table_name="metric_computations",
         columns=[
             "batch_uuid",
             "metric_name",
@@ -181,4 +181,4 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_table("batch_metric_computations")
+    op.drop_table("metric_computations")

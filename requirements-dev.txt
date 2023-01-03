@@ -1,4 +1,7 @@
 --requirement requirements.txt
+
+--requirement requirements-ms.txt
+
 --requirement reqs/requirements-dev-test.txt
 --requirement reqs/requirements-dev-sqlalchemy.txt
 
