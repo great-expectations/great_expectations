@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Mapping, Optional, Union
 
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
@@ -37,15 +37,12 @@ yaml.default_flow_style = False
 class FileDataContext(SerializableDataContext):
     """
     Extends AbstractDataContext, contains only functionality necessary to hydrate state from disk.
-
-    TODO: Most of the functionality in DataContext will be refactored into this class, and the current DataContext
-    class will exist only for backwards-compatibility reasons.
     """
 
     def __init__(
         self,
-        context_root_dir: PathStr,
         project_config: Optional[DataContextConfig] = None,
+        context_root_dir: Optional[PathStr] = None,
         runtime_environment: Optional[dict] = None,
     ) -> None:
         """FileDataContext constructor
@@ -57,20 +54,40 @@ class FileDataContext(SerializableDataContext):
             runtime_environment (Optional[dict]): a dictionary of config variables that override both those set in
                 config_variables.yml and the environment
         """
-        if isinstance(context_root_dir, pathlib.Path):
-            context_root_dir = str(context_root_dir)
-        self._context_root_directory = context_root_dir
-        if not project_config:
-            project_config = FileDataContext._load_file_backed_project_config(
-                context_root_directory=context_root_dir,
-            )
-        self._project_config = self._apply_global_config_overrides(
-            config=project_config
+        self._context_root_directory = self._init_context_root_directory(
+            context_root_dir
         )
+        self._project_config = self._init_project_config(project_config)
         super().__init__(
             context_root_dir=self._context_root_directory,
             runtime_environment=runtime_environment,
         )
+
+    def _init_context_root_directory(self, context_root_dir: Optional[PathStr]) -> str:
+        if isinstance(context_root_dir, pathlib.Path):
+            context_root_dir = str(context_root_dir)
+
+        if not context_root_dir:
+            context_root_dir = FileDataContext.find_context_root_dir()
+            if not context_root_dir:
+                raise ValueError(
+                    "A FileDataContext relies on the presence of a local great_expectations.yml project config"
+                )
+
+        return context_root_dir
+
+    def _init_project_config(
+        self, project_config: Optional[Union[DataContextConfig, Mapping]]
+    ) -> DataContextConfig:
+        if project_config:
+            project_config = FileDataContext.get_or_create_data_context_config(
+                project_config
+            )
+        else:
+            project_config = FileDataContext._load_file_backed_project_config(
+                context_root_directory=self._context_root_directory,
+            )
+        return self._apply_global_config_overrides(config=project_config)
 
     def _init_datasource_store(self) -> None:
         from great_expectations.data_context.store.datasource_store import (
