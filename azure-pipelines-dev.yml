@@ -113,6 +113,10 @@ stages:
 
     - job: static_type_check
       steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: 3.7
+        displayName: 'Use Python 3.7'
       - script: |
           pip install --requirement requirements-types.txt
           invoke type-check --ci --pretty
