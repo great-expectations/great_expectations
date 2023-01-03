@@ -30,6 +30,12 @@ repos:
     hooks:
       - id: pyupgrade
         args: ["--py3-plus"]
+  - repo: local
+    hooks:
+      - id: check-docstrings
+        name: check-docstrings
+        entry: scripts/check_docstrings
+        language: script
 # https://pre-commit.ci/
 ci:
     autofix_commit_msg: |
