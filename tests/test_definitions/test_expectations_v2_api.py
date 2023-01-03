@@ -24,7 +24,7 @@ from tests.conftest import build_test_backends_list_v2_api
 logger = logging.getLogger(__name__)
 
 
-def pytest_generate_tests(metafunc):
+def pytest_generate_tests(metafunc):  # noqa: C901 - 38
     # Load all the JSON files in the directory
     dir_path = os.path.dirname(os.path.realpath(__file__))
     expectation_dirs = [

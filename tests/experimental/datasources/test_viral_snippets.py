@@ -155,7 +155,7 @@ def test_zep_simple_validate_workflow(zep_file_context: FileDataContext):
         column="passenger_count", min_value=1, max_value=12
     )
     print(f"  results ->\n{pf(result)}")
-    assert result["success"] == True
+    assert result["success"] is True
 
 
 @pytest.mark.unit
