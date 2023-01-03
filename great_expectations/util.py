@@ -2039,7 +2039,7 @@ def numpy_quantile(
     """
     quantile: npt.NDArray
     if version.parse(np.__version__) >= version.parse("1.22.0"):
-        quantile = np.quantile(  # type: ignore[method]
+        quantile = np.quantile(  # type: ignore[call-arg]
             a=a,
             q=q,
             axis=axis,
