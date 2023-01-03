@@ -1802,11 +1802,14 @@ def get_context(
     )
     from great_expectations.data_context.types.base import DataContextConfig
 
+    # If available and applicable, convert project_config mapping into a rich config type
     if project_config:
         project_config = EphemeralDataContext.get_or_create_data_context_config(
             project_config
         )
-    assert project_config is None or isinstance(project_config, DataContextConfig)
+    assert project_config is None or isinstance(
+        project_config, DataContextConfig
+    ), "project_config must be of type Optional[DataContextConfig]"
 
     # Chetan - 20221208 - not formally deprecating these values until a future date
     (
@@ -1850,20 +1853,14 @@ def get_context(
 
     # Second, check for which type of local
     # Prioritize FileDataContext but default to EphemeralDataContext if no context_root_dir
-    if context_root_dir:
+    if context_root_dir or not project_config:
         return FileDataContext(
             project_config=project_config,
             context_root_dir=context_root_dir,
             runtime_environment=runtime_environment,
         )
-    if project_config is not None:
-        return EphemeralDataContext(
-            project_config=project_config,
-            runtime_environment=runtime_environment,
-        )
-    return FileDataContext(
+    return EphemeralDataContext(
         project_config=project_config,
-        context_root_dir=context_root_dir,
         runtime_environment=runtime_environment,
     )
 
