@@ -1,7 +1,7 @@
 ---
 title: How to use Great Expectations with Amazon Web Services using S3 cloud storage and Pandas
 ---
-import Prerequisites from '../components/deployment_pattern_prerequisites.jsx'
+import Prerequisites from '@site/docs/components/_prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import Congratulations from './components/_congratulations_aws_s3_pandas.md'
