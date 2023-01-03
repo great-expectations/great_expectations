@@ -124,8 +124,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     ) -> None:
         """Validates that a value_set has been provided."""
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
         try:
             assert "value_set" in configuration.kwargs, "value_set is required"
             assert isinstance(

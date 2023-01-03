@@ -242,8 +242,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         """Ensures that min_value and max_value are both set."""
         super().validate_configuration(configuration)
 
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         try:
             assert (

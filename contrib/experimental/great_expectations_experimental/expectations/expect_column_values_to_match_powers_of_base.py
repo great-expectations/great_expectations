@@ -217,8 +217,7 @@ class ExpectColumnValuesToMatchPowersOfBase(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         base_integer = configuration.kwargs["base_integer"]
 

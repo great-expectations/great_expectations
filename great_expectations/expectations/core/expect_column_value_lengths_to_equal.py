@@ -98,8 +98,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
     ) -> None:
         """Ensure value is set."""
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
         try:
             assert (
                 "value" in configuration.kwargs
