@@ -9,12 +9,7 @@ import pytest
 from great_expectations.core.usage_statistics.usage_statistics import (
     run_validation_operator_usage_statistics,
 )
-from great_expectations.data_context import (
-    BaseDataContext,
-    DataContext,
-    EphemeralDataContext,
-    FileDataContext,
-)
+from great_expectations.data_context import BaseDataContext, DataContext
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.util import file_relative_path
 from tests.integration.usage_statistics.test_integration_usage_statistics import (

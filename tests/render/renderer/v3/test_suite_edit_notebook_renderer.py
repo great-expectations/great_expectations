@@ -1225,7 +1225,7 @@ def test_raise_exception_quotes_or_space_with_row_condition(
     # behavior of building and opening docs, which is not part of this test.
     context: DataContext = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     root_dir: str = context.root_directory
-    uncommitted_dir: str = os.path.join(root_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(root_dir, "uncommitted")  # noqa: F841
     expectation_suite_name: str = "warning"
 
     context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
