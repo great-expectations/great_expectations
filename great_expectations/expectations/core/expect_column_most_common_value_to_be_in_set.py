@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -22,7 +22,7 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.render.renderer_configuration import RendererParams
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
 class ExpectColumnMostCommonValueToBeInSet(ColumnExpectation):
@@ -121,15 +121,15 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args = (
+        add_param_args: List[AddParamArgs] = [
             ("column", RendererValueType.STRING),
             ("value_set", RendererValueType.ARRAY),
             ("ties_okay", RendererValueType.BOOLEAN),
-        )
+        ]
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
-        params: RendererParams = renderer_configuration.params
+        params = renderer_configuration.params
         template_str = ""
 
         if params.value_set:
