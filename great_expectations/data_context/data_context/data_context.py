@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING, Optional, Tuple
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -24,6 +25,7 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
 
 
+@public_api
 def DataContext(
     context_root_dir: Optional[PathStr] = None,
     runtime_environment: Optional[dict] = None,

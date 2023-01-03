@@ -24,6 +24,7 @@ import importlib
 import logging
 import pathlib
 import shutil
+from typing import Tuple
 from urllib.parse import urlparse
 
 import invoke
@@ -185,13 +186,37 @@ class SphinxInvokeDocsBuilder:
         """Build markdown stubs with rst directives for auto documenting classes."""
 
         # 1. Parse code & find any classes marked with @public_api
-        # 2. Parse code & find any classes with methods marked with @public_api
+        # 2. Parse code & find any classes with methods marked with @public_api NO - only if class is marked public_api
         # 3. Parse code & find any module level functions marked with @public_api
         # 4. Generate dotted path to import class e.g. great_expectations.data_context.data_context.DataContext
         # 5. Generate markdown stub string
+        markdown_stub_string = self._gen_md_stub_str()
         # 6. Write markdown stub strings to files
-        pass
+        filepath = self.base_path / "data_context.md"
+        with filepath.open("a") as f:
+            f.write(markdown_stub_string)
+
+    def _gen_md_stub_str(self) -> str:
+        return """# DataContext
+
+```{eval-rst}
+.. autoclass:: great_expectations.data_context.data_context.DataContext
+   :members:
+   :inherited-members:
+
+```
+"""
 
     def _remove_md_stubs(self):
         """Remove markdown stubs."""
-        pass
+
+        excluded_files: Tuple[pathlib.Path, ...] = (
+            self.base_path / "index.md",
+            self.base_path / "README.md",
+        )
+
+        all_files: Tuple[pathlib.Path] = tuple(self.base_path.glob("*.md"))
+
+        for file in all_files:
+            if file not in excluded_files:
+                file.unlink()
