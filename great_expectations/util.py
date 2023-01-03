@@ -94,6 +94,7 @@ if TYPE_CHECKING:
     import numpy.typing as npt
 
     from great_expectations.alias_types import PathStr
+    from great_expectations.data_context import FileDataContext
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
@@ -1730,6 +1731,33 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
         [np.ndarray], np.ndarray
     ] = np.vectorize(pyfunc=convert_decimal_to_float)
     return convert_decimal_to_float_vectorized(data)
+
+
+@overload
+def get_context(
+    project_config: Optional[Union[DataContextConfig, Mapping]] = ...,
+    context_root_dir: PathStr = ...,
+    runtime_environment: Optional[dict] = ...,
+) -> FileDataContext:
+    ...
+
+
+@overload
+def get_context(
+    project_config: Optional[Union[DataContextConfig, Mapping]] = ...,
+    context_root_dir: Optional[PathStr] = ...,
+    runtime_environment: Optional[dict] = ...,
+    cloud_base_url: Optional[str] = ...,
+    cloud_access_token: Optional[str] = ...,
+    cloud_organization_id: Optional[str] = ...,
+    cloud_mode: Optional[bool] = ...,
+    # <GX_RENAME> Deprecated as of 0.15.37
+    ge_cloud_base_url: Optional[str] = ...,
+    ge_cloud_access_token: Optional[str] = ...,
+    ge_cloud_organization_id: Optional[str] = ...,
+    ge_cloud_mode: Optional[bool] = ...,
+) -> AbstractDataContext:
+    ...
 
 
 def get_context(
