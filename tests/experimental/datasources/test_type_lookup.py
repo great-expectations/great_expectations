@@ -1,5 +1,5 @@
 from pprint import pprint as pp
-from typing import Hashable, Iterable, Mapping, Optional, Tuple
+from typing import Iterable, Mapping, Optional, Tuple
 
 import pytest
 
