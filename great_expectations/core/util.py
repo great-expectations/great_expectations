@@ -19,7 +19,9 @@ from typing import (
     MutableMapping,
     Optional,
     Tuple,
+    TypeVar,
     Union,
+    overload,
 )
 from urllib.parse import urlparse
 
@@ -42,7 +44,7 @@ from great_expectations.util import convert_decimal_to_float
 try:
     from pyspark.sql.types import StructType
 except ImportError:
-    StructType = None  # type: ignore[assignment, misc]
+    StructType = None
 
 logger = logging.getLogger(__name__)
 
@@ -88,26 +90,30 @@ try:
     from pyspark.sql import SparkSession
 
 except ImportError:
-    pyspark = None  # type: ignore[assignment]
-    SparkSession = None  # type: ignore[assignment, misc]
+    pyspark = None
+    SparkSession = None
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
 
 
 if TYPE_CHECKING:
+    import numpy.typing as npt
     from pyspark.sql import SparkSession  # noqa: F401
+    from ruamel.yaml.comments import CommentedMap
 
 
 _SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
 
+M = TypeVar("M", bound=MutableMapping)
+
 
 def nested_update(
-    d: MutableMapping,
+    d: M,
     u: Mapping,
     dedup: bool = False,
     concat_lists: bool = True,
-) -> MutableMapping:
+) -> M:
     """
     Update d with items from u, recursively and joining elements. By default, list values are
     concatenated without de-duplication. If concat_lists is set to False, lists in u (new dict)
@@ -183,8 +189,75 @@ def determine_progress_bar_method_by_environment() -> Callable:
 
 JSONValues: TypeAlias = Union[dict, list, str, int, float, bool, None]
 
+ToBool: TypeAlias = bool
+ToFloat: TypeAlias = Union[float, np.floating]
+ToInt: TypeAlias = Union[int, np.integer]
+ToStr: TypeAlias = Union[
+    str, bytes, uuid.UUID, datetime.date, datetime.datetime, np.datetime64
+]
 
-def convert_to_json_serializable(data) -> JSONValues:  # noqa: C901 - complexity 28
+ToList: TypeAlias = Union[list, set, tuple, "npt.NDArray", pd.Index, pd.Series]
+ToDict: TypeAlias = Union[
+    dict, "CommentedMap", pd.DataFrame, SerializableDictDot, SerializableDotDict
+]
+
+JSONConvertable: TypeAlias = Union[
+    ToDict, ToList, ToStr, ToInt, ToFloat, ToBool, ToBool, None
+]
+
+
+@overload
+def convert_to_json_serializable(  # type: ignore[misc] # overlap with `ToList`?
+    data: ToDict,
+) -> dict:
+    ...
+
+
+@overload
+def convert_to_json_serializable(  # type: ignore[misc] # overlap with `ToDict`?
+    data: ToList,
+) -> list:
+    ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToBool,
+) -> bool:
+    ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToFloat,
+) -> float:
+    ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToInt,
+) -> int:
+    ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToStr,
+) -> str:
+    ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: None,
+) -> None:
+    ...
+
+
+def convert_to_json_serializable(  # noqa: C901 - complexity 28
+    data: JSONConvertable,
+) -> JSONValues:
     """
     Helper function to convert an object to one that is json serializable
 
@@ -229,7 +302,7 @@ def convert_to_json_serializable(data) -> JSONValues:  # noqa: C901 - complexity
         return new_dict
 
     if isinstance(data, (list, tuple, set)):
-        new_list = []
+        new_list: List[JSONValues] = []
         for val in data:
             new_list.append(convert_to_json_serializable(val))
 
@@ -269,11 +342,11 @@ def convert_to_json_serializable(data) -> JSONValues:  # noqa: C901 - complexity
         return bool(data)
 
     if np.issubdtype(type(data), np.integer) or np.issubdtype(type(data), np.uint):
-        return int(data)
+        return int(data)  # type: ignore[arg-type] # could be None
 
     if np.issubdtype(type(data), np.floating):
         # Note: Use np.floating to avoid FutureWarning from numpy
-        return float(round(data, sys.float_info.dig))
+        return float(round(data, sys.float_info.dig))  # type: ignore[arg-type] # could be None
 
     # Note: This clause has to come after checking for np.ndarray or we get:
     #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`
@@ -333,6 +406,7 @@ def convert_to_json_serializable(data) -> JSONValues:  # noqa: C901 - complexity
         raise TypeError(
             f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
         )
+    return None
 
 
 def ensure_json_serializable(data):  # noqa: C901 - complexity 21
