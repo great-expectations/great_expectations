@@ -19,7 +19,7 @@ def test_base_class_not_instantiable_due_to_abstract_methods():
 def test_DataSetProfiler_methods():
     toy_dataset = PandasDataset({"x": [1, 2, 3]})
 
-    assert DatasetProfiler.validate(1) == False
+    assert DatasetProfiler.validate(1) is False
     assert DatasetProfiler.validate(toy_dataset)
 
     with pytest.raises(NotImplementedError):
@@ -323,7 +323,7 @@ def test_context_profiler_with_data_asset_name(filesystem_csv_data_context):
         "rad_datasource", data_assets=["f1"], profiler=BasicDatasetProfiler
     )
 
-    assert profiling_result["success"] == True
+    assert profiling_result["success"] is True
     assert len(profiling_result["results"]) == 1
     assert (
         profiling_result["results"][0][0].expectation_suite_name
@@ -367,7 +367,7 @@ def test_context_profiler_with_non_existing_generator(filesystem_csv_data_contex
     assert isinstance(context.datasources["rad_datasource"], PandasDatasource)
     assert context.list_expectation_suites() == []
     with pytest.raises(ge_exceptions.ProfilerError):
-        profiling_result = context.profile_datasource(
+        profiling_result = context.profile_datasource(  # noqa: F841
             "rad_datasource",
             data_assets=["this_asset_doesnot_exist"],
             profiler=BasicDatasetProfiler,

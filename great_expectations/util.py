@@ -53,7 +53,7 @@ import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
-from typing_extensions import TypeGuard
+from typing_extensions import Literal, TypeGuard
 
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
@@ -94,6 +94,7 @@ if TYPE_CHECKING:
     import numpy.typing as npt
 
     from great_expectations.alias_types import PathStr
+    from great_expectations.data_context import FileDataContext
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
@@ -1579,8 +1580,8 @@ def isclose(
     return cast(
         bool,
         np.isclose(
-            a=np.float64(operand_a),
-            b=np.float64(operand_b),
+            a=np.float64(operand_a),  # type:ignore[arg-type]
+            b=np.float64(operand_b),  # type:ignore[arg-type]
             rtol=rtol,
             atol=atol,
             equal_nan=equal_nan,
@@ -1732,8 +1733,44 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
     return convert_decimal_to_float_vectorized(data)
 
 
+@overload
 def get_context(
-    project_config: Optional[Union["DataContextConfig", Mapping]] = None,
+    project_config: Optional[Union[DataContextConfig, Mapping]] = ...,
+    context_root_dir: PathStr = ...,
+    runtime_environment: Optional[dict] = ...,
+    cloud_base_url: None = ...,
+    cloud_access_token: None = ...,
+    cloud_organization_id: None = ...,
+    cloud_mode: Optional[Literal[False]] = ...,
+    # <GX_RENAME> Deprecated as of 0.15.37
+    ge_cloud_base_url: None = ...,
+    ge_cloud_access_token: None = ...,
+    ge_cloud_organization_id: None = ...,
+    ge_cloud_mode: Optional[Literal[False]] = ...,
+) -> FileDataContext:
+    ...
+
+
+@overload
+def get_context(
+    project_config: Optional[Union[DataContextConfig, Mapping]] = ...,
+    context_root_dir: Optional[PathStr] = ...,
+    runtime_environment: Optional[dict] = ...,
+    cloud_base_url: Optional[str] = ...,
+    cloud_access_token: Optional[str] = ...,
+    cloud_organization_id: Optional[str] = ...,
+    cloud_mode: Optional[bool] = ...,
+    # <GX_RENAME> Deprecated as of 0.15.37
+    ge_cloud_base_url: Optional[str] = ...,
+    ge_cloud_access_token: Optional[str] = ...,
+    ge_cloud_organization_id: Optional[str] = ...,
+    ge_cloud_mode: Optional[bool] = ...,
+) -> AbstractDataContext:
+    ...
+
+
+def get_context(
+    project_config: Optional[Union[DataContextConfig, Mapping]] = None,
     context_root_dir: Optional[PathStr] = None,
     runtime_environment: Optional[dict] = None,
     cloud_base_url: Optional[str] = None,
@@ -1754,18 +1791,18 @@ def get_context(
         my_context = gx.get_context([parameters])
 
     1. If gx.get_context() is run in a filesystem where `great_expectations init` has been run, then it will return a
-        DataContext
+        FileDataContext.
 
     2. If gx.get_context() is passed in a `context_root_dir` (which contains great_expectations.yml) then it will return
-         a DataContext
+         a FileDataContext.
 
-    3. If gx.get_context() is passed in an in-memory `project_config` then it will return BaseDataContext.
+    3. If gx.get_context() is passed in an in-memory `project_config` then it will return EphemeralDataContext.
         `context_root_dir` can also be passed in, but the configurations from the in-memory config will override the
         configurations in the `great_expectations.yml` file.
 
 
-    4. If GX is being run in the cloud, and the information needed for ge_cloud_config (ie ge_cloud_base_url,
-        ge_cloud_access_token, ge_cloud_organization_id) are passed in as parameters to get_context(), configured as
+    4. If GX is being run in the Cloud, and the information needed for gx_cloud_config (ie gx_cloud_base_url,
+        gx_cloud_access_token, gx_cloud_organization_id) are passed in as parameters to get_context(), configured as
         environment variables, or in a .conf file, then get_context() will return a CloudDataContext.
 
 
@@ -1777,8 +1814,6 @@ def get_context(
     | (cloud_mode=False)    | Local               | Local         |
     +-----------------------+---------------------+---------------+
 
-    TODO: This method will eventually return FileDataContext and EphemeralDataContext, rather than DataContext and Base
-
     Args:
         project_config (dict or DataContextConfig): In-memory configuration for DataContext.
         context_root_dir (str or pathlib.Path): Path to directory that contains great_expectations.yml file
@@ -1787,21 +1822,31 @@ def get_context(
             from environment variables.
 
         The following parameters are relevant when running ge_cloud
-        cloud_base_url (str): url for ge_cloud endpoint.
-        cloud_access_token (str): access_token for ge_cloud account.
-        cloud_organization_id (str): org_id for ge_cloud account.
-        cloud_mode (bool): bool flag to specify whether to run GX in cloud mode (default is None).
+            * cloud_base_url (str): url for GX Cloud endpoint.
+            * cloud_access_token (str): access_token for GX Cloud account.
+            * cloud_organization_id (str): org_id for GX Cloud account.
+            * cloud_mode (bool): bool flag to specify whether to run GX in Cloud mode (default is None).
 
     Returns:
-        DataContext. Either a DataContext, BaseDataContext, or CloudDataContext depending on environment and/or
+        DataContext. Either a FileDataContext, EpehemralDataContext, or CloudDataContext depending on environment and/or
         parameters
 
     """
     from great_expectations.data_context.data_context import (
-        BaseDataContext,
         CloudDataContext,
-        DataContext,
+        EphemeralDataContext,
+        FileDataContext,
     )
+    from great_expectations.data_context.types.base import DataContextConfig
+
+    # If available and applicable, convert project_config mapping into a rich config type
+    if project_config:
+        project_config = EphemeralDataContext.get_or_create_data_context_config(
+            project_config
+        )
+    assert project_config is None or isinstance(
+        project_config, DataContextConfig
+    ), "project_config must be of type Optional[DataContextConfig]"
 
     # Chetan - 20221208 - not formally deprecating these values until a future date
     (
@@ -1820,8 +1865,7 @@ def get_context(
         ge_cloud_organization_id=ge_cloud_organization_id,
     )
 
-    # First, check for ge_cloud conditions
-
+    # First, check for GX Cloud conditions
     config_available = CloudDataContext.is_cloud_config_available(
         cloud_base_url=cloud_base_url,
         cloud_access_token=cloud_access_token,
@@ -1845,16 +1889,15 @@ def get_context(
         )
 
     # Second, check for which type of local
-
-    if project_config is not None:
-        return BaseDataContext(
+    # Prioritize FileDataContext but default to EphemeralDataContext if no context_root_dir
+    if context_root_dir or not project_config:
+        return FileDataContext(
             project_config=project_config,
             context_root_dir=context_root_dir,
             runtime_environment=runtime_environment,
         )
-
-    return DataContext(
-        context_root_dir=context_root_dir,
+    return EphemeralDataContext(
+        project_config=project_config,
         runtime_environment=runtime_environment,
     )
 
@@ -2039,14 +2082,14 @@ def numpy_quantile(
     """
     quantile: npt.NDArray
     if version.parse(np.__version__) >= version.parse("1.22.0"):
-        quantile = np.quantile(
+        quantile = np.quantile(  # type: ignore[call-arg]
             a=a,
             q=q,
             axis=axis,
             method=method,
         )
     else:
-        quantile = np.quantile(  # type: ignore[call-overload]
+        quantile = np.quantile(
             a=a,
             q=q,
             axis=axis,

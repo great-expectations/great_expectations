@@ -3,6 +3,7 @@ from pprint import pprint
 from typing import Callable, ContextManager
 
 import pytest
+from pydantic import ValidationError
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
@@ -33,7 +34,9 @@ _DEFAULT_TEST_MONTHS = list(range(1, 13))
 
 @contextmanager
 def _source(
-    validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None], dialect: str
+    validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None],
+    dialect: str,
+    connection_string: str = "postgresql+psycopg2://postgres:@localhost/test_ci",
 ) -> PostgresDatasource:
     execution_eng_cls = sqlachemy_execution_engine_mock_cls(
         validate_batch_spec=validate_batch_spec, dialect=dialect
@@ -43,7 +46,7 @@ def _source(
         PostgresDatasource.execution_engine_override = execution_eng_cls
         yield PostgresDatasource(
             name="my_datasource",
-            connection_string="postgresql+psycopg2://postgres:@localhost/test_ci",
+            connection_string=connection_string,
         )
     finally:
         PostgresDatasource.execution_engine_override = original_override
@@ -596,3 +599,47 @@ def test_datasource_dict_has_properties(create_source):
         source_dict = source.dict()
         pprint(source_dict)
         assert isinstance(source_dict["assets"]["my_asset"]["order_by"], list)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "connection_string",
+    [
+        "postgresql://userName:@hostname/dbName",
+        "postgresql://userName@hostname",
+        "postgresql://userName:password@hostname",
+        "postgres://userName:@hostname",
+        "postgresql+psycopg2://userName:@hostname",
+        "postgresql+pg8000://userName:@hostname",
+    ],
+)
+def test_validate_valid_postgres_connection_string(create_source, connection_string):
+    connection_string = "postgresql://userName:@hostname/dbName"
+    with create_source(
+        validate_batch_spec=lambda _: None,
+        dialect="postgresql",
+        connection_string=connection_string,
+    ):
+        # As long as no exception is thrown we consider this a pass. Pydantic normalizes the underlying
+        # connection string so a direct str comparison isn't possible.
+        pass
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "connection_string",
+    [
+        "postgresql://",
+        "postgresql://username",
+        "postgresql://username/dbName",
+        "postgresql+invalid://",
+    ],
+)
+def test_validate_invalid_postgres_connection_string(create_source, connection_string):
+    with pytest.raises(ValidationError):
+        with create_source(
+            validate_batch_spec=lambda _: None,
+            dialect="postgresql",
+            connection_string=connection_string,
+        ):
+            pass

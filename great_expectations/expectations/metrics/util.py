@@ -1,15 +1,17 @@
 import logging
 import re
 import warnings
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
+import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.execution_engine import (
     ExecutionEngine,
+    PandasExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
@@ -171,10 +173,15 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
             dialect.dialect,
             snowflake.sqlalchemy.snowdialect.SnowflakeDialect,
         ):
-            if positive:
-                return BinaryExpression(column, literal(regex), custom_op("RLIKE"))
-            else:
-                return BinaryExpression(column, literal(regex), custom_op("NOT RLIKE"))
+            # if positive:
+            #     return BinaryExpression(column, literal(regex), custom_op("RLIKE"))
+            # else:
+            #     return BinaryExpression(column, literal(regex), custom_op("NOT RLIKE"))
+
+            # While the snowflake docs mention having regex-related functions, they don't
+            # seem to work with the Python driver
+            # https://docs.snowflake.com/en/sql-reference/functions/regexp.html
+            return None
     except (
         AttributeError,
         TypeError,
@@ -1058,3 +1065,168 @@ def get_sqlalchemy_source_table_and_schema(
         )
     else:
         return engine.batch_manager.active_batch_data.selectable
+
+
+def get_unexpected_indices_for_multiple_pandas_named_indices(
+    domain_records_df: pd.DataFrame,
+    unexpected_index_column_names: List[str],
+    expectation_domain_column_name: Union[str, None] = None,
+) -> List[Dict[str, Any]]:
+    """
+    Builds unexpected_index list for Pandas Dataframe in situation where the named
+    columns is also a named index. This method handles the case when there are multiple named indices.
+    Args:
+        domain_records_df: reference to Pandas dataframe
+        expectation_domain_column_name: column that Expectation is being run for
+        unexpected_index_column_names: column_names for indices, either named index or unexpected_index_columns
+
+    Returns:
+        List of Dicts that contain ID/PK values
+    """
+    if expectation_domain_column_name is None:
+        raise ge_exceptions.MetricResolutionError(
+            message=f"Error: The domain column is currently set to None. Please check your configuration.",
+            failed_metrics=["unexpected_index_list"],
+        )
+
+    domain_records_df_index_names: List[str] = domain_records_df.index.names
+    unexpected_indices: List[Union[int, str]] = list(domain_records_df.index)
+
+    tuple_index: Dict[str, int] = dict()
+    for column_name in unexpected_index_column_names:
+        if column_name not in domain_records_df_index_names:
+            raise ge_exceptions.MetricResolutionError(
+                message=f"Error: The column {column_name} does not exist in the named indices. Please check your configuration",
+                failed_metrics=["unexpected_index_list"],
+            )
+        else:
+            tuple_index[column_name] = domain_records_df_index_names.index(
+                column_name, 0
+            )
+
+    unexpected_index_list: List[Dict[str, Any]] = list()
+
+    for index in unexpected_indices:
+        primary_key_dict: Dict[str, Any] = dict()
+        # domain column first
+        primary_key_dict[expectation_domain_column_name] = domain_records_df.at[
+            index, expectation_domain_column_name
+        ]
+        for column_name in unexpected_index_column_names:
+            primary_key_dict[column_name] = index[tuple_index[column_name]]
+        unexpected_index_list.append(primary_key_dict)
+    return unexpected_index_list
+
+
+def get_unexpected_indices_for_single_pandas_named_index(
+    domain_records_df: pd.DataFrame,
+    unexpected_index_column_names: List[str],
+    expectation_domain_column_name: Union[str, None] = None,
+) -> List[Dict[str, Any]]:
+    """
+    Builds unexpected_index list for Pandas Dataframe in situation where the named
+    columns is also a named index. This method handles the case when there is a single named index.
+    Args:
+        domain_records_df: reference to Pandas dataframe
+        expectation_domain_column_name: column that Expectation is being run on.
+        unexpected_index_column_names: column_names for indices, either named index or unexpected_index_columns
+
+    Returns:
+        List of Dicts that contain ID/PK values
+
+    """
+    unexpected_index_values_by_named_index: List[Union[int, str]] = list(
+        domain_records_df.index
+    )
+    unexpected_index_list: List[Dict[str, Any]] = list()
+    if not (
+        len(unexpected_index_column_names) == 1
+        and unexpected_index_column_names[0] == domain_records_df.index.name
+    ):
+        raise ge_exceptions.MetricResolutionError(
+            message=f"Error: The column {unexpected_index_column_names[0] if unexpected_index_column_names else '<no column specified>'} does not exist in the named indices. Please check your configuration",
+            failed_metrics=["unexpected_index_list"],
+        )
+
+    for index in unexpected_index_values_by_named_index:
+        primary_key_dict: Dict[str, Any] = dict()
+        # domain column first
+        primary_key_dict[expectation_domain_column_name] = domain_records_df.at[
+            index, expectation_domain_column_name
+        ]
+        column_name: str = unexpected_index_column_names[0]
+        primary_key_dict[column_name] = index
+        unexpected_index_list.append(primary_key_dict)
+    return unexpected_index_list
+
+
+def compute_unexpected_pandas_indices(
+    domain_records_df: pd.DataFrame,
+    result_format: Dict[str, Any],
+    execution_engine: PandasExecutionEngine,
+    metrics: Dict[str, Any],
+    expectation_domain_column_name: Union[str, None] = None,
+) -> Union[List[int], List[Dict[str, Any]]]:
+    """
+    Helper method to compute unexpected_index_list for PandasExecutionEngine. Handles logic needed for named indices.
+
+    Args:
+        domain_records_df: DataFrame of data we are currently running Expectation on.
+        result_format: configuration that contains `unexpected_index_column_names`
+        expectation_domain_column_name: column that we are running Expectation on.
+        execution_engine: PandasExecutionEngine
+        metrics: dict of currently available metrics
+
+    Returns:
+        list of unexpected_index_list values. It can either be a list of dicts or a list of numbers (if using default index).
+
+    """
+    if domain_records_df.index.name is not None:
+        unexpected_index_column_names: List[str] = result_format.get(
+            "unexpected_index_column_names", [domain_records_df.index.name]
+        )
+        unexpected_index_list: Optional[
+            List[Dict[str, Any]]
+        ] = get_unexpected_indices_for_single_pandas_named_index(
+            domain_records_df=domain_records_df,
+            unexpected_index_column_names=unexpected_index_column_names,
+            expectation_domain_column_name=expectation_domain_column_name,
+        )
+    # multiple named indices
+    elif domain_records_df.index.names[0] is not None:
+        unexpected_index_column_names: Union[List[str], None] = result_format.get(
+            "unexpected_index_column_names", list(domain_records_df.index.names)
+        )
+        unexpected_index_list: Optional[
+            List[Dict[str, Any]]
+        ] = get_unexpected_indices_for_multiple_pandas_named_indices(
+            domain_records_df=domain_records_df,
+            unexpected_index_column_names=unexpected_index_column_names,
+            expectation_domain_column_name=expectation_domain_column_name,
+        )
+    # named columns
+    elif result_format.get("unexpected_index_column_names"):
+        unexpected_index_column_names: List[str] = result_format.get(
+            "unexpected_index_column_names"
+        )
+        unexpected_index_list: Optional[List[Dict[str, Any]]] = []
+        unexpected_indices: List[Union[int, str]] = list(domain_records_df.index)
+        for index in unexpected_indices:
+            primary_key_dict: Dict[str, Any] = dict()
+            primary_key_dict[expectation_domain_column_name] = domain_records_df.at[
+                index, expectation_domain_column_name
+            ]
+            for column_name in unexpected_index_column_names:
+                column_name = get_dbms_compatible_column_names(
+                    column_names=column_name,
+                    batch_columns_list=metrics["table.columns"],
+                    execution_engine=execution_engine,
+                    error_message_template='Error: The unexpected_index_column "{column_name:s}" does not exist in Dataframe. Please check your configuration and try again.',
+                )
+                primary_key_dict[column_name] = domain_records_df.at[index, column_name]
+            unexpected_index_list.append(primary_key_dict)
+    # or just the default indices
+    else:
+        unexpected_index_list = list(domain_records_df.index)
+
+    return unexpected_index_list
