@@ -115,8 +115,8 @@ stages:
       steps:
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: 3.7
-        displayName: 'Use Python 3.7'
+          versionSpec: 3.8
+        displayName: 'Use Python 3.8'
       - script: |
           pip install --requirement requirements-types.txt
           invoke type-check --ci --pretty
