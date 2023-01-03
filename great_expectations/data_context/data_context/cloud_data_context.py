@@ -100,27 +100,29 @@ class CloudDataContext(SerializableDataContext):
             cloud_access_token=cloud_access_token,
             cloud_organization_id=cloud_organization_id,
         )
-
         self._context_root_directory = self.determine_context_root_directory(
             context_root_dir
         )
+        self._project_config = self._init_project_config(project_config)
 
+        super().__init__(
+            context_root_dir=self._context_root_directory,
+            runtime_environment=runtime_environment,
+        )
+
+    def _init_project_config(
+        self, project_config: Optional[Union[DataContextConfig, Mapping]]
+    ) -> DataContextConfig:
         if project_config is None:
             project_config = self.retrieve_data_context_config_from_cloud(
                 cloud_config=self._cloud_config,
             )
 
-        project_data_context_config: DataContextConfig = (
-            self.get_or_create_data_context_config(project_config)
+        project_data_context_config = (
+            CloudDataContext.get_or_create_data_context_config(project_config)
         )
 
-        self._project_config = self._apply_global_config_overrides(
-            config=project_data_context_config
-        )
-        super().__init__(
-            context_root_dir=self._context_root_directory,
-            runtime_environment=runtime_environment,
-        )
+        return self._apply_global_config_overrides(config=project_data_context_config)
 
     @staticmethod
     def _resolve_cloud_args(
