@@ -14,7 +14,6 @@ from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -35,30 +34,6 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
-
-
-@pytest.fixture
-def spark_dataframe_for_unexpected_rows_with_index(
-    spark_session,
-) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821
-    df: pandas.DataFrame = pd.DataFrame(
-        {
-            "pk_1": [0, 1, 2, 3, 4, 5],
-            "pk_2": ["zero", "one", "two", "three", "four", "five"],
-            "animals": [
-                "cat",
-                "fish",
-                "dog",
-                "giraffe",
-                "lion",
-                "zebra",
-            ],
-        }
-    )
-    test_df: "pyspark.sql.dataframe.DataFrame" = spark_session.createDataFrame(
-        data=df
-    )  # noqa: F821
-    return test_df
 
 
 @pytest.fixture
@@ -717,112 +692,6 @@ def test_include_unexpected_rows_without_explicit_result_format_raises_error(
     )
     with pytest.raises(ValueError):
         expectation.validate(validator)
-
-
-# Spark
-def test_spark_single_column_complete_result_format(
-    in_memory_runtime_context,
-    spark_dataframe_for_unexpected_rows_with_index,
-):
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "COMPLETE",
-            },
-        },
-    )
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch_definition = BatchDefinition(
-        datasource_name="spark_datasource",
-        data_connector_name="runtime_data_connector",
-        data_asset_name="my_asset",
-        batch_identifiers=IDDict({}),
-        batch_spec_passthrough=None,
-    )
-    batch = Batch(
-        data=spark_dataframe_for_unexpected_rows_with_index,
-        batch_definition=batch_definition,
-    )
-    engine = SparkDFExecutionEngine()
-    validator = Validator(
-        execution_engine=engine,
-        data_context=in_memory_runtime_context,
-        batches=[
-            batch,
-        ],
-    )
-    result = expectation.validate(validator)
-    assert convert_to_json_serializable(result.result) == {
-        "element_count": 6,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "partial_unexpected_counts": [
-            {"count": 1, "value": "giraffe"},
-            {"count": 1, "value": "lion"},
-            {"count": 1, "value": "zebra"},
-        ],
-        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_count": 3,
-        "unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_percent": 50.0,
-        "unexpected_percent_nonmissing": 50.0,
-        "unexpected_percent_total": 50.0,
-    }
-
-
-def test_spark_single_column_summary_result_format(
-    in_memory_runtime_context,
-    spark_dataframe_for_unexpected_rows_with_index,
-):
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "SUMMARY",
-            },
-        },
-    )
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch_definition = BatchDefinition(
-        datasource_name="spark_datasource",
-        data_connector_name="runtime_data_connector",
-        data_asset_name="my_asset",
-        batch_identifiers=IDDict({}),
-        batch_spec_passthrough=None,
-    )
-    batch = Batch(
-        data=spark_dataframe_for_unexpected_rows_with_index,
-        batch_definition=batch_definition,
-    )
-    engine = SparkDFExecutionEngine()
-    validator = Validator(
-        execution_engine=engine,
-        data_context=in_memory_runtime_context,
-        batches=[
-            batch,
-        ],
-    )
-    result = expectation.validate(validator)
-    assert convert_to_json_serializable(result.result) == {
-        "element_count": 6,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "partial_unexpected_counts": [
-            {"count": 1, "value": "giraffe"},
-            {"count": 1, "value": "lion"},
-            {"count": 1, "value": "zebra"},
-        ],
-        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_count": 3,
-        "unexpected_percent": 50.0,
-        "unexpected_percent_nonmissing": 50.0,
-        "unexpected_percent_total": 50.0,
-    }
 
 
 # Spark
