@@ -309,7 +309,7 @@ If you plan to contribute your Expectation to the public open source project, yo
 
 would become
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py#L135-L141
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py#L134-L140
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
