@@ -1845,13 +1845,12 @@ def get_context(
     # Second, check for which type of local
 
     if project_config is not None:
-        return BaseDataContext(
+        return EphemeralDataContext(
             project_config=project_config,
-            context_root_dir=context_root_dir,
             runtime_environment=runtime_environment,
         )
 
-    return DataContext(
+    return FileDataContext(
         context_root_dir=context_root_dir,
         runtime_environment=runtime_environment,
     )
