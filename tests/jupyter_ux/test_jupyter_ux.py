@@ -172,7 +172,7 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
 
 @pytest.mark.smoketest
 def test_display_profiled_column_evrs_as_section(titanic_profiled_evrs_1):
-    section_html = jux.display_profiled_column_evrs_as_section(
+    section_html = jux.display_profiled_column_evrs_as_section(  # noqa: F841
         titanic_profiled_evrs_1,
         "SexCode",
         include_styling=False,
@@ -182,7 +182,7 @@ def test_display_profiled_column_evrs_as_section(titanic_profiled_evrs_1):
 
 @pytest.mark.smoketest
 def test_display_column_evrs_as_section(titanic_profiled_evrs_1):
-    section_html = jux.display_column_evrs_as_section(
+    section_html = jux.display_column_evrs_as_section(  # noqa: F841
         titanic_profiled_evrs_1,
         "SexCode",
         include_styling=False,

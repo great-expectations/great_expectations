@@ -28,7 +28,7 @@ from great_expectations.util import build_in_memory_runtime_context
 from tests.conftest import build_test_backends_list_v3_api
 
 
-def pytest_generate_tests(metafunc):
+def pytest_generate_tests(metafunc):  # noqa C901 - 35
     # Load all the JSON files in the directory
     dir_path = os.path.dirname(os.path.realpath(__file__))
     expectation_dirs = [

@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import datetime
 import json
 import os
 from collections import OrderedDict
+from typing import TYPE_CHECKING
 
 import pytest
 from freezegun import freeze_time
@@ -21,6 +24,9 @@ from great_expectations.self_check.util import (
     get_dataset,
 )
 from great_expectations.util import is_library_loadable
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
 
 FALSEY_VALUES = [None, [], False]
 
@@ -601,7 +607,7 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
 def test_BasicSuiteBuilderProfiler_uses_all_columns_if_configuration_does_not_have_included_or_excluded_columns_on_pandas(
     pandas_dataset, empty_data_context
 ):
-    context: "DataContext" = empty_data_context
+    context: AbstractDataContext = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(pandas_dataset)
     assert isinstance(observed_suite, ExpectationSuite)
 
@@ -820,7 +826,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_columns_if_configuration_does_not_ha
 def test_BasicSuiteBuilderProfiler_uses_selected_columns_on_pandas(
     pandas_dataset, empty_data_context
 ):
-    context: "DataContext" = empty_data_context
+    context: AbstractDataContext = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset, profiler_configuration={"included_columns": ["naturals"]}
     )
@@ -925,7 +931,7 @@ def test_BasicSuiteBuilderProfiler_uses_selected_columns_on_pandas(
 def test_BasicSuiteBuilderProfiler_respects_excluded_expectations_on_pandas(
     pandas_dataset, empty_data_context
 ):
-    context: "DataContext" = empty_data_context
+    context: AbstractDataContext = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
@@ -994,7 +1000,7 @@ def test_BasicSuiteBuilderProfiler_respects_excluded_expectations_on_pandas(
 def test_BasicSuiteBuilderProfiler_respects_included_expectations_on_pandas(
     pandas_dataset, empty_data_context
 ):
-    context: "DataContext" = empty_data_context
+    context: AbstractDataContext = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
@@ -1044,7 +1050,7 @@ def test_BasicSuiteBuilderProfiler_respects_included_expectations_on_pandas(
 def test_BasicSuiteBuilderProfiler_uses_no_columns_if_included_columns_are_falsey_on_pandas(
     included_columns, pandas_dataset, empty_data_context
 ):
-    context: "DataContext" = empty_data_context
+    context: AbstractDataContext = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
@@ -1081,7 +1087,7 @@ def test_BasicSuiteBuilderProfiler_uses_no_columns_if_included_columns_are_false
 def test_BasicSuiteBuilderProfiler_uses_no_expectations_if_included_expectations_are_falsey_on_pandas(
     included_expectations, pandas_dataset, empty_data_context
 ):
-    context: "DataContext" = empty_data_context
+    context: AbstractDataContext = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
@@ -1108,7 +1114,7 @@ def test_BasicSuiteBuilderProfiler_uses_no_expectations_if_included_expectations
 def test_BasicSuiteBuilderProfiler_uses_all_expectations_if_excluded_expectations_are_falsey_on_pandas(
     excluded_expectations, pandas_dataset, empty_data_context
 ):
-    context: "DataContext" = empty_data_context
+    context: AbstractDataContext = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
@@ -1333,7 +1339,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_expectations_if_excluded_expectation
 def test_BasicSuiteBuilderProfiler_uses_all_columns_if_excluded_columns_are_falsey_on_pandas(
     excluded_columns, pandas_dataset, empty_data_context
 ):
-    context: "DataContext" = empty_data_context
+    context: AbstractDataContext = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
