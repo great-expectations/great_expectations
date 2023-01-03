@@ -1800,6 +1800,13 @@ def get_context(
         EphemeralDataContext,
         FileDataContext,
     )
+    from great_expectations.data_context.types.base import DataContextConfig
+
+    if project_config:
+        project_config = EphemeralDataContext.get_or_create_data_context_config(
+            project_config
+        )
+    assert project_config is None or isinstance(project_config, DataContextConfig)
 
     # Chetan - 20221208 - not formally deprecating these values until a future date
     (
@@ -1818,8 +1825,7 @@ def get_context(
         ge_cloud_organization_id=ge_cloud_organization_id,
     )
 
-    # First, check for ge_cloud conditions
-
+    # First, check for GX Cloud conditions
     config_available = CloudDataContext.is_cloud_config_available(
         cloud_base_url=cloud_base_url,
         cloud_access_token=cloud_access_token,
@@ -1843,14 +1849,20 @@ def get_context(
         )
 
     # Second, check for which type of local
-
+    # Prioritize FileDataContext but default to EphemeralDataContext if no context_root_dir
+    if context_root_dir:
+        return FileDataContext(
+            project_config=project_config,
+            context_root_dir=context_root_dir,
+            runtime_environment=runtime_environment,
+        )
     if project_config is not None:
         return EphemeralDataContext(
             project_config=project_config,
             runtime_environment=runtime_environment,
         )
-
     return FileDataContext(
+        project_config=project_config,
         context_root_dir=context_root_dir,
         runtime_environment=runtime_environment,
     )

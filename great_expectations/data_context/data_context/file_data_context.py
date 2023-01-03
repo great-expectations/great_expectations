@@ -68,7 +68,7 @@ class FileDataContext(SerializableDataContext):
             context_root_dir = str(context_root_dir)
 
         if not context_root_dir:
-            context_root_dir = FileDataContext.find_context_yml_file()
+            context_root_dir = FileDataContext.find_context_root_dir()
             if not context_root_dir:
                 raise ValueError(
                     "A FileDataContext relies on the presence of a local great_expectations.yml project config"
