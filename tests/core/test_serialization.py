@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import copy
 import inspect
 import logging
 from decimal import Decimal
-from typing import Union
+from typing import TYPE_CHECKING, Union
 from unittest import mock
 
 import pandas as pd
@@ -40,9 +42,12 @@ except ImportError:
     StructField = None
     StructType = None
 
+if TYPE_CHECKING:
+    from pyspark.sql import SparkSession
+
 
 @pytest.fixture
-def spark_schema(spark_session) -> "StructType":
+def spark_schema(spark_session: SparkSession) -> "StructType":
     return StructType(
         [
             StructField("a", IntegerType(), True, None),
@@ -55,7 +60,7 @@ def spark_schema(spark_session) -> "StructType":
 # Spark schemas. They follow the pattern described in:
 # https://miguendes.me/how-to-use-fixtures-as-arguments-in-pytestmarkparametrize
 @pytest.fixture
-def checkpoint_config_spark(spark_session) -> CheckpointConfig:
+def checkpoint_config_spark(spark_session: SparkSession) -> CheckpointConfig:
     return CheckpointConfig(
         name="my_nested_checkpoint",
         config_version=1,
@@ -78,7 +83,7 @@ def checkpoint_config_spark(spark_session) -> CheckpointConfig:
 
 @pytest.fixture
 def checkpoint_config_with_schema_spark(
-    spark_session, spark_schema
+    spark_session: SparkSession, spark_schema
 ) -> CheckpointConfig:
     return CheckpointConfig(
         name="my_nested_checkpoint",
@@ -103,7 +108,7 @@ def checkpoint_config_with_schema_spark(
 
 
 @pytest.fixture
-def datasource_config_spark(spark_session) -> DatasourceConfig:
+def datasource_config_spark(spark_session: SparkSession) -> DatasourceConfig:
     return DatasourceConfig(
         name="taxi_data",
         class_name="Datasource",
@@ -132,7 +137,7 @@ def datasource_config_spark(spark_session) -> DatasourceConfig:
 
 @pytest.fixture
 def datasource_config_with_schema_at_asset_level_spark(
-    spark_session, spark_schema
+    spark_session: SparkSession, spark_schema
 ) -> DatasourceConfig:
     return DatasourceConfig(
         name="taxi_data",
@@ -165,7 +170,7 @@ def datasource_config_with_schema_at_asset_level_spark(
 
 @pytest.fixture
 def datasource_config_with_schema_at_data_connector_level_spark(
-    spark_session, spark_schema
+    spark_session: SparkSession, spark_schema
 ) -> DatasourceConfig:
     return DatasourceConfig(
         name="taxi_data",
