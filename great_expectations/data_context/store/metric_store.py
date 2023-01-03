@@ -1,11 +1,13 @@
 import json
 
-from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
 from great_expectations.data_context.store.store import Store
+from great_expectations.data_context.types.resource_identifiers import (
+    ValidationMetricIdentifier,
+)
 from great_expectations.util import (
     filter_properties_dict,
     load_class,
@@ -18,7 +20,7 @@ class MetricStore(Store):
     A MetricStore stores ValidationMetric information to be used between runs.
     """
 
-    _key_class = ValidationMetricIdentifier  # type: ignore[assignment]
+    _key_class = ValidationMetricIdentifier
 
     def __init__(self, store_backend=None, store_name=None) -> None:
         if store_backend is not None:
