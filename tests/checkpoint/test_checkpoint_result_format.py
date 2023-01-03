@@ -1176,6 +1176,10 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column(
         {"animals": "lion", "pk_1": 4, "pk_2": "four"},
         {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
     ]
+    unexpected_index_query: str = evrs[0]["results"][0]["result"][
+        "unexpected_index_query"
+    ]
+    assert unexpected_index_query == [(3, "three"), (4, "four"), (5, "five")]
 
 
 @pytest.mark.integration

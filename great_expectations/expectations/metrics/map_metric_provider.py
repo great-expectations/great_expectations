@@ -1802,12 +1802,12 @@ def _pandas_map_condition_index(
 
 def _pandas_map_condition_query(
     cls,
-    execution_engine: SqlAlchemyExecutionEngine,
+    execution_engine: PandasExecutionEngine,
     metric_domain_kwargs: Dict,
     metric_value_kwargs: Dict,
     metrics: Dict[str, Any],
     **kwargs,
-) -> Optional[str]:
+) -> Optional[List[Any]]:
     """
     Returns query that will return all rows which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation.
@@ -1816,55 +1816,20 @@ def _pandas_map_condition_query(
     to return, along with column the Expectation is run on.
     """
     (
-        unexpected_condition,
+        boolean_mapped_unexpected_values,
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition")
-    print("hello")
-    # domain_kwargs: dict = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    # result_format: dict = metric_value_kwargs["result_format"]
-    #
-    # # We will not return map_condition_query if return_unexpected_index_query = False
-    # return_unexpected_index_query: bool = result_format.get(
-    #     "return_unexpected_index_query"
-    # )
-    # if return_unexpected_index_query is False:
-    #     return
-    #
-    # column_selector: List[sa.Column] = [sa.column(domain_kwargs["column"])]
-    # all_table_columns: List[str] = metrics.get("table.columns")
-    # unexpected_index_column_names: List[str] = result_format.get(
-    #     "unexpected_index_column_names"
-    # )
-    # for column_name in unexpected_index_column_names:
-    #     if column_name not in all_table_columns:
-    #         raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
-    #             message=f'Error: The unexpected_index_column: "{column_name}" in does not exist in SQL Table. '
-    #             f"Please check your configuration and try again."
-    #         )
-    #     column_selector.append(sa.column(column_name))
-    #
-    # unexpected_condition_query_with_selected_columns: sa.select = sa.select(
-    #     column_selector
-    # ).where(unexpected_condition)
-    # source_table_and_schema: sa.Table = get_sqlalchemy_source_table_and_schema(
-    #     execution_engine
-    # )
-    #
-    # source_table_and_schema_as_selectable: Union[
-    #     sa.Table, sa.Select
-    # ] = get_sqlalchemy_selectable(source_table_and_schema)
-    # final_select_statement: sa.select = (
-    #     unexpected_condition_query_with_selected_columns.select_from(
-    #         source_table_and_schema_as_selectable
-    #     )
-    # )
-    #
-    # query_as_string: str = sql_statement_with_post_compile_to_string(
-    #     engine=execution_engine, select_statement=final_select_statement
-    # )
-    query_as_string = ""
-    return query_as_string
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
+    domain_records_df: pd.DataFrame = execution_engine.get_domain_records(
+        domain_kwargs=domain_kwargs
+    )
+    res = domain_records_df.index[boolean_mapped_unexpected_values].to_list()
+    return res
 
 
 def _pandas_column_map_condition_value_counts(
