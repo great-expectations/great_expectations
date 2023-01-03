@@ -1,4 +1,3 @@
-import json
 import logging
 import re
 import traceback
@@ -17,7 +16,6 @@ from great_expectations.render import (
     RenderedSectionContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
-    TextContent,
 )
 from great_expectations.render.renderer.content_block import (
     ExceptionListContentBlockRenderer,
