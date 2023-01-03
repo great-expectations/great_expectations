@@ -95,7 +95,6 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 
 if TYPE_CHECKING:
     from pyspark.sql import SparkSession
-    from pyspark.sql.dataframe import DataFrame
 
 yaml = YAML()
 ###
@@ -7259,7 +7258,7 @@ def spark_dataframe_for_unexpected_rows_with_index(
             ],
         }
     )
-    test_df: "pyspark.sql.dataframe.DataFrame" = spark_session.createDataFrame(
+    test_df = spark_session.createDataFrame(
         data=df,
-    )  # noqa: F821
+    )
     return test_df
