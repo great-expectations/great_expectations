@@ -61,11 +61,17 @@ class SphinxInvokeDocsBuilder:
 
         self._remove_temp_html()
 
+        self._remove_md_stubs()
+
+        self._build_md_stubs()
+
         self._build_html_api_docs_in_temp_folder()
 
         self._remove_existing_api_docs()
 
         self._process_and_create_docusaurus_mdx_files()
+
+        self._remove_md_stubs()
 
         self._remove_temp_html()
 
@@ -174,3 +180,18 @@ class SphinxInvokeDocsBuilder:
             shutil.rmtree(temp_dir, ignore_errors=True)
 
         logger.debug("Removed existing generated raw Sphinx HTML.")
+
+    def _build_md_stubs(self):
+        """Build markdown stubs with rst directives for auto documenting classes."""
+
+        # 1. Parse code & find any classes marked with @public_api
+        # 2. Parse code & find any classes with methods marked with @public_api
+        # 3. Parse code & find any module level functions marked with @public_api
+        # 4. Generate dotted path to import class e.g. great_expectations.data_context.data_context.DataContext
+        # 5. Generate markdown stub string
+        # 6. Write markdown stub strings to files
+        pass
+
+    def _remove_md_stubs(self):
+        """Remove markdown stubs."""
+        pass
