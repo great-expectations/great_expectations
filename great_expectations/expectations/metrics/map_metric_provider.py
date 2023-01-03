@@ -2489,7 +2489,7 @@ def _sqlalchemy_map_condition_index(
             sa.Table, sa.Select
         ] = get_sqlalchemy_selectable(domain_records_as_selectable)
 
-    # since SQL tables can be **very** large, truncate query_result values at 10, or at `partial_unexpected_count`
+    # since SQL tables can be **very** large, truncate query_result values at 20, or at `partial_unexpected_count`
     final_query: sa.select = (
         unexpected_condition_query_with_selected_columns.select_from(
             domain_records_as_selectable
@@ -2737,15 +2737,16 @@ def _spark_map_condition_index(
                 f"Error: The unexpected_index_column '{col_name}' does not exist in Spark DataFrame. Please check your configuration and try again."
             )
 
+    if result_format["result_format"] != "COMPLETE":
+        filtered.limit(result_format["partial_unexpected_count"])
+
     for row in filtered.collect():
         dict_to_add: dict = {}
         for col_name in columns_to_keep:
             dict_to_add[col_name] = row[col_name]
         unexpected_index_list.append(dict_to_add)
 
-    if result_format["result_format"] == "COMPLETE":
-        return unexpected_index_list
-    return unexpected_index_list[: result_format["partial_unexpected_count"]]
+    return unexpected_index_list
 
 
 def _spark_map_condition_query(
