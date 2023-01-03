@@ -193,10 +193,10 @@ stages:
           matrix:
             standard:
               pytest_args: 'tests --ignore "tests/rule_based_profiler" --ignore "tests/integration"'
-              run_unit_tests: True
+              run_unit_tests: true
             slow:
               pytest_args: 'tests/rule_based_profiler tests/integration'
-              run_unit_tests: False
+              run_unit_tests: false
 
         steps:
           - task: UsePythonVersion@0
@@ -216,7 +216,7 @@ stages:
               invoke tests --ci --cloud --timeout=3.0
 
             displayName: 'Unit Tests'
-            condition: ${{ variables['run_unit_tests'] }}
+            condition: ${{ eq(variables.run_unit_tests, true) }}
             env:
               GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
