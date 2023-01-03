@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Mapping, Optional, Union
 
 from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context.data_context.abstract_data_context import (
@@ -20,14 +20,11 @@ class EphemeralDataContext(AbstractDataContext):
     """
     Will contain functionality to create DataContext at runtime (ie. passed in config object or from stores). Users will
     be able to use EphemeralDataContext for having a temporary or in-memory DataContext
-
-    TODO: Most of the BaseDataContext code will be migrated to this class, which will continue to exist for backwards
-    compatibility reasons.
     """
 
     def __init__(
         self,
-        project_config: DataContextConfig,
+        project_config: Union[DataContextConfig, Mapping],
         runtime_environment: Optional[dict] = None,
     ) -> None:
         """EphemeralDataContext constructor
@@ -37,10 +34,16 @@ class EphemeralDataContext(AbstractDataContext):
                 override both those set in config_variables.yml and the environment
 
         """
-        self._project_config = self._apply_global_config_overrides(
-            config=project_config
-        )
+        self._project_config = self._init_project_config(project_config)
         super().__init__(runtime_environment=runtime_environment)
+
+    def _init_project_config(
+        self, project_config: Union[DataContextConfig, Mapping]
+    ) -> DataContextConfig:
+        project_config = EphemeralDataContext.get_or_create_data_context_config(
+            project_config
+        )
+        return self._apply_global_config_overrides(project_config)
 
     def _init_variables(self) -> EphemeralDataContextVariables:
         variables = EphemeralDataContextVariables(

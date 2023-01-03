@@ -294,6 +294,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
 
     @abstractmethod
+    def _init_project_config(
+        self, project_config: Union[DataContextConfig, Mapping]
+    ) -> DataContextConfig:
+        raise NotImplementedError
+
+    @abstractmethod
     def _init_variables(self) -> DataContextVariables:
         raise NotImplementedError
 
