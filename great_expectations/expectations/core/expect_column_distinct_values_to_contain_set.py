@@ -103,7 +103,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
     ) -> None:
         """Validating that user has inputted a value set and that configuration has been initialized"""
         super().validate_configuration(configuration)
-
+        configuration = configuration or self.configuration
         try:
             assert "value_set" in configuration.kwargs, "value_set is required"
             assert isinstance(

@@ -95,6 +95,7 @@ class ExpectColumnToExist(TableExpectation):
 
         # Setting up a configuration
         super().validate_configuration(configuration)
+        configuration = configuration or self.configuration
 
         # Ensuring that a proper value has been provided
         try:

@@ -324,7 +324,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         elif "partial_unexpected_list" in result.result:
             values = [str(item) for item in result.result["partial_unexpected_list"]]
         else:
-            return
+            return None
 
         classes = ["col-3", "mt-1", "pl-1", "pr-1"]
 
@@ -379,6 +379,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     ) -> None:
         """Validates that a value_set has been provided."""
         super().validate_configuration(configuration)
+        configuration = configuration or self.configuration
         # supports extensibility by allowing value_set to not be provided in config but captured via child-class default_kwarg_values, e.g. parameterized expectations
         value_set = configuration.kwargs.get(
             "value_set"

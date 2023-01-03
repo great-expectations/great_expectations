@@ -186,7 +186,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[RenderedStringTemplateContent]:
-        renderer_configuration = RendererConfiguration(
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
@@ -329,7 +329,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
     ) -> None:
         """Validating that user has inputted a value set and that configuration has been initialized"""
         super().validate_configuration(configuration)
-
+        configuration = configuration or self.configuration
         try:
             assert "value_set" in configuration.kwargs, "value_set is required"
             assert (

@@ -93,6 +93,7 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration)
+        configuration = configuration or self.configuration
         try:
             assert (
                 "like_pattern_list" in configuration.kwargs
