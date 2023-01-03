@@ -1,11 +1,14 @@
-from typing import Any, List, Optional, Union
+from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.expectations.expectation import ColumnMapExpectation
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    render_evaluation_parameter_string,
+)
 from great_expectations.render import (
     LegacyRendererType,
     RenderedBulletListContent,
@@ -15,7 +18,6 @@ from great_expectations.render import (
 )
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
-    AddParamArgs,
     RendererConfiguration,
     RendererValueType,
 )
@@ -43,9 +45,8 @@ try:
 except ImportError:
     pass
 
-from great_expectations.expectations.expectation import (
-    render_evaluation_parameter_string,
-)
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
 class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
