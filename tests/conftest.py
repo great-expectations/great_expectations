@@ -95,6 +95,7 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 
 if TYPE_CHECKING:
     from pyspark.sql import SparkSession
+    from pyspark.sql.dataframe import DataFrame
 
 yaml = YAML()
 ###
