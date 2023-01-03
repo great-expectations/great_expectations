@@ -863,7 +863,7 @@ class Expectation(metaclass=MetaExpectation):
             query = result_dict.get("unexpected_index_query")
             query_info = CollapseContent(
                 **{
-                    "collapse_toggle_link": "Show query to retrieve all unexpected values...",
+                    "collapse_toggle_link": "To retrieve all unexpected values...",
                     "collapse": [
                         RenderedStringTemplateContent(
                             **{

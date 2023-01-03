@@ -674,6 +674,10 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
         "partial_unexpected_index_list"
     ]
     assert first_result_partial_list == expected_unexpected_indices_output
+    unexpected_index_query: str = evrs[0]["results"][0]["result"][
+        "unexpected_index_query"
+    ]
+    assert unexpected_index_query == [3, 4, 5]
 
 
 @pytest.mark.integration
@@ -720,6 +724,10 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
     ]
     # this is just 1 because we set `partial_unexpected_count` above
     assert first_result_partial_list == [{"animals": "giraffe", "pk_1": 3}]
+    unexpected_index_query: str = evrs[0]["results"][0]["result"][
+        "unexpected_index_query"
+    ]
+    assert unexpected_index_query == [3, 4, 5]
 
 
 @pytest.mark.integration
@@ -760,6 +768,10 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
         "partial_unexpected_index_list"
     ]
     assert first_result_partial_list == expected_unexpected_indices_output
+    unexpected_index_query: str = evrs[0]["results"][0]["result"][
+        "unexpected_index_query"
+    ]
+    assert unexpected_index_query == [3, 4, 5]
 
 
 @pytest.mark.integration
@@ -1050,6 +1062,10 @@ def test_pandas_result_format_in_checkpoint_named_index_one_index_column(
         {"animals": "lion", "pk_2": "four"},
         {"animals": "zebra", "pk_2": "five"},
     ]
+    unexpected_index_query: str = evrs[0]["results"][0]["result"][
+        "unexpected_index_query"
+    ]
+    assert unexpected_index_query == ["three", "four", "five"]
 
 
 @pytest.mark.integration
