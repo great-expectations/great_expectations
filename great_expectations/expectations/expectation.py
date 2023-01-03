@@ -73,6 +73,7 @@ from great_expectations.exceptions import (
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
+    SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.registry import (
@@ -2580,7 +2581,9 @@ class ColumnMapExpectation(TableExpectation, ABC):
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
             )
-        if isinstance(execution_engine, SqlAlchemyExecutionEngine):
+        if isinstance(
+            execution_engine, (SparkDFExecutionEngine, SqlAlchemyExecutionEngine)
+        ):
             if "unexpected_index_column_names" in validation_dependencies.result_format:
                 metric_kwargs = get_metric_kwargs(
                     f"{self.map_metric}.unexpected_index_list",
