@@ -1,7 +1,7 @@
 """This module contains shared TypeAliases"""
 
 import pathlib
-from typing import Union
+from typing import Dict, List, Union
 
 from typing_extensions import TypeAlias
 
