@@ -1,8 +1,8 @@
-datasources:
+xdatasources:
   my_pg_ds:
     type: postgres
     name: my_pg_ds
-    connection_string: "postgres://foo.bar"
+    connection_string: "postgresql://userName:@hostname/dbName"
     assets:
       my_table_asset_wo_splitters:
         type: table

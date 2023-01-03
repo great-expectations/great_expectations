@@ -620,7 +620,8 @@ def main(**kwargs):
     if kwargs["backends"]:
         backends = [name.strip() for name in kwargs["backends"].split(",")]
 
-    context_dir, context = _disable_progress_bars()
+    # context_dir, context = _disable_progress_bars()
+    context = None
 
     gallery_info = build_gallery(
         include_core=not kwargs["no_core"],
@@ -646,8 +647,8 @@ def main(**kwargs):
     with open(f"./{kwargs['outfile_name']}", "w") as outfile:
         json.dump(gallery_info, outfile, indent=4)
 
-    print(f"Deleting {context_dir}")
-    shutil.rmtree(context_dir)
+    # print(f"Deleting {context_dir}")
+    # shutil.rmtree(context_dir)
 
 
 if __name__ == "__main__":

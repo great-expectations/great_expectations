@@ -1,5 +1,5 @@
 ---
-title: Reference Architectures
+title: Integrations guides
 ---
 
 ## Overview

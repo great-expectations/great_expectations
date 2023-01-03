@@ -3859,7 +3859,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         logger.info(
             f"{self.__class__.__name__} has not implemented `_load_zep_config()` returning empty `GxConfig`"
         )
-        return GxConfig(datasources={})
+        return GxConfig(xdatasources={})
 
     def _attach_zep_config_datasources(self, config: GxConfig):
         """Called at end of __init__"""
