@@ -53,7 +53,7 @@ import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
-from typing_extensions import TypeGuard
+from typing_extensions import Literal, TypeGuard
 
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
@@ -94,6 +94,7 @@ if TYPE_CHECKING:
     import numpy.typing as npt
 
     from great_expectations.alias_types import PathStr
+    from great_expectations.data_context import FileDataContext
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
@@ -1730,6 +1731,42 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
         [np.ndarray], np.ndarray
     ] = np.vectorize(pyfunc=convert_decimal_to_float)
     return convert_decimal_to_float_vectorized(data)
+
+
+@overload
+def get_context(
+    project_config: Optional[Union[DataContextConfig, Mapping]] = ...,
+    context_root_dir: PathStr = ...,
+    runtime_environment: Optional[dict] = ...,
+    cloud_base_url: None = ...,
+    cloud_access_token: None = ...,
+    cloud_organization_id: None = ...,
+    cloud_mode: Optional[Literal[False]] = ...,
+    # <GX_RENAME> Deprecated as of 0.15.37
+    ge_cloud_base_url: None = ...,
+    ge_cloud_access_token: None = ...,
+    ge_cloud_organization_id: None = ...,
+    ge_cloud_mode: Optional[Literal[False]] = ...,
+) -> FileDataContext:
+    ...
+
+
+@overload
+def get_context(
+    project_config: Optional[Union[DataContextConfig, Mapping]] = ...,
+    context_root_dir: Optional[PathStr] = ...,
+    runtime_environment: Optional[dict] = ...,
+    cloud_base_url: Optional[str] = ...,
+    cloud_access_token: Optional[str] = ...,
+    cloud_organization_id: Optional[str] = ...,
+    cloud_mode: Optional[bool] = ...,
+    # <GX_RENAME> Deprecated as of 0.15.37
+    ge_cloud_base_url: Optional[str] = ...,
+    ge_cloud_access_token: Optional[str] = ...,
+    ge_cloud_organization_id: Optional[str] = ...,
+    ge_cloud_mode: Optional[bool] = ...,
+) -> AbstractDataContext:
+    ...
 
 
 def get_context(
