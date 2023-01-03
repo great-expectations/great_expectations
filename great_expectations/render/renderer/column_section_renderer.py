@@ -1,4 +1,3 @@
-import json
 import logging
 import re
 import traceback
@@ -17,7 +16,6 @@ from great_expectations.render import (
     RenderedSectionContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
-    TextContent,
 )
 from great_expectations.render.renderer.content_block import (
     ExceptionListContentBlockRenderer,
@@ -393,40 +391,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
     @classmethod
     def _render_failed(cls, evrs):
         return ExceptionListContentBlockRenderer.render(evrs, include_column_name=False)
-
-    @classmethod
-    def _render_unrecognized(cls, evrs, content_blocks) -> None:
-        unrendered_blocks = []
-        new_block = None
-        for evr in evrs:
-            if evr.expectation_config.expectation_type not in [
-                "expect_column_to_exist",
-                "expect_column_values_to_be_of_type",
-                "expect_column_values_to_be_in_set",
-                "expect_column_unique_value_count_to_be_between",
-                "expect_column_proportion_of_unique_values_to_be_between",
-                "expect_column_values_to_not_be_null",
-                "expect_column_max_to_be_between",
-                "expect_column_mean_to_be_between",
-                "expect_column_min_to_be_between",
-            ]:
-                new_block = TextContent(**{"content_block_type": "text", "text": []})
-                new_block["content"].append(
-                    """
-    <div class="alert alert-primary" role="alert">
-        Warning! Unrendered EVR:<br/>
-    <pre>"""
-                    + json.dumps(evr, indent=2)
-                    + """</pre>
-    </div>
-                """
-                )
-
-        if new_block is not None:
-            unrendered_blocks.append(new_block)
-
-        # print(unrendered_blocks)
-        content_blocks += unrendered_blocks
 
 
 class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
