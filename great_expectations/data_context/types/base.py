@@ -89,7 +89,7 @@ BYC = TypeVar("BYC", bound="BaseYamlConfig")
 
 
 class BaseYamlConfig(SerializableDictDot):
-    _config_schema_class: ClassVar = None
+    _config_schema_class: ClassVar[Optional[Type[Schema]]] = None
 
     exclude_field_names: ClassVar[Set[str]] = {
         "commented_map",
