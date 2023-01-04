@@ -662,7 +662,7 @@ snapshots[
                 "schema": {"type": "boolean"},
                 "value": True,
             },
-            "strictly": {"schema": {"type": "boolean"}, "value": 10},
+            "strictly": {"schema": {"type": "boolean"}, "value": True},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "$column values must be strictly greater than previous values, at least $mostly_pct % of the time. Values should be parsed as datetimes.",
