@@ -25,6 +25,8 @@ from great_expectations.util import (
 )
 
 if TYPE_CHECKING:
+    from marshmallow import Schema
+
     from great_expectations.rule_based_profiler.rule.rule import Rule
     from great_expectations.rule_based_profiler.rule_based_profiler import (
         RuleBasedProfiler,
@@ -512,7 +514,7 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         Please see parent BaseYamlConfig for more details.
         """
         try:
-            schema_instance = cls._get_schema_instance()
+            schema_instance: Schema = cls._get_schema_instance()
             config: Union[dict, BaseYamlConfig] = schema_instance.load(commented_map)
             config.pop("class_name", None)  # type: ignore[union-attr] # BaseYamlConfig has no `.pop()`
             config.pop("module_name", None)  # type: ignore[union-attr] # BaseYamlConfig has no `.pop()`
