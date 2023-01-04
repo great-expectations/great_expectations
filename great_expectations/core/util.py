@@ -32,6 +32,7 @@ from IPython import get_ipython
 from typing_extensions import TypeAlias
 
 from great_expectations import exceptions as ge_exceptions
+from great_expectations.alias_types import JSONValues
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.types import SerializableDictDot
@@ -186,8 +187,6 @@ def determine_progress_bar_method_by_environment() -> Callable:
         return tqdm_notebook
     return tqdm
 
-
-JSONValues: TypeAlias = Union[dict, list, str, int, float, bool, None]
 
 ToBool: TypeAlias = bool
 ToFloat: TypeAlias = Union[float, np.floating]
