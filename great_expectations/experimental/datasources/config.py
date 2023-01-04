@@ -110,3 +110,12 @@ class GxConfig(ExperimentalBaseModel):
                     )
                     raise
         return super().parse_yaml(f)
+
+    def __copy__(self):
+        return self.copy(deep=False)
+
+    def __deepcopy__(self, memo):
+        # TODO: raise warning an filter in instantiate_class_from_config
+        copy = self.copy(deep=False)
+        memo[id(copy)] = copy
+        return copy

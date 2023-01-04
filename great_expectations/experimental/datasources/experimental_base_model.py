@@ -39,7 +39,6 @@ _Self = TypeVar("_Self", bound="ExperimentalBaseModel")
 class ExperimentalBaseModel(pydantic.BaseModel):
     class Config:
         extra = pydantic.Extra.forbid
-        # copy_on_model_validation = "deep"
 
     @classmethod
     def parse_yaml(cls: Type[_Self], f: Union[pathlib.Path, str]) -> _Self:
@@ -133,14 +132,3 @@ class ExperimentalBaseModel(pydantic.BaseModel):
 
     def __str__(self):
         return self.yaml()
-
-    def __copy__(self):
-        return self.copy(deep=False)
-
-    def __deepcopy__(self, memo):
-        print(f"__deepcopy__ {self.__class__.__name__}  \tmemo:{len(memo)}")
-        # TODO: raise warning an filter in instantiate_class_from_config
-        copy = self.copy(deep=False)
-        memo[id(copy)] = copy
-        print(f" return __deepcopy__ {self.__class__.__name__}")
-        return copy
