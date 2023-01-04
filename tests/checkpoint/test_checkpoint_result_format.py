@@ -829,6 +829,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
         "partial_unexpected_index_list"
     ]
     assert first_result_partial_list == [{"animals": "giraffe", "pk_1": 3}]
+    assert evrs[0]["results"][0]["result"].get("unexpected_index_query") is None
 
 
 @pytest.mark.integration
@@ -911,6 +912,10 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
         "partial_unexpected_index_list"
     ]
     assert first_result_partial_list == expected_unexpected_indices_output
+    unexpected_index_query: str = evrs[0]["results"][0]["result"][
+        "unexpected_index_query"
+    ]
+    assert unexpected_index_query == [3, 4, 5]
 
     second_result_full_list = evrs[0]["results"][1]["result"]["unexpected_index_list"]
     assert second_result_full_list == expected_unexpected_indices_output
@@ -918,6 +923,10 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
         "partial_unexpected_index_list"
     ]
     assert second_result_partial_list == expected_unexpected_indices_output
+    unexpected_index_query: str = evrs[0]["results"][0]["result"][
+        "unexpected_index_query"
+    ]
+    assert unexpected_index_query == [3, 4, 5]
 
 
 @pytest.mark.integration
@@ -966,6 +975,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
         "partial_unexpected_index_list"
     )
     assert not first_result_partial_list
+    assert evrs[0]["results"][0]["result"].get("unexpected_index_query") is None
 
 
 @pytest.mark.integration
@@ -998,7 +1008,10 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
         "partial_unexpected_index_list"
     ]
     assert first_result_partial_list == expected_unexpected_indices_output
-    assert evrs[0]["results"][0]["result"].get("unexpected_index_query") is None
+    unexpected_index_query: str = evrs[0]["results"][0]["result"][
+        "unexpected_index_query"
+    ]
+    assert unexpected_index_query == [3, 4, 5]
 
 
 @pytest.mark.integration
@@ -1029,6 +1042,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
         "partial_unexpected_index_list"
     ]
     assert first_result_partial_list == [{"animals": "giraffe", "pk_1": 3}]
+    assert evrs[0]["results"][0]["result"].get("unexpected_index_query") is None
 
 
 @pytest.mark.integration
@@ -1103,13 +1117,20 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
         "partial_unexpected_index_list"
     ]
     assert first_result_partial_list == expected_unexpected_indices_output
-
+    first_result_unexpected_index_query: str = evrs[0]["results"][0]["result"][
+        "unexpected_index_query"
+    ]
+    assert first_result_unexpected_index_query == [3, 4, 5]
     second_result_full_list = evrs[0]["results"][1]["result"]["unexpected_index_list"]
     assert second_result_full_list == expected_unexpected_indices_output
     second_result_partial_list = evrs[0]["results"][1]["result"][
         "partial_unexpected_index_list"
     ]
     assert second_result_partial_list == expected_unexpected_indices_output
+    second_result_unexpected_index_query: str = evrs[0]["results"][1]["result"][
+        "unexpected_index_query"
+    ]
+    assert second_result_unexpected_index_query == [3, 4, 5]
 
 
 @pytest.mark.integration
@@ -1147,6 +1168,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
         "partial_unexpected_index_list"
     ]
     assert first_result_partial_list == expected_unexpected_indices_output
+    assert evrs[0]["results"][0]["result"].get("unexpected_index_query") is None
 
 
 @pytest.mark.integration
@@ -1183,6 +1205,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_basic_out
         "partial_unexpected_index_list"
     )
     assert not first_result_partial_list
+    assert evrs[0]["results"][0]["result"].get("unexpected_index_query") is None
 
 
 # spark
