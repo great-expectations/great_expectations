@@ -3,20 +3,13 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING, Mapping, Optional, Tuple, Union
 
+from great_expectations.util import get_context
+
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
 
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
-)
-from great_expectations.data_context.data_context.cloud_data_context import (
-    CloudDataContext,
-)
-from great_expectations.data_context.data_context.ephemeral_data_context import (
-    EphemeralDataContext,
-)
-from great_expectations.data_context.data_context.file_data_context import (
-    FileDataContext,
 )
 from great_expectations.data_context.types.base import DataContextConfig, GXCloudConfig
 
@@ -151,33 +144,23 @@ def BaseDataContext(
     # initialize runtime_environment as empty dict if None
     runtime_environment = runtime_environment or {}
 
-    if cloud_mode:
-        cloud_base_url: Optional[str] = None
-        cloud_access_token: Optional[str] = None
-        cloud_organization_id: Optional[str] = None
-        if cloud_config:
-            cloud_base_url = cloud_config.base_url
-            cloud_access_token = cloud_config.access_token
-            cloud_organization_id = cloud_config.organization_id
-        return CloudDataContext(
-            project_config=project_data_context_config,
-            runtime_environment=runtime_environment,
-            context_root_dir=context_root_dir,
-            cloud_base_url=cloud_base_url,
-            cloud_access_token=cloud_access_token,
-            cloud_organization_id=cloud_organization_id,
-        )
-    elif context_root_dir:
-        return FileDataContext(
-            project_config=project_data_context_config,
-            context_root_dir=context_root_dir,
-            runtime_environment=runtime_environment,
-        )
-    else:
-        return EphemeralDataContext(
-            project_config=project_data_context_config,
-            runtime_environment=runtime_environment,
-        )
+    cloud_base_url: Optional[str] = None
+    cloud_access_token: Optional[str] = None
+    cloud_organization_id: Optional[str] = None
+    if cloud_config:
+        cloud_base_url = cloud_config.base_url
+        cloud_access_token = cloud_config.access_token
+        cloud_organization_id = cloud_config.organization_id
+
+    return get_context(
+        project_config=project_data_context_config,
+        context_root_dir=context_root_dir,
+        runtime_environment=runtime_environment,
+        cloud_base_url=cloud_base_url,
+        cloud_access_token=cloud_access_token,
+        cloud_organization_id=cloud_organization_id,
+        cloud_mode=cloud_mode,
+    )
 
 
 def _resolve_cloud_args(
