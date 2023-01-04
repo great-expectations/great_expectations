@@ -22,6 +22,8 @@ from great_expectations.rule_based_profiler.parameter_container import (
 from great_expectations.util import convert_ndarray_to_datetime_dtype_best_effort
 
 if TYPE_CHECKING:
+    from numbers import Number
+
     import numpy.typing as npt
 
 logger = logging.getLogger(__name__)
@@ -60,8 +62,8 @@ class ExactNumericRangeEstimator(NumericRangeEstimator):
             parse_strings_as_datetimes=True,
             fuzzy=False,
         )
-        min_value = np.amin(a=metric_values_converted)
-        max_value = np.amax(a=metric_values_converted)
+        min_value: Number = np.amin(a=metric_values_converted)
+        max_value: Number = np.amax(a=metric_values_converted)
         return build_numeric_range_estimation_result(
             metric_values=metric_values_converted,
             min_value=min_value,
