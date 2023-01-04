@@ -874,7 +874,7 @@ class Expectation(metaclass=MetaExpectation):
             query = result_dict.get("unexpected_index_query")
             query_info = CollapseContent(
                 **{
-                    "collapse_toggle_link": "Show query to retrieve all unexpected values...",
+                    "collapse_toggle_link": "To retrieve all unexpected values...",
                     "collapse": [
                         RenderedStringTemplateContent(
                             **{
@@ -2649,6 +2649,19 @@ class ColumnMapExpectation(TableExpectation, ABC):
                 metric_name=f"{self.map_metric}.unexpected_index_list",
                 metric_configuration=MetricConfiguration(
                     metric_name=f"{self.map_metric}.unexpected_index_list",
+                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                ),
+            )
+            metric_kwargs = get_metric_kwargs(
+                f"{self.map_metric}.unexpected_index_query",
+                configuration=configuration,
+                runtime_configuration=runtime_configuration,
+            )
+            validation_dependencies.set_metric_configuration(
+                metric_name=f"{self.map_metric}.unexpected_index_query",
+                metric_configuration=MetricConfiguration(
+                    metric_name=f"{self.map_metric}.unexpected_index_query",
                     metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
