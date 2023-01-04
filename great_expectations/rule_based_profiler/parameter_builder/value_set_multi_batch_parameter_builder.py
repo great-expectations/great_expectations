@@ -146,7 +146,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         )
         details: dict = parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]
 
-        unique_values: Set = _get_unique_values_from_nested_collection_of_sets(
+        unique_values: set = _get_unique_values_from_nested_collection_of_sets(
             collection=metric_values  # type: ignore[arg-type] # could be None
         )
 
