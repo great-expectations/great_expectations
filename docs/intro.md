@@ -3,7 +3,7 @@ title: Welcome
 slug: /
 ---
 
-Welcome to Great Expectations!
+Welcome to Great Expectations! This is a test change
 
 Great Expectations is the leading tool for [validating](./terms/validation.md), [documenting](./terms/data_docs.md), and [profiling](./terms/profiler.md) your data to maintain quality and improve communication between teams. Head over to our [getting started](./tutorials/getting_started/tutorial_overview.md) tutorial.
 
@@ -103,5 +103,5 @@ If you have bugfix or feature request, please [upvote an existing issue](https:/
 #### Contribute code or documentation
 We welcome contributions to Great Expectations. Please start with our [Contributing guide](./contributing/contributing_overview.md) and don’t be shy with questions!
 
-#### Not interested in managing your own configuration or infrastructure? 
+#### Not interested in managing your own configuration or infrastructure?
 Learn more about Great Expectations Cloud — our fully managed SaaS offering. Sign up for [our weekly cloud workshop](https://greatexpectations.io/cloud)! You’ll get to see our newest features and apply for our private Alpha program!
