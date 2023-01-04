@@ -168,7 +168,7 @@ def _get_docstring_errors() -> List[DocstringError]:
     """Get all docstring errors."""
 
     filepaths_containing_public_api_entities = [
-        pathlib.Path(d.filepath).resolve() for d in _get_public_api_definitions()
+        pathlib.Path(d.filepath).resolve() for d in get_public_api_definitions()
     ]
     pydocstyle_raw_errors = run_pydocstyle(
         paths=filepaths_containing_public_api_entities
@@ -181,7 +181,7 @@ def _get_docstring_errors() -> List[DocstringError]:
     return parsed_pydocstyle_errors + parsed_darglint_errors
 
 
-def _get_public_api_definitions() -> Set[Definition]:
+def get_public_api_definitions() -> Set[Definition]:
     """Get entities marked with the @public_api decorator."""
     code_file_contents = FileContents.create_from_local_files(
         _default_code_absolute_paths()
@@ -198,7 +198,7 @@ def _public_api_docstring_errors() -> Set[DocstringError]:
     """Get all docstring errors for entities marked with the @public_api decorator."""
 
     logger.debug("Getting public api definitions.")
-    public_api_definitions = _get_public_api_definitions()
+    public_api_definitions = get_public_api_definitions()
     public_api_definition_tuples: Set[Tuple[str, str]] = {
         (str(_repo_relative_filepath(d.filepath)), d.name)
         for d in public_api_definitions

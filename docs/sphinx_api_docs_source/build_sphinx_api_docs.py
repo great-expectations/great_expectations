@@ -20,6 +20,7 @@ Typical usage example:
         doc_builder._build_html_api_docs_in_temp_folder(clean=clean)
         ...
 """
+import ast
 import importlib
 import logging
 import pathlib
@@ -29,6 +30,10 @@ from urllib.parse import urlparse
 
 import invoke
 from bs4 import BeautifulSoup
+
+from great_expectations.util import camel_to_snake
+from scripts.check_public_api_docstrings import get_public_api_definitions
+from scripts.public_api_report import Definition
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
@@ -184,23 +189,51 @@ class SphinxInvokeDocsBuilder:
 
     def _build_md_stubs(self):
         """Build markdown stubs with rst directives for auto documenting classes."""
-
+        # TODO: Flesh this out
         # 1. Parse code & find any classes marked with @public_api
         # 2. Parse code & find any classes with methods marked with @public_api NO - only if class is marked public_api
-        # 3. Parse code & find any module level functions marked with @public_api
+        # 3. Parse code & find any module level functions marked with @public_api # TODO
+        definitions = get_public_api_definitions()
+
         # 4. Generate dotted path to import class e.g. great_expectations.data_context.data_context.DataContext
-        # 5. Generate markdown stub string
-        markdown_stub_string = self._gen_md_stub_str()
-        # 6. Write markdown stub strings to files
-        filepath = self.base_path / "data_context.md"
-        with filepath.open("a") as f:
-            f.write(markdown_stub_string)
+        import_paths = []
+        for definition in definitions:
+            # print(definition)
+            if isinstance(definition.ast_definition, ast.ClassDef):
+                # 5. Generate markdown stub string
+                md_stub = self._create_md_stub(definition=definition)
 
-    def _gen_md_stub_str(self) -> str:
-        return """# DataContext
+                # 6. Write markdown stub strings to files
+                filepath = self.base_path / self._get_md_file_name(
+                    definition=definition
+                )
+                with filepath.open("a") as f:
+                    f.write(md_stub)
 
-```{eval-rst}
-.. autoclass:: great_expectations.data_context.data_context.DataContext
+    def _get_class_name(self, definition: Definition):
+        return definition.ast_definition.name
+
+    def _get_md_file_name(self, definition: Definition):
+        snake_name = camel_to_snake(self._get_class_name(definition=definition))
+        return f"{snake_name}.md"
+
+    def _convert_path_to_dotted_import(self, definition: Definition):
+        path = definition.filepath
+        relpath = path.relative_to(self.repo_root)
+        dotted_path_prefix = str(".".join(relpath.parts)).replace(".py", "")
+
+        class_name = self._get_class_name(definition=definition)
+        dotted_path = f"{dotted_path_prefix}.{class_name}"
+
+        return dotted_path
+
+    def _create_md_stub(self, definition: Definition) -> str:
+        class_name = self._get_class_name(definition=definition)
+        dotted_path = self._convert_path_to_dotted_import(definition=definition)
+        return f"""# {class_name}
+
+```{{eval-rst}}
+.. autoclass:: {dotted_path}
    :members:
    :inherited-members:
 
