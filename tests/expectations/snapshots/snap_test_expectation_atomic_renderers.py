@@ -549,14 +549,10 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_between 1
     "value": {
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "max_value": {"schema": {"type": "number"}, "value": 5},
             "min_value": {"schema": {"type": "number"}, "value": 1},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
-            "row_condition": {"schema": {"type": "string"}, "value": None},
-            "strict_max": {"schema": {"type": "boolean"}, "value": None},
-            "strict_min": {"schema": {"type": "boolean"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "$column values must be greater than or equal to $min_value and less than or equal to $max_value, at least $mostly_pct % of the time.",
@@ -660,14 +656,12 @@ snapshots[
     "value": {
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
             "parse_strings_as_datetimes": {
                 "schema": {"type": "boolean"},
                 "value": True,
             },
-            "row_condition": {"schema": {"type": "string"}, "value": None},
             "strictly": {"schema": {"type": "boolean"}, "value": 10},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
@@ -728,10 +722,8 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_of_type 1
     "value": {
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
-            "row_condition": {"schema": {"type": "string"}, "value": None},
             "type_": {"schema": {"type": "string"}, "value": "my_type"},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
@@ -745,10 +737,8 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_unique 1"
     "value": {
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
-            "row_condition": {"schema": {"type": "string"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "$column values must be unique, at least $mostly_pct % of the time.",
@@ -879,11 +869,9 @@ snapshots[
     "value": {
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
             "regex": {"schema": {"type": "string"}, "value": "^superconductive$"},
-            "row_condition": {"schema": {"type": "string"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "$column values must not match this regular expression: $regex, at least $mostly_pct % of the time.",
@@ -921,11 +909,11 @@ snapshots["test_atomic_prescriptive_summary_expect_compound_columns_to_be_unique
                 "schema": {"type": "array"},
                 "value": ["my_first_col", "my_second_col", "my_third_col"],
             },
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
-            "ignore_row_if": {"schema": {"type": "string"}, "value": None},
+            "column_list_0": {"schema": {"type": "string"}, "value": "my_first_col"},
+            "column_list_1": {"schema": {"type": "string"}, "value": "my_second_col"},
+            "column_list_2": {"schema": {"type": "string"}, "value": "my_third_col"},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
-            "row_condition": {"schema": {"type": "string"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "Values for given compound columns must be unique together, at least $mostly_pct % of the time: $column_list_0, $column_list_1, $column_list_2",
@@ -1013,9 +1001,9 @@ snapshots[
     "value": {
         "params": {
             "column_list": {"schema": {"type": "array"}, "value": ["a", "b", "c"]},
-            "v__0": {"schema": {"type": "string"}, "value": "a"},
-            "v__1": {"schema": {"type": "string"}, "value": "b"},
-            "v__2": {"schema": {"type": "string"}, "value": "c"},
+            "column_list_0": {"schema": {"type": "string"}, "value": "a"},
+            "column_list_1": {"schema": {"type": "string"}, "value": "b"},
+            "column_list_2": {"schema": {"type": "string"}, "value": "c"},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "Must have these columns in this order: $column_list_0, $column_list_1, $column_list_2",
