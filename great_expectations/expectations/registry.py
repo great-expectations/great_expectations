@@ -16,7 +16,6 @@ from typing import (
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import IDDict
-from great_expectations.core.metric import Metric
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
@@ -60,7 +59,7 @@ class RendererImpl(NamedTuple):
 
 def register_renderer(
     object_name: str,
-    parent_class: Type[Union[Expectation, Metric]],
+    parent_class: Type[Expectation],
     renderer_fn: Callable[..., Union[RenderedAtomicContent, RenderedContent]],
 ):
     # noinspection PyUnresolvedReferences
