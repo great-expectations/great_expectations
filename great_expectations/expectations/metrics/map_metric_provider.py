@@ -1828,11 +1828,14 @@ def _pandas_map_condition_query(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
+    #
     domain_values_df: pd.DataFrame = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs
     )
-    domain_values = domain_values_df[boolean_mapped_unexpected_values == True]
-    return domain_values.index.to_list()
+    domain_values_df_filtered: pd.DataFrame = domain_values_df[
+        boolean_mapped_unexpected_values == True
+    ]
+    return domain_values_df_filtered.index.to_list()
 
 
 def _pandas_column_map_condition_value_counts(
