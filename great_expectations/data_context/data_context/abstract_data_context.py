@@ -50,7 +50,6 @@ from great_expectations.core.config_provider import (
 )
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serializer import (
     AbstractConfigSerializer,
@@ -91,6 +90,7 @@ from great_expectations.data_context.types.refs import (
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
+    ValidationMetricIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import (
@@ -292,6 +292,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         config_provider.register_provider(
             _RuntimeEnvironmentConfigurationProvider(self.runtime_environment)
         )
+
+    @abstractmethod
+    def _init_project_config(
+        self, project_config: Union[DataContextConfig, Mapping]
+    ) -> DataContextConfig:
+        raise NotImplementedError
 
     @abstractmethod
     def _init_variables(self) -> DataContextVariables:
