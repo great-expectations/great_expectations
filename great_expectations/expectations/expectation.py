@@ -1599,7 +1599,7 @@ class Expectation(metaclass=MetaExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         value_set: List[Optional[Any]] = renderer_configuration.params.value_set.value
-        if len(value_set) > 0:
+        if value_set:
             for idx, value in enumerate(value_set):
                 if isinstance(value, Number):
                     param_type = RendererValueType.NUMBER
@@ -1614,13 +1614,45 @@ class Expectation(metaclass=MetaExpectation):
     @param_method(param_name="value_set")
     def _get_value_set_string(renderer_configuration: RendererConfiguration) -> str:
         value_set: List[Optional[Any]] = renderer_configuration.params.value_set.value
-        if len(value_set) > 0:
+        if value_set:
             value_set_str = " ".join(
                 [f"$v__{str(idx)}" for idx in range(len(value_set))]
             )
         else:
             value_set_str = "[ ]"
         return value_set_str
+
+    @staticmethod
+    @param_method(param_name="column_list")
+    def _add_column_list_params(
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        column_list: List[
+            Optional[Any]
+        ] = renderer_configuration.params.column_list.value
+        if column_list:
+            for idx, value in enumerate(column_list):
+                if isinstance(value, Number):
+                    param_type = RendererValueType.NUMBER
+                else:
+                    param_type = RendererValueType.STRING
+                renderer_configuration.add_param(
+                    name=f"column_list_{str(idx)}", param_type=param_type, value=value
+                )
+        return renderer_configuration
+
+    @staticmethod
+    @param_method(param_name="column_list")
+    def _get_column_list_string(renderer_configuration: RendererConfiguration) -> str:
+        column_list: List[
+            Optional[Any]
+        ] = renderer_configuration.params.column_list.value
+        column_list_str = ""
+        if column_list:
+            column_list_str = ", ".join(
+                [f"$column_list_{str(idx)}" for idx in range(len(column_list))]
+            )
+        return column_list_str
 
     @staticmethod
     @param_method(param_name="mostly")

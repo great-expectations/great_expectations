@@ -98,90 +98,39 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        styling = runtime_configuration.get("styling")
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: List[AddParamArgs] = [
+            ("column_list", RendererValueType.ARRAY),
+            ("ignore_row_if", RendererValueType.STRING),
+            ("mostly", RendererValueType.NUMBER),
+        ]
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            [
-                "column_list",
-                "ignore_row_if",
-                "row_condition",
-                "condition_parser",
-                "mostly",
-            ],
-        )
-        params_with_json_schema = {
-            "column_list": {
-                "schema": {"type": "array"},
-                "value": params.get("column_list"),
-            },
-            "ignore_row_if": {
-                "schema": {"type": "string"},
-                "value": params.get("ignore_row_if"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-            "mostly": {
-                "schema": {"type": "number"},
-                "value": params.get("mostly"),
-            },
-            "mostly_pct": {
-                "schema": {"type": "string"},
-                "value": params.get("mostly_pct"),
-            },
-        }
+        params = renderer_configuration.params
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:
-            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+        if params.mostly and params.mostly.value < 1.0:
+            renderer_configuration = cls._add_mostly_pct_param(
+                renderer_configuration=renderer_configuration
             )
             template_str = "Values for given compound columns must be unique together, at least $mostly_pct % of the time: "
         else:
             template_str = "Values for given compound columns must be unique together: "
 
-        column_list = params.get("column_list") if params.get("column_list") else []
-
-        if len(column_list) > 0:
-            for idx, val in enumerate(column_list[:-1]):
-                param = f"$column_list_{idx}"
-                template_str += f"{param}, "
-                params[param] = val
-
-            last_idx = len(column_list) - 1
-            last_param = f"$column_list_{last_idx}"
-            template_str += last_param
-            params[last_param] = column_list[last_idx]
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
+        if params.column_list:
+            renderer_configuration = cls._add_column_list_params(
+                renderer_configuration=renderer_configuration
             )
-            template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
+            template_str += cls._get_column_list_string(
+                renderer_configuration=renderer_configuration
             )
-            params_with_json_schema.update(conditional_params)
 
-        return template_str, params_with_json_schema, None, styling
+        renderer_configuration.template_str = template_str
+
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
