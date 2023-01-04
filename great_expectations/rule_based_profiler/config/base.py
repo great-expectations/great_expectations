@@ -25,8 +25,6 @@ from great_expectations.util import (
 )
 
 if TYPE_CHECKING:
-    from marshmallow import Schema
-
     from great_expectations.rule_based_profiler.rule.rule import Rule
     from great_expectations.rule_based_profiler.rule_based_profiler import (
         RuleBasedProfiler,
