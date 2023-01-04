@@ -1807,38 +1807,31 @@ def _pandas_map_condition_query(
     metrics: Dict[str, Any],
     **kwargs,
 ) -> Optional[List[Any]]:
-    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+    """
+    Returns query that will return all rows which do not meet an expected Expectation condition for instances
+    of ColumnMapExpectation. For Pandas, this is currently the full set of unexpected_indices.
+
+    Requires `unexpected_index_column_names` to be part of `result_format` dict to specify primary_key columns
+    to return, along with column the Expectation is run on.
+    """
+    result_format: dict = metric_value_kwargs["result_format"]
+
+    # We will not return map_condition_query if return_unexpected_index_query = False
+    return_unexpected_index_query: bool = result_format.get(
+        "return_unexpected_index_query"
+    )
+    if return_unexpected_index_query is False:
+        return
+
     (
         boolean_mapped_unexpected_values,
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
-    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
-
-    if "column" not in accessor_domain_kwargs:
-        raise ValueError(
-            """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
-(_pandas_column_map_condition_values).
-"""
-        )
-    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
-    column_name = get_dbms_compatible_column_names(
-        column_names=column_name,
-        batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
+    domain_values_df: pd.DataFrame = execution_engine.get_domain_records(
+        domain_kwargs=compute_domain_kwargs
     )
-    ###
-    # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
-    # currently handle filter_column_isnull differently than other map_fn / map_condition
-    # cases.
-    ###
-    filter_column_isnull = kwargs.get(
-        "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
-    )
-    if filter_column_isnull:
-        df = df[df[column_name].notnull()]
-    domain_values = df[column_name]
-    domain_values = domain_values[boolean_mapped_unexpected_values == True]
+    domain_values = domain_values_df[boolean_mapped_unexpected_values == True]
     return domain_values.index.to_list()
 
 

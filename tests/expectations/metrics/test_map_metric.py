@@ -22,10 +22,7 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.execution_engine import (
     MetricPartialFunctionTypes,
 )
-from great_expectations.expectations.core import (
-    ExpectColumnValueLengthsToEqual,
-    ExpectColumnValuesToBeInSet,
-)
+from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
 from great_expectations.expectations.metrics import (
     ColumnMax,
     ColumnValuesNonNull,
