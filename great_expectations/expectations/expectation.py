@@ -2285,7 +2285,7 @@ representation."""
         else:
             below_max = True
 
-        success = above_min and below_max
+        success = bool(above_min and below_max)
 
         return {"success": success, "result": {"observed_value": metric_value}}
 
