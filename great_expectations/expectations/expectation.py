@@ -2272,9 +2272,6 @@ class TableExpectation(Expectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ) -> Dict[str, Union[bool, Dict[str, Any]]]:
-        # TODO: <Alex>ALEX</Alex>
-        metrics = convert_to_json_serializable(data=metrics)
-        # TODO: <Alex>ALEX</Alex>
         metric_value: Optional[Any] = metrics.get(metric_name)
 
         if metric_value is None:
@@ -2359,7 +2356,7 @@ representation."""
         else:
             below_max = True
 
-        success = above_min and below_max
+        success = bool(above_min and below_max)
 
         return {"success": success, "result": {"observed_value": metric_value}}
 
