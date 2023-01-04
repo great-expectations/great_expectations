@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 import pathlib
+import warnings
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Dict, List, Type, Union
 
@@ -31,6 +32,10 @@ _MISSING_XDATASOURCES_ERRORS: Final[List[PydanticErrorDict]] = [
         "type": "value_error.missing",
     }
 ]
+
+
+class GxConfigDeepCopyWarning(RuntimeWarning):
+    pass
 
 
 class GxConfig(ExperimentalBaseModel):
@@ -115,7 +120,11 @@ class GxConfig(ExperimentalBaseModel):
         return self.copy(deep=False)
 
     def __deepcopy__(self, memo):
-        # TODO: raise warning an filter in instantiate_class_from_config
+        LOGGER.debug(f"{type(self).__name__} __deep_copy__")
+        warnings.warn(
+            f"{type(self).__name__}.__deepcopy__ returns a shallow copy",
+            GxConfigDeepCopyWarning,
+        )
         copy = self.copy(deep=False)
         memo[id(copy)] = copy
         return copy
