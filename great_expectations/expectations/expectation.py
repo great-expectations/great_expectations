@@ -73,6 +73,7 @@ from great_expectations.exceptions import (
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
+    SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.registry import (
@@ -863,7 +864,7 @@ class Expectation(metaclass=MetaExpectation):
             query = result_dict.get("unexpected_index_query")
             query_info = CollapseContent(
                 **{
-                    "collapse_toggle_link": "Show query to retrieve all unexpected values...",
+                    "collapse_toggle_link": "To retrieve all unexpected values...",
                     "collapse": [
                         RenderedStringTemplateContent(
                             **{
@@ -1753,6 +1754,7 @@ class Expectation(metaclass=MetaExpectation):
                 expectation_type=exp_test["expectation_type"],
                 test=exp_test["test"],
                 raise_exception=False,
+                debug_logger=debug_logger,
             )
             _end = time.time()
             _duration = _end - _start
@@ -2579,7 +2581,22 @@ class ColumnMapExpectation(TableExpectation, ABC):
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
             )
-        if isinstance(execution_engine, SqlAlchemyExecutionEngine):
+            metric_kwargs = get_metric_kwargs(
+                f"{self.map_metric}.unexpected_index_query",
+                configuration=configuration,
+                runtime_configuration=runtime_configuration,
+            )
+            validation_dependencies.set_metric_configuration(
+                metric_name=f"{self.map_metric}.unexpected_index_query",
+                metric_configuration=MetricConfiguration(
+                    metric_name=f"{self.map_metric}.unexpected_index_query",
+                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                ),
+            )
+        if isinstance(
+            execution_engine, (SparkDFExecutionEngine, SqlAlchemyExecutionEngine)
+        ):
             if "unexpected_index_column_names" in validation_dependencies.result_format:
                 metric_kwargs = get_metric_kwargs(
                     f"{self.map_metric}.unexpected_index_list",

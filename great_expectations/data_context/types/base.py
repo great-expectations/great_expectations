@@ -947,6 +947,7 @@ class ExecutionEngineConfig(DictDot):
         azure_options=None,
         gcs_options=None,
         credentials_info=None,
+        connect_args=None,
         **kwargs,
     ) -> None:
         self._class_name = class_name
@@ -969,6 +970,8 @@ class ExecutionEngineConfig(DictDot):
             self.gcs_options = gcs_options
         if credentials_info is not None:
             self.credentials_info = credentials_info
+        if connect_args is not None:
+            self.connect_args = connect_args
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -1003,6 +1006,9 @@ class ExecutionEngineConfigSchema(Schema):
     spark_config = fields.Raw(required=False, allow_none=True)
     boto3_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
+    connect_args = fields.Dict(
+        keys=fields.Str(), values=fields.Dict(), required=False, allow_none=True
     )
     azure_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
@@ -1597,6 +1603,11 @@ class DataContextConfigSchema(Schema):
         required=False,
         allow_none=True,
     )
+    xdatasources = fields.Dict(
+        required=False,
+        allow_none=True,
+        load_only=True,
+    )
     expectations_store_name = fields.Str()
     validations_store_name = fields.Str()
     evaluation_parameter_store_name = fields.Str()
@@ -1628,7 +1639,8 @@ class DataContextConfigSchema(Schema):
     REMOVE_KEYS_IF_NONE = [
         "concurrency",  # 0.13.33
         "progress_bars",  # 0.13.49
-        "include_rendered_content",  # 0.15.19
+        "include_rendered_content",  # 0.15.19,
+        "xdatasources",
     ]
 
     # noinspection PyUnusedLocal
@@ -2314,6 +2326,7 @@ class DataContextConfig(BaseYamlConfig):
                 Dict[str, Dict[str, Union[Dict[str, str], str, dict]]],
             ]
         ] = None,
+        xdatasources: Optional[dict] = None,
         expectations_store_name: Optional[str] = None,
         validations_store_name: Optional[str] = None,
         evaluation_parameter_store_name: Optional[str] = None,
@@ -2332,6 +2345,9 @@ class DataContextConfig(BaseYamlConfig):
         progress_bars: Optional[ProgressBarsConfig] = None,
         include_rendered_content: Optional[IncludeRenderedContentConfig] = None,
     ) -> None:
+        if xdatasources:
+            logger.warning("`xdatasources` are an experimental feature")
+
         # Set defaults
         if config_version is None:
             config_version = DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value
