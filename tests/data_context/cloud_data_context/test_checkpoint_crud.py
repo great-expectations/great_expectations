@@ -128,23 +128,8 @@ def mocked_get_response(
 
 @pytest.mark.cloud
 @pytest.mark.integration
-@pytest.mark.parametrize(
-    "data_context_fixture_name",
-    [
-        # In order to leverage existing fixtures in parametrization, we provide
-        # their string names and dynamically retrieve them using pytest's built-in
-        # `request` fixture.
-        # Source: https://stackoverflow.com/a/64348247
-        pytest.param(
-            "empty_base_data_context_in_cloud_mode",
-            id="BaseDataContext",
-        ),
-        pytest.param("empty_data_context_in_cloud_mode", id="DataContext"),
-        pytest.param("empty_cloud_data_context", id="CloudDataContext"),
-    ],
-)
 def test_cloud_backed_data_context_add_checkpoint(
-    data_context_fixture_name: str,
+    empty_cloud_data_context: CloudDataContext,
     checkpoint_id: str,
     validation_ids: Tuple[str, str],
     checkpoint_config: dict,
@@ -152,13 +137,12 @@ def test_cloud_backed_data_context_add_checkpoint(
     mocked_get_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    request,
 ) -> None:
     """
     All Cloud-backed contexts (DataContext, BaseDataContext, and CloudDataContext) should save to a Cloud-backed CheckpointStore when calling `add_checkpoint`.
     When saving, it should use the id from the response to create the checkpoint.
     """
-    context = request.getfixturevalue(data_context_fixture_name)
+    context = empty_cloud_data_context
 
     # Make sure the fixture has the right configuration
     assert isinstance(context, CloudDataContext)
