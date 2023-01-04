@@ -131,7 +131,7 @@ with something like:
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L116
+```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L115
 ```
 
 with this one:
@@ -656,7 +656,7 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L105-L110
+```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L104-L109
 ```
 
 would become
