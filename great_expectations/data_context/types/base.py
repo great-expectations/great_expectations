@@ -175,7 +175,7 @@ class BaseYamlConfig(SerializableDictDot):
         raise NotImplementedError
 
     @classmethod
-    def get_schema_class(cls):
+    def get_schema_class(cls) -> Type[Schema]:
         raise NotImplementedError
 
 
