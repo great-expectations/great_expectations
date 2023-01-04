@@ -303,7 +303,7 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/multicolumn_map_expectation_template.py#L119-L123
+```python file=../../../../examples/expectations/multicolumn_map_expectation_template.py#L119-L124
 ```
 
 would become
