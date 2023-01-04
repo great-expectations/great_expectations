@@ -194,6 +194,19 @@ def get_public_api_definitions() -> Set[Definition]:
     return public_api_checker.get_all_public_api_definitions()
 
 
+def get_public_api_module_level_function_definitions() -> Set[Definition]:
+    """Get module level functions marked with the @public_api decorator."""
+    code_file_contents = FileContents.create_from_local_files(
+        _default_code_absolute_paths()
+    )
+
+    code_parser = CodeParser(file_contents=code_file_contents)
+
+    public_api_checker = PublicAPIChecker(code_parser=code_parser)
+
+    return public_api_checker.get_module_level_function_public_api_definitions()
+
+
 def _public_api_docstring_errors() -> Set[DocstringError]:
     """Get all docstring errors for entities marked with the @public_api decorator."""
 

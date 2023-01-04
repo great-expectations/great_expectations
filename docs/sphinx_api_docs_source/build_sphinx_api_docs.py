@@ -17,7 +17,7 @@ Typical usage example:
 
         doc_builder = SphinxInvokeDocsBuilder(ctx=ctx)
         doc_builder.exit_with_error_if_docs_dependencies_are_not_installed()
-        doc_builder._build_html_api_docs_in_temp_folder(clean=clean)
+        doc_builder.build_docs(clean=clean)
         ...
 """
 import ast
@@ -32,7 +32,10 @@ import invoke
 from bs4 import BeautifulSoup
 
 from great_expectations.util import camel_to_snake
-from scripts.check_public_api_docstrings import get_public_api_definitions
+from scripts.check_public_api_docstrings import (
+    get_public_api_definitions,
+    get_public_api_module_level_function_definitions,
+)
 from scripts.public_api_report import Definition
 
 logger = logging.getLogger(__name__)
@@ -70,6 +73,7 @@ class SphinxInvokeDocsBuilder:
         self._remove_md_stubs()
 
         self._build_class_md_stubs()
+        self._build_module_md_stubs()
 
         self._build_html_api_docs_in_temp_folder()
 
@@ -125,7 +129,8 @@ class SphinxInvokeDocsBuilder:
             p
             for p in paths
             if p.is_file()
-            and p.name not in ("genindex.html", "search.html", "index.html")
+            and p.name
+            not in ("genindex.html", "search.html", "index.html", "py-modindex.html")
             and "_static" not in str(p)
         ]
 
@@ -144,6 +149,15 @@ class SphinxInvokeDocsBuilder:
                 # Add class="sphinx-api-doc" to section tag to reference in css
                 doc = soup.find("section")
                 doc["class"] = "sphinx-api-doc"
+
+                # Change style to styles to avoid rendering errors
+                tags_with_style = doc.find_all(
+                    "col", style=lambda value: value in value
+                )
+                for tag in tags_with_style:
+                    style = tag["style"]
+                    del tag["style"]
+                    tag["styles"] = style
 
                 # Process documentation links
                 external_refs = doc.find_all(class_="reference external")
@@ -202,9 +216,13 @@ class SphinxInvokeDocsBuilder:
             f.write(stub)
 
     def _build_module_md_stubs(self):
-        """Build markdown"""
-        # 3. Parse code & find any module level functions marked with @public_api # TODO
-        pass
+        """Build markdown stub files with rst directives for auto documenting modules."""
+
+        definitions = get_public_api_module_level_function_definitions()
+
+        for definition in definitions:
+            md_stub = self._create_module_md_stub(definition=definition)
+            self._write_stub(stub=md_stub, definition=definition)
 
     def _get_class_name(self, definition: Definition):
         return definition.ast_definition.name
@@ -214,14 +232,19 @@ class SphinxInvokeDocsBuilder:
         return f"{snake_name}.md"
 
     def _get_dotted_import_of_class(self, definition: Definition):
-        path = definition.filepath
-        relpath = path.relative_to(self.repo_root)
-        dotted_path_prefix = str(".".join(relpath.parts)).replace(".py", "")
+        dotted_path_prefix = self._get_dotted_path_prefix(definition=definition)
 
         class_name = self._get_class_name(definition=definition)
         dotted_path = f"{dotted_path_prefix}.{class_name}"
 
         return dotted_path
+
+    def _get_dotted_path_prefix(self, definition: Definition):
+        """Get the dotted path up to the class or function name."""
+        path = definition.filepath
+        relpath = path.relative_to(self.repo_root)
+        dotted_path_prefix = str(".".join(relpath.parts)).replace(".py", "")
+        return dotted_path_prefix
 
     def _create_md_stub(self, definition: Definition) -> str:
         class_name = self._get_class_name(definition=definition)
@@ -237,13 +260,13 @@ class SphinxInvokeDocsBuilder:
 """
 
     def _create_module_md_stub(self, definition: Definition) -> str:
-        # TODO: Replace with module name
-        class_name = self._get_class_name(definition=definition)
-        dotted_import = self._get_dotted_import_of_class(definition=definition)
-        return f"""# {class_name}
+
+        dotted_path_prefix = self._get_dotted_path_prefix(definition=definition)
+
+        return f"""# {dotted_path_prefix}
 
 ```{{eval-rst}}
-.. automodule:: {dotted_import}
+.. automodule:: {dotted_path_prefix}
    :members:
    :inherited-members:
 
