@@ -207,10 +207,11 @@ class SphinxInvokeDocsBuilder:
 
         for definition in definitions:
             if isinstance(definition.ast_definition, ast.ClassDef):
-                md_stub = self._create_md_stub(definition=definition)
+                md_stub = self._create_class_md_stub(definition=definition)
                 self._write_stub(stub=md_stub, definition=definition)
 
     def _write_stub(self, stub: str, definition: Definition) -> None:
+        """Write the markdown stub file with appropriate filename."""
         filepath = self.base_path / self._get_md_file_name(definition=definition)
         with filepath.open("a") as f:
             f.write(stub)
@@ -224,17 +225,23 @@ class SphinxInvokeDocsBuilder:
             md_stub = self._create_module_md_stub(definition=definition)
             self._write_stub(stub=md_stub, definition=definition)
 
-    def _get_class_name(self, definition: Definition):
+    def _get_entity_name(self, definition: Definition):
+        """Get the name of the entity (class, module, function)."""
         return definition.ast_definition.name
 
     def _get_md_file_name(self, definition: Definition):
-        snake_name = camel_to_snake(self._get_class_name(definition=definition))
+        """Generate markdown file name from the entity definition."""
+        snake_name = camel_to_snake(self._get_entity_name(definition=definition))
         return f"{snake_name}.md"
 
-    def _get_dotted_import_of_class(self, definition: Definition):
+    def _get_dotted_path_to_class(self, definition: Definition):
+        """Get the dotted path to a class.
+
+        e.g. great_expectations.core.expectation_suite.ExpectationSuite
+        """
         dotted_path_prefix = self._get_dotted_path_prefix(definition=definition)
 
-        class_name = self._get_class_name(definition=definition)
+        class_name = self._get_entity_name(definition=definition)
         dotted_path = f"{dotted_path_prefix}.{class_name}"
 
         return dotted_path
@@ -246,9 +253,10 @@ class SphinxInvokeDocsBuilder:
         dotted_path_prefix = str(".".join(relpath.parts)).replace(".py", "")
         return dotted_path_prefix
 
-    def _create_md_stub(self, definition: Definition) -> str:
-        class_name = self._get_class_name(definition=definition)
-        dotted_import = self._get_dotted_import_of_class(definition=definition)
+    def _create_class_md_stub(self, definition: Definition) -> str:
+        """Create the markdown stub content for a class."""
+        class_name = self._get_entity_name(definition=definition)
+        dotted_import = self._get_dotted_path_to_class(definition=definition)
         return f"""# {class_name}
 
 ```{{eval-rst}}
@@ -260,7 +268,7 @@ class SphinxInvokeDocsBuilder:
 """
 
     def _create_module_md_stub(self, definition: Definition) -> str:
-
+        """Create the markdown stub content for a module."""
         dotted_path_prefix = self._get_dotted_path_prefix(definition=definition)
 
         return f"""# {dotted_path_prefix}
@@ -274,7 +282,7 @@ class SphinxInvokeDocsBuilder:
 """
 
     def _remove_md_stubs(self):
-        """Remove markdown stubs."""
+        """Remove all markdown stub files."""
 
         excluded_files: Tuple[pathlib.Path, ...] = (
             self.base_path / "index.md",
