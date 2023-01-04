@@ -122,7 +122,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
 
         one_batch_table_columns_names_value: MetricValue
         multi_batch_table_columns_names_sets_as_list: List[Set[str]] = [
-            set({one_batch_table_columns_names_value})  # type: ignore[arg-type] # could be dict
+            set(one_batch_table_columns_names_value)  # type: ignore[arg-type] # could be dict
             for one_batch_table_columns_names_value in table_columns_names_multi_batch_value  # type: ignore[union-attr] # not all iterable
         ]
 
