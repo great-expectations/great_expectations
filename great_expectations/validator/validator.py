@@ -1117,6 +1117,7 @@ class Validator:
 
             try:
                 if self._data_context is None:
+                    # TODO: <Alex>ALEX</Alex>
                     # Support for GX-V2 (to be deprecated soon).
                     expectation_validation_graph = ExpectationValidationGraph(
                         configuration=evaluated_config,
@@ -1125,6 +1126,7 @@ class Validator:
                             runtime_configuration=runtime_configuration,
                         ),
                     )
+                    # TODO: <Alex>ALEX</Alex>
                 else:
                     # Support for GX-V4 (multi-Batch).
                     expectation_validation_graph = ExpectationValidationGraph(

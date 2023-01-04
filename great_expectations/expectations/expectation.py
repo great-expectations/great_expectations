@@ -1035,11 +1035,13 @@ class Expectation(metaclass=MetaExpectation):
 
         provided_metrics: Dict[str, MetricValue]
         if validator.data_context is None:
+            # TODO: <Alex>ALEX</Alex>
             # Support for GX-V2 (to be deprecated soon).
             provided_metrics = {
                 metric_name: metrics[metric_configuration.id]
                 for metric_name, metric_configuration in validation_dependencies.metric_configurations.items()
             }
+            # TODO: <Alex>ALEX</Alex>
         else:
             # Support for GX-V4 (multi-Batch).
             metrics_by_domain: Optional[
@@ -1054,7 +1056,6 @@ class Expectation(metaclass=MetaExpectation):
             # TODO: <Alex>ALEX-MULTI_BATCH -- Many GX codebase tests do not pass in multi-Batch mode, because all but two (2) example multi-Batch Expectations are developed in single-Batch style.  One of action items is to upgrade all single/active-Batch Expectation implementations to adopt multi-Batch style.</Alex>
             # TODO: <Alex>ALEX -- To support multi-Batch Expectations, uncomment code between the next two (2) "TODO" comments and comment out the single-Batch code between two (2) "TODO" comments in section below.</Alex>
             # TODO: <Alex>ALEX</Alex>
-            # # TODO: <Alex>ALEX -- This access/lookup can be simplified.</Alex>
             # # noinspection PyTypeChecker
             # provided_metrics: Dict[str, MetricValue] = {
             #     metric_name: list(
