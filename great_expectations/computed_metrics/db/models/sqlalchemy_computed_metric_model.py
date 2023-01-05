@@ -40,7 +40,7 @@ class ComputedMetric(
     AccountMixin,
 ):
     """
-    SQLAlchemy model for each row in "computed_metric" table.
+    SQLAlchemy model for each row in "computed_metrics" table.
     """
 
     id = sa.Column(sa.Integer(), nullable=False, primary_key=True)
