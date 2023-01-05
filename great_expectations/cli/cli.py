@@ -45,7 +45,7 @@ class CLIState:
         ).get(
             "directory"
         )
-        context: FileDataContext = toolkit.load_data_context_with_error_handling(
+        context: FileDataContext = toolkit.load_data_context_with_error_handling(  # type: ignore[assignment] # will exit if error
             directory=directory,
             from_cli_upgrade_command=False,
         )
@@ -82,7 +82,7 @@ class CLI(click.MultiCommand):
 
         return commands
 
-    def get_command(self, ctx: click.Context, name: str) -> Optional[str]:
+    def get_command(self, ctx: click.Context, name: str) -> Optional[str]:  # type: ignore[override] # MultiCommand returns `Optional[Command]`
         module_name = name.replace("-", "_")
         legacy_module = ""
         if not self.is_v3_api(ctx):
@@ -95,7 +95,7 @@ class CLI(click.MultiCommand):
 
         except ModuleNotFoundError:
             cli_message(
-                f"<red>The command `{name}` does not exist.\nPlease use one of: {self.list_commands(None)}</red>"
+                f"<red>The command `{name}` does not exist.\nPlease use one of: {self.list_commands(None)}</red>"  # type: ignore[arg-type] # expects click Context
             )
             return None
 
@@ -114,11 +114,11 @@ class CLI(click.MultiCommand):
     def is_v3_api(ctx: click.Context) -> bool:
         """Determine if v3 api is requested by searching context params."""
         if ctx.params:
-            return ctx.params and "v3_api" in ctx.params.keys() and ctx.params["v3_api"]
+            return ctx.params and "v3_api" in ctx.params.keys() and ctx.params["v3_api"]  # type: ignore[return-value]  # could be non-bool
 
         root_ctx_params = ctx.find_root().params
         return (
-            root_ctx_params
+            root_ctx_params  # type: ignore[return-value]  # could be non-bool
             and "v3_api" in root_ctx_params.keys()
             and root_ctx_params["v3_api"]
         )
@@ -186,7 +186,7 @@ def cli(
         cli_message("Using v2 (Batch Kwargs) API")
 
         ge_config_version: float = (
-            ctx.obj.get_data_context_from_config_file().get_config().config_version
+            ctx.obj.get_data_context_from_config_file().get_config().config_version  # type: ignore[union-attr]  # config_version
         )
         if ge_config_version >= FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE:
             raise ge_exceptions.InvalidDataContextConfigError(

@@ -52,7 +52,6 @@ exclude = [
     'checkpoint/types/checkpoint_result\.py',  # 34
     'checkpoint/util\.py',  # 5
     'cli/checkpoint\.py',  # 9
-    'cli/cli\.py',  # 8
     'cli/suite\.py',  # 24
     'cli/upgrade_helpers/upgrade_helper_v11\.py',  # 59
     'cli/upgrade_helpers/upgrade_helper_v13\.py',  # 17
