@@ -1,3 +1,4 @@
+import copy
 import difflib
 import functools
 import logging
@@ -162,6 +163,12 @@ def test_zep_simple_validate_workflow(zep_file_context: FileDataContext):
 
 
 @pytest.mark.unit
+def test_zep_deep_copy_raises_warning(zep_only_config: GxConfig):
+    with pytest.warns(ZEPDeepCopyWarning):
+        copy.deepcopy(zep_only_config)
+
+
+@pytest.mark.unit
 def test_save_project_does_not_break(zep_file_context: FileDataContext):
     print(zep_file_context.zep_config)
     zep_file_context._save_project_config()
@@ -172,15 +179,6 @@ def test_variables_save_config_does_not_break(zep_file_context: FileDataContext)
     print(zep_file_context.zep_config)
     print(zep_file_context.variables)
     zep_file_context.variables.save_config()
-
-
-@pytest.mark.unit
-def test_save_datacontext_config_raises_warning(zep_file_context: FileDataContext):
-    with pytest.warns(ZEPDeepCopyWarning):
-        # NOTE: difference between `variables.save_config()` + `_save_project_config()`
-        # TODO: revisit this...
-        # zep_file_context._save_project_config()
-        zep_file_context.variables.save_config()
 
 
 @pytest.mark.unit
