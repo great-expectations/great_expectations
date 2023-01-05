@@ -15,6 +15,7 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
     Args:
         template_dict: dict with the following keys: \
             column_list (columns to check uniqueness on separated by comma)
+        condition: the filter - for boolean column, you can provide just the column name (evaluated to True)
     """
 
     metric_dependencies = ("query.template_values",)
@@ -23,6 +24,7 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
             SELECT COUNT(1) FROM (
             SELECT {column_list}, COUNT(1)
             FROM {active_batch}
+            WHERE {condition}
             GROUP BY {column_list}
             HAVING count(1) > 1
             )
@@ -34,6 +36,8 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
         "query",
         "template_dict",
         "batch_id",
+        "row_condition",
+        "condition_parser",
     )
     default_kwarg_values = {
         "include_config": True,
@@ -106,6 +110,7 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
                     "in": {
                         "template_dict": {
                             "column_list": "unique_num,unique_str,unique_str2",
+                            "condition": "1=1",
                         }
                     },
                     "out": {"success": True},
@@ -118,9 +123,23 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
                     "in": {
                         "template_dict": {
                             "column_list": "duplicate_num,duplicate_str,duplicate_str2",
+                            "condition": "1=1",
                         }
                     },
                     "out": {"success": False},
+                    "only_for": ["sqlite"],
+                },
+                {
+                    "title": "passing_condition_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "template_dict": {
+                            "column_list": "unique_num,unique_str,duplicate_str2",
+                            "condition": "duplicate_str2!='a'",
+                        }
+                    },
+                    "out": {"success": True},
                     "only_for": ["sqlite"],
                 },
             ],
@@ -129,7 +148,7 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
 
     library_metadata = {
         "tags": ["query-based"],
-        "contributors": ["@itaise"],
+        "contributors": ["@itaise", "@maayaniti"],
     }
 
 
