@@ -109,7 +109,7 @@ ExpectColumnPairValuesToMatchSomeCriteria().print_diagnostic_checklist()
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py#L147
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py#L146
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -304,12 +304,12 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/column_pair_map_expectation_template.py#L117-L122
+```python file=../../../../examples/expectations/column_pair_map_expectation_template.py#L116-L121
 ```
 
 would become
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py#L135-L141
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py#L134-L140
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!

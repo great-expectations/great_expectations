@@ -11,6 +11,7 @@ import warnings
 from typing import (
     TYPE_CHECKING,
     Any,
+    ClassVar,
     Dict,
     List,
     MutableMapping,
@@ -88,9 +89,9 @@ BYC = TypeVar("BYC", bound="BaseYamlConfig")
 
 
 class BaseYamlConfig(SerializableDictDot):
-    _config_schema_class = None
+    _config_schema_class: ClassVar[Optional[Type[Schema]]] = None
 
-    exclude_field_names: Set[str] = {
+    exclude_field_names: ClassVar[Set[str]] = {
         "commented_map",
     }
 
@@ -174,7 +175,7 @@ class BaseYamlConfig(SerializableDictDot):
         raise NotImplementedError
 
     @classmethod
-    def get_schema_class(cls):
+    def get_schema_class(cls) -> Type[Schema]:
         raise NotImplementedError
 
 

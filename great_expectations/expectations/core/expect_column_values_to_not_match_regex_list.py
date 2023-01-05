@@ -97,8 +97,7 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
         try:
             assert "regex_list" in configuration.kwargs, "regex_list is required"
             assert isinstance(

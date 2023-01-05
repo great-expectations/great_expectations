@@ -77,8 +77,7 @@ class ExpectColumnAggregateToMatchSomeCriteria(ColumnExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

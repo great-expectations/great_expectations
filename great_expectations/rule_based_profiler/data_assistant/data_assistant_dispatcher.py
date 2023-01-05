@@ -31,7 +31,7 @@ class DataAssistantDispatcher:
         """
         self._data_context = data_context
 
-        self._data_assistant_runner_cache = {}
+        self._data_assistant_runner_cache: dict = {}
 
     def __getattr__(self, name: str) -> DataAssistantRunner:
         # Both, registered data_assistant_type and alias name are supported for invocation.

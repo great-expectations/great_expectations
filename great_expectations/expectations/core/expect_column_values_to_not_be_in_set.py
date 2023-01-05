@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -26,7 +26,7 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.render.renderer_configuration import RendererParams
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
 class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
@@ -124,8 +124,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     ) -> None:
         """Validates that a value_set has been provided."""
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
         try:
             assert "value_set" in configuration.kwargs, "value_set is required"
             assert isinstance(
@@ -143,16 +142,16 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args = (
+        add_param_args: List[AddParamArgs] = [
             ("column", RendererValueType.STRING),
             ("value_set", RendererValueType.ARRAY),
             ("mostly", RendererValueType.NUMBER),
             ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
-        )
+        ]
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
-        params: RendererParams = renderer_configuration.params
+        params = renderer_configuration.params
         template_str = ""
 
         if params.value_set:

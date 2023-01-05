@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -19,7 +19,7 @@ from great_expectations.render.renderer_configuration import (
 from great_expectations.render.util import ordinal, substitute_none_for_missing
 
 if TYPE_CHECKING:
-    from great_expectations.render.renderer_configuration import RendererParams
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
 class ExpectColumnToExist(TableExpectation):
@@ -95,6 +95,7 @@ class ExpectColumnToExist(TableExpectation):
 
         # Setting up a configuration
         super().validate_configuration(configuration)
+        configuration = configuration or self.configuration
 
         # Ensuring that a proper value has been provided
         try:
@@ -118,14 +119,14 @@ class ExpectColumnToExist(TableExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args = (
+        add_param_args: List[AddParamArgs] = [
             ("column", RendererValueType.STRING),
             ("column_index", RendererValueType.NUMBER),
-        )
+        ]
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
-        params: RendererParams = renderer_configuration.params
+        params = renderer_configuration.params
 
         if not params.column_index:
             if renderer_configuration.include_column_name:
