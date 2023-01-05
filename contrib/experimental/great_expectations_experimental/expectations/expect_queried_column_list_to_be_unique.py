@@ -56,7 +56,6 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
         Returns:
             None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
-        # assert "condition" not in configuration.kwargs, "condition cannot be altered"
         super().validate_configuration(configuration)
 
     def _validate(
