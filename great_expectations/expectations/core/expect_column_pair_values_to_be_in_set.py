@@ -117,8 +117,7 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
     ) -> None:
         """Ensures that both column_A and column_B have been provided."""
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
         try:
             assert (
                 "column_A" in configuration.kwargs

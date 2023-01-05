@@ -161,8 +161,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
 
         # Setting up a configuration
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         min_value = configuration.kwargs["min_value"]
         max_value = configuration.kwargs["max_value"]

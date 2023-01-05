@@ -7,7 +7,18 @@ import itertools
 import logging
 import numbers
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ClassVar,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
 
 import numpy as np
 import pandas as pd
@@ -80,7 +91,7 @@ class ParameterBuilder(ABC, Builder):
         ```
     """
 
-    exclude_field_names: Set[str] = Builder.exclude_field_names | {
+    exclude_field_names: ClassVar[Set[str]] = Builder.exclude_field_names | {
         "evaluation_parameter_builders",
     }
 

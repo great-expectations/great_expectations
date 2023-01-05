@@ -110,9 +110,9 @@ def get_batch_request(
 
     batch_spec_passthrough: Optional[
         Dict[str, Union[str, Dict[str, Any]]]
-    ] = batch_request.get(
+    ] = batch_request.get(  # type: ignore[assignment] # can't guarantee shape of 'batch_spec_passthrough'
         "batch_spec_passthrough"
-    )  # type: ignore[assignment] # can't guarantee shape of 'batch_spec_passthrough'
+    )
     if batch_spec_passthrough is None:
         batch_spec_passthrough = {}
 

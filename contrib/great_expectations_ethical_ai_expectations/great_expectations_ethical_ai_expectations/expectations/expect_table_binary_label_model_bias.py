@@ -226,8 +226,7 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         #        columns = configuration.kwargs.get("important_columns")
         y_true = configuration.kwargs.get("y_true")
