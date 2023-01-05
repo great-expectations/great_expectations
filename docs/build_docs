@@ -1,6 +1,9 @@
 #!/bin/bash
 
+echo "START Listing pwd and pwd contents"
 pwd;
+ls;
+echo "END Listing pwd and pwd contents"
 
 echo "Building docs."
 (cd docs/sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt; invoke docs) && (yarn build)
