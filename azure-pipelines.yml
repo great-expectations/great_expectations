@@ -151,7 +151,7 @@ stages:
               echo "##vso[task.setvariable variable=IMAGE_SUFFIX;isOutput=true]${SUFFIX}"
             name: suffix
             env:
-              BRANCH_NAME: $(Build.SourceBranchName)
+              BRANCH_NAME: $(Build.SourceBranch)
 
       - job: build_push
         dependsOn: make_suffix
