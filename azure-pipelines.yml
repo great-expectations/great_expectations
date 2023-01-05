@@ -170,9 +170,10 @@ stages:
         steps:
           - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              # Remove /refs/heads or /refs/tags from the FULL_BRANCH_NAME
               BRANCH_NAME="${FULL_BRANCH_NAME/#refs\/heads\/}"
-              # We repull the develop branch. We could build the local branch that is already present but we should
-              # prune it's depth since we don't need the git history.
+              BRANCH_NAME="${BRANCH_NAME/#refs\/tags\/}"
+              # Use the local branch that is already present, but prune it's depth since we don't need the git history.
               CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${DOCKER_TAG} "
               CMD+="--target test --build-arg PYTHON_VERSION=$(python.version) "
               CMD+="--build-arg GE_USAGE_STATISTICS_URL=\"$(GE_USAGE_STATISTICS_URL)\" "
