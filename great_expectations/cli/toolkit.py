@@ -34,7 +34,6 @@ from great_expectations.datasource import BaseDatasource
 from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import FileDataContext
     from great_expectations.datasource import LegacyDatasource
     from great_expectations.experimental.datasources.interfaces import (
         Datasource as XDatasource,
