@@ -6,7 +6,7 @@ ls;
 echo "END Listing pwd and pwd contents"
 
 echo "Installing dev dependencies"
-pip install -r requirements-dev.txt -c constraints-dev.txt
+pip install -c constraints-dev.txt -e ".[test]"
 (cd docs/sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt)
 
 echo "Building sphinx API docs."
