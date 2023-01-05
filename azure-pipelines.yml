@@ -171,8 +171,7 @@ stages:
           - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
               BRANCH_NAME="${FULL_BRANCH_NAME/#refs\/heads\/}"
-              # We repull the develop branch. We could build the local branch that is already present but we should
-              # prune it's depth since we don't need the git history.
+              # Use the local branch that is already present, but prune it's depth since we don't need the git history.
               CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${DOCKER_TAG} "
               CMD+="--target test --build-arg PYTHON_VERSION=$(python.version) "
               CMD+="--build-arg GE_USAGE_STATISTICS_URL=\"$(GE_USAGE_STATISTICS_URL)\" "
@@ -181,7 +180,9 @@ stages:
               eval ${CMD}
             displayName: 'Build python $(python.version) image'
             env:
-              FULL_BRANCH_NAME: $(Build.SourceBranchName)
+              FULL_BRANCH_NAME:
+                ${{ if eq(variables.isRelease, false) }}: $(Build.SourceBranch)
+                ${{ if eq(variables.isRelease, true) }}: $(Build.SourceBranch) -replace "refs/tags/", ""
 
           - bash: |
               docker login -u ${DOCKER_USER} -p ${DOCKER_TOKEN}
