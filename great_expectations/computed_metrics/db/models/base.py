@@ -1,6 +1,11 @@
+import json
 import logging
 
+from marshmallow import Schema
+from ruamel.yaml.comments import CommentedMap
+
 from great_expectations.computed_metrics.util import pluralize, underscore
+from great_expectations.core.util import convert_to_json_serializable
 
 logger = logging.getLogger(__name__)
 
@@ -53,32 +58,48 @@ class Base:
     #     return db_session
     # TODO: <Alex>ALEX</Alex>
 
+    def __repr__(self):
+        return json.dumps(self.to_json_dict(), indent=2)
+
+    def __str__(self):
+        return self.__repr__()
+
+    def to_json_dict(self) -> dict:
+        serialized_model: CommentedMap = self.get_marshmallow_schema_instance().dump(
+            self.to_dict()
+        )
+        return convert_to_json_serializable(data=dict(serialized_model))
+
+    @classmethod
+    def get_marshmallow_schema_instance(cls) -> Schema:
+        # noinspection PyTypeChecker
+        return NotImplementedError
+
+    # noinspection PyMethodMayBeStatic
+    def to_dict(self) -> dict:
+        # noinspection PyTypeChecker
+        return NotImplementedError
+
 
 class PrimaryKeyMixin:
-    id = (
-        sa.Column(
-            sa.Integer(),
-            nullable=False,
-            primary_key=True,
-        ),
+    id = sa.Column(
+        sa.Integer(),
+        nullable=False,
+        primary_key=True,
     )
 
 
 class TimestampsMixin:
-    created_at = (
-        sa.Column(
-            sa.DateTime(),
-            nullable=False,
-            server_default=sa.func.now(),
-        ),
+    created_at = sa.Column(
+        sa.DateTime(),
+        nullable=False,
+        server_default=sa.func.now(),
     )
-    updated_at = (
-        sa.Column(
-            sa.DateTime(),
-            nullable=False,
-            server_default=sa.func.now(),
-            onupdate=sa.func.now(),
-        ),
+    updated_at = sa.Column(
+        sa.DateTime(),
+        nullable=False,
+        server_default=sa.func.now(),
+        onupdate=sa.func.now(),
     )
 
     @validates("created_at")
@@ -95,12 +116,10 @@ class SoftDeleteMixin:
         nullable=True,
         # onupdate=get_onupdate_timestamp_callback(attribute_name="deleted"),
     )
-    deleted = (
-        sa.Column(
-            sa.Boolean(),
-            nullable=False,
-            default=False,
-        ),
+    deleted = sa.Column(
+        sa.Boolean(),
+        nullable=False,
+        default=False,
     )
     # TODO: <Alex>ALEX</Alex>
     # status = sa.Column(
@@ -116,12 +135,10 @@ class ArchiveMixin:
         sa.DateTime(),
         nullable=True,
     )
-    archived = (
-        sa.Column(
-            sa.Boolean(),
-            nullable=False,
-            default=False,
-        ),
+    archived = sa.Column(
+        sa.Boolean(),
+        nullable=False,
+        default=False,
     )
 
     # TODO: <Alex>ALEX</Alex>
