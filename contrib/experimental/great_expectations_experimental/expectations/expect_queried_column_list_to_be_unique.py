@@ -19,12 +19,10 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
     """
 
     metric_dependencies = ("query.template_values",)
-
     query = """
             SELECT COUNT(1) FROM (
             SELECT {column_list}, COUNT(1)
             FROM {active_batch}
-            WHERE {condition}
             GROUP BY {column_list}
             HAVING count(1) > 1
             )
@@ -44,6 +42,8 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
         "catch_exceptions": False,
         "meta": None,
         "query": query,
+        # "row_condition": RowCondition("1=1", RowConditionParserType.SQL),
+        # "condition_parser": "great_expectations__experimental__",
     }
 
     def validate_configuration(
@@ -59,7 +59,7 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
         Returns:
             None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
-
+        # assert "condition" not in configuration.kwargs, "condition cannot be altered"
         super().validate_configuration(configuration)
 
     def _validate(
@@ -110,7 +110,6 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
                     "in": {
                         "template_dict": {
                             "column_list": "unique_num,unique_str,unique_str2",
-                            "condition": "1=1",
                         }
                     },
                     "out": {"success": True},
@@ -123,7 +122,8 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
                     "in": {
                         "template_dict": {
                             "column_list": "duplicate_num,duplicate_str,duplicate_str2",
-                            "condition": "1=1",
+                            "row_condition": "1=1",
+                            "condition_parser": "great_expectations__experimental__",
                         }
                     },
                     "out": {"success": False},
@@ -136,7 +136,8 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
                     "in": {
                         "template_dict": {
                             "column_list": "unique_num,unique_str,duplicate_str2",
-                            "condition": "duplicate_str2!='a'",
+                            "row_condition": 'col("duplicate_str2")!="a"',
+                            "condition_parser": "great_expectations__experimental__",
                         }
                     },
                     "out": {"success": True},
