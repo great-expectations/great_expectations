@@ -1,5 +1,7 @@
 #!/bin/bash
 
+pwd;
+
 echo "Building docs."
 (cd docs/sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt; invoke docs) && (yarn build)
 echo "Successfully finished building docs."
