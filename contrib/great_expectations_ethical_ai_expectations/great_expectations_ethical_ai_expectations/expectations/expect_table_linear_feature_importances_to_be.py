@@ -157,8 +157,7 @@ class ExpectTableLinearFeatureImportancesToBe(TableExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         n_features = configuration.kwargs.get("n_features")
         columns = configuration.kwargs.get("important_columns")

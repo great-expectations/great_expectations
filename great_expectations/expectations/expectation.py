@@ -2285,7 +2285,7 @@ representation."""
         else:
             below_max = True
 
-        success = above_min and below_max
+        success = bool(above_min and below_max)
 
         return {"success": success, "result": {"observed_value": metric_value}}
 
@@ -2413,10 +2413,10 @@ class ColumnExpectation(TableExpectation, ABC):
 
 
 class ColumnMapExpectation(TableExpectation, ABC):
-    map_metric = None
+    map_metric: Optional[str] = None
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     domain_type = MetricDomainTypes.COLUMN
-    success_keys = ("mostly",)
+    success_keys: Tuple[str, ...] = ("mostly",)
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
@@ -2428,7 +2428,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
 
     @classmethod
     def is_abstract(cls) -> bool:
-        return cls.map_metric is None or super().is_abstract()
+        return not cls.map_metric or super().is_abstract()
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
