@@ -1,7 +1,3 @@
-# TODO: <Alex>ALEX</Alex>
-# import uuid
-# TODO: <Alex>ALEX</Alex>
-
 import logging
 
 logger = logging.getLogger(__name__)
@@ -56,7 +52,7 @@ class ComputedMetric(
         sa.UnicodeText(),
         nullable=False,
     )
-    batch_uuid = sa.Column(
+    batch_id = sa.Column(
         sa.UnicodeText(),
         nullable=False,
     )
@@ -64,11 +60,11 @@ class ComputedMetric(
         sa.Unicode(128),
         nullable=False,
     )
-    metric_domain_kwargs_uuid = sa.Column(
+    metric_domain_kwargs_id = sa.Column(
         sa.UnicodeText(),
         nullable=False,
     )
-    metric_value_kwargs_uuid = sa.Column(
+    metric_value_kwargs_id = sa.Column(
         sa.UnicodeText(),
         nullable=False,
     )

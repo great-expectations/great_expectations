@@ -21,10 +21,10 @@ class ComputedMetric(Attributes):
     # noinspection PyShadowingBuiltins
     def __init__(
         self,
-        batch_uuid: str,
+        batch_id: str,
         metric_name: str,
-        metric_domain_kwargs_uuid: str,
-        metric_value_kwargs_uuid: str,
+        metric_domain_kwargs_id: str,
+        metric_value_kwargs_id: str,
         datasource_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
         batch_name: Optional[str] = None,
@@ -57,10 +57,10 @@ class ComputedMetric(Attributes):
             "datasource_name": datasource_name,
             "data_asset_name": data_asset_name,
             "batch_name": batch_name,
-            "batch_uuid": batch_uuid,
+            "batch_id": batch_id,
             "metric_name": metric_name,
-            "metric_domain_kwargs_uuid": metric_domain_kwargs_uuid,
-            "metric_value_kwargs_uuid": metric_value_kwargs_uuid,
+            "metric_domain_kwargs_id": metric_domain_kwargs_id,
+            "metric_value_kwargs_id": metric_value_kwargs_id,
             "value": value,
             "details": details,
         }
@@ -89,25 +89,10 @@ class ComputedMetricSchema(Schema):
     datasource_name = fields.String(required=True, allow_none=True)
     data_asset_name = fields.String(required=True, allow_none=True)
     batch_name = fields.Raw(required=True, allow_none=True)
-    # TODO: <Alex>ALEX</Alex>
-    # batch_uuid = fields.UUID(required=True, allow_none=False)
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    batch_uuid = fields.String(required=True, allow_none=False)
-    # TODO: <Alex>ALEX</Alex>
+    batch_id = fields.String(required=True, allow_none=False)
     metric_name = fields.String(required=True, allow_none=False)
-    # TODO: <Alex>ALEX</Alex>
-    # metric_domain_kwargs_uuid = fields.UUID(required=True, allow_none=False)
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    metric_domain_kwargs_uuid = fields.String(required=True, allow_none=False)
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    # metric_value_kwargs_uuid = fields.UUID(required=True, allow_none=True)
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    metric_value_kwargs_uuid = fields.String(required=True, allow_none=True)
-    # TODO: <Alex>ALEX</Alex>
+    metric_domain_kwargs_id = fields.String(required=True, allow_none=False)
+    metric_value_kwargs_id = fields.String(required=True, allow_none=True)
     value = fields.Raw(required=False, allow_none=True)
     details = fields.Dict(required=False, allow_none=True)
 

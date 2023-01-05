@@ -100,7 +100,7 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column(
-            "batch_uuid",
+            "batch_id",
             sa.UnicodeText(),
             nullable=False,
         ),
@@ -110,12 +110,12 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column(
-            "metric_domain_kwargs_uuid",
+            "metric_domain_kwargs_id",
             sa.UnicodeText(),
             nullable=False,
         ),
         sa.Column(
-            "metric_value_kwargs_uuid",
+            "metric_value_kwargs_id",
             sa.UnicodeText(),
             nullable=False,
         ),
@@ -136,10 +136,10 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(
-        op.f("idx_computed_metrics_batch_uuid"),
+        op.f("idx_computed_metrics_batch_id"),
         table_name="computed_metrics",
         columns=[
-            "batch_uuid",
+            "batch_id",
         ],
         unique=False,
     )
@@ -152,29 +152,29 @@ def upgrade() -> None:
         unique=False,
     )
     op.create_index(
-        op.f("idx_computed_metrics_metric_domain_kwargs_uuid"),
+        op.f("idx_computed_metrics_metric_domain_kwargs_id"),
         table_name="computed_metrics",
         columns=[
-            "metric_domain_kwargs_uuid",
+            "metric_domain_kwargs_id",
         ],
         unique=False,
     )
     op.create_index(
-        op.f("idx_computed_metrics_metric_value_kwargs_uuid"),
+        op.f("idx_computed_metrics_metric_value_kwargs_id"),
         table_name="computed_metrics",
         columns=[
-            "metric_value_kwargs_uuid",
+            "metric_value_kwargs_id",
         ],
         unique=False,
     )
     op.create_index(
-        op.f("idx_computed_metrics_batch_uuid_metric_configuration_uuid"),
+        op.f("idx_computed_metrics_batch_id_metric_configuration_id"),
         table_name="computed_metrics",
         columns=[
-            "batch_uuid",
+            "batch_id",
             "metric_name",
-            "metric_domain_kwargs_uuid",
-            "metric_value_kwargs_uuid",
+            "metric_domain_kwargs_id",
+            "metric_value_kwargs_id",
         ],
         unique=False,
     )

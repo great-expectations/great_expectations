@@ -785,10 +785,10 @@ class ExecutionEngine(ABC):
             )
             timestamp = datetime.datetime.now()
             computed_metric = ComputedMetric(
-                batch_uuid=batch_id,
+                batch_id=batch_id,
                 metric_name=metric_computation_configuration.metric_configuration.metric_name,
-                metric_domain_kwargs_uuid=metric_computation_configuration.metric_configuration.metric_domain_kwargs_id,
-                metric_value_kwargs_uuid=metric_computation_configuration.metric_configuration.metric_value_kwargs_id,
+                metric_domain_kwargs_id=metric_computation_configuration.metric_configuration.metric_domain_kwargs_id,
+                metric_value_kwargs_id=metric_computation_configuration.metric_configuration.metric_value_kwargs_id,
                 created_at=timestamp,
                 updated_at=timestamp,
                 value=metrics[metric_computation_configuration.metric_configuration.id],
