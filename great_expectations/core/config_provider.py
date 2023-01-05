@@ -173,8 +173,8 @@ class _CloudConfigurationProvider(_AbstractConfigurationProvider):
     """
     Responsible for the management of a user's GX Cloud credentials.
 
-    See `GeCloudConfig` for more information. Note that this is only registered on the primary
-    config provider when in a Cloud-backend environment.
+    See `GXCloudConfig` for more information. Note that this is only registered on the primary
+    config provider when in a Cloud-backed environment.
     """
 
     def __init__(self, cloud_config: GXCloudConfig) -> None:
@@ -189,4 +189,8 @@ class _CloudConfigurationProvider(_AbstractConfigurationProvider):
             GXCloudEnvironmentVariable.BASE_URL: self._cloud_config.base_url,
             GXCloudEnvironmentVariable.ACCESS_TOKEN: self._cloud_config.access_token,
             GXCloudEnvironmentVariable.ORGANIZATION_ID: self._cloud_config.organization_id,  # type: ignore[dict-item]
+            # <GX_RENAME> Deprecated as of 0.15.37 - required to include in provider for backwards compatibility
+            GXCloudEnvironmentVariable._OLD_BASE_URL: self._cloud_config.base_url,
+            GXCloudEnvironmentVariable._OLD_ACCESS_TOKEN: self._cloud_config.access_token,
+            GXCloudEnvironmentVariable._OLD_ORGANIZATION_ID: self._cloud_config.organization_id,  # type: ignore[dict-item]
         }
