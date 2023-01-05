@@ -112,8 +112,7 @@ class ExpectColumnValuesToBeInSetSparkOptimized(ColumnExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
         value_set = configuration.kwargs.get(
             "value_set"
         ) or self.default_kwarg_values.get("value_set")

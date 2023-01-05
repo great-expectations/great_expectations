@@ -279,8 +279,7 @@ class ExpectColumnValuesGeometryDistanceToAddressToBeBetween(ColumnMapExpectatio
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         min_val = None
         max_val = None
