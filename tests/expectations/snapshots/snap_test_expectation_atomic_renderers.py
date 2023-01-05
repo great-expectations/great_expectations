@@ -745,10 +745,8 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_unique 1"
     "value": {
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
-            "row_condition": {"schema": {"type": "string"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "$column values must be unique, at least $mostly_pct % of the time.",

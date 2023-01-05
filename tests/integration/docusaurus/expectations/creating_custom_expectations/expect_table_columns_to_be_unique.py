@@ -155,8 +155,7 @@ class ExpectTableColumnsToBeUnique(TableExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         strict = configuration.kwargs.get("strict")
 

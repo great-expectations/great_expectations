@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional, Set, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
 
 import numpy as np
 
@@ -8,9 +8,6 @@ from great_expectations.core.domain import Domain
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
-)
-from great_expectations.rule_based_profiler.metric_computation_result import (
-    MetricValues,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
@@ -28,6 +25,9 @@ if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
+    from great_expectations.rule_based_profiler.metric_computation_result import (
+        MetricValues,
+    )
 
 
 class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
@@ -42,8 +42,8 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
     Step-4: Compute mean value of match scores as "success_ratio" (divide sum of scores by number of Batch objects).
     """
 
-    exclude_field_names: Set[
-        str
+    exclude_field_names: ClassVar[
+        Set[str]
     ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
         "metric_name",
         "single_batch_mode",
@@ -123,9 +123,9 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
         one_batch_table_columns_names_value: MetricValue
         multi_batch_table_columns_names_sets_as_list: List[Set[str]] = [
             # TODO: <Alex>ALEX -- extra subscripting in compliance with multi-Batch metrics.</Alex>
-            set(one_batch_table_columns_names_value[0])
+            set(one_batch_table_columns_names_value[0])  # type: ignore[arg-type] # could be dict
             # TODO: <Alex>ALEX</Alex>
-            for one_batch_table_columns_names_value in table_columns_names_multi_batch_value
+            for one_batch_table_columns_names_value in table_columns_names_multi_batch_value  # type: ignore[union-attr] # not all iterable
         ]
 
         multi_batch_table_columns_names_as_set: Set[str] = set().union(
