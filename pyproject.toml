@@ -163,7 +163,9 @@ filterwarnings = [
     # This deprecation warning comes from getsentry/responses, a mocking utility for requests. It is a dependency in moto.
     "ignore:stream argument is deprecated. Use stream parameter in request directly:DeprecationWarning",
     # We likely won't be updating to `marhsmallow` 4, these errors should be filtered out
-    "error::marshmallow.warnings.RemovedInMarshmallow4Warning"
+    "error::marshmallow.warnings.RemovedInMarshmallow4Warning",
+    # should be filter these out when it is acceptable
+    "error::great_expectations.experimental.datasources.ZEPDeepCopyWarning",
 ]
 junit_family="xunit2"
 markers = [
