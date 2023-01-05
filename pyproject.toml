@@ -115,42 +115,24 @@ exclude = [
     'render/renderer/v3/suite_profile_notebook_renderer\.py',  # 4
     'render/util\.py',  # 2
     'render/view/view\.py',  # 11
-    'rule_based_profiler/builder\.py',  # 4
-    'rule_based_profiler/config/base\.py',  # 13
     'rule_based_profiler/data_assistant_result/data_assistant_result\.py',  # 71
-    'rule_based_profiler/data_assistant_result/onboarding_data_assistant_result\.py', # 1
     'rule_based_profiler/data_assistant_result/plot_components\.py', # 12
-    'rule_based_profiler/data_assistant/data_assistant_dispatcher\.py',  # 3
     'rule_based_profiler/data_assistant/data_assistant\.py',  # 15
     'rule_based_profiler/domain_builder/categorical_column_domain_builder\.py',  # 18
-    'rule_based_profiler/domain_builder/column_domain_builder\.py',
-    'rule_based_profiler/domain_builder/column_pair_domain_builder\.py',  # 4
-    'rule_based_profiler/domain_builder/domain_builder\.py',  # 5
     'rule_based_profiler/domain_builder/map_metric_column_domain_builder\.py',  # 8
-    'rule_based_profiler/domain_builder/multi_column_domain_builder\.py',  # 4
-    'rule_based_profiler/domain_builder/table_domain_builder\.py',  # 1
     'rule_based_profiler/estimators/bootstrap_numeric_range_estimator\.py',  # 8
-    'rule_based_profiler/estimators/exact_numeric_range_estimator\.py',  # 3
     'rule_based_profiler/estimators/kde_numeric_range_estimator\.py',  # 7
-    'rule_based_profiler/estimators/numeric_range_estimator\.py',  # 1
-    'rule_based_profiler/estimators/quantiles_numeric_range_estimator\.py',  # 5
     'rule_based_profiler/expectation_configuration_builder',  # 13
     'rule_based_profiler/helpers/cardinality_checker\.py',  # 9
-    'rule_based_profiler/helpers/simple_semantic_type_filter\.py',  # 7
-    'rule_based_profiler/helpers/util\.py',  # 53
+    'rule_based_profiler/helpers/util\.py',  # 46
     'rule_based_profiler/parameter_builder/histogram_single_batch_parameter_builder\.py',  # 7
-    'rule_based_profiler/parameter_builder/mean_table_columns_set_match_multi_batch_parameter_builder\.py',  # 2
     'rule_based_profiler/parameter_builder/mean_unexpected_map_metric_multi_batch_parameter_builder\.py',  # 19
     'rule_based_profiler/parameter_builder/metric_multi_batch_parameter_builder\.py',  # 15
-    'rule_based_profiler/parameter_builder/metric_single_batch_parameter_builder\.py',  # 3
     'rule_based_profiler/parameter_builder/numeric_metric_range_multi_batch_parameter_builder\.py',  # 27
     'rule_based_profiler/parameter_builder/parameter_builder\.py',  # 40
     'rule_based_profiler/parameter_builder/partition_parameter_builder\.py',  # 9
     'rule_based_profiler/parameter_builder/regex_pattern_string_parameter_builder\.py',  # 21
     'rule_based_profiler/parameter_builder/simple_date_format_string_parameter_builder\.py',  # 20
-    'rule_based_profiler/parameter_builder/value_counts_single_batch_parameter_builder\.py',  # 3
-    'rule_based_profiler/parameter_builder/value_set_multi_batch_parameter_builder\.py',  # 2
-    'rule_based_profiler/parameter_container\.py',  # 7
     'rule_based_profiler/rule_based_profiler\.py',  # 40
     'validation_operators/types/validation_operator_result\.py', # 35
     'validation_operators/validation_operators\.py',  # 16
