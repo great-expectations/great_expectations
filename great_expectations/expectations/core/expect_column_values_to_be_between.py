@@ -251,6 +251,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
 
         # Setting up a configuration
         super().validate_configuration(configuration)
+        configuration = configuration or self.configuration
 
         min_val = None
         max_val = None

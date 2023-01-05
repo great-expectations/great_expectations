@@ -97,6 +97,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration)
+        configuration = configuration or self.configuration
         try:
             assert (
                 "column" in configuration.kwargs
@@ -112,7 +113,8 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
 
     @classmethod
     def _prescriptive_template(
-        cls, renderer_configuration: RendererConfiguration
+        cls,
+        renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         add_param_args: List[AddParamArgs] = [
             ("column", RendererValueType.STRING),
