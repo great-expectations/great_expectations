@@ -165,7 +165,7 @@ filterwarnings = [
     # We likely won't be updating to `marhsmallow` 4, these errors should be filtered out
     "error::marshmallow.warnings.RemovedInMarshmallow4Warning",
     # should be filter these out when it is acceptable
-    "error::great_expectations.experimental.datasources.ZEPDeepCopyWarning",
+    "error::great_expectations.experimental.ZEPDeepCopyWarning",
 ]
 junit_family="xunit2"
 markers = [

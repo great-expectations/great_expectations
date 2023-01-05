@@ -21,6 +21,8 @@ from typing import (
 import pydantic
 from ruamel.yaml import YAML
 
+from great_expectations.experimental.warnings import ZEPDeepCopyWarning
+
 if TYPE_CHECKING:
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
@@ -31,10 +33,6 @@ yaml = YAML(typ="safe")
 # NOTE (kilo59): the following settings appear to be what we use in existing codebase
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
-
-
-class ZEPDeepCopyWarning(RuntimeWarning):
-    pass
 
 
 # TODO (kilo59): replace this with `typing_extensions.Self` once mypy supports it
