@@ -286,6 +286,21 @@ class CodeParser:
             )
         return all_usages
 
+    def get_module_level_function_definitions(self) -> Set[Definition]:
+        """Get Definition objects only for functions defined at the module level."""
+        all_usages: Set[Definition] = set()
+        for file_contents in self.file_contents:
+            module_level_function_definitions = (
+                self._get_module_level_function_definitions_from_file_contents(
+                    file_contents=file_contents
+                )
+            )
+            all_usages |= self._build_file_usage_definitions(
+                file_contents=file_contents,
+                entity_definitions=module_level_function_definitions,
+            )
+        return all_usages
+
     def _build_file_usage_definitions(
         self,
         file_contents: FileContents,
@@ -316,6 +331,14 @@ class CodeParser:
 
         return set(all_defs)
 
+    def _get_module_level_function_definitions_from_file_contents(
+        self, file_contents: FileContents
+    ) -> Set[Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]]:
+        """Parse FileContents to retrieve module level function definitions as ast trees."""
+        tree = ast.parse(file_contents.contents)
+        defs = self._list_module_level_function_definitions(tree=tree)
+        return set(defs)
+
     def _list_class_definitions(self, tree: ast.AST) -> List[ast.ClassDef]:
         """List class definitions from an ast tree."""
 
@@ -333,9 +356,19 @@ class CodeParser:
         """List function definitions from an ast tree."""
         function_definitions = []
         for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef) or isinstance(
-                node, ast.AsyncFunctionDef
-            ):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                function_definitions.append(node)
+
+        return function_definitions
+
+    def _list_module_level_function_definitions(
+        self, tree: ast.AST
+    ) -> List[Union[ast.FunctionDef, ast.AsyncFunctionDef]]:
+        """List function definitions that appear outside of classes."""
+
+        function_definitions = []
+        for node in ast.iter_child_nodes(tree):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 function_definitions.append(node)
 
         return function_definitions
@@ -357,6 +390,16 @@ class PublicAPIChecker:
         for (
             definition
         ) in self.code_parser.get_all_class_method_and_function_definitions():
+            if self.is_definition_marked_public_api(definition):
+                definitions.append(definition)
+
+        return set(definitions)
+
+    def get_module_level_function_public_api_definitions(self) -> Set[Definition]:
+        """Get module level function definitions that are marked with the public api decorator."""
+        definitions: List[Definition] = []
+
+        for definition in self.code_parser.get_module_level_function_definitions():
             if self.is_definition_marked_public_api(definition):
                 definitions.append(definition)
 
