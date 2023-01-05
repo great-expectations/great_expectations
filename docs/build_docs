@@ -5,6 +5,12 @@ pwd;
 ls;
 echo "END Listing pwd and pwd contents"
 
-echo "Building docs."
-(cd docs/sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt; invoke docs) && (yarn build)
-echo "Successfully finished building docs."
+echo "Installing dev dependencies"
+pip install -r requirements-dev.txt -c constraints-dev.txt
+(cd docs/sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt)
+
+echo "Building sphinx API docs."
+(cd docs/sphinx_api_docs_source; invoke docs)
+echo "Successfully built sphinx API docs."
+yarn build
+echo "Successfully finished building docusaurus docs."
