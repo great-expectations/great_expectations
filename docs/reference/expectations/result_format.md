@@ -7,12 +7,14 @@ The `result_format` parameter may be either a string or a dictionary which speci
   * For string usage, see `result_format` values.
   * For dictionary usage, `result_format` which may include the following keys:
     * `result_format`: Sets the fields to return in result.
+    * `unexpected_index_columns`: Defines the primary key (PK) columns used to represent unexpected results.
+    * `return_unexpected_index_query`: Boolean flag that can be used to suppress PK output.
     * `partial_unexpected_count`: Sets the number of results to include in partial_unexpected_count, if applicable. If 
       set to 0, this will suppress the unexpected counts.
     * `include_unexpected_rows`: When running validations, this will return the entire row for each unexpected value in
       dictionary form. When using `include_unexpected_rows`, you must explicitly specify `result_format` as well, and
       `result_format` must be more verbose than `BOOLEAN_ONLY`. *WARNING: *
-
+  
   :::warning
   `include_unexpected_rows` returns EVERY row for each unexpected value; for large tables, this could return an 
   unwieldy amount of data.
@@ -48,13 +50,15 @@ checkpoint_config = {
         "result_format": {
             "result_format": "COMPLETE",
             "include_unexpected_rows": True
+            "unexpected_index_columns": ["my_pk_column"],
+            "return_unexpected_index_query": True
         }
     }
 }
 ```
 The results will then be stored in the Validation Result after running the Checkpoint.
 :::note
-Regardless of where Result Format is configured, `unexpected_list` and `unexpected_index_list` are never rendered in Data Docs.
+Regardless of where Result Format is configured, `unexpected_list` is never rendered in Data Docs. `unexpected_index_list` is rendered when `COMPLETE` is selected. 
 :::
 
 ## result_format values
@@ -80,6 +84,7 @@ cases for working with Great Expectations, including interactive exploratory wor
 |    partial_unexpected_index_list      |no              |no              |yes             |yes             |
 |    partial_unexpected_counts          |no              |no              |yes             |yes             |
 |    unexpected_index_list              |no              |no              |no              |yes             |
+|    unexpected_index_query             |no              |no              |no              |yes             |
 |    unexpected_list                    |no              |no              |no              |yes             |
 ### Fields defined for `column_aggregate_expectation` type Expectations
 | Fields within `result`                |BOOLEAN_ONLY    |BASIC           |SUMMARY         |COMPLETE        |
@@ -100,19 +105,27 @@ cases for working with Great Expectations, including interactive exploratory wor
 
 Example input:
 ```python
+my_df = pd.DataFrame(
+        {
+            "pk_column": ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen"],
+            "my_var": ['A', 'B', 'B', 'C', 'C', 'C', 'D', 'D', 'D', 'D', 'E', 'E', 'E', 'E', 'E']
+        }
+    )
+# this is actually a Validator
 print(list(my_df.my_var))
-['A', 'B', 'B', 'C', 'C', 'C', 'D', 'D', 'D', 'D', 'E', 'E', 'E', 'E', 'E', 'F', 'F', 'F', 'F', 'F', 'F', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'H', 'H', 'H', 'H', 'H', 'H', 'H', 'H']
+['A', 'B', 'B', 'C', 'C', 'C', 'D', 'D', 'D', 'D', 'E', 'E', 'E', 'E', 'E']
 ```
 
 Example outputs for different values of `result_format`:
 
-
 ```python
-my_df.expect_column_values_to_be_in_set(
+result = my_df.expect_column_values_to_be_in_set(
     "my_var",
-    ["B", "C", "D", "F", "G", "H"],
+    ["B", "C", "D"],
     result_format={'result_format': 'BOOLEAN_ONLY'}
 )
+
+print(result.result)
 {
     'success': False
 }
@@ -121,38 +134,50 @@ my_df.expect_column_values_to_be_in_set(
 ```python
 my_df.expect_column_values_to_be_in_set(
     "my_var",
-    ["B", "C", "D", "F", "G", "H"],
+    ["B", "C", "D"],
     result_format={'result_format': 'BASIC'}
 )
 {
     'success': False,
     'result': {
-        'unexpected_count': 6,
-        'unexpected_percent': 0.16666666666666666,
-        'unexpected_percent_nonmissing': 0.16666666666666666,
-        'partial_unexpected_list': ['A', 'E', 'E', 'E', 'E', 'E']
+        "element_count": 15,
+        "unexpected_count": 6,
+        "unexpected_percent": 40.0,
+        "partial_unexpected_list": [
+            "A",
+            "E",
+            "E",
+            "E",
+            "E",
+            "E"
+        ],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 40.0,
+        "unexpected_percent_nonmissing": 40.0
     }
 }
 ```
 
 ```python
-expect_column_values_to_match_regex(
+expect_column_values_to_be_in_set(
     "my_column",
-    "[A-Z][a-z]+",
+    ["B", "C", "D", "F", "G", "H"],
     result_format={'result_format': 'SUMMARY'}
 )
 {
     'success': False,
     'result': {
-        'element_count': 36,
-        'unexpected_count': 6,
-        'unexpected_percent': 0.16666666666666666,
-        'unexpected_percent_nonmissing': 0.16666666666666666,
-        'missing_count': 0,
-        'missing_percent': 0.0,
-        'partial_unexpected_counts': [{'value': 'A', 'count': 1}, {'value': 'E', 'count': 5}],
-        'partial_unexpected_index_list': [0, 10, 11, 12, 13, 14],
-        'partial_unexpected_list': ['A', 'E', 'E', 'E', 'E', 'E']
+        'element_count': 15, 
+        'unexpected_count': 6, 
+        'unexpected_percent': 40.0, 
+        'partial_unexpected_list': ['A', 'E', 'E', 'E', 'E', 'E'], 
+        'missing_count': 0, 
+        'missing_percent': 0.0, 
+        'unexpected_percent_total': 40.0, 
+        'unexpected_percent_nonmissing': 40.0, 
+        'partial_unexpected_index_list': [0, 10, 11, 12, 13, 14], 
+        'partial_unexpected_counts': [{'value': 'E', 'count': 5}, {'value': 'A', 'count': 1}]
     }
 }
 ```
@@ -166,8 +191,17 @@ my_df.expect_column_values_to_be_in_set(
 {
     'success': False,
     'result': {
-        'unexpected_index_list': [0, 10, 11, 12, 13, 14],
-        'unexpected_list': ['A', 'E', 'E', 'E', 'E', 'E']
+        'element_count': 15,
+        'unexpected_count': 6,
+        'unexpected_percent': 40.0, 
+        'partial_unexpected_list': ['A', 'E', 'E', 'E', 'E', 'E'], 
+        'missing_count': 0, 
+        'missing_percent': 0.0, 
+        'unexpected_percent_total': 40.0, 
+        'unexpected_percent_nonmissing': 40.0, 
+        'partial_unexpected_index_list': [0, 10, 11, 12, 13, 14], 
+        'partial_unexpected_counts': [{'value': 'E', 'count': 5}, {'value': 'A', 'count': 1}], 'unexpected_list': ['A', 'E', 'E', 'E', 'E', 'E'], 
+        'unexpected_index_list': [0, 10, 11, 12, 13, 14]
     }
 }
 ```
@@ -362,7 +396,7 @@ expect_column_mean_to_be_between
 ```
 
 ## Behavior for `COMPLETE`
-
+# TODO THIS IS WHERE IT NEEDS TO BE UPDATEDj
 A `result` is generated with all available justification for why an expectation was met or not. The format is  
 intended for debugging pipelines or developing detailed regression tests.
 
