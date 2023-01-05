@@ -8913,7 +8913,7 @@ a.text-dark:focus, a.text-dark:hover {
   --pst-icon-check-circle: "\f058";
   --pst-icon-info-circle: "\f05a";
   --pst-icon-exclamation-triangle: "\f071";
-  --pst-icon-exclamation-circle: "";
+  --pst-icon-exclamation-circle: "";  // Removed since we are not currently using fontawesome
   --pst-icon-times-circle: "\f057";
   --pst-icon-lightbulb: "\f0eb";
   --pst-icon-download: "\f019";
