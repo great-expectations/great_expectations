@@ -15,7 +15,6 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
     Args:
         template_dict: dict with the following keys: \
             column_list (columns to check uniqueness on separated by comma)
-        condition: the filter - for boolean column, you can provide just the column name (evaluated to True)
     """
 
     metric_dependencies = ("query.template_values",)
