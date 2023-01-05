@@ -77,8 +77,7 @@ class ExpectColumnValuesToContainValidEmail(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
     examples = [
         {

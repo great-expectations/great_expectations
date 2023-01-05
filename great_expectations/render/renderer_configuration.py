@@ -115,7 +115,7 @@ class RendererTableValue(_RendererValueBase):
 
 
 class MetaNotesFormat(str, Enum):
-    """Possible formats that can be passed into MetaNotes."""
+    """Possible formats that can be rendered via MetaNotes."""
 
     STRING = "string"
     MARKDOWN = "markdown"
@@ -130,7 +130,7 @@ class MetaNotes(TypedDict):
 
 class RendererConfiguration(GenericModel, Generic[RendererParams]):
     """
-    Configuration object built for each renderer. Operations are performed strictly on this object at the renderer
+    Configuration object built for each renderer. Operations to be performed strictly on this object at the renderer
         implementation-level.
     """
 
@@ -493,9 +493,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         """Adds a param that can be substituted into a template string during rendering.
 
         Attributes:
-            name (str): A name for the attribute to be added to this RendererConfiguration instance.
-            param_type (one or more RendererValueTypes): The possible types for the value being substituted. If more
-                than one param_type is passed, inference based on param value will be performed, and the first
+            name (str): A name for the attribute to be added to the params of this RendererConfiguration instance.
+            param_type (one or a list of RendererValueTypes): The possible types for the value being substituted. If
+                more than one param_type is passed, inference based on param value will be performed, and the first
                 param_type to match the value will be selected.
                     One of:
                      - array

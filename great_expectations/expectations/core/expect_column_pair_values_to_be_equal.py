@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -22,7 +22,7 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.render.renderer_configuration import RendererParams
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
 class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
@@ -96,8 +96,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
     ) -> None:
         """Ensures both column_A and column_B have been provided."""
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
         try:
             assert (
                 "column_A" in configuration.kwargs
@@ -111,16 +110,16 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args = (
+        add_param_args: List[AddParamArgs] = [
             ("column_A", RendererValueType.STRING),
             ("column_B", RendererValueType.STRING),
             ("mostly", RendererValueType.NUMBER),
             ("ignore_row_if", RendererValueType.STRING),
-        )
+        ]
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
-        params: RendererParams = renderer_configuration.params
+        params = renderer_configuration.params
         template_str = ""
 
         if not params.column_A or not params.column_B:

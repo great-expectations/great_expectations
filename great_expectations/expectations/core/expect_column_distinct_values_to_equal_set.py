@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -23,7 +23,7 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.render.renderer_configuration import RendererParams
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
 class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
@@ -103,8 +103,7 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
     ) -> None:
         """Validating that user has inputted a value set and that configuration has been initialized"""
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
         try:
             assert "value_set" in configuration.kwargs, "value_set is required"
             assert isinstance(
@@ -122,15 +121,15 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args = (
+        add_param_args: List[AddParamArgs] = [
             ("column", RendererValueType.STRING),
             ("value_set", RendererValueType.ARRAY),
             ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
-        )
+        ]
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
-        params: RendererParams = renderer_configuration.params
+        params = renderer_configuration.params
         template_str = ""
 
         if params.value_set:

@@ -23,8 +23,7 @@ class ExpectColumnValuesToHaveValidICD10CodeFormat(RegexBasedColumnMapExpectatio
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
     regex_camel_name = "ICD10Codes"
     regex = "[A-Za-z][0-9][A-Za-z0-9](?:\\.[A-Za-z0-9]{0,4})?\\Z"
