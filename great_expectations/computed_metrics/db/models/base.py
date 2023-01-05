@@ -39,8 +39,8 @@ class Base:
 
     # noinspection PyMethodParameters
     @declared_attr
-    def __table_args__(cls):
-        return {"extend_existing": True}
+    def __abstract__(cls):
+        return True
 
     # TODO: <Alex>ALEX</Alex>
     # @declared_attr
