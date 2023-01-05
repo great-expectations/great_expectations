@@ -455,7 +455,7 @@ hr {
 
 code {
   word-wrap: break-word;
-  color: #e83e8c;
+  color: #ff6310;
   font-size: 87.5%
 }
 
@@ -8913,7 +8913,7 @@ a.text-dark:focus, a.text-dark:hover {
   --pst-icon-check-circle: "\f058";
   --pst-icon-info-circle: "\f05a";
   --pst-icon-exclamation-triangle: "\f071";
-  --pst-icon-exclamation-circle: "\f06a";
+  --pst-icon-exclamation-circle: "";  // Removed since we are not currently using fontawesome
   --pst-icon-times-circle: "\f057";
   --pst-icon-lightbulb: "\f0eb";
   --pst-icon-download: "\f019";
@@ -8945,7 +8945,7 @@ a.text-dark:focus, a.text-dark:hover {
   --pst-color-text-muted: #646464;
   --pst-color-shadow: #d8d8d8;
   --pst-color-border: #c9c9c9;
-  --pst-color-inline-code: #e83e8c;
+  --pst-color-inline-code: #ff6310;
   --pst-color-target: #fbe54e;
   --pst-color-background: #fff;
   --pst-color-on-background: #fff;
