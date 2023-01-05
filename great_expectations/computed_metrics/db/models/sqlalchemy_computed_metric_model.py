@@ -31,7 +31,7 @@ from great_expectations.computed_metrics.db.models.base import (
 # TODO: <Alex>ALEX</Alex>
 
 
-class SqlAlchemyComputedMetricModel(
+class ComputedMetric(
     SqlAlchemyModelBase,
     PrimaryKeyMixin,
     TimestampsMixin,
@@ -43,61 +43,44 @@ class SqlAlchemyComputedMetricModel(
     SQLAlchemy model for each row in "computed_metric" table.
     """
 
-    datasource_name = (
-        sa.Column(
-            sa.Unicode(128),
-            nullable=False,
-        ),
+    id = sa.Column(sa.Integer(), nullable=False, primary_key=True)
+    datasource_name = sa.Column(
+        sa.Unicode(128),
+        nullable=False,
     )
-    data_asset_name = (
-        sa.Column(
-            sa.Unicode(128),
-            nullable=False,
-        ),
+    data_asset_name = sa.Column(
+        sa.Unicode(128),
+        nullable=False,
     )
-    batch_name = (
-        sa.Column(
-            sa.UnicodeText(),
-            nullable=False,
-        ),
+    batch_name = sa.Column(
+        sa.UnicodeText(),
+        nullable=False,
     )
-    batch_uuid = (
-        sa.Column(
-            sa.UnicodeText(),
-            nullable=False,
-        ),
+    batch_uuid = sa.Column(
+        sa.UnicodeText(),
+        nullable=False,
     )
-    metric_name = (
-        sa.Column(
-            sa.Unicode(128),
-            nullable=False,
-        ),
+    metric_name = sa.Column(
+        sa.Unicode(128),
+        nullable=False,
     )
-    metric_domain_kwargs_uuid = (
-        sa.Column(
-            sa.UnicodeText(),
-            nullable=False,
-        ),
+    metric_domain_kwargs_uuid = sa.Column(
+        sa.UnicodeText(),
+        nullable=False,
     )
-    metric_value_kwargs_uuid = (
-        sa.Column(
-            sa.UnicodeText(),
-            nullable=False,
-        ),
+    metric_value_kwargs_uuid = sa.Column(
+        sa.UnicodeText(),
+        nullable=False,
     )
-    value = (
-        sa.Column(
-            sa.JSON(),
-            nullable=True,
-        ),
+    value = sa.Column(
+        sa.JSON(),
+        nullable=True,
     )
-    details = (
-        sa.Column(
-            sa.JSON(),
-            nullable=True,
-            default={
-                "exception_type": "",
-                "exception_message": "",
-            },
-        ),
+    details = sa.Column(
+        sa.JSON(),
+        nullable=True,
+        default={
+            "exception_type": "",
+            "exception_message": "",
+        },
     )

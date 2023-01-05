@@ -37,6 +37,11 @@ class Base:
     def __tablename__(cls):
         return pluralize(underscore(cls.__name__))
 
+    # noinspection PyMethodParameters
+    @declared_attr
+    def __table_args__(cls):
+        return {"extend_existing": True}
+
     # TODO: <Alex>ALEX</Alex>
     # @declared_attr
     # def query(cls):
