@@ -34,10 +34,6 @@ _MISSING_XDATASOURCES_ERRORS: Final[List[PydanticErrorDict]] = [
 ]
 
 
-class GxConfigDeepCopyWarning(RuntimeWarning):
-    pass
-
-
 class GxConfig(ExperimentalBaseModel):
     """Represents the full new-style/experimental configuration file."""
 
@@ -115,16 +111,3 @@ class GxConfig(ExperimentalBaseModel):
                     )
                     raise
         return super().parse_yaml(f)
-
-    def __copy__(self):
-        return self.copy(deep=False)
-
-    def __deepcopy__(self, memo):
-        LOGGER.debug(f"{type(self).__name__} __deep_copy__")
-        warnings.warn(
-            f"{type(self).__name__}.__deepcopy__ returns a shallow copy",
-            GxConfigDeepCopyWarning,
-        )
-        copy = self.copy(deep=False)
-        memo[id(copy)] = copy
-        return copy

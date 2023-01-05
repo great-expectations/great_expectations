@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import pathlib
+import warnings
 from io import StringIO
 from pprint import pformat as pf
 from typing import (
@@ -30,6 +31,11 @@ yaml = YAML(typ="safe")
 # NOTE (kilo59): the following settings appear to be what we use in existing codebase
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
+
+
+class ZEPDeepCopyWarning(RuntimeWarning):
+    pass
+
 
 # TODO (kilo59): replace this with `typing_extensions.Self` once mypy supports it
 # Taken from this SO answer https://stackoverflow.com/a/72182814/6304433
@@ -132,3 +138,16 @@ class ExperimentalBaseModel(pydantic.BaseModel):
 
     def __str__(self):
         return self.yaml()
+
+    def __copy__(self):
+        return self.copy(deep=False)
+
+    def __deepcopy__(self, memo):
+        LOGGER.debug(f"{type(self).__name__} __deep_copy__")
+        warnings.warn(
+            f"{type(self).__name__}.__deepcopy__ returns a shallow copy",
+            ZEPDeepCopyWarning,
+        )
+        copy = self.copy(deep=False)
+        memo[id(copy)] = copy
+        return copy

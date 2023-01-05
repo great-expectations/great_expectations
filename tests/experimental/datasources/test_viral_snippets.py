@@ -11,9 +11,9 @@ pytestmark = [pytest.mark.integration]
 
 from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
-from great_expectations.experimental.datasources.config import (
-    GxConfig,
-    GxConfigDeepCopyWarning,
+from great_expectations.experimental.datasources.config import GxConfig
+from great_expectations.experimental.datasources.experimental_base_model import (
+    ZEPDeepCopyWarning,
 )
 
 LOGGER = logging.getLogger(__file__)
@@ -176,10 +176,11 @@ def test_variables_save_config_does_not_break(zep_file_context: FileDataContext)
 
 @pytest.mark.unit
 def test_save_datacontext_config_raises_warning(zep_file_context: FileDataContext):
-    with pytest.warns(GxConfigDeepCopyWarning):
+    with pytest.warns(ZEPDeepCopyWarning):
         # NOTE: difference between `variables.save_config()` + `_save_project_config()`
         # TODO: revisit this...
-        zep_file_context._save_project_config()
+        # zep_file_context._save_project_config()
+        zep_file_context.variables.save_config()
 
 
 @pytest.mark.unit
