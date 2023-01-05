@@ -189,7 +189,7 @@ class _CloudConfigurationProvider(_AbstractConfigurationProvider):
         access_token = self._cloud_config.access_token
         organization_id = self._cloud_config.organization_id
 
-        cloud_values = {
+        cloud_values: Dict[str, str] = {
             GXCloudEnvironmentVariable.BASE_URL: base_url,
             GXCloudEnvironmentVariable.ACCESS_TOKEN: access_token,
             # <GX_RENAME> Deprecated as of 0.15.37
@@ -197,6 +197,7 @@ class _CloudConfigurationProvider(_AbstractConfigurationProvider):
             GXCloudEnvironmentVariable._OLD_ACCESS_TOKEN: access_token,
         }
 
+        # organization_id is nullable so we conditionally include it in the output
         if organization_id:
             cloud_values.update(
                 {
