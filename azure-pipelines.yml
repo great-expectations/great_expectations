@@ -170,7 +170,9 @@ stages:
         steps:
           - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              # Remove /refs/heads or /refs/tags from the FULL_BRANCH_NAME
               BRANCH_NAME="${FULL_BRANCH_NAME/#refs\/heads\/}"
+              BRANCH_NAME="${BRANCH_NAME/#refs\/tags\/}"
               # Use the local branch that is already present, but prune it's depth since we don't need the git history.
               CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${DOCKER_TAG} "
               CMD+="--target test --build-arg PYTHON_VERSION=$(python.version) "
@@ -180,9 +182,7 @@ stages:
               eval ${CMD}
             displayName: 'Build python $(python.version) image'
             env:
-              FULL_BRANCH_NAME:
-                ${{ if eq(variables.isRelease, false) }}: $(Build.SourceBranch)
-                ${{ if eq(variables.isRelease, true) }}: $(Build.SourceBranch) -replace "refs/tags/", ""
+              FULL_BRANCH_NAME: $(Build.SourceBranch)
 
           - bash: |
               docker login -u ${DOCKER_USER} -p ${DOCKER_TOKEN}
