@@ -2413,7 +2413,7 @@ class ColumnExpectation(TableExpectation, ABC):
 
 
 class ColumnMapExpectation(TableExpectation, ABC):
-    map_metric = ""
+    map_metric: Optional[str] = None
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     domain_type = MetricDomainTypes.COLUMN
     success_keys: Tuple[str, ...] = ("mostly",)
