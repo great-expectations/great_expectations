@@ -91,6 +91,16 @@ def _get_sqlite_datetime_range(
 
 
 class SqliteDatasource(SQLDatasource):
+    """Adds a sqlite datasource to the data context.
+
+    Args:
+        name: The name of this sqlite datasource
+        connection_str: The SQLAlchemy connection string used to connect to the sqlite database.
+            For example: "sqlite:///path/to/file.db"
+        assets: An optional dictionary whose keys are TableAsset names and whose values
+            are TableAsset objects.
+    """
+
     # class var definitions
     asset_types: ClassVar[List[Type[DataAsset]]] = [SqliteTableAsset]
 
