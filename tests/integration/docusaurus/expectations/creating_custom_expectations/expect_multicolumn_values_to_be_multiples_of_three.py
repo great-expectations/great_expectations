@@ -121,15 +121,12 @@ class ExpectMulticolumnValuesToBeMultiplesOfThree(MulticolumnMapExpectation):
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
-            try:
-                assert (
-                    "column_list" in configuration.kwargs
-                ), "column_list must be provided"
-            except AssertionError as e:
-                raise InvalidExpectationConfigurationError(str(e))
+        try:
+            assert "column_list" in configuration.kwargs, "column_list must be provided"
+        except AssertionError as e:
+            raise InvalidExpectationConfigurationError(str(e))
 
     # This dictionary contains metadata for display in the public gallery
     # <snippet>

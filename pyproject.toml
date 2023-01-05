@@ -85,7 +85,7 @@ exclude = [
     'execution_engine/split_and_sample/sparkdf_data_splitter\.py',  # 4
     'execution_engine/split_and_sample/sqlalchemy_data_sampler\.py',  # 10
     'execution_engine/split_and_sample/sqlalchemy_data_splitter\.py',  # 22
-    'expectations/core/expect_column_', # 214
+    'expectations/core/expect_column_', # 147
     'expectations/core/expect_compound_columns_to_be_unique\.py', # 3
     'expectations/core/expect_multicolumn_sum_to_equal\.py', # 4
     'expectations/core/expect_multicolumn_values_to_be_unique\.py', # 3
