@@ -189,12 +189,21 @@ class _CloudConfigurationProvider(_AbstractConfigurationProvider):
         access_token = self._cloud_config.access_token
         organization_id = self._cloud_config.organization_id
 
-        return {
+        cloud_values = {
             GXCloudEnvironmentVariable.BASE_URL: base_url,
             GXCloudEnvironmentVariable.ACCESS_TOKEN: access_token,
-            GXCloudEnvironmentVariable.ORGANIZATION_ID: organization_id,  # type: ignore[dict-item]
-            # <GX_RENAME> Deprecated as of 0.15.37 - required to include in provider for backwards compatibility
+            # <GX_RENAME> Deprecated as of 0.15.37
             GXCloudEnvironmentVariable._OLD_BASE_URL: base_url,
             GXCloudEnvironmentVariable._OLD_ACCESS_TOKEN: access_token,
-            GXCloudEnvironmentVariable._OLD_ORGANIZATION_ID: organization_id,  # type: ignore[dict-item]
         }
+
+        if organization_id:
+            cloud_values.update(
+                {
+                    GXCloudEnvironmentVariable.ORGANIZATION_ID: organization_id,
+                    # <GX_RENAME> Deprecated as of 0.15.37
+                    GXCloudEnvironmentVariable._OLD_ORGANIZATION_ID: organization_id,
+                }
+            )
+
+        return cloud_values
