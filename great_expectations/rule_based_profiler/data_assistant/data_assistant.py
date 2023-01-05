@@ -109,6 +109,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
         ...
     """
 
+    data_assistant_type: str  # Added by `MetaDataAssistant`
+
     class CommonlyUsedParameterBuilders:
         def get_table_row_count_metric_multi_batch_parameter_builder(
             self,

@@ -1799,6 +1799,66 @@ def _pandas_map_condition_index(
     return unexpected_index_list[: result_format["partial_unexpected_count"]]
 
 
+def _pandas_map_condition_query(
+    cls,
+    execution_engine: PandasExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+) -> Optional[List[Any]]:
+    """
+    Returns query that will return all rows which do not meet an expected Expectation condition for instances
+    of ColumnMapExpectation. For Pandas, this is currently the full set of unexpected_indices.
+
+    Requires `unexpected_index_column_names` to be part of `result_format` dict to specify primary_key columns
+    to return, along with column the Expectation is run on.
+    """
+    result_format: dict = metric_value_kwargs["result_format"]
+
+    # We will not return map_condition_query if return_unexpected_index_query = False
+    return_unexpected_index_query: bool = result_format.get(
+        "return_unexpected_index_query"
+    )
+    if return_unexpected_index_query is False:
+        return
+
+    (
+        boolean_mapped_unexpected_values,
+        compute_domain_kwargs,
+        accessor_domain_kwargs,
+    ) = metrics.get("unexpected_condition")
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
+    domain_records_df: pd.DataFrame = execution_engine.get_domain_records(
+        domain_kwargs=domain_kwargs
+    )
+    if "column" in accessor_domain_kwargs:
+        column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+
+        column_name = get_dbms_compatible_column_names(
+            column_names=column_name,
+            batch_columns_list=metrics["table.columns"],
+            execution_engine=execution_engine,
+        )
+        filter_column_isnull = kwargs.get(
+            "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
+        )
+        if filter_column_isnull:
+            domain_records_df = domain_records_df[
+                domain_records_df[column_name].notnull()
+            ]
+
+    elif "column_list" in accessor_domain_kwargs:
+        column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+            "column_list"
+        ]
+        verify_column_names_exist(
+            column_names=column_list, batch_columns_list=metrics["table.columns"]
+        )
+    domain_values_df_filtered = domain_records_df[boolean_mapped_unexpected_values]
+    return domain_values_df_filtered.index.to_list()
+
+
 def _pandas_column_map_condition_value_counts(
     cls,
     execution_engine: PandasExecutionEngine,
@@ -3071,6 +3131,15 @@ class MapMetricProvider(MetricProvider):
                         execution_engine=engine,
                         metric_class=cls,
                         metric_provider=_pandas_map_condition_index,
+                        metric_fn_type=MetricFunctionTypes.VALUE,
+                    )
+                    register_metric(
+                        metric_name=f"{metric_name}.unexpected_index_query",
+                        metric_domain_keys=metric_domain_keys,
+                        metric_value_keys=(*metric_value_keys, "result_format"),
+                        execution_engine=engine,
+                        metric_class=cls,
+                        metric_provider=_pandas_map_condition_query,
                         metric_fn_type=MetricFunctionTypes.VALUE,
                     )
                     register_metric(
