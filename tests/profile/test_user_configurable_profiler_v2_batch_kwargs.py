@@ -255,7 +255,7 @@ def test__validate_semantic_types_dict(cardinality_dataset):
         )
     assert e.value.args[0] == (
         "Column col_few is specified in both the semantic_types_dict and the list of ignored columns. Please remove "
-        f"one of these entries to proceed."
+        "one of these entries to proceed."
     )
 
 
@@ -404,7 +404,7 @@ def test_primary_or_compound_key_not_found_in_columns(mock_emit, cardinality_dat
     # key includes a non-existent column, should fail
     with pytest.raises(ValueError) as e:
         # noinspection PyUnusedLocal
-        bad_key_profiler = UserConfigurableProfiler(
+        bad_key_profiler = UserConfigurableProfiler(  # noqa: F841
             cardinality_dataset,
             primary_or_compound_key=["col_unique", "col_that_does_not_exist"],
         )

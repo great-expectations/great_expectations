@@ -243,9 +243,9 @@ def test_action_list_operator(validation_operators_data_context):
         ][0]
     )
 
-    first_validation_result = data_context.stores["validation_result_store"].get(
-        validation_result_store_keys[0]
-    )
+    first_validation_result = data_context.stores[  # noqa: F841
+        "validation_result_store"
+    ].get(validation_result_store_keys[0])
     assert (
         data_context.stores["validation_result_store"]
         .get(validation_result_store_keys[0])
@@ -271,7 +271,7 @@ def test_warning_and_failure_validation_operator(validation_operators_data_conte
 
     # We want to demonstrate running the validation operator with both a pre-built batch (DataAsset) and with
     # a tuple of parameters for get_batch
-    results = data_context.run_validation_operator(
+    results = data_context.run_validation_operator(  # noqa: F841
         assets_to_validate=[batch],
         run_id=RunIdentifier(run_name="test-100"),
         validation_operator_name="errors_and_warnings_validation_operator",

@@ -58,6 +58,10 @@ class FakeAbstractDataContext(AbstractDataContext):
         """Abstract method. Only a stub is needed."""
         pass
 
+    def _init_project_config(self, project_config):
+        """Abstract method. Only a stub is needed."""
+        pass
+
 
 @pytest.mark.unit
 def test_save_datasource_empty_store(datasource_config_with_names: DatasourceConfig):

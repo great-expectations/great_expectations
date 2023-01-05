@@ -60,8 +60,7 @@ class ExpectQueriedColumnToHaveNDistinctValuesWithCondition(QueryExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
     def _validate(
         self,
