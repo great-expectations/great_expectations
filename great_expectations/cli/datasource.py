@@ -319,7 +319,7 @@ class FilesYamlHelper(BaseDatasourceNewYamlHelper):
         self.base_path: str = ""
         self.context_root_dir: str = context_root_dir
 
-    def get_notebook_renderer(  # type: ignore[override]
+    def get_notebook_renderer(
         self, context: FileDataContext
     ) -> DatasourceNewNotebookRenderer:
         return DatasourceNewNotebookRenderer(
@@ -493,7 +493,7 @@ data_connectors:
     password: {password}
     database: {database}"""
 
-    def get_notebook_renderer(  # type: ignore[override] # BaseDatasourceNewYamlHelper
+    def get_notebook_renderer(
         self, context: FileDataContext
     ) -> DatasourceNewNotebookRenderer:
         return DatasourceNewNotebookRenderer(
