@@ -1,4 +1,5 @@
 import logging
+import warnings
 from typing import Any, Dict, List, Optional, Tuple, Type
 
 from great_expectations.core.configuration import AbstractConfig
@@ -10,6 +11,7 @@ from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
+from great_expectations.experimental.warnings import ZEPDeepCopyWarning
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +49,10 @@ class Store:
         self._store_name = store_name
         logger.debug("Building store_backend.")
         module_name = "great_expectations.data_context.store"
+
+        # TODO: 010523 (kilo59) short-circuit this path with ZEP
+        warnings.simplefilter(action="ignore", category=ZEPDeepCopyWarning)
+
         self._store_backend = instantiate_class_from_config(
             config=store_backend,
             runtime_environment=runtime_environment or {},
