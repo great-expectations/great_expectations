@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import importlib
 import logging
 from typing import List, Optional
@@ -5,7 +7,6 @@ from typing import List, Optional
 import click
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations import DataContext
 from great_expectations import __version__ as ge_version
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_logging import _set_up_logger
@@ -30,7 +31,7 @@ class CLIState:
         self,
         v3_api: bool = True,
         config_file_location: Optional[str] = None,
-        data_context: Optional[DataContext] = None,
+        data_context: Optional[FileDataContext] = None,
         assume_yes: bool = False,
     ) -> None:
         self.v3_api = v3_api
@@ -38,22 +39,24 @@ class CLIState:
         self._data_context = data_context
         self.assume_yes = assume_yes
 
-    def get_data_context_from_config_file(self) -> DataContext:
-        directory: str = toolkit.parse_cli_config_file_location(
-            config_file_location=self.config_file_location
-        ).get("directory")
-        context: DataContext = toolkit.load_data_context_with_error_handling(
+    def get_data_context_from_config_file(self) -> FileDataContext:
+        directory: str = toolkit.parse_cli_config_file_location(  # type: ignore[assignment] # could be None
+            config_file_location=self.config_file_location  # type: ignore[arg-type] # could be None
+        ).get(
+            "directory"
+        )
+        context: FileDataContext = toolkit.load_data_context_with_error_handling(
             directory=directory,
             from_cli_upgrade_command=False,
         )
         return context
 
     @property
-    def data_context(self) -> Optional[DataContext]:
+    def data_context(self) -> Optional[FileDataContext]:
         return self._data_context
 
     @data_context.setter
-    def data_context(self, data_context: DataContext) -> None:
+    def data_context(self, data_context: FileDataContext) -> None:
         assert isinstance(
             data_context, FileDataContext
         ), "GX CLI interaction requires a FileDataContext"

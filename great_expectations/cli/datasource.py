@@ -22,7 +22,7 @@ from great_expectations.render.renderer.datasource_new_notebook_renderer import 
 )
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import AbstractDataContext, FileDataContext
+    from great_expectations.data_context import FileDataContext
 
 
 logger = logging.getLogger(__name__)
@@ -108,7 +108,7 @@ def datasource_new(ctx: click.Context, name: str, jupyter: bool) -> None:
 @click.pass_context
 def delete_datasource(ctx: click.Context, datasource: str) -> None:
     """Delete the datasource specified as an argument"""
-    context: AbstractDataContext = ctx.obj.data_context
+    context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     if not ctx.obj.assume_yes:
@@ -146,7 +146,7 @@ def delete_datasource(ctx: click.Context, datasource: str) -> None:
 @click.pass_context
 def datasource_list(ctx: click.Context) -> None:
     """List known Datasources."""
-    context: AbstractDataContext = ctx.obj.data_context
+    context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
     try:
         datasources = context.list_datasources()
@@ -278,12 +278,12 @@ class BaseDatasourceNewYamlHelper:
         return notebook_path
 
     def get_notebook_renderer(
-        self, context: AbstractDataContext
+        self, context: FileDataContext
     ) -> DatasourceNewNotebookRenderer:
         """Get a renderer specifically constructed for the datasource type."""
         raise NotImplementedError
 
-    def send_backend_choice_usage_message(self, context: AbstractDataContext) -> None:
+    def send_backend_choice_usage_message(self, context: FileDataContext) -> None:
         send_usage_message(
             data_context=context,
             event=UsageStatsEvents.CLI_NEW_DS_CHOICE,
@@ -917,7 +917,7 @@ CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES: list = [
 
 
 def check_if_datasource_name_exists(
-    context: AbstractDataContext, datasource_name: str
+    context: FileDataContext, datasource_name: str
 ) -> bool:
     """
     Check if a Datasource name already exists in the on-disk version of the given DataContext and if so raise an error

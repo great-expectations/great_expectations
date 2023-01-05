@@ -34,7 +34,7 @@ from great_expectations.datasource import BaseDatasource
 from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import AbstractDataContext
+    from great_expectations.data_context import FileDataContext
     from great_expectations.datasource import LegacyDatasource
     from great_expectations.experimental.datasources.interfaces import (
         Datasource as XDatasource,
@@ -53,7 +53,7 @@ EXIT_UPGRADE_CONTINUATION_MESSAGE = (
 
 
 def prompt_profile_to_create_a_suite(
-    data_context: AbstractDataContext,
+    data_context: FileDataContext,
     expectation_suite_name: str,
 ) -> None:
 
@@ -82,7 +82,7 @@ When you run this notebook, Great Expectations will store these expectations in 
 
 def get_or_create_expectation_suite(
     expectation_suite_name: Optional[str],
-    data_context: AbstractDataContext,
+    data_context: FileDataContext,
     data_asset_name: Optional[str] = None,
     usage_event: Optional[str] = None,
     suppress_usage_message: bool = False,
@@ -151,7 +151,7 @@ def get_default_expectation_suite_name(
 
 
 def tell_user_suite_exists(
-    data_context: AbstractDataContext,
+    data_context: FileDataContext,
     expectation_suite_name: str,
     usage_event: Optional[str],
     suppress_usage_message: bool = False,
@@ -174,7 +174,7 @@ def launch_jupyter_notebook(notebook_path: str) -> None:
 
 
 def get_validator(
-    context: AbstractDataContext,
+    context: FileDataContext,
     batch_request: Union[dict, BatchRequest],
     suite: Union[str, ExpectationSuite],
 ) -> Validator:
@@ -198,7 +198,7 @@ def get_validator(
 
 
 def load_expectation_suite(  # type: ignore[return] # sys.exit if no suite
-    data_context: AbstractDataContext,
+    data_context: FileDataContext,
     expectation_suite_name: str,
     usage_event: Optional[str],
     suppress_usage_message: bool = False,
@@ -241,7 +241,7 @@ def load_expectation_suite(  # type: ignore[return] # sys.exit if no suite
 
 
 def exit_with_failure_message_and_stats(
-    data_context: AbstractDataContext,
+    data_context: FileDataContext,
     usage_event: Optional[str],
     suppress_usage_message: bool = False,
     message: Optional[str] = None,
@@ -258,7 +258,7 @@ def exit_with_failure_message_and_stats(
 
 
 def delete_checkpoint(
-    context: AbstractDataContext,
+    context: FileDataContext,
     checkpoint_name: str,
     usage_event: str,
     assume_yes: bool,
@@ -285,7 +285,7 @@ def delete_checkpoint(
 
 
 def run_checkpoint(  # type: ignore[return] # sys.exit if no result
-    context: AbstractDataContext,
+    context: FileDataContext,
     checkpoint_name: str,
     usage_event: str,
 ) -> CheckpointResult:
@@ -312,7 +312,7 @@ def run_checkpoint(  # type: ignore[return] # sys.exit if no result
 
 
 def validate_checkpoint(
-    context: AbstractDataContext,
+    context: FileDataContext,
     checkpoint_name: str,
     usage_event: str,
     failure_message: Optional[str] = None,
@@ -332,7 +332,7 @@ def validate_checkpoint(
 
 
 def load_checkpoint(  # type: ignore[return] # sys.exit if no checkpoint
-    context: AbstractDataContext,
+    context: FileDataContext,
     checkpoint_name: str,
     usage_event: str,
 ) -> Union[Checkpoint, LegacyCheckpoint]:
@@ -357,7 +357,7 @@ def load_checkpoint(  # type: ignore[return] # sys.exit if no checkpoint
 
 
 def select_datasource(
-    context: AbstractDataContext, datasource_name: Optional[str] = None
+    context: FileDataContext, datasource_name: Optional[str] = None
 ) -> Union[BaseDatasource, LegacyDatasource, XDatasource, None]:
     """Select a datasource interactively."""
     # TODO consolidate all the myriad CLI tests into this
@@ -402,9 +402,9 @@ def select_datasource(
 
 def load_data_context_with_error_handling(
     directory: Optional[str], from_cli_upgrade_command: bool = False
-) -> Optional[AbstractDataContext]:
+) -> Optional[FileDataContext]:
     """Return a DataContext with good error handling and exit codes."""
-    context: Optional[AbstractDataContext]
+    context: Optional[FileDataContext]
     ge_config_version: float
     try:
         directory = directory or FileDataContext.find_context_root_dir()
@@ -468,13 +468,13 @@ def load_data_context_with_error_handling(
 
 def upgrade_project_strictly_multiple_versions_increment(
     directory: str, ge_config_version: float, from_cli_upgrade_command: bool = False
-) -> Optional[AbstractDataContext]:
+) -> Optional[FileDataContext]:
     upgrade_helper_class = (
         GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
         if ge_config_version
         else None
     )
-    context: Optional[AbstractDataContext]
+    context: Optional[FileDataContext]
     if upgrade_helper_class and int(ge_config_version) < CURRENT_GX_CONFIG_VERSION:
         upgrade_project(
             context_root_dir=directory,
@@ -587,10 +587,10 @@ To learn more about the upgrade process, visit \
 
 def upgrade_project_one_or_multiple_versions_increment(
     directory: str,
-    context: AbstractDataContext,
+    context: FileDataContext,
     ge_config_version: float,
     from_cli_upgrade_command: bool = False,
-) -> Optional[AbstractDataContext]:
+) -> Optional[FileDataContext]:
     # noinspection PyBroadException
     try:
         send_usage_message(
@@ -670,10 +670,10 @@ def upgrade_project_one_or_multiple_versions_increment(
 
 def upgrade_project_zero_versions_increment(
     directory: str,
-    context: AbstractDataContext,
+    context: FileDataContext,
     ge_config_version: float,
     from_cli_upgrade_command: bool = False,
-) -> Optional[AbstractDataContext]:
+) -> Optional[FileDataContext]:
     upgrade_helper_class = (
         GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
         if ge_config_version
@@ -828,7 +828,7 @@ def confirm_proceed_or_exit(
     continuation_message: str = "Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !",
     exit_on_no: bool = True,
     exit_code: int = 0,
-    data_context: Optional[AbstractDataContext] = None,
+    data_context: Optional[FileDataContext] = None,
     usage_stats_event: Optional[str] = None,
 ) -> bool:
     """
@@ -943,7 +943,7 @@ def get_relative_path_from_config_file_to_base_path(
 
 def load_json_file_into_dict(
     filepath: str,
-    data_context: AbstractDataContext,
+    data_context: FileDataContext,
     usage_event: Optional[str] = None,
 ) -> Optional[Dict[str, Union[str, int, Dict[str, Any]]]]:
     suppress_usage_message: bool = (usage_event is None) or (data_context is None)
@@ -1026,7 +1026,7 @@ def get_batch_request_from_citations(
 
 
 def add_citation_with_batch_request(
-    data_context: AbstractDataContext,
+    data_context: FileDataContext,
     expectation_suite: ExpectationSuite,
     batch_request: Optional[Dict[str, Union[str, int, Dict[str, Any]]]] = None,
 ) -> None:
@@ -1045,7 +1045,7 @@ def add_citation_with_batch_request(
 
 def get_batch_request_from_json_file(
     batch_request_json_file_path: str,
-    data_context: AbstractDataContext,
+    data_context: FileDataContext,
     usage_event: Optional[str] = None,
     suppress_usage_message: bool = False,
 ) -> Optional[Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]]:
@@ -1075,7 +1075,7 @@ def get_batch_request_from_json_file(
 
 
 def get_batch_request_using_datasource_name(
-    data_context: AbstractDataContext,
+    data_context: FileDataContext,
     datasource_name: Optional[str] = None,
     usage_event: Optional[str] = None,
     suppress_usage_message: bool = False,
