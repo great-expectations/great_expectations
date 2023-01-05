@@ -40,6 +40,10 @@ def DataContext(
     ge_cloud_access_token: None = ...,
     ge_cloud_organization_id: None = ...,
 ) -> FileDataContext:
+    """
+    If `context_root_dir` is provided and `cloud_mode`/`ge_cloud_mode` are `False`
+    a `FileDataContext` will always be returned.
+    """
     ...
 
 
