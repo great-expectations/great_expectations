@@ -40,9 +40,7 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
         "include_config": True,
         "catch_exceptions": False,
         "meta": None,
-        "query": query,
-        # "row_condition": RowCondition("1=1", RowConditionParserType.SQL),
-        # "condition_parser": "great_expectations__experimental__",
+        "query": query
     }
 
     def validate_configuration(
