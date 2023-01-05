@@ -40,7 +40,7 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
         "include_config": True,
         "catch_exceptions": False,
         "meta": None,
-        "query": query
+        "query": query,
     }
 
     def validate_configuration(
