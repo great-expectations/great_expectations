@@ -31,7 +31,7 @@ from great_expectations.computed_metrics.db.models.base import (
 # TODO: <Alex>ALEX</Alex>
 
 
-class SqlAlchemyMetricComputationModel(
+class SqlAlchemyComputedMetricModel(
     SqlAlchemyModelBase,
     PrimaryKeyMixin,
     TimestampsMixin,
