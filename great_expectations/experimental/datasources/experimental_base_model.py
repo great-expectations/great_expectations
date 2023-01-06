@@ -56,7 +56,18 @@ class ExperimentalBaseModel(pydantic.BaseModel):
         ...
 
     def yaml(
-        self, stream_or_path: Union[StringIO, pathlib.Path, None] = None, **yaml_kwargs
+        self,
+        stream_or_path: Union[StringIO, pathlib.Path, None] = None,
+        include: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
+        exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
+        by_alias: bool = False,
+        skip_defaults: Union[bool, None] = None,
+        exclude_unset: bool = False,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+        encoder: Union[Callable[[Any], Any], None] = None,
+        models_as_dict: bool = True,
+        **yaml_kwargs,
     ) -> Union[str, pathlib.Path]:
         """
         Serialize the config object as yaml.
@@ -69,7 +80,17 @@ class ExperimentalBaseModel(pydantic.BaseModel):
 
         # pydantic json encoder has support for many more types
         # TODO: can we dump json string directly to yaml.dump?
-        intermediate_json = json.loads(self.json())
+        intermediate_json = self._json_dict(
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            skip_defaults=skip_defaults,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+            encoder=encoder,
+            models_as_dict=models_as_dict,
+        )
         yaml.dump(intermediate_json, stream=stream_or_path, **yaml_kwargs)
 
         if isinstance(stream_or_path, pathlib.Path):
