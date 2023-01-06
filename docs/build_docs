@@ -1,16 +1,13 @@
 #!/bin/bash
 
-echo "START Listing pwd and pwd contents"
-pwd;
-ls;
-echo "END Listing pwd and pwd contents"
-
 echo "Installing dev dependencies"
 pip install -c constraints-dev.txt -e ".[test]"
+
+echo "Installing dev dependencies"
 (cd docs/sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt)
 
 echo "Building sphinx API docs."
 (cd docs/sphinx_api_docs_source; invoke docs)
-echo "Successfully built sphinx API docs."
+
+echo "Building docusaurus docs."
 yarn build
-echo "Successfully finished building docusaurus docs."
