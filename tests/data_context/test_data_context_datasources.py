@@ -19,6 +19,7 @@ from great_expectations.data_context.types.base import (
     GXCloudConfig,
 )
 from great_expectations.datasource import Datasource
+from great_expectations.util import get_context
 
 
 @pytest.fixture
@@ -63,8 +64,10 @@ def test_data_context_instantiates_ge_cloud_store_backend_with_cloud_config(
     context = get_context(
         project_config=data_context_config_with_datasources,
         context_root_dir=str(project_path),
+        cloud_base_url=ge_cloud_config.base_url,
+        cloud_access_token=ge_cloud_config.access_token,
+        cloud_organization_id=ge_cloud_config.organization_id,
         cloud_mode=True,
-        cloud_config=ge_cloud_config,
     )
 
     assert isinstance(context._datasource_store.store_backend, GXCloudStoreBackend)
