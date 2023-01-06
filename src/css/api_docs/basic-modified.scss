@@ -621,6 +621,8 @@ dl.field-list > dt {
 }
 
 dl.field-list > dt:after {
+    // Note: colon in content removed since it was duplicating
+    // on Netlify deploy.
     content: "";
 }
 
