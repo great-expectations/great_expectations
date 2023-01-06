@@ -8,7 +8,8 @@ The `result_format` parameter may be either a string or a dictionary which speci
   * For dictionary usage, `result_format` which may include the following keys:
     * `result_format`: Sets the fields to return in result.
     * `unexpected_index_column_names`: Defines the primary key (PK) columns used to represent unexpected results.
-    * `return_unexpected_index_query`: Boolean flag that can be used to suppress PK output.
+    * `return_unexpected_index_query`: Boolean flag that can be used to suppress output that allows you to retrieve 
+      the full set of unexpected results (default is `True`).
     * `partial_unexpected_count`: Sets the number of results to include in partial_unexpected_count, if applicable. If 
       set to 0, this will suppress the unexpected counts.
     * `include_unexpected_rows`: When running validations, this will return the entire row for each unexpected value in
@@ -26,11 +27,10 @@ the configuration will not be persisted, and you will receive a `UserWarning`. W
 configuration be used for exploratory analysis, with the final configuration added at the Checkpoint-level.
 
 ### Expectation Level Config
-To apply `result_format` to an Expectation, pass it into the Expectation. We will first need to obtain a (Validator)[] object instance by running the `$ great_expectations suite new` command.
+To apply `result_format` to an Expectation, pass it into the Expectation. We will first need to obtain a [Validator]() object instance by running the `$ great_expectations suite new` command.
 
 ```python name="result_format_complete_example_set"
 ```
-In order to see those values at the Suite level, configure `result_format` in your Checkpoint configuration.
 
 ### Checkpoint Level Config
 To apply `result_format` to every Expectation in a Suite, define it in your Checkpoint configuration under the `runtime_configuration` key.
@@ -40,16 +40,23 @@ To apply `result_format` to every Expectation in a Suite, define it in your Chec
 
 The results will then be stored in the Validation Result after running the Checkpoint.
 :::note
-Regardless of where Result Format is configured, `unexpected_list` is never rendered in Data Docs. `unexpected_index_list` is rendered when `COMPLETE` is selected. 
+The `unexpected_index_list`, as represented by default indices or primary key (PK) indices defined in `unexpected_index_column_names` is rendered in DataDocs when `COMPLETE` is selected. 
+
+By default, `unexpected_index_query`, which for `SQL` and `Spark` is a query that allows you to retrieve the full set of unexpected values from the dataset, is also rendered by default when `COMPLETE` is selected.
+For `Pandas`, this parameter returns the full set of unexpected indices, which can also be used to retrieve the full set of unexpected values. 
+
+To suppress this output, the `return_unexpected_index_query` parameter can be set to `False`. 
+
+Regardless of where Result Format is configured, `unexpected_list` is never rendered in Data Docs.
 :::
 
-## result_format values
+## `result_format` Values and Fields
 
 Great Expectations supports four values for `result_format`: `BOOLEAN_ONLY`, `BASIC`, `SUMMARY`, and `COMPLETE`. The 
 out-of-the-box default is `BASIC`. Each successive value includes more detail and so can support different use 
 cases for working with Great Expectations, including interactive exploratory work and automatic validation.
 
-## Fields defined for all Expectations
+### Fields defined for all Expectations
 | Fields within `result`                |BOOLEAN_ONLY    |BASIC           |SUMMARY         |COMPLETE        |
 ----------------------------------------|----------------|----------------|----------------|-----------------
 |    element_count                      |no              |yes             |yes             |yes             |
@@ -90,7 +97,7 @@ The following examples will use the data defined in the following Pandas DataFra
 ```python name="pandas_df_for_result_format"
 ```
 
-## Behavior for `BOOLEAN_ONLY`
+### Behavior for `BOOLEAN_ONLY`
 
 When the `result_format` is `BOOLEAN_ONLY`, no `result` is returned. The result of evaluating the Expectation is  
 exclusively returned via the value of the `success` parameter.
@@ -109,7 +116,7 @@ False
 {}
 ```
 
-#### Behavior for `BASIC`
+### Behavior for `BASIC`
 
 For `BASIC` format, a `result` is generated with a basic justification for why an expectation was met or not. The format is intended 
 for quick, at-a-glance feedback. For example, it tends to work well in Jupyter Notebooks.
@@ -181,7 +188,7 @@ True
 ```
 
 
-#### Behavior for `SUMMARY`
+### Behavior for `SUMMARY`
 
 A `result` is generated with a summary justification for why an expectation was met or not. The format is intended  
 for more detailed exploratory work and includes additional information beyond what is included by `BASIC`.
@@ -283,7 +290,7 @@ expect_column_mean_to_be_between
 ```
 
 
-#### Behavior for `COMPLETE`
+### Behavior for `COMPLETE`
 A `result` is generated with all available justification for why an expectation was met or not. The format is  
 intended for debugging pipelines or developing detailed regression tests.
 

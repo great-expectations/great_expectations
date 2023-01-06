@@ -315,7 +315,6 @@ checkpoint_dict: dict = {
         "result_format": {
             "result_format": "COMPLETE",
             "unexpected_index_column_names": ["pk_column"],
-            "include_unexpected_rows": True,
             "return_unexpected_index_query": True,
         },
     },
