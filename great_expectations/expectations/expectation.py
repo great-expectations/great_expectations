@@ -1661,60 +1661,6 @@ class Expectation(metaclass=MetaExpectation):
         return _get_string(renderer_configuration=renderer_configuration)
 
     @staticmethod
-    def _add_value_set_params(
-        renderer_configuration: RendererConfiguration,
-    ) -> RendererConfiguration:
-        return Expectation._add_array_params(
-            array_param_name="value_set",
-            param_prefix="v__",
-            renderer_configuration=renderer_configuration,
-        )
-
-    @staticmethod
-    def _get_value_set_string(renderer_configuration: RendererConfiguration) -> str:
-        return Expectation._get_array_string(
-            array_param_name="value_set",
-            param_prefix="v__",
-            renderer_configuration=renderer_configuration,
-        )
-
-    @staticmethod
-    def _add_column_list_params(
-        renderer_configuration: RendererConfiguration,
-    ) -> RendererConfiguration:
-        return Expectation._add_array_params(
-            array_param_name="column_list",
-            param_prefix="column_list_",
-            renderer_configuration=renderer_configuration,
-        )
-
-    @staticmethod
-    def _get_column_list_string(renderer_configuration: RendererConfiguration) -> str:
-        return Expectation._get_array_string(
-            array_param_name="column_list",
-            param_prefix="column_list_",
-            renderer_configuration=renderer_configuration,
-        )
-
-    @staticmethod
-    def _add_regex_list_params(
-        renderer_configuration: RendererConfiguration,
-    ) -> RendererConfiguration:
-        return Expectation._add_array_params(
-            array_param_name="regex_list",
-            param_prefix="regex_list_",
-            renderer_configuration=renderer_configuration,
-        )
-
-    @staticmethod
-    def _get_regex_list_string(renderer_configuration: RendererConfiguration) -> str:
-        return Expectation._get_array_string(
-            array_param_name="regex_list",
-            param_prefix="regex_list_",
-            renderer_configuration=renderer_configuration,
-        )
-
-    @staticmethod
     @param_method(param_name="mostly")
     def _add_mostly_pct_param(
         renderer_configuration: RendererConfiguration,
