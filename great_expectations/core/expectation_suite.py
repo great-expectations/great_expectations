@@ -22,11 +22,6 @@ from marshmallow import Schema, ValidationError, fields, pre_dump
 
 import great_expectations as gx
 from great_expectations import __version__ as ge_version
-from great_expectations.core._docs_decorators import (
-    deprecated_argument,
-    new_argument,
-    public_api,
-)
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
 )
@@ -65,7 +60,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-@public_api
 class ExpectationSuite(SerializableDictDot):
     """
     This ExpectationSuite object has create, read, update, and delete functionality for its expectations:
@@ -118,13 +112,6 @@ class ExpectationSuite(SerializableDictDot):
     def name(self) -> str:
         return self.expectation_suite_name
 
-    @public_api  # TODO: Remove (just for testing)
-    @deprecated_argument(
-        argument_name="comment", version="0.15.37"
-    )  # TODO: Remove (just for testing)
-    @new_argument(
-        argument_name="comment", version="0.15.37"
-    )  # TODO: Remove (just for testing)
     def add_citation(
         self,
         comment: str,
