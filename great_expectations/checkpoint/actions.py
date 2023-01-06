@@ -152,6 +152,8 @@ class SlackNotificationAction(ValidationAction):
             module_name: great_expectations.render.renderer.slack_renderer
             class_name: SlackRenderer
           show_failed_expectations: *Optional* (boolean) shows a list of failed expectation types. default is false.
+          base_url: # optional string that provides a GX cloud base URL for using with params to route to a
+          # specific validation result
 
     """
 
@@ -165,6 +167,7 @@ class SlackNotificationAction(ValidationAction):
         notify_on="all",
         notify_with=None,
         show_failed_expectations=False,
+        base_url=None
     ) -> None:
         """Construct a SlackNotificationAction
 
@@ -205,6 +208,7 @@ class SlackNotificationAction(ValidationAction):
         self.notify_on = notify_on
         self.notify_with = notify_with
         self.show_failed_expectations = show_failed_expectations
+        self.base_url = base_url
 
     def _run(
         self,
@@ -236,12 +240,19 @@ class SlackNotificationAction(ValidationAction):
 
         validation_success = validation_result_suite.success
         data_docs_pages = None
-
         if payload:
             # process the payload
             for action_names in payload.keys():
                 if payload[action_names]["class"] == "UpdateDataDocsAction":
                     data_docs_pages = payload[action_names]
+
+        # Assemble complete GX Cloud URL to direct to a specific validation result
+        cloud_url = None
+        if (
+            isinstance(self.base_url, str)
+            and isinstance(validation_result_suite_identifier.cloud_id, str)
+        ):
+            cloud_url = f"{self.base_url}/?validationResultId={validation_result_suite_identifier.cloud_id}"
 
         if (
             self.notify_on == "all"
@@ -255,6 +266,7 @@ class SlackNotificationAction(ValidationAction):
                 data_docs_pages,
                 self.notify_with,
                 self.show_failed_expectations,
+                cloud_url
             )
 
             # this will actually send the POST request to the Slack webapp server
