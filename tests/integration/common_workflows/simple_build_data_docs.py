@@ -2,12 +2,12 @@ import os
 import tempfile
 
 import great_expectations as gx
-from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
     FilesystemStoreBackendDefaults,
 )
+from great_expectations.util import get_context
 
 """
 A simple test to verify that `context.build_data_docs()` works as expected.
@@ -41,5 +41,5 @@ data_context_config = DataContextConfig(
         root_directory=tempfile.mkdtemp() + os.sep + "my_greatexp_workdir"
     ),
 )
-context = BaseDataContext(project_config=data_context_config)
+context = get_context(project_config=data_context_config)
 print(f"Great Expectations data_docs url: {context.build_data_docs()}")
