@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import inspect
 import re
 from datetime import datetime
 from enum import Enum
