@@ -33,5 +33,3 @@ import Miscellaneous from './components_index/_miscellaneous.mdx'
 ## Data Docs
 <DataDocs />
 
-## Miscellaneous
-<Miscellaneous />
