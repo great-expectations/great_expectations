@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, Optional, Tuple
 
 import altair as alt
 import numpy as np

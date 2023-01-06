@@ -1,5 +1,5 @@
 from itertools import zip_longest
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,

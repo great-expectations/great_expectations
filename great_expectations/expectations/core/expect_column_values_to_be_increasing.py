@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,

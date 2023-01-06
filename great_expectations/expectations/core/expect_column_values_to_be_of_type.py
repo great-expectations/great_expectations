@@ -1,7 +1,7 @@
 import inspect
 import logging
 import warnings
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 import numpy as np
 import pandas as pd
