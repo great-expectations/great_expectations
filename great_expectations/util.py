@@ -55,6 +55,7 @@ from packaging import version
 from pkg_resources import Distribution
 from typing_extensions import Literal, TypeGuard
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
     PluginClassNotFoundError,
@@ -1769,6 +1770,7 @@ def get_context(
     ...
 
 
+@public_api
 def get_context(
     project_config: Optional[Union[DataContextConfig, Mapping]] = None,
     context_root_dir: Optional[PathStr] = None,
