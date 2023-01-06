@@ -351,8 +351,8 @@ class FileDataContextVariables(DataContextVariables):
         xdatasources: Dict[str, XDatasource] = self.data_context.xdatasources
         config_xdatasources = self.data_context.zep_config.datasources
         if xdatasources or config_xdatasources:
-            logger.debug(
-                f"Temporary `XDatasource` removal during {type(self).__class__.__name__}.save_config() operation {len(xdatasources)}"
+            logger.info(
+                f"Temporary `XDatasource` removal during {type(self).__name__}.save_config() operation - {len(xdatasources)} items"
             )
             config_xdatasources.update(  # TODO: make config and live xdatasource sync a discrete method
                 xdatasources
@@ -363,7 +363,7 @@ class FileDataContextVariables(DataContextVariables):
         save_result = super().save_config()
 
         if config_xdatasources:  # config_xdatasources is the superset
-            logger.debug(f"Replacing {len(config_xdatasources)} `XDatasource`s")
+            logger.info(f"Replacing {len(config_xdatasources)} `XDatasource`s")
             self.data_context.datasources.update(config_xdatasources)
 
         return save_result
