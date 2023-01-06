@@ -1324,7 +1324,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id
                 },
             }
         ],
-        "collapse_toggle_link": "Show query to retrieve all unexpected values...",
+        "collapse_toggle_link": "To retrieve all unexpected values...",
         "content_block_type": "collapse",
         "inline_link": False,
     }

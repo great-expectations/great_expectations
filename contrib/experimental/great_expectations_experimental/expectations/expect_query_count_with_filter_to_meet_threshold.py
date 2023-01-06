@@ -45,8 +45,7 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
         threshold = configuration["kwargs"].get("threshold")
 
         try:

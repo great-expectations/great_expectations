@@ -131,6 +131,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration)
+        configuration = configuration or self.configuration
         try:
             assert "type_list" in configuration.kwargs, "type_list is required"
             assert (
