@@ -17,6 +17,7 @@ class SlackRenderer(Renderer):
         data_docs_pages=None,
         notify_with=None,
         show_failed_expectations: bool = False,
+        cloud_url: str = None,
     ):
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
@@ -75,8 +76,9 @@ class SlackRenderer(Renderer):
                     failed_expectations_text = self.create_failed_expectations_text(
                         validation_result["results"]
                     )
-
-            summary_text = f"""*Batch Validation Status*: {status}
+            summary_text = f"""
+{f"*<{cloud_url} | GX Cloud Validation Result >*" if cloud_url else ""}
+*Batch Validation Status*: {f"*<{cloud_url} | {status}>*" if cloud_url else status}
 *Expectation suite name*: `{expectation_suite_name}`
 *Data asset name*: `{data_asset_name}`
 *Run ID*: `{run_id}`
