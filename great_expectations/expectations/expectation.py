@@ -482,21 +482,19 @@ class Expectation(metaclass=MetaExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> RenderedAtomicContent:
-        (
-            template_str,
-            params_with_json_schema,
-            meta_notes,
-            _,
-        ) = cls._atomic_prescriptive_template(
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
         )
+        renderer_configuration = cls._prescriptive_template(
+            renderer_configuration=renderer_configuration,
+        )
         value_obj = renderedAtomicValueSchema.load(
             {
-                "template": template_str,
-                "params": params_with_json_schema,
-                "meta_notes": meta_notes,
+                "template": renderer_configuration.template_str,
+                "params": renderer_configuration.params.dict(),
+                "meta_notes": renderer_configuration.meta_notes,
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
         )
