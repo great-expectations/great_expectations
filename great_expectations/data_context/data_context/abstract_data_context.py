@@ -2916,7 +2916,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     @property
     def xdatasources(self) -> Dict[str, XDatasource]:
         return {
-            k: self.datasources[k] for k in self.__xdatasource_keys  # type: ignore[assignment,misc] # _xdatasource_keys are all `XDatasource`s
+            k: self.datasources[k] for k in self.__xdatasource_keys  # type: ignore[misc] # _xdatasource_keys are all `XDatasource`s
         }
 
     @property
