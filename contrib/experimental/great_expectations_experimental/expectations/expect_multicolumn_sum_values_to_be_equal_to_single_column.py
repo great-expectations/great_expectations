@@ -196,7 +196,7 @@ class ExpectMulticolumnSumValuesToBeEqualToSingleColumn(MulticolumnMapExpectatio
             "multi-column expectation",
             "multi-column sum values to be equal to single column",
         ],
-        "contributors": ["@AsaFLachisch", "mkopec87"],
+        "contributors": ["@AsaFLachisch", "@mkopec87"],
     }
     # </snippet>
 
