@@ -122,11 +122,17 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
             template_str = "Values must always be unique across columns: "
 
         if params.column_list:
-            renderer_configuration = cls._add_column_list_params(
-                renderer_configuration=renderer_configuration
+            array_param_name = "column_list"
+            param_prefix = "column_list_"
+            renderer_configuration = cls._add_array_params(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
             )
-            template_str += cls._get_column_list_string(
-                renderer_configuration=renderer_configuration
+            template_str += cls._get_array_string(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
             )
 
         renderer_configuration.template_str = template_str

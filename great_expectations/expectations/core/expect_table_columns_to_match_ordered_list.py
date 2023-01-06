@@ -131,11 +131,17 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
             template_str = "Must have a list of columns in a specific order, but that order is not specified."
         else:
             template_str = "Must have these columns in this order: "
-            renderer_configuration = cls._add_column_list_params(
-                renderer_configuration=renderer_configuration
+            array_param_name = "column_list"
+            param_prefix = "column_list_"
+            renderer_configuration = cls._add_array_params(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
             )
-            template_str += cls._get_column_list_string(
-                renderer_configuration=renderer_configuration
+            template_str += cls._get_array_string(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
             )
 
         renderer_configuration.template_str = template_str
