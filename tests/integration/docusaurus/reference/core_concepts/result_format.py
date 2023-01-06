@@ -60,6 +60,7 @@ dataframe: pd.DataFrame = pd.DataFrame(
     }
 )
 
+# NOTE: The following code is only for testing and can be ignored by users.
 data_context_config: DataContextConfig = DataContextConfig(
     datasources={  # type: ignore[arg-type]
         "pandas_datasource": {
@@ -134,8 +135,6 @@ assert validation_result.result == {
     "unexpected_percent_total": 40.0,
     "unexpected_percent_nonmissing": 40.0,
 }
-
-# assert validation_result.result == "hello"
 
 # <snippet>
 validation_result = my_validator.expect_column_values_to_be_in_set(
@@ -221,6 +220,7 @@ assert validation_result.result == {
 
 
 # Checkpoint
+# NOTE: The following code is only for testing and can be ignored by users.
 context.create_expectation_suite(expectation_suite_name="test_suite")
 test_suite = context.get_expectation_suite(expectation_suite_name="test_suite")
 
@@ -275,7 +275,7 @@ checkpoint_dict: dict = {
     },
 }
 # </snippet>
-batch_request_for_pandas_unexpected_rows_and_index = {
+batch_request = {
     "datasource_name": "pandas_datasource",
     "data_connector_name": "runtime_data_connector",
     "data_asset_name": "IN_MEMORY_DATA_ASSET",
@@ -294,13 +294,12 @@ context.add_checkpoint(
         clean_falsy=True,
     ),
 )
-# noinspection PyProtectedMember
 context._save_project_config()
 
 result: CheckpointResult = context.run_checkpoint(
     checkpoint_name="my_checkpoint",
     expectation_suite_name="test_suite",
-    batch_request=batch_request_for_pandas_unexpected_rows_and_index,
+    batch_request=batch_request,
 )
 evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
 
