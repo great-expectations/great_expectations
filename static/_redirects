@@ -220,8 +220,3 @@
 /docs/reference/supporting_resources.md https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_overview
 /docs/reference/validation.md https://docs.greatexpectations.io/docs/guides/validation/validate_data_overview
 /docs/guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook https://greatexpectations.io/expectations/
-
-# Redirects for deprecated API docs
-/docs/api_docs/classes/great_expectations-data_context-data_context-data_context-DataContext /docs/reference/api/abstract_data_context
-/docs/api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-test_yaml_config /docs/reference/api/abstract_data_context
-/docs/api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-create /docs/reference/api/great_expectations.util
