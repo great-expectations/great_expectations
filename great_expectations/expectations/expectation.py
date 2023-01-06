@@ -202,6 +202,11 @@ def param_method(param_name: str) -> Callable:
     If a helper method is decorated with @param_method(param_name="<param_name>") and the param attribute does not
     exist, the method will return either the input RendererConfiguration or None depending on the declared return type.
     """
+    if not param_name:
+        # If param_name was passed as an empty string
+        raise RendererConfigurationError(
+            "Method decorated with @param_method must be passed an existing param_name."
+        )
 
     def _param_method(param_func: Callable) -> Callable:
         @functools.wraps(param_func)
@@ -1600,6 +1605,11 @@ class Expectation(metaclass=MetaExpectation):
         param_prefix: str,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
+        if not param_prefix:
+            raise RendererConfigurationError(
+                "Array param_prefix must be a non-empty string."
+            )
+
         @staticmethod
         @param_method(param_name=array_param_name)
         def _add_params(
@@ -1629,6 +1639,11 @@ class Expectation(metaclass=MetaExpectation):
         param_prefix: str,
         renderer_configuration: RendererConfiguration,
     ) -> str:
+        if not param_prefix:
+            raise RendererConfigurationError(
+                "Array param_prefix must be a non-empty string."
+            )
+
         @staticmethod
         @param_method(param_name=array_param_name)
         def _get_string(renderer_configuration: RendererConfiguration) -> str:
@@ -1644,6 +1659,60 @@ class Expectation(metaclass=MetaExpectation):
             return array_string
 
         return _get_string(renderer_configuration=renderer_configuration)
+
+    @staticmethod
+    def _add_value_set_params(
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        return Expectation._add_array_params(
+            array_param_name="value_set",
+            param_prefix="v__",
+            renderer_configuration=renderer_configuration,
+        )
+
+    @staticmethod
+    def _get_value_set_string(renderer_configuration: RendererConfiguration) -> str:
+        return Expectation._get_array_string(
+            array_param_name="value_set",
+            param_prefix="v__",
+            renderer_configuration=renderer_configuration,
+        )
+
+    @staticmethod
+    def _add_column_list_params(
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        return Expectation._add_array_params(
+            array_param_name="column_list",
+            param_prefix="column_list_",
+            renderer_configuration=renderer_configuration,
+        )
+
+    @staticmethod
+    def _get_column_list_string(renderer_configuration: RendererConfiguration) -> str:
+        return Expectation._get_array_string(
+            array_param_name="column_list",
+            param_prefix="column_list_",
+            renderer_configuration=renderer_configuration,
+        )
+
+    @staticmethod
+    def _add_regex_list_params(
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        return Expectation._add_array_params(
+            array_param_name="regex_list",
+            param_prefix="regex_list_",
+            renderer_configuration=renderer_configuration,
+        )
+
+    @staticmethod
+    def _get_regex_list_string(renderer_configuration: RendererConfiguration) -> str:
+        return Expectation._get_array_string(
+            array_param_name="regex_list",
+            param_prefix="regex_list_",
+            renderer_configuration=renderer_configuration,
+        )
 
     @staticmethod
     @param_method(param_name="mostly")

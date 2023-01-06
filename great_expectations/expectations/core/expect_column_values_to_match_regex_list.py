@@ -150,16 +150,10 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
         if not params.regex_list or not params.regex_list.value:
             values_string = "[ ]"
         else:
-            array_param_name = "regex_list"
-            param_prefix = "v__"
-            renderer_configuration = cls._add_array_params(
-                array_param_name=array_param_name,
-                param_prefix=param_prefix,
+            renderer_configuration = cls._add_regex_list_params(
                 renderer_configuration=renderer_configuration,
             )
-            values_string = cls._get_array_string(
-                array_param_name=array_param_name,
-                param_prefix=param_prefix,
+            values_string = cls._get_regex_list_string(
                 renderer_configuration=renderer_configuration,
             )
 
