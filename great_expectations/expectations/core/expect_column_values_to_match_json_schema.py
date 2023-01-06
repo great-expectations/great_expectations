@@ -123,7 +123,7 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
             template_str = "values must match a JSON Schema but none was specified."
         else:
             formatted_json = (
-                f"<pre>{json.dumps(params.get('json_schema'), indent=4)}</pre>"
+                f"<pre>{json.dumps(params.json_schema.value, indent=4)}</pre>"
             )
             renderer_configuration.add_param(
                 name="formatted_json",
