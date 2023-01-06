@@ -70,6 +70,9 @@ def custom_process_docstring(app, what, name, obj, options, lines):
     _remove_feature_maturity_info(
         app=app, what=what, name=name, obj=obj, options=options, lines=lines
     )
+    _remove_duplicate_colons(
+        app=app, what=what, name=name, obj=obj, options=options, lines=lines
+    )
 
 
 def _remove_whitelist_tag(app, what, name, obj, options, lines):
@@ -93,6 +96,19 @@ def _process_relevant_documentation_tag(app, what, name, obj, options, lines):
             trimmed_line = line.replace(
                 DOCUMENTATION_TAG, "Relevant Documentation Links\n"
             )
+            lines[idx] = trimmed_line
+
+
+def _remove_duplicate_colons(app, what, name, obj, options, lines):
+    """Remove and replace duplicate colons with single colons.
+
+    E.g. Parameters:: is changed to Parameters:
+
+    Note: This method modifies lines in place per sphinx documentation.
+    """
+    for idx, line in enumerate(lines):
+        if "::" in line:
+            trimmed_line = line.replace("::", ":")
             lines[idx] = trimmed_line
 
 

@@ -166,8 +166,7 @@ T = TypeVar("T", dict, list, str)
 
 @public_api
 class AbstractDataContext(ConfigPeer, ABC):
-    """
-    Base class for all DataContexts that contain all context-agnostic data context operations.
+    """Base class for all DataContexts that contain all context-agnostic data context operations.
 
     The class encapsulates most store / core components and convenience methods used to access them, meaning the
     majority of DataContext functionality lives here.
