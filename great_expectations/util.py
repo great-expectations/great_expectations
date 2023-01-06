@@ -1807,9 +1807,7 @@ def get_context(
 
     Read on for more details about each of the Data Context types:
 
-    **FileDataContext:**
-
-    A Data Context configured via a yaml file.
+    **FileDataContext:** A Data Context configured via a yaml file.
 
     Returned by default if you have no cloud configuration set up and pass no parameters.
 
@@ -1824,13 +1822,11 @@ def get_context(
 
     - Parent directories of the current directory (e.g. in case you invoke the CLI in a sub folder of your Great Expectations directory).
 
-    project_config: Used to override the configuration on disk.
+    project_config: Optionally override the configuration on disk.
 
-    runtime_environment: Runtime overrides of specific configuration values.
+    runtime_environment: Optionally override specific configuration values.
 
-    **EphemeralDataContext:**
-
-    A temporary, in-memory Data Context typically used in a pipeline.
+    **EphemeralDataContext:** A temporary, in-memory Data Context typically used in a pipeline.
 
     The default if you pass in a project_config.
 
@@ -1838,34 +1834,30 @@ def get_context(
 
     project_config: Used to configure the Data Context.
 
-    runtime_environment: Runtime overrides of configuration values.
+    runtime_environment: Optionally override specific configuration values.
 
-    Your configuration is stored in memory, and you can pass a project_config and/or runtime_environment
-    to set your configuration.
+    **CloudDataContext:** A Data Context whose configuration comes from Great Expectations Cloud.
 
-    **CloudDataContext:**
+    The default if you have a cloud configuration set up. Pass `cloud_mode=False` if
+    you have a cloud configuration set up and you do not wish to create a CloudDataContext.
 
-    A Data Context whose configuration comes from Great Expectations Cloud.
-
-    The default if you have a cloud configuration set up. Pass cloud_mode=False
-    if you have a cloud configuration set up and you do not wish to create a
-    CloudDataContext.
-
-    Cloud configuration can be set up by passing cloud_* parameters to
-    get_context(), configuring cloud environment variables, or in a
+    Cloud configuration can be set up by passing `cloud_*` parameters to
+    `get_context()`, configuring cloud environment variables, or in a
     great_expectations.conf file.
 
     Available parameters
 
     cloud_base_url: Override env var or great_expectations.conf file.
+
     cloud_access_token: Override env var or great_expectations.conf file.
+
     cloud_organization_id: Override env var or great_expectations.conf file.
 
     cloud_mode: Set to True or False to explicitly enable/disable cloud mode.
 
-    project_config: Used to override the configuration in cloud.
+    project_config: Optionally override the cloud configuration.
 
-    runtime_environment: Runtime overrides of configuration values.
+    runtime_environment: Optionally override specific configuration values.
 
     Args:
         project_config: In-memory configuration for DataContext.
