@@ -102,11 +102,11 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args: List[AddParamArgs] = [
+        add_param_args: AddParamArgs = (
             ("column_list", RendererValueType.ARRAY),
             ("ignore_row_if", RendererValueType.STRING),
             ("mostly", RendererValueType.NUMBER),
-        ]
+        )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 

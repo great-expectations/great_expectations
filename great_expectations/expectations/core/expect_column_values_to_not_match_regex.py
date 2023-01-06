@@ -195,11 +195,11 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args: List[AddParamArgs] = [
+        add_param_args: AddParamArgs = (
             ("column", RendererValueType.STRING),
             ("regex", RendererValueType.STRING),
             ("mostly", RendererValueType.NUMBER),
-        ]
+        )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
