@@ -349,7 +349,7 @@ class FileDataContextVariables(DataContextVariables):
         # overridden in order to prevent calling `instantiate_class_from_config` on ZEP objects
         # parent class does not have access to the `data_context`
         xdatasources: Dict[str, XDatasource] = self.data_context.xdatasources
-        config_xdatasources = self.data_context.zep_config.datasources
+        config_xdatasources = self.data_context.zep_config.xdatasources
         if xdatasources or config_xdatasources:
             logger.info(
                 f"Temporary `XDatasource` removal during {type(self).__name__}.save_config() operation - {len(xdatasources)} items"
@@ -359,12 +359,15 @@ class FileDataContextVariables(DataContextVariables):
             )
             for xdatasource_name in xdatasources.keys():
                 self.data_context.datasources.pop(xdatasource_name)
+            # this would be `deep_copy'ed in `instantiate_class_from_config` too
+            self.data_context.zep_config.xdatasources = {}
 
         save_result = super().save_config()
 
         if config_xdatasources:  # config_xdatasources is the superset
             logger.info(f"Replacing {len(config_xdatasources)} `XDatasource`s")
             self.data_context.datasources.update(config_xdatasources)
+            self.data_context.zep_config.xdatasources = config_xdatasources
 
         return save_result
 
