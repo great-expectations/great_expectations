@@ -91,7 +91,9 @@ class SerializableDataContext(AbstractDataContext):
             zep_datasources = self.xdatasources
             if zep_datasources or self.zep_config.datasources:
                 self.zep_config.datasources.update(zep_datasources)
-                logger.info(f"Saving ZEP config to {config_filepath}")
+                logger.info(
+                    f"Saving {len(self.zep_config.datasources)} ZEP Datasources to {config_filepath}"
+                )
                 with open(config_filepath, "r+") as io_file:
                     yaml_dict = yaml.load(io_file)
                     yaml.dump({**yaml_dict, **self.zep_config._json_dict()}, io_file)
