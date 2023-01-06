@@ -39,6 +39,8 @@ Great Expectations is a piece of the puzzle when it comes to being a data practi
 4. **No Soliciting. Do not cold DM our users to promote your product. If we receive a valid soliciting complaint about you, we will remove you from the community. 
 5. Have any questions about our promotional rules or want to run what you plan to share by us? DM @Kyle Eaton
 
+All self promotion posts are subject to review and can be removed by GX team's if deemed unfit for the GX Community Slack.
+
 ## All Channels
 
 **\#contributors-contributing**<br/>
