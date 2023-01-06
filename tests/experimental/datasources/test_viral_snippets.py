@@ -1,3 +1,4 @@
+import difflib
 import functools
 import logging
 import pathlib
@@ -6,7 +7,7 @@ from pprint import pformat as pf
 import pytest
 
 # apply markers to entire test module
-pytestmark = [pytest.mark.integration]
+pytestmark = [pytest.mark.unit]  # TODO: revert before merge
 
 from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
@@ -105,7 +106,7 @@ def zep_yaml_config_file(
     for ds_name in zep_only_config.datasources.keys():
         assert ds_name in yaml_string
 
-    print(f"  Config File Text\n-----------\n{config_file_path.read_text()}")
+    LOGGER.info(f"  Config File Text\n-----------\n{config_file_path.read_text()}")
     return config_file_path
 
 
@@ -157,9 +158,40 @@ def test_zep_simple_validate_workflow(zep_file_context: FileDataContext):
     assert result["success"] is True
 
 
-@pytest.mark.xfail(reason="TypeError: cannot pickle 'module' object")
-def test_save_datacontext(zep_file_context: FileDataContext):
+def test_save_project_does_not_break(zep_file_context: FileDataContext):
+    print(zep_file_context.zep_config)
+    zep_file_context._save_project_config()
+
+
+def test_variables_save_config_does_not_break(zep_file_context: FileDataContext):
+    print(zep_file_context.zep_config)
+    print(zep_file_context.variables)
     zep_file_context.variables.save_config()
+
+
+def test_save_datacontext_persists_zep_config(
+    file_dc_config_dir_init: pathlib.Path, zep_only_config: GxConfig
+):
+    config_file = file_dc_config_dir_init / FileDataContext.GX_YML
+
+    initial_yaml = config_file.read_text()
+    for ds_name in zep_only_config.datasources:
+        assert ds_name not in initial_yaml
+
+    context: FileDataContext = get_context(
+        context_root_dir=config_file.parent, cloud_mode=False
+    )
+
+    context.zep_config = zep_only_config
+    context._save_project_config()
+
+    final_yaml = config_file.read_text()
+    diff = difflib.ndiff(initial_yaml.splitlines(), final_yaml.splitlines())
+
+    print("\n".join(diff))
+
+    for ds_name in zep_only_config.datasources:
+        assert ds_name in final_yaml
 
 
 if __name__ == "__main__":
