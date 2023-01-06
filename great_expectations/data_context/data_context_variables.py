@@ -348,16 +348,14 @@ class FileDataContextVariables(DataContextVariables):
         """
         # overridden in order to prevent calling `instantiate_class_from_config` on ZEP objects
         # parent class does not have access to the `data_context`
-        xdatasources: Dict[str, XDatasource] = self.data_context.xdatasources
-        config_xdatasources_stash = self.data_context.zep_config.xdatasources
-        if xdatasources or config_xdatasources_stash:
+        config_xdatasources_stash: Dict[
+            str, XDatasource
+        ] = self.data_context._synchronize_zep_datasources()
+        if config_xdatasources_stash:
             logger.info(
-                f"Stashing `XDatasource` during {type(self).__name__}.save_config() operation - {len(xdatasources)} stashed"
+                f"Stashing `XDatasource` during {type(self).__name__}.save_config() - {len(config_xdatasources_stash)} stashed"
             )
-            config_xdatasources_stash.update(  # TODO: make config and live xdatasource sync a discrete method
-                xdatasources
-            )
-            for xdatasource_name in xdatasources.keys():
+            for xdatasource_name in config_xdatasources_stash.keys():
                 self.data_context.datasources.pop(xdatasource_name)
             # this would be `deep_copy'ed in `instantiate_class_from_config` too
             self.data_context.zep_config.xdatasources = {}

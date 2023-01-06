@@ -88,9 +88,8 @@ class SerializableDataContext(AbstractDataContext):
             with open(config_filepath, "w") as outfile:
                 self.config.to_yaml(outfile)
 
-            zep_datasources = self.xdatasources
-            if zep_datasources or self.zep_config.datasources:
-                self.zep_config.datasources.update(zep_datasources)
+            zep_datasources = self._synchronize_zep_datasources()
+            if zep_datasources:
                 logger.info(
                     f"Saving {len(self.zep_config.datasources)} ZEP Datasources to {config_filepath}"
                 )

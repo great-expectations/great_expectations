@@ -3881,3 +3881,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         for ds_name, datasource in config.datasources.items():
             logger.info(f"Loaded '{ds_name}' from ZEP config")
             self._attach_datasource_to_context(datasource)
+
+    def _synchronize_zep_datasources(self) -> Dict[str, XDatasource]:
+        """
+        Update `self.zep_config.xdatasources` with any newly added datasources.
+        Should be called before serializing `zep_config`.
+        """
+        xdatasources = self.xdatasources
+        if xdatasources:
+            self.zep_config.xdatasources.update(xdatasources)
+        return self.zep_config.xdatasources
