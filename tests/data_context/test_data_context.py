@@ -71,7 +71,7 @@ parameterized_expectation_suite_name = "my_dag_node.default"
 @pytest.fixture(scope="function")
 def titanic_multibatch_data_context(
     tmp_path,
-) -> DataContext:
+) -> FileDataContext:
     """
     Based on titanic_data_context, but with 2 identical batches of
     data asset "titanic"
@@ -95,7 +95,7 @@ def titanic_multibatch_data_context(
         file_relative_path(__file__, "../test_sets/Titanic.csv"),
         str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
     )
-    return gx.data_context.DataContext(context_path)
+    return get_context(context_root_dir=context_path)
 
 
 @pytest.fixture
@@ -121,7 +121,7 @@ def data_context_with_bad_datasource(tmp_path_factory):
         os.path.join(fixture_dir, "great_expectations_bad_datasource.yml"),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
-    return gx.data_context.DataContext(context_path)
+    return get_context(context_root_dir=context_path)
 
 
 def test_create_duplicate_expectation_suite(titanic_data_context):
