@@ -7,7 +7,7 @@ from pprint import pformat as pf
 import pytest
 
 # apply markers to entire test module
-pytestmark = [pytest.mark.unit]  # TODO: revert before merge
+pytestmark = [pytest.mark.integration]
 
 from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
