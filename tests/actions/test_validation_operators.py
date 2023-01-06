@@ -7,8 +7,8 @@ from freezegun import freeze_time
 
 import great_expectations as gx
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.data_context import BaseDataContext
 from great_expectations.self_check.util import modify_locale
+from great_expectations.util import get_context
 from great_expectations.validation_operators.validation_operators import (
     WarningAndFailureExpectationSuitesValidationOperator,
 )
@@ -57,7 +57,7 @@ def warning_failure_validation_operator_data_context(
     # NOTE: This setup is almost identical to test_DefaultDataContextAwareValidationOperator.
     # Consider converting to a single fixture.
 
-    data_context = BaseDataContext(
+    data_context = get_context(
         basic_data_context_config_for_validation_operator,
         project_path,
     )
