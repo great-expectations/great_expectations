@@ -1,5 +1,3 @@
-from typing import Dict
-
 from great_expectations.expectations.regex_based_column_map_expectation import (
     RegexBasedColumnMapExpectation,
 )
@@ -10,8 +8,7 @@ class ExpectColumnValuesToBeValidScientificNotation(RegexBasedColumnMapExpectati
 
     # These values will be used to configure the metric created by your expectation
     regex_camel_name = "ScientificNotation"
-    # regex = r"^[+\-]?(?=\.\d|\d)(?:0|[1-9]\d*)?(?:\.\d+)?(?:(?<=\d)(?:[eE][+\-]?\d+))?$"
-    regex = r"^[+\-]?$"
+    regex = r"^[+\-]?(?=\.\d|\d)(?:0|[1-9]\d*)?(?:\.\d+)?(?:(?<=\d)(?:[eE][+\-]?\d+))?$"
     semantic_type_name_plural = "scientific_notations"
 
     # These examples will be shown in the public gallery.
@@ -21,7 +18,7 @@ class ExpectColumnValuesToBeValidScientificNotation(RegexBasedColumnMapExpectati
             "data": {
                 "valid": ["-3.14", "1.07E-10", "3.14e-12"],
                 "invalid": ["11.e-12", "0E+5", "007"],
-                "empty": ["", None, False],
+                "empty": ["", None, None],
             },
             "suppress_test_for": ["mssql", "bigquery"],
             "tests": [
@@ -71,7 +68,7 @@ class ExpectColumnValuesToBeValidScientificNotation(RegexBasedColumnMapExpectati
         ],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@rdodev",  # Don't forget to add your github handle here!
-            "@mkopec87"
+            "@mkopec87",
         ],
     }
 

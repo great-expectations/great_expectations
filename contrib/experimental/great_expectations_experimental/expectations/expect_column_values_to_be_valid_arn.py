@@ -1,12 +1,5 @@
-from typing import Dict, Optional
-
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions.exceptions import (
-    InvalidExpectationConfigurationError,
-)
 from great_expectations.expectations.regex_based_column_map_expectation import (
     RegexBasedColumnMapExpectation,
-    RegexColumnMapMetricProvider,
 )
 
 
@@ -94,7 +87,7 @@ class ExpectColumnValuesToBeValidArn(RegexBasedColumnMapExpectation):
         ],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@rdodev",  # Don't forget to add your github handle here!
-            "@mkopec87"
+            "@mkopec87",
         ],
     }
 
