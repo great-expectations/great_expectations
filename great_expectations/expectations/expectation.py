@@ -3361,6 +3361,12 @@ def add_values_with_json_schema_from_list_in_params(
     Utility function used in _atomic_prescriptive_template() to take list values from a given params dict key,
     convert each value to a dict with JSON schema type info, then add it to params_with_json_schema (dict).
     """
+    # deprecated-v0.15.43
+    warnings.warn(
+        "The method add_values_with_json_schema_from_list_in_params is deprecated as of v0.15.43 and will be removed in "
+        "v0.18. Please refer to Expectation method _prescriptive_template for the latest renderer template pattern.",
+        DeprecationWarning,
+    )
     target_list = params.get(param_key_with_list)
     if target_list is not None and len(target_list) > 0:
         for i, v in enumerate(target_list):

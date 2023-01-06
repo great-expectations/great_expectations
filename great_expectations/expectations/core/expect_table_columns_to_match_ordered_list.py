@@ -1,5 +1,5 @@
 from itertools import zip_longest
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import Dict, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -9,7 +9,6 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     InvalidExpectationConfigurationError,
     TableExpectation,
-    add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -19,9 +18,6 @@ from great_expectations.render.renderer_configuration import (
     RendererValueType,
 )
 from great_expectations.render.util import substitute_none_for_missing
-
-if TYPE_CHECKING:
-    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
 class ExpectTableColumnsToMatchOrderedList(TableExpectation):
