@@ -220,3 +220,4 @@
 /docs/reference/supporting_resources.md https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_overview
 /docs/reference/validation.md https://docs.greatexpectations.io/docs/guides/validation/validate_data_overview
 /docs/guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook https://greatexpectations.io/expectations/
+/docs/guides/miscellaneous/how_to_use_the_great_expectation_docker_images docs/guides/setup/setup_overview
