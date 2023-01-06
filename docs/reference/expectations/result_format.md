@@ -8,8 +8,9 @@ The `result_format` parameter may be either a string or a dictionary which speci
   * For dictionary usage, `result_format` which may include the following keys:
     * `result_format`: Sets the fields to return in result.
     * `unexpected_index_column_names`: Defines the primary key (PK) columns used to represent unexpected results.
-    * `return_unexpected_index_query`: Boolean flag that can be used to suppress output that allows you to retrieve 
-      the full set of unexpected results (default is `True`).
+    * `return_unexpected_index_query`: When running validations, a query (or a set of indices) will be returned that will
+      allow you to retrieve the full set of unexpected results defined by the PK.  Setting this value to `False` will 
+      suppress the output (default is `True`).
     * `partial_unexpected_count`: Sets the number of results to include in partial_unexpected_count, if applicable. If 
       set to 0, this will suppress the unexpected counts.
     * `include_unexpected_rows`: When running validations, this will return the entire row for each unexpected value in
@@ -27,7 +28,7 @@ the configuration will not be persisted, and you will receive a `UserWarning`. W
 configuration be used for exploratory analysis, with the final configuration added at the Checkpoint-level.
 
 ### Expectation Level Config
-To apply `result_format` to an Expectation, pass it into the Expectation. We will first need to obtain a [Validator]() object instance by running the `$ great_expectations suite new` command.
+To apply `result_format` to an Expectation, pass it into the Expectation. We will first need to obtain a Validator object instance by running the `$ great_expectations suite new` command.
 
 ```python name="result_format_complete_example_set"
 ```
@@ -40,14 +41,16 @@ To apply `result_format` to every Expectation in a Suite, define it in your Chec
 
 The results will then be stored in the Validation Result after running the Checkpoint.
 :::note
-The `unexpected_index_list`, as represented by default indices or primary key (PK) indices defined in `unexpected_index_column_names` is rendered in DataDocs when `COMPLETE` is selected. 
+The `unexpected_index_list`, as represented by primary key (PK) columns, is 
+rendered in DataDocs when `COMPLETE` is selected. 
 
-By default, `unexpected_index_query`, which for `SQL` and `Spark` is a query that allows you to retrieve the full set of unexpected values from the dataset, is also rendered by default when `COMPLETE` is selected.
-For `Pandas`, this parameter returns the full set of unexpected indices, which can also be used to retrieve the full set of unexpected values. 
+The `unexpected_index_query`, which for `SQL` and `Spark` is a query that allows you to retrieve the full set of 
+unexpected values from the dataset, is also rendered by default when `COMPLETE` is selected. For `Pandas`, this parameter 
+returns the full set of unexpected indices, which can also be used to retrieve the full set of unexpected values. 
 
 To suppress this output, the `return_unexpected_index_query` parameter can be set to `False`. 
 
-Regardless of where Result Format is configured, `unexpected_list` is never rendered in Data Docs.
+Regardless of how Result Format is configured, `unexpected_list` is never rendered in Data Docs.
 :::
 
 ## `result_format` Values and Fields
@@ -142,8 +145,13 @@ The basic `result` includes:
 ```
 
 **Note:** When unexpected values are duplicated, `unexpected_list` will contain multiple copies of the value.
+
+For example:
+
 ```python name="result_format_basic_example_set"
 ```
+
+Will return the following output:
 ```python
 >>> print(validation_result.success)
 False
@@ -179,6 +187,8 @@ For example:
 
 ```python name="result_format_basic_example_agg"
 ```
+
+Will return the following output:
 ```python
 >>> print(validation_result.success)
 True
@@ -186,7 +196,6 @@ True
 >>> print(validation_result.result)
 {'observed_value': 3.6666666666666665}
 ```
-
 
 ### Behavior for `SUMMARY`
 
@@ -197,7 +206,7 @@ For example, it can support generating dashboard results of whether a set of exp
 Great Expectations has standard behavior for support for describing the results of `column_map_expectation` and
 `column_aggregate_expectation` expectations.
 
-`column_map_expectation` applies a boolean test function to each element within a column, and so returns a list of  
+`column_map_expectation` applies a boolean test function to each element within a column, and so returns a list of
 unexpected values to justify the expectation result.
 
 The summary `result` includes:
@@ -214,7 +223,7 @@ The summary `result` includes:
         'missing_count': The number of missing values in the column
         'missing_percent': The total percent of missing values in the column
         'partial_unexpected_counts': [{A list of objects with value and counts, showing the number of times each of the unexpected values occurs}
-        'partial_unexpected_index_list': [A list of up to 20 of the indices of the unexpected values in the column]
+        'partial_unexpected_index_list': [A list of up to 20 of the indices of the unexpected values in the column, as defined by the primary key column]
     }
 }
 ```
@@ -222,6 +231,8 @@ The summary `result` includes:
 For example:
 ```python name="result_format_summary_example_set"
 ```
+
+Will return the following output:
 ```python
 >>> print(validation_result.success)
 False
@@ -263,30 +274,22 @@ The summary `result` includes:
     'success': False,
     'result': {
         'observed_value': The aggregate statistic computed for the column (also in `BASIC`)
-        'element_count': The total number of values in the column
-        'missing_count':  The number of missing values in the column
-        'missing_percent': The total percent of missing values in the column
-        'details': {<expectation-specific result justification fields>}
     }
 }
 ```
 
 For example:
 
+```python name="result_format_summary_example_agg"
+```
+
+Will return the following output:
 ```python
-[1, 1, 2, 2, NaN]
+>>> print(validation_result.success)
+True
 
-expect_column_mean_to_be_between
-
-{
-    "success" : Boolean,
-    "result" : {
-        "observed_value" : 1.5,
-        'element_count': 5,
-        'missing_count': 1,
-        'missing_percent': 0.2
-    }
-}
+>>> print(validation_result.result)
+{'observed_value': 3.6666666666666665}
 ```
 
 
@@ -307,8 +310,8 @@ The complete `result` includes:
     'success': False,
     'result': {
         "unexpected_list" : [A list of all values that violate the expectation]
-        'unexpected_index_list': [A list of the indices of the unexpected values in the column]
-        'unexpected_index_query': [A query that can be used to retrieve all unexpected values (SQL and Spark), or the full list of unexpected indices (for Pandas)]
+        'unexpected_index_list': [A list of the indices of the unexpected values in the column, as defined by primary key column]
+        'unexpected_index_query': [A query that can be used to retrieve all unexpected values (SQL and Spark), or the full list of unexpected indices (Pandas)]
         'element_count': The total number of values in the column (also in `SUMMARY`)
         'unexpected_count': The total count of unexpected values in the column (also in `SUMMARY`)
         'unexpected_percent': The overall percent of unexpected values (also in `SUMMARY`)
@@ -320,9 +323,10 @@ The complete `result` includes:
 ```
 
 For example:
-
 ```python name="result_format_complete_example_set"
 ```
+
+Will return the following output:
 ```python
 >>> print(validation_result.success)
 False
@@ -374,32 +378,20 @@ The complete `result` includes:
     'success': False,
     'result': {
         'observed_value': The aggregate statistic computed for the column (also in `SUMMARY`)
-        'element_count': The total number of values in the column (also in `SUMMARY`)
-        'missing_count':  The number of missing values in the column (also in `SUMMARY`)
-        'missing_percent': The total percent of missing values in the column (also in `SUMMARY`)
         'details': {<expectation-specific result justification fields, which may be more detailed than in `SUMMARY`>}
     }
 }
 ```
 
 For example:
-
-```python
-[1, 1, 2, 2, NaN]
-
-expect_column_mean_to_be_between
-
-{
-    "success" : Boolean,
-    "result" : {
-        "observed_value" : 1.5,
-        'element_count': 5,
-        'missing_count': 1,
-        'missing_percent': 0.2
-    }
-}
+```python name="result_format_complete_example_agg"
 ```
 
-#### In a `Checkpoint` configuration 
-```python name="result_format_checkpoint_example"
+Will return the following output:
+```python
+>>> print(validation_result.success)
+True
+
+>>> print(validation_result.result)
+{'observed_value': 3.6666666666666665}
 ```

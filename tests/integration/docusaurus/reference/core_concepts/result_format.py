@@ -23,7 +23,7 @@ from great_expectations.validator.validator import Validator
 
 # Snippet: example data frame for result_format
 # <snippet name="pandas_df_for_result_format">
-dataframe: pd.DataFrame = pd.DataFrame(
+dataframe = pd.DataFrame(
     {
         "pk_column": [
             "zero",
@@ -163,7 +163,7 @@ assert validation_result.result == {
 # Snippet: result_format BASIC example with aggregate
 # <snippet name="result_format_basic_example_agg">
 validation_result = my_validator.expect_column_max_to_be_between(
-    column="my_numbers", min_value=0.0, max_value=10.0, result_format="SUMMARY"
+    column="my_numbers", min_value=0.0, max_value=10.0, result_format="BASIC"
 )
 # </snippet>
 assert validation_result.success == True
@@ -263,6 +263,15 @@ assert validation_result.result == {
     ],
     "unexpected_index_query": [0, 10, 11, 12, 13, 14],
 }
+
+# Snippet: result_format COMPLETE example with agg
+# <snippet name="result_format_complete_example_agg">
+validation_result = my_validator.expect_column_mean_to_be_between(
+    column="my_numbers", min_value=0.0, max_value=10.0, result_format="COMPLETE"
+)
+# </snippet>
+assert validation_result.success == True
+assert validation_result.result == {"observed_value": 3.6666666666666665}
 
 
 # Checkpoint
