@@ -126,24 +126,6 @@ class ExpectationSuite(SerializableDictDot):
         profiler_config: Optional[dict] = None,
         citation_date: Optional[Union[str, datetime.datetime]] = None,
     ) -> None:
-        """Some docstring.
-
-        `some code`
-
-        Args:
-            comment: some description.
-            batch_request: some description.
-            batch_definition: some description.
-            batch_spec: some description.
-            batch_kwargs: some description.
-            batch_markers: some description.
-            batch_parameters: some description.
-            profiler_config: some description.
-            citation_date: some description.
-
-        Returns:
-
-        """
         if "citations" not in self.meta:
             self.meta["citations"] = []
 
