@@ -1610,13 +1610,12 @@ class Expectation(metaclass=MetaExpectation):
                 "Array param_prefix must be a non-empty string."
             )
 
-        @staticmethod
         @param_method(param_name=array_param_name)
         def _add_params(
             renderer_configuration: RendererConfiguration,
         ) -> RendererConfiguration:
-            array: Iterable[Optional[Any]] = renderer_configuration.params.getattr(
-                array_param_name
+            array: Iterable[Optional[Any]] = getattr(
+                renderer_configuration.params, array_param_name
             ).value
             if array:
                 for idx, value in enumerate(array):
@@ -1644,15 +1643,14 @@ class Expectation(metaclass=MetaExpectation):
                 "Array param_prefix must be a non-empty string."
             )
 
-        @staticmethod
         @param_method(param_name=array_param_name)
         def _get_string(renderer_configuration: RendererConfiguration) -> str:
-            array: Iterable[Optional[Any]] = renderer_configuration.params.getattr(
-                array_param_name
+            array: Iterable[Optional[Any]] = getattr(
+                renderer_configuration.params, array_param_name
             ).value
             if array:
                 array_string = " ".join(
-                    [f"{param_prefix}{str(idx)}" for idx in range(len(array))]
+                    [f"${param_prefix}{str(idx)}" for idx in range(len(array))]
                 )
             else:
                 array_string = "[ ]"

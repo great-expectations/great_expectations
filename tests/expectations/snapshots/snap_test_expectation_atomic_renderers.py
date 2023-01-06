@@ -627,10 +627,8 @@ snapshots[
     "value": {
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
-            "row_condition": {"schema": {"type": "string"}, "value": None},
             "type_list": {
                 "schema": {"type": "array"},
                 "value": ["type_a", "type_b", "type_c"],
@@ -787,7 +785,6 @@ snapshots[
     "value": {
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "match_on": {"schema": {"type": "string"}, "value": "all"},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
@@ -795,7 +792,6 @@ snapshots[
                 "schema": {"type": "array"},
                 "value": ["^superconductive$", "ge|great_expectations"],
             },
-            "row_condition": {"schema": {"type": "string"}, "value": None},
             "v__0": {"schema": {"type": "string"}, "value": "^superconductive$"},
             "v__1": {"schema": {"type": "string"}, "value": "ge|great_expectations"},
         },
@@ -812,10 +808,8 @@ snapshots[
     "value": {
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
-            "row_condition": {"schema": {"type": "string"}, "value": None},
             "strftime_format": {"schema": {"type": "string"}, "value": "%Y-%m"},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
@@ -849,10 +843,8 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_not_be_null 
     "value": {
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
-            "row_condition": {"schema": {"type": "string"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "$column values must not be null, at least $mostly_pct % of the time.",
@@ -914,7 +906,7 @@ snapshots["test_atomic_prescriptive_summary_expect_compound_columns_to_be_unique
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
-        "template": "Values for given compound columns must be unique together, at least $mostly_pct % of the time: $column_list_0, $column_list_1, $column_list_2",
+        "template": "Values for given compound columns must be unique together, at least $mostly_pct % of the time: $column_list_0 $column_list_1 $column_list_2",
     },
     "value_type": "StringValueType",
 }
@@ -934,7 +926,7 @@ snapshots[
             "column_list_2": {"schema": {"type": "string"}, "value": "C"},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
-        "template": "Values must be unique across columns, at least $mostly_pct % of the time: $column_list_0, $column_list_1, $column_list_2",
+        "template": "Values must be unique across columns, at least $mostly_pct % of the time: $column_list_0 $column_list_1 $column_list_2",
     },
     "value_type": "StringValueType",
 }
@@ -949,16 +941,17 @@ snapshots[
                 "schema": {"type": "array"},
                 "value": ["my_first_column", "my_second_column"],
             },
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "ignore_row_if": {"schema": {"type": "string"}, "value": "foo"},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
-            "row_condition": {"schema": {"type": "string"}, "value": None},
-            "v__0": {"schema": {"type": "string"}, "value": "my_first_column"},
-            "v__1": {"schema": {"type": "string"}, "value": "my_second_column"},
+            "column_list_0": {"schema": {"type": "string"}, "value": "my_first_column"},
+            "column_list_1": {
+                "schema": {"type": "string"},
+                "value": "my_second_column",
+            },
         },
         "schema": {"type": "com.superconductive.rendered.string"},
-        "template": "Values must be unique across columns, at least $mostly_pct % of the time: $column_list_0, $column_list_1",
+        "template": "Values must be unique across columns, at least $mostly_pct % of the time: $column_list_0 $column_list_1",
     },
     "value_type": "StringValueType",
 }
@@ -1002,7 +995,7 @@ snapshots[
             "column_list_2": {"schema": {"type": "string"}, "value": "c"},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
-        "template": "Must have these columns in this order: $column_list_0, $column_list_1, $column_list_2",
+        "template": "Must have these columns in this order: $column_list_0 $column_list_1 $column_list_2",
     },
     "value_type": "StringValueType",
 }
@@ -1011,11 +1004,14 @@ snapshots["test_atomic_prescriptive_summary_expect_table_columns_to_match_set 1"
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
-            "column_list": {"schema": {"type": "array"}, "value": ["a", "b", "c"]},
+            "column_set": {"schema": {"type": "array"}, "value": ["a", "b", "c"]},
+            "column_set_0": {"schema": {"type": "string"}, "value": "a"},
+            "column_set_1": {"schema": {"type": "string"}, "value": "b"},
+            "column_set_2": {"schema": {"type": "string"}, "value": "c"},
             "exact_match": {"schema": {"type": "boolean"}, "value": True},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
-        "template": "Must have exactly these columns (in any order): $column_list_0, $column_list_1, $column_list_2",
+        "template": "Must have exactly these columns (in any order): $column_set_0 $column_set_1 $column_set_2",
     },
     "value_type": "StringValueType",
 }
