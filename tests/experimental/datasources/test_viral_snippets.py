@@ -194,5 +194,30 @@ def test_save_datacontext_persists_zep_config(
         assert ds_name in final_yaml
 
 
+def test_add_and_save_zep_datasource(
+    file_dc_config_dir_init: pathlib.Path, zep_only_config: GxConfig
+):
+    config_file = file_dc_config_dir_init / FileDataContext.GX_YML
+
+    initial_yaml = config_file.read_text()
+    for ds_name in zep_only_config.datasources:
+        assert ds_name not in initial_yaml
+
+    context: FileDataContext = get_context(
+        context_root_dir=config_file.parent, cloud_mode=False
+    )
+
+    context.zep_config = zep_only_config
+    context._save_project_config()
+
+    final_yaml = config_file.read_text()
+    diff = difflib.ndiff(initial_yaml.splitlines(), final_yaml.splitlines())
+
+    print("\n".join(diff))
+
+    for ds_name in zep_only_config.datasources:
+        assert ds_name in final_yaml
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-vv"])
