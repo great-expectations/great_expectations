@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Optional, Tuple
+from typing import TYPE_CHECKING, Optional, Tuple, overload
+
+from typing_extensions import Literal
 
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
@@ -22,6 +24,47 @@ from great_expectations.data_context.types.base import GXCloudConfig
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
+
+
+@overload
+def DataContext(
+    context_root_dir: PathStr = ...,
+    runtime_environment: Optional[dict] = ...,
+    cloud_mode: Literal[False] = ...,
+    cloud_base_url: None = ...,
+    cloud_access_token: None = ...,
+    cloud_organization_id: None = ...,
+    # Deprecated as of 0.15.37
+    ge_cloud_mode: Literal[False] = ...,
+    ge_cloud_base_url: None = ...,
+    ge_cloud_access_token: None = ...,
+    ge_cloud_organization_id: None = ...,
+) -> FileDataContext:
+    """
+    If `context_root_dir` is provided and `cloud_mode`/`ge_cloud_mode` are `False`
+    a `FileDataContext` will always be returned.
+    """
+    ...
+
+
+@overload
+def DataContext(
+    context_root_dir: Optional[PathStr] = ...,
+    runtime_environment: Optional[dict] = ...,
+    cloud_mode: bool = ...,
+    cloud_base_url: Optional[str] = ...,
+    cloud_access_token: Optional[str] = ...,
+    cloud_organization_id: Optional[str] = ...,
+    # <GX_RENAME> Deprecated as of 0.15.37
+    ge_cloud_mode: bool = ...,
+    ge_cloud_base_url: Optional[str] = ...,
+    ge_cloud_access_token: Optional[str] = ...,
+    ge_cloud_organization_id: Optional[str] = ...,
+) -> AbstractDataContext:
+    ...
+
+
+# TODO: add additional overloads
 
 
 def DataContext(
