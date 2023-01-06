@@ -124,7 +124,7 @@ from great_expectations.validator.validator import ValidationDependencies, Valid
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
-    from great_expectations.render.renderer_configuration import MetaNotes
+    from great_expectations.render.renderer_configuration import AddParamArgs, MetaNotes
 
 logger = logging.getLogger(__name__)
 
@@ -386,18 +386,16 @@ class Expectation(metaclass=MetaExpectation):
         else:
             template_str = f"{template_str[:-2]}."
 
-        add_param_args = (
-            (
-                "expectation_type",
-                RendererValueType.STRING,
-                renderer_configuration.expectation_type,
-            ),
-            ("kwargs", RendererValueType.STRING, renderer_configuration.kwargs),
+        renderer_configuration.add_param(
+            name="expectation_type",
+            param_type=RendererValueType.STRING,
+            value=renderer_configuration.expectation_type,
         )
-        for name, param_type, value in add_param_args:
-            renderer_configuration.add_param(
-                name=name, param_type=param_type, value=value
-            )
+        renderer_configuration.add_param(
+            name="kwargs",
+            param_type=RendererValueType.STRING,
+            value=renderer_configuration.kwargs,
+        )
 
         value_obj = renderedAtomicValueSchema.load(
             {
@@ -931,18 +929,16 @@ class Expectation(metaclass=MetaExpectation):
         else:
             template_str = f"{template_str[:-2]}."
 
-        add_param_args = (
-            (
-                "expectation_type",
-                RendererValueType.STRING,
-                renderer_configuration.expectation_type,
-            ),
-            ("kwargs", RendererValueType.STRING, renderer_configuration.kwargs),
+        renderer_configuration.add_param(
+            name="expectation_type",
+            param_type=RendererValueType.STRING,
+            value=renderer_configuration.expectation_type,
         )
-        for name, param_type, value in add_param_args:
-            renderer_configuration.add_param(
-                name=name, param_type=param_type, value=value
-            )
+        renderer_configuration.add_param(
+            name="kwargs",
+            param_type=RendererValueType.STRING,
+            value=renderer_configuration.kwargs,
+        )
 
         value_obj = renderedAtomicValueSchema.load(
             {
