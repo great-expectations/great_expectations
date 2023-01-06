@@ -197,17 +197,19 @@ def test_save_datacontext_persists_zep_config(
 def test_add_and_save_zep_datasource(
     file_dc_config_dir_init: pathlib.Path, zep_only_config: GxConfig
 ):
+    datasource_name = "save_ds_test"
     config_file = file_dc_config_dir_init / FileDataContext.GX_YML
 
     initial_yaml = config_file.read_text()
-    for ds_name in zep_only_config.datasources:
-        assert ds_name not in initial_yaml
+    assert datasource_name not in initial_yaml
 
     context: FileDataContext = get_context(
         context_root_dir=config_file.parent, cloud_mode=False
     )
 
-    context.zep_config = zep_only_config
+    ds = context.sources.add_sqlite(
+        name=datasource_name, connection_string=f"sqlite:///{db_file}"
+    )
     context._save_project_config()
 
     final_yaml = config_file.read_text()
@@ -215,8 +217,8 @@ def test_add_and_save_zep_datasource(
 
     print("\n".join(diff))
 
-    for ds_name in zep_only_config.datasources:
-        assert ds_name in final_yaml
+    assert datasource_name == ds.name
+    assert datasource_name in final_yaml
 
 
 if __name__ == "__main__":
