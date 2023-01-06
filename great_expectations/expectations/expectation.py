@@ -20,9 +20,9 @@ from typing import (
     Any,
     Callable,
     Dict,
-    Iterable,
     List,
     Optional,
+    Sequence,
     Set,
     Tuple,
     Type,
@@ -1614,7 +1614,7 @@ class Expectation(metaclass=MetaExpectation):
         def _add_params(
             renderer_configuration: RendererConfiguration,
         ) -> RendererConfiguration:
-            array: Iterable[Optional[Any]] = getattr(
+            array: Sequence[Optional[Any]] = getattr(
                 renderer_configuration.params, array_param_name
             ).value
             if array:
@@ -1645,7 +1645,7 @@ class Expectation(metaclass=MetaExpectation):
 
         @param_method(param_name=array_param_name)
         def _get_string(renderer_configuration: RendererConfiguration) -> str:
-            array: Iterable[Optional[Any]] = getattr(
+            array: Sequence[Optional[Any]] = getattr(
                 renderer_configuration.params, array_param_name
             ).value
             if array:
