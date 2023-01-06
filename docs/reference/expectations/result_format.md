@@ -36,8 +36,7 @@ In order to see those values at the Suite level, configure `result_format` in yo
 ### Checkpoint Level Config
 To apply `result_format` to every Expectation in a Suite, define it in your Checkpoint configuration under the `runtime_configuration` key.
 
-TODO check line
-```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L172-L205
+```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L243-L276
 ```
 
 The results will then be stored in the Validation Result after running the Checkpoint.
@@ -88,18 +87,18 @@ cases for working with Great Expectations, including interactive exploratory wor
 ## result_format examples
 
 Example input:
-```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L20-L57
+```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L24-L61
 ```
 
 Example outputs for different values of `result_format`:
 
-```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L108-L110
+```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L112-L116
 ```
 ```python
-print(validation_result)
-{
-    'success': False
-}
+print(validation_result.success)
+False
+print(validation_result.result)
+{}
 ```
 
 ```python

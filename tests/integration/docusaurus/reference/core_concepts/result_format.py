@@ -120,7 +120,7 @@ assert validation_result.result == {}
 
 # <snippet>
 validation_result = my_validator.expect_column_values_to_be_in_set(
-    "my_var", ["B", "C", "D"], result_format={"result_format": "BASIC"}
+    column="my_var", value_set=["B", "C", "D"], result_format={"result_format": "BASIC"}
 )
 # </snippet>
 assert validation_result.success == False
@@ -139,8 +139,8 @@ assert validation_result.result == {
 
 # <snippet>
 validation_result = my_validator.expect_column_values_to_be_in_set(
-    "my_var",
-    ["B", "C", "D"],
+    column="my_var",
+    value_set=["B", "C", "D"],
     result_format={
         "result_format": "SUMMARY",
         "unexpected_index_column_names": ["pk_column"],
@@ -175,8 +175,8 @@ assert validation_result.result == {
 
 # <snippet>
 validation_result = my_validator.expect_column_values_to_be_in_set(
-    "my_var",
-    ["B", "C", "D"],
+    column="my_var",
+    value_set=["B", "C", "D"],
     result_format={
         "result_format": "COMPLETE",
         "unexpected_index_column_names": ["pk_column"],
