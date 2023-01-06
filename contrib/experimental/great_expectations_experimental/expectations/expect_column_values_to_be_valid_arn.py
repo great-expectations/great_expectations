@@ -1,9 +1,3 @@
-"""
-This is a template for creating custom RegexBasedColumnMapExpectations.
-For detailed instructions on how to use it, please see:
-    https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations
-"""
-
 from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -21,7 +15,7 @@ class ExpectColumnValuesToBeValidArn(RegexBasedColumnMapExpectation):
 
     # These values will be used to configure the metric created by your expectation
     regex_camel_name = "AmazonResourceName"
-    regex = "^arn:(?P<Partition>[^:\n]*):(?P<Service>[^:\n]*):(?P<Region>[^:\n]*):(?P<AccountID>[^:\n]*):(?P<Ignore>(?P<ResourceType>[^:\/\n]*)[:\/])?(?P<Resource>.*)$"
+    regex = r"^arn:([^:\n]*):([^:\n]*):([^:\n]*):([^:\n]*):(([^:\/\n]*)[:\/])?(.*)$"
     semantic_type_name_plural = "arns"
 
     # These examples will be shown in the public gallery.
@@ -100,6 +94,7 @@ class ExpectColumnValuesToBeValidArn(RegexBasedColumnMapExpectation):
         ],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@rdodev",  # Don't forget to add your github handle here!
+            "@mkopec87"
         ],
     }
 

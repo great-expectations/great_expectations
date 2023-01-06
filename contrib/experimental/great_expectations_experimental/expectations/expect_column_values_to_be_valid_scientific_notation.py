@@ -1,9 +1,3 @@
-"""
-This is a template for creating custom RegexBasedColumnMapExpectations.
-For detailed instructions on how to use it, please see:
-    https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations
-"""
-
 from typing import Dict
 
 from great_expectations.expectations.regex_based_column_map_expectation import (
@@ -16,7 +10,8 @@ class ExpectColumnValuesToBeValidScientificNotation(RegexBasedColumnMapExpectati
 
     # These values will be used to configure the metric created by your expectation
     regex_camel_name = "ScientificNotation"
-    regex = "^[+\-]?(?=\.\d|\d)(?:0|[1-9]\d*)?(?:\.\d+)?(?:(?<=\d)(?:[eE][+\-]?\d+))?$"
+    # regex = r"^[+\-]?(?=\.\d|\d)(?:0|[1-9]\d*)?(?:\.\d+)?(?:(?<=\d)(?:[eE][+\-]?\d+))?$"
+    regex = r"^[+\-]?$"
     semantic_type_name_plural = "scientific_notations"
 
     # These examples will be shown in the public gallery.
@@ -76,6 +71,7 @@ class ExpectColumnValuesToBeValidScientificNotation(RegexBasedColumnMapExpectati
         ],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@rdodev",  # Don't forget to add your github handle here!
+            "@mkopec87"
         ],
     }
 
