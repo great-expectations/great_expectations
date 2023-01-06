@@ -349,12 +349,12 @@ class FileDataContextVariables(DataContextVariables):
         # overridden in order to prevent calling `instantiate_class_from_config` on ZEP objects
         # parent class does not have access to the `data_context`
         xdatasources: Dict[str, XDatasource] = self.data_context.xdatasources
-        config_xdatasources = self.data_context.zep_config.xdatasources
-        if xdatasources or config_xdatasources:
+        config_xdatasources_stash = self.data_context.zep_config.xdatasources
+        if xdatasources or config_xdatasources_stash:
             logger.info(
-                f"Temporary `XDatasource` removal during {type(self).__name__}.save_config() operation - {len(xdatasources)} items"
+                f"Stashing `XDatasource` during {type(self).__name__}.save_config() operation - {len(xdatasources)} stashed"
             )
-            config_xdatasources.update(  # TODO: make config and live xdatasource sync a discrete method
+            config_xdatasources_stash.update(  # TODO: make config and live xdatasource sync a discrete method
                 xdatasources
             )
             for xdatasource_name in xdatasources.keys():
@@ -364,10 +364,12 @@ class FileDataContextVariables(DataContextVariables):
 
         save_result = super().save_config()
 
-        if config_xdatasources:  # config_xdatasources is the superset
-            logger.info(f"Replacing {len(config_xdatasources)} `XDatasource`s")
-            self.data_context.datasources.update(config_xdatasources)
-            self.data_context.zep_config.xdatasources = config_xdatasources
+        if config_xdatasources_stash:  # config_xdatasources is the superset
+            logger.info(
+                f"Replacing {len(config_xdatasources_stash)} stashed `XDatasource`s"
+            )
+            self.data_context.datasources.update(config_xdatasources_stash)
+            self.data_context.zep_config.xdatasources = config_xdatasources_stash
 
         return save_result
 
