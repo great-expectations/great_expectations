@@ -216,7 +216,7 @@ stages:
               invoke tests --ci --cloud --timeout=3.0
 
             displayName: 'Unit Tests'
-            condition: ${{ variables.run_unit_tests }}
+            condition: ${{ run_unit_tests }}
             env:
               GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
