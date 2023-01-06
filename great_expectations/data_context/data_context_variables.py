@@ -304,7 +304,7 @@ class EphemeralDataContextVariables(DataContextVariables):
 
 @dataclass(repr=False)
 class FileDataContextVariables(DataContextVariables):
-    data_context: Optional[FileDataContext] = None
+    data_context: FileDataContext = None  # type: ignore[assignment] # resolved in __post_init__
 
     def __post_init__(self) -> None:
         # Chetan - 20220607 - Although the above argument is not truly optional, we are
