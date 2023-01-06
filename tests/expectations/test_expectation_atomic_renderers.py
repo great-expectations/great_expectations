@@ -664,7 +664,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_decreasing(
             "column": "my_column",
             "mostly": 0.8,
             "parse_strings_as_datetimes": True,
-            "strictly": 50,
+            "strictly": True,
         },
     }
     rendered_content = get_prescriptive_rendered_content(update_dict)

@@ -567,10 +567,8 @@ snapshots[
     "value": {
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
-            "row_condition": {"schema": {"type": "string"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "$column values must be parseable by dateutil, at least $mostly_pct % of the time.",
@@ -585,15 +583,13 @@ snapshots[
     "value": {
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
             "parse_strings_as_datetimes": {
                 "schema": {"type": "boolean"},
                 "value": True,
             },
-            "row_condition": {"schema": {"type": "string"}, "value": None},
-            "strictly": {"schema": {"type": "boolean"}, "value": 50},
+            "strictly": {"schema": {"type": "boolean"}, "value": True},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "$column values must be strictly less than previous values, at least $mostly_pct % of the time. Values should be parsed as datetimes.",
@@ -753,11 +749,13 @@ snapshots[
     "value": {
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "json_schema": {"schema": {"type": "object"}, "value": {"foo": "bar"}},
+            "formatted_json": {
+                "schema": {"type": "string"},
+                "value": "<pre>{\n" '    "foo": "bar"\n' "}</pre>",
+            },
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
-            "row_condition": {"schema": {"type": "string"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "$column values must match the following JSON Schema, at least $mostly_pct % of the time: $formatted_json",
@@ -928,14 +926,12 @@ snapshots[
     "value": {
         "params": {
             "column_list": {"schema": {"type": "array"}, "value": ["A", "B", "C"]},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "ignore_row_if": {"schema": {"type": "string"}, "value": "foo"},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
-            "row_condition": {"schema": {"type": "string"}, "value": None},
-            "v__0": {"schema": {"type": "string"}, "value": "A"},
-            "v__1": {"schema": {"type": "string"}, "value": "B"},
-            "v__2": {"schema": {"type": "string"}, "value": "C"},
+            "column_list_0": {"schema": {"type": "string"}, "value": "A"},
+            "column_list_1": {"schema": {"type": "string"}, "value": "B"},
+            "column_list_2": {"schema": {"type": "string"}, "value": "C"},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "Values must be unique across columns, at least $mostly_pct % of the time: $column_list_0, $column_list_1, $column_list_2",
