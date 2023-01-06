@@ -84,17 +84,24 @@ cases for working with Great Expectations, including interactive exploratory wor
 |    SUMMARY                            | Detailed exploratory work with follow-on investigation.      |
 |    COMPLETE                           | Debugging pipelines or developing detailed regression tests. |
 
-## result_format examples
+## Examples
 
-Example input:
-```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L24-L61
+The following examples will use the data defined in the following Pandas DataFrame:
+
+```python name="pandas_df_for_result_format"
 ```
 
-Example outputs for different values of `result_format`:
+## Behavior for `BOOLEAN_ONLY`
 
-#### `BOOLEAN_ONLY`
-```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L113-L117
+When the `result_format` is `BOOLEAN_ONLY`, no `result` is returned. The result of evaluating the Expectation is  
+exclusively returned via the value of the `success` parameter.
+
+For example:
+
+```python name="result_format_boolean_example"
 ```
+
+Will return the following output:
 ```python
 >>> print(validation_result.success)
 False
@@ -103,8 +110,33 @@ False
 {}
 ```
 
-#### `BASIC`
-```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L123-L127
+#### Behavior for `BASIC`
+
+For `BASIC` format, a `result` is generated with a basic justification for why an expectation was met or not. The format is intended 
+for quick, at-a-glance feedback. For example, it tends to work well in Jupyter Notebooks.
+
+Great Expectations has standard behavior for support for describing the results of `column_map_expectation` and
+`column_aggregate_expectation` expectations.
+
+`column_map_expectation` applies a boolean test function to each element within a column, and so returns a list of  
+unexpected values to justify the expectation result.
+
+The basic `result` includes:
+
+```python
+{
+    "success" : Boolean,
+    "result" : {
+        "partial_unexpected_list" : [A list of up to 20 values that violate the expectation]
+        "unexpected_count" : The total count of unexpected values in the column
+        "unexpected_percent" : The overall percent of unexpected values
+        "unexpected_percent_nonmissing" : The percent of unexpected values, excluding missing values from the denominator
+    }
+}
+```
+
+**Note:** When unexpected values are duplicated, `unexpected_list` will contain multiple copies of the value.
+```python name="result_format_basic_example_set"
 ```
 ```python
 >>> print(validation_result.success)
@@ -123,8 +155,67 @@ False
 }
 ```
 
-#### `SUMMARY`
-```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L142-L150
+`column_aggregate_expectation` computes a single aggregate value for the column, and so returns a single 
+`observed_value` to justify the expectation result.
+
+The basic `result` includes:
+
+```python
+{
+    "success" : Boolean,
+    "result" : {
+        "observed_value" : The aggregate statistic computed for the column
+    }
+}
+```
+
+For example:
+
+```python name="result_format_basic_example_agg"
+```
+```python
+>>> print(validation_result.success)
+True
+
+>>> print(validation_result.result)
+{'observed_value': 3.6666666666666665}
+```
+
+
+#### Behavior for `SUMMARY`
+
+A `result` is generated with a summary justification for why an expectation was met or not. The format is intended  
+for more detailed exploratory work and includes additional information beyond what is included by `BASIC`.
+For example, it can support generating dashboard results of whether a set of expectations are being met.
+
+Great Expectations has standard behavior for support for describing the results of `column_map_expectation` and
+`column_aggregate_expectation` expectations.
+
+`column_map_expectation` applies a boolean test function to each element within a column, and so returns a list of  
+unexpected values to justify the expectation result.
+
+The summary `result` includes:
+
+```python
+{
+    'success': False,
+    'result': {
+        'element_count': The total number of values in the column
+        'unexpected_count': The total count of unexpected values in the column (also in `BASIC`)
+        'unexpected_percent': The overall percent of unexpected values (also in `BASIC`)
+        'unexpected_percent_nonmissing': The percent of unexpected values, excluding missing values from the denominator (also in `BASIC`)
+        "partial_unexpected_list" : [A list of up to 20 values that violate the expectation] (also in `BASIC`)
+        'missing_count': The number of missing values in the column
+        'missing_percent': The total percent of missing values in the column
+        'partial_unexpected_counts': [{A list of objects with value and counts, showing the number of times each of the unexpected values occurs}
+        'partial_unexpected_index_list': [A list of up to 20 of the indices of the unexpected values in the column]
+        TODO update this with the unexpected_idex_column_names
+    }
+}
+```
+
+For example:
+```python name="result_format_summary_example_set"
 ```
 ```python
 >>> print(validation_result.success)
@@ -156,9 +247,75 @@ False
 }
 ```
 
-#### `COMPLETE`
+`column_aggregate_expectation` computes a single aggregate value for the column, and so returns a `observed_value` 
+to justify the expectation result. It also includes additional information regarding observed values and counts, 
+depending on the specific expectation.
 
-```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L178-L186
+The summary `result` includes:
+
+```python
+{
+    'success': False,
+    'result': {
+        'observed_value': The aggregate statistic computed for the column (also in `BASIC`)
+        'element_count': The total number of values in the column
+        'missing_count':  The number of missing values in the column
+        'missing_percent': The total percent of missing values in the column
+        'details': {<expectation-specific result justification fields>}
+    }
+}
+```
+
+For example:
+
+```python
+[1, 1, 2, 2, NaN]
+
+expect_column_mean_to_be_between
+
+{
+    "success" : Boolean,
+    "result" : {
+        "observed_value" : 1.5,
+        'element_count': 5,
+        'missing_count': 1,
+        'missing_percent': 0.2
+    }
+}
+```
+
+
+#### Behavior for `COMPLETE`
+A `result` is generated with all available justification for why an expectation was met or not. The format is  
+intended for debugging pipelines or developing detailed regression tests.
+
+Great Expectations has standard behavior for support for describing the results of `column_map_expectation` and
+`column_aggregate_expectation` expectations.
+
+`column_map_expectation` applies a boolean test function to each element within a column, and so returns a list of 
+unexpected values to justify the expectation result.
+
+The complete `result` includes:
+
+```python
+{
+    'success': False,
+    'result': {
+        "unexpected_list" : [A list of all values that violate the expectation]
+        'unexpected_index_list': [A list of the indices of the unexpected values in the column]
+        'element_count': The total number of values in the column (also in `SUMMARY`)
+        'unexpected_count': The total count of unexpected values in the column (also in `SUMMARY`)
+        'unexpected_percent': The overall percent of unexpected values (also in `SUMMARY`)
+        'unexpected_percent_nonmissing': The percent of unexpected values, excluding missing values from the denominator (also in `SUMMARY`)
+        'missing_count': The number of missing values in the column  (also in `SUMMARY`)
+        'missing_percent': The total percent of missing values in the column  (also in `SUMMARY`)
+    }
+}
+```
+
+For example:
+
+```python name="result_format_complete_example_set"
 ```
 ```python
 >>> print(validation_result.success)
@@ -200,246 +357,6 @@ False
 }
 ```
 
-#### In a `Checkpoint` configuration 
-```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L245-L278
-```
-
-## Behavior for `BOOLEAN_ONLY`
-
-When the `result_format` is `BOOLEAN_ONLY`, no `result` is returned. The result of evaluating the Expectation is  
-exclusively returned via the value of the `success` parameter.
-
-For example:
-
-```python
-my_df.expect_column_values_to_be_in_set(
-    "possible_benefactors",
-    ["Joe Gargery", "Mrs. Gargery", "Mr. Pumblechook", "Ms. Havisham", "Mr. Jaggers"]
-    result_format={'result_format': 'BOOLEAN_ONLY'}
-)
-{
-    'success': False
-}
-
-my_df.expect_column_values_to_be_in_set(
-    "possible_benefactors",
-    ["Joe Gargery", "Mrs. Gargery", "Mr. Pumblechook", "Ms. Havisham", "Mr. Jaggers", "Mr. Magwitch"]
-    result_format={'result_format': 'BOOLEAN_ONLY'}
-)
-{
-    'success': False
-}
-```
-
-## Behavior for `BASIC`
-
-A `result` is generated with a basic justification for why an expectation was met or not. The format is intended 
-for quick, at-a-glance feedback. For example, it tends to work well in Jupyter Notebooks.
-
-Great Expectations has standard behavior for support for describing the results of `column_map_expectation` and
-`column_aggregate_expectation` expectations.
-
-`column_map_expectation` applies a boolean test function to each element within a column, and so returns a list of  
-unexpected values to justify the expectation result.
-
-The basic `result` includes:
-
-```python
-{
-    "success" : Boolean,
-    "result" : {
-        "partial_unexpected_list" : [A list of up to 20 values that violate the expectation]
-        "unexpected_count" : The total count of unexpected values in the column
-        "unexpected_percent" : The overall percent of unexpected values
-        "unexpected_percent_nonmissing" : The percent of unexpected values, excluding missing values from the denominator
-    }
-}
-```
-
-**Note:** When unexpected values are duplicated, `unexpected_list` will contain multiple copies of the value.
-
-```python
-[1,2,2,3,3,3,None,None,None,None]
-
-expect_column_values_to_be_unique
-
-{
-    "success" : True,
-    "result" : {
-        "partial_unexpected_list" : [2,2,3,3,3]
-        "unexpected_count" : 5,
-        "unexpected_percent" : 0.5,
-        "unexpected_percent_nonmissing" : 0.8333333
-    }
-}
-```
-
-
-`column_aggregate_expectation` computes a single aggregate value for the column, and so returns a single 
-`observed_value` to justify the expectation result.
-
-The basic `result` includes:
-
-```python
-{
-    "success" : Boolean,
-    "result" : {
-        "observed_value" : The aggregate statistic computed for the column
-    }
-}
-```
-
-For example:
-
-```python
-[1, 1, 2, 2]
-
-expect_column_mean_to_be_between
-
-{
-    "success" : Boolean,
-    "result" : {
-        "observed_value" : 1.5
-    }
-}
-```
-
-
-## Behavior for `SUMMARY`
-
-A `result` is generated with a summary justification for why an expectation was met or not. The format is intended  
-for more detailed exploratory work and includes additional information beyond what is included by `BASIC`.
-For example, it can support generating dashboard results of whether a set of expectations are being met.
-
-Great Expectations has standard behavior for support for describing the results of `column_map_expectation` and
-`column_aggregate_expectation` expectations.
-
-`column_map_expectation` applies a boolean test function to each element within a column, and so returns a list of  
-unexpected values to justify the expectation result.
-
-The summary `result` includes:
-
-```python
-{
-    'success': False,
-    'result': {
-        'element_count': The total number of values in the column
-        'unexpected_count': The total count of unexpected values in the column (also in `BASIC`)
-        'unexpected_percent': The overall percent of unexpected values (also in `BASIC`)
-        'unexpected_percent_nonmissing': The percent of unexpected values, excluding missing values from the denominator (also in `BASIC`)
-        "partial_unexpected_list" : [A list of up to 20 values that violate the expectation] (also in `BASIC`)
-        'missing_count': The number of missing values in the column
-        'missing_percent': The total percent of missing values in the column
-        'partial_unexpected_counts': [{A list of objects with value and counts, showing the number of times each of the unexpected values occurs}]
-        'partial_unexpected_index_list': [A list of up to 20 of the indices of the unexpected values in the column]
-    }
-}
-```
-
-For example:
-
-```python
-{
-    'success': False,
-    'result': {
-        'element_count': 36,
-        'unexpected_count': 6,
-        'unexpected_percent': 0.16666666666666666,
-        'unexpected_percent_nonmissing': 0.16666666666666666,
-        'missing_count': 0,
-        'missing_percent': 0.0,
-        'partial_unexpected_counts': [{'value': 'A', 'count': 1}, {'value': 'E', 'count': 5}],
-        'partial_unexpected_index_list': [0, 10, 11, 12, 13, 14],
-        'partial_unexpected_list': ['A', 'E', 'E', 'E', 'E', 'E']
-    }
-}
-```
-
-`column_aggregate_expectation` computes a single aggregate value for the column, and so returns a `observed_value` 
-to justify the expectation result. It also includes additional information regarding observed values and counts, 
-depending on the specific expectation.
-
-
-The summary `result` includes:
-
-```python
-{
-    'success': False,
-    'result': {
-        'observed_value': The aggregate statistic computed for the column (also in `BASIC`)
-        'element_count': The total number of values in the column
-        'missing_count':  The number of missing values in the column
-        'missing_percent': The total percent of missing values in the column
-        'details': {<expectation-specific result justification fields>}
-    }
-}
-```
-
-For example:
-
-```python
-[1, 1, 2, 2, NaN]
-
-expect_column_mean_to_be_between
-
-{
-    "success" : Boolean,
-    "result" : {
-        "observed_value" : 1.5,
-        'element_count': 5,
-        'missing_count': 1,
-        'missing_percent': 0.2
-    }
-}
-```
-
-## Behavior for `COMPLETE`
-# TODO THIS IS WHERE IT NEEDS TO BE UPDATEDj
-A `result` is generated with all available justification for why an expectation was met or not. The format is  
-intended for debugging pipelines or developing detailed regression tests.
-
-Great Expectations has standard behavior for support for describing the results of `column_map_expectation` and
-`column_aggregate_expectation` expectations.
-
-`column_map_expectation` applies a boolean test function to each element within a column, and so returns a list of 
-unexpected values to justify the expectation result.
-
-The complete `result` includes:
-
-```python
-{
-    'success': False,
-    'result': {
-        "unexpected_list" : [A list of all values that violate the expectation]
-        'unexpected_index_list': [A list of the indices of the unexpected values in the column]
-        'element_count': The total number of values in the column (also in `SUMMARY`)
-        'unexpected_count': The total count of unexpected values in the column (also in `SUMMARY`)
-        'unexpected_percent': The overall percent of unexpected values (also in `SUMMARY`)
-        'unexpected_percent_nonmissing': The percent of unexpected values, excluding missing values from the denominator (also in `SUMMARY`)
-        'missing_count': The number of missing values in the column  (also in `SUMMARY`)
-        'missing_percent': The total percent of missing values in the column  (also in `SUMMARY`)
-    }
-}
-```
-
-For example:
-
-```python
-{
-    'success': False,
-    'result': {
-        'element_count': 36,
-        'unexpected_count': 6,
-        'unexpected_percent': 0.16666666666666666,
-        'unexpected_percent_nonmissing': 0.16666666666666666,
-        'missing_count': 0,
-        'missing_percent': 0.0,
-        'unexpected_index_list': [0, 10, 11, 12, 13, 14],
-        'unexpected_list': ['A', 'E', 'E', 'E', 'E', 'E']
-    }
-}
-```
-
 `column_aggregate_expectation` computes a single aggregate value for the column, and so returns a `observed_value` 
 to justify the expectation result. It also includes additional information regarding observed values and counts,  
 depending on the specific expectation.
@@ -475,4 +392,8 @@ expect_column_mean_to_be_between
         'missing_percent': 0.2
     }
 }
+```
+
+#### In a `Checkpoint` configuration 
+```python name="result_format_checkpoint_example"
 ```
