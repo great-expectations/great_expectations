@@ -8,7 +8,6 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -20,6 +19,9 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
@@ -28,6 +30,7 @@ from great_expectations.datasource.data_connector.batch_filter import (
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
 from great_expectations.render import RenderedAtomicContent, RenderedAtomicValue
+from great_expectations.util import get_context
 from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import Validator
 
@@ -36,7 +39,7 @@ from great_expectations.validator.validator import Validator
 def yellow_trip_pandas_data_context(
     tmp_path_factory,
     monkeypatch,
-) -> DataContext:
+) -> FileDataContext:
     """
     Provides a data context with a data_connector for a pandas datasource which can connect to three months of
     yellow trip taxi data in csv form. This data connector enables access to all three months through a BatchRequest
@@ -114,7 +117,7 @@ def yellow_trip_pandas_data_context(
         ),
     )
 
-    context = DataContext(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
     assert context.root_directory == context_path
 
     return context
@@ -190,7 +193,7 @@ def test_validator_default_expectation_args__sql(
 def test_columns(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
-    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    data_context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
     batch_request: Dict[str, Union[str, Dict[str, Any]]] = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_basic_data_connector",
@@ -218,7 +221,7 @@ def test_columns(
 def test_head(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
-    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    data_context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
     batch_request: Dict[str, Union[str, Dict[str, Any]]] = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_basic_data_connector",
@@ -252,7 +255,7 @@ def test_head(
 def multi_batch_taxi_validator(
     yellow_trip_pandas_data_context,
 ) -> Validator:
-    context: DataContext = yellow_trip_pandas_data_context
+    context = yellow_trip_pandas_data_context
 
     suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
 
@@ -274,7 +277,7 @@ def multi_batch_taxi_validator(
 def multi_batch_taxi_validator_ge_cloud_mode(
     yellow_trip_pandas_data_context,
 ) -> Validator:
-    context: DataContext = yellow_trip_pandas_data_context
+    context = yellow_trip_pandas_data_context
     context._cloud_mode = True
 
     suite = ExpectationSuite(
@@ -402,7 +405,7 @@ def test_validator_can_instantiate_with_a_multi_batch_request(
 def test_validator_with_bad_batchrequest(
     yellow_trip_pandas_data_context,
 ):
-    context: DataContext = yellow_trip_pandas_data_context
+    context = yellow_trip_pandas_data_context
 
     suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
 
@@ -565,7 +568,7 @@ def test_adding_expectation_to_validator_not_send_usage_message(
 def test_validator_load_additional_batch_to_validator(
     yellow_trip_pandas_data_context,
 ):
-    context: DataContext = yellow_trip_pandas_data_context
+    context = yellow_trip_pandas_data_context
 
     suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
 
@@ -614,7 +617,7 @@ def test_validator_load_additional_batch_to_validator(
 def test_instantiate_validator_with_a_list_of_batch_requests(
     yellow_trip_pandas_data_context,
 ):
-    context: DataContext = yellow_trip_pandas_data_context
+    context = yellow_trip_pandas_data_context
     suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
 
     jan_batch_request: BatchRequest = BatchRequest(
@@ -941,7 +944,7 @@ def test_validator_docstrings(multi_batch_taxi_validator):
 def test_validator_include_rendered_content(
     yellow_trip_pandas_data_context,
 ):
-    context: DataContext = yellow_trip_pandas_data_context
+    context = yellow_trip_pandas_data_context
     batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
         data_connector_name="monthly",
@@ -1169,13 +1172,13 @@ def test_list_available_expectation_types(
 
 
 def _context_to_validator_and_expectation_sql(
-    context: DataContext,
+    context: FileDataContext,
 ) -> Tuple[Validator, ExpectColumnValuesToBeInSet]:
     """
     Helper method used by sql tests in this suite. Takes in a Datacontext and returns a tuple of Validator and
     Expectation after building a BatchRequest and creating ExpectationSuite.
     Args:
-        context (DataContext): DataContext to use
+        context (FileDataContext): DataContext to use
     """
 
     expectation_configuration = ExpectationConfiguration(
