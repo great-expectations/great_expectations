@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import enum
+import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from great_expectations.core.config_provider import _ConfigurationProvider
 from great_expectations.core.data_context_key import DataContextKey
@@ -25,6 +26,11 @@ if TYPE_CHECKING:
         FileDataContext,
     )
     from great_expectations.data_context.store import DataContextStore
+    from great_expectations.experimental.datasources.interfaces import (
+        Datasource as XDatasource,
+    )
+
+logger = logging.getLogger(__file__)
 
 
 class DataContextVariableSchema(str, enum.Enum):
@@ -335,6 +341,32 @@ class FileDataContextVariables(DataContextVariables):
             runtime_environment=None,
         )
         return store
+
+    def save_config(self) -> Any:
+        """
+        Persist any changes made to variables utilizing the configured Store.
+        """
+        # overridden in order to prevent calling `instantiate_class_from_config` on ZEP objects
+        # parent class does not have access to the `data_context`
+        xdatasources: Dict[str, XDatasource] = self.data_context.xdatasources
+        config_xdatasources = self.data_context.zep_config.datasources
+        if xdatasources or config_xdatasources:
+            logger.debug(
+                f"Temporary `XDatasource` removal during {type(self).__class__.__name__}.save_config() operation {len(xdatasources)}"
+            )
+            config_xdatasources.update(  # TODO: make config and live xdatasource sync a discrete method
+                xdatasources
+            )
+            for xdatasource_name in xdatasources.keys():
+                self.data_context.datasources.pop(xdatasource_name)
+
+        save_result = super().save_config()
+
+        if config_xdatasources:  # config_xdatasources is the superset
+            logger.debug(f"Replacing {len(config_xdatasources)} `XDatasource`s")
+            self.data_context.datasources.update(config_xdatasources)
+
+        return save_result
 
 
 @dataclass(repr=False)
