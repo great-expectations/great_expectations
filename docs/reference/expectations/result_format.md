@@ -7,7 +7,7 @@ The `result_format` parameter may be either a string or a dictionary which speci
   * For string usage, see `result_format` values.
   * For dictionary usage, `result_format` which may include the following keys:
     * `result_format`: Sets the fields to return in result.
-    * `unexpected_index_columns`: Defines the primary key (PK) columns used to represent unexpected results.
+    * `unexpected_index_column_names`: Defines the primary key (PK) columns used to represent unexpected results.
     * `return_unexpected_index_query`: Boolean flag that can be used to suppress PK output.
     * `partial_unexpected_count`: Sets the number of results to include in partial_unexpected_count, if applicable. If 
       set to 0, this will suppress the unexpected counts.
@@ -21,41 +21,25 @@ The `result_format` parameter may be either a string or a dictionary which speci
   :::
 
 ## Configure Result Format
-Result Format can be applied to either a single Expectation or an entire Checkpoint.
+Result Format can be applied to either a single Expectation or an entire Checkpoint. When configured at the Expectation-level, 
+the configuration will not be persisted, and you will receive a `UserWarning`. We therefore recommend that the Expectation-level
+configuration be used for exploratory analysis, with the final configuration added at the Checkpoint-level.
+
 ### Expectation Level Config
-To apply `result_format` to an Expectation, pass it into the Expectation's configuration:
-```python
-# first obtain a validator object, for instance by running the `$ great_expectations suite new` notebook.
-validation_result = validator.expect_column_values_to_be_between(
-    column="pickup_location_id",
-    min_value=0,
-    max_value=100,
-    result_format="COMPLETE",
-    include_unexpected_rows=True
-)
-unexpected_index_list = validation_result["result"]["unexpected_index_list"]
-unexpected_list = validation_result["result"]["unexpected_list"]
+To apply `result_format` to an Expectation, pass it into the Expectation. We will first need to obtain a (Validator)[] object instance by running the `$ great_expectations suite new` command.
+
+TODO check line
+```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L106-L108
 ```
-When configured at the Expectation level, the `unexpected_index_list` and `unexpected_list` won't be passed through to the final Validation Result object.
 In order to see those values at the Suite level, configure `result_format` in your Checkpoint configuration.
+
 ### Checkpoint Level Config
 To apply `result_format` to every Expectation in a Suite, define it in your Checkpoint configuration under the `runtime_configuration` key.
-```python
-checkpoint_config = {
-    "class_name": "SimpleCheckpoint", # or Checkpoint
-    "validations": [
-        # omitted for brevity
-    ],
-    "runtime_configuration": {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "include_unexpected_rows": True
-            "unexpected_index_columns": ["my_pk_column"],
-            "return_unexpected_index_query": True
-        }
-    }
-}
+
+TODO check line
+```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L172-L205
 ```
+
 The results will then be stored in the Validation Result after running the Checkpoint.
 :::note
 Regardless of where Result Format is configured, `unexpected_list` is never rendered in Data Docs. `unexpected_index_list` is rendered when `COMPLETE` is selected. 
@@ -104,28 +88,15 @@ cases for working with Great Expectations, including interactive exploratory wor
 ## result_format examples
 
 Example input:
-```python
-my_df = pd.DataFrame(
-        {
-            "pk_column": ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen"],
-            "my_var": ['A', 'B', 'B', 'C', 'C', 'C', 'D', 'D', 'D', 'D', 'E', 'E', 'E', 'E', 'E']
-        }
-    )
-# this is actually a Validator
-print(list(my_df.my_var))
-['A', 'B', 'B', 'C', 'C', 'C', 'D', 'D', 'D', 'D', 'E', 'E', 'E', 'E', 'E']
+```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L20-L57
 ```
 
 Example outputs for different values of `result_format`:
 
+```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L108-L110
+```
 ```python
-result = my_df.expect_column_values_to_be_in_set(
-    "my_var",
-    ["B", "C", "D"],
-    result_format={'result_format': 'BOOLEAN_ONLY'}
-)
-
-print(result.result)
+print(validation_result)
 {
     'success': False
 }
@@ -169,15 +140,26 @@ expect_column_values_to_be_in_set(
     'success': False,
     'result': {
         'element_count': 15, 
-        'unexpected_count': 6, 
-        'unexpected_percent': 40.0, 
-        'partial_unexpected_list': ['A', 'E', 'E', 'E', 'E', 'E'], 
-        'missing_count': 0, 
-        'missing_percent': 0.0, 
-        'unexpected_percent_total': 40.0, 
-        'unexpected_percent_nonmissing': 40.0, 
-        'partial_unexpected_index_list': [0, 10, 11, 12, 13, 14], 
-        'partial_unexpected_counts': [{'value': 'E', 'count': 5}, {'value': 'A', 'count': 1}]
+        'unexpected_count': 6,
+        'unexpected_percent': 40.0,
+        'partial_unexpected_list': ['A', 'E', 'E', 'E', 'E', 'E'],
+        'unexpected_index_column_names': ['pk_column'],
+        'missing_count': 0,
+        'missing_percent': 0.0,
+        'unexpected_percent_total': 40.0,
+        'unexpected_percent_nonmissing': 40.0,
+        'partial_unexpected_index_list': [
+            {'my_var': 'A', 'pk_column': 'zero'}, 
+            {'my_var': 'E', 'pk_column': 'ten'},
+            {'my_var': 'E', 'pk_column': 'eleven'},
+            {'my_var': 'E', 'pk_column': 'twelve'},
+            {'my_var': 'E', 'pk_column': 'thirteen'},
+            {'my_var': 'E', 'pk_column': 'fourteen'}
+        ],
+        'partial_unexpected_counts': [
+            {'value': 'E', 'count': 5},
+            {'value': 'A', 'count': 1}
+        ]
     }
 }
 ```
@@ -193,15 +175,36 @@ my_df.expect_column_values_to_be_in_set(
     'result': {
         'element_count': 15,
         'unexpected_count': 6,
-        'unexpected_percent': 40.0, 
-        'partial_unexpected_list': ['A', 'E', 'E', 'E', 'E', 'E'], 
-        'missing_count': 0, 
-        'missing_percent': 0.0, 
-        'unexpected_percent_total': 40.0, 
-        'unexpected_percent_nonmissing': 40.0, 
-        'partial_unexpected_index_list': [0, 10, 11, 12, 13, 14], 
-        'partial_unexpected_counts': [{'value': 'E', 'count': 5}, {'value': 'A', 'count': 1}], 'unexpected_list': ['A', 'E', 'E', 'E', 'E', 'E'], 
-        'unexpected_index_list': [0, 10, 11, 12, 13, 14]
+        'unexpected_percent': 40.0,
+        'partial_unexpected_list': [
+            'A', 'E', 'E', 'E', 'E', 'E'
+        ],
+        'unexpected_index_column_names': ['pk_column'],
+        'missing_count': 0,
+        'missing_percent': 0.0,
+        'unexpected_percent_total': 40.0,
+        'unexpected_percent_nonmissing': 40.0,
+        'partial_unexpected_index_list': [
+            {'my_var': 'A', 'pk_column': 'zero'},
+            {'my_var': 'E', 'pk_column': 'ten'},
+            {'my_var': 'E', 'pk_column': 'eleven'},
+            {'my_var': 'E', 'pk_column': 'twelve'},
+            {'my_var': 'E', 'pk_column': 'thirteen'},
+            {'my_var': 'E', 'pk_column': 'fourteen'}],
+        'partial_unexpected_counts': [
+            {'value': 'E', 'count': 5},
+            {'value': 'A', 'count': 1}
+        ], 
+        'unexpected_list': ['A', 'E', 'E', 'E', 'E', 'E'],
+        'unexpected_index_list': [
+            {'my_var': 'A', 'pk_column': 'zero'},
+            {'my_var': 'E', 'pk_column': 'ten'},
+            {'my_var': 'E', 'pk_column': 'eleven'},
+            {'my_var': 'E', 'pk_column': 'twelve'},
+            {'my_var': 'E', 'pk_column': 'thirteen'},
+            {'my_var': 'E', 'pk_column': 'fourteen'}
+        ], 
+        'unexpected_index_query': [0, 10, 11, 12, 13, 14]
     }
 }
 ```
