@@ -92,120 +92,116 @@ Example input:
 
 Example outputs for different values of `result_format`:
 
-```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L112-L116
+#### `BOOLEAN_ONLY`
+```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L113-L117
 ```
 ```python
-print(validation_result.success)
+>>> print(validation_result.success)
 False
-print(validation_result.result)
+
+>>> print(validation_result.result)
 {}
 ```
 
+#### `BASIC`
+```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L123-L127
+```
 ```python
-my_df.expect_column_values_to_be_in_set(
-    "my_var",
-    ["B", "C", "D"],
-    result_format={'result_format': 'BASIC'}
-)
+>>> print(validation_result.success)
+False
+
+>>> print(validation_result.result)
 {
-    'success': False,
-    'result': {
-        "element_count": 15,
-        "unexpected_count": 6,
-        "unexpected_percent": 40.0,
-        "partial_unexpected_list": [
-            "A",
-            "E",
-            "E",
-            "E",
-            "E",
-            "E"
-        ],
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "unexpected_percent_total": 40.0,
-        "unexpected_percent_nonmissing": 40.0
-    }
+    "element_count": 15,
+    "unexpected_count": 6,
+    "unexpected_percent": 40.0,
+    "partial_unexpected_list": ["A", "E", "E", "E", "E", "E"],
+    "missing_count": 0,
+    "missing_percent": 0.0,
+    "unexpected_percent_total": 40.0,
+    "unexpected_percent_nonmissing": 40.0,
 }
 ```
 
+#### `SUMMARY`
+```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L142-L150
+```
 ```python
-expect_column_values_to_be_in_set(
-    "my_column",
-    ["B", "C", "D", "F", "G", "H"],
-    result_format={'result_format': 'SUMMARY'}
-)
+>>> print(validation_result.success)
+False
+
+>>> print(validation_result.result)
 {
-    'success': False,
-    'result': {
-        'element_count': 15, 
-        'unexpected_count': 6,
-        'unexpected_percent': 40.0,
-        'partial_unexpected_list': ['A', 'E', 'E', 'E', 'E', 'E'],
-        'unexpected_index_column_names': ['pk_column'],
-        'missing_count': 0,
-        'missing_percent': 0.0,
-        'unexpected_percent_total': 40.0,
-        'unexpected_percent_nonmissing': 40.0,
-        'partial_unexpected_index_list': [
-            {'my_var': 'A', 'pk_column': 'zero'}, 
-            {'my_var': 'E', 'pk_column': 'ten'},
-            {'my_var': 'E', 'pk_column': 'eleven'},
-            {'my_var': 'E', 'pk_column': 'twelve'},
-            {'my_var': 'E', 'pk_column': 'thirteen'},
-            {'my_var': 'E', 'pk_column': 'fourteen'}
-        ],
-        'partial_unexpected_counts': [
-            {'value': 'E', 'count': 5},
-            {'value': 'A', 'count': 1}
-        ]
-    }
+    "element_count": 15,
+    "unexpected_count": 6,
+    "unexpected_percent": 40.0,
+    "partial_unexpected_list": ["A", "E", "E", "E", "E", "E"],
+    "unexpected_index_column_names": ["pk_column"],
+    "missing_count": 0,
+    "missing_percent": 0.0,
+    "unexpected_percent_total": 40.0,
+    "unexpected_percent_nonmissing": 40.0,
+    "partial_unexpected_index_list": [
+        {"my_var": "A", "pk_column": "zero"},
+        {"my_var": "E", "pk_column": "ten"},
+        {"my_var": "E", "pk_column": "eleven"},
+        {"my_var": "E", "pk_column": "twelve"},
+        {"my_var": "E", "pk_column": "thirteen"},
+        {"my_var": "E", "pk_column": "fourteen"},
+    ],
+    "partial_unexpected_counts": [
+        {"value": "E", "count": 5},
+        {"value": "A", "count": 1},
+    ],
 }
 ```
 
+#### `COMPLETE`
+
+```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L178-L186
+```
 ```python
-my_df.expect_column_values_to_be_in_set(
-    "my_var",
-    ["B", "C", "D", "F", "G", "H"],
-    result_format={'result_format': 'COMPLETE'}
-)
+>>> print(validation_result.success)
+False
+
+>>> print(validation_result.result)
 {
-    'success': False,
-    'result': {
-        'element_count': 15,
-        'unexpected_count': 6,
-        'unexpected_percent': 40.0,
-        'partial_unexpected_list': [
-            'A', 'E', 'E', 'E', 'E', 'E'
-        ],
-        'unexpected_index_column_names': ['pk_column'],
-        'missing_count': 0,
-        'missing_percent': 0.0,
-        'unexpected_percent_total': 40.0,
-        'unexpected_percent_nonmissing': 40.0,
-        'partial_unexpected_index_list': [
-            {'my_var': 'A', 'pk_column': 'zero'},
-            {'my_var': 'E', 'pk_column': 'ten'},
-            {'my_var': 'E', 'pk_column': 'eleven'},
-            {'my_var': 'E', 'pk_column': 'twelve'},
-            {'my_var': 'E', 'pk_column': 'thirteen'},
-            {'my_var': 'E', 'pk_column': 'fourteen'}],
-        'partial_unexpected_counts': [
-            {'value': 'E', 'count': 5},
-            {'value': 'A', 'count': 1}
-        ], 
-        'unexpected_list': ['A', 'E', 'E', 'E', 'E', 'E'],
-        'unexpected_index_list': [
-            {'my_var': 'A', 'pk_column': 'zero'},
-            {'my_var': 'E', 'pk_column': 'ten'},
-            {'my_var': 'E', 'pk_column': 'eleven'},
-            {'my_var': 'E', 'pk_column': 'twelve'},
-            {'my_var': 'E', 'pk_column': 'thirteen'},
-            {'my_var': 'E', 'pk_column': 'fourteen'}
-        ], 
-        'unexpected_index_query': [0, 10, 11, 12, 13, 14]
-    }
+    "element_count": 15,
+    "unexpected_count": 6,
+    "unexpected_percent": 40.0,
+    "partial_unexpected_list": ["A", "E", "E", "E", "E", "E"],
+    "unexpected_index_column_names": ["pk_column"],
+    "missing_count": 0,
+    "missing_percent": 0.0,
+    "unexpected_percent_total": 40.0,
+    "unexpected_percent_nonmissing": 40.0,
+    "partial_unexpected_index_list": [
+        {"my_var": "A", "pk_column": "zero"},
+        {"my_var": "E", "pk_column": "ten"},
+        {"my_var": "E", "pk_column": "eleven"},
+        {"my_var": "E", "pk_column": "twelve"},
+        {"my_var": "E", "pk_column": "thirteen"},
+        {"my_var": "E", "pk_column": "fourteen"},
+    ],
+    "partial_unexpected_counts": [
+        {"value": "E", "count": 5},
+        {"value": "A", "count": 1},
+    ],
+    "unexpected_list": ["A", "E", "E", "E", "E", "E"],
+    "unexpected_index_list": [
+        {"my_var": "A", "pk_column": "zero"},
+        {"my_var": "E", "pk_column": "ten"},
+        {"my_var": "E", "pk_column": "eleven"},
+        {"my_var": "E", "pk_column": "twelve"},
+        {"my_var": "E", "pk_column": "thirteen"},
+        {"my_var": "E", "pk_column": "fourteen"},
+    ],
+    "unexpected_index_query": [0, 10, 11, 12, 13, 14],
 }
+```
+
+#### In a `Checkpoint` configuration 
+```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L245-L278
 ```
 
 ## Behavior for `BOOLEAN_ONLY`
@@ -268,7 +264,7 @@ The basic `result` includes:
 expect_column_values_to_be_unique
 
 {
-    "success" : Boolean,
+    "success" : True,
     "result" : {
         "partial_unexpected_list" : [2,2,3,3,3]
         "unexpected_count" : 5,
