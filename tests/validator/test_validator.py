@@ -1253,7 +1253,7 @@ def test_validator_result_format_config_from_expectation(
 
 
 @pytest.mark.integration
-def test_graph_validate_with_two_expectaions_and_diff_result_format(
+def test_graph_validate_with_two_expectaions_and_fist_expectation_without_additional_configuration(
     in_memory_runtime_context, basic_datasource
 ):
     in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
@@ -1317,7 +1317,7 @@ def test_graph_validate_with_two_expectaions_and_diff_result_format(
         )
     )
 
-    expectation_configuration_expect_column_distinct_values_to_equal_set = (
+    expectation_configuration_expect_column_values_to_be_null = (
         ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_null",
             kwargs={
@@ -1342,7 +1342,7 @@ def test_graph_validate_with_two_expectaions_and_diff_result_format(
         batches=[batch],
     ).graph_validate(
         configurations=[
-            expectation_configuration_expect_column_distinct_values_to_equal_set,
+            expectation_configuration_expect_column_values_to_be_null,
             expectation_configuration_expect_column_values_to_be_in_set,
         ]
     )
@@ -1420,7 +1420,7 @@ def test_graph_validate_with_two_expectaions_and_diff_result_format(
 
 
 @pytest.mark.integration
-def test_graph_validate_with_two_expectaions_and_first_result_format_complet(
+def test_graph_validate_with_two_expectaions_and_first_expectation_with_result_format_complete(
     in_memory_runtime_context, basic_datasource
 ):
     in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
@@ -1484,7 +1484,7 @@ def test_graph_validate_with_two_expectaions_and_first_result_format_complet(
         )
     )
 
-    expectation_configuration_expect_column_distinct_values_to_equal_set = (
+    expectation_configuration_expect_column_values_to_be_null = (
         ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_null",
             kwargs={
@@ -1510,7 +1510,7 @@ def test_graph_validate_with_two_expectaions_and_first_result_format_complet(
     ).graph_validate(
         configurations=[
             expectation_configuration_expect_column_values_to_be_in_set,
-            expectation_configuration_expect_column_distinct_values_to_equal_set,
+            expectation_configuration_expect_column_values_to_be_null,
         ]
     )
 
