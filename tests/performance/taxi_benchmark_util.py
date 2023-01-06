@@ -10,9 +10,6 @@ from great_expectations import DataContext
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context import AbstractDataContext
-from great_expectations.data_context.data_context.abstract_data_context import (
-    AbstractDataContext,
-)
 from great_expectations.data_context.types.base import (
     ConcurrencyConfig,
     DataContextConfig,
