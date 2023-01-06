@@ -28,15 +28,14 @@ configuration be used for exploratory analysis, with the final configuration add
 ### Expectation Level Config
 To apply `result_format` to an Expectation, pass it into the Expectation. We will first need to obtain a (Validator)[] object instance by running the `$ great_expectations suite new` command.
 
-TODO check line
-```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L106-L108
+```python name="result_format_complete_example_set"
 ```
 In order to see those values at the Suite level, configure `result_format` in your Checkpoint configuration.
 
 ### Checkpoint Level Config
 To apply `result_format` to every Expectation in a Suite, define it in your Checkpoint configuration under the `runtime_configuration` key.
 
-```python file=../../../tests/integration/docusaurus/reference/core_concepts/result_format.py#L243-L276
+```python name="result_format_checkpoint_example"
 ```
 
 The results will then be stored in the Validation Result after running the Checkpoint.
@@ -209,7 +208,6 @@ The summary `result` includes:
         'missing_percent': The total percent of missing values in the column
         'partial_unexpected_counts': [{A list of objects with value and counts, showing the number of times each of the unexpected values occurs}
         'partial_unexpected_index_list': [A list of up to 20 of the indices of the unexpected values in the column]
-        TODO update this with the unexpected_idex_column_names
     }
 }
 ```
@@ -303,6 +301,7 @@ The complete `result` includes:
     'result': {
         "unexpected_list" : [A list of all values that violate the expectation]
         'unexpected_index_list': [A list of the indices of the unexpected values in the column]
+        'unexpected_index_query': [A query that can be used to retrieve all unexpected values (SQL and Spark), or the full list of unexpected indices (for Pandas)]
         'element_count': The total number of values in the column (also in `SUMMARY`)
         'unexpected_count': The total count of unexpected values in the column (also in `SUMMARY`)
         'unexpected_percent': The overall percent of unexpected values (also in `SUMMARY`)
@@ -353,7 +352,7 @@ False
         {"my_var": "E", "pk_column": "thirteen"},
         {"my_var": "E", "pk_column": "fourteen"},
     ],
-    "unexpected_index_query": [0, 10, 11, 12, 13, 14],
+    "unexpected_index_query": [0, 10, 11, 12, 13, 14],  # For Spark and SQL, this will be a query that can be used to retrieve all unexpected results
 }
 ```
 
