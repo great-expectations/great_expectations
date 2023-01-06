@@ -21,6 +21,7 @@ from typing import (
     Mapping,
     Optional,
     Sequence,
+    Set,
     Tuple,
     TypeVar,
     Union,
@@ -201,6 +202,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_environment (dict): a dictionary of config variables that
                 override those set in config_variables.yml and the environment
         """
+        self._xdatasource_keys: Set[str] = set()
         self.zep_config = self._load_zep_config()
 
         if runtime_environment is None:
@@ -593,6 +595,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "name already exists in the data context."
             )
         self.datasources[datasource.name] = datasource
+        self._xdatasource_keys.add(datasource.name)
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
@@ -2909,6 +2912,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     ) -> Dict[str, Union[LegacyDatasource, BaseDatasource, XDatasource]]:
         """A single holder for all Datasources in this context"""
         return self._cached_datasources
+
+    @property
+    def xdatasources(self) -> Dict[str, XDatasource]:
+        return {
+            k: self.datasources[k] for k in self._xdatasource_keys  # type: ignore[assignment,misc] # _xdatasource_keys are all `XDatasource`s
+        }
 
     @property
     def data_context_id(self) -> str:
