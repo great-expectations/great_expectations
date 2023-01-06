@@ -20,6 +20,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Iterable,
     List,
     Optional,
     Set,
@@ -1594,65 +1595,55 @@ class Expectation(metaclass=MetaExpectation):
             return False
 
     @staticmethod
-    @param_method(param_name="value_set")
-    def _add_value_set_params(
+    def _add_array_params(
+        array_param_name: str,
+        param_prefix: str,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        value_set: List[Optional[Any]] = renderer_configuration.params.value_set.value
-        if value_set:
-            for idx, value in enumerate(value_set):
-                if isinstance(value, Number):
-                    param_type = RendererValueType.NUMBER
-                else:
-                    param_type = RendererValueType.STRING
-                renderer_configuration.add_param(
-                    name=f"v__{str(idx)}", param_type=param_type, value=value
-                )
-        return renderer_configuration
+        @staticmethod
+        @param_method(param_name=array_param_name)
+        def _add_params(
+            renderer_configuration: RendererConfiguration,
+        ) -> RendererConfiguration:
+            array: Iterable[Optional[Any]] = renderer_configuration.params.getattr(
+                array_param_name
+            ).value
+            if array:
+                for idx, value in enumerate(array):
+                    if isinstance(value, Number):
+                        param_type = RendererValueType.NUMBER
+                    else:
+                        param_type = RendererValueType.STRING
+                    renderer_configuration.add_param(
+                        name=f"{param_prefix}{str(idx)}",
+                        param_type=param_type,
+                        value=value,
+                    )
+            return renderer_configuration
+
+        return _add_params(renderer_configuration=renderer_configuration)
 
     @staticmethod
-    @param_method(param_name="value_set")
-    def _get_value_set_string(renderer_configuration: RendererConfiguration) -> str:
-        value_set: List[Optional[Any]] = renderer_configuration.params.value_set.value
-        if value_set:
-            value_set_str = " ".join(
-                [f"$v__{str(idx)}" for idx in range(len(value_set))]
-            )
-        else:
-            value_set_str = "[ ]"
-        return value_set_str
-
-    @staticmethod
-    @param_method(param_name="column_list")
-    def _add_column_list_params(
+    def _get_array_string(
+        array_param_name: str,
+        param_prefix: str,
         renderer_configuration: RendererConfiguration,
-    ) -> RendererConfiguration:
-        column_list: List[
-            Optional[Any]
-        ] = renderer_configuration.params.column_list.value
-        if column_list:
-            for idx, value in enumerate(column_list):
-                if isinstance(value, Number):
-                    param_type = RendererValueType.NUMBER
-                else:
-                    param_type = RendererValueType.STRING
-                renderer_configuration.add_param(
-                    name=f"column_list_{str(idx)}", param_type=param_type, value=value
+    ) -> str:
+        @staticmethod
+        @param_method(param_name=array_param_name)
+        def _get_string(renderer_configuration: RendererConfiguration) -> str:
+            array: Iterable[Optional[Any]] = renderer_configuration.params.getattr(
+                array_param_name
+            ).value
+            if array:
+                array_string = " ".join(
+                    [f"{param_prefix}{str(idx)}" for idx in range(len(array))]
                 )
-        return renderer_configuration
+            else:
+                array_string = "[ ]"
+            return array_string
 
-    @staticmethod
-    @param_method(param_name="column_list")
-    def _get_column_list_string(renderer_configuration: RendererConfiguration) -> str:
-        column_list: List[
-            Optional[Any]
-        ] = renderer_configuration.params.column_list.value
-        column_list_str = ""
-        if column_list:
-            column_list_str = ", ".join(
-                [f"$column_list_{str(idx)}" for idx in range(len(column_list))]
-            )
-        return column_list_str
+        return _get_string(renderer_configuration=renderer_configuration)
 
     @staticmethod
     @param_method(param_name="mostly")

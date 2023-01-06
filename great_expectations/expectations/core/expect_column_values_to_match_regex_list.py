@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -7,16 +7,22 @@ from great_expectations.core import (
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     InvalidExpectationConfigurationError,
-    add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
 class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
@@ -126,61 +132,38 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
+        renderer_configuration: RendererConfiguration,
     ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        add_param_args: AddParamArgs = (
+            ("column", RendererValueType.STRING),
+            ("regex_list", RendererValueType.ARRAY),
+            ("mostly", RendererValueType.NUMBER),
+            ("match_on", RendererValueType.STRING),
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            [
-                "column",
-                "regex_list",
-                "mostly",
-                "match_on",
-                "row_condition",
-                "condition_parser",
-            ],
-        )
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "regex_list": {
-                "schema": {"type": "array"},
-                "value": params.get("regex_list"),
-            },
-            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
-            "mostly_pct": {
-                "schema": {"type": "string"},
-                "value": params.get("mostly_pct"),
-            },
-            "match_on": {"schema": {"type": "string"}, "value": params.get("match_on")},
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-        }
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
-        if not params.get("regex_list") or len(params.get("regex_list")) == 0:
+        params = renderer_configuration.param
+
+        if not params.regex_list or not params.regex_list.value:
             values_string = "[ ]"
         else:
-            for i, v in enumerate(params["regex_list"]):
-                params[f"v__{str(i)}"] = v
-            values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params["regex_list"])]
+            array_param_name = "regex_list"
+            param_prefix = "v__"
+            renderer_configuration = cls._add_array_params(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
+            )
+            values_string = cls._get_array_string(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
             )
 
-        if params.get("match_on") == "all":
+        if params.match_on and params.match_on.value == "all":
             template_str = (
                 "values must match all of the following regular expressions: "
                 + values_string
@@ -191,35 +174,20 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
                 + values_string
             )
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:
-            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+        if params.mostly and params.mostly.value < 1.0:
+            renderer_configuration = cls._add_mostly_pct_param(
+                renderer_configuration=renderer_configuration
             )
-            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
 
-        if include_column_name:
+        if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
-            )
-            template_str = f"{conditional_template_str}, then {template_str}"
-            params_with_json_schema.update(conditional_params)
+        renderer_configuration.template_str = template_str
 
-        params_with_json_schema = add_values_with_json_schema_from_list_in_params(
-            params=params,
-            params_with_json_schema=params_with_json_schema,
-            param_key_with_list="regex_list",
-        )
-
-        return template_str, params_with_json_schema, None, styling
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
