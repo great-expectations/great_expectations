@@ -1811,7 +1811,7 @@ def get_context(
 
     Returned by default if you have no cloud configuration set up and pass no parameters.
 
-    Available parameters
+    Relevant parameters
 
     context_root_dir: If you pass context_root_dir, we will look for a great_expectations.yml
     configuration there. If not we will look at the following locations:
@@ -1830,7 +1830,7 @@ def get_context(
 
     The default if you pass in a project_config.
 
-    Available parameters
+    Relevant parameters
 
     project_config: Used to configure the Data Context.
 
@@ -1845,7 +1845,7 @@ def get_context(
     `get_context()`, configuring cloud environment variables, or in a
     great_expectations.conf file.
 
-    Available parameters
+    Relevant parameters
 
     cloud_base_url: Override env var or great_expectations.conf file.
 
@@ -1869,9 +1869,9 @@ def get_context(
         cloud_access_token: Optional access_token for GX Cloud account.
         cloud_organization_id: Optional org_id for GX Cloud account.
         cloud_mode: Optional flag, whether to run GX in Cloud mode (default is None).
-        ge_cloud_base_url: url for GX Cloud endpoint.
-        ge_cloud_access_token: access_token for GX Cloud account.
-        ge_cloud_organization_id: org_id for GX Cloud account.
+        ge_cloud_base_url: Optional url for GX Cloud endpoint.
+        ge_cloud_access_token: Optional access_token for GX Cloud account.
+        ge_cloud_organization_id: Optional org_id for GX Cloud account.
         ge_cloud_mode: Optional flag, whether to run GX in Cloud mode (default is None).
             If None, the environment determines
 
