@@ -5,7 +5,7 @@ import enum
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
 
 from great_expectations.core.config_provider import _ConfigurationProvider
 from great_expectations.core.data_context_key import DataContextKey
@@ -354,7 +354,16 @@ class FileDataContextVariables(DataContextVariables):
         return save_result
 
     @contextlib.contextmanager
-    def _zep_objects_stash(self: FileDataContextVariables):
+    def _zep_objects_stash(
+        self: FileDataContextVariables,
+    ) -> Generator[None, None, None]:
+        """
+        Temporarily remove and stash zep objects from the datacontext.
+        Replace them once the context ends.
+
+        NOTE: This could be generalized into a stand-alone context manager function,
+        but it would need to take in the data_context containing the zep objects.
+        """
         config_xdatasources_stash: Dict[
             str, XDatasource
         ] = self.data_context._synchronize_zep_datasources()
