@@ -76,9 +76,18 @@ class SlackRenderer(Renderer):
                     failed_expectations_text = self.create_failed_expectations_text(
                         validation_result["results"]
                     )
-            summary_text = f"""
-{f"*<{cloud_url} | GX Cloud Validation Result >*" if cloud_url else ""}
-*Batch Validation Status*: {f"*<{cloud_url} | {status}>*" if cloud_url else status}
+            summary_text = ""
+            if cloud_url:
+                # This adds hyperlinks to GX Cloud
+                title_hlink = f"*<{cloud_url} | GX Cloud Validation Result >*"
+                batch_validation_status_hlink = f"*Batch Validation Status*: *<{cloud_url} | {status}>*"
+                summary_text += f"""{title_hlink}  
+{batch_validation_status_hlink}
+                """
+            else:
+                summary_text += f"*Batch Validation Status*: {status}"
+
+            summary_text += f"""
 *Expectation suite name*: `{expectation_suite_name}`
 *Data asset name*: `{data_asset_name}`
 *Run ID*: `{run_id}`
