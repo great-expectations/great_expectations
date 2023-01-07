@@ -359,7 +359,7 @@ class FileDataContextVariables(DataContextVariables):
     ) -> Generator[None, None, None]:
         """
         Temporarily remove and stash zep objects from the datacontext.
-        Replace them once the context ends.
+        Replace them once the with block ends.
 
         NOTE: This could be generalized into a stand-alone context manager function,
         but it would need to take in the data_context containing the zep objects.
