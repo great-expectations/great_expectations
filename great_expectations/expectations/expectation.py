@@ -310,7 +310,7 @@ class Expectation(metaclass=MetaExpectation):
         "catch_exceptions",
         "result_format",
     )
-    default_kwarg_values = {
+    default_kwarg_values: dict[str, bool | str | float | None] = {
         "include_config": True,
         "catch_exceptions": False,
         "result_format": "BASIC",
