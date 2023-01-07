@@ -21,7 +21,6 @@ from typing import (
     Mapping,
     Optional,
     Sequence,
-    Set,
     Tuple,
     TypeVar,
     Union,
@@ -108,6 +107,9 @@ from great_expectations.datasource.datasource_serializer import (
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.experimental.datasources.config import GxConfig
+from great_expectations.experimental.datasources.interfaces import (
+    Datasource as XDatasource,
+)
 from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.rule_based_profiler.config.base import (
@@ -149,9 +151,6 @@ if TYPE_CHECKING:
         GXCloudIdentifier,
     )
     from great_expectations.experimental.datasources.interfaces import Batch as XBatch
-    from great_expectations.experimental.datasources.interfaces import (
-        Datasource as XDatasource,
-    )
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.rule_based_profiler import RuleBasedProfilerResult
     from great_expectations.validation_operators.validation_operators import (
@@ -202,7 +201,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_environment (dict): a dictionary of config variables that
                 override those set in config_variables.yml and the environment
         """
-        self.__xdatasource_keys: Set[str] = set()
         self.zep_config = self._load_zep_config()
 
         if runtime_environment is None:
@@ -595,7 +593,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "name already exists in the data context."
             )
         self.datasources[datasource.name] = datasource
-        self.__xdatasource_keys.add(datasource.name)
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
@@ -2916,7 +2913,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     @property
     def xdatasources(self) -> Dict[str, XDatasource]:
         return {
-            k: self.datasources[k] for k in self.__xdatasource_keys  # type: ignore[misc] # _xdatasource_keys are all `XDatasource`s
+            name: ds
+            for (name, ds) in self.datasources.items()
+            if isinstance(ds, XDatasource)
         }
 
     @property
