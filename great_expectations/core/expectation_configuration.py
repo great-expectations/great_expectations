@@ -4,7 +4,7 @@ import copy
 import json
 import logging
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type, Union
 
 import jsonpatch
 from marshmallow import Schema, ValidationError, fields, post_dump, post_load
@@ -96,7 +96,7 @@ class ExpectationContextSchema(Schema):
 class ExpectationConfiguration(SerializableDictDot):
     """ExpectationConfiguration defines the parameters and name of a specific expectation."""
 
-    kwarg_lookup_dict = {
+    kwarg_lookup_dict: ClassVar[dict[str, dict[str, Any]]] = {
         "expect_column_to_exist": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["column_index"],
