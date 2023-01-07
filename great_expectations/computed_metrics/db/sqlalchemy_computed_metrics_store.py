@@ -1,5 +1,6 @@
 import datetime
 import logging
+import os
 
 # TODO: <Alex>ALEX</Alex>
 # from uuid import uuid4
@@ -28,6 +29,7 @@ logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sa
+    from alembic.config import Config as AlembicConfig
     from sqlalchemy.engine import Engine
     from sqlalchemy.engine.url import URL
     from sqlalchemy.orm import scoped_session, sessionmaker
@@ -40,6 +42,7 @@ except ImportError:
     URL = None
     scoped_session = None
     sessionmaker = None
+    AlembicConfig = None
 
 
 class SqlAlchemyComputedMetricsStore:
@@ -174,8 +177,8 @@ class SqlAlchemyComputedMetricsStore:
         metric_name: Optional[str] = None,
         metric_domain_kwargs_id: Optional[str] = None,
         metric_value_kwargs_id: Optional[str] = None,
-        timestamp_begin: Optional[datetime.datetime] = None,
-        timestamp_end: Optional[datetime.datetime] = None,
+        datetime_begin: Optional[datetime.datetime] = None,
+        datetime_end: Optional[datetime.datetime] = None,
     ) -> Union[ComputedMetricBusinessObject, None]:
         key = ComputedMetricIdentifier(
             metric_key=(
@@ -207,12 +210,12 @@ class SqlAlchemyComputedMetricsStore:
         )
 
         with self._managed_scoped_db_session() as session:
-            results = self._get_timestamp_filtered_query_results(
+            results = self._get_datetime_filtered_query_results(
                 query_object=session.query(SqlAlchemyComputedMetricModel).filter(
                     conditions
                 ),
-                timestamp_begin=timestamp_begin,
-                timestamp_end=timestamp_end,
+                datetime_begin=datetime_begin,
+                datetime_end=datetime_end,
             )
 
         if not results:
@@ -222,38 +225,38 @@ class SqlAlchemyComputedMetricsStore:
 
     def list(
         self,
-        timestamp_begin: Optional[datetime.datetime] = None,
-        timestamp_end: Optional[datetime.datetime] = None,
+        datetime_begin: Optional[datetime.datetime] = None,
+        datetime_end: Optional[datetime.datetime] = None,
     ) -> List[ComputedMetricBusinessObject]:
         with self._managed_scoped_db_session() as session:
-            return self._get_timestamp_filtered_query_results(
+            return self._get_datetime_filtered_query_results(
                 query_object=session.query(SqlAlchemyComputedMetricModel),
-                timestamp_begin=timestamp_begin,
-                timestamp_end=timestamp_end,
+                datetime_begin=datetime_begin,
+                datetime_end=datetime_end,
             )
 
-    def _get_timestamp_filtered_query_results(
+    def _get_datetime_filtered_query_results(
         self,
         query_object,
-        timestamp_begin: Optional[datetime.datetime] = None,
-        timestamp_end: Optional[datetime.datetime] = None,
+        datetime_begin: Optional[datetime.datetime] = None,
+        datetime_end: Optional[datetime.datetime] = None,
     ) -> List[ComputedMetricBusinessObject]:
-        if timestamp_begin is None and timestamp_end is None:
+        if datetime_begin is None and datetime_end is None:
             results = query_object.all()
-        elif timestamp_begin is not None and timestamp_end is None:
+        elif datetime_begin is not None and datetime_end is None:
             results = query_object.filter(
-                SqlAlchemyComputedMetricModel.timestamp_begin >= timestamp_begin
+                SqlAlchemyComputedMetricModel.updated_at >= datetime_begin
             ).all()
-        elif timestamp_begin is None and timestamp_end is not None:
+        elif datetime_begin is None and datetime_end is not None:
             results = query_object.filter(
-                SqlAlchemyComputedMetricModel.timestamp_end <= timestamp_end
+                SqlAlchemyComputedMetricModel.updated_at <= datetime_end
             ).all()
-        elif timestamp_begin is not None and timestamp_end is not None:
+        elif datetime_begin is not None and datetime_end is not None:
             results = (
                 query_object.filter(
-                    SqlAlchemyComputedMetricModel.timestamp_begin >= timestamp_begin
+                    SqlAlchemyComputedMetricModel.updated_at >= datetime_begin
                 )
-                .filter(SqlAlchemyComputedMetricModel.timestamp_end <= timestamp_end)
+                .filter(SqlAlchemyComputedMetricModel.updated_at <= datetime_end)
                 .all()
             )
         else:
@@ -445,3 +448,22 @@ class SqlAlchemyComputedMetricsStore:
             value=sa_computed_metric_model_obj.value,
             details=sa_computed_metric_model_obj.details,
         )
+
+
+def build_sqlalchemy_computed_metrics_store_from_alembic_config(
+    store_name: Optional[str] = None,
+) -> SqlAlchemyComputedMetricsStore:
+    return SqlAlchemyComputedMetricsStore(
+        connection_string=get_sqlalchemy_connection_string_from_alembic_config(),
+        store_name=store_name,
+    )
+
+
+def get_sqlalchemy_connection_string_from_alembic_config() -> str:
+    """Find the alembic.ini config file, replace DB URL, and return full alembic config"""
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    alembic_config = AlembicConfig(os.path.join(current_dir, "alembic.ini"))
+    config_ini_section: dict = alembic_config.get_section(
+        alembic_config.config_ini_section
+    )
+    return config_ini_section.get("sqlalchemy.url")
