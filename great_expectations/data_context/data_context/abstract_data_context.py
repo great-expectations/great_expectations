@@ -2263,8 +2263,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def add_batch_kwargs_generator(
         self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
     ):
-        """
-        Add a batch kwargs generator to the named datasource, using the provided
+        """Add a batch kwargs generator to the named datasource, using the provided
         configuration.
 
         Args:
@@ -2274,7 +2273,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             **kwargs: batch kwargs generator configuration, provided as kwargs
 
         Returns:
-
+            The batch_kwargs_generator
         """
         datasource_obj = self.get_datasource(datasource_name)
         generator = datasource_obj.add_batch_kwargs_generator(
