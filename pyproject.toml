@@ -79,7 +79,6 @@ exclude = [
     'datasource/data_connector/configured_asset_sql_data_connector\.py',  # 47
     'execution_engine/split_and_sample/sparkdf_data_sampler\.py',  # 11
     'execution_engine/split_and_sample/sparkdf_data_splitter\.py',  # 4
-    'execution_engine/split_and_sample/sqlalchemy_data_sampler\.py',  # 10
     'execution_engine/split_and_sample/sqlalchemy_data_splitter\.py',  # 22
     'expectations/core/expect_column_', # 147
     'expectations/core/expect_compound_columns_to_be_unique\.py', # 3
