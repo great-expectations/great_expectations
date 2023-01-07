@@ -58,6 +58,7 @@ class ExperimentalBaseModel(pydantic.BaseModel):
     def yaml(
         self,
         stream_or_path: Union[StringIO, pathlib.Path, None] = None,
+        *,
         include: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
         exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
         by_alias: bool = False,
