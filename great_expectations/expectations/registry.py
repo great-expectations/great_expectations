@@ -340,7 +340,7 @@ def get_domain_metrics_dict_by_name(
     }
 
 
-def get_expectation_impl(expectation_name: str):
+def get_expectation_impl(expectation_name: str) -> Type[Expectation]:
     renamed: Dict[str, str] = {
         "expect_column_values_to_be_vector": "expect_column_values_to_be_vectors",
         "expect_columns_values_confidence_for_data_label_to_be_greater_than_or_equalto_threshold": "expect_column_values_confidence_for_data_label_to_be_greater_than_or_equal_to_threshold",
@@ -355,10 +355,11 @@ def get_expectation_impl(expectation_name: str):
         )
         expectation_name = renamed[expectation_name]
 
-    if expectation_name not in _registered_expectations:
+    expectation = _registered_expectations.get(expectation_name)
+    if not expectation:
         raise ge_exceptions.ExpectationNotFoundError(f"{expectation_name} not found")
 
-    return _registered_expectations.get(expectation_name)
+    return expectation
 
 
 def list_registered_expectation_implementations(
