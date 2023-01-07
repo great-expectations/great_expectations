@@ -46,7 +46,7 @@ class InMemoryStoreBackend(StoreBackend):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def _get(self, key):
+    def _get(self, key, **kwargs):
         try:
             return self._store[key]
         except KeyError as e:

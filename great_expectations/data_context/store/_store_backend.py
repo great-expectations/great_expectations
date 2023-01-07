@@ -170,7 +170,7 @@ class StoreBackend(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def _get(self, key) -> None:
+    def _get(self, key, **kwargs) -> None:
         raise NotImplementedError
 
     @abstractmethod

@@ -112,6 +112,33 @@ class SqlAlchemyComputedMetricsStore:
     def config(self) -> dict:
         return self._config
 
+    def _get(
+        self, key: ComputedMetricIdentifier, **kwargs
+    ) -> Union[ComputedMetricBusinessObject, None]:
+        try:
+            batch_id: Optional[str]
+            metric_name: Optional[str]
+            metric_domain_kwargs_id: Optional[str]
+            metric_value_kwargs_id: Optional[str]
+            (
+                batch_id,
+                metric_name,
+                metric_domain_kwargs_id,
+                metric_value_kwargs_id,
+            ) = key.to_tuple()
+            datetime_begin: Optional[datetime.datetime] = kwargs.get("datetime_begin")
+            datetime_end: Optional[datetime.datetime] = kwargs.get("datetime_end")
+            return self.get(
+                batch_id=batch_id,
+                metric_name=metric_name,
+                metric_domain_kwargs_id=metric_domain_kwargs_id,
+                metric_value_kwargs_id=metric_value_kwargs_id,
+                datetime_begin=datetime_begin,
+                datetime_end=datetime_end,
+            )
+        except Exception as e:
+            raise ge_exceptions.InvalidKeyError(f"{str(e)}")
+
     def create(
         self,
         batch_id: str,
@@ -134,6 +161,15 @@ class SqlAlchemyComputedMetricsStore:
         value: Optional[Any] = None,
         details: Optional[Dict[str, Any]] = None,
     ) -> None:
+        key = ComputedMetricIdentifier(
+            metric_key=(
+                batch_id,
+                metric_name,
+                metric_domain_kwargs_id,
+                metric_value_kwargs_id,
+            )
+        )
+
         timestamp = datetime.datetime.now()
         if created_at is None:
             created_at = timestamp
@@ -162,9 +198,13 @@ class SqlAlchemyComputedMetricsStore:
             value=value,
             details=details,
         )
+
+        self._set(key=key, value=computed_metric_business_object)
+
+    def _set(self, key, value: ComputedMetricBusinessObject, **kwargs) -> None:
         sa_computed_metric_model_obj: SqlAlchemyComputedMetricModel = (
             self._translate_computed_metric_business_object_to_sqlalchemy_model(
-                computed_metric_business_object=computed_metric_business_object
+                computed_metric_business_object=value
             )
         )
 
@@ -180,20 +220,6 @@ class SqlAlchemyComputedMetricsStore:
         datetime_begin: Optional[datetime.datetime] = None,
         datetime_end: Optional[datetime.datetime] = None,
     ) -> Union[ComputedMetricBusinessObject, None]:
-        key = ComputedMetricIdentifier(
-            metric_key=(
-                batch_id,
-                metric_name,
-                metric_domain_kwargs_id,
-                metric_value_kwargs_id,
-            )
-        )
-        (
-            batch_id,
-            metric_name,
-            metric_domain_kwargs_id,
-            metric_value_kwargs_id,
-        ) = key.to_tuple()
         filtering_criteria = {
             "batch_id": batch_id,
             "metric_name": metric_name,
