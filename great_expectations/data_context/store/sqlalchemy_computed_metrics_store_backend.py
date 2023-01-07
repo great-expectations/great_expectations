@@ -152,12 +152,13 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
             Optional[Union[str, UUID]],
             Optional[Union[str, UUID]],
         ],
-        value: ComputedMetricBusinessObject,
+        value: dict,
         **kwargs,
     ) -> None:
+        computed_metric_business_object = ComputedMetricBusinessObject(**value)
         sa_computed_metric_model_obj: SqlAlchemyComputedMetricModel = (
             self._translate_computed_metric_business_object_to_sqlalchemy_model(
-                computed_metric_business_object=value
+                computed_metric_business_object=computed_metric_business_object
             )
         )
 
