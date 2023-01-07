@@ -4,7 +4,17 @@ import copy
 import json
 import logging
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Type,
+    Union,
+)
 
 import jsonpatch
 from marshmallow import Schema, ValidationError, fields, post_dump, post_load
@@ -95,8 +105,8 @@ class ExpectationContextSchema(Schema):
 
 
 class KWargDetailsDict(TypedDict):
-    domain_kwargs: list[str]
-    success_kwargs: list[str]
+    domain_kwargs: Sequence[str]
+    success_kwargs: Sequence[str]
     default_kwarg_values: dict[str, str | bool | float | None]
 
 
