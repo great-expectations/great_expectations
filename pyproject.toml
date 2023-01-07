@@ -77,7 +77,6 @@ exclude = [
     'dataset/sparkdf_dataset\.py', # 3
     'dataset/sqlalchemy_dataset\.py', # 16
     'datasource/data_connector/configured_asset_sql_data_connector\.py',  # 47
-    'execution_engine/split_and_sample/pandas_data_sampler\.py',  # 16
     'execution_engine/split_and_sample/sparkdf_data_sampler\.py',  # 11
     'execution_engine/split_and_sample/sparkdf_data_splitter\.py',  # 4
     'execution_engine/split_and_sample/sqlalchemy_data_sampler\.py',  # 10
