@@ -4,7 +4,7 @@ import copy
 import json
 import logging
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
 import jsonpatch
 from marshmallow import Schema, ValidationError, fields, post_dump, post_load
@@ -35,7 +35,7 @@ from great_expectations.render import RenderedAtomicContent, RenderedAtomicConte
 from great_expectations.types import SerializableDictDot
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import DataContext
+    from great_expectations.data_context import AbstractDataContext
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation import Expectation
     from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
@@ -970,7 +970,8 @@ class ExpectationConfiguration(SerializableDictDot):
                 "expectation configuration kwargs must be a dict."
             )
         self._kwargs = kwargs
-        self._raw_kwargs = None  # the kwargs before evaluation parameters are evaluated
+        # the kwargs before evaluation parameters are evaluated
+        self._raw_kwargs: dict[str, Any] | None = None
         if meta is None:
             meta = {}
         # We require meta information to be serializable, but do not convert until necessary
@@ -985,7 +986,7 @@ class ExpectationConfiguration(SerializableDictDot):
         self,
         evaluation_parameters,
         interactive_evaluation: bool = True,
-        data_context: Optional[DataContext] = None,
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         if not self._raw_kwargs:
             evaluation_args, _ = build_evaluation_parameters(
@@ -1187,6 +1188,7 @@ class ExpectationConfiguration(SerializableDictDot):
         expectation_kwargs_dict = self.kwarg_lookup_dict.get(
             self.expectation_type, None
         )
+        runtime_keys: list[str] | tuple[str, ...]
         if expectation_kwargs_dict is None:
             try:
                 impl = get_expectation_impl(self.expectation_type)
@@ -1327,7 +1329,7 @@ class ExpectationConfiguration(SerializableDictDot):
         return myself
 
     def get_evaluation_parameter_dependencies(self) -> dict:
-        parsed_dependencies = {}
+        parsed_dependencies: dict = {}
         for value in self.kwargs.values():
             if isinstance(value, dict) and "$PARAMETER" in value:
                 param_string_dependencies = find_evaluation_parameter_dependencies(
@@ -1335,7 +1337,7 @@ class ExpectationConfiguration(SerializableDictDot):
                 )
                 nested_update(parsed_dependencies, param_string_dependencies)
 
-        dependencies = {}
+        dependencies: dict = {}
         urns = parsed_dependencies.get("urns", [])
         for string_urn in urns:
             try:
@@ -1377,7 +1379,7 @@ class ExpectationConfiguration(SerializableDictDot):
                 },
             )
 
-    def _get_expectation_impl(self):
+    def _get_expectation_impl(self) -> Type[Expectation]:
         return get_expectation_impl(self.expectation_type)
 
     def validate(
@@ -1385,7 +1387,7 @@ class ExpectationConfiguration(SerializableDictDot):
         validator: Validator,
         runtime_configuration=None,
     ):
-        expectation_impl: Expectation = self._get_expectation_impl()
+        expectation_impl: Type[Expectation] = self._get_expectation_impl()
         # noinspection PyCallingNonCallable
         return expectation_impl(self).validate(
             validator=validator,
@@ -1399,7 +1401,7 @@ class ExpectationConfiguration(SerializableDictDot):
         execution_engine: Optional[ExecutionEngine] = None,
         **kwargs: dict,
     ):
-        expectation_impl: Expectation = self._get_expectation_impl()
+        expectation_impl: Type[Expectation] = self._get_expectation_impl()
         # noinspection PyCallingNonCallable
         return expectation_impl(self).metrics_validate(
             metrics=metrics,
