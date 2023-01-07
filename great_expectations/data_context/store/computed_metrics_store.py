@@ -7,7 +7,10 @@ from great_expectations.computed_metrics.computed_metric import (
     computedMetricSchema,
 )
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
-from great_expectations.data_context.store import InMemoryStoreBackend
+from great_expectations.data_context.store import (
+    InMemoryStoreBackend,
+    SqlAlchemyComputedMetricsStoreBackend,
+)
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.types.resource_identifiers import (
     ComputedMetricIdentifier,
@@ -49,7 +52,10 @@ class ComputedMetricsStore(Store):
             )
 
             # Store Backend Class was loaded successfully; verify that it is of a correct subclass.
-            if not issubclass(store_backend_class, InMemoryStoreBackend):
+            if not issubclass(
+                store_backend_class,
+                (InMemoryStoreBackend, SqlAlchemyComputedMetricsStoreBackend),
+            ):
                 raise ge_exceptions.DataContextError(
                     "Invalid StoreBackend configuration: expected an InMemoryStoreBackend instance."
                 )
