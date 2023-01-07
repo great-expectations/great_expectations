@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import inspect
 import os
 import re
@@ -14,6 +16,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationBackendTestResultCounts,
     ExpectationDescriptionDiagnostics,
     ExpectationDiagnosticCheckMessage,
+    ExpectationDiagnosticCheckMessageDict,
     ExpectationDiagnosticMaturityMessages,
     ExpectationErrorDiagnostics,
     ExpectationExecutionEngineDiagnostics,
@@ -100,8 +103,8 @@ class ExpectationDiagnostics(SerializableDictDot):
         ],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether the Expectation has a library_metadata object"""
-        sub_messages = []
-        for problem in library_metadata.problems:
+        sub_messages: list[ExpectationDiagnosticCheckMessageDict] = []
+        for problem in library_metadata.problems:  # type: ignore[union-attr] # could be ExpectationDescriptionDiagnostics
             sub_messages.append(
                 {
                     "message": problem,
