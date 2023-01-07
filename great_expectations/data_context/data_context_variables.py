@@ -311,7 +311,7 @@ class EphemeralDataContextVariables(DataContextVariables):
 
 @dataclass(repr=False)
 class FileDataContextVariables(DataContextVariables):
-    data_context: FileDataContext = None  # type: ignore[assignment] # validated in __post_init__
+    data_context: FileDataContext = None  # type: ignore[assignment] # post_init ensures field always set
 
     def __post_init__(self) -> None:
         # Chetan - 20220607 - Although the above argument is not truly optional, we are
@@ -391,9 +391,9 @@ class FileDataContextVariables(DataContextVariables):
 
 @dataclass(repr=False)
 class CloudDataContextVariables(DataContextVariables):
-    ge_cloud_base_url: str = None  # type: ignore[assignment] # validated in __post_init__
-    ge_cloud_organization_id: str = None  # type: ignore[assignment] # validated in __post_init__
-    ge_cloud_access_token: str = None  # type: ignore[assignment] # validated in __post_init__
+    ge_cloud_base_url: str = None  # type: ignore[assignment] # post_init ensures field always set
+    ge_cloud_organization_id: str = None  # type: ignore[assignment] # post_init ensures field always set
+    ge_cloud_access_token: str = None  # type: ignore[assignment] # post_init ensures field always set
 
     def __post_init__(self) -> None:
         # Chetan - 20220607 - Although the above arguments are not truly optional, we are
