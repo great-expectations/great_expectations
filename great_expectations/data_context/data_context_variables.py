@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import enum
 import logging
 from abc import ABC, abstractmethod
@@ -348,9 +349,16 @@ class FileDataContextVariables(DataContextVariables):
         """
         # overridden in order to prevent calling `instantiate_class_from_config` on ZEP objects
         # parent class does not have access to the `data_context`
+        with self._zep_objects_stash():
+            save_result = super().save_config()
+        return save_result
+
+    @contextlib.contextmanager
+    def _zep_objects_stash(self: FileDataContextVariables):
         config_xdatasources_stash: Dict[
             str, XDatasource
         ] = self.data_context._synchronize_zep_datasources()
+
         if config_xdatasources_stash:
             logger.info(
                 f"Stashing `XDatasource` during {type(self).__name__}.save_config() - {len(config_xdatasources_stash)} stashed"
@@ -359,17 +367,17 @@ class FileDataContextVariables(DataContextVariables):
                 self.data_context.datasources.pop(xdatasource_name)
             # this would be `deep_copy'ed in `instantiate_class_from_config` too
             self.data_context.zep_config.xdatasources = {}
-
-        save_result = super().save_config()
-
-        if config_xdatasources_stash:  # config_xdatasources is the superset
-            logger.info(
-                f"Replacing {len(config_xdatasources_stash)} stashed `XDatasource`s"
-            )
-            self.data_context.datasources.update(config_xdatasources_stash)
-            self.data_context.zep_config.xdatasources = config_xdatasources_stash
-
-        return save_result
+        try:
+            yield
+        except Exception:
+            raise
+        finally:
+            if config_xdatasources_stash:
+                logger.info(
+                    f"Replacing {len(config_xdatasources_stash)} stashed `XDatasource`s"
+                )
+                self.data_context.datasources.update(config_xdatasources_stash)
+                self.data_context.zep_config.xdatasources = config_xdatasources_stash
 
 
 @dataclass(repr=False)
