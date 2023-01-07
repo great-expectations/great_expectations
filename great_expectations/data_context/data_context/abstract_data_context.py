@@ -3678,7 +3678,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         build_index: bool = True,
     ):
         """Build Data Docs for your project.
-        
+
         --Documentation--
             - https://docs.greatexpectations.io/docs/terms/data_docs/
 
