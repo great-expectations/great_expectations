@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type, Uni
 import jsonpatch
 from marshmallow import Schema, ValidationError, fields, post_dump, post_load
 from pyparsing import ParseResults
+from typing_extensions import TypedDict
 
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
@@ -93,10 +94,16 @@ class ExpectationContextSchema(Schema):
         return ExpectationContext(**data)
 
 
+class KWargDetailsDict(TypedDict):
+    domain_kwargs: list[str]
+    success_kwargs: list[str]
+    default_kwarg_values: dict[str, str | bool | float | None]
+
+
 class ExpectationConfiguration(SerializableDictDot):
     """ExpectationConfiguration defines the parameters and name of a specific expectation."""
 
-    kwarg_lookup_dict: ClassVar[dict[str, dict[str, Any]]] = {
+    kwarg_lookup_dict: ClassVar[dict[str, KWargDetailsDict]] = {
         "expect_column_to_exist": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["column_index"],
@@ -1079,7 +1086,7 @@ class ExpectationConfiguration(SerializableDictDot):
     def rendered_content(self, value: Optional[List[RenderedAtomicContent]]) -> None:
         self._rendered_content = value
 
-    def _get_default_custom_kwargs(self) -> dict:
+    def _get_default_custom_kwargs(self) -> KWargDetailsDict:
         # NOTE: this is a holdover until class-first expectations control their
         # defaults, and so defaults are inherited.
         if self.expectation_type.startswith("expect_column_pair"):
@@ -1120,7 +1127,7 @@ class ExpectationConfiguration(SerializableDictDot):
         }
 
     def get_domain_kwargs(self) -> dict:
-        expectation_kwargs_dict = self.kwarg_lookup_dict.get(
+        expectation_kwargs_dict: KWargDetailsDict | None = self.kwarg_lookup_dict.get(
             self.expectation_type, None
         )
         if expectation_kwargs_dict is None:
