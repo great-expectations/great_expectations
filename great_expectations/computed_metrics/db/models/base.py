@@ -47,17 +47,6 @@ class Base:
     def __abstract__(cls):
         return True
 
-    # TODO: <Alex>ALEX</Alex>
-    # @declared_attr
-    # def query(cls):
-    #     query = db_session.query_property()
-    #     return query
-    #
-    # @declared_attr
-    # def session(cls):
-    #     return db_session
-    # TODO: <Alex>ALEX</Alex>
-
     def __repr__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
