@@ -143,6 +143,6 @@ class ComputedMetricsStore(Store):
                 resource_type=GXCloudRESTResource.CHECKPOINT, ge_cloud_id=ge_cloud_id
             )
         else:
-            key = MetricIdentifier(metric_key=name)  # type: ignore[arg-type]
+            key = MetricIdentifier(computed_metric_key=name)  # type: ignore[arg-type]
 
         return key

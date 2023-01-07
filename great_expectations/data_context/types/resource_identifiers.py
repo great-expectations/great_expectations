@@ -571,7 +571,7 @@ class ConfigurationIdentifierSchema(Schema):
 class ComputedMetricIdentifier(DataContextKey):
     def __init__(
         self,
-        metric_key: Tuple[
+        computed_metric_key: Tuple[
             Optional[Union[str, tuple, dict, UUID]],
             Optional[str],
             Optional[Union[str, tuple, dict, UUID]],
@@ -579,13 +579,13 @@ class ComputedMetricIdentifier(DataContextKey):
         ],
     ) -> None:
         super().__init__()
-        conditioned_metric_key: List[Union[str, UUID]] = []
+        conditioned_computed_metric_key: List[Union[str, UUID]] = []
         element: Optional[Union[str, tuple, dict, UUID]]
-        for element in metric_key:
+        for element in computed_metric_key:
             if isinstance(element, UUID):
-                conditioned_metric_key.append(str(element))
+                conditioned_computed_metric_key.append(str(element))
             elif isinstance(element, (type(None), tuple, dict)):
-                conditioned_metric_key.append(
+                conditioned_computed_metric_key.append(
                     hashlib.md5(
                         json.dumps(
                             convert_to_json_serializable(data=element), sort_keys=True
@@ -593,31 +593,31 @@ class ComputedMetricIdentifier(DataContextKey):
                     ).hexdigest()
                 )
             else:
-                conditioned_metric_key.append(element)
+                conditioned_computed_metric_key.append(element)
 
-        metric_key = tuple(conditioned_metric_key)
+        computed_metric_key = tuple(conditioned_computed_metric_key)
 
-        metric_key = cast(
+        computed_metric_key = cast(
             Tuple[
                 Optional[Union[str, UUID]],
                 Optional[str],
                 Optional[Union[str, UUID]],
                 Optional[Union[str, UUID]],
             ],
-            metric_key,
+            computed_metric_key,
         )
-        if any(not isinstance(element, str) for element in metric_key):
+        if any(not isinstance(element, str) for element in computed_metric_key):
             types_detected: str = (
-                f"{[type(element).__name__ for element in metric_key]}"
+                f"{[type(element).__name__ for element in computed_metric_key]}"
             )
             raise ge_exceptions.InvalidDataContextKeyError(
-                f"metric_key tuple elements must be of string type; {types_detected} detected"
+                f"computed_metric_key tuple elements must be of string type; {types_detected} detected"
             )
 
-        self._metric_key = metric_key
+        self._computed_metric_key = computed_metric_key
 
     @property
-    def metric_key(
+    def computed_metric_key(
         self,
     ) -> Tuple[
         Optional[Union[str, UUID]],
@@ -625,7 +625,7 @@ class ComputedMetricIdentifier(DataContextKey):
         Optional[Union[str, UUID]],
         Optional[Union[str, UUID]],
     ]:
-        return self._metric_key
+        return self._computed_metric_key
 
     def to_tuple(
         self,
@@ -635,11 +635,11 @@ class ComputedMetricIdentifier(DataContextKey):
         Optional[Union[str, UUID]],
         Optional[Union[str, UUID]],
     ]:
-        return self._metric_key
+        return self.computed_metric_key
 
     def to_fixed_length_tuple(self) -> tuple:
         # noinspection PyRedundantParentheses
-        return (self._metric_key,)
+        return (self.computed_metric_key,)
 
     @classmethod
     def from_tuple(
@@ -651,18 +651,18 @@ class ComputedMetricIdentifier(DataContextKey):
             Optional[Union[str, UUID]],
         ],
     ) -> ComputedMetricIdentifier:
-        return cls(metric_key=value)
+        return cls(computed_metric_key=value)
 
     @classmethod
     def from_fixed_length_tuple(cls, value: tuple) -> ComputedMetricIdentifier:
-        return cls(metric_key=value[0])
+        return cls(computed_metric_key=value[0])
 
     def __repr__(self):
-        return f"{self.__class__.__name__}::{self._metric_key}"
+        return f"{self.__class__.__name__}::{self._computed_metric_key}"
 
 
 class ComputedMetricIdentifierSchema(Schema):
-    metric_key = fields.Str()
+    computed_metric_key = fields.Str()
 
     # noinspection PyUnusedLocal
     @post_load

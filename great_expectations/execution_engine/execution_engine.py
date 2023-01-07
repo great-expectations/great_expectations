@@ -635,7 +635,7 @@ class ExecutionEngine(ABC):
                 or self.batch_manager.active_batch_id
             )
             key = ComputedMetricIdentifier(
-                metric_key=(
+                computed_metric_key=(
                     batch_id,
                     metric_configuration.metric_name,
                     metric_configuration.metric_domain_kwargs_id,
@@ -648,7 +648,7 @@ class ExecutionEngine(ABC):
             except ge_exceptions.InvalidKeyError as exc_ik:
                 # TODO: <Alex>ALEX</Alex>
                 print(
-                    f'Non-existent ComputedMetric record named "{key.metric_key}".\n\nDetails: {exc_ik}'
+                    f'Non-existent ComputedMetric record named "{key.computed_metric_key}".\n\nDetails: {exc_ik}'
                 )
                 # TODO: <Alex>ALEX</Alex>
             except ValidationError as exc_ve:
@@ -776,7 +776,7 @@ class ExecutionEngine(ABC):
                 or self.batch_manager.active_batch_id
             )
             key = ComputedMetricIdentifier(
-                metric_key=(
+                computed_metric_key=(
                     batch_id,
                     metric_computation_configuration.metric_configuration.metric_name,
                     metric_computation_configuration.metric_configuration.metric_domain_kwargs_id,
