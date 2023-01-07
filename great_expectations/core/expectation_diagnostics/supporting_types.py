@@ -4,7 +4,7 @@ import inspect
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Optional, Union
+from typing import List, Optional, Sequence, Union
 
 from typing_extensions import TypedDict
 
@@ -159,7 +159,7 @@ class ExpectationDiagnosticCheckMessage(SerializableDictDot):
     message: str
     passed: bool
     doc_url: Optional[str] = None
-    sub_messages: List[
+    sub_messages: Sequence[
         ExpectationDiagnosticCheckMessage | ExpectationDiagnosticCheckMessageDict
     ] = field(default_factory=list)
 
