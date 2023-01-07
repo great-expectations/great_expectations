@@ -1144,8 +1144,8 @@ class ExpectationConfiguration(SerializableDictDot):
             try:
                 impl = get_expectation_impl(self.expectation_type)
             except ExpectationNotFoundError:
-                expectation_kwargs_dict = self._get_default_custom_kwargs()
-                default_kwarg_values = expectation_kwargs_dict.get(
+                expectation_kwargs_dict = self._get_default_custom_kwargs()  # type: ignore[assignment]
+                default_kwarg_values: dict[str, Any] = expectation_kwargs_dict.get(
                     "default_kwarg_values", {}
                 )
                 domain_keys = expectation_kwargs_dict["domain_kwargs"]
