@@ -246,7 +246,7 @@ class SlackNotificationAction(ValidationAction):
                 if payload[action_names]["class"] == "UpdateDataDocsAction":
                     data_docs_pages = payload[action_names]
 
-        # Assemble complete GX Cloud URL to direct to a specific validation result
+        # Assemble complete GX Cloud URL for a specific validation result
         cloud_url = None
         if (
             isinstance(self.base_url, str)
