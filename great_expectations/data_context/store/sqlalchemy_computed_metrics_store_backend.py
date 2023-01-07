@@ -8,6 +8,7 @@ import os
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
+from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.computed_metrics.computed_metric import (
@@ -17,9 +18,6 @@ from great_expectations.computed_metrics.db.models.sqlalchemy_computed_metric_mo
     ComputedMetric as SqlAlchemyComputedMetricModel,
 )
 from great_expectations.data_context.store import StoreBackend
-from great_expectations.data_context.types.resource_identifiers import (
-    ComputedMetricIdentifier,
-)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import (
     filter_properties_dict,
@@ -113,22 +111,29 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
         return self._config
 
     def _get(
-        self, key: ComputedMetricIdentifier, **kwargs
+        self,
+        key: Tuple[
+            Optional[Union[str, UUID]],
+            Optional[str],
+            Optional[Union[str, UUID]],
+            Optional[Union[str, UUID]],
+        ],
+        **kwargs,
     ) -> Union[ComputedMetricBusinessObject, None]:
         try:
-            batch_id: Optional[str]
+            batch_id: Optional[Union[str, UUID]]
             metric_name: Optional[str]
-            metric_domain_kwargs_id: Optional[str]
-            metric_value_kwargs_id: Optional[str]
+            metric_domain_kwargs_id: Optional[Union[str, UUID]]
+            metric_value_kwargs_id: Optional[Union[str, UUID]]
             (
                 batch_id,
                 metric_name,
                 metric_domain_kwargs_id,
                 metric_value_kwargs_id,
-            ) = key.to_tuple()
+            ) = key
             datetime_begin: Optional[datetime.datetime] = kwargs.get("datetime_begin")
             datetime_end: Optional[datetime.datetime] = kwargs.get("datetime_end")
-            return self.get(
+            return self.get_by_computed_metric_identifier_keys_and_datetime_range(
                 batch_id=batch_id,
                 metric_name=metric_name,
                 metric_domain_kwargs_id=metric_domain_kwargs_id,
@@ -139,7 +144,17 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
         except Exception as e:
             raise ge_exceptions.InvalidKeyError(f"{str(e)}")
 
-    def _set(self, key, value: ComputedMetricBusinessObject, **kwargs) -> None:
+    def _set(
+        self,
+        key: Tuple[
+            Optional[Union[str, UUID]],
+            Optional[str],
+            Optional[Union[str, UUID]],
+            Optional[Union[str, UUID]],
+        ],
+        value: ComputedMetricBusinessObject,
+        **kwargs,
+    ) -> None:
         sa_computed_metric_model_obj: SqlAlchemyComputedMetricModel = (
             self._translate_computed_metric_business_object_to_sqlalchemy_model(
                 computed_metric_business_object=value
@@ -149,7 +164,7 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
         with self._managed_scoped_db_session() as session:
             session.add(sa_computed_metric_model_obj)
 
-    def get(
+    def get_by_computed_metric_identifier_keys_and_datetime_range(
         self,
         batch_id: Optional[str] = None,
         metric_name: Optional[str] = None,
@@ -184,7 +199,9 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
             )
 
         if not results:
-            return None
+            raise ge_exceptions.InvalidKeyError(
+                f'Query for invalid key "{str(filtering_criteria)}" encountered.'
+            )
 
         return results[0]
 
@@ -210,13 +227,11 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
         value: Optional[Any] = None,
         details: Optional[Dict[str, Any]] = None,
     ) -> None:
-        key = ComputedMetricIdentifier(
-            metric_key=(
-                batch_id,
-                metric_name,
-                metric_domain_kwargs_id,
-                metric_value_kwargs_id,
-            )
+        key = (
+            batch_id,
+            metric_name,
+            metric_domain_kwargs_id,
+            metric_value_kwargs_id,
         )
 
         timestamp = datetime.datetime.now()
