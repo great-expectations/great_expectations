@@ -1278,24 +1278,24 @@ class ExpectationConfiguration(SerializableDictDot):
         if match_type == "domain":
             return all(
                 (
-                    self.expectation_type == other.expectation_type,
-                    self.get_domain_kwargs() == other.get_domain_kwargs(),
+                    self.expectation_type == other.expectation_type,  # type: ignore[union-attr] # could be dict
+                    self.get_domain_kwargs() == other.get_domain_kwargs(),  # type: ignore[union-attr] # could be dict
                 )
             )
 
         if match_type == "success":
             return all(
                 (
-                    self.expectation_type == other.expectation_type,
-                    self.get_success_kwargs() == other.get_success_kwargs(),
+                    self.expectation_type == other.expectation_type,  # type: ignore[union-attr] # could be dict
+                    self.get_success_kwargs() == other.get_success_kwargs(),  # type: ignore[union-attr] # could be dict
                 )
             )
 
         if match_type == "runtime":
             return all(
                 (
-                    self.expectation_type == other.expectation_type,
-                    self.kwargs == other.kwargs,
+                    self.expectation_type == other.expectation_type,  # type: ignore[union-attr] # could be dict
+                    self.kwargs == other.kwargs,  # type: ignore[union-attr] # could be dict
                 )
             )
 
