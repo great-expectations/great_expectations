@@ -1486,11 +1486,11 @@ class ExpectationConfigurationSchema(Schema):
     )
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
     expectation_context = fields.Nested(
-        lambda: ExpectationContextSchema, required=False, allow_none=True
+        lambda: ExpectationContextSchema, required=False, allow_none=True  # type: ignore[arg-type,return-value]
     )
     rendered_content = fields.List(
         fields.Nested(
-            lambda: RenderedAtomicContentSchema, required=False, allow_none=True
+            lambda: RenderedAtomicContentSchema, required=False, allow_none=True  # type: ignore[arg-type,return-value]
         )
     )
 
