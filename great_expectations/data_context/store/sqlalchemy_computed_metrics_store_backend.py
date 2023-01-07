@@ -17,6 +17,7 @@ from great_expectations.computed_metrics.computed_metric import (
 from great_expectations.computed_metrics.db.models.sqlalchemy_computed_metric_model import (
     ComputedMetric as SqlAlchemyComputedMetricModel,
 )
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.store import StoreBackend
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import (
@@ -133,13 +134,15 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
             ) = key
             datetime_begin: Optional[datetime.datetime] = kwargs.get("datetime_begin")
             datetime_end: Optional[datetime.datetime] = kwargs.get("datetime_end")
-            return self.get_by_computed_metric_identifier_keys_and_datetime_range(
-                batch_id=batch_id,
-                metric_name=metric_name,
-                metric_domain_kwargs_id=metric_domain_kwargs_id,
-                metric_value_kwargs_id=metric_value_kwargs_id,
-                datetime_begin=datetime_begin,
-                datetime_end=datetime_end,
+            return convert_to_json_serializable(
+                data=self.get_by_computed_metric_identifier_keys_and_datetime_range(
+                    batch_id=batch_id,
+                    metric_name=metric_name,
+                    metric_domain_kwargs_id=metric_domain_kwargs_id,
+                    metric_value_kwargs_id=metric_value_kwargs_id,
+                    datetime_begin=datetime_begin,
+                    datetime_end=datetime_end,
+                )
             )
         except Exception as e:
             raise ge_exceptions.InvalidKeyError(f"{str(e)}")
