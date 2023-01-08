@@ -44,7 +44,7 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
     }
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
+            self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -59,11 +59,11 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
         super().validate_configuration(configuration)
 
     def _validate(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+            self,
+            configuration: ExpectationConfiguration,
+            metrics: dict,
+            runtime_configuration: dict = None,
+            execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
         metrics = convert_to_json_serializable(data=metrics)
         num_of_duplicates = list(metrics.get("query.template_values")[0].values())[0]
@@ -98,6 +98,7 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
                     },
                 },
             ],
+            "only_for": ["spark", "sqlite", "bigquery", "trino", "redshift"],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -109,7 +110,6 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
                         }
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite"],
                 },
                 {
                     "title": "basic_negative_test",
@@ -123,7 +123,6 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
                         }
                     },
                     "out": {"success": False},
-                    "only_for": ["sqlite"],
                 },
                 {
                     "title": "passing_condition_test",
@@ -137,7 +136,6 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
                         }
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite"],
                 },
             ],
         }
