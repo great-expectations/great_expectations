@@ -645,6 +645,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._cached_datasources[datasource_name] = updated_datasource
         return updated_datasource
 
+    @public_api
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE,
         args_payload_fn=add_datasource_usage_statistics,
@@ -656,13 +657,17 @@ class AbstractDataContext(ConfigPeer, ABC):
         save_changes: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
-        """Add a new datasource to the data context, with configuration provided as kwargs.
+        """Add a new Datasource to the data context, with configuration provided as kwargs.
+        
+        --Documentation--
+            - https://docs.greatexpectations.io/docs/terms/datasource
+        
         Args:
-            name: the name for the new datasource to add
-            initialize: if False, add the datasource to the config, but do not
+            name: the name of the new Datasource to add
+            initialize: if False, add the Datasource to the config, but do not
                 initialize it, for example if a user needs to debug database connectivity.
             save_changes (bool): should GX save the Datasource config?
-            kwargs (keyword arguments): the configuration for the new datasource
+            kwargs (keyword arguments): the configuration for the new Datasource
 
         Returns:
             datasource (Datasource)
