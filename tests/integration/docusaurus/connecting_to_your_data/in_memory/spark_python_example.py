@@ -1,12 +1,12 @@
 from ruamel import yaml
 
 import great_expectations as gx
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from great_expectations.data_context import BaseDataContext
+from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
+from great_expectations.util import get_context
 
 # Set up a basic spark session
 spark = gx.core.util.get_or_create_spark_application()
@@ -27,7 +27,7 @@ data_context_config = DataContextConfig(
     store_backend_defaults=store_backend_defaults,
     checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
 )
-context = BaseDataContext(project_config=data_context_config)
+context = get_context(project_config=data_context_config)
 
 datasource_config = {
     "name": "my_spark_dataframe",

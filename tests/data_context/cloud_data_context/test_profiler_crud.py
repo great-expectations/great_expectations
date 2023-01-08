@@ -4,8 +4,8 @@ from unittest import mock
 import pytest
 
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
-from great_expectations.data_context.data_context.base_data_context import (
-    BaseDataContext,
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
 )
 from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import DataContextConfig, GXCloudConfig
@@ -14,6 +14,7 @@ from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
+from great_expectations.util import get_context
 from tests.data_context.conftest import MockResponse
 
 
@@ -98,7 +99,7 @@ def mocked_post_response(
 @pytest.mark.cloud
 @pytest.mark.integration
 def test_profiler_save_with_existing_profiler_retrieves_obj_with_id_from_store(
-    empty_base_data_context_in_cloud_mode: BaseDataContext,
+    empty_base_data_context_in_cloud_mode: CloudDataContext,
     profiler_with_id: RuleBasedProfiler,
     mocked_get_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
@@ -149,7 +150,7 @@ def test_profiler_save_with_existing_profiler_retrieves_obj_with_id_from_store(
 @pytest.mark.cloud
 @pytest.mark.integration
 def test_profiler_save_with_new_profiler_retrieves_obj_with_id_from_store(
-    empty_base_data_context_in_cloud_mode: BaseDataContext,
+    empty_base_data_context_in_cloud_mode: CloudDataContext,
     profiler_without_id: RuleBasedProfiler,
     profiler_id: str,
     mocked_get_response: Callable[[], MockResponse],
@@ -344,10 +345,12 @@ def test_list_profilers(
 ) -> None:
     project_path_name = "foo/bar/baz"
 
-    context = BaseDataContext(
+    context = get_context(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path_name,
-        cloud_config=ge_cloud_config,
+        cloud_base_url=ge_cloud_config.base_url,
+        cloud_organization_id=ge_cloud_config.organization_id,
+        cloud_access_token=ge_cloud_config.access_token,
         cloud_mode=True,
     )
 
