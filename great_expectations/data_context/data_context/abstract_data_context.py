@@ -1250,7 +1250,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
     ) -> Checkpoint:
-        """Add a Checkpoint to the DataContext
+        """Add a Checkpoint to the DataContext.
 
         ---Documentation---
             - https://docs.greatexpectations.io/docs/terms/checkpoint/
