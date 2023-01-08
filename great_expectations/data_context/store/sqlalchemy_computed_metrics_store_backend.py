@@ -1,10 +1,6 @@
 import datetime
 import logging
 import os
-
-# TODO: <Alex>ALEX</Alex>
-# from uuid import uuid4
-# TODO: <Alex>ALEX</Alex>
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -17,8 +13,10 @@ from great_expectations.computed_metrics.computed_metric import (
 from great_expectations.computed_metrics.db.models.sqlalchemy_computed_metric_model import (
     ComputedMetric as SqlAlchemyComputedMetricModel,
 )
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.store import StoreBackend
+from great_expectations.data_context.types.resource_identifiers import (
+    ComputedMetricIdentifier,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import (
     filter_properties_dict,
@@ -120,7 +118,7 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
             Optional[Union[str, UUID]],
         ],
         **kwargs,
-    ) -> Union[ComputedMetricBusinessObject, None]:
+    ) -> ComputedMetricBusinessObject:
         try:
             batch_id: Optional[Union[str, UUID]]
             metric_name: Optional[str]
@@ -134,8 +132,8 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
             ) = key
             datetime_begin: Optional[datetime.datetime] = kwargs.get("datetime_begin")
             datetime_end: Optional[datetime.datetime] = kwargs.get("datetime_end")
-            return convert_to_json_serializable(
-                data=self.get_by_computed_metric_identifier_keys_and_datetime_range(
+            computed_metric_business_object: ComputedMetricBusinessObject = (
+                self.get_by_computed_metric_identifier_keys_and_datetime_range(
                     batch_id=batch_id,
                     metric_name=metric_name,
                     metric_domain_kwargs_id=metric_domain_kwargs_id,
@@ -144,6 +142,8 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
                     datetime_end=datetime_end,
                 )
             )
+            return computed_metric_business_object
+
         except Exception as e:
             raise ge_exceptions.InvalidKeyError(f"{str(e)}")
 
@@ -164,19 +164,32 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
                 computed_metric_business_object=computed_metric_business_object
             )
         )
-
         with self._managed_scoped_db_session() as session:
             session.add(sa_computed_metric_model_obj)
 
     def get_by_computed_metric_identifier_keys_and_datetime_range(
         self,
-        batch_id: Optional[str] = None,
+        batch_id: Optional[Union[str, UUID]] = None,
         metric_name: Optional[str] = None,
-        metric_domain_kwargs_id: Optional[str] = None,
-        metric_value_kwargs_id: Optional[str] = None,
+        metric_domain_kwargs_id: Optional[Union[str, UUID]] = None,
+        metric_value_kwargs_id: Optional[Union[str, UUID]] = None,
         datetime_begin: Optional[datetime.datetime] = None,
         datetime_end: Optional[datetime.datetime] = None,
-    ) -> Union[ComputedMetricBusinessObject, None]:
+    ) -> ComputedMetricBusinessObject:
+        key = ComputedMetricIdentifier(
+            computed_metric_key=(
+                batch_id,
+                metric_name,
+                metric_domain_kwargs_id,
+                metric_value_kwargs_id,
+            )
+        )
+        (
+            batch_id,
+            metric_name,
+            metric_domain_kwargs_id,
+            metric_value_kwargs_id,
+        ) = key.to_tuple()
         filtering_criteria = {
             "batch_id": batch_id,
             "metric_name": metric_name,
@@ -231,13 +244,6 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
         value: Optional[Any] = None,
         details: Optional[Dict[str, Any]] = None,
     ) -> None:
-        key = (
-            batch_id,
-            metric_name,
-            metric_domain_kwargs_id,
-            metric_value_kwargs_id,
-        )
-
         timestamp = datetime.datetime.now()
         if created_at is None:
             created_at = timestamp
@@ -266,8 +272,15 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
             value=value,
             details=details,
         )
-
-        self._set(key=key, value=computed_metric_business_object)
+        key = ComputedMetricIdentifier(
+            computed_metric_key=(
+                batch_id,
+                metric_name,
+                metric_domain_kwargs_id,
+                metric_value_kwargs_id,
+            )
+        )
+        self._set(key=key.to_tuple(), value=computed_metric_business_object)
 
     def list(
         self,
@@ -403,18 +416,12 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
         try:
             yield session
             session.commit()
-        except Exception:
+        except Exception as e:
             session.rollback()
             raise
         finally:
             session.close()
             session.remove()
-
-    # TODO: <Alex>ALEX</Alex>
-    # def _get_session(self):
-    #     session_class = self._get_session_maker()
-    #     return session_class()
-    # TODO: <Alex>ALEX</Alex>
 
     def _get_scoped_db_session(self):
         scoped_db_session = scoped_session(self._get_session_maker())

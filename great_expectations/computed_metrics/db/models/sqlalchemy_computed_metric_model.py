@@ -43,18 +43,34 @@ class ComputedMetric(
     SQLAlchemy model for each row in "computed_metrics" table.
     """
 
+    # TODO: <Alex>ALEX</Alex>
+    # datasource_name = sa.Column(
+    #     sa.Unicode(128),
+    #     nullable=False,
+    # )
+    # data_asset_name = sa.Column(
+    #     sa.Unicode(128),
+    #     nullable=False,
+    # )
+    # batch_name = sa.Column(
+    #     sa.UnicodeText(),
+    #     nullable=False,
+    # )
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
     datasource_name = sa.Column(
         sa.Unicode(128),
-        nullable=False,
+        nullable=True,
     )
     data_asset_name = sa.Column(
         sa.Unicode(128),
-        nullable=False,
+        nullable=True,
     )
     batch_name = sa.Column(
         sa.UnicodeText(),
-        nullable=False,
+        nullable=True,
     )
+    # TODO: <Alex>ALEX</Alex>
     batch_id = sa.Column(
         sa.UnicodeText(),
         nullable=False,
@@ -102,7 +118,7 @@ class ComputedMetric(
             "datasource_name": self.datasource_name,
             "data_asset_name": self.data_asset_name,
             "batch_name": self.batch_name,
-            "batch_id": self.batch_name,
+            "batch_id": self.batch_id,
             "metric_name": self.metric_name,
             "metric_domain_kwargs_id": self.metric_domain_kwargs_id,
             "metric_value_kwargs_id": self.metric_value_kwargs_id,

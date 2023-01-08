@@ -36,6 +36,11 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+IN_MEMORY_STORE_BACKEND_METRICS: set = {
+    "table.column_types",
+    "table.head",
+}
+
 _registered_expectations = {}
 _registered_metrics = {}
 _registered_renderers = {}

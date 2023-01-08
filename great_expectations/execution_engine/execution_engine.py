@@ -18,6 +18,7 @@ from typing import (
     Tuple,
     Union,
 )
+from uuid import UUID
 
 from marshmallow import ValidationError
 
@@ -38,7 +39,10 @@ from great_expectations.data_context.store.computed_metrics_store import (
 from great_expectations.data_context.types.resource_identifiers import (
     ComputedMetricIdentifier,
 )
-from great_expectations.expectations.registry import get_metric_provider
+from great_expectations.expectations.registry import (
+    IN_MEMORY_STORE_BACKEND_METRICS,
+    get_metric_provider,
+)
 from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
@@ -272,10 +276,19 @@ class ExecutionEngine(ABC):
         self._batch_manager = BatchManager(execution_engine=self)
 
         # TODO: <Alex>ALEX -- temporary here (for demonstration purposes); ultimately, "MetricsService" will route requests to "ComputedMetricsStore" and "ExecutionEngine" as appropriate.</Alex>
+        # self._computed_metrics_store: ComputedMetricsStore = ComputedMetricsStore(
+        #     store_name="alex_test_0",
+        #     store_backend={
+        #         "class_name": "InMemoryStoreBackend",
+        #     },
+        # )
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
         self._computed_metrics_store: ComputedMetricsStore = ComputedMetricsStore(
-            store_name="alex_test_0",
+            store_name="alex_test_1",
             store_backend={
-                "class_name": "InMemoryStoreBackend",
+                "class_name": "SqlAlchemyComputedMetricsStoreBackend",
+                "connection_string": "postgresql+psycopg2://postgres:@localhost/test_ci",
             },
         )
         # TODO: <Alex>ALEX</Alex>
@@ -623,6 +636,11 @@ class ExecutionEngine(ABC):
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
     ) -> Dict[Tuple[str, str, str], MetricValue]:
+        metrics_to_resolve = filter(
+            lambda element: element.metric_name not in IN_MEMORY_STORE_BACKEND_METRICS,
+            metrics_to_resolve,
+        )
+
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
         metric_configuration: MetricConfiguration
@@ -648,12 +666,14 @@ class ExecutionEngine(ABC):
             except ge_exceptions.InvalidKeyError as exc_ik:
                 # TODO: <Alex>ALEX</Alex>
                 print(
-                    f'Non-existent ComputedMetric record named "{key.computed_metric_key}".\n\nDetails: {exc_ik}'
+                    f'ExecutionEngine: Non-existent ComputedMetric record named "{key.computed_metric_key}".\n\nDetails: {exc_ik}'
                 )
                 # TODO: <Alex>ALEX</Alex>
             except ValidationError as exc_ve:
                 # TODO: <Alex>ALEX</Alex>
-                print(f"Invalid ComputedMetric record; validation error: {exc_ve}")
+                print(
+                    f"ExecutionEngine: Invalid ComputedMetric record; validation error: {exc_ve}"
+                )
                 # TODO: <Alex>ALEX</Alex>
 
         return resolved_metrics
@@ -761,14 +781,21 @@ class ExecutionEngine(ABC):
         metric_fn_direct_configurations: List[MetricComputationConfiguration],
         metric_fn_bundle_configurations: List[MetricComputationConfiguration],
     ) -> None:
+        metric_computation_configurations: List[MetricComputationConfiguration] = list(
+            filter(
+                lambda element: element.metric_configuration.metric_name
+                not in IN_MEMORY_STORE_BACKEND_METRICS,
+                metric_fn_direct_configurations + metric_fn_bundle_configurations,
+            )
+        )
+
         batch_id: str
         key: ComputedMetricIdentifier
         timestamp: datetime.datetime
         computed_metric: ComputedMetric
         metric_computation_configuration: MetricComputationConfiguration
-        for metric_computation_configuration in (
-            metric_fn_direct_configurations + metric_fn_bundle_configurations
-        ):
+        for metric_computation_configuration in metric_computation_configurations:
+            batch_id: Optional[Union[str, UUID]]
             batch_id = (
                 metric_computation_configuration.metric_configuration.metric_domain_kwargs.get(
                     "batch_id"
@@ -783,12 +810,21 @@ class ExecutionEngine(ABC):
                     metric_computation_configuration.metric_configuration.metric_value_kwargs_id,
                 )
             )
+            metric_name: Optional[str]
+            metric_domain_kwargs_id: Optional[Union[str, UUID]]
+            metric_value_kwargs_id: Optional[Union[str, UUID]]
+            (
+                batch_id,
+                metric_name,
+                metric_domain_kwargs_id,
+                metric_value_kwargs_id,
+            ) = key.to_tuple()
             timestamp = datetime.datetime.now()
             computed_metric = ComputedMetric(
                 batch_id=batch_id,
-                metric_name=metric_computation_configuration.metric_configuration.metric_name,
-                metric_domain_kwargs_id=metric_computation_configuration.metric_configuration.metric_domain_kwargs_id,
-                metric_value_kwargs_id=metric_computation_configuration.metric_configuration.metric_value_kwargs_id,
+                metric_name=metric_name,
+                metric_domain_kwargs_id=metric_domain_kwargs_id,
+                metric_value_kwargs_id=metric_value_kwargs_id,
                 created_at=timestamp,
                 updated_at=timestamp,
                 value=metrics[metric_computation_configuration.metric_configuration.id],

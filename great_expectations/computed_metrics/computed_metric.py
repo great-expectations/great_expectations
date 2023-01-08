@@ -76,19 +76,42 @@ class ComputedMetricSchema(Schema):
         unknown = INCLUDE
 
     id = fields.Integer(required=False, allow_none=True)
-    created_at = fields.DateTime(required=False, allow_none=True)
-    updated_at = fields.DateTime(required=False, allow_none=True)
-    deleted_at = fields.DateTime(required=False, allow_none=True)
+    # TODO: <Alex>ALEX</Alex>
+    # created_at = fields.DateTime(required=False, allow_none=True)
+    # updated_at = fields.DateTime(required=False, allow_none=True)
+    # deleted_at = fields.DateTime(required=False, allow_none=True)
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    created_at = fields.Raw(required=False, allow_none=True)
+    updated_at = fields.Raw(required=False, allow_none=True)
+    deleted_at = fields.Raw(required=False, allow_none=True)
+    # TODO: <Alex>ALEX</Alex>
     deleted = fields.Boolean(required=False, allow_none=True, default=False)
-    archived_at = fields.DateTime(required=False, allow_none=True)
+    # TODO: <Alex>ALEX</Alex>
+    # archived_at = fields.DateTime(required=False, allow_none=True)
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    archived_at = fields.Raw(required=False, allow_none=True)
+    # TODO: <Alex>ALEX</Alex>
     archived = fields.Boolean(required=False, allow_none=True, default=False)
     # TODO: <Alex>ALEX</Alex>
     # status = fields.Integer(required=False, allow_none=True, default=0)
     # TODO: <Alex>ALEX</Alex>
     data_context_uuid = fields.UUID(required=False, allow_none=True)
-    datasource_name = fields.String(required=True, allow_none=True)
-    data_asset_name = fields.String(required=True, allow_none=True)
-    batch_name = fields.Raw(required=True, allow_none=True)
+    # TODO: <Alex>ALEX</Alex>
+    # datasource_name = fields.String(required=True, allow_none=True)
+    # data_asset_name = fields.String(required=True, allow_none=True)
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    datasource_name = fields.String(required=False, allow_none=True)
+    data_asset_name = fields.String(required=False, allow_none=True)
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    # batch_name = fields.Raw(required=True, allow_none=True)
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    batch_name = fields.Raw(required=False, allow_none=True)
+    # TODO: <Alex>ALEX</Alex>
     batch_id = fields.String(required=True, allow_none=False)
     metric_name = fields.String(required=True, allow_none=False)
     metric_domain_kwargs_id = fields.String(required=True, allow_none=False)

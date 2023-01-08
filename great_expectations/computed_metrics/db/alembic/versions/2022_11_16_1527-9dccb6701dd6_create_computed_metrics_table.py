@@ -84,21 +84,40 @@ def upgrade() -> None:
             sa.UnicodeText(),
             nullable=True,
         ),
+        # TODO: <Alex>ALEX</Alex>
+        # sa.Column(
+        #     "datasource_name",
+        #     sa.Unicode(128),
+        #     nullable=False,
+        # ),
+        # sa.Column(
+        #     "data_asset_name",
+        #     sa.Unicode(128),
+        #     nullable=False,
+        # ),
+        # sa.Column(
+        #     "batch_name",
+        #     sa.UnicodeText(),
+        #     nullable=False,
+        # ),
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
         sa.Column(
             "datasource_name",
             sa.Unicode(128),
-            nullable=False,
+            nullable=True,
         ),
         sa.Column(
             "data_asset_name",
             sa.Unicode(128),
-            nullable=False,
+            nullable=True,
         ),
         sa.Column(
             "batch_name",
             sa.UnicodeText(),
-            nullable=False,
+            nullable=True,
         ),
+        # TODO: <Alex>ALEX</Alex>
         sa.Column(
             "batch_id",
             sa.UnicodeText(),
