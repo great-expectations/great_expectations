@@ -663,8 +663,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             - https://docs.greatexpectations.io/docs/terms/datasource
 
         Args:
-            name: the name of the new Datasource to add
-            initialize: if False, add the Datasource to the config, but do not
+            name (str): the name of the new Datasource to add
+            initialize (bool): if False, add the Datasource to the config, but do not
                 initialize it, for example if a user needs to debug database connectivity.
             save_changes (bool): should GX save the Datasource config?
             kwargs (keyword arguments): the configuration for the new Datasource
