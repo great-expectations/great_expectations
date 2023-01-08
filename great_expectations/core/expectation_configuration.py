@@ -12,7 +12,6 @@ from typing import (
     List,
     Mapping,
     Optional,
-    Sequence,
     Type,
     Union,
 )
@@ -107,8 +106,8 @@ class ExpectationContextSchema(Schema):
 
 
 class KWargDetailsDict(TypedDict):
-    domain_kwargs: Sequence[str]
-    success_kwargs: Sequence[str]
+    domain_kwargs: tuple[str, ...]
+    success_kwargs: tuple[str, ...]
     default_kwarg_values: dict[str, str | bool | float | RuleBasedProfilerConfig | None]
 
 
@@ -117,8 +116,8 @@ class ExpectationConfiguration(SerializableDictDot):
 
     kwarg_lookup_dict: ClassVar[Mapping[str, KWargDetailsDict]] = {
         "expect_column_to_exist": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["column_index"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("column_index",),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -129,8 +128,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_table_columns_to_match_ordered_list": {
-            "domain_kwargs": [],
-            "success_kwargs": ["column_list"],
+            "domain_kwargs": (),
+            "success_kwargs": ("column_list",),
             "default_kwarg_values": {
                 "result_format": "BASIC",
                 "include_config": True,
@@ -138,8 +137,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_table_columns_to_match_set": {
-            "domain_kwargs": [],
-            "success_kwargs": ["column_set", "exact_match"],
+            "domain_kwargs": (),
+            "success_kwargs": ("column_set", "exact_match"),
             "default_kwarg_values": {
                 "result_format": "BASIC",
                 "include_config": True,
@@ -148,8 +147,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_table_column_count_to_be_between": {
-            "domain_kwargs": [],
-            "success_kwargs": ["min_value", "max_value"],
+            "domain_kwargs": (),
+            "success_kwargs": ("min_value", "max_value"),
             "default_kwarg_values": {
                 "min_value": None,
                 "max_value": None,
@@ -159,8 +158,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_table_column_count_to_equal": {
-            "domain_kwargs": [],
-            "success_kwargs": ["value"],
+            "domain_kwargs": (),
+            "success_kwargs": ("value",),
             "default_kwarg_values": {
                 "result_format": "BASIC",
                 "include_config": True,
@@ -168,8 +167,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_table_row_count_to_be_between": {
-            "domain_kwargs": [],
-            "success_kwargs": ["min_value", "max_value"],
+            "domain_kwargs": (),
+            "success_kwargs": ("min_value", "max_value"),
             "default_kwarg_values": {
                 "min_value": None,
                 "max_value": None,
@@ -179,8 +178,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_table_row_count_to_equal": {
-            "domain_kwargs": [],
-            "success_kwargs": ["value"],
+            "domain_kwargs": (),
+            "success_kwargs": ("value",),
             "default_kwarg_values": {
                 "result_format": "BASIC",
                 "include_config": True,
@@ -188,8 +187,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_values_to_be_unique": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["mostly"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("mostly",),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -200,8 +199,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_values_to_not_be_null": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["mostly"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("mostly",),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -212,8 +211,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_compound_columns_to_be_unique": {
-            "domain_kwargs": ["column_list", "row_condition", "condition_parser"],
-            "success_kwargs": ["ignore_row_if"],
+            "domain_kwargs": ("column_list", "row_condition", "condition_parser"),
+            "success_kwargs": ("ignore_row_if",),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -224,8 +223,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_values_to_be_null": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["mostly"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("mostly",),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -236,8 +235,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_values_to_be_of_type": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["type_", "mostly"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("type_", "mostly"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -248,8 +247,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_values_to_be_in_type_list": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["type_list", "mostly"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("type_list", "mostly"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -260,8 +259,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_values_to_be_in_set": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["value_set", "mostly", "parse_strings_as_datetimes"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("value_set", "mostly", "parse_strings_as_datetimes"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -273,8 +272,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_values_to_not_be_in_set": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["value_set", "mostly", "parse_strings_as_datetimes"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("value_set", "mostly", "parse_strings_as_datetimes"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -286,8 +285,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_values_to_be_between": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": [
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": (
                 "min_value",
                 "max_value",
                 "strict_min",
@@ -296,7 +295,7 @@ class ExpectationConfiguration(SerializableDictDot):
                 "parse_strings_as_datetimes",
                 "output_strftime_format",
                 "mostly",
-            ],
+            ),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -314,8 +313,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_values_to_be_increasing": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["strictly", "parse_strings_as_datetimes", "mostly"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("strictly", "parse_strings_as_datetimes", "mostly"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -328,8 +327,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_values_to_be_decreasing": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["strictly", "parse_strings_as_datetimes", "mostly"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("strictly", "parse_strings_as_datetimes", "mostly"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -342,8 +341,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_value_lengths_to_be_between": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["min_value", "max_value", "mostly"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("min_value", "max_value", "mostly"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -356,8 +355,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_value_lengths_to_equal": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["value", "mostly"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("value", "mostly"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -368,8 +367,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_values_to_match_regex": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["regex", "mostly"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("regex", "mostly"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -380,8 +379,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_values_to_not_match_regex": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["regex", "mostly"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("regex", "mostly"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -392,8 +391,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_values_to_match_regex_list": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["regex_list", "match_on", "mostly"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("regex_list", "match_on", "mostly"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -405,8 +404,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_values_to_not_match_regex_list": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["regex_list", "mostly"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("regex_list", "mostly"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -417,8 +416,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_values_to_match_strftime_format": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["strftime_format", "mostly"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("strftime_format", "mostly"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -429,8 +428,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_values_to_be_dateutil_parseable": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["mostly"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("mostly",),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -441,8 +440,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_values_to_be_json_parseable": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["mostly"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("mostly",),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -453,8 +452,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_values_to_match_json_schema": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["json_schema", "mostly"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("json_schema", "mostly"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -465,8 +464,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["distribution", "p_value", "params"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("distribution", "p_value", "params"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -478,8 +477,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_distinct_values_to_be_in_set": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["value_set", "parse_strings_as_datetimes"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("value_set", "parse_strings_as_datetimes"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -490,8 +489,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_distinct_values_to_equal_set": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["value_set", "parse_strings_as_datetimes"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("value_set", "parse_strings_as_datetimes"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -502,8 +501,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_distinct_values_to_contain_set": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["value_set", "parse_strings_as_datetimes"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("value_set", "parse_strings_as_datetimes"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -514,8 +513,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_mean_to_be_between": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("min_value", "max_value", "strict_min", "strict_max"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -529,8 +528,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_median_to_be_between": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("min_value", "max_value", "strict_min", "strict_max"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -544,8 +543,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_quantile_values_to_be_between": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["quantile_ranges", "allow_relative_error"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("quantile_ranges", "allow_relative_error"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -556,8 +555,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_stdev_to_be_between": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("min_value", "max_value", "strict_min", "strict_max"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -571,8 +570,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_unique_value_count_to_be_between": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["min_value", "max_value"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("min_value", "max_value"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -584,8 +583,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_proportion_of_unique_values_to_be_between": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("min_value", "max_value", "strict_min", "strict_max"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -599,8 +598,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_most_common_value_to_be_in_set": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["value_set", "ties_okay"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("value_set", "ties_okay"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -611,8 +610,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_sum_to_be_between": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["min_value", "max_value", "strict_min", "strict_max"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("min_value", "max_value", "strict_min", "strict_max"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -626,15 +625,15 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_min_to_be_between": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": [
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": (
                 "min_value",
                 "max_value",
                 "strict_min",
                 "strict_max",
                 "parse_strings_as_datetimes",
                 "output_strftime_format",
-            ],
+            ),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -650,15 +649,15 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_max_to_be_between": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": [
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": (
                 "min_value",
                 "max_value",
                 "strict_min",
                 "strict_max",
                 "parse_strings_as_datetimes",
                 "output_strftime_format",
-            ],
+            ),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -674,8 +673,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_chisquare_test_p_value_to_be_greater_than": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["partition_object", "p", "tail_weight_holdout"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("partition_object", "p", "tail_weight_holdout"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -688,13 +687,13 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": [
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": (
                 "partition_object",
                 "p",
                 "bootstrap_samples",
                 "bootstrap_sample_size",
-            ],
+            ),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -708,14 +707,14 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_kl_divergence_to_be_less_than": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": [
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": (
                 "partition_object",
                 "threshold",
                 "tail_weight_holdout",
                 "internal_weight_holdout",
                 "bucketize_data",
-            ],
+            ),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -730,13 +729,13 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_pair_values_to_be_equal": {
-            "domain_kwargs": [
+            "domain_kwargs": (
                 "column_A",
                 "column_B",
                 "row_condition",
                 "condition_parser",
-            ],
-            "success_kwargs": ["ignore_row_if"],
+            ),
+            "success_kwargs": ("ignore_row_if",),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -747,18 +746,18 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_pair_values_A_to_be_greater_than_B": {
-            "domain_kwargs": [
+            "domain_kwargs": (
                 "column_A",
                 "column_B",
                 "row_condition",
                 "condition_parser",
-            ],
-            "success_kwargs": [
+            ),
+            "success_kwargs": (
                 "or_equal",
                 "parse_strings_as_datetimes",
                 "allow_cross_type_comparisons",
                 "ignore_row_if",
-            ],
+            ),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -772,13 +771,13 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_pair_values_to_be_in_set": {
-            "domain_kwargs": [
+            "domain_kwargs": (
                 "column_A",
                 "column_B",
                 "row_condition",
                 "condition_parser",
-            ],
-            "success_kwargs": ["value_pairs_set", "ignore_row_if", "mostly"],
+            ),
+            "success_kwargs": ("value_pairs_set", "ignore_row_if", "mostly"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -790,8 +789,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_multicolumn_values_to_be_unique": {
-            "domain_kwargs": ["column_list", "row_condition", "condition_parser"],
-            "success_kwargs": ["ignore_row_if"],
+            "domain_kwargs": ("column_list", "row_condition", "condition_parser"),
+            "success_kwargs": ("ignore_row_if",),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -802,8 +801,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_multicolumn_sum_to_equal": {
-            "domain_kwargs": ["column_list", "row_condition", "condition_parser"],
-            "success_kwargs": ["sum_total", "ignore_row_if"],
+            "domain_kwargs": ("column_list", "row_condition", "condition_parser"),
+            "success_kwargs": ("sum_total", "ignore_row_if"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -814,8 +813,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "_expect_column_values_to_be_of_type__aggregate": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["type_", "mostly"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("type_", "mostly"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -826,8 +825,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "_expect_column_values_to_be_of_type__map": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["type_", "mostly"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("type_", "mostly"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -838,8 +837,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "_expect_column_values_to_be_in_type_list__aggregate": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["type_list", "mostly"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("type_list", "mostly"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -850,8 +849,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "_expect_column_values_to_be_in_type_list__map": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["type_list", "mostly"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("type_list", "mostly"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -862,8 +861,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_value_z_scores_to_be_less_than": {
-            "domain_kwargs": ["column", "row_condition", "condition_parser"],
-            "success_kwargs": ["threshold", "mostly", "double_sided"],
+            "domain_kwargs": ("column", "row_condition", "condition_parser"),
+            "success_kwargs": ("threshold", "mostly", "double_sided"),
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
@@ -874,13 +873,13 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_file_line_regex_match_count_to_be_between": {
-            "domain_kwargs": [],
-            "success_kwargs": [
+            "domain_kwargs": (),
+            "success_kwargs": (
                 "regex",
                 "expected_min_count",
                 "expected_max_count",
                 "skip",
-            ],
+            ),
             "default_kwarg_values": {
                 "expected_min_count": 0,
                 "expected_max_count": None,
@@ -895,8 +894,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_file_line_regex_match_count_to_equal": {
-            "domain_kwargs": [],
-            "success_kwargs": ["regex", "expected_count", "skip"],
+            "domain_kwargs": (),
+            "success_kwargs": ("regex", "expected_count", "skip"),
             "default_kwarg_values": {
                 "expected_count": 0,
                 "skip": None,
@@ -910,8 +909,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_file_hash_to_equal": {
-            "domain_kwargs": [],
-            "success_kwargs": ["value", "hash_alg"],
+            "domain_kwargs": (),
+            "success_kwargs": ("value", "hash_alg"),
             "default_kwarg_values": {
                 "hash_alg": "md5",
                 "result_format": "BASIC",
@@ -921,8 +920,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_file_size_to_be_between": {
-            "domain_kwargs": [],
-            "success_kwargs": ["minsize", "maxsize"],
+            "domain_kwargs": (),
+            "success_kwargs": ("minsize", "maxsize"),
             "default_kwarg_values": {
                 "minsize": 0,
                 "maxsize": None,
@@ -933,8 +932,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_file_to_exist": {
-            "domain_kwargs": [],
-            "success_kwargs": ["filepath"],
+            "domain_kwargs": (),
+            "success_kwargs": ("filepath",),
             "default_kwarg_values": {
                 "filepath": None,
                 "result_format": "BASIC",
@@ -944,8 +943,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_file_to_have_valid_table_header": {
-            "domain_kwargs": [],
-            "success_kwargs": ["regex", "skip"],
+            "domain_kwargs": (),
+            "success_kwargs": ("regex", "skip"),
             "default_kwarg_values": {
                 "skip": None,
                 "result_format": "BASIC",
@@ -955,8 +954,8 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_file_to_be_valid_json": {
-            "domain_kwargs": [],
-            "success_kwargs": ["schema"],
+            "domain_kwargs": (),
+            "success_kwargs": ("schema",),
             "default_kwarg_values": {
                 "schema": None,
                 "result_format": "BASIC",
@@ -1103,14 +1102,14 @@ class ExpectationConfiguration(SerializableDictDot):
         # defaults, and so defaults are inherited.
         if self.expectation_type.startswith("expect_column_pair"):
             return {
-                "domain_kwargs": [
+                "domain_kwargs": (
                     "column_A",
                     "column_B",
                     "row_condition",
                     "condition_parser",
-                ],
+                ),
                 # NOTE: this is almost certainly incomplete; subclasses should override
-                "success_kwargs": [],
+                "success_kwargs": (),
                 "default_kwarg_values": {
                     "column_A": None,
                     "column_B": None,
@@ -1120,9 +1119,9 @@ class ExpectationConfiguration(SerializableDictDot):
             }
         elif self.expectation_type.startswith("expect_column"):
             return {
-                "domain_kwargs": ["column", "row_condition", "condition_parser"],
+                "domain_kwargs": ("column", "row_condition", "condition_parser"),
                 # NOTE: this is almost certainly incomplete; subclasses should override
-                "success_kwargs": [],
+                "success_kwargs": (),
                 "default_kwarg_values": {
                     "column": None,
                     "row_condition": None,
@@ -1132,9 +1131,9 @@ class ExpectationConfiguration(SerializableDictDot):
 
         logger.warning("Requested kwargs for an unrecognized expectation.")
         return {
-            "domain_kwargs": [],
+            "domain_kwargs": (),
             # NOTE: this is almost certainly incomplete; subclasses should override
-            "success_kwargs": [],
+            "success_kwargs": (),
             "default_kwarg_values": {},
         }
 
