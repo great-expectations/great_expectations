@@ -466,9 +466,9 @@ class ExpectationDiagnostics(SerializableDictDot):
         rx_expectation_instance_repr = re.compile(r"<.*\.([^\.]*) object at .*")
 
         try:
-            expectation_camel_name = rx_expectation_instance_repr.match(
+            expectation_camel_name = rx_expectation_instance_repr.match(  # type: ignore[union-attr] # could be None
                 repr(expectation_instance)
-            ).group(  # type: ignore[union-attr] # could be None
+            ).group(
                 1
             )
         except AttributeError:
