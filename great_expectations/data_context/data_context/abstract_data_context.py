@@ -1279,7 +1279,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_ge_cloud_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
             default_validation_id: The default validation ID to use in generating this checkpoint.
 
-        Returns: The Checkpoint object created.
+        Returns:
+            The Checkpoint object created.
         """
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
