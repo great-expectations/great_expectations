@@ -50,6 +50,7 @@ if TYPE_CHECKING:
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation import Expectation
     from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
+    from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
     from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
@@ -107,7 +108,7 @@ class ExpectationContextSchema(Schema):
 class KWargDetailsDict(TypedDict):
     domain_kwargs: Sequence[str]
     success_kwargs: Sequence[str]
-    default_kwarg_values: dict[str, str | bool | float | None]
+    default_kwarg_values: dict[str, str | bool | float | RuleBasedProfilerConfig | None]
 
 
 class ExpectationConfiguration(SerializableDictDot):
