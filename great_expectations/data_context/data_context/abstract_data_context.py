@@ -658,10 +658,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         **kwargs: Optional[dict],
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         """Add a new Datasource to the data context, with configuration provided as kwargs.
-        
+
         --Documentation--
             - https://docs.greatexpectations.io/docs/terms/datasource
-        
+
         Args:
             name: the name of the new Datasource to add
             initialize: if False, add the Datasource to the config, but do not
