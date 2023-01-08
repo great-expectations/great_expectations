@@ -966,7 +966,11 @@ class ExpectationConfiguration(SerializableDictDot):
         },
     }
 
-    runtime_kwargs = ["result_format", "include_config", "catch_exceptions"]
+    runtime_kwargs: tuple[str, ...] = (
+        "result_format",
+        "include_config",
+        "catch_exceptions",
+    )
 
     def __init__(
         self,
@@ -1206,7 +1210,7 @@ class ExpectationConfiguration(SerializableDictDot):
         expectation_kwargs_dict = self.kwarg_lookup_dict.get(
             self.expectation_type, None
         )
-        runtime_keys: list[str] | tuple[str, ...]
+        runtime_keys: tuple[str, ...]
         if expectation_kwargs_dict is None:
             try:
                 impl = get_expectation_impl(self.expectation_type)
