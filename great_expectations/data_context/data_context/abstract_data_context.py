@@ -3667,6 +3667,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         profiling_results["success"] = True
         return profiling_results
 
+    @public_api
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS,
     )
