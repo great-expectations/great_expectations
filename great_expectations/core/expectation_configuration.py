@@ -10,6 +10,7 @@ from typing import (
     ClassVar,
     Dict,
     List,
+    Mapping,
     Optional,
     Sequence,
     Type,
@@ -108,7 +109,9 @@ class ExpectationContextSchema(Schema):
 class KWargDetailsDict(TypedDict):
     domain_kwargs: Sequence[str]
     success_kwargs: Sequence[str]
-    default_kwarg_values: dict[str, str | bool | float | RuleBasedProfilerConfig | None]
+    default_kwarg_values: Mapping[
+        str, str | bool | float | RuleBasedProfilerConfig | None
+    ]
 
 
 class ExpectationConfiguration(SerializableDictDot):
