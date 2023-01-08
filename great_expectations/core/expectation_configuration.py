@@ -109,15 +109,13 @@ class ExpectationContextSchema(Schema):
 class KWargDetailsDict(TypedDict):
     domain_kwargs: Sequence[str]
     success_kwargs: Sequence[str]
-    default_kwarg_values: Mapping[
-        str, str | bool | float | RuleBasedProfilerConfig | None
-    ]
+    default_kwarg_values: dict[str, str | bool | float | RuleBasedProfilerConfig | None]
 
 
 class ExpectationConfiguration(SerializableDictDot):
     """ExpectationConfiguration defines the parameters and name of a specific expectation."""
 
-    kwarg_lookup_dict: ClassVar[dict[str, KWargDetailsDict]] = {
+    kwarg_lookup_dict: ClassVar[Mapping[str, KWargDetailsDict]] = {
         "expect_column_to_exist": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["column_index"],
