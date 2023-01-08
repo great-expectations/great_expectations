@@ -214,7 +214,7 @@ class ExpectationValidationResult(SerializableDictDot):
         - atomic diagnostic renderer for the expectation configuration associated with this
           ExpectationValidationResult to self.rendered_content.
         """
-        inline_renderer_config: "InlineRendererConfig" = {  # type: ignore[assignment]
+        inline_renderer_config: InlineRendererConfig = {
             "class_name": "InlineRenderer",
             "render_object": self,
         }

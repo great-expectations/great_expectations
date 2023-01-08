@@ -120,7 +120,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         return ExpectationDiagnosticCheckMessage(
             message="Has a valid library_metadata object",
             passed=library_metadata.library_metadata_passed_checks,  # type: ignore[union-attr] # could be ExpectationDescriptionDiagnostics
-            sub_messages=sub_messages,  # type: ignore[arg-type] # FIX THIS
+            sub_messages=sub_messages,
         )
 
     @staticmethod
