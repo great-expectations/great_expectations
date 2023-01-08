@@ -109,7 +109,6 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
                         }
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite"],
                 },
                 {
                     "title": "basic_negative_test",
@@ -121,8 +120,14 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
                         }
                     },
                     "out": {"success": False},
-                    "only_for": ["sqlite"],
                 },
+            ],
+            "test_backends": [
+                {
+                    "backend": "sqlalchemy",
+                    "dialects": ["sqlite"],
+                },
+                {"backend": "spark", "dialects": None},
             ],
         }
     ]
