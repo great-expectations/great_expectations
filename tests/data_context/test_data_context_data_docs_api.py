@@ -4,11 +4,11 @@ from unittest import mock
 import pytest
 
 from great_expectations import DataContext
-from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 from great_expectations.exceptions import DataContextError
+from great_expectations.util import get_context
 
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
@@ -352,7 +352,7 @@ def test_build_data_docs_skipping_index_does_not_build_index(
 
 
 def test_get_site_names_with_no_sites(tmpdir, basic_data_context_config):
-    context = BaseDataContext(basic_data_context_config, context_root_dir=tmpdir)
+    context = get_context(basic_data_context_config, context_root_dir=tmpdir)
     assert context.get_site_names() == []
 
 
@@ -372,5 +372,5 @@ def test_get_site_names_with_three_sites(tmpdir, basic_data_context_config):
             },
             "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
         }
-    context = BaseDataContext(basic_data_context_config, context_root_dir=tmpdir)
+    context = get_context(basic_data_context_config, context_root_dir=tmpdir)
     assert context.get_site_names() == ["site-0", "site-1", "site-2"]

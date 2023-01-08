@@ -6,11 +6,11 @@ from pyspark.context import SparkContext
 import great_expectations as gx
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     S3StoreBackendDefaults,
 )
+from great_expectations.util import get_context
 
 sc = SparkContext.getOrCreate()
 glueContext = GlueContext(sc)
@@ -40,7 +40,7 @@ config = DataContextConfig(
         ]
     ),
 )
-context_gx = BaseDataContext(project_config=config)
+context_gx = get_context(project_config=config)
 
 expectation_suite_name = "suite_name"
 suite = context_gx.create_expectation_suite(expectation_suite_name)
