@@ -24,12 +24,12 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
     metric_dependencies = ("query.template_values",)
 
     query = """
-                SELECT COUNT(*) n
+                SELECT COUNT(1)
                 FROM {active_batch}
                 WHERE {col} = {filter}
             """
 
-    success_keys = ("query", "template_values")
+    success_keys = ("template_dict", "query")
 
     domain_keys = ("batch_id", "row_condition", "condition_parser")
 
@@ -75,7 +75,12 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
 
     examples = [
         {
-            "data": {"col1": [1, 1, 1, 2, 2, 2, 2, 2]},
+            "data": [
+                {
+                    "dataset_name": "test",
+                    "data": {"col1": [1, 1, 1, 2, 2, 2, 2, 2]},
+                },
+            ],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -105,9 +110,7 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
 
     library_metadata = {
         "tags": ["query-based"],
-        "contributors": [
-            "@CarstenFrommhold",
-        ],
+        "contributors": ["@CarstenFrommhold", "@mkopec87"],
     }
 
 
