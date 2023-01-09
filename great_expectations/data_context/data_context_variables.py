@@ -367,16 +367,15 @@ class FileDataContextVariables(DataContextVariables):
         config_xdatasources_stash: Dict[
             str, XDatasource
         ] = self.data_context._synchronize_zep_datasources()
-
-        if config_xdatasources_stash:
-            logger.info(
-                f"Stashing `XDatasource` during {type(self).__name__}.save_config() - {len(config_xdatasources_stash)} stashed"
-            )
-            for xdatasource_name in config_xdatasources_stash.keys():
-                self.data_context.datasources.pop(xdatasource_name)
-            # this would be `deep_copy'ed in `instantiate_class_from_config` too
-            self.data_context.zep_config.xdatasources = {}
         try:
+            if config_xdatasources_stash:
+                logger.info(
+                    f"Stashing `XDatasource` during {type(self).__name__}.save_config() - {len(config_xdatasources_stash)} stashed"
+                )
+                for xdatasource_name in config_xdatasources_stash.keys():
+                    self.data_context.datasources.pop(xdatasource_name)
+                # this would be `deep_copy'ed in `instantiate_class_from_config` too
+                self.data_context.zep_config.xdatasources = {}
             yield
         except Exception:
             raise
