@@ -143,7 +143,7 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.exceptions import DataContextError
 
-context = gx.data_context.DataContext()
+context = gx.get_context()
 
 batch_request = {self._batch_request}
 
@@ -205,7 +205,7 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.exceptions import DataContextError
 
-context = gx.data_context.DataContext()
+context = gx.get_context()
 
 batch_request = {self._batch_request}
 
@@ -246,7 +246,7 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.exceptions import DataContextError
 
-context = gx.data_context.DataContext()
+context = gx.get_context()
 
 batch_request = {self._batch_request}
 

@@ -45,7 +45,7 @@ To begin, we'll need to set up our imports and instantiate our <TechnicalTag tag
 :::note
 Depending on your use-case, workflow, and directory structures, you may need to update you context root directory as follows:
 ```python
-context = gx.data_context.DataContext( 
+context = gx.get_context(
     context_root_dir='/my/context/root/directory/great_expectations'
 )
 ```
@@ -96,7 +96,7 @@ For more on these configurations, see our [guide on the optional parameters avai
 ### 5. Checkpoint Set-Up
 <br/>
 
-Before we can validate our second table, we need to define a <TechnicalTag tag="checkpoint" text="Checkpoint" />. 
+Before we can validate our second table, we need to define a <TechnicalTag tag="checkpoint" text="Checkpoint" />.
 
 We will pass both the `pg_batch_request` and Expectation Suite defined above to this checkpoint.
 
@@ -132,7 +132,7 @@ To begin, we'll need to set up our imports and instantiate our <TechnicalTag tag
 :::note
 Depending on your use-case, workflow, and directory structures, you may need to update you context root directory as follows:
 ```python
-context = gx.data_context.DataContext( 
+context = gx.get_context(
     context_root_dir='/my/context/root/directory/great_expectations'
 )
 ```
@@ -183,7 +183,7 @@ For more on these configurations, see our [guide on the optional parameters avai
 ### 5. Checkpoint Set-Up
 <br/>
 
-Before we can validate our second table, we need to define a <TechnicalTag tag="checkpoint" text="Checkpoint" />. 
+Before we can validate our second table, we need to define a <TechnicalTag tag="checkpoint" text="Checkpoint" />.
 
 We will pass both the `pg_runtime_batch_request` and Expectation Suite defined above to this checkpoint.
 
