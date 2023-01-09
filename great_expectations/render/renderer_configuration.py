@@ -106,13 +106,7 @@ RendererParams = TypeVar("RendererParams", bound=_RendererValueBase)
 
 RendererValueTypes: TypeAlias = Union[RendererValueType, List[RendererValueType]]
 
-
-class AddParamKeywordArgs(NamedTuple):
-    name: str
-    param_type: RendererValueTypes
-
-
-AddParamArgs: TypeAlias = Tuple[AddParamKeywordArgs, ...]
+AddParamArgs: TypeAlias = Tuple[Tuple[str, RendererValueTypes], ...]
 
 
 class RendererTableValue(_RendererValueBase):
