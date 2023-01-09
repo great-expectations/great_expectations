@@ -81,13 +81,6 @@ module.exports = {
             'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3'
           ]
         },
-        {
-          type: 'category',
-          label: 'Miscellaneous',
-          items: [
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectation_docker_images' }
-          ]
-        },
         { type: 'doc', id: 'guides/setup/index', label: 'Index' }
       ]
     },
