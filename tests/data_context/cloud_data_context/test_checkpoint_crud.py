@@ -345,7 +345,7 @@ def test_cloud_data_context_run_checkpoint_e2e():
     checkpoint = context.add_checkpoint(**config)
     ```
     """
-    context = DataContext(cloud_mode=True)
+    context = get_context(cloud_mode=True)
 
     checkpoint_name = "OSS_E2E_run_checkpoint"
 
