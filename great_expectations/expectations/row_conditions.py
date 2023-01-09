@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import enum
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from pyparsing import (
     CaselessLiteral,
@@ -27,8 +30,12 @@ try:
 except ImportError:
     sa = None
 
+if TYPE_CHECKING:
+    import sqlalchemy as sa
+    from sqlalchemy.sql.expression import ColumnElement
 
-def _set_notnull(s, l, t) -> None:
+
+def _set_notnull(s, l, t) -> None:  # noqa: E741 # ambiguous name `l`
     t["notnull"] = True
 
 
@@ -114,7 +121,9 @@ def _parse_great_expectations_condition(row_condition: str):
 
 
 # noinspection PyUnresolvedReferences
-def parse_condition_to_spark(row_condition: str) -> "pyspark.sql.Column":
+def parse_condition_to_spark(
+    row_condition: str,
+) -> "pyspark.sql.Column":  # noqa: F821 # TODO: pyspark typing
     parsed = _parse_great_expectations_condition(row_condition)
     column = parsed["column"]
     if "condition_value" in parsed:
@@ -148,7 +157,7 @@ def parse_condition_to_spark(row_condition: str) -> "pyspark.sql.Column":
 
 def parse_condition_to_sqlalchemy(
     row_condition: str,
-) -> "sqlalchemy.sql.expression.ColumnElement":
+) -> ColumnElement | None:
     parsed = _parse_great_expectations_condition(row_condition)
     column = parsed["column"]
     if "condition_value" in parsed:
