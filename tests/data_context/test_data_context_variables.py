@@ -111,7 +111,7 @@ def ephemeral_data_context_variables(
 
 @pytest.fixture
 def file_data_context_variables(
-    data_context_config: DataContextConfig, empty_data_context: DataContext
+    data_context_config: DataContextConfig, empty_data_context: FileDataContext
 ) -> FileDataContextVariables:
     return FileDataContextVariables(
         data_context=empty_data_context,

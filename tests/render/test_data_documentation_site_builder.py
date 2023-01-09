@@ -5,7 +5,6 @@ from typing import Dict
 import pytest
 from freezegun import freeze_time
 
-from great_expectations import DataContext
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.store import ExpectationsStore, ValidationsStore
 from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
@@ -18,6 +17,7 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
 )
 from great_expectations.render.renderer.site_builder import SiteBuilder
+from great_expectations.util import get_context
 
 
 def assert_how_to_buttons(
@@ -600,7 +600,7 @@ def test_site_builder_with_custom_site_section_builders_config(tmp_path_factory)
         ),
         str(os.path.join(project_dir, "great_expectations.yml")),
     )
-    context = DataContext(context_root_dir=project_dir)
+    context = get_context(context_root_dir=project_dir)
     local_site_config = context._project_config.data_docs_sites.get("local_site")
 
     module_name = "great_expectations.render.renderer.site_builder"
