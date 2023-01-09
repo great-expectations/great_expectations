@@ -1802,7 +1802,7 @@ class Expectation(metaclass=MetaExpectation):
 
         return test_results
 
-    def _get_rendered_result_as_string(self, rendered_result) -> str:
+    def _get_rendered_result_as_string(self, rendered_result) -> str:  # noqa: C901 - 16
         """Convenience method to get rendered results as strings."""
 
         result: str = ""
@@ -2193,7 +2193,7 @@ class TableExpectation(Expectation, ABC):
 
         return True
 
-    def _validate_metric_value_between(
+    def _validate_metric_value_between(  # noqa: C901 - 21
         self,
         metric_name,
         configuration: ExpectationConfiguration,
@@ -3137,7 +3137,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         )
 
 
-def _format_map_output(
+def _format_map_output(  # noqa: C901 - 22
     result_format: dict,
     success: bool,
     element_count: Optional[int] = None,

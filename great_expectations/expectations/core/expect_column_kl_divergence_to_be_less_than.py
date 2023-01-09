@@ -366,7 +366,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
 
         return validation_dependencies
 
-    def _validate(
+    def _validate(  # noqa: C901 - 29
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
