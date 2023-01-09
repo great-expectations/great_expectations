@@ -22,6 +22,7 @@ from typing import (
     Dict,
     List,
     Optional,
+    Sequence,
     Set,
     Tuple,
     Type,
@@ -201,6 +202,11 @@ def param_method(param_name: str) -> Callable:
     If a helper method is decorated with @param_method(param_name="<param_name>") and the param attribute does not
     exist, the method will return either the input RendererConfiguration or None depending on the declared return type.
     """
+    if not param_name:
+        # If param_name was passed as an empty string
+        raise RendererConfigurationError(
+            "Method decorated with @param_method must be passed an existing param_name."
+        )
 
     def _param_method(param_func: Callable) -> Callable:
         @functools.wraps(param_func)
@@ -1594,33 +1600,63 @@ class Expectation(metaclass=MetaExpectation):
             return False
 
     @staticmethod
-    @param_method(param_name="value_set")
-    def _add_value_set_params(
+    def _add_array_params(
+        array_param_name: str,
+        param_prefix: str,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        value_set: List[Optional[Any]] = renderer_configuration.params.value_set.value
-        if len(value_set) > 0:
-            for idx, value in enumerate(value_set):
-                if isinstance(value, Number):
-                    param_type = RendererValueType.NUMBER
-                else:
-                    param_type = RendererValueType.STRING
-                renderer_configuration.add_param(
-                    name=f"v__{str(idx)}", param_type=param_type, value=value
-                )
-        return renderer_configuration
+        if not param_prefix:
+            raise RendererConfigurationError(
+                "Array param_prefix must be a non-empty string."
+            )
+
+        @param_method(param_name=array_param_name)
+        def _add_params(
+            renderer_configuration: RendererConfiguration,
+        ) -> RendererConfiguration:
+            array: Sequence[Optional[Any]] = getattr(
+                renderer_configuration.params, array_param_name
+            ).value
+            if array:
+                for idx, value in enumerate(array):
+                    if isinstance(value, Number):
+                        param_type = RendererValueType.NUMBER
+                    else:
+                        param_type = RendererValueType.STRING
+                    renderer_configuration.add_param(
+                        name=f"{param_prefix}{str(idx)}",
+                        param_type=param_type,
+                        value=value,
+                    )
+            return renderer_configuration
+
+        return _add_params(renderer_configuration=renderer_configuration)
 
     @staticmethod
-    @param_method(param_name="value_set")
-    def _get_value_set_string(renderer_configuration: RendererConfiguration) -> str:
-        value_set: List[Optional[Any]] = renderer_configuration.params.value_set.value
-        if len(value_set) > 0:
-            value_set_str = " ".join(
-                [f"$v__{str(idx)}" for idx in range(len(value_set))]
+    def _get_array_string(
+        array_param_name: str,
+        param_prefix: str,
+        renderer_configuration: RendererConfiguration,
+    ) -> str:
+        if not param_prefix:
+            raise RendererConfigurationError(
+                "Array param_prefix must be a non-empty string."
             )
-        else:
-            value_set_str = "[ ]"
-        return value_set_str
+
+        @param_method(param_name=array_param_name)
+        def _get_string(renderer_configuration: RendererConfiguration) -> str:
+            array: Sequence[Optional[Any]] = getattr(
+                renderer_configuration.params, array_param_name
+            ).value
+            if array:
+                array_string = " ".join(
+                    [f"${param_prefix}{str(idx)}" for idx in range(len(array))]
+                )
+            else:
+                array_string = "[ ]"
+            return array_string
+
+        return _get_string(renderer_configuration=renderer_configuration)
 
     @staticmethod
     @param_method(param_name="mostly")
