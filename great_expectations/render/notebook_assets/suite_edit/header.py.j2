@@ -4,7 +4,7 @@ import great_expectations.jupyter_ux
 from great_expectations.checkpoint import LegacyCheckpoint
 from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 
-context = gx.data_context.DataContext()
+context = gx.get_context()
 
 # Feel free to change the name of your suite here. Renaming this will not
 # remove the other one.

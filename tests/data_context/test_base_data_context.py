@@ -10,6 +10,9 @@ from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import BaseDataContext
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
+)
 from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.validator.validator import Validator
@@ -168,8 +171,10 @@ def test_get_config_with_variables_substituted(
 
 
 @pytest.fixture
-def prepare_validator_for_cloud_e2e() -> Callable[[DataContext], Tuple[Validator, str]]:
-    def _closure(context: DataContext) -> Tuple[Validator, str]:
+def prepare_validator_for_cloud_e2e() -> Callable[
+    [CloudDataContext], Tuple[Validator, str]
+]:
+    def _closure(context: CloudDataContext) -> Tuple[Validator, str]:
         # Create a suite to be used in Validator instantiation
         suites = context.list_expectation_suites()
         expectation_suite_ge_cloud_id = suites[0].cloud_id
@@ -260,7 +265,9 @@ def prepare_validator_for_cloud_e2e() -> Callable[[DataContext], Tuple[Validator
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
 def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_cloud_backend(
     mock_save_project_config: mock.MagicMock,
-    prepare_validator_for_cloud_e2e: Callable[[DataContext], Tuple[Validator, str]],
+    prepare_validator_for_cloud_e2e: Callable[
+        [CloudDataContext], Tuple[Validator, str]
+    ],
 ) -> None:
     """
     What does this test do and why?
@@ -294,7 +301,9 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
 def test_validator_e2e_workflow_with_cloud_enabled_context(
     mock_save_project_config: mock.MagicMock,
-    prepare_validator_for_cloud_e2e: Callable[[DataContext], Tuple[Validator, str]],
+    prepare_validator_for_cloud_e2e: Callable[
+        [CloudDataContext], Tuple[Validator, str]
+    ],
 ) -> None:
     """
     What does this test do and why?

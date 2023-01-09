@@ -45,7 +45,7 @@ from great_expectations.checkpoint import LegacyCheckpoint
 from great_expectations.profile.user_configurable_profiler import UserConfigurableProfiler
 from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 
-context = gx.data_context.DataContext()
+context = gx.get_context()
 
 expectation_suite_name = "{self.suite_name}"
 
