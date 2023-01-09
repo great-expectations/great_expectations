@@ -223,7 +223,7 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
         )
 
         if params["mostly"] is not None and params["mostly"] < 1.0:
-            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
+            params_with_json_schema["mostly_pct"]["value"] = num_to_str(  # FIXME
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
             template_str = "Values must be unique across columns, at least $mostly_pct % of the time: "

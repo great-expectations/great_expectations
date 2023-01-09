@@ -196,7 +196,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
             else:
                 template_str = "values must match this set: $set_"
             if params["mostly"] is not None:
-                params_with_json_schema["mostly_pct"]["value"] = num_to_str(
+                params_with_json_schema["mostly_pct"]["value"] = num_to_str(  # FIXME
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
                 template_str += ", at least $mostly_pct % of the time."
@@ -253,7 +253,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
             else:
                 template_str = "values must match this set: $set_"
             if params["mostly"] is not None:
-                params["mostly_pct"] = num_to_str(
+                params["mostly_pct"] = num_to_str(  # FIXME
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
                 template_str += ", at least $mostly_pct % of the time."
