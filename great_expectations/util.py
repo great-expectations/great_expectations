@@ -891,9 +891,6 @@ def build_in_memory_runtime_context() -> AbstractDataContext:
     """
     Create generic in-memory "BaseDataContext" context for manipulations as required by tests.
     """
-    from great_expectations.data_context.data_context.base_data_context import (
-        BaseDataContext,
-    )
     from great_expectations.data_context.types.base import (
         DataContextConfig,
         InMemoryStoreBackendDefaults,
