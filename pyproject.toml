@@ -77,12 +77,6 @@ exclude = [
     'dataset/sparkdf_dataset\.py', # 3
     'dataset/sqlalchemy_dataset\.py', # 16
     'datasource/data_connector/configured_asset_sql_data_connector\.py',  # 47
-    'execution_engine/split_and_sample/data_splitter\.py',  # 6
-    'execution_engine/split_and_sample/pandas_data_sampler\.py',  # 16
-    'execution_engine/split_and_sample/sparkdf_data_sampler\.py',  # 11
-    'execution_engine/split_and_sample/sparkdf_data_splitter\.py',  # 4
-    'execution_engine/split_and_sample/sqlalchemy_data_sampler\.py',  # 10
-    'execution_engine/split_and_sample/sqlalchemy_data_splitter\.py',  # 22
     'expectations/core/expect_column_values_to_be_of_type\.py', # 12
     'expectations/core/expect_column_values_to_not_match_regex_list\.py', # 2
     'expectations/core/expect_column_values_to_not_match_regex\.py', # 2
