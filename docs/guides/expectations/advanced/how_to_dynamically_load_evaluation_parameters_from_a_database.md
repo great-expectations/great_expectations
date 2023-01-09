@@ -62,7 +62,7 @@ Ensure you have added valid credentials to the ``config-variables.yml`` file:
 
 ```python
 import great_expectations as gx
-context = gx.DataContext()
+context = gx.get_context()
 
 batch_kwargs = {
     "datasource": "movies_db",

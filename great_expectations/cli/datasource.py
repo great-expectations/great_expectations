@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
 import click
 from typing_extensions import TypeAlias
 
-from great_expectations import DataContext
 from great_expectations.cli import toolkit
 from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
 from great_expectations.cli.util import verify_library_dependent_modules
@@ -20,6 +19,7 @@ from great_expectations.datasource.types import DatasourceTypes
 from great_expectations.render.renderer.datasource_new_notebook_renderer import (
     DatasourceNewNotebookRenderer,
 )
+from great_expectations.util import get_context
 
 if TYPE_CHECKING:
     from great_expectations.data_context import FileDataContext
@@ -931,6 +931,6 @@ def check_if_datasource_name_exists(
     # TODO: 20210324 Anthony: Note reading the context from disk is a temporary fix to allow use in a notebook
     #  after test_yaml_config(). test_yaml_config() should update a copy of the in-memory data context rather than
     #  making changes directly to the in-memory context.
-    context_on_disk = DataContext(context.root_directory)
+    context_on_disk = get_context(context_root_dir=context.root_directory)
 
     return datasource_name in [d["name"] for d in context_on_disk.list_datasources()]
