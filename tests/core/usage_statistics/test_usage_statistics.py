@@ -9,7 +9,6 @@ import pytest
 from great_expectations.core.usage_statistics.usage_statistics import (
     run_validation_operator_usage_statistics,
 )
-from great_expectations.data_context import DataContext
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import get_context
@@ -195,7 +194,7 @@ def test_global_override_in_yml(tmp_path_factory, monkeypatch):
     )
 
     assert (
-        DataContext(
+        get_context(
             context_root_dir=context_path
         )._project_config.anonymous_usage_statistics.enabled
         is False
@@ -255,7 +254,7 @@ def test_global_override_conf_overrides_yml_and_env_variable(
     )
 
     assert (
-        DataContext(
+        get_context(
             context_root_dir=context_path
         )._project_config.anonymous_usage_statistics.enabled
         is True
@@ -265,7 +264,7 @@ def test_global_override_conf_overrides_yml_and_env_variable(
         "great_expectations.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
         config_dirs,
     ):
-        context = DataContext(context_root_dir=context_path)
+        context = get_context(context_root_dir=context_path)
         project_config = context._project_config
         assert project_config.anonymous_usage_statistics.enabled is False
 
@@ -321,7 +320,7 @@ def test_global_override_env_overrides_yml_and_conf(tmp_path_factory, monkeypatc
     )
 
     assert (
-        DataContext(
+        get_context(
             context_root_dir=context_path
         )._project_config.anonymous_usage_statistics.enabled
         is False
@@ -331,7 +330,7 @@ def test_global_override_env_overrides_yml_and_conf(tmp_path_factory, monkeypatc
         "great_expectations.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
         config_dirs,
     ):
-        context = DataContext(context_root_dir=context_path)
+        context = get_context(context_root_dir=context_path)
         project_config = context._project_config
         assert project_config.anonymous_usage_statistics.enabled is False
 
@@ -387,7 +386,7 @@ def test_global_override_yml_overrides_env_and_conf(tmp_path_factory, monkeypatc
     )
 
     assert (
-        DataContext(
+        get_context(
             context_root_dir=context_path
         )._project_config.anonymous_usage_statistics.enabled
         is False
@@ -397,6 +396,6 @@ def test_global_override_yml_overrides_env_and_conf(tmp_path_factory, monkeypatc
         "great_expectations.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
         config_dirs,
     ):
-        context = DataContext(context_root_dir=context_path)
+        context = get_context(context_root_dir=context_path)
         project_config = context._project_config
         assert project_config.anonymous_usage_statistics.enabled is False

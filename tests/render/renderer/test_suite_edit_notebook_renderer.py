@@ -6,9 +6,6 @@ import nbformat
 import pytest
 from nbconvert.preprocessors import ExecutePreprocessor
 
-import great_expectations as gx
-from great_expectations import DataContext
-
 # noinspection PyProtectedMember
 from great_expectations.cli.v012.suite import _suite_edit
 from great_expectations.core.expectation_suite import (
@@ -23,6 +20,7 @@ from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
 from great_expectations.render.renderer_configuration import MetaNotesFormat
+from great_expectations.util import get_context
 
 
 @pytest.fixture
@@ -58,7 +56,7 @@ def data_context_with_bad_notebooks(tmp_path_factory):
         os.path.join(fixture_dir, custom_notebook_assets_dir),
         str(os.path.join(context_path, "plugins", custom_notebook_assets_dir)),
     )
-    return gx.data_context.DataContext(context_path)
+    return get_context(context_root_dir=context_path)
 
 
 def _create_custom_notebooks_context(path, ge_yml_name):
@@ -94,7 +92,7 @@ def data_context_custom_notebooks(tmp_path_factory):
     ge_yml_fixture = "great_expectations_custom_notebooks.yml"
     context_path = _create_custom_notebooks_context(tmp_path_factory, ge_yml_fixture)
 
-    return gx.data_context.DataContext(context_path)
+    return get_context(context_root_dir=context_path)
 
 
 @pytest.fixture
@@ -106,7 +104,7 @@ def data_context_custom_notebooks_defaults(tmp_path_factory):
     ge_yml_fixture = "great_expectations_custom_notebooks_defaults.yml"
     context_path = _create_custom_notebooks_context(tmp_path_factory, ge_yml_fixture)
 
-    return gx.data_context.DataContext(context_path)
+    return get_context(context_root_dir=context_path)
 
 
 @pytest.fixture
@@ -115,7 +113,7 @@ def critical_suite_with_citations(empty_data_context) -> ExpectationSuite:
     This hand made fixture has a wide range of expectations, and has a mix of
     metadata including an BasicSuiteBuilderProfiler entry, and citations.
     """
-    context: DataContext = empty_data_context
+    context = empty_data_context
     schema = ExpectationSuiteSchema()
     critical_suite = {
         "expectation_suite_name": "critical",
@@ -191,7 +189,7 @@ def suite_with_multiple_citations(empty_data_context) -> ExpectationSuite:
 
     The most recent citation does not have batch_kwargs
     """
-    context: DataContext = empty_data_context
+    context = empty_data_context
     schema = ExpectationSuiteSchema()
     critical_suite = {
         "expectation_suite_name": "critical",
@@ -247,7 +245,7 @@ def warning_suite(empty_data_context) -> ExpectationSuite:
     This hand made fixture has a wide range of expectations, and has a mix of
     metadata including BasicSuiteBuilderProfiler entries.
     """
-    context: DataContext = empty_data_context
+    context = empty_data_context
     schema = ExpectationSuiteSchema()
     warning_suite = {
         "expectation_suite_name": "warning",
@@ -1492,7 +1490,7 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context_no_data_doc
     ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
     # Assertions about output
-    context = DataContext(root_dir)
+    context = get_context(context_root_dir=root_dir)
     obs_validation_result = context.get_validation_result("warning")
     assert obs_validation_result.statistics == {
         "evaluated_expectations": 3,
