@@ -11,7 +11,6 @@ from typing import (
     Generic,
     Iterable,
     List,
-    NamedTuple,
     Optional,
     Tuple,
     Type,
