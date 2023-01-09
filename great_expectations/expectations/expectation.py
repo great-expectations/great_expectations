@@ -453,6 +453,12 @@ class Expectation(metaclass=MetaExpectation):
         Template function that contains the logic that is shared by AtomicPrescriptiveRendererType.SUMMARY and
         LegacyRendererType.PRESCRIPTIVE.
         """
+        # deprecated-v0.15.43
+        warnings.warn(
+            "The method _atomic_prescriptive_template is deprecated as of v0.15.43 and will be removed in v0.18. "
+            "Please refer to Expectation method _prescriptive_template for the latest renderer template pattern.",
+            DeprecationWarning,
+        )
         renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
