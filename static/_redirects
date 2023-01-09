@@ -220,4 +220,8 @@
 /docs/reference/supporting_resources.md https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_overview
 /docs/reference/validation.md https://docs.greatexpectations.io/docs/guides/validation/validate_data_overview
 /docs/guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook https://greatexpectations.io/expectations/
-/docs/guides/miscellaneous/how_to_use_the_great_expectation_docker_images /docs/guides/setup/setup_overview
+
+# Redirects for deprecated API docs
+# /docs/api_docs/classes/great_expectations-data_context-data_context-data_context-DataContext https://m-dx-149-launch-api-docs--launch-api-docs-staging.netlify.app/docs/reference/api/abstract_data_context
+# /docs/api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-test_yaml_config https://m-dx-149-launch-api-docs--launch-api-docs-staging.netlify.app/docs/reference/api/abstract_data_context
+# /docs/api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-create https://m-dx-149-launch-api-docs--launch-api-docs-staging.netlify.app/docs/reference/api/great_expectations.util
