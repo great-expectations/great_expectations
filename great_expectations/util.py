@@ -1789,7 +1789,7 @@ def get_context(
     ge_cloud_organization_id: Optional[str] = None,
     ge_cloud_mode: Optional[bool] = None,
 ) -> AbstractDataContext:
-    """Method to return the appropriate DataContext depending on parameters and environment.
+    """Method to return the appropriate Data Context depending on parameters and environment.
 
     Usage:
         `import great_expectations as gx`
@@ -1860,7 +1860,7 @@ def get_context(
     runtime_environment: Optionally override specific configuration values.
 
     Args:
-        project_config: In-memory configuration for DataContext.
+        project_config: In-memory configuration for Data Context.
         context_root_dir (str or pathlib.Path): Path to directory that contains great_expectations.yml file
         runtime_environment: A dictionary of values can be passed to a DataContext when it is instantiated.
             These values will override both values from the config variables file and
