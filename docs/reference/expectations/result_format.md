@@ -9,7 +9,7 @@ The `result_format` parameter may be either a string or a dictionary which speci
     * `result_format`: Sets the fields to return in result.
     * `unexpected_index_column_names`: Defines columns that can be used to identify unexpected results, for example primary key (PK) column(s) or other columns with unique identifiers. Supports multiple column names as a list.
     * `return_unexpected_index_query`: When running validations, a query (or a set of indices) will be returned that will
-      allow you to retrieve the full set of unexpected results defined by the PK.  Setting this value to `False` will 
+      allow you to retrieve the full set of unexpected results including any columns identified in `unexpected_index_column_names`.  Setting this value to `False` will 
       suppress the output (default is `True`).
     * `partial_unexpected_count`: Sets the number of results to include in partial_unexpected_count, if applicable. If 
       set to 0, this will suppress the unexpected counts.
