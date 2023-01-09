@@ -4,7 +4,7 @@ title: Result format
 
 
 The `result_format` parameter may be either a string or a dictionary which specifies the fields to return in `result`.
-  * For string usage, see [`result_format` values and fields](#result_format-values-and-fields).
+  * For string usage, see `result_format` [values and fields](#result_format-values-and-fields).
   * For dictionary usage, `result_format` which may include the following keys:
     * `result_format`: Sets the fields to return in result.
     * `unexpected_index_column_names`: Defines the primary key (PK) columns used to represent unexpected results.
