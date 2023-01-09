@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Build API docs then build docusaurus docs.
+# Currently used in our netlify pipeline.
+
 echo "Installing dev dependencies"
 pip install -c constraints-dev.txt -e ".[test]"
 
