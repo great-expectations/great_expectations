@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, Optional, Tuple
 
 import altair as alt
 import numpy as np
@@ -47,6 +47,9 @@ from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 from great_expectations.validator.validator import ValidationDependencies
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -1030,7 +1033,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args = (
+        add_param_args: AddParamArgs = (
             ("column", RendererValueType.STRING),
             ("mostly", RendererValueType.NUMBER),
             ("threshold", RendererValueType.NUMBER),

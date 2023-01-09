@@ -47,7 +47,7 @@ from great_expectations.expectations.expectation import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.render.renderer_configuration import RendererParams
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
 class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
@@ -192,7 +192,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args = (
+        add_param_args: AddParamArgs = (
             ("column", RendererValueType.STRING),
             ("value_set", RendererValueType.ARRAY),
             ("mostly", RendererValueType.NUMBER),
@@ -201,15 +201,21 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
-        params: RendererParams = renderer_configuration.params
+        params = renderer_configuration.params
         template_str = ""
 
         if params.value_set:
-            renderer_configuration = cls._add_value_set_params(
-                renderer_configuration=renderer_configuration
+            array_param_name = "value_set"
+            param_prefix = "v__"
+            renderer_configuration = cls._add_array_params(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
             )
-            value_set_str: str = cls._get_value_set_string(
-                renderer_configuration=renderer_configuration
+            value_set_str: str = cls._get_array_string(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
             )
             template_str += f"values must belong to this set: {value_set_str}"
 
@@ -240,7 +246,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[RenderedStringTemplateContent]:
-        renderer_configuration = RendererConfiguration(
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
@@ -324,7 +330,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         elif "partial_unexpected_list" in result.result:
             values = [str(item) for item in result.result["partial_unexpected_list"]]
         else:
-            return
+            return None
 
         classes = ["col-3", "mt-1", "pl-1", "pr-1"]
 
@@ -379,6 +385,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     ) -> None:
         """Validates that a value_set has been provided."""
         super().validate_configuration(configuration)
+        configuration = configuration or self.configuration
         # supports extensibility by allowing value_set to not be provided in config but captured via child-class default_kwarg_values, e.g. parameterized expectations
         value_set = configuration.kwargs.get(
             "value_set"

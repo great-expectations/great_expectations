@@ -49,6 +49,7 @@ class RendererValueType(str, Enum):
     BOOLEAN = "boolean"
     DATETIME = "datetime"
     NUMBER = "number"
+    OBJECT = "object"
     STRING = "string"
 
 
@@ -104,7 +105,7 @@ RendererParams = TypeVar("RendererParams", bound=_RendererValueBase)
 
 RendererValueTypes: TypeAlias = Union[RendererValueType, List[RendererValueType]]
 
-AddParamArgs: TypeAlias = Tuple[str, RendererValueTypes]
+AddParamArgs: TypeAlias = Tuple[Tuple[str, RendererValueTypes], ...]
 
 
 class RendererTableValue(_RendererValueBase):
@@ -115,7 +116,7 @@ class RendererTableValue(_RendererValueBase):
 
 
 class MetaNotesFormat(str, Enum):
-    """Possible formats that can be passed into MetaNotes."""
+    """Possible formats that can be rendered via MetaNotes."""
 
     STRING = "string"
     MARKDOWN = "markdown"
@@ -130,7 +131,7 @@ class MetaNotes(TypedDict):
 
 class RendererConfiguration(GenericModel, Generic[RendererParams]):
     """
-    Configuration object built for each renderer. Operations are performed strictly on this object at the renderer
+    Configuration object built for each renderer. Operations to be performed strictly on this object at the renderer
         implementation-level.
     """
 
@@ -193,6 +194,10 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
         @root_validator(pre=True)
         def _validate_param_type_matches_value(cls, values: dict) -> dict:
+            """
+            This root_validator ensures that a value can be parsed by its RendererValueType.
+            If RendererValueType.OBJECT is passed, it is treated as valid for any value.
+            """
             param_type: RendererValueType = values["schema"]["type"]
             value: Any = values["value"]
             if param_type == RendererValueType.STRING:
@@ -218,9 +223,10 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 elif param_type == RendererValueType.BOOLEAN:
                     if value is not True and value is not False:
                         raise renderer_configuration_error
-                else:
+                elif param_type == RendererValueType.ARRAY:
                     if not isinstance(value, Iterable):
                         raise renderer_configuration_error
+
             return values
 
         def __eq__(self, other: Any) -> bool:
@@ -466,9 +472,6 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     def _choose_param_type_for_value(
         param_types: List[RendererValueType], value: Any
     ) -> RendererValueType:
-        if isinstance(value, dict):
-            return RendererValueType.STRING
-
         for param_type in param_types:
             try:
                 renderer_param: Type[
@@ -480,6 +483,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 return param_type
             except ValidationError:
                 pass
+
         raise RendererConfigurationError(
             f"None of the param_types: {param_types} match the value: {value}"
         )
@@ -493,9 +497,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         """Adds a param that can be substituted into a template string during rendering.
 
         Attributes:
-            name (str): A name for the attribute to be added to this RendererConfiguration instance.
-            param_type (one or more RendererValueTypes): The possible types for the value being substituted. If more
-                than one param_type is passed, inference based on param value will be performed, and the first
+            name (str): A name for the attribute to be added to the params of this RendererConfiguration instance.
+            param_type (one or a list of RendererValueTypes): The possible types for the value being substituted. If
+                more than one param_type is passed, inference based on param value will be performed, and the first
                 param_type to match the value will be selected.
                     One of:
                      - array

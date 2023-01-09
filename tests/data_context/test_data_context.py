@@ -10,7 +10,6 @@ import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
 
-import great_expectations as gx
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -19,7 +18,7 @@ from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.data_context import BaseDataContext, DataContext
+from great_expectations.data_context import DataContext
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -53,6 +52,7 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.util import (
     deep_filter_properties_iterable,
     gen_directory_tree_str,
+    get_context,
     is_library_loadable,
 )
 from tests.test_utils import create_files_in_directory, safe_remove
@@ -70,7 +70,7 @@ parameterized_expectation_suite_name = "my_dag_node.default"
 @pytest.fixture(scope="function")
 def titanic_multibatch_data_context(
     tmp_path,
-) -> DataContext:
+) -> FileDataContext:
     """
     Based on titanic_data_context, but with 2 identical batches of
     data asset "titanic"
@@ -94,7 +94,7 @@ def titanic_multibatch_data_context(
         file_relative_path(__file__, "../test_sets/Titanic.csv"),
         str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
     )
-    return gx.data_context.DataContext(context_path)
+    return get_context(context_root_dir=context_path)
 
 
 @pytest.fixture
@@ -120,7 +120,7 @@ def data_context_with_bad_datasource(tmp_path_factory):
         os.path.join(fixture_dir, "great_expectations_bad_datasource.yml"),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
-    return gx.data_context.DataContext(context_path)
+    return get_context(context_root_dir=context_path)
 
 
 def test_create_duplicate_expectation_suite(titanic_data_context):
@@ -866,7 +866,7 @@ def test_ConfigOnlyDataContext__initialization(
     config_path = str(
         tmp_path_factory.mktemp("test_ConfigOnlyDataContext__initialization__dir")
     )
-    context = BaseDataContext(
+    context = get_context(
         basic_data_context_config,
         config_path,
     )
@@ -892,7 +892,7 @@ def test__normalize_absolute_or_relative_path(
     )
     test_dir = full_test_dir.parts[-1]
     config_path = str(full_test_dir)
-    context = BaseDataContext(
+    context = get_context(
         basic_data_context_config,
         config_path,
     )
@@ -1418,11 +1418,11 @@ def test_load_config_variables_property(
     try:
         # We should be able to load different files based on an environment variable
         monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "dev")
-        context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
+        context = get_context(basic_data_context_config, context_root_dir=base_path)
         config_vars = context.config_variables
         assert config_vars["env"] == "dev"
         monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "prod")
-        context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
+        context = get_context(basic_data_context_config, context_root_dir=base_path)
         config_vars = context.config_variables
         assert config_vars["env"] == "prod"
     except Exception:

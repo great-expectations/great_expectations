@@ -5,10 +5,10 @@ import pytest
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import DataContextError
 from great_expectations.self_check.util import expectationSuiteSchema
+from great_expectations.util import get_context
 
 
 @pytest.fixture()
@@ -29,7 +29,7 @@ def parameterized_expectation_suite(empty_data_context_stats_enabled):
 def validation_operators_data_context(
     basic_data_context_config_for_validation_operator, filesystem_csv_4
 ):
-    data_context = BaseDataContext(basic_data_context_config_for_validation_operator)
+    data_context = get_context(basic_data_context_config_for_validation_operator)
 
     data_context.add_datasource(
         "my_datasource",

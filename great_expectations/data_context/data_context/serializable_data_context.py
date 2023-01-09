@@ -448,7 +448,7 @@ class SerializableDataContext(AbstractDataContext):
         cls, ge_dir: PathStr
     ) -> Optional[SerializableDataContext]:
         try:
-            context = cls(ge_dir)
+            context = cls(context_root_dir=ge_dir)
             return context
         except (
             gx_exceptions.DataContextError,

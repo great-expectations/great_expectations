@@ -17,7 +17,7 @@ def add_values_with_json_schema_from_list_in_params(
 ) -> dict:
     # deprecated-v0.15.29
     warnings.warn(
-        "The module great_expectations.expectations.util.py is deprecated as of v0.15.29 in and will be removed in "
+        "The module great_expectations.expectations.util.py is deprecated as of v0.15.29 and will be removed in "
         "v0.18. Please import method add_values_with_json_schema_from_list_in_params from "
         "great_expectations.expectations.expectation.",
         DeprecationWarning,
