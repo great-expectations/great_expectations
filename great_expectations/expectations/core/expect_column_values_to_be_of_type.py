@@ -190,9 +190,10 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
     )
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration)
+        configuration = configuration or self.configuration
         try:
             assert "type_" in configuration.kwargs, "type_ is required"
         except AssertionError as e:

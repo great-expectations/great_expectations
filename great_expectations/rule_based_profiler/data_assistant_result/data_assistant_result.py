@@ -157,7 +157,7 @@ class DataAssistantResult(SerializableDictDot):
     _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
 
     @property
-    def metric_expectation_map(self) -> Dict[Union[str, Tuple[str]], str]:
+    def metric_expectation_map(self) -> Dict[Union[str, Tuple[str, ...]], str]:
         """
         A mapping is defined for which metrics to plot and their associated expectations.
         """

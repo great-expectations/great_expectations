@@ -146,11 +146,10 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
     )
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         assert "strftime_format" in configuration.kwargs, "strftime_format is required"
 
