@@ -11,7 +11,6 @@ from typing import (
     Generic,
     Iterable,
     List,
-    NamedTuple,
     Optional,
     Tuple,
     Type,
@@ -106,14 +105,7 @@ RendererParams = TypeVar("RendererParams", bound=_RendererValueBase)
 
 RendererValueTypes: TypeAlias = Union[RendererValueType, List[RendererValueType]]
 
-
-class AddParamKeywordArgs(NamedTuple):
-    name: str
-    param_type: RendererValueTypes
-    value: Optional[Any] = None
-
-
-AddParamArgs: TypeAlias = Tuple[AddParamKeywordArgs, ...]
+AddParamArgs: TypeAlias = Tuple[Tuple[str, RendererValueTypes], ...]
 
 
 class RendererTableValue(_RendererValueBase):
