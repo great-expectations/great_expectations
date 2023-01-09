@@ -28,7 +28,7 @@ the configuration will not be persisted, and you will receive a `UserWarning`. W
 configuration be used for exploratory analysis, with the final configuration added at the Checkpoint-level.
 
 ### Expectation Level Config
-To apply `result_format` to an Expectation, pass it into the Expectation. We will first need to obtain a Validator object instance by running the `$ great_expectations suite new` command.
+To apply `result_format` to an Expectation, pass it into the Expectation. We will first need to obtain a Validator object instance (e.g. by running the `$ great_expectations suite new` command).
 
 ```python name="result_format_complete_example_set"
 ```
