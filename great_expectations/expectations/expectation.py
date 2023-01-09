@@ -124,7 +124,7 @@ from great_expectations.validator.validator import ValidationDependencies, Valid
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
-    from great_expectations.render.renderer_configuration import MetaNotes
+    from great_expectations.render.renderer_configuration import AddParamArgs, MetaNotes
 
 logger = logging.getLogger(__name__)
 
@@ -386,18 +386,16 @@ class Expectation(metaclass=MetaExpectation):
         else:
             template_str = f"{template_str[:-2]}."
 
-        add_param_args = (
-            (
-                "expectation_type",
-                RendererValueType.STRING,
-                renderer_configuration.expectation_type,
-            ),
-            ("kwargs", RendererValueType.STRING, renderer_configuration.kwargs),
+        renderer_configuration.add_param(
+            name="expectation_type",
+            param_type=RendererValueType.STRING,
+            value=renderer_configuration.expectation_type,
         )
-        for name, param_type, value in add_param_args:
-            renderer_configuration.add_param(
-                name=name, param_type=param_type, value=value
-            )
+        renderer_configuration.add_param(
+            name="kwargs",
+            param_type=RendererValueType.STRING,
+            value=renderer_configuration.kwargs,
+        )
 
         value_obj = renderedAtomicValueSchema.load(
             {
@@ -455,6 +453,12 @@ class Expectation(metaclass=MetaExpectation):
         Template function that contains the logic that is shared by AtomicPrescriptiveRendererType.SUMMARY and
         LegacyRendererType.PRESCRIPTIVE.
         """
+        # deprecated-v0.15.43
+        warnings.warn(
+            "The method _atomic_prescriptive_template is deprecated as of v0.15.43 and will be removed in v0.18. "
+            "Please refer to Expectation method _prescriptive_template for the latest renderer template pattern.",
+            DeprecationWarning,
+        )
         renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
@@ -482,21 +486,19 @@ class Expectation(metaclass=MetaExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> RenderedAtomicContent:
-        (
-            template_str,
-            params_with_json_schema,
-            meta_notes,
-            _,
-        ) = cls._atomic_prescriptive_template(
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
         )
+        renderer_configuration = cls._prescriptive_template(
+            renderer_configuration=renderer_configuration,
+        )
         value_obj = renderedAtomicValueSchema.load(
             {
-                "template": template_str,
-                "params": params_with_json_schema,
-                "meta_notes": meta_notes,
+                "template": renderer_configuration.template_str,
+                "params": renderer_configuration.params.dict(),
+                "meta_notes": renderer_configuration.meta_notes,
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
         )
@@ -933,18 +935,16 @@ class Expectation(metaclass=MetaExpectation):
         else:
             template_str = f"{template_str[:-2]}."
 
-        add_param_args = (
-            (
-                "expectation_type",
-                RendererValueType.STRING,
-                renderer_configuration.expectation_type,
-            ),
-            ("kwargs", RendererValueType.STRING, renderer_configuration.kwargs),
+        renderer_configuration.add_param(
+            name="expectation_type",
+            param_type=RendererValueType.STRING,
+            value=renderer_configuration.expectation_type,
         )
-        for name, param_type, value in add_param_args:
-            renderer_configuration.add_param(
-                name=name, param_type=param_type, value=value
-            )
+        renderer_configuration.add_param(
+            name="kwargs",
+            param_type=RendererValueType.STRING,
+            value=renderer_configuration.kwargs,
+        )
 
         value_obj = renderedAtomicValueSchema.load(
             {
@@ -3361,6 +3361,12 @@ def add_values_with_json_schema_from_list_in_params(
     Utility function used in _atomic_prescriptive_template() to take list values from a given params dict key,
     convert each value to a dict with JSON schema type info, then add it to params_with_json_schema (dict).
     """
+    # deprecated-v0.15.43
+    warnings.warn(
+        "The method add_values_with_json_schema_from_list_in_params is deprecated as of v0.15.43 and will be removed in "
+        "v0.18. Please refer to Expectation method _prescriptive_template for the latest renderer template pattern.",
+        DeprecationWarning,
+    )
     target_list = params.get(param_key_with_list)
     if target_list is not None and len(target_list) > 0:
         for i, v in enumerate(target_list):
