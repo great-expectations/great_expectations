@@ -1246,11 +1246,15 @@ class Expectation(metaclass=MetaExpectation):
         """
 
         if debug_logger is not None:
-            _debug = lambda x: debug_logger.debug(f"(run_diagnostics) {x}")
-            _error = lambda x: debug_logger.error(f"(run_diagnostics) {x}")
+            _debug = lambda x: debug_logger.debug(  # noqa: E731
+                f"(run_diagnostics) {x}"
+            )
+            _error = lambda x: debug_logger.error(  # noqa: E731
+                f"(run_diagnostics) {x}"
+            )
         else:
-            _debug = lambda x: x
-            _error = lambda x: x
+            _debug = lambda x: x  # noqa: E731
+            _error = lambda x: x  # noqa: E731
 
         library_metadata: AugmentedLibraryMetadata = (
             self._get_augmented_library_metadata()
@@ -1472,8 +1476,8 @@ class Expectation(metaclass=MetaExpectation):
             top_level_suppress_test_for = example.get("suppress_test_for")
             for test in example["tests"]:
                 if (
-                    test.get("include_in_gallery") == True
-                    or return_only_gallery_examples == False
+                    test.get("include_in_gallery") == True  # noqa: E712
+                    or return_only_gallery_examples == False  # noqa: E712
                 ):
                     copied_test = deepcopy(test)
                     if top_level_only_for:
@@ -1698,11 +1702,15 @@ class Expectation(metaclass=MetaExpectation):
         """Generate test results. This is an internal method for run_diagnostics."""
 
         if debug_logger is not None:
-            _debug = lambda x: debug_logger.debug(f"(_get_test_results) {x}")
-            _error = lambda x: debug_logger.error(f"(_get_test_results) {x}")
+            _debug = lambda x: debug_logger.debug(  # noqa: E731
+                f"(_get_test_results) {x}"
+            )
+            _error = lambda x: debug_logger.error(  # noqa: E731
+                f"(_get_test_results) {x}"
+            )
         else:
-            _debug = lambda x: x
-            _error = lambda x: x
+            _debug = lambda x: x  # noqa: E731
+            _error = lambda x: x  # noqa: E731
         _debug("Starting")
 
         test_results = []
@@ -1848,7 +1856,7 @@ class Expectation(metaclass=MetaExpectation):
         elif isinstance(rendered_result, int):
             result = repr(rendered_result)
 
-        elif rendered_result == None:
+        elif rendered_result is None:
             result = ""
 
         else:
