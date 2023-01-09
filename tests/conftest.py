@@ -2660,8 +2660,7 @@ def empty_data_context_in_cloud_mode(
         autospec=True,
         side_effect=mocked_get_cloud_config,
     ):
-        context = get_context(
-            cloud_mode=True,
+        context = CloudDataContext(
             context_root_dir=project_path_name,
         )
         return context
