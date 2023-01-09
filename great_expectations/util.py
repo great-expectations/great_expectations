@@ -892,9 +892,6 @@ def build_in_memory_runtime_context() -> AbstractDataContext:
     """
     Create generic in-memory "BaseDataContext" context for manipulations as required by tests.
     """
-    from great_expectations.data_context.data_context.base_data_context import (
-        BaseDataContext,
-    )
     from great_expectations.data_context.types.base import (
         DataContextConfig,
         InMemoryStoreBackendDefaults,
@@ -944,7 +941,7 @@ def build_in_memory_runtime_context() -> AbstractDataContext:
         store_backend_defaults=InMemoryStoreBackendDefaults(),
     )
 
-    context = BaseDataContext(project_config=data_context_config)
+    context = get_context(project_config=data_context_config)
 
     return context
 
@@ -990,9 +987,7 @@ def validate(
         logger.info("Using expectation suite from DataContext.")
         # Allow data_context to be a string, and try loading it from path in that case
         if isinstance(data_context, str):
-            from great_expectations.data_context import DataContext
-
-            data_context = DataContext(data_context)
+            data_context = get_context(context_root_dir=data_context)
 
         expectation_suite = data_context.get_expectation_suite(
             expectation_suite_name=expectation_suite_name
