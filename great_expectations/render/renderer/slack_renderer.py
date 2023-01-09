@@ -80,7 +80,9 @@ class SlackRenderer(Renderer):
             if cloud_url:
                 # This adds hyperlinks to GX Cloud
                 title_hlink = f"*<{cloud_url} | GX Cloud Validation Result >*"
-                batch_validation_status_hlink = f"*Batch Validation Status*: *<{cloud_url} | {status}>*"
+                batch_validation_status_hlink = (
+                    f"*Batch Validation Status*: *<{cloud_url} | {status}>*"
+                )
                 summary_text += f"""{title_hlink}  
 {batch_validation_status_hlink}
                 """

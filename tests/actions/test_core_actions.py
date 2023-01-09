@@ -217,7 +217,7 @@ def test_SlackNotificationAction(
         renderer=renderer,
         slack_webhook=slack_webhook,
         notify_on=notify_on,
-        base_url=base_url
+        base_url=base_url,
     )
 
     assert slack_action.run(

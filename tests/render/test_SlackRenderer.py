@@ -1,9 +1,10 @@
+import pytest
+
 from great_expectations.core.batch import BatchDefinition, IDDict
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.render.renderer import SlackRenderer
-import pytest
 
 
 @pytest.fixture
@@ -77,7 +78,9 @@ def success_expectation_suite_validation_result():
     )
 
 
-def test_SlackRenderer_validation_results_with_datadocs(success_expectation_suite_validation_result):
+def test_SlackRenderer_validation_results_with_datadocs(
+    success_expectation_suite_validation_result,
+):
     validation_result_suite = success_expectation_suite_validation_result
 
     rendered_output = SlackRenderer().render(validation_result_suite)
@@ -419,10 +422,13 @@ def test_create_failed_expectations_text():
     )
 
 
-def test_SlackRenderer_show_failed_expectations(failed_expectation_suite_validation_result):
+def test_SlackRenderer_show_failed_expectations(
+    failed_expectation_suite_validation_result,
+):
     slack_renderer = SlackRenderer()
     rendered_msg = slack_renderer.render(
-        validation_result=failed_expectation_suite_validation_result, show_failed_expectations=True
+        validation_result=failed_expectation_suite_validation_result,
+        show_failed_expectations=True,
     )
 
     assert (
@@ -436,11 +442,13 @@ def test_slack_renderer_shows_gx_cloud_url(failed_expectation_suite_validation_r
     slack_renderer = SlackRenderer()
     cloud_url = "app.greatexpectations.io/?validationResultId=123-456-789"
     rendered_msg = slack_renderer.render(
-        validation_result=failed_expectation_suite_validation_result, show_failed_expectations=True,
-        cloud_url=cloud_url
+        validation_result=failed_expectation_suite_validation_result,
+        show_failed_expectations=True,
+        cloud_url=cloud_url,
     )
 
     assert (
-        ""f"*<{cloud_url} | Failed :x:>*"""
-        in rendered_msg["blocks"][0]["text"]["text"]
+        ""
+        f"*<{cloud_url} | Failed :x:>*"
+        "" in rendered_msg["blocks"][0]["text"]["text"]
     )

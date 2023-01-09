@@ -167,7 +167,7 @@ class SlackNotificationAction(ValidationAction):
         notify_on="all",
         notify_with=None,
         show_failed_expectations=False,
-        base_url=None
+        base_url=None,
     ) -> None:
         """Construct a SlackNotificationAction
 
@@ -250,10 +250,7 @@ class SlackNotificationAction(ValidationAction):
         base_url = getattr(self, "base_url", None)
         cloud_id = getattr(validation_result_suite_identifier, "cloud_id", None)
         cloud_url = None
-        if (
-            base_url
-            and cloud_id
-        ):
+        if base_url and cloud_id:
             cloud_url = f"{self.base_url}/?validationResultId={validation_result_suite_identifier.cloud_id}"
 
         if (
@@ -268,7 +265,7 @@ class SlackNotificationAction(ValidationAction):
                 data_docs_pages,
                 self.notify_with,
                 self.show_failed_expectations,
-                cloud_url
+                cloud_url,
             )
 
             # this will actually send the POST request to the Slack webapp server
