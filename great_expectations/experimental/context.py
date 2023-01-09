@@ -9,6 +9,7 @@ from pydantic import DirectoryPath, validate_arguments
 
 from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.sources import _SourceFactories
+from great_expectations.util import get_context
 
 if TYPE_CHECKING:
     from great_expectations.experimental.datasources.interfaces import Datasource
@@ -37,7 +38,7 @@ class DataContext:
         _config_file: str = "config.yaml",  # for ease of use during POC
     ) -> DataContext:
         if not cls._context:
-            cls._context = DataContext(context_root_dir=context_root_dir)
+            cls._context = get_context(context_root_dir=context_root_dir)
 
         assert cls._context
         if cls._context.root_directory:
