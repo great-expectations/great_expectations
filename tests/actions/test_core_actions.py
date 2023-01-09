@@ -128,7 +128,6 @@ def test_SlackNotificationAction(
     slack_token = "test"
     slack_channel = "test"
     notify_on = "all"
-    base_url = "https://app.greatexpectations.io"
 
     # test with just web_hook set; expect pass
     slack_action = SlackNotificationAction(
@@ -195,29 +194,6 @@ def test_SlackNotificationAction(
         renderer=renderer,
         slack_webhook=slack_webhook,
         notify_on=notify_on,
-    )
-
-    assert slack_action.run(
-        validation_result_suite_identifier=validation_result_suite_id,
-        validation_result_suite=ExpectationSuiteValidationResult(
-            success=False,
-            results=[],
-            statistics={
-                "successful_expectations": [],
-                "evaluated_expectations": [],
-            },
-        ),
-        data_asset=None,
-    ) == {"slack_notification_result": "Slack notification succeeded."}
-
-    # test with GX Cloud Base URL with failed run; expect pass
-    notify_on = "failure"
-    slack_action = SlackNotificationAction(
-        data_context=data_context_parameterized_expectation_suite,
-        renderer=renderer,
-        slack_webhook=slack_webhook,
-        notify_on=notify_on,
-        base_url=base_url,
     )
 
     assert slack_action.run(
