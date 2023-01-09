@@ -45,6 +45,9 @@ except ImportError:
     concat = None
 
 if TYPE_CHECKING:
+    import sqlalchemy as sa
+    from sqlalchemy.sql.expression import Cast, ColumnOperators
+
     from great_expectations.execution_engine.sqlalchemy_execution_engine import (
         SqlAlchemyExecutionEngine,
     )
@@ -358,11 +361,12 @@ class SqlAlchemyDataSplitter(DataSplitter):
         processed_splitter_method_name: str = self._get_splitter_method_name(
             splitter_method_name
         )
+        batch_identifiers_list: List[dict]
         if self._is_datetime_splitter(processed_splitter_method_name):
             splitter_fn_name: str = self.DATETIME_SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING[
                 processed_splitter_method_name
             ]
-            batch_identifiers_list: List[dict] = getattr(self, splitter_fn_name)(
+            batch_identifiers_list = getattr(self, splitter_fn_name)(
                 execution_engine, table_name, **splitter_kwargs
             )
         else:
@@ -497,9 +501,11 @@ class SqlAlchemyDataSplitter(DataSplitter):
         # future improvements.
         # NOTE: AJB 20220511 for awsathena we need to cast extracted date parts
         # to string first before concatenating them.
+        concat_clause: List[Label]
+        concat_date_parts: Cast | ColumnOperators
         if len(date_parts) == 1:
             # MSSql does not accept single item concatenation
-            concat_clause: List[Label] = [
+            concat_clause = [
                 sa.func.distinct(
                     sa.func.extract(date_parts[0].value, sa.column(column_name)).label(
                         date_parts[0].value
@@ -511,6 +517,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
             # NOTE: <Alex>6/29/2022</Alex>
             Certain SQLAlchemy-compliant backends (e.g., Amazon Redshift, SQLite) allow only binary operators for "CONCAT".
             """
+            concat_clause: list[Label]
             if self._dialect == GXSqlDialect.SQLITE:
                 concat_date_parts = sa.cast(
                     sa.func.extract(date_parts[0].value, sa.column(column_name)),
