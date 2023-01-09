@@ -11,6 +11,7 @@ from typing import (
     Generic,
     Iterable,
     List,
+    NamedTuple,
     Optional,
     Tuple,
     Type,
@@ -25,6 +26,7 @@ from pydantic import (
     BaseModel,
     Field,
     ValidationError,
+    constr,
     create_model,
     root_validator,
     validator,
@@ -105,7 +107,13 @@ RendererParams = TypeVar("RendererParams", bound=_RendererValueBase)
 
 RendererValueTypes: TypeAlias = Union[RendererValueType, List[RendererValueType]]
 
-AddParamArgs: TypeAlias = Tuple[Tuple[str, RendererValueTypes], ...]
+
+class AddParamKeywordArgs(NamedTuple):
+    name: str
+    param_type: RendererValueTypes
+
+
+AddParamArgs: TypeAlias = Tuple[AddParamKeywordArgs, ...]
 
 
 class RendererTableValue(_RendererValueBase):
@@ -490,7 +498,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
     def add_param(
         self,
-        name: str,
+        name: constr(min_length=1),
         param_type: RendererValueTypes,
         value: Optional[Any] = None,
     ) -> None:
