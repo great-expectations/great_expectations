@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -12,6 +12,10 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import substitute_none_for_missing
 from great_expectations.rule_based_profiler.config import (
     ParameterBuilderConfig,
@@ -25,6 +29,9 @@ from great_expectations.rule_based_profiler.parameter_container import (
     PARAMETER_KEY,
     VARIABLES_KEY,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
 class ExpectTableColumnsToMatchSet(TableExpectation):
@@ -137,7 +144,7 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
     )
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -168,51 +175,46 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("column_set", RendererValueType.ARRAY),
+            ("exact_match", RendererValueType.BOOLEAN),
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs, ["column_set", "exact_match"]
-        )
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
-        if params["column_set"] is None:
+        params = renderer_configuration.params
+
+        if not params.column_set:
             template_str = "Must specify a set or list of columns."
-
         else:
-            # standardize order of the set for output
-            params["column_list"] = list(params["column_set"])
-
-            column_list_template_str = ", ".join(
-                [f"$column_list_{idx}" for idx in range(len(params["column_list"]))]
+            array_param_name = "column_set"
+            param_prefix = "column_set_"
+            renderer_configuration = cls._add_array_params(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
+            )
+            column_set_str: str = cls._get_array_string(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
             )
 
-            exact_match_str = "exactly" if params["exact_match"] is True else "at least"
+            exact_match_str = (
+                "exactly"
+                if params.exact_match and params.exact_match.value is True
+                else "at least"
+            )
 
-            template_str = f"Must have {exact_match_str} these columns (in any order): {column_list_template_str}"
+            template_str = f"Must have {exact_match_str} these columns (in any order): {column_set_str}"
 
-            for idx in range(len(params["column_list"])):
-                params[f"column_list_{str(idx)}"] = params["column_list"][idx]
+        renderer_configuration.template_str = template_str
 
-        params_with_json_schema = {
-            "column_list": {
-                "schema": {"type": "array"},
-                "value": params.get("column_list"),
-            },
-            "exact_match": {
-                "schema": {"type": "boolean"},
-                "value": params.get("exact_match"),
-            },
-        }
-        return template_str, params_with_json_schema, None, styling
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)

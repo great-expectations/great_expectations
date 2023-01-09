@@ -7,12 +7,11 @@ from click.testing import CliRunner
 from freezegun import freeze_time
 
 from great_expectations.cli import cli
-from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.util import gen_directory_tree_str
+from great_expectations.util import gen_directory_tree_str, get_context
 from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
@@ -194,7 +193,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     shutil.rmtree(validations_dir)
     os.mkdir(validations_dir)
     shutil.rmtree(os.path.join(uncommitted_dir, "data_docs", "local_site"))
-    context = DataContext(ge_dir)
+    context = get_context(context_root_dir=ge_dir)
     assert not context.list_expectation_suites()
 
     data_folder_path = os.path.join(project_dir, "data")
@@ -240,7 +239,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     config = _load_config_file(os.path.join(ge_dir, FileDataContext.GX_YML))
     assert "data__dir" in config["datasources"].keys()
 
-    context = DataContext(ge_dir)
+    context = get_context(context_root_dir=ge_dir)
     assert len(context.list_datasources()) == 1
     assert context.list_datasources()[0]["name"] == "data__dir"
     assert context.list_datasources()[0]["class_name"] == "PandasDatasource"
@@ -259,7 +258,7 @@ def _remove_all_datasources(ge_dir):
     with open(config_path, "w") as f:
         yaml.dump(config, f)
 
-    context = DataContext(ge_dir)
+    context = get_context(context_root_dir=ge_dir)
     assert context.list_datasources() == []
 
 
@@ -300,7 +299,9 @@ def initialized_project(mock_webbrowser, monkeypatch, tmp_path_factory):
         in mock_webbrowser.call_args[0][0]
     )
 
-    context = DataContext(os.path.join(project_dir, FileDataContext.GX_DIR))
+    context = get_context(
+        context_root_dir=os.path.join(project_dir, FileDataContext.GX_DIR)
+    )
     assert isinstance(context, FileDataContext)
     assert len(context.list_datasources()) == 1
     return project_dir
@@ -318,7 +319,7 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     project_dir = initialized_project
     ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
 
-    context = DataContext(ge_dir)
+    context = get_context(context_root_dir=ge_dir)
     context.add_datasource(
         "another_datasource",
         module_name="great_expectations.datasource",
@@ -464,7 +465,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     _delete_and_recreate_dir(data_docs_dir)
     _delete_and_recreate_dir(validations_dir)
 
-    context = DataContext(ge_dir)
+    context = get_context(context_root_dir=ge_dir)
     assert context.list_expectation_suites() == []
 
     runner = CliRunner(mix_stderr=False)
