@@ -1,4 +1,4 @@
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py imports"
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py imports">
 import os
 
 import great_expectations as gx
@@ -20,11 +20,11 @@ bigquery_dataset = "demo"
 
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py get_context"
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py get_context">
 context = gx.get_context()
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py datasource_yaml"
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py datasource_yaml">
 datasource_yaml = f"""
 name: my_bigquery_datasource
 class_name: Datasource
@@ -49,16 +49,16 @@ datasource_yaml = datasource_yaml.replace(
     CONNECTION_STRING,
 )
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py test_yaml_config"
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py test_yaml_config">
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py add_datasource"
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py add_datasource">
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 
 # Test for RuntimeBatchRequest using a query.
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py runtime_batch_request"
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py runtime_batch_request">
 batch_request = RuntimeBatchRequest(
     datasource_name="my_bigquery_datasource",
     data_connector_name="default_runtime_data_connector_name",

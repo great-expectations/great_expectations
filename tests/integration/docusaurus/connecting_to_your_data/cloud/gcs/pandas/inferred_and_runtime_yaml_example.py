@@ -1,6 +1,6 @@
 from typing import List
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py imports"
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py imports">
 from ruamel import yaml
 
 import great_expectations as gx
@@ -8,11 +8,11 @@ from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchReque
 
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py get_context"
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py get_context">
 context = gx.get_context()
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py datasource_yaml"
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py datasource_yaml">
 datasource_yaml = rf"""
 name: my_gcs_datasource
 class_name: Datasource
@@ -43,12 +43,12 @@ datasource_yaml = datasource_yaml.replace(
 
 context.test_yaml_config(datasource_yaml)
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py add_datasource"
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py add_datasource">
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 
 # Here is a RuntimeBatchRequest using a path to a single CSV file
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py rumtime_batch_request"
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py rumtime_batch_request">
 batch_request = RuntimeBatchRequest(
     datasource_name="my_gcs_datasource",
     data_connector_name="default_runtime_data_connector_name",
@@ -64,7 +64,7 @@ batch_request.runtime_parameters[
     "path"
 ] = f"gs://test_docs_data/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv"
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py validator_creation"
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py validator_creation">
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
 )
@@ -84,7 +84,7 @@ batch: Batch = batch_list[0]
 assert batch.data.dataframe.shape[0] == 10000
 
 # Here is a BatchRequest naming a data_asset
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py batch_request"
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py batch_request">
 batch_request = BatchRequest(
     datasource_name="my_gcs_datasource",
     data_connector_name="default_inferred_data_connector_name",
