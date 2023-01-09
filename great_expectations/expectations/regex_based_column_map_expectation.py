@@ -68,7 +68,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         map_metric = "column_values.match_" + regex_snake_name + "_regex"
 
         # Define the class using `type`. This allows us to name it dynamically.
-        new_column_regex_metric_provider = type(
+        new_column_regex_metric_provider = type(  # noqa: F841 # never used
             f"(ColumnValuesMatch{regex_camel_name}Regex",
             (RegexColumnMapMetricProvider,),
             {
@@ -257,7 +257,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
 
-        params_with_json_schema = {
+        params_with_json_schema = {  # noqa: F841 # never used
             "column": {"schema": {"type": "string"}, "value": params.get("column")},
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
