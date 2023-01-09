@@ -1041,10 +1041,12 @@ class Validator:
         result: ExpectationValidationResult
         for configuration in processed_configurations:
             try:
+                runtime_configuration_default = copy.deepcopy(runtime_configuration)
+
                 result = configuration.metrics_validate(
                     metrics=resolved_metrics,
                     execution_engine=self._execution_engine,
-                    runtime_configuration=runtime_configuration,
+                    runtime_configuration=runtime_configuration_default,
                 )
                 evrs.append(result)
             except Exception as err:
