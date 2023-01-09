@@ -27,7 +27,7 @@ const constructSnippetMap = require('./snippet')
 function codeImport () {
   // Instantiated within the import so it can be hot-reloaded
   const snippetMap = constructSnippetMap('.')
-  console.log(snippetMap)
+  // console.log(snippetMap)
 
   return function transformer (tree, file) {
     const codes = []
