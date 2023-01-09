@@ -1,4 +1,4 @@
-# <snippet>
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py imports">
 import pandas as pd
 from ruamel import yaml
 
@@ -7,7 +7,7 @@ from great_expectations.core.batch import RuntimeBatchRequest
 
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py get_context">
 context = gx.get_context()
 # </snippet>
 
@@ -64,7 +64,7 @@ great_expectations datasource new
 assert test_yaml == test_python
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py create_expectation_suite">
 context.create_expectation_suite("my_expectation_suite")
 # </snippet>
 
@@ -114,7 +114,7 @@ assert context.list_checkpoints() == ["my_missing_keys_checkpoint"]
 
 df = pd.read_csv("./data/yellow_tripdata_sample_2019-01.csv")
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py run_checkpoint">
 results = context.run_checkpoint(
     checkpoint_name="my_missing_keys_checkpoint",
     batch_request={
@@ -165,7 +165,7 @@ assert set(context.list_checkpoints()) == {
 df_1 = pd.read_csv("./data/yellow_tripdata_sample_2019-01.csv")
 df_2 = pd.read_csv("./data/yellow_tripdata_sample_2019-02.csv")
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py runtime_batch_request">
 batch_request_1 = RuntimeBatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="default_runtime_data_connector_name",
