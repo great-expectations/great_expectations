@@ -11,7 +11,7 @@ from great_expectations.core.batch import RuntimeBatchRequest
 context = gx.get_context()
 # </snippet>
 
-# YAML <snippet>
+# YAML <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py datasource_yaml">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -30,7 +30,7 @@ context.add_datasource(**yaml.safe_load(datasource_yaml))
 
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
-# Python <snippet>
+# Python <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py datasource_config">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -55,7 +55,7 @@ test_python = context.test_yaml_config(
 
 # CLI
 datasource_cli = """
-<snippet>
+<snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py datasource_new_cli">
 great_expectations datasource new
 </snippet>
 """
@@ -68,7 +68,7 @@ assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
 context.create_expectation_suite("my_expectation_suite")
 # </snippet>
 
-# YAML <snippet>
+# YAML <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py checkpoint_config_yaml_missing_keys">
 checkpoint_yaml = """
 name: my_missing_keys_checkpoint
 config_version: 1
@@ -85,7 +85,7 @@ context.add_checkpoint(**yaml.safe_load(checkpoint_yaml))
 
 test_yaml = context.test_yaml_config(checkpoint_yaml, return_mode="report_object")
 
-# Python <snippet>
+# Python <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py checkpoint_config_python_missing_keys">
 checkpoint_config = {
     "name": "my_missing_keys_checkpoint",
     "config_version": 1,
@@ -129,7 +129,7 @@ results = context.run_checkpoint(
 # NOTE: The following code is only for testing and can be ignored by users.
 assert results["success"] == True
 
-# YAML <snippet>
+# YAML <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py checkpoint_config_yaml_missing_batch_request">
 checkpoint_yaml = """
 name: my_missing_batch_request_checkpoint
 config_version: 1
@@ -141,7 +141,7 @@ context.add_checkpoint(**yaml.safe_load(checkpoint_yaml))
 
 test_yaml = context.test_yaml_config(checkpoint_yaml, return_mode="report_object")
 
-# Python <snippet>
+# Python <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py checkpoint_config_python_missing_batch_request">
 checkpoint_config = {
     "name": "my_missing_batch_request_checkpoint",
     "config_version": 1,
