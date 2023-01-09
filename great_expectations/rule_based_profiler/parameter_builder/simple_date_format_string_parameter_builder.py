@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Set, Union
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain
 from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
     AttributedResolvedMetrics,
@@ -197,7 +197,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         # This should never happen.
         if len(metric_computation_result.attributed_resolved_metrics) != 1:
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({metric_computation_result.attributed_resolved_metrics} found).'
             )
 
@@ -212,7 +212,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         metric_values = attributed_resolved_metrics.conditioned_metric_values
 
         if metric_values is None:
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"Result of metric computations for {self.__class__.__name__} is empty."
             )
 

@@ -9,7 +9,7 @@ import ruamel
 from dateutil.parser import parse
 from ruamel.yaml import yaml_object
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 
 yaml = ruamel.yaml.YAML()
 
@@ -133,13 +133,13 @@ class DataSplitter(abc.ABC):
             None, this method raises exceptions if the config is invalid.
         """
         if len(date_parts) == 0:
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 "date_parts are required when using split_on_date_parts."
             )
         if not all(
             (isinstance(dp, DatePart)) or (isinstance(dp, str)) for dp in date_parts
         ):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 "date_parts should be of type DatePart or str."
             )
 
@@ -156,7 +156,7 @@ class DataSplitter(abc.ABC):
         try:
             [DatePart(date_part_string) for date_part_string in date_part_strings]
         except ValueError as e:
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 f"{e} please only specify strings that are supported in DatePart: {[dp.value for dp in DatePart]}"
             )
 

@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource import PandasDatasource
 from great_expectations.profile.base import DatasetProfiler, Profiler
@@ -366,7 +366,7 @@ def test_context_profiler_with_non_existing_generator(filesystem_csv_data_contex
 
     assert isinstance(context.datasources["rad_datasource"], PandasDatasource)
     assert context.list_expectation_suites() == []
-    with pytest.raises(ge_exceptions.ProfilerError):
+    with pytest.raises(gx_exceptions.ProfilerError):
         profiling_result = context.profile_datasource(  # noqa: F841
             "rad_datasource",
             data_assets=["this_asset_doesnot_exist"],

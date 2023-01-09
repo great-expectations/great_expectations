@@ -1,7 +1,7 @@
 import abc
 from typing import Any, Callable, Optional
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.id_dict import BatchSpec
 
 
@@ -48,7 +48,7 @@ class DataSampler(abc.ABC):
             SamplerError
         """
         if batch_spec.get("sampling_kwargs") is None:
-            raise ge_exceptions.SamplerError(
+            raise gx_exceptions.SamplerError(
                 "Please make sure to provide sampling_kwargs in addition to your sampling_method."
             )
 
@@ -67,7 +67,7 @@ class DataSampler(abc.ABC):
             SamplerError
         """
         if batch_spec["sampling_kwargs"].get(key) is None:
-            raise ge_exceptions.SamplerError(
+            raise gx_exceptions.SamplerError(
                 f"Please make sure to provide the {key} key in sampling_kwargs in addition to your sampling_method."
             )
 

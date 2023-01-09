@@ -16,7 +16,7 @@ from uuid import UUID
 
 from marshmallow import Schema, fields, post_dump, post_load, pre_dump
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
 from great_expectations.core.batch import BatchDefinition, BatchMarkers
 from great_expectations.core.expectation_configuration import (
@@ -76,7 +76,7 @@ class ExpectationValidationResult(SerializableDictDot):
         **kwargs: dict,
     ) -> None:
         if result and not self.validate_result_dict(result):
-            raise ge_exceptions.InvalidCacheValueError(result)
+            raise gx_exceptions.InvalidCacheValueError(result)
         self.success = success
         self.expectation_config = expectation_config
         # TODO: re-add
@@ -311,7 +311,7 @@ class ExpectationValidationResult(SerializableDictDot):
 
     def get_metric(self, metric_name, **kwargs):
         if not self.expectation_config:
-            raise ge_exceptions.UnavailableMetricError(
+            raise gx_exceptions.UnavailableMetricError(
                 "No ExpectationConfig found in this ExpectationValidationResult. Unable to "
                 "return a metric."
             )
@@ -324,20 +324,20 @@ class ExpectationValidationResult(SerializableDictDot):
                 metric_name, self.expectation_config.kwargs
             )
             if metric_kwargs_id != curr_metric_kwargs:
-                raise ge_exceptions.UnavailableMetricError(
+                raise gx_exceptions.UnavailableMetricError(
                     "Requested metric_kwargs_id (%s) does not match the configuration of this "
                     "ExpectationValidationResult (%s)."
                     % (metric_kwargs_id or "None", curr_metric_kwargs or "None")
                 )
             if len(metric_name_parts) < 2:
-                raise ge_exceptions.UnavailableMetricError(
+                raise gx_exceptions.UnavailableMetricError(
                     "Expectation-defined metrics must include a requested metric."
                 )
             elif len(metric_name_parts) == 2:
                 if metric_name_parts[1] == "success":
                     return self.success
                 else:
-                    raise ge_exceptions.UnavailableMetricError(
+                    raise gx_exceptions.UnavailableMetricError(
                         "Metric name must have more than two parts for keys other than "
                         "success."
                     )
@@ -348,11 +348,11 @@ class ExpectationValidationResult(SerializableDictDot):
                     elif metric_name_parts[2] == "details":
                         return self.result["details"].get(metric_name_parts[3])
                 except KeyError:
-                    raise ge_exceptions.UnavailableMetricError(
+                    raise gx_exceptions.UnavailableMetricError(
                         "Unable to get metric {} -- KeyError in "
                         "ExpectationValidationResult.".format(metric_name)
                     )
-        raise ge_exceptions.UnavailableMetricError(
+        raise gx_exceptions.UnavailableMetricError(
             f"Unrecognized metric name {metric_name}"
         )
 
@@ -483,7 +483,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             if len(metric_name_parts) == 2:
                 return self.statistics.get(metric_name_parts[1])
             else:
-                raise ge_exceptions.UnavailableMetricError(
+                raise gx_exceptions.UnavailableMetricError(
                     f"Unrecognized metric {metric_name}"
                 )
 
@@ -501,13 +501,13 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
                         ):
                             metric_value = result.get_metric(metric_name, **kwargs)
                             break
-                    except ge_exceptions.UnavailableMetricError:
+                    except gx_exceptions.UnavailableMetricError:
                         pass
                 if metric_value is not None:
                     self._metrics[(metric_name, metric_kwargs_id)] = metric_value
                     return metric_value
 
-        raise ge_exceptions.UnavailableMetricError(
+        raise gx_exceptions.UnavailableMetricError(
             "Metric {} with metric_kwargs_id {} is not available.".format(
                 metric_name, metric_kwargs_id
             )

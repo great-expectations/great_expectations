@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 
 import click
 
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.cli.batch_request import get_batch_request
@@ -222,7 +222,7 @@ def load_expectation_suite(  # type: ignore[return] # sys.exit if no suite
             expectation_suite_name=expectation_suite_name
         )
         return suite
-    except ge_exceptions.DataContextError:
+    except gx_exceptions.DataContextError:
         if create_if_not_exist:
             suite = data_context.create_expectation_suite(
                 expectation_suite_name=expectation_suite_name
@@ -301,7 +301,7 @@ def run_checkpoint(  # type: ignore[return] # sys.exit if no result
             checkpoint_name=checkpoint_name
         )
         return result
-    except ge_exceptions.CheckpointError as e:
+    except gx_exceptions.CheckpointError as e:
         cli_message(string=failure_message)
         exit_with_failure_message_and_stats(
             data_context=context,
@@ -320,7 +320,7 @@ def validate_checkpoint(
         _ = load_checkpoint(
             context=context, checkpoint_name=checkpoint_name, usage_event=usage_event
         )
-    except ge_exceptions.CheckpointError as e:
+    except gx_exceptions.CheckpointError as e:
         if failure_message:
             cli_message(string=failure_message)
         exit_with_failure_message_and_stats(
@@ -342,8 +342,8 @@ def load_checkpoint(  # type: ignore[return] # sys.exit if no checkpoint
         )
         return checkpoint
     except (
-        ge_exceptions.CheckpointNotFoundError,
-        ge_exceptions.InvalidCheckpointConfigError,
+        gx_exceptions.CheckpointNotFoundError,
+        gx_exceptions.InvalidCheckpointConfigError,
     ):
         exit_with_failure_message_and_stats(
             data_context=context,
@@ -419,7 +419,7 @@ def load_data_context_with_error_handling(
                     from_cli_upgrade_command=from_cli_upgrade_command,
                 )
             elif ge_config_version > CURRENT_GX_CONFIG_VERSION:
-                raise ge_exceptions.UnsupportedConfigVersionError(
+                raise gx_exceptions.UnsupportedConfigVersionError(
                     f"""Invalid config version ({ge_config_version}).\n    The maximum valid version is \
 {CURRENT_GX_CONFIG_VERSION}.
 """
@@ -433,7 +433,7 @@ def load_data_context_with_error_handling(
                 )
 
         return context
-    except ge_exceptions.UnsupportedConfigVersionError as err:
+    except gx_exceptions.UnsupportedConfigVersionError as err:
         directory = directory or FileDataContext.find_context_root_dir()
         ge_config_version = FileDataContext.get_ge_config_version(  # type: ignore[assignment] # could be none
             context_root_dir=directory
@@ -449,18 +449,18 @@ def load_data_context_with_error_handling(
             cli_message(string=f"<red>{err.message}</red>")
             sys.exit(1)
     except (
-        ge_exceptions.ConfigNotFoundError,
-        ge_exceptions.InvalidConfigError,
+        gx_exceptions.ConfigNotFoundError,
+        gx_exceptions.InvalidConfigError,
     ) as err:
         cli_message(string=f"<red>{err.message}</red>")
         sys.exit(1)
-    except ge_exceptions.PluginModuleNotFoundError as err:
+    except gx_exceptions.PluginModuleNotFoundError as err:
         cli_message(string=err.cli_colored_message)
         sys.exit(1)
-    except ge_exceptions.PluginClassNotFoundError as err:
+    except gx_exceptions.PluginClassNotFoundError as err:
         cli_message(string=err.cli_colored_message)
         sys.exit(1)
-    except ge_exceptions.InvalidConfigurationYamlError as err:
+    except gx_exceptions.InvalidConfigurationYamlError as err:
         cli_message(string=f"<red>{str(err)}</red>")
         sys.exit(1)
 
@@ -898,7 +898,7 @@ def parse_cli_config_file_location(config_file_location: str) -> dict:
             directory = config_file_location
 
         else:
-            raise ge_exceptions.ConfigNotFoundError()
+            raise gx_exceptions.ConfigNotFoundError()
 
     else:
         # Return None if config_file_location is empty rather than default output of ""
