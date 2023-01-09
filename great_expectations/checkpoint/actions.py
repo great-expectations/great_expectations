@@ -152,9 +152,6 @@ class SlackNotificationAction(ValidationAction):
             module_name: great_expectations.render.renderer.slack_renderer
             class_name: SlackRenderer
           show_failed_expectations: *Optional* (boolean) shows a list of failed expectation types. default is false.
-          base_url: # optional string that provides a GX cloud base URL for using with params to route to a
-          # specific validation result
-
     """
 
     def __init__(
@@ -208,7 +205,6 @@ class SlackNotificationAction(ValidationAction):
         self.notify_on = notify_on
         self.notify_with = notify_with
         self.show_failed_expectations = show_failed_expectations
-        self.base_url = base_url
 
     def _run(
         self,
@@ -247,11 +243,10 @@ class SlackNotificationAction(ValidationAction):
                     data_docs_pages = payload[action_names]
 
         # Assemble complete GX Cloud URL for a specific validation result
-        base_url = getattr(self, "base_url", None)
         cloud_id = getattr(validation_result_suite_identifier, "cloud_id", None)
         cloud_url = None
-        if base_url and cloud_id:
-            cloud_url = f"{self.base_url}/?validationResultId={validation_result_suite_identifier.cloud_id}"
+        if cloud_id:
+            cloud_url = f"https://app.greatexpectations.io/?validationResultId={validation_result_suite_identifier.cloud_id}"
 
         if (
             self.notify_on == "all"
