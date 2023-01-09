@@ -133,7 +133,10 @@ exclude = [
     'expectations/core/expect_multicolumn_sum_to_equal\.py', # 4
     'expectations/core/expect_multicolumn_values_to_be_unique\.py', # 3
     'expectations/core/expect_select_column_values_to_be_unique_within_record\.py', # 3
-    'expectations/core/expect_table_column', # 25
+    'expectations/core/expect_table_columns_to_match_set', # 8
+    'expectations/core/expect_table_columns_to_match_ordered_list', # 11
+    'expectations/core/expect_table_column_count_to_equal', # 5
+    'expectations/core/expect_table_column_count_to_be_between', # 3
     'expectations/core/expect_table_row_count_to_equal_other_table', # 11
     'expectations/metrics/column_aggregate_metrics/column_', # 21
     'expectations/metrics/map_metric_provider\.py',  # 57
