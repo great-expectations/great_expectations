@@ -1,7 +1,7 @@
 import pytest
 
 from great_expectations.core import Domain
-from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_types import MetricDomainTypes
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 

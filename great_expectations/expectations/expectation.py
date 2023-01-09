@@ -63,7 +63,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.exceptions import (
     ExpectationNotFoundError,
@@ -1056,49 +1056,49 @@ class Expectation(metaclass=MetaExpectation):
             # TODO: <Alex>ALEX-MULTI_BATCH -- Many GX codebase tests do not pass in multi-Batch mode, because all but two (2) example multi-Batch Expectations are developed in single-Batch style.  One of action items is to upgrade all single/active-Batch Expectation implementations to adopt multi-Batch style.</Alex>
             # TODO: <Alex>ALEX -- To support multi-Batch Expectations, uncomment code between the next two (2) "TODO" comments and comment out the single-Batch code between two (2) "TODO" comments in section below.</Alex>
             # TODO: <Alex>ALEX</Alex>
-            # noinspection PyTypeChecker
-            provided_metrics: Dict[str, MetricValue] = {
-                metric_name: list(
-                    dict(
-                        filter(
-                            lambda element: element[0].is_superset(
-                                other=metric_configuration.get_domain()
-                            ),
-                            metrics_by_domain.items(),
-                        )
-                    ).values()
-                )[0][
-                    f"{RAW_PARAMETER_KEY}{sanitize_parameter_name(name=metric_configuration.metric_name, suffix=metric_configuration.metric_value_kwargs_id)}"
-                ][
-                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-                ]
-                for metric_name, metric_configuration in validation_dependencies.metric_configurations.items()
-            }
+            # # noinspection PyTypeChecker
+            # provided_metrics: Dict[str, MetricValue] = {
+            #     metric_name: list(
+            #         dict(
+            #             filter(
+            #                 lambda element: element[0].is_superset(
+            #                     other=metric_configuration.get_domain()
+            #                 ),
+            #                 metrics_by_domain.items(),
+            #             )
+            #         ).values()
+            #     )[0][
+            #         f"{RAW_PARAMETER_KEY}{sanitize_parameter_name(name=metric_configuration.metric_name, suffix=metric_configuration.metric_value_kwargs_id)}"
+            #     ][
+            #         FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+            #     ]
+            #     for metric_name, metric_configuration in validation_dependencies.metric_configurations.items()
+            # }
             # TODO: <Alex>ALEX</Alex>
             # TODO: <Alex>ALEX-SINGLE_BATCH -- All GX codebase tests pass in single-Batch mode.</Alex>
             # TODO: <Alex>ALEX -- To support single-Batch Expectations, uncomment code between the next two (2) "TODO" comments and comment out the single-Batch code between two (2) "TODO" comments in section above.</Alex>
             # TODO: <Alex>ALEX</Alex>
             # TODO: <Alex>ALEX -- This access/lookup can be simplified.</Alex>
-            # # noinspection PyTypeChecker
-            # provided_metrics: Dict[str, MetricValue] = {
-            #     metric_name: list(
-            #         list(
-            #             dict(
-            #                 filter(
-            #                     lambda element: element[0].is_superset(
-            #                         other=metric_configuration.get_domain()
-            #                     ),
-            #                     metrics_by_domain.items(),
-            #                 )
-            #             ).values()
-            #         )[0][
-            #             f"{RAW_PARAMETER_KEY}{sanitize_parameter_name(name=metric_configuration.metric_name, suffix=metric_configuration.metric_value_kwargs_id)}"
-            #         ][
-            #             FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-            #         ].values()
-            #     )[-1][0]
-            #     for metric_name, metric_configuration in validation_dependencies.metric_configurations.items()
-            # }
+            # noinspection PyTypeChecker
+            provided_metrics: Dict[str, MetricValue] = {
+                metric_name: list(
+                    list(
+                        dict(
+                            filter(
+                                lambda element: element[0].is_superset(
+                                    other=metric_configuration.get_domain()
+                                ),
+                                metrics_by_domain.items(),
+                            )
+                        ).values()
+                    )[0][
+                        f"{RAW_PARAMETER_KEY}{sanitize_parameter_name(name=metric_configuration.metric_name, suffix=metric_configuration.metric_value_kwargs_id)}"
+                    ][
+                        FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+                    ].values()
+                )[-1][0]
+                for metric_name, metric_configuration in validation_dependencies.metric_configurations.items()
+            }
             # TODO: <Alex>ALEX</Alex>
 
         expectation_validation_result: Union[

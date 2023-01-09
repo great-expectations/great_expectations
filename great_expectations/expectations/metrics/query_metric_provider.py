@@ -20,3 +20,10 @@ class QueryMetricProvider(MetricProvider):
     """
 
     domain_keys = ("batch_id", "row_condition", "condition_parser")
+
+    @classmethod
+    def is_persistable(cls) -> bool:
+        """
+        Computed values can be too large and/or of incompatible type for getting persisted (other than in memory).
+        """
+        return False

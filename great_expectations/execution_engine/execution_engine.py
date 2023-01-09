@@ -5,7 +5,6 @@ import datetime
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass
-from enum import Enum
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -25,7 +24,11 @@ from marshmallow import ValidationError
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.computed_metrics.computed_metric import ComputedMetric
 from great_expectations.core.batch_manager import BatchManager
-from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_types import (
+    MetricDomainTypes,
+    MetricFunctionTypes,
+    MetricPartialFunctionTypes,
+)
 from great_expectations.core.util import (
     AzureUrl,
     DBFSPath,
@@ -40,7 +43,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ComputedMetricIdentifier,
 )
 from great_expectations.expectations.registry import (
-    IN_MEMORY_STORE_BACKEND_METRICS,
+    IN_MEMORY_STORE_BACKEND_TABLE_METRICS,
     get_metric_provider,
 )
 from great_expectations.expectations.row_conditions import (
@@ -84,40 +87,6 @@ class NoOpDict:
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def update(self, value):
         return None
-
-
-class MetricFunctionTypes(Enum):
-    VALUE = "value"
-    MAP_VALUES = "value"  # "map_values"
-    WINDOW_VALUES = "value"  # "window_values"
-    AGGREGATE_VALUE = "value"  # "aggregate_value"
-
-
-class MetricPartialFunctionTypes(Enum):
-    MAP_FN = "map_fn"
-    MAP_SERIES = "map_series"
-    MAP_CONDITION_FN = "map_condition_fn"
-    MAP_CONDITION_SERIES = "map_condition_series"
-    WINDOW_FN = "window_fn"
-    WINDOW_CONDITION_FN = "window_condition_fn"
-    AGGREGATE_FN = "aggregate_fn"
-
-    @property
-    def metric_suffix(self) -> str:
-        if self.name in ["MAP_FN", "MAP_SERIES", "WINDOW_FN"]:
-            return "map"
-
-        if self.name in [
-            "MAP_CONDITION_FN",
-            "MAP_CONDITION_SERIES",
-            "WINDOW_CONDITION_FN",
-        ]:
-            return "condition"
-
-        if self.name in ["AGGREGATE_FN"]:
-            return "aggregate_fn"
-
-        return ""
 
 
 @dataclass(frozen=True)
@@ -291,6 +260,12 @@ class ExecutionEngine(ABC):
                 "connection_string": "postgresql+psycopg2://postgres:@localhost/test_ci",
             },
         )
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        import os
+
+        if "PYTEST_CURRENT_TEST" in os.environ:
+            self._computed_metrics_store._store_backend.delete_multiple()
         # TODO: <Alex>ALEX</Alex>
 
         if batch_data_dict is None:
@@ -637,7 +612,9 @@ class ExecutionEngine(ABC):
         metrics_to_resolve: Iterable[MetricConfiguration],
     ) -> Dict[Tuple[str, str, str], MetricValue]:
         metrics_to_resolve = filter(
-            lambda element: element.metric_name not in IN_MEMORY_STORE_BACKEND_METRICS,
+            lambda element: self._is_metric_persistable(
+                metric_name=element.metric_name
+            ),
             metrics_to_resolve,
         )
 
@@ -783,8 +760,9 @@ class ExecutionEngine(ABC):
     ) -> None:
         metric_computation_configurations: List[MetricComputationConfiguration] = list(
             filter(
-                lambda element: element.metric_configuration.metric_name
-                not in IN_MEMORY_STORE_BACKEND_METRICS,
+                lambda element: self._is_metric_persistable(
+                    metric_name=element.metric_configuration.metric_name
+                ),
                 metric_fn_direct_configurations + metric_fn_bundle_configurations,
             )
         )
@@ -896,6 +874,20 @@ class ExecutionEngine(ABC):
             )
 
         return split_domain_kwargs
+
+    def _is_metric_persistable(self, metric_name: str) -> bool:
+        non_persistable: bool = metric_name in IN_MEMORY_STORE_BACKEND_TABLE_METRICS
+        if non_persistable:
+            return False
+
+        try:
+            return get_metric_provider(metric_name=metric_name, execution_engine=self)[
+                0
+            ].is_persistable()
+        except ge_exceptions.MetricProviderError:
+            pass
+
+        return True
 
     @staticmethod
     def _split_table_metric_domain_kwargs(

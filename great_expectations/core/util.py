@@ -319,6 +319,17 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 28
     if isinstance(data, np.float64):
         return float(data)
 
+    # TODO: <Alex>ALEX</Alex>
+    # if isinstance(data, type(np.dtype('int64'))):
+    #     return int(data)
+    #
+    # if isinstance(data, type(np.dtype('float64'))):
+    #     return float(data)
+    #
+    # if isinstance(data, type(np.dtype('O'))):
+    #     return 'str'
+    # TODO: <Alex>ALEX</Alex>
+
     if isinstance(data, (datetime.datetime, datetime.date)):
         return data.isoformat()
 

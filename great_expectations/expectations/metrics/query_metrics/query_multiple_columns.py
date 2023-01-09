@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional, Union
 
-from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,

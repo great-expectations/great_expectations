@@ -13,6 +13,7 @@ from great_expectations.computed_metrics.computed_metric import (
 from great_expectations.computed_metrics.db.models.sqlalchemy_computed_metric_model import (
     ComputedMetric as SqlAlchemyComputedMetricModel,
 )
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.store import StoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
     ComputedMetricIdentifier,
@@ -294,6 +295,33 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
                 datetime_end=datetime_end,
             )
 
+    def delete_multiple(
+        self,
+        datetime_begin: Optional[datetime.datetime] = None,
+        datetime_end: Optional[datetime.datetime] = None,
+    ) -> None:
+        with self._managed_scoped_db_session() as session:
+            query_object = session.query(SqlAlchemyComputedMetricModel)
+            if datetime_begin is None and datetime_end is None:
+                query_object.delete()
+            elif datetime_begin is not None and datetime_end is None:
+                query_object.filter(
+                    SqlAlchemyComputedMetricModel.updated_at >= datetime_begin
+                ).delete()
+            elif datetime_begin is None and datetime_end is not None:
+                query_object.filter(
+                    SqlAlchemyComputedMetricModel.updated_at <= datetime_end
+                ).delete()
+            elif datetime_begin is not None and datetime_end is not None:
+                query_object.filter(
+                    SqlAlchemyComputedMetricModel.updated_at >= datetime_begin
+                ).filter(
+                    SqlAlchemyComputedMetricModel.updated_at <= datetime_end
+                ).delete()
+            else:
+                # The following line should never be reached.
+                return
+
     def _get_datetime_filtered_query_results(
         self,
         query_object,
@@ -476,7 +504,9 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
         # TODO: <Alex>ALEX</Alex>
         # sa_computed_metric_model_obj.id = computed_metric_business_object.id
         # TODO: <Alex>ALEX</Alex>
-        sa_computed_metric_model_obj.value = computed_metric_business_object.value
+        sa_computed_metric_model_obj.value = convert_to_json_serializable(
+            data=computed_metric_business_object.value
+        )
         sa_computed_metric_model_obj.details = computed_metric_business_object.details
         return sa_computed_metric_model_obj
 

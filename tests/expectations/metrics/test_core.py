@@ -9,12 +9,10 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch
+from great_expectations.core.metric_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import (
-    MetricPartialFunctionTypes,
 )
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,

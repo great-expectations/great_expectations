@@ -3,12 +3,12 @@ from functools import wraps
 from typing import Any, Callable, Dict, Optional, Type, Union
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.execution_engine.execution_engine import (
+from great_expectations.core.metric_types import (
     MetricDomainTypes,
     MetricFunctionTypes,
     MetricPartialFunctionTypes,
 )
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.execution_engine.sparkdf_execution_engine import (
     SparkDFExecutionEngine,
 )

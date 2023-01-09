@@ -9,7 +9,7 @@ from great_expectations.core.domain import (
     SemanticDomainTypes,
 )
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_types import MetricDomainTypes
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult

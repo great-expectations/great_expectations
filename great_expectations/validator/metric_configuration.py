@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 
 from great_expectations.core.domain import Domain
 from great_expectations.core.id_dict import IDDict
-from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
 
 

@@ -4,6 +4,11 @@ from typing import Dict, Optional
 import numpy as np
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.metric_types import (
+    MetricDomainTypes,
+    MetricFunctionTypes,
+    MetricPartialFunctionTypes,
+)
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.exceptions.exceptions import MetricResolutionError
 from great_expectations.execution_engine import ExecutionEngine, SparkDFExecutionEngine
@@ -12,8 +17,6 @@ from great_expectations.expectations.metrics import ColumnAggregateMetricProvide
 from great_expectations.expectations.metrics.import_manager import F, sparktypes
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
-    MetricDomainTypes,
-    MetricPartialFunctionTypes,
     column_condition_partial,
     metric_partial,
 )

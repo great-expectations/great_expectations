@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional, cast
 
-from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_types import MetricDomainTypes
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -27,6 +27,13 @@ class ColumnTypes(TableMetricProvider):
     metric_name = "table.column_types"
     value_keys = ("include_nested",)
     default_kwarg_values = {"include_nested": True}
+
+    @classmethod
+    def is_persistable(cls) -> bool:
+        """
+        Computed values can contain types that are incompatible with getting persisted (other than in memory).
+        """
+        return False
 
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(

@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional
 
 from great_expectations.core import Domain
-from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.helpers.util import sanitize_parameter_name
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchValidationGraphParameterBuilder,

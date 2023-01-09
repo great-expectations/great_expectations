@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional, Set
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set
 
 import numpy as np
+import pandas as pd
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.domain import Domain
@@ -36,8 +37,8 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
     Compute histogram using specified metric for one Batch of data.
     """
 
-    exclude_field_names: Set[
-        str
+    exclude_field_names: ClassVar[
+        Set[str]
     ] = MetricSingleBatchParameterBuilder.exclude_field_names | {
         "column_partition_metric_single_batch_parameter_builder_config",
         "metric_name",
@@ -147,7 +148,7 @@ elements.
         # TODO: <Alex>ALEX -- extra subscripting in compliance with multi-Batch metrics.</Alex>
         bins = bins[0]
         # TODO: <Alex>ALEX</Alex>
-        if not np.issubdtype(bins.dtype, np.number):
+        if not (np.issubdtype(bins.dtype, np.number) or np.all(pd.isnull(bins))):
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"""Partitioning values for {self.__class__.__name__} by \
 {self._column_partition_metric_single_batch_parameter_builder_config.name} did not yield bins of supported data type.

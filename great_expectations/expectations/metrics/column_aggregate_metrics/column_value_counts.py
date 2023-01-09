@@ -1,9 +1,8 @@
 from typing import Any, Dict, List, Optional
 
-import numpy as np
 import pandas as pd
 
-from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -29,6 +28,13 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
     value_keys = ("sort", "collate")
 
     default_kwarg_values = {"sort": "value", "collate": None}
+
+    @classmethod
+    def is_persistable(cls) -> bool:
+        """
+        Computed values can contain types that are incompatible with getting persisted (other than in memory).
+        """
+        return False
 
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(

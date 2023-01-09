@@ -45,12 +45,11 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.id_dict import BatchSpec
-from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_types import MetricDomainTypes
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
-from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
-from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
+from great_expectations.dataset import PandasDataset
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
@@ -108,6 +107,24 @@ except ImportError:
 
     logger.debug(
         "Unable to load pandas; install optional pandas dependency for support."
+    )
+
+try:
+    from great_expectations.dataset import SqlAlchemyDataset
+    from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
+except ImportError:
+    SqlAlchemyDataset = None
+    SqlAlchemyBatchReference = None
+    logger.debug(
+        "Unable to load sqlalchemy dataset; install optional sqlalchemy dependency for support."
+    )
+
+try:
+    from great_expectations.dataset import SparkDFDataset
+except ImportError:
+    SparkDFDataset = None
+    logger.debug(
+        "Unable to load spark dataset; install optional spark dependency for support."
     )
 
 if TYPE_CHECKING:

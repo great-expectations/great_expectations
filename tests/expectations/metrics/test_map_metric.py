@@ -9,6 +9,7 @@ from great_expectations.core import (
 )
 from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.core.metric_types import MetricPartialFunctionTypes
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.util import file_relative_path
@@ -18,9 +19,6 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import (
-    MetricPartialFunctionTypes,
 )
 from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
 from great_expectations.expectations.metrics import (

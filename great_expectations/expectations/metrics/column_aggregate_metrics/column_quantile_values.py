@@ -7,7 +7,7 @@ from typing import Any, Dict, List
 
 import numpy as np
 
-from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -64,6 +64,13 @@ except ImportError:
 class ColumnQuantileValues(ColumnAggregateMetricProvider):
     metric_name = "column.quantile_values"
     value_keys = ("quantiles", "allow_relative_error")
+
+    @classmethod
+    def is_persistable(cls) -> bool:
+        """
+        Computed values can contain types that are incompatible with getting persisted (other than in memory).
+        """
+        return False
 
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, quantiles, allow_relative_error, **kwargs):

@@ -5,7 +5,7 @@ services:
     command:
       - postgres
       - "-c"
-      - "max_connections=1000"
+      - "max_connections=100000"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_HOST_AUTH_METHOD: trust
