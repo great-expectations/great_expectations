@@ -6,7 +6,7 @@ import pandas as pd
 from ruamel import yaml
 
 from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.data_context import BaseDataContext
+from great_expectations.util import get_context
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     FilesystemStoreBackendDefaults,
@@ -35,7 +35,7 @@ data_context_config = DataContextConfig(
         root_directory=root_directory
     ),
 )
-context = BaseDataContext(project_config=data_context_config)
+context = get_context(project_config=data_context_config)
 # CODE ^^^^^ ^^^^^
 
 # ASSERTIONS vvvvv vvvvv
