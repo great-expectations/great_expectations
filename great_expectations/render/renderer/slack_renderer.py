@@ -83,7 +83,7 @@ class SlackRenderer(Renderer):
                 batch_validation_status_hlink = (
                     f"*Batch Validation Status*: *<{cloud_url} | {status}>*"
                 )
-                summary_text += f"""{title_hlink}  
+                summary_text += f"""{title_hlink}
 {batch_validation_status_hlink}
                 """
             else:
