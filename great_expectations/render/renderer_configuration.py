@@ -26,7 +26,6 @@ from pydantic import (
     BaseModel,
     Field,
     ValidationError,
-    constr,
     create_model,
     root_validator,
     validator,
@@ -498,7 +497,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
     def add_param(
         self,
-        name: constr(min_length=1),
+        name: str,
         param_type: RendererValueTypes,
         value: Optional[Any] = None,
     ) -> None:
