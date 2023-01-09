@@ -42,7 +42,7 @@ def data_context_without_config_variables_filepath_configured(tmp_path_factory):
         config_variables_fixture_filename=None,
     )
 
-    return gx.data_context.DataContext(context_path)
+    return gx.get_context(context_root_dir=context_path)
 
 
 @pytest.fixture()
@@ -61,7 +61,7 @@ def data_context_with_variables_in_config(tmp_path_factory, monkeypatch):
         config_variables_fixture_filename="config_variables.yml",
     )
 
-    return gx.data_context.DataContext(context_path)
+    return gx.get_context(context_root_dir=context_path)
 
 
 def create_data_context_files(

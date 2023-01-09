@@ -22,7 +22,6 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
-from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -31,6 +30,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
 from great_expectations.datasource import BaseDatasource
+from great_expectations.util import get_context
 from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
@@ -407,7 +407,7 @@ def load_data_context_with_error_handling(
     ge_config_version: float
     try:
         directory = directory or FileDataContext.find_context_root_dir()
-        context = DataContext(context_root_dir=directory)
+        context = get_context(context_root_dir=directory)
         ge_config_version = context.get_config().config_version  # type: ignore[union-attr] # could be dict, str
 
         if from_cli_upgrade_command:
@@ -480,7 +480,7 @@ def upgrade_project_strictly_multiple_versions_increment(
             ge_config_version=ge_config_version,
             from_cli_upgrade_command=from_cli_upgrade_command,
         )
-        context = DataContext(context_root_dir=directory)
+        context = get_context(context_root_dir=directory)
         # noinspection PyBroadException
         try:
             send_usage_message(
@@ -523,7 +523,7 @@ def upgrade_project(
     # This loading of DataContext is optional and just to track if someone exits here.
     # noinspection PyBroadException
     try:
-        data_context = DataContext(context_root_dir)
+        data_context = get_context(context_root_dir=context_root_dir)
     except Exception:
         # Do not raise error for usage stats
         data_context = None
@@ -571,7 +571,7 @@ To learn more about the upgrade process, visit \
 
     # noinspection PyBroadException
     try:
-        data_context = DataContext(context_root_dir=context_root_dir)
+        data_context = get_context(context_root_dir=context_root_dir)
         send_usage_message(
             data_context=data_context,
             event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END,
@@ -649,7 +649,7 @@ def upgrade_project_one_or_multiple_versions_increment(
             )
             cli_message(f"<green>{upgrade_message}</green>")
 
-        context = DataContext(context_root_dir=directory)
+        context = get_context(context_root_dir=directory)
 
         # noinspection PyBroadException
         try:
@@ -727,7 +727,7 @@ def upgrade_project_zero_versions_increment(
         )
         cli_message(f"<green>{upgrade_message}</green>")
 
-    context = DataContext(context_root_dir=directory)
+    context = get_context(context_root_dir=directory)
 
     # noinspection PyBroadException
     try:

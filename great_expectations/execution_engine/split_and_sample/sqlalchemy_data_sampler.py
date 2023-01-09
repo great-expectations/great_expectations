@@ -1,4 +1,6 @@
-from typing import Optional, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchSpec
@@ -23,12 +25,18 @@ except ImportError:
     Dialect = None
 
 
+if TYPE_CHECKING:
+    import sqlalchemy as sa
+
+    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+
+
 class SqlAlchemyDataSampler(DataSampler):
     """Sampling methods for data stores with SQL interfaces."""
 
     def sample_using_limit(
         self,
-        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
+        execution_engine: SqlAlchemyExecutionEngine,
         batch_spec: BatchSpec,
         where_clause: Optional[Selectable] = None,
     ) -> Union[str, BinaryExpression, BooleanClauseList]:
@@ -133,7 +141,7 @@ class SqlAlchemyDataSampler(DataSampler):
 
     @staticmethod
     def sample_using_random(
-        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
+        execution_engine: SqlAlchemyExecutionEngine,
         batch_spec: BatchSpec,
         where_clause: Optional[Selectable] = None,
     ) -> Selectable:

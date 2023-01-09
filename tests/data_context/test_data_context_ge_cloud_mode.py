@@ -6,18 +6,20 @@ from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_U
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
-from great_expectations.exceptions import DataContextError, GXCloudError
+from great_expectations.exceptions import GXCloudError
+from great_expectations.exceptions.exceptions import GXCloudConfigurationError
 from great_expectations.util import get_context
 
 
 @pytest.mark.cloud
+@pytest.mark.unit
 def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_error():
     # Don't want to make a real request in a unit test so we simply patch the config fixture
     with mock.patch(
         "great_expectations.data_context.CloudDataContext._get_cloud_config_dict",
         return_value={"base_url": None, "organization_id": None, "access_token": None},
     ):
-        with pytest.raises(DataContextError):
+        with pytest.raises(GXCloudConfigurationError):
             get_context(context_root_dir="/my/context/root/dir", cloud_mode=True)
 
 
