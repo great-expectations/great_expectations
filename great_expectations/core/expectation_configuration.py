@@ -966,7 +966,7 @@ class ExpectationConfiguration(SerializableDictDot):
         },
     }
 
-    runtime_kwargs: tuple[str, ...] = (
+    runtime_kwargs: ClassVar[tuple[str, ...]] = (
         "result_format",
         "include_config",
         "catch_exceptions",
