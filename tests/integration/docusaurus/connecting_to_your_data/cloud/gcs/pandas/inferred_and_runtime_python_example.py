@@ -7,7 +7,7 @@ from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchReque
 
 context = gx.get_context()
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py datasource_config"
 datasource_config = {
     "name": "my_gcs_datasource",
     "class_name": "Datasource",
@@ -39,11 +39,11 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
     "prefix"
 ] = "data/taxi_yellow_tripdata_samples/"
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py test_yaml_config"
 context.test_yaml_config(yaml.dump(datasource_config))
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py add_datasource"
 context.add_datasource(**datasource_config)
 # </snippet>
 
