@@ -107,7 +107,6 @@ exclude = [
     'expectations/core/expect_column_values_to_be_between\.py', # 3
     'expectations/core/expect_column_unique_value_count_to_be_between\.py', # 1
     'expectations/core/expect_column_to_exist\.py', # 4
-    'expectations/core/expect_column_sum_to_be_between\.py', # 1
     'expectations/core/expect_column_stdev_to_be_between\.py', # 1
     'expectations/core/expect_column_quantile_values_to_be_between\.py', # 15
     'expectations/core/expect_column_value_lengths_to_equal\.py', # 1
