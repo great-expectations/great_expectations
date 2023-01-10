@@ -58,6 +58,12 @@ class BatchRequestError(Exception):
 
 
 class DataAsset(ExperimentalBaseModel):
+    # To subclass a DataAsset one must define `type` as a Class literal explicitly on the sublass
+    # as well as implementing the methods in the `Abstract Methods` section below.
+    # For example:
+    #     type: Literal["MyAssetTypeID"] = "MyAssetTypeID"
+    #     type: Literal["table"] = "table"
+    #     type: Literal["csv"] = "csv"
     name: str
     type: str
 
@@ -75,6 +81,25 @@ class DataAsset(ExperimentalBaseModel):
     def datasource(self, ds: Datasource):
         assert isinstance(ds, Datasource)
         self._datasource = ds
+
+    # Abstract Methods
+    def batch_request_options_template(
+        self,
+    ) -> BatchRequestOptions:
+        """A BatchRequestOptions template for get_batch_request.
+
+        Returns:
+            A BatchRequestOptions dictionary with the correct shape that get_batch_request
+            will understand. All the option values are defaulted to None.
+        """
+        raise NotImplementedError
+
+    def get_batch_list_from_batch_request(
+        self, batch_request: BatchRequest
+    ) -> List[Batch]:
+        raise NotImplementedError
+
+    # End Abstract Methods
 
     def get_batch_request(
         self, options: Optional[BatchRequestOptions] = None
@@ -102,26 +127,10 @@ class DataAsset(ExperimentalBaseModel):
             options=options or {},
         )
 
-    def batch_request_options_template(
-        self,
-    ) -> BatchRequestOptions:
-        """A BatchRequestOptions template for get_batch_request.
-
-        Returns:
-            A BatchRequestOptions dictionary with the correct shape that get_batch_request
-            will understand. All the option values are defaulted to None.
-        """
-        raise NotImplementedError
-
     def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
         return set(options.keys()).issubset(
             set(self.batch_request_options_template().keys())
         )
-
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> List[Batch]:
-        raise NotImplementedError
 
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
         """Validates the batch_request has the correct form.
@@ -153,6 +162,16 @@ DataAssetType = TypeVar("DataAssetType", bound=DataAsset)
 class Datasource(
     ExperimentalBaseModel, Generic[DataAssetType], metaclass=MetaDatasource
 ):
+    # To subclass Datasource one needs to define:
+    # asset_types
+    # type
+    # assets
+    #
+    # The important part of defining `assets` is setting the Dict type correctly.
+    # In addition, one must define the methods in the `Abstract Methods` section below.
+    # If one writes a class level docstring, this will become the documenation for the
+    # data context method `data_context.sources.add_my_datasource` method.
+
     # class attrs
     asset_types: ClassVar[List[Type[DataAsset]]] = []
     # Datasource instance attrs but these will be fed into the `execution_engine` constructor
@@ -210,12 +229,6 @@ class Datasource(
         """Returns the execution engine to be used"""
         return self.execution_engine_override or self.execution_engine_type()
 
-    def execution_engine_type(self) -> Type[ExecutionEngine]:
-        """Return the ExecutionEngine type use for this Datasource"""
-        raise NotImplementedError(
-            "One needs to implement 'execution_engine_type' on a Datasource subclass"
-        )
-
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> List[Batch]:
@@ -251,6 +264,15 @@ class Datasource(
         asset._datasource = self
         self.assets[asset.name] = asset
         return asset
+
+    # Abstract Methods
+    def execution_engine_type(self) -> Type[ExecutionEngine]:
+        """Return the ExecutionEngine type use for this Datasource"""
+        raise NotImplementedError(
+            "One needs to implement 'execution_engine_type' on a Datasource subclass"
+        )
+
+    # End Abstract Methods
 
 
 class Batch:
