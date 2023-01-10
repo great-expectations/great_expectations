@@ -5,7 +5,7 @@ import sys
 import click
 
 from great_expectations import DataContext
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as gx_exceptions
 from great_expectations.cli.v012 import toolkit
 from great_expectations.cli.v012.datasource import get_batch_kwargs
 from great_expectations.cli.v012.mark import Mark as mark
@@ -20,7 +20,7 @@ try:
 except ImportError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through
-    SQLAlchemyError = ge_exceptions.ProfilerError
+    SQLAlchemyError = gx_exceptions.ProfilerError
 
 
 @click.group()
@@ -41,7 +41,7 @@ def validation_operator_list(directory):
     """List known Validation Operators."""
     try:
         context = DataContext(directory)
-    except ge_exceptions.ConfigNotFoundError as err:
+    except gx_exceptions.ConfigNotFoundError as err:
         cli_message(f"<red>{err.message}</red>")
         return
 
@@ -148,7 +148,7 @@ def validation_operator_run(  # noqa: C901 - 24
 
     try:
         context = DataContext(directory)
-    except ge_exceptions.ConfigNotFoundError as err:
+    except gx_exceptions.ConfigNotFoundError as err:
         cli_message(f"Failed to process <red>{err.message}</red>")
         sys.exit(1)
 
@@ -326,7 +326,7 @@ Let us help you specify the batch of data your want the validation operator to v
                         run_id=run_id,
                         evaluation_parameters=suite.evaluation_parameters,
                     )
-        except (ge_exceptions.DataContextError, OSError, SQLAlchemyError) as e:
+        except (gx_exceptions.DataContextError, OSError, SQLAlchemyError) as e:
             cli_message(f"<red>{e}</red>")
             send_usage_message(
                 data_context=context,

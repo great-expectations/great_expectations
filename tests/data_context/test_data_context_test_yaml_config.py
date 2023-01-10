@@ -7,7 +7,7 @@ from unittest import mock
 
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.config_validator.yaml_config_validator import (
@@ -447,7 +447,7 @@ execution_engine:
     class_name: NOT_A_REAL_CLASS_NAME
 """
 
-    with pytest.raises(ge_exceptions.DatasourceInitializationError) as excinfo:
+    with pytest.raises(gx_exceptions.DatasourceInitializationError) as excinfo:
         empty_data_context_stats_enabled.test_yaml_config(yaml_config=first_config)
         # print(excinfo.value.message)
         # shortened_message_len = len(excinfo.value.message)
