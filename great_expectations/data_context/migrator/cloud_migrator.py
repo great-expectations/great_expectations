@@ -24,7 +24,7 @@ from typing import TYPE_CHECKING, Dict, List, NamedTuple, Optional
 
 import requests
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.configuration import AbstractConfig
 from great_expectations.core.http import create_session
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
@@ -145,7 +145,7 @@ class CloudMigrator:
                     event_payload=event_payload,
                     success=False,
                 )
-            raise ge_exceptions.MigrationError(
+            raise gx_exceptions.MigrationError(
                 "Migration failed. Please check the error message for more details."
             ) from e
 
