@@ -5,7 +5,7 @@ title: Result format
 
 The `result_format` parameter may be either a string or a dictionary which specifies the fields to return in `result`.
   * For string usage, see `result_format` [values and fields](#result_format-values-and-fields).
-  * For dictionary usage, `result_format` which may include the following keys:
+  * For dictionary usage, `result_format` may include the following keys:
     * `result_format`: Sets the fields to return in result.
     * `unexpected_index_column_names`: Defines columns that can be used to identify unexpected results, for example primary key (PK) column(s) or other columns with unique identifiers. Supports multiple column names as a list.
     * `return_unexpected_index_query`: When running validations, a query (or a set of indices) will be returned that will
@@ -30,13 +30,13 @@ configuration be used for exploratory analysis, with the final configuration add
 ### Expectation Level Config
 To apply `result_format` to an Expectation, pass it into the Expectation. We will first need to obtain a Validator object instance (e.g. by running the `$ great_expectations suite new` command).
 
-```python name="result_format_complete_example_set"
+```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_set"
 ```
 
 ### Checkpoint Level Config
 To apply `result_format` to every Expectation in a Suite, define it in your Checkpoint configuration under the `runtime_configuration` key.
 
-```python name="result_format_checkpoint_example"
+```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_checkpoint_example"
 ```
 
 The results will then be stored in the Validation Result after running the Checkpoint.
@@ -97,7 +97,7 @@ cases for working with Great Expectations, including interactive exploratory wor
 
 The following examples will use the data defined in the following Pandas DataFrame:
 
-```python name="pandas_df_for_result_format"
+```python name="tests/integration/docusaurus/reference/core_concepts/result_format/pandas_df_for_result_format"
 ```
 
 ### Behavior for `BOOLEAN_ONLY`
@@ -107,7 +107,7 @@ exclusively returned via the value of the `success` parameter.
 
 For example:
 
-```python name="result_format_boolean_example"
+```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_boolean_example"
 ```
 
 Will return the following output:
@@ -116,7 +116,8 @@ Will return the following output:
 False
 
 >>> print(validation_result.result)
-{}
+```
+```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_boolean_example_output"
 ```
 
 ### Behavior for `BASIC`
@@ -148,7 +149,7 @@ The basic `result` includes:
 
 For example:
 
-```python name="result_format_basic_example_set"
+```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_basic_example_set"
 ```
 
 Will return the following output:
@@ -157,16 +158,8 @@ Will return the following output:
 False
 
 >>> print(validation_result.result)
-{
-    "element_count": 15,
-    "unexpected_count": 6,
-    "unexpected_percent": 40.0,
-    "partial_unexpected_list": ["A", "E", "E", "E", "E", "E"],
-    "missing_count": 0,
-    "missing_percent": 0.0,
-    "unexpected_percent_total": 40.0,
-    "unexpected_percent_nonmissing": 40.0,
-}
+```
+```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_basic_example_set_output"
 ```
 
 `column_aggregate_expectation` computes a single aggregate value for the column, and so returns a single 
@@ -185,7 +178,7 @@ The basic `result` includes:
 
 For example:
 
-```python name="result_format_basic_example_agg"
+```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_basic_example_agg"
 ```
 
 Will return the following output:
@@ -194,7 +187,8 @@ Will return the following output:
 True
 
 >>> print(validation_result.result)
-{'observed_value': 3.6666666666666665}
+```
+```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_basic_example_agg_output"
 ```
 
 ### Behavior for `SUMMARY`
@@ -229,7 +223,7 @@ The summary `result` includes:
 ```
 
 For example:
-```python name="result_format_summary_example_set"
+```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_summary_example_set"
 ```
 
 Will return the following output:
@@ -237,30 +231,9 @@ Will return the following output:
 >>> print(validation_result.success)
 False
 
->>> print(validation_result.result)
-{
-    "element_count": 15,
-    "unexpected_count": 6,
-    "unexpected_percent": 40.0,
-    "partial_unexpected_list": ["A", "E", "E", "E", "E", "E"],
-    "unexpected_index_column_names": ["pk_column"],
-    "missing_count": 0,
-    "missing_percent": 0.0,
-    "unexpected_percent_total": 40.0,
-    "unexpected_percent_nonmissing": 40.0,
-    "partial_unexpected_index_list": [
-        {"my_var": "A", "pk_column": "zero"},
-        {"my_var": "E", "pk_column": "ten"},
-        {"my_var": "E", "pk_column": "eleven"},
-        {"my_var": "E", "pk_column": "twelve"},
-        {"my_var": "E", "pk_column": "thirteen"},
-        {"my_var": "E", "pk_column": "fourteen"},
-    ],
-    "partial_unexpected_counts": [
-        {"value": "E", "count": 5},
-        {"value": "A", "count": 1},
-    ],
-}
+>>> print(validation_result.result) 
+```
+```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_summary_example_set_output"
 ```
 
 `column_aggregate_expectation` computes a single aggregate value for the column, and so returns a `observed_value` 
@@ -280,7 +253,7 @@ The summary `result` includes:
 
 For example:
 
-```python name="result_format_summary_example_agg"
+```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_summary_example_agg"
 ```
 
 Will return the following output:
@@ -289,7 +262,8 @@ Will return the following output:
 True
 
 >>> print(validation_result.result)
-{'observed_value': 3.6666666666666665}
+```
+```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_summary_example_agg_output"
 ```
 
 
@@ -323,7 +297,7 @@ The complete `result` includes:
 ```
 
 For example:
-```python name="result_format_complete_example_set"
+```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_set"
 ```
 
 Will return the following output:
@@ -332,39 +306,8 @@ Will return the following output:
 False
 
 >>> print(validation_result.result)
-{
-    "element_count": 15,
-    "unexpected_count": 6,
-    "unexpected_percent": 40.0,
-    "partial_unexpected_list": ["A", "E", "E", "E", "E", "E"],
-    "unexpected_index_column_names": ["pk_column"],
-    "missing_count": 0,
-    "missing_percent": 0.0,
-    "unexpected_percent_total": 40.0,
-    "unexpected_percent_nonmissing": 40.0,
-    "partial_unexpected_index_list": [
-        {"my_var": "A", "pk_column": "zero"},
-        {"my_var": "E", "pk_column": "ten"},
-        {"my_var": "E", "pk_column": "eleven"},
-        {"my_var": "E", "pk_column": "twelve"},
-        {"my_var": "E", "pk_column": "thirteen"},
-        {"my_var": "E", "pk_column": "fourteen"},
-    ],
-    "partial_unexpected_counts": [
-        {"value": "E", "count": 5},
-        {"value": "A", "count": 1},
-    ],
-    "unexpected_list": ["A", "E", "E", "E", "E", "E"],
-    "unexpected_index_list": [
-        {"my_var": "A", "pk_column": "zero"},
-        {"my_var": "E", "pk_column": "ten"},
-        {"my_var": "E", "pk_column": "eleven"},
-        {"my_var": "E", "pk_column": "twelve"},
-        {"my_var": "E", "pk_column": "thirteen"},
-        {"my_var": "E", "pk_column": "fourteen"},
-    ],
-    "unexpected_index_query": [0, 10, 11, 12, 13, 14],  # For Spark and SQL, this will be a query that can be used to retrieve all unexpected results
-}
+```
+```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_set_output"
 ```
 
 `column_aggregate_expectation` computes a single aggregate value for the column, and so returns a `observed_value` 
@@ -384,7 +327,7 @@ The complete `result` includes:
 ```
 
 For example:
-```python name="result_format_complete_example_agg"
+```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_agg"
 ```
 
 Will return the following output:
@@ -393,5 +336,6 @@ Will return the following output:
 True
 
 >>> print(validation_result.result)
-{'observed_value': 3.6666666666666665}
+```
+```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_agg_output"
 ```

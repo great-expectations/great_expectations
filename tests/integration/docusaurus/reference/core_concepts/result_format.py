@@ -22,60 +22,12 @@ from great_expectations.util import filter_properties_dict
 from great_expectations.validator.validator import Validator
 
 # Snippet: example data frame for result_format
-# <snippet name="pandas_df_for_result_format">
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/pandas_df_for_result_format">
 dataframe = pd.DataFrame(
     {
-        "pk_column": [
-            "zero",
-            "one",
-            "two",
-            "three",
-            "four",
-            "five",
-            "six",
-            "seven",
-            "eight",
-            "nine",
-            "ten",
-            "eleven",
-            "twelve",
-            "thirteen",
-            "fourteen",
-        ],
-        "my_var": [
-            "A",
-            "B",
-            "B",
-            "C",
-            "C",
-            "C",
-            "D",
-            "D",
-            "D",
-            "D",
-            "E",
-            "E",
-            "E",
-            "E",
-            "E",
-        ],
-        "my_numbers": [
-            1,
-            2,
-            2,
-            3,
-            3,
-            3,
-            4,
-            None,
-            4,
-            4,
-            5,
-            5,
-            5,
-            5,
-            None,
-        ],
+        "pk_column": ["zero", "one", "two", "three", "four", "five", "six", "seven"],
+        "my_var": ["A", "B", "B", "C", "C", "C", "D", "D"],
+        "my_numbers": [1, 2, 2, 3, 3, 3, 4, None],
     }
 )
 # </snippet>
@@ -131,7 +83,7 @@ my_validator: Validator = Validator(
 
 # Expectation-level Configuration
 # Snippet: result_format BOOLEAN example
-# <snippet name="result_format_boolean_example">
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_boolean_example">
 validation_result = my_validator.expect_column_values_to_be_in_set(
     column="my_var",
     value_set=["B", "C", "D"],
@@ -139,17 +91,24 @@ validation_result = my_validator.expect_column_values_to_be_in_set(
 )
 # </snippet>
 assert validation_result.success == False
-assert validation_result.result == {}
+
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_boolean_example_output">
+expected_output: dict = {}
+# </snippet>
+
+assert validation_result.result == expected_output
 
 # Snippet: result_format BASIC example with set
-# <snippet name="result_format_basic_example_set">
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_basic_example_set">
 validation_result = my_validator.expect_column_values_to_be_in_set(
     column="my_var", value_set=["B", "C", "D"], result_format={"result_format": "BASIC"}
 )
 # </snippet>
 
 assert validation_result.success == False
-assert validation_result.result == {
+
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_basic_example_set_output">
+expected_output: dict = {
     "element_count": 15,
     "unexpected_count": 6,
     "unexpected_percent": 40.0,
@@ -159,19 +118,24 @@ assert validation_result.result == {
     "unexpected_percent_total": 40.0,
     "unexpected_percent_nonmissing": 40.0,
 }
+# </snippet>
+assert validation_result.result == expected_output
 
 # Snippet: result_format BASIC example with aggregate
-# <snippet name="result_format_basic_example_agg">
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_basic_example_agg">
 validation_result = my_validator.expect_column_max_to_be_between(
     column="my_numbers", min_value=0.0, max_value=10.0, result_format="BASIC"
 )
 # </snippet>
 assert validation_result.success == True
-assert validation_result.result == {"observed_value": 3.5384615384615383}
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_basic_example_agg_output">
+expected_output: dict = {"observed_value": 3.5384615384615383}
+# </snippet>
+assert validation_result.result == expected_output
 
 
 # Snippet: result_format SUMMARY example with set
-# <snippet name="result_format_summary_example_set">
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_summary_example_set">
 validation_result = my_validator.expect_column_values_to_be_in_set(
     column="my_var",
     value_set=["B", "C", "D"],
@@ -182,8 +146,12 @@ validation_result = my_validator.expect_column_values_to_be_in_set(
     },
 )
 # </snippet>
+
 assert validation_result.success == False
-assert validation_result.result == {
+
+
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_summary_example_set_output">
+expected_validation_result: dict = {
     "element_count": 15,
     "unexpected_count": 6,
     "unexpected_percent": 40.0,
@@ -206,19 +174,25 @@ assert validation_result.result == {
         {"value": "A", "count": 1},
     ],
 }
+# </snippet>
+
+assert validation_result.result == expected_validation_result
 
 # Snippet: result_format SUMMARY example with agg
-# <snippet name="result_format_summary_example_agg">
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_summary_example_agg">
 validation_result = my_validator.expect_column_mean_to_be_between(
     column="my_numbers", min_value=0.0, max_value=10.0, result_format="SUMMARY"
 )
 # </snippet>
 assert validation_result.success == True
-assert validation_result.result == {"observed_value": 3.6666666666666665}
 
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_summary_example_agg_output">
+expected_output: dict = {"observed_value": 3.6666666666666665}
+# </snippet>
+assert validation_result.result == expected_output
 
 # Snippet: result_format COMPLETE example with set
-# <snippet name="result_format_complete_example_set">
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_set">
 validation_result = my_validator.expect_column_values_to_be_in_set(
     column="my_var",
     value_set=["B", "C", "D"],
@@ -230,7 +204,9 @@ validation_result = my_validator.expect_column_values_to_be_in_set(
 )
 # </snippet>
 assert validation_result.success == False
-assert validation_result.result == {
+
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_set_output">
+expected_validation_result: dict = {
     "element_count": 15,
     "unexpected_count": 6,
     "unexpected_percent": 40.0,
@@ -263,15 +239,22 @@ assert validation_result.result == {
     ],
     "unexpected_index_query": [0, 10, 11, 12, 13, 14],
 }
+# </snippet>
+
+assert validation_result.result == expected_validation_result
 
 # Snippet: result_format COMPLETE example with agg
-# <snippet name="result_format_complete_example_agg">
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_agg">
 validation_result = my_validator.expect_column_mean_to_be_between(
     column="my_numbers", min_value=0.0, max_value=10.0, result_format="COMPLETE"
 )
 # </snippet>
 assert validation_result.success == True
-assert validation_result.result == {"observed_value": 3.6666666666666665}
+
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_agg_output">
+expected_output: dict = {"observed_value": 3.6666666666666665}
+# </snippet>
+assert validation_result.result == expected_output
 
 
 # Checkpoint
@@ -294,7 +277,7 @@ context.save_expectation_suite(
     overwriting_existing=True,
 )
 
-# <snippet name="result_format_checkpoint_example">
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_checkpoint_example">
 checkpoint_dict: dict = {
     "name": "my_checkpoint",
     "config_version": 1.0,
