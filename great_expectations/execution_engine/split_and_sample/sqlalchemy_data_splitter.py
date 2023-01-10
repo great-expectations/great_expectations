@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Union
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.execution_engine.split_and_sample.data_splitter import (
     DataSplitter,
     DatePart,
@@ -45,6 +45,9 @@ except ImportError:
     concat = None
 
 if TYPE_CHECKING:
+    import sqlalchemy as sa
+    from sqlalchemy.sql.expression import Cast, ColumnOperators
+
     from great_expectations.execution_engine.sqlalchemy_execution_engine import (
         SqlAlchemyExecutionEngine,
     )
@@ -173,7 +176,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         """
         self._validate_date_parts(date_parts)
 
-        date_parts: List[DatePart] = self._convert_date_parts(date_parts)
+        date_parts = self._convert_date_parts(date_parts)
 
         column_batch_identifiers: dict = batch_identifiers[column_name]
 
@@ -358,21 +361,22 @@ class SqlAlchemyDataSplitter(DataSplitter):
         processed_splitter_method_name: str = self._get_splitter_method_name(
             splitter_method_name
         )
+        batch_identifiers_list: List[dict]
         if self._is_datetime_splitter(processed_splitter_method_name):
             splitter_fn_name: str = self.DATETIME_SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING[
                 processed_splitter_method_name
             ]
-            batch_identifiers_list: List[dict] = getattr(self, splitter_fn_name)(
+            batch_identifiers_list = getattr(self, splitter_fn_name)(
                 execution_engine, table_name, **splitter_kwargs
             )
         else:
-            batch_identifiers_list: List[
-                dict
-            ] = self.get_data_for_batch_identifiers_for_non_date_part_splitters(
-                execution_engine,
-                table_name,
-                processed_splitter_method_name,
-                splitter_kwargs,
+            batch_identifiers_list = (
+                self.get_data_for_batch_identifiers_for_non_date_part_splitters(
+                    execution_engine,
+                    table_name,
+                    processed_splitter_method_name,
+                    splitter_kwargs,
+                )
             )
 
         return batch_identifiers_list
@@ -490,16 +494,18 @@ class SqlAlchemyDataSplitter(DataSplitter):
         """
         self._validate_date_parts(date_parts)
 
-        date_parts: List[DatePart] = self._convert_date_parts(date_parts)
+        date_parts = self._convert_date_parts(date_parts)
 
         # NOTE: AJB 20220414 concatenating to find distinct values to support all dialects.
         # There are more performant dialect-specific methods that can be implemented in
         # future improvements.
         # NOTE: AJB 20220511 for awsathena we need to cast extracted date parts
         # to string first before concatenating them.
+        concat_clause: list[Label]
+        concat_date_parts: Cast | ColumnOperators
         if len(date_parts) == 1:
             # MSSql does not accept single item concatenation
-            concat_clause: List[Label] = [
+            concat_clause = [
                 sa.func.distinct(
                     sa.func.extract(date_parts[0].value, sa.column(column_name)).label(
                         date_parts[0].value
@@ -526,11 +532,11 @@ class SqlAlchemyDataSplitter(DataSplitter):
                         )
                     )
 
-                concat_clause: List[Label] = [
+                concat_clause = [
                     sa.func.distinct(concat_date_parts).label("concat_distinct_values"),
                 ]
             else:
-                concat_date_parts: concat = sa.func.concat(
+                concat_date_parts = sa.func.concat(
                     "",
                     sa.cast(
                         sa.func.extract(date_parts[0].value, sa.column(column_name)),
@@ -538,7 +544,6 @@ class SqlAlchemyDataSplitter(DataSplitter):
                     ),
                 )
 
-                date_part: DatePart
                 for date_part in date_parts[1:]:
                     concat_date_parts = sa.func.concat(
                         concat_date_parts,
@@ -548,7 +553,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
                         ),
                     )
 
-                concat_clause: List[Label] = [
+                concat_clause = [
                     sa.func.distinct(concat_date_parts).label("concat_distinct_values"),
                 ]
 
@@ -618,7 +623,10 @@ class SqlAlchemyDataSplitter(DataSplitter):
         return execution_engine.execute_split_query(split_query)
 
     def _get_params_for_batch_identifiers_from_date_part_splitter(
-        self, column_name: str, result: List[LegacyRow], date_parts: List[DatePart]
+        self,
+        column_name: str,
+        result: List[LegacyRow],
+        date_parts: List[DatePart] | List[str],
     ) -> List[dict]:
         """Get parameters used to build BatchIdentifiers from the results of a get_data_for_batch_identifiers_for_split_on_date_parts
 
@@ -631,7 +639,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         Returns:
             List of dicts of the form [{column_name: {date_part_name: date_part_value}}]
         """
-        date_parts: List[DatePart] = self._convert_date_parts(date_parts)
+        date_parts = self._convert_date_parts(date_parts)
 
         data_for_batch_identifiers: List[dict] = [
             {
@@ -711,7 +719,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
                 processed_splitter_method_name
             ]
         except ValueError:
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 f"Please provide a supported splitter method name, you provided: {splitter_method_name}"
             )
 

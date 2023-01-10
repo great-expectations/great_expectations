@@ -2,7 +2,7 @@ from typing import Optional
 
 import dataprofiler as dp
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
@@ -59,7 +59,7 @@ class DataProfilerColumnProfileReport(DataProfilerProfileMetricProvider):
                 "'profile_path' does not point to a valid DataProfiler stored profile."
             )
         except Exception as e:
-            raise ge_exceptions.MetricError(
+            raise gx_exceptions.MetricError(
                 message=str(e),
             ) from e
 

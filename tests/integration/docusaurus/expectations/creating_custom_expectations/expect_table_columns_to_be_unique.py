@@ -17,7 +17,7 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py TableColumnsUnique class_def">
 # This class defines a Metric to support your Expectation.
 
 
@@ -82,7 +82,7 @@ class TableColumnsUnique(TableMetricProvider):
 
 
 # </snippet>
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py ExpectTableColumnsToBeUnique class_def">
 class ExpectTableColumnsToBeUnique(TableExpectation):
     # </snippet>
     """Expect table to contain columns with unique contents."""
