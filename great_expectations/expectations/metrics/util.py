@@ -13,6 +13,7 @@ from typing_extensions import reveal_type
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchData
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -711,7 +712,7 @@ def verify_column_names_exist(
 
     for column_name in column_names_list:
         if column_name not in batch_columns_list:
-            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=error_message_template.format(column_name=column_name)
             )
 
@@ -1095,7 +1096,7 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(
         List of Dicts that contain ID/PK values
     """
     if expectation_domain_column_name is None:
-        raise ge_exceptions.MetricResolutionError(
+        raise gx_exceptions.MetricResolutionError(
             message=f"Error: The domain column is currently set to None. Please check your configuration.",
             failed_metrics=["unexpected_index_list"],
         )
@@ -1108,7 +1109,7 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(
     tuple_index: Dict[str, int] = dict()
     for column_name in unexpected_index_column_names:
         if column_name not in domain_records_df_index_names:
-            raise ge_exceptions.MetricResolutionError(
+            raise gx_exceptions.MetricResolutionError(
                 message=f"Error: The column {column_name} does not exist in the named indices. Please check your configuration",
                 failed_metrics=["unexpected_index_list"],
             )
@@ -1157,7 +1158,7 @@ def get_unexpected_indices_for_single_pandas_named_index(
         len(unexpected_index_column_names) == 1
         and unexpected_index_column_names[0] == domain_records_df.index.name
     ):
-        raise ge_exceptions.MetricResolutionError(
+        raise gx_exceptions.MetricResolutionError(
             message=f"Error: The column {unexpected_index_column_names[0] if unexpected_index_column_names else '<no column specified>'} does not exist in the named indices. Please check your configuration",
             failed_metrics=["unexpected_index_list"],
         )

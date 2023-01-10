@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
@@ -1279,7 +1279,7 @@ def test_get_profiler(
 def test_get_profiler_non_existent_profiler_raises_error(
     mock_data_context: mock.MagicMock, empty_profiler_store: ProfilerStore
 ):
-    with pytest.raises(ge_exceptions.ProfilerNotFoundError) as e:
+    with pytest.raises(gx_exceptions.ProfilerNotFoundError) as e:
         RuleBasedProfiler.get_profiler(
             data_context=mock_data_context,
             profiler_store=empty_profiler_store,
@@ -1327,7 +1327,7 @@ def test_delete_profiler_with_too_many_args_raises_error(
 def test_delete_profiler_non_existent_profiler_raises_error(
     populated_profiler_store: ProfilerStore,
 ):
-    with pytest.raises(ge_exceptions.ProfilerNotFoundError) as e:
+    with pytest.raises(gx_exceptions.ProfilerNotFoundError) as e:
         RuleBasedProfiler.delete_profiler(
             profiler_store=populated_profiler_store,
             name="my_non_existent_profiler",

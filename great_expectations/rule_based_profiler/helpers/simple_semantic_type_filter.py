@@ -14,7 +14,7 @@ from typing import (
 
 from typing_extensions import TypeGuard
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import (
     InferredSemanticDomainType,
     SemanticDomainTypes,
@@ -136,7 +136,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
             )
         )
         if len(column_types_dict_list) != 1:
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Error: {len(column_types_dict_list)} columns were found while obtaining semantic type \
     information.  Please ensure that the specified column name refers to exactly one column.
     """

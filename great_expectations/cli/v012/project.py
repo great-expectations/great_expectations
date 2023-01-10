@@ -3,7 +3,7 @@ import sys
 import click
 
 from great_expectations import DataContext
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as gx_exceptions
 from great_expectations.cli.v012.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.v012.toolkit import load_data_context_with_error_handling
 from great_expectations.cli.v012.util import cli_message
@@ -80,14 +80,14 @@ upgrade your Great Expectations configuration to version {float(CURRENT_GX_CONFI
             )
         return True, None, context
     except (
-        ge_exceptions.InvalidConfigurationYamlError,
-        ge_exceptions.InvalidTopLevelConfigKeyError,
-        ge_exceptions.MissingTopLevelConfigKeyError,
-        ge_exceptions.InvalidConfigValueTypeError,
-        ge_exceptions.UnsupportedConfigVersionError,
-        ge_exceptions.DataContextError,
-        ge_exceptions.PluginClassNotFoundError,
-        ge_exceptions.PluginModuleNotFoundError,
-        ge_exceptions.GreatExpectationsError,
+        gx_exceptions.InvalidConfigurationYamlError,
+        gx_exceptions.InvalidTopLevelConfigKeyError,
+        gx_exceptions.MissingTopLevelConfigKeyError,
+        gx_exceptions.InvalidConfigValueTypeError,
+        gx_exceptions.UnsupportedConfigVersionError,
+        gx_exceptions.DataContextError,
+        gx_exceptions.PluginClassNotFoundError,
+        gx_exceptions.PluginModuleNotFoundError,
+        gx_exceptions.GreatExpectationsError,
     ) as err:
         return False, err.message, None

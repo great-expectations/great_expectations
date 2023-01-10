@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Unio
 
 import numpy as np
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.estimators.bootstrap_numeric_range_estimator import (
@@ -240,7 +240,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
                     not truncate_values_keys
                     <= NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS
                 ):
-                    raise ge_exceptions.ProfilerExecutionError(
+                    raise gx_exceptions.ProfilerExecutionError(
                         message=f"""Unrecognized truncate_values key(s) in {self.__class__.__name__}:
 "{str(truncate_values_keys - NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS)}" \
 detected.
@@ -447,7 +447,7 @@ detected.
             estimator
             not in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES
         ):
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""The directive "estimator" for {self.__class__.__name__} can be only one of
 {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES} ("{estimator}" was detected).
 """
@@ -747,7 +747,7 @@ detected.
                 for distribution_boundary in truncate_values.values()
             ]
         ):
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""The directive "truncate_values" for {self.__class__.__name__} must specify the
 [lower_bound, upper_bound] closed interval, where either boundary is a numeric value (or None).
 """
@@ -787,7 +787,7 @@ detected.
             round_decimals is None
             or (isinstance(round_decimals, int) and (round_decimals >= 0))
         ):
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a
 positive integer, or must be omitted (or set to None).
 """
