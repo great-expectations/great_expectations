@@ -16,7 +16,7 @@ from pyparsing import (
     alphas,
 )
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot
 
@@ -64,7 +64,7 @@ condition = (column_name + not_null).setParseAction(_set_notnull) ^ (
 )
 
 
-class ConditionParserError(ge_exceptions.GreatExpectationsError):
+class ConditionParserError(gx_exceptions.GreatExpectationsError):
     pass
 
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING, Any, ClassVar, List, Optional, Set, Union
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,
@@ -101,7 +101,7 @@ class Builder(SerializableDictDot):
             ]
         )
         if num_supplied_batch_specification_args > 1:
-            raise ge_exceptions.ProfilerConfigurationError(
+            raise gx_exceptions.ProfilerConfigurationError(
                 f'Please pass at most one of "batch_list" and "batch_request" arguments (you passed {num_supplied_batch_specification_args} arguments).'
             )
 
