@@ -39,7 +39,7 @@ In this workflow, we will be making use of the `UserConfigurableProfiler` to pro
 
 To begin, we'll need to set up our imports and instantiate our <TechnicalTag tag="data_context" text="Data Context" />:
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L2-L10
+```python name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py imports"
 ```
 
 :::note
@@ -58,12 +58,12 @@ In order to profile our first table and validate our second table, we need to se
 
 In this guide, we will use a MySQL <TechnicalTag tag="datasource" text= "Datasource" /> as our source data -- the data we trust to be correct.
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L81-L85
+```python name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py mysql_batch_request"
 ```
 
 From this data, we will create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> and use that suite to validate our second table, pulled from a PostgreSQL Datasource.
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L88-L92
+```python name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py pg_batch_request"
 ```
 
 ### 4. Profile Source Data
@@ -71,17 +71,17 @@ From this data, we will create an <TechnicalTag tag="expectation_suite" text="Ex
 
 We can now use the `mysql_batch_request` defined above to build a <TechnicalTag tag="validator" text="Validator" />:
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L95
+```python name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py get_validator"
 ```
 
 Instantiate our `UserConfigurableProfiler`:
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L98-L104
+```python name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py profiler"
 ```
 
 And use that profiler to build and save an Expectation Suite:
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L107-L111
+```python name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py build_suite"
 ```
 
 <details>
@@ -100,7 +100,7 @@ Before we can validate our second table, we need to define a <TechnicalTag tag="
 
 We will pass both the `pg_batch_request` and Expectation Suite defined above to this checkpoint.
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L114-L124
+```python name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py checkpoint_config"
 ```
 
 ### 6. Validation
@@ -108,7 +108,7 @@ We will pass both the `pg_batch_request` and Expectation Suite defined above to 
 
 Finally, we can use our Checkpoint to validate that our two tables are identical:
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L127-L129
+```python name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py run_checkpoint"
 ```
 
 If we now inspect the results of this Checkpoint (`results["success"]`), we can see that our Validation was successful!
@@ -126,7 +126,7 @@ In this workflow, we will be making use of the `UserConfigurableProfiler` to pro
 
 To begin, we'll need to set up our imports and instantiate our <TechnicalTag tag="data_context" text="Data Context" />:
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py#L2-L10
+```python name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py imports"
 ```
 
 :::note
@@ -145,12 +145,12 @@ In order to profile our first table and validate our second table, we need to se
 
 In this guide, we will use a MySQL <TechnicalTag tag="datasource" text= "Datasource" /> as our source data -- the data we trust to be correct.
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py#L81-L87
+```python name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py mysql_runtime_batch_request"
 ```
 
 From this data, we will create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> and use that suite to validate our second table, pulled from a PostgreSQL Datasource.
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py#L90-L96
+```python name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py pg_runtime_batch_request"
 ```
 
 ### 4. Profile Source Data
@@ -158,17 +158,17 @@ From this data, we will create an <TechnicalTag tag="expectation_suite" text="Ex
 
 We can now use the `mysql_runtime_batch_request` defined above to build a <TechnicalTag tag="validator" text="Validator" />:
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py#L99-L101
+```python name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py get_validator"
 ```
 
 Instantiate our `UserConfigurableProfiler`:
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py#L104-L110
+```python name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py profiler"
 ```
 
 And use that profiler to build and save an Expectation Suite:
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py#L113-L117
+```python name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py build_suite"
 ```
 
 <details>
@@ -187,7 +187,7 @@ Before we can validate our second table, we need to define a <TechnicalTag tag="
 
 We will pass both the `pg_runtime_batch_request` and Expectation Suite defined above to this checkpoint.
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py#L120-L130
+```python name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py checkpoint_config"
 ```
 
 ### 6. Validation
@@ -195,7 +195,7 @@ We will pass both the `pg_runtime_batch_request` and Expectation Suite defined a
 
 Finally, we can use our Checkpoint to validate that our two batches of data - queried from two different tables - are identical:
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py#L133-L135
+```python name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py run_checkpoint"
 ```
 
 If we now inspect the results of this Checkpoint (`results["success"]`), we can see that our Validation was successful!
