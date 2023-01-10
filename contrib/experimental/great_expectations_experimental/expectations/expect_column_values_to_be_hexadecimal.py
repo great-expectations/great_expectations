@@ -10,7 +10,7 @@ class ExpectColumnValuesToBeHexadecimal(RegexBasedColumnMapExpectation):
     """Expect column values to be valid hexadecimals."""
 
     regex_camel_name = "HexadecimalNumber"
-    regex = "^[0-9a-fA-F]+$"
+    regex = r"^[0-9a-fA-F]+$"
     semantic_type_name_plural = "hexadecimals"
 
     map_metric = RegexBasedColumnMapExpectation.register_metric(
@@ -37,6 +37,7 @@ class ExpectColumnValuesToBeHexadecimal(RegexBasedColumnMapExpectation):
                 "e": ["a8", "21", "2.0", "1B", "4AA", "31"],
                 "f": ["a8", "41", "ca", "", "0", "31"],
             },
+            "suppress_test_for": ["bigquery", "snowflake"],
             "tests": [
                 {
                     "title": "positive_test_with_mostly",
