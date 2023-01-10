@@ -107,6 +107,9 @@ from great_expectations.datasource.datasource_serializer import (
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.experimental.datasources.config import GxConfig
+from great_expectations.experimental.datasources.interfaces import (
+    Datasource as XDatasource,
+)
 from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.rule_based_profiler.config.base import (
@@ -148,9 +151,6 @@ if TYPE_CHECKING:
         GXCloudIdentifier,
     )
     from great_expectations.experimental.datasources.interfaces import Batch as XBatch
-    from great_expectations.experimental.datasources.interfaces import (
-        Datasource as XDatasource,
-    )
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.rule_based_profiler import RuleBasedProfilerResult
     from great_expectations.validation_operators.validation_operators import (
@@ -2911,6 +2911,14 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return self._cached_datasources
 
     @property
+    def xdatasources(self) -> Dict[str, XDatasource]:
+        return {
+            name: ds
+            for (name, ds) in self.datasources.items()
+            if isinstance(ds, XDatasource)
+        }
+
+    @property
     def data_context_id(self) -> str:
         return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
 
@@ -3872,3 +3880,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         for ds_name, datasource in config.datasources.items():
             logger.info(f"Loaded '{ds_name}' from ZEP config")
             self._attach_datasource_to_context(datasource)
+
+    def _synchronize_zep_datasources(self) -> Dict[str, XDatasource]:
+        """
+        Update `self.zep_config.xdatasources` with any newly added datasources.
+        Should be called before serializing `zep_config`.
+        """
+        xdatasources = self.xdatasources
+        if xdatasources:
+            self.zep_config.xdatasources.update(xdatasources)
+        return self.zep_config.xdatasources

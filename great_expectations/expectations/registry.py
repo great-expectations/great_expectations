@@ -36,9 +36,9 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-_registered_expectations = {}
-_registered_metrics = {}
-_registered_renderers = {}
+_registered_expectations: dict = {}
+_registered_metrics: dict = {}
+_registered_renderers: dict = {}
 
 """
 {
@@ -63,7 +63,7 @@ def register_renderer(
     renderer_fn: Callable[..., Union[RenderedAtomicContent, RenderedContent]],
 ):
     # noinspection PyUnresolvedReferences
-    renderer_name = renderer_fn._renderer_type
+    renderer_name = renderer_fn._renderer_type  # type: ignore[attr-defined]
     if object_name not in _registered_renderers:
         logger.debug(f"Registering {renderer_name} for expectation_type {object_name}.")
         _registered_renderers[object_name] = {
@@ -186,11 +186,11 @@ def register_metric(
         Union[MetricFunctionTypes, MetricPartialFunctionTypes]
     ] = None,
 ) -> dict:
-    res = {}
+    res: dict = {}
     execution_engine_name = execution_engine.__name__
     logger.debug(f"Registering metric: {metric_name}")
     if metric_provider is not None and metric_fn_type is not None:
-        metric_provider.metric_fn_type = metric_fn_type
+        metric_provider.metric_fn_type = metric_fn_type  # type: ignore[attr-defined]
     if metric_name in _registered_metrics:
         metric_definition = _registered_metrics[metric_name]
         current_domain_keys = metric_definition.get("metric_domain_keys", set())
@@ -340,7 +340,7 @@ def get_domain_metrics_dict_by_name(
     }
 
 
-def get_expectation_impl(expectation_name: str):
+def get_expectation_impl(expectation_name: str) -> Type[Expectation]:
     renamed: Dict[str, str] = {
         "expect_column_values_to_be_vector": "expect_column_values_to_be_vectors",
         "expect_columns_values_confidence_for_data_label_to_be_greater_than_or_equalto_threshold": "expect_column_values_confidence_for_data_label_to_be_greater_than_or_equal_to_threshold",
@@ -355,10 +355,13 @@ def get_expectation_impl(expectation_name: str):
         )
         expectation_name = renamed[expectation_name]
 
-    if expectation_name not in _registered_expectations:
+    expectation: Type[Expectation] | None = _registered_expectations.get(
+        expectation_name
+    )
+    if not expectation:
         raise gx_exceptions.ExpectationNotFoundError(f"{expectation_name} not found")
 
-    return _registered_expectations.get(expectation_name)
+    return expectation
 
 
 def list_registered_expectation_implementations(
