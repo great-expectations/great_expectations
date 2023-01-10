@@ -93,7 +93,7 @@ Replace the Expectation class name
 ```
 
 with your real Expectation class name, in upper camel case:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L7
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py ExpectColumnValuesToBeInSolfegeScaleSet class_def"
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
