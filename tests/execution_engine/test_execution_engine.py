@@ -3,7 +3,7 @@ from typing import Dict, Tuple
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchData, BatchMarkers
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.row_conditions import (
@@ -152,7 +152,7 @@ def test_add_column_row_condition_with_unsupported_filter_nan_true(
     e = test_execution_engine
 
     # Ensuring that an attempt to filter nans within base class yields an error
-    with pytest.raises(ge_exceptions.GreatExpectationsError) as error:
+    with pytest.raises(gx_exceptions.GreatExpectationsError) as error:
         _ = e.add_column_row_condition({}, "a", filter_nan=True)
     assert (
         "Base ExecutionEngine does not support adding nan condition filters"
@@ -325,5 +325,5 @@ def test_resolve_metrics_with_incomplete_metric_input():
     }
 
     # Ensuring that incomplete metrics given raises a GreatExpectationsError
-    with pytest.raises(ge_exceptions.GreatExpectationsError) as error:
+    with pytest.raises(gx_exceptions.GreatExpectationsError) as error:
         engine.resolve_metrics(metrics_to_resolve=(desired_metric,), metrics={})

@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as gx_exceptions
 from great_expectations.cli import toolkit
 from great_expectations.cli.toolkit import (
     get_relative_path_from_config_file_to_base_path,
@@ -113,7 +113,7 @@ def test_parse_cli_config_file_location_posix_paths(tmp_path_factory):
     fixtures = filename_fixtures + absolute_path_fixtures + relative_path_fixtures
 
     for fixture in fixtures:
-        with pytest.raises(ge_exceptions.ConfigNotFoundError):
+        with pytest.raises(gx_exceptions.ConfigNotFoundError):
             toolkit.parse_cli_config_file_location(fixture["input_path"])
 
         # Create files and re-run assertions
@@ -172,7 +172,7 @@ def test_parse_cli_config_file_location_posix_paths_existing_files_with_no_exten
     ]
 
     for fixture in filename_no_extension_fixtures:
-        with pytest.raises(ge_exceptions.ConfigNotFoundError):
+        with pytest.raises(gx_exceptions.ConfigNotFoundError):
             toolkit.parse_cli_config_file_location(fixture["input_path"])
 
     # Create files and re-run assertions
@@ -300,7 +300,7 @@ def test_parse_cli_config_file_location_windows_paths(tmp_path_factory):
     fixtures = filename_fixtures + absolute_path_fixtures + relative_path_fixtures
 
     for fixture in fixtures:
-        with pytest.raises(ge_exceptions.ConfigNotFoundError):
+        with pytest.raises(gx_exceptions.ConfigNotFoundError):
             toolkit.parse_cli_config_file_location(fixture["input_path"])
 
     # Create files and re-run assertions

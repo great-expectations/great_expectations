@@ -2,7 +2,7 @@ import logging
 from copy import deepcopy
 from typing import Any, Dict, List, Optional, Tuple
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchMarkers,
@@ -57,7 +57,7 @@ class DataConnector:
             batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
         if execution_engine is None:
-            raise ge_exceptions.DataConnectorError(
+            raise gx_exceptions.DataConnectorError(
                 "A non-existent/unknown ExecutionEngine instance was referenced."
             )
 

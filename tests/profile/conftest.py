@@ -30,7 +30,7 @@ def titanic_data_context_modular_api(tmp_path_factory, monkeypatch):
     shutil.copy(
         titanic_csv_path, str(os.path.join(context_path, "../data/Titanic.csv"))
     )
-    return gx.data_context.DataContext(context_path)
+    return gx.get_context(context_root_dir=context_path)
 
 
 @pytest.fixture()
