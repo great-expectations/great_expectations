@@ -50,7 +50,7 @@ from great_expectations.core.util import (
     get_or_create_spark_application,
     get_sql_dialect_floating_point_infinity_value,
 )
-from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
+from great_expectations.dataset import PandasDataset
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.exceptions.exceptions import (
@@ -466,6 +466,24 @@ except ImportError:
 #     import teradatasqlalchemy.types as teradatatypes
 # except ImportError:
 #     teradatasqlalchemy = None
+
+try:
+    from great_expectations.dataset import SqlAlchemyDataset
+    from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
+except ImportError:
+    SqlAlchemyDataset = None
+    SqlAlchemyBatchReference = None
+    logger.debug(
+        "Unable to load sqlalchemy dataset; install optional sqlalchemy dependency for support."
+    )
+
+try:
+    from great_expectations.dataset import SparkDFDataset
+except ImportError:
+    SparkDFDataset = None
+    logger.debug(
+        "Unable to load spark dataset; install optional spark dependency for support."
+    )
 
 import tempfile
 
@@ -2810,6 +2828,7 @@ def evaluate_json_test_v3_api(
     NOTE: Tests can be suppressed for certain data types if the test contains the Key 'suppress_test_for' with a list
         of DataAsset types to suppress, such as ['SQLAlchemy', 'Pandas'].
 
+    :param validator: (Validator) reference to "Validator" (key object that resolves Metrics and validates Expectations)
     :param expectation_type: (string) the name of the expectation to be run using the test input
     :param test: (dict) a dictionary containing information for the test to be run. The dictionary must include:
         - title: (string) the name of the test

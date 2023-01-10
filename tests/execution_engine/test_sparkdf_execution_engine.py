@@ -8,11 +8,11 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import PathBatchSpec, RuntimeDataBatchSpec
-from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.execution_engine import SparkDFExecutionEngine
-from great_expectations.execution_engine.execution_engine import (
+from great_expectations.core.metric_types import (
+    MetricDomainTypes,
     MetricPartialFunctionTypes,
 )
+from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,

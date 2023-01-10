@@ -8,17 +8,17 @@ import pandas as pd
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_types import (
+    MetricDomainTypes,
+    MetricFunctionTypes,
+    MetricPartialFunctionTypes,
+)
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import (
-    MetricDomainTypes,
-    MetricFunctionTypes,
-    MetricPartialFunctionTypes,
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (

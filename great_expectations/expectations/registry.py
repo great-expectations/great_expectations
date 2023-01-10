@@ -16,6 +16,10 @@ from typing import (
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import IDDict
+from great_expectations.core.metric_types import (
+    MetricFunctionTypes,
+    MetricPartialFunctionTypes,
+)
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
@@ -25,11 +29,7 @@ from great_expectations.validator.computed_metric import MetricValue
 
 if TYPE_CHECKING:
     from great_expectations.core import ExpectationConfiguration
-    from great_expectations.execution_engine.execution_engine import (
-        ExecutionEngine,
-        MetricFunctionTypes,
-        MetricPartialFunctionTypes,
-    )
+    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation import Expectation
     from great_expectations.expectations.metrics.metric_provider import MetricProvider
     from great_expectations.render import RenderedAtomicContent, RenderedContent

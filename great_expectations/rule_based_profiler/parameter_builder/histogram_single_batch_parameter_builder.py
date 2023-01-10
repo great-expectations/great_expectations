@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional, Set
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set
 
 import numpy as np
 
@@ -36,8 +36,8 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
     Compute histogram using specified metric for one Batch of data.
     """
 
-    exclude_field_names: Set[
-        str
+    exclude_field_names: ClassVar[
+        Set[str]
     ] = MetricSingleBatchParameterBuilder.exclude_field_names | {
         "column_partition_metric_single_batch_parameter_builder_config",
         "metric_name",

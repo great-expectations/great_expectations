@@ -20,7 +20,7 @@ from typing import (
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_manager import BatchManager
-from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_types import MetricDomainTypes
 from great_expectations.core.util import (
     AzureUrl,
     DBFSPath,

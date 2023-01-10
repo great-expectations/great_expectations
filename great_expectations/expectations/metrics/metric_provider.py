@@ -4,12 +4,12 @@ from typing import Callable, Optional, Tuple, Type, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_engine.execution_engine import (
+from great_expectations.core.metric_types import (
     MetricDomainTypes,
     MetricFunctionTypes,
     MetricPartialFunctionTypes,
 )
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.metrics import MetaMetricProvider
 from great_expectations.expectations.registry import (
     get_metric_provider,

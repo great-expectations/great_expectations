@@ -63,7 +63,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_types import MetricDomainTypes
 from great_expectations.core.util import nested_update
 from great_expectations.exceptions import (
     ExpectationNotFoundError,
@@ -124,7 +124,7 @@ from great_expectations.validator.validator import ValidationDependencies, Valid
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
-    from great_expectations.render.renderer_configuration import AddParamArgs, MetaNotes
+    from great_expectations.render.renderer_configuration import MetaNotes
 
 logger = logging.getLogger(__name__)
 

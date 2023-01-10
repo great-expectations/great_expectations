@@ -5,13 +5,13 @@ from typing import Any, Dict
 import pandas as pd
 from dateutil.parser import parse
 
+from great_expectations.core.metric_types import (
+    MetricDomainTypes,
+    MetricPartialFunctionTypes,
+)
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import (
-    MetricDomainTypes,
-    MetricPartialFunctionTypes,
 )
 from great_expectations.expectations.metrics.import_manager import F, Window, sparktypes
 from great_expectations.expectations.metrics.map_metric_provider import (

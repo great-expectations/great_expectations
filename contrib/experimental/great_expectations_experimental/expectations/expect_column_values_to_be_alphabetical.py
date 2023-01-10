@@ -14,10 +14,6 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import (
-    MetricDomainTypes,
-    MetricPartialFunctionTypes,
-)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     Expectation,

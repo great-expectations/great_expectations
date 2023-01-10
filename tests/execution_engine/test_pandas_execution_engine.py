@@ -5,6 +5,8 @@ from unittest import mock
 import pandas as pd
 import pytest
 
+from great_expectations.core.metric_types import MetricDomainTypes
+
 # noinspection PyBroadException
 from great_expectations.validator.computed_metric import MetricValue
 
@@ -17,7 +19,6 @@ except:
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec, S3BatchSpec
-from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine.pandas_execution_engine import (
     PandasExecutionEngine,
     storage,
