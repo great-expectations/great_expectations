@@ -30,8 +30,13 @@ from great_expectations._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
 
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.execution_engine.execution_engine import (
+    MetricComputationConfiguration,
+    SplitDomainKwargs,
+)
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sampler import (
     SqlAlchemyDataSampler,
 )
@@ -59,11 +64,6 @@ from great_expectations.exceptions import (
 )
 from great_expectations.exceptions import exceptions as gx_exceptions
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_engine.execution_engine import (
-    MetricComputationConfiguration,
-    MetricDomainTypes,
-    SplitDomainKwargs,
-)
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
