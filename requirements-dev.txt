@@ -9,4 +9,4 @@
 --requirement reqs/requirements-dev-pagerduty.txt
 --requirement reqs/requirements-dev-spark.txt
 
---requirement reqs/requirements-cms.txt
+--requirement reqs/requirements-dev-cms.txt
