@@ -410,11 +410,11 @@ stages:
         strategy:
           matrix:
             Python37:
-              min_constraints: 'reqs/py37-min-test-constraints.txt '
+              min_constraints: 'reqs/requirements-dev-py37-min-test-constraints.txt '
             Python38:
-              min_constraints: 'reqs/py38-min-test-constraints.txt '
+              min_constraints: 'reqs/requirements-dev-py38-min-test-constraints.txt '
             Python39:
-              min_constraints: 'reqs/py39-min-test-constraints.txt '
+              min_constraints: 'reqs/requirements-dev-py39-min-test-constraints.txt '
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
         steps:
