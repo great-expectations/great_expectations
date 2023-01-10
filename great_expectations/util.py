@@ -1802,14 +1802,7 @@ def get_context(
 
     Read on for more details about each of the Data Context types:
 
-    **FileDataContext:** A Data Context configured via a yaml file.
-
-    Returned by default if you have no cloud configuration set up and pass no parameters.
-
-    Relevant parameters
-
-    context_root_dir: If you pass context_root_dir, we will look for a great_expectations.yml
-    configuration there. If not we will look at the following locations:
+    **FileDataContext:** A Data Context configured via a yaml file. Returned by default if you have no cloud configuration set up and pass no parameters. If you pass context_root_dir, we will look for a great_expectations.yml configuration there. If not we will look at the following locations:
 
     - Path defined in a GX_HOME environment variable.
 
@@ -1817,42 +1810,39 @@ def get_context(
 
     - Parent directories of the current directory (e.g. in case you invoke the CLI in a sub folder of your Great Expectations directory).
 
-    project_config: Optionally override the configuration on disk.
+    Relevant parameters
 
-    runtime_environment: Optionally override specific configuration values.
+    - context_root_dir: Provide an alternative directory to look for GX config.
 
-    **EphemeralDataContext:** A temporary, in-memory Data Context typically used in a pipeline.
+    - project_config: Optionally override the configuration on disk - only if `context_root_dir` is also provided.
 
-    The default if you pass in a project_config.
+    - runtime_environment: Optionally override specific configuration values.
+
+    **EphemeralDataContext:** A temporary, in-memory Data Context typically used in a pipeline. The default if you pass in only a project_config and have no cloud configuration set up.
 
     Relevant parameters
 
-    project_config: Used to configure the Data Context.
+    - project_config: Used to configure the Data Context.
 
-    runtime_environment: Optionally override specific configuration values.
+    - runtime_environment: Optionally override specific configuration values.
 
-    **CloudDataContext:** A Data Context whose configuration comes from Great Expectations Cloud.
+    **CloudDataContext:** A Data Context whose configuration comes from Great Expectations Cloud. The default if you have a cloud configuration set up. Pass `cloud_mode=False` if you have a cloud configuration set up and you do not wish to create a CloudDataContext.
 
-    The default if you have a cloud configuration set up. Pass `cloud_mode=False` if
-    you have a cloud configuration set up and you do not wish to create a CloudDataContext.
-
-    Cloud configuration can be set up by passing `cloud_*` parameters to
-    `get_context()`, configuring cloud environment variables, or in a
-    great_expectations.conf file.
+    Cloud configuration can be set up by passing `cloud_*` parameters to `get_context()`, configuring cloud environment variables, or in a great_expectations.conf file.
 
     Relevant parameters
 
-    cloud_base_url: Override env var or great_expectations.conf file.
+    - cloud_base_url: Override env var or great_expectations.conf file.
 
-    cloud_access_token: Override env var or great_expectations.conf file.
+    - cloud_access_token: Override env var or great_expectations.conf file.
 
-    cloud_organization_id: Override env var or great_expectations.conf file.
+    - cloud_organization_id: Override env var or great_expectations.conf file.
 
-    cloud_mode: Set to True or False to explicitly enable/disable cloud mode.
+    - cloud_mode: Set to True or False to explicitly enable/disable cloud mode.
 
-    project_config: Optionally override the cloud configuration.
+    - project_config: Optionally override the cloud configuration.
 
-    runtime_environment: Optionally override specific configuration values.
+    - runtime_environment: Optionally override specific configuration values.
 
     Args:
         project_config: In-memory configuration for Data Context.
@@ -1860,15 +1850,16 @@ def get_context(
         runtime_environment: A dictionary of values can be passed to a DataContext when it is instantiated.
             These values will override both values from the config variables file and
             from environment variables.
-        cloud_base_url: Optional url for GX Cloud endpoint.
-        cloud_access_token: Optional access_token for GX Cloud account.
-        cloud_organization_id: Optional org_id for GX Cloud account.
-        cloud_mode: Optional flag, whether to run GX in Cloud mode (default is None).
-        ge_cloud_base_url: Optional url for GX Cloud endpoint.
-        ge_cloud_access_token: Optional access_token for GX Cloud account.
-        ge_cloud_organization_id: Optional org_id for GX Cloud account.
-        ge_cloud_mode: Optional flag, whether to run GX in Cloud mode (default is None).
-            If None, the environment determines
+        cloud_base_url: url for GX Cloud endpoint.
+        cloud_access_token: access_token for GX Cloud account.
+        cloud_organization_id: org_id for GX Cloud account.
+        cloud_mode: whether to run GX in Cloud mode (default is None).
+            If None, cloud mode is assumed if cloud credentials are set up. Set to False to override.
+        ge_cloud_base_url: url for GX Cloud endpoint.
+        ge_cloud_access_token: access_token for GX Cloud account.
+        ge_cloud_organization_id: org_id for GX Cloud account.
+        ge_cloud_mode: whether to run GX in Cloud mode (default is None).
+            If None, cloud mode is assumed if cloud credentials are set up. Set to False to override.
 
     Returns:
         A Data Context. Either a FileDataContext, EphemeralDataContext, or
