@@ -43,7 +43,7 @@ We recommend placing it in your project directory, for example ``great_expectati
 
 **main.py:**
 
-```python file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L89-L118
+```python name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py imports"
 ```
 
 ### 3. If you haven't done so already, authenticate the gcloud CLI and set the project
