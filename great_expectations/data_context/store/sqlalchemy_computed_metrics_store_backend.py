@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.computed_metrics.computed_metric import (
     ComputedMetric as ComputedMetricBusinessObject,
 )
@@ -59,7 +59,7 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
             store_name=store_name,
         )
         if not sa:
-            raise ge_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(
                 "ModuleNotFoundError: No module named 'sqlalchemy'"
             )
 
@@ -85,7 +85,7 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
             self.drivername = parsed_url.drivername
             self._engine = sa.create_engine(url, **kwargs)
         else:
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 "Credentials, url, connection_string, or an engine are required for a DatabaseStoreBackend."
             )
 
@@ -146,7 +146,7 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
             return computed_metric_business_object
 
         except Exception as e:
-            raise ge_exceptions.InvalidKeyError(f"{str(e)}")
+            raise gx_exceptions.InvalidKeyError(f"{str(e)}")
 
     def _set(
         self,
@@ -217,7 +217,7 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
             )
 
         if not results:
-            raise ge_exceptions.InvalidKeyError(
+            raise gx_exceptions.InvalidKeyError(
                 f'Query for invalid key "{str(filtering_criteria)}" encountered.'
             )
 
@@ -419,7 +419,7 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
                 )
             except ValueError as e:
                 if "incorrect password" in str(e).lower():
-                    raise ge_exceptions.DatasourceKeyPairAuthBadPassphraseError(
+                    raise gx_exceptions.DatasourceKeyPairAuthBadPassphraseError(
                         datasource_name="SqlAlchemyDatasource",
                         message="Decryption of key failed, was the passphrase incorrect?",
                     ) from e

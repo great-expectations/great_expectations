@@ -1,7 +1,7 @@
 import logging
 from typing import Optional, Union
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.computed_metrics.computed_metric import (
     ComputedMetric,
     computedMetricSchema,
@@ -56,7 +56,7 @@ class ComputedMetricsStore(Store):
                 store_backend_class,
                 (InMemoryStoreBackend, SqlAlchemyComputedMetricsStoreBackend),
             ):
-                raise ge_exceptions.DataContextError(
+                raise gx_exceptions.DataContextError(
                     "Invalid StoreBackend configuration: expected an InMemoryStoreBackend instance."
                 )
 

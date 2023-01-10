@@ -3,8 +3,8 @@ from functools import wraps
 from typing import Any, Callable, Dict, Optional, Type, Union
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.metric_types import (
-    MetricDomainTypes,
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import (
     MetricFunctionTypes,
     MetricPartialFunctionTypes,
 )

@@ -4,11 +4,8 @@ from typing import Dict, Optional
 import numpy as np
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.core.metric_types import (
-    MetricDomainTypes,
-    MetricFunctionTypes,
-    MetricPartialFunctionTypes,
-)
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.exceptions.exceptions import MetricResolutionError
 from great_expectations.execution_engine import ExecutionEngine, SparkDFExecutionEngine

@@ -7,7 +7,7 @@ from great_expectations.core.domain import (
     Domain,
     SemanticDomainTypes,
 )
-from great_expectations.core.metric_types import MetricDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.helpers.util import (
     integer_semantic_domain_type,
 )

@@ -1,7 +1,8 @@
 from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.core.metric_types import MetricDomainTypes, MetricFunctionTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import MetricFunctionTypes
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )

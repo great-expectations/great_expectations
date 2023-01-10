@@ -471,8 +471,8 @@ try:
     from great_expectations.dataset import SqlAlchemyDataset
     from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 except ImportError:
-    SqlAlchemyDataset = None
-    SqlAlchemyBatchReference = None
+    SqlAlchemyDataset = None  # type: ignore[misc,assignment] # could be None
+    SqlAlchemyBatchReference = None  # type: ignore[misc,assignment] # could be None
     logger.debug(
         "Unable to load sqlalchemy dataset; install optional sqlalchemy dependency for support."
     )
@@ -480,7 +480,7 @@ except ImportError:
 try:
     from great_expectations.dataset import SparkDFDataset
 except ImportError:
-    SparkDFDataset = None
+    SparkDFDataset = None  # type: ignore[misc,assignment] # could be None
     logger.debug(
         "Unable to load spark dataset; install optional spark dependency for support."
     )

@@ -3,7 +3,7 @@ from typing import Dict, List
 import pytest
 
 from great_expectations.core.domain import Domain
-from great_expectations.core.metric_types import MetricDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
     ParameterNode,

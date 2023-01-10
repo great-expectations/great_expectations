@@ -4,7 +4,7 @@ import pytest
 
 from great_expectations.core.batch import Batch
 from great_expectations.core.domain import Domain
-from great_expectations.core.metric_types import MetricDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchValidationGraphParameterBuilder,

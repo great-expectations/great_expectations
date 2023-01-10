@@ -1,4 +1,4 @@
-from great_expectations.core.metric_types import MetricPartialFunctionTypes
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,

@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional, Union
 
-from great_expectations.core.metric_types import MetricDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
@@ -61,16 +61,7 @@ class QueryTable(QueryMetricProvider):
         engine: sqlalchemy_engine_Engine = execution_engine.engine
         result: List[sqlalchemy_engine_Row] = engine.execute(sa.text(query)).fetchall()
 
-        # TODO: <Alex>ALEX</Alex>
-        # return [dict(element._mapping) for element in result]
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # return [dict(element._asdict()) for element in result]
-        # return [element._asdict() for element in result]
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
         return [dict(element) for element in result]
-        # TODO: <Alex>ALEX</Alex>
         # </snippet>
 
     @metric_value(engine=SparkDFExecutionEngine)

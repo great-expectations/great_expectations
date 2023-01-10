@@ -610,7 +610,7 @@ class ComputedMetricIdentifier(DataContextKey):
             types_detected: str = (
                 f"{[type(element).__name__ for element in computed_metric_key]}"
             )
-            raise ge_exceptions.InvalidDataContextKeyError(
+            raise gx_exceptions.InvalidDataContextKeyError(
                 f"computed_metric_key tuple elements must be of string type; {types_detected} detected"
             )
 

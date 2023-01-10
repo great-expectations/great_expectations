@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.metric_types import MetricDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,

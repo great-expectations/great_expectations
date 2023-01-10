@@ -5,10 +5,8 @@ from typing import Any, Dict
 import pandas as pd
 from dateutil.parser import parse
 
-from great_expectations.core.metric_types import (
-    MetricDomainTypes,
-    MetricPartialFunctionTypes,
-)
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,

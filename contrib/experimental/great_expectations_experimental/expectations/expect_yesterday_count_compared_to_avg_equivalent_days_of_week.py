@@ -2,7 +2,8 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.core.metric_types import MetricDomainTypes, MetricFunctionTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import MetricFunctionTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,

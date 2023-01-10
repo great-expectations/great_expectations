@@ -24,8 +24,8 @@ from marshmallow import ValidationError
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.computed_metrics.computed_metric import ComputedMetric
 from great_expectations.core.batch_manager import BatchManager
-from great_expectations.core.metric_types import (
-    MetricDomainTypes,
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import (
     MetricFunctionTypes,
     MetricPartialFunctionTypes,
 )
@@ -640,7 +640,7 @@ class ExecutionEngine(ABC):
             try:
                 res = self._computed_metrics_store.get(key=key)
                 resolved_metrics[metric_configuration.id] = res.value
-            except ge_exceptions.InvalidKeyError as exc_ik:
+            except gx_exceptions.InvalidKeyError as exc_ik:
                 # TODO: <Alex>ALEX</Alex>
                 print(
                     f'ExecutionEngine: Non-existent ComputedMetric record named "{key.computed_metric_key}".\n\nDetails: {exc_ik}'
@@ -884,7 +884,7 @@ class ExecutionEngine(ABC):
             return get_metric_provider(metric_name=metric_name, execution_engine=self)[
                 0
             ].is_persistable()
-        except ge_exceptions.MetricProviderError:
+        except gx_exceptions.MetricProviderError:
             pass
 
         return True
