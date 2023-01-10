@@ -81,13 +81,6 @@ module.exports = {
             'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3'
           ]
         },
-        {
-          type: 'category',
-          label: 'Miscellaneous',
-          items: [
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectation_docker_images' }
-          ]
-        },
         { type: 'doc', id: 'guides/setup/index', label: 'Index' }
       ]
     },
@@ -283,11 +276,18 @@ module.exports = {
       label: 'Integration guides',
       link: { type: 'doc', id: 'deployment_patterns/integrations_and_howtos_overview' },
       items: [
+        {
+          type: 'category',
+          label: 'Using Great Expectations with AWS',
+          items: [
+            'deployment_patterns/how_to_use_great_expectations_in_aws_glue',
+            { label: 'How to use Great Expectations with AWS using S3 and Pandas', type: 'doc', id: 'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_cloud_storage_and_pandas' }
+          ]
+        },
         'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
         'deployment_patterns/how_to_use_great_expectations_with_airflow',
         'deployment_patterns/how_to_use_great_expectations_in_databricks',
-        'deployment_patterns/how_to_use_great_expectations_in_aws_glue',
         { type: 'doc', id: 'integrations/integration_datahub' },
         'deployment_patterns/how_to_use_great_expectations_in_deepnote',
         'deployment_patterns/how_to_use_great_expectations_in_flyte',

@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -12,7 +12,14 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import substitute_none_for_missing
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
 class ExpectTableColumnCountToEqual(TableExpectation):
@@ -72,7 +79,7 @@ class ExpectTableColumnCountToEqual(TableExpectation):
     """ A Metric Decorator for the Column Count"""
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -105,24 +112,15 @@ class ExpectTableColumnCountToEqual(TableExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        renderer_configuration.add_param(
+            name="value", param_type=RendererValueType.NUMBER
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(configuration.kwargs, ["value"])
-        template_str = "Must have exactly $value columns."
-        params_with_json_schema = {
-            "value": {"schema": {"type": "number"}, "value": params.get("value")},
-        }
-        return template_str, params_with_json_schema, None, styling
+        renderer_configuration.template_str = "Must have exactly $value columns."
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
