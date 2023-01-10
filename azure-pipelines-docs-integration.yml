@@ -104,7 +104,7 @@ stages:
           displayName: 'Update pip'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines google-cloud-bigquery-storage git+https://github.com/awslabs/aws-glue-libs.git
+            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines google-cloud-bigquery-storage git+https://github.com/awslabs/aws-glue-libs.git "cryptography==38.0.4"
           displayName: 'Install dependencies'
 
         - task: DownloadSecureFile@1
