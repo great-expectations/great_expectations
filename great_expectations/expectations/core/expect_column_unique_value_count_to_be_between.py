@@ -39,7 +39,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.render.renderer_configuration import RendererParams
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
 class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
@@ -213,30 +213,30 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args = (
+        add_param_args: List[AddParamArgs] = [
             ("column", RendererValueType.STRING),
             ("min_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
             ("max_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
             ("mostly", RendererValueType.NUMBER),
             ("strict_min", RendererValueType.BOOLEAN),
             ("strict_max", RendererValueType.BOOLEAN),
-        )
+        ]
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
-        params: RendererParams = renderer_configuration.params
+        params = renderer_configuration.params
 
         if not params.min_value and not params.max_value:
             template_str = "may have any number of unique values."
         else:
             at_least_str = "greater than or equal to"
             if params.strict_min:
-                at_least_str: str = cls._get_strict_min_string(
+                at_least_str = cls._get_strict_min_string(
                     renderer_configuration=renderer_configuration
                 )
             at_most_str = "less than or equal to"
             if params.strict_max:
-                at_most_str: str = cls._get_strict_max_string(
+                at_most_str = cls._get_strict_max_string(
                     renderer_configuration=renderer_configuration
                 )
 

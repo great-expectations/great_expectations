@@ -79,7 +79,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
     args_keys = ("column", "threshold")
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -94,8 +94,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
 
         # Setting up a configuration
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
         try:
             # Ensuring Z-score Threshold metric has been properly provided
             assert (

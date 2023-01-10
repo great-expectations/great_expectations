@@ -6,11 +6,11 @@ import pytest
 
 import great_expectations as gx
 from great_expectations import DataContext
-from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.render.renderer.checkpoint_new_notebook_renderer import (
     CheckpointNewNotebookRenderer,
 )
+from great_expectations.util import get_context
 
 
 @pytest.fixture
@@ -110,7 +110,7 @@ def test_find_datasource_with_asset_on_context_with_a_datasource_with_a_dataconn
     config = context.get_config_with_variables_substituted()
     root_directory = context.root_directory
 
-    context = BaseDataContext(project_config=config, context_root_dir=root_directory)
+    context = get_context(project_config=config, context_root_dir=root_directory)
 
     renderer = CheckpointNewNotebookRenderer(context, "foo")
     obs = renderer._find_datasource_with_asset()

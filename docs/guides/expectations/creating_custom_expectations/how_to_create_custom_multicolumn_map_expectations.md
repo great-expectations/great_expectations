@@ -104,11 +104,11 @@ with something like:
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
 
-```python file=../../../../examples/expectations/multicolumn_map_expectation_template.py#L131
+```python file=../../../../examples/expectations/multicolumn_map_expectation_template.py#L130
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py#L148
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py#L145
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -303,12 +303,12 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/multicolumn_map_expectation_template.py#L120-L125
+```python file=../../../../examples/expectations/multicolumn_map_expectation_template.py#L119-L124
 ```
 
 would become
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py#L136-L142
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py#L133-L139
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!

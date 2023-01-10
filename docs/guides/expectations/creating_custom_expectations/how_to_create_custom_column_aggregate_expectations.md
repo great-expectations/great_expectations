@@ -254,7 +254,7 @@ In this step, we simply need to validate that the results of our Metrics meet ou
 
 The validate method is implemented as `_validate(...)`:
 
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L95-L101
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L94-L100
 ```
 
 This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies, 
@@ -322,7 +322,7 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L105-L110
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L104-L109
 ```
 
 would become

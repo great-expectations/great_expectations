@@ -123,7 +123,7 @@ class DataAssistantRunner:
                 DataAssistantResult: The result object for the DataAssistant
             """
             if batch_request is None:
-                data_assistant_name: str = self._data_assistant_cls.data_assistant_type  # type: ignore[attr-defined] # dynamic attr assigned in __new__
+                data_assistant_name: str = self._data_assistant_cls.data_assistant_type
                 raise ge_exceptions.DataAssistantExecutionError(
                     message=f"""Utilizing "{data_assistant_name}.run()" requires valid "batch_request" to be specified \
 (empty or missing "batch_request" detected)."""
@@ -219,7 +219,7 @@ class DataAssistantRunner:
         Returns:
             DataAssistant: The "DataAssistant" object, corresponding to this instance's specified "DataAssistant" type.
         """
-        data_assistant_name: str = self._data_assistant_cls.data_assistant_type  # type: ignore[attr-defined] # dynamic attr assigned in __new__
+        data_assistant_name: str = self._data_assistant_cls.data_assistant_type
 
         data_assistant: DataAssistant
 
