@@ -1,6 +1,6 @@
 import logging
 from abc import ABC
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -24,11 +24,18 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
 from great_expectations.util import camel_to_snake
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +77,9 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
         return map_metric
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ):
         super().validate_configuration(configuration)
         try:
             assert (
@@ -143,80 +152,43 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                 return f'Less than {mostly * 100}% of values in column "{column}" are in the set {str(set_)}.'
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("column", RendererValueType.STRING),
+            ("mostly", RendererValueType.NUMBER),
+            ("set_", RendererValueType.STRING),
+            ("set_semantic_name", RendererValueType.STRING),
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            [
-                "column",
-                "set_",
-                "mostly",
-                "row_condition",
-                "condition_parser",
-                "set_semantic_name",
-            ],
-        )
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
-            "mostly_pct": {
-                "schema": {"type": "number"},
-                "value": params.get("mostly_pct"),
-            },
-            "set_": {"schema": {"type": "string"}, "value": params.get("set_")},
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-            "set_semantic_name": {
-                "schema": {"type": "string"},
-                "value": params.get("set_semantic_name"),
-            },
-        }
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
-        if not params.get("set_"):
+        params = renderer_configuration.params
+
+        if not params.set_:
             template_str = "values must match a set but none was specified."
         else:
-            if params.get("set_semantic_name"):
+            if params.set_semantic_name:
                 template_str = "values must match the set $set_semantic_name: $set_"
             else:
                 template_str = "values must match this set: $set_"
-            if params["mostly"] is not None:
-                params_with_json_schema["mostly_pct"]["value"] = num_to_str(  # FIXME
-                    params["mostly"] * 100, precision=15, no_scientific=True
+
+            if params.mostly and params.mostly.value < 1.0:
+                renderer_configuration = cls._add_mostly_pct_param(
+                    renderer_configuration=renderer_configuration
                 )
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."
 
-        if include_column_name:
+        if renderer_configuration.include_column_name:
             template_str = "$column " + template_str
 
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
-            )
-            template_str = conditional_template_str + ", then " + template_str
-            params_with_json_schema.update(conditional_params)
+        renderer_configuration.template_str = template_str
 
-        return template_str, params_with_json_schema, None, styling
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
