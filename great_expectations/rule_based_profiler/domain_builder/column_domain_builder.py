@@ -12,7 +12,7 @@ from typing import (
     cast,
 )
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -248,7 +248,7 @@ class ColumnDomainBuilder(DomainBuilder):
 
         for column_name in effective_column_names:
             if column_name not in table_columns:
-                raise ge_exceptions.ProfilerExecutionError(
+                raise gx_exceptions.ProfilerExecutionError(
                     message=f'Error: The column "{column_name}" in BatchData does not exist.'
                 )
 

@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 
 import great_expectations
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.id_dict import BatchSpec
@@ -110,7 +110,7 @@ def test_batch_data_get_batch_ambiguous_parameter_pandas_engine(
     test_df: pd.DataFrame = test_df_pandas
 
     # raised by get_batch_list()
-    with pytest.raises(ge_exceptions.GreatExpectationsTypeError):
+    with pytest.raises(gx_exceptions.GreatExpectationsTypeError):
         # noinspection PyUnusedLocal
         batch_list: List[Batch] = context.get_batch_list(
             RuntimeBatchRequest(
@@ -311,7 +311,7 @@ def test_batch_data_get_validator_ambiguous_parameter_pandas_engine(
 
     context.create_expectation_suite("my_expectations")
     # raised by get_batch_list() in DataContext
-    with pytest.raises(ge_exceptions.GreatExpectationsTypeError):
+    with pytest.raises(gx_exceptions.GreatExpectationsTypeError):
         batch_list: List[Batch] = context.get_validator(
             RuntimeBatchRequest(
                 datasource_name="my_datasource",
@@ -526,7 +526,7 @@ def test_file_path_get_batch_pandas_not_supported_directory(
     data_context_with_datasource_pandas_engine, taxi_test_file_directory
 ):
     context: DataContext = data_context_with_datasource_pandas_engine
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         batch_list: List[Batch] = context.get_batch_list(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
@@ -542,7 +542,7 @@ def test_file_path_get_batch_pandas_not_supported_directory(
 
 def test_get_batch_pandas_wrong_path(data_context_with_datasource_pandas_engine):
     context: DataContext = data_context_with_datasource_pandas_engine
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         batch_list: List[Batch] = context.get_batch_list(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
@@ -560,7 +560,7 @@ def test_file_path_get_batch_pandas_wrong_reader_method(
     data_context_with_datasource_pandas_engine, taxi_test_file
 ):
     context: DataContext = data_context_with_datasource_pandas_engine
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         batch_list: List[Batch] = context.get_batch_list(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",

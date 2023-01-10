@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from marshmallow import ValidationError
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import ConfigurationStore
@@ -121,8 +121,8 @@ class CheckpointStore(ConfigurationStore):
         )
         try:
             self.remove_key(key=key)
-        except ge_exceptions.InvalidKeyError as exc_ik:
-            raise ge_exceptions.CheckpointNotFoundError(
+        except gx_exceptions.InvalidKeyError as exc_ik:
+            raise gx_exceptions.CheckpointNotFoundError(
                 message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'  # type: ignore[union-attr]
             )
 
@@ -134,12 +134,12 @@ class CheckpointStore(ConfigurationStore):
         )
         try:
             checkpoint_config: CheckpointConfig = self.get(key=key)  # type: ignore[assignment]
-        except ge_exceptions.InvalidKeyError as exc_ik:
-            raise ge_exceptions.CheckpointNotFoundError(
+        except gx_exceptions.InvalidKeyError as exc_ik:
+            raise gx_exceptions.CheckpointNotFoundError(
                 message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'  # type: ignore[union-attr]
             )
         except ValidationError as exc_ve:
-            raise ge_exceptions.InvalidCheckpointConfigError(
+            raise gx_exceptions.InvalidCheckpointConfigError(
                 message="Invalid Checkpoint configuration", validation_error=exc_ve
             )
 
@@ -159,7 +159,7 @@ class CheckpointStore(ConfigurationStore):
                     )
                 )
             ):
-                raise ge_exceptions.CheckpointError(
+                raise gx_exceptions.CheckpointError(
                     message="Attempt to instantiate LegacyCheckpoint with insufficient and/or incorrect arguments."
                 )
 
