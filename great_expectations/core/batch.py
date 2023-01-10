@@ -4,7 +4,7 @@ import json
 import logging
 from typing import Any, Callable, Dict, Optional, Set, Union
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchIdError
@@ -807,7 +807,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: C901 - complexity 21
     # ensure that the first parameter is datasource_name, which should be a str. This check prevents users
     # from passing in batch_request as an unnamed parameter.
     if not isinstance(datasource_name, str):
-        raise ge_exceptions.GreatExpectationsTypeError(
+        raise gx_exceptions.GreatExpectationsTypeError(
             f"the first parameter, datasource_name, must be a str, not {type(datasource_name)}"
         )
 

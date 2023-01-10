@@ -7,7 +7,7 @@ from uuid import UUID
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -166,7 +166,7 @@ def test_validator_default_expectation_args__sql(
 
     print(my_validator.get_default_expectation_arguments())
 
-    with pytest.raises(ge_exceptions.InvalidDataContextKeyError):
+    with pytest.raises(gx_exceptions.InvalidDataContextKeyError):
         # expectation_suite_name is a number not str
         # noinspection PyUnusedLocal
         my_validator = context.get_validator(
@@ -415,7 +415,7 @@ def test_validator_with_bad_batchrequest(
         data_asset_name="i_dont_exist",
         data_connector_query={"batch_filter_parameters": {"year": "2019"}},
     )
-    with pytest.raises(ge_exceptions.InvalidBatchRequestError):
+    with pytest.raises(gx_exceptions.InvalidBatchRequestError):
         # noinspection PyUnusedLocal
         _: Validator = context.get_validator(
             batch_request=multi_batch_request, expectation_suite=suite
@@ -885,7 +885,7 @@ def test_graph_validate_with_bad_config_catch_exceptions_false(
     )
     with pytest.raises(
         tuple(
-            [ge_exceptions.MetricResolutionError, ge_exceptions.ProfilerExecutionError]
+            [gx_exceptions.MetricResolutionError, gx_exceptions.ProfilerExecutionError]
         )
     ) as eee:
         # noinspection PyUnusedLocal

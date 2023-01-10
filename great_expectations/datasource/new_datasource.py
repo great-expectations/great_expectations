@@ -2,7 +2,7 @@ import copy
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
@@ -49,7 +49,7 @@ class BaseDatasource:
 
         self._data_context_root_directory = data_context_root_directory
         if execution_engine is None:
-            raise ge_exceptions.ExecutionEngineError(
+            raise gx_exceptions.ExecutionEngineError(
                 message="No ExecutionEngine configuration provided."
             )
 
@@ -60,7 +60,7 @@ class BaseDatasource:
                 config_defaults={"module_name": "great_expectations.execution_engine"},
             )
         except Exception as e:
-            raise ge_exceptions.ExecutionEngineError(message=str(e))
+            raise gx_exceptions.ExecutionEngineError(message=str(e))
 
         self._datasource_config: dict = {
             "execution_engine": execution_engine,
