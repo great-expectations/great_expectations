@@ -6,7 +6,6 @@ from typing import Any, List, Optional
 
 import pandas as pd
 
-from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine.split_and_sample.data_splitter import DatePart
 from tests.test_utils import convert_string_columns_to_datetime
 
