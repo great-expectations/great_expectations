@@ -13,7 +13,7 @@ from great_expectations.data_context.types.resource_identifiers import Expectati
 {% endif -%}
 from great_expectations.exceptions import DataContextError
 
-context = gx.data_context.DataContext()
+context = gx.get_context()
 {% if batch_request %}
 batch_request = {{ batch_request }}
 {% endif %}

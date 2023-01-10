@@ -54,7 +54,7 @@ def data_context_simple_expectation_suite_with_custom_pandas_dataset(tmp_path_fa
         os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
         str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
     )
-    return gx.data_context.DataContext(context_path)
+    return gx.get_context(context_root_dir=context_path)
 
 
 def test_data_asset_expectation_suite(empty_data_context_stats_enabled):

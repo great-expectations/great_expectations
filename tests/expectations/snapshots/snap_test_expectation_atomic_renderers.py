@@ -671,10 +671,8 @@ snapshots[
     "value": {
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
-            "row_condition": {"schema": {"type": "string"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "$column values must be parseable as JSON, at least $mostly_pct % of the time.",
@@ -766,11 +764,9 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_match_regex 
     "value": {
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
             "regex": {"schema": {"type": "string"}, "value": "^superconductive$"},
-            "row_condition": {"schema": {"type": "string"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "$column values must match this regular expression: $regex, at least $mostly_pct % of the time.",
@@ -876,11 +872,9 @@ snapshots[
     "value": {
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
             "regex_list": {"schema": {"type": "array"}, "value": ["^a", "^b", "^c"]},
-            "row_condition": {"schema": {"type": "string"}, "value": None},
             "v__0": {"schema": {"type": "string"}, "value": "^a"},
             "v__1": {"schema": {"type": "string"}, "value": "^b"},
             "v__2": {"schema": {"type": "string"}, "value": "^c"},
@@ -962,10 +956,7 @@ snapshots[
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
-            "max_value": {"schema": {"type": "number"}, "value": None},
             "min_value": {"schema": {"type": "number"}, "value": 5},
-            "strict_max": {"schema": {"type": "boolean"}, "value": None},
-            "strict_min": {"schema": {"type": "boolean"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "Must have greater than or equal to $min_value columns.",
