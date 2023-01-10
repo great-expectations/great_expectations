@@ -56,9 +56,6 @@ exclude = [
     'cli/upgrade_helpers/upgrade_helper_v11\.py',  # 59
     'cli/upgrade_helpers/upgrade_helper_v13\.py',  # 17
     'core/batch\.py', # 29
-    'core/expectation_configuration\.py', # 21
-    'core/expectation_diagnostics', # 20
-    'core/expectation_validation_result\.py', # 9
     'core/usage_statistics/anonymizers/action_anonymizer\.py', # 1
     'core/usage_statistics/anonymizers/anonymizer\.py', # 6
     'core/usage_statistics/anonymizers/base\.py', # 8
@@ -141,7 +138,6 @@ exclude = [
     'expectations/metrics/metric_provider\.py',  # 12
     'expectations/metrics/util\.py', # 11
     'expectations/regex_based_column_map_expectation\.py',  # 3
-    'expectations/registry\.py',  # 19
     'expectations/row_conditions\.py',  # 4
     'expectations/set_based_column_map_expectation\.py',  # 3
     'render/renderer/checkpoint_new_notebook_renderer\.py',  # 9
