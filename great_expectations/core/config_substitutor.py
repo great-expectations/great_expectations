@@ -6,7 +6,7 @@ from collections import OrderedDict
 from functools import lru_cache
 from typing import Any, Dict, Optional
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.types.base import BaseYamlConfig
 
 try:
@@ -142,7 +142,7 @@ class _ConfigurationSubstitutor:
                     return config_variable_value
                 template_str = template_str.replace(m.group(), config_variable_value)
             else:
-                raise ge_exceptions.MissingConfigVariableError(
+                raise gx_exceptions.MissingConfigVariableError(
                     f"""\n\nUnable to find a match for config substitution variable: `{config_variable_name}`.
     Please add this missing variable to your `uncommitted/config_variables.yml` file or your environment variables.
     See https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials""",

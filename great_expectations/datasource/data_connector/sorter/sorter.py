@@ -2,7 +2,7 @@ import json
 import logging
 from typing import Any, List, Union, ValuesView
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition
 
 logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ class Sorter:
         elif orderby == "desc":
             reverse = True
         else:
-            raise ge_exceptions.SorterError(
+            raise gx_exceptions.SorterError(
                 f'Illegal sort order "{orderby}" for attribute "{name}".'
             )
         self._reverse = reverse

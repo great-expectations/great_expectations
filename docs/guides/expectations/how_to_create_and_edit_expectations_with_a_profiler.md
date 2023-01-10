@@ -55,16 +55,16 @@ If you go that route, you can follow along in the resulting Jupyter Notebook ins
 Load an on-disk <TechnicalTag tag="data_context" text="Data Context" /> via:
 
 ```python
-from great_expectations.data_context.data_context import DataContext
+import great_expectations as gx
 
-context = DataContext(
+context = gx.get_context(
     context_root_dir='path/to/my/context/root/directory/great_expectations'
 )
 ```
 
 Alternatively, [you can instantiate a Data Context without a .yml file](../setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md)
 
-### 2. Set your expectation_suite_name and create your Batch Request 
+### 2. Set your expectation_suite_name and create your Batch Request
 
 The <TechnicalTag tag="batch_request" text="Batch Request" /> specifies which <TechnicalTag tag="batch" text="Batch" /> of data you would like to <TechnicalTag tag="profiling" text="Profile" /> in order to create your Expectation Suite. We will pass it into a <TechnicalTag tag="validator" text="Validator" /> in the next step.
 
@@ -117,11 +117,11 @@ If you'd like, you can <TechnicalTag tag="validation" text="Validate" /> your da
 ```python
 from great_expectations.checkpoint.checkpoint import SimpleCheckpoint
 
-# Review and save our Expectation Suite 
+# Review and save our Expectation Suite
 print(validator.get_expectation_suite(discard_failed_expectations=False))
 validator.save_expectation_suite(discard_failed_expectations=False)
 
-# Set up and run a Simple Checkpoint for ad hoc validation of our data 
+# Set up and run a Simple Checkpoint for ad hoc validation of our data
 checkpoint_config = {
     "class_name": "SimpleCheckpoint",
     "validations": [
@@ -140,7 +140,7 @@ checkpoint_result = checkpoint.run()
 context.build_data_docs()
 
 # Get the only validation_result_identifier from our SimpleCheckpoint run, and open Data Docs to that page
-validation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0] 
+validation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]
 context.open_data_docs(resource_identifier=validation_result_identifier)
 ```
 

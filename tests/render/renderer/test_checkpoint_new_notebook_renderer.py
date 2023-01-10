@@ -33,7 +33,7 @@ def assetless_dataconnector_context(
         ),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
-    context = gx.data_context.DataContext(context_path)
+    context = gx.get_context(context_root_dir=context_path)
     assert context.root_directory == context_path
 
     datasource_config = f"""

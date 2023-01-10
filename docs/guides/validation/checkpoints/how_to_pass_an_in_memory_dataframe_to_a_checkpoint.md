@@ -23,12 +23,12 @@ This guide will help you pass an in-memory DataFrame to an existing <TechnicalTa
 
 
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L2-L7
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py imports"
 ```
 
 If you have an existing configured DataContext in your filesystem in the form of a `great_expectations.yml` file, you can load it like this:
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L11
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py get_context"
 ```
 
 If you do not have a filesystem to work with, you can load your DataContext following the instructions in [How to instantiate a Data Context without a yml file](../../setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md).
@@ -49,13 +49,13 @@ In order to pass in a DataFrame at runtime, your `great_expectations.yml` should
 
 <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L15-L28
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py datasource_yaml"
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L34-L49
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py datasource_config"
 ```
 
 </TabItem>
@@ -76,7 +76,7 @@ You will need an <TechnicalTag tag="expectation_suite" text="Expectation Suite" 
 
 For the purposes of this guide, we have created an empty suite named `my_expectation_suite` by running:
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L68
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py create_expectation_suite"
 ```
 
 We will now walk through two examples for configuring a `Checkpoint` and passing it an in-memory DataFrame at runtime.
@@ -95,13 +95,13 @@ If we configure a `SimpleCheckpoint` that contains a single `batch_request` in `
 
 <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L72-L83
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py checkpoint_config_yaml_missing_keys"
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L89-L104
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py checkpoint_config_python_missing_keys"
 ```
 
 </TabItem>
@@ -113,7 +113,7 @@ We can then pass the remaining keys for the in-memory DataFrame (`df`) and it's 
 df = pd.read_csv("<PATH TO DATA>")
 ```
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L118-L126
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py run_checkpoint"
 ```
 
 #### Example 2: Pass a complete `RuntimeBatchRequest` at runtime
@@ -130,13 +130,13 @@ If we configure a `SimpleCheckpoint` that does not contain any `validations`:
 
 <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L133-L139
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py checkpoint_config_yaml_missing_batch_request"
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L145-L151
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py checkpoint_config_python_missing_batch_request"
 ```
 
 </TabItem>
@@ -149,7 +149,7 @@ df_1 = pd.read_csv("<PATH TO DATA 1>")
 df_2 = pd.read_csv("<PATH TO DATA 2>")
 ```
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L169-L191
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py runtime_batch_request"
 ```
 
 ## Additional Notes

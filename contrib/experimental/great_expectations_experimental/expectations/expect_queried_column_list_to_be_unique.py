@@ -18,7 +18,6 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
     """
 
     metric_dependencies = ("query.template_values",)
-
     query = """
             SELECT COUNT(1) FROM (
             SELECT {column_list}, COUNT(1)
@@ -34,6 +33,8 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
         "query",
         "template_dict",
         "batch_id",
+        "row_condition",
+        "condition_parser",
     )
     default_kwarg_values = {
         "include_config": True,
@@ -55,7 +56,6 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
         Returns:
             None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
-
         super().validate_configuration(configuration)
 
     def _validate(
@@ -98,6 +98,7 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
                     },
                 },
             ],
+            "only_for": ["spark", "sqlite", "bigquery", "trino", "redshift"],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -117,24 +118,32 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
                     "in": {
                         "template_dict": {
                             "column_list": "duplicate_num,duplicate_str,duplicate_str2",
+                            "row_condition": "1=1",
+                            "condition_parser": "great_expectations__experimental__",
                         }
                     },
                     "out": {"success": False},
                 },
-            ],
-            "test_backends": [
                 {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite"],
+                    "title": "passing_condition_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "template_dict": {
+                            "column_list": "unique_num,unique_str,duplicate_str2",
+                            "row_condition": 'col("duplicate_str2")!="a"',
+                            "condition_parser": "great_expectations__experimental__",
+                        }
+                    },
+                    "out": {"success": True},
                 },
-                {"backend": "spark", "dialects": None},
             ],
         }
     ]
 
     library_metadata = {
         "tags": ["query-based"],
-        "contributors": ["@itaise"],
+        "contributors": ["@itaise", "@maayaniti"],
     }
 
 

@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from ruamel.yaml import YAML
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
@@ -348,7 +348,7 @@ def test_column_pair_domain_builder_wrong_column_names(
         data_context=data_context,
     )
 
-    with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:
+    with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyUnusedLocal
         domains: List[Domain] = domain_builder.get_domains(
             rule_name="my_rule", variables=variables, batch_request=batch_request
@@ -455,7 +455,7 @@ def test_multi_column_domain_builder_wrong_column_list(
         data_context=data_context,
     )
 
-    with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:
+    with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyUnusedLocal
         domains: List[Domain] = domain_builder.get_domains(
             rule_name="my_rule", variables=variables, batch_request=batch_request
@@ -465,7 +465,7 @@ def test_multi_column_domain_builder_wrong_column_list(
         excinfo.value
     )
 
-    with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:
+    with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyUnusedLocal
         domains: List[Domain] = domain_builder.get_domains(
             rule_name="my_rule", variables=variables, batch_request=batch_request
