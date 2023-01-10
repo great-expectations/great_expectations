@@ -12,7 +12,7 @@ try:
 except (ImportError, ModuleNotFoundError):
     parse_bigquery_url = None
 
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as gx_exceptions
 from great_expectations.datasource import (
     BaseDatasource,
     Datasource,
@@ -93,7 +93,7 @@ def get_batch_request(
             msg_prompt_enter_data_asset_name=msg_prompt_enter_data_asset_name,
         )
     else:
-        raise ge_exceptions.DataContextError(
+        raise gx_exceptions.DataContextError(
             f"Datasource '{datasource.name}' of unsupported type {type(datasource)} was encountered."
         )
 
@@ -422,7 +422,7 @@ def _get_batch_spec_passthrough(
         # where appropriate.
         _: SqlAlchemyExecutionEngine = datasource.execution_engine
     else:
-        raise ge_exceptions.DataContextError(
+        raise gx_exceptions.DataContextError(
             "Datasource {:s} of unsupported type {:s} was encountered.".format(
                 datasource.name, str(type(datasource))
             )

@@ -9,7 +9,7 @@ import pytest
 from moto import mock_s3
 from ruamel.yaml import YAML
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -933,7 +933,7 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
               name: for_me_Me_Me
     """,
     )
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         my_data_connector: ConfiguredAssetS3DataConnector = (
             instantiate_class_from_config(
@@ -1002,7 +1002,7 @@ def test_return_all_batch_definitions_too_many_sorters():
 
     """,
     )
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         my_data_connector: ConfiguredAssetS3DataConnector = (
             instantiate_class_from_config(

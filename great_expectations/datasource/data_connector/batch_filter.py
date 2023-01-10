@@ -2,7 +2,7 @@ import itertools
 import logging
 from typing import Callable, Dict, List, Optional, Union
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.id_dict import IDDict
 from great_expectations.util import is_int
@@ -37,7 +37,7 @@ def build_batch_filter(
         )
     data_connector_query_keys: set = set(data_connector_query_dict.keys())
     if not data_connector_query_keys <= BatchFilter.RECOGNIZED_KEYS:
-        raise ge_exceptions.BatchFilterError(
+        raise gx_exceptions.BatchFilterError(
             f"""Unrecognized data_connector_query key(s):
 "{str(data_connector_query_keys - BatchFilter.RECOGNIZED_KEYS)}" detected.
             """
@@ -46,7 +46,7 @@ def build_batch_filter(
         "custom_filter_function"
     )
     if custom_filter_function and not isinstance(custom_filter_function, Callable):  # type: ignore[arg-type]
-        raise ge_exceptions.BatchFilterError(
+        raise gx_exceptions.BatchFilterError(
             f"""The type of a custom_filter must be a function (Python "Callable").  The type given is
 "{str(type(custom_filter_function))}", which is illegal.
             """
@@ -58,13 +58,13 @@ def build_batch_filter(
     )
     if batch_filter_parameters:
         if not isinstance(batch_filter_parameters, dict):
-            raise ge_exceptions.BatchFilterError(
+            raise gx_exceptions.BatchFilterError(
                 f"""The type of batch_filter_parameters must be a dictionary (Python "dict").  The type given is
 "{str(type(batch_filter_parameters))}", which is illegal.
                 """
             )
         if not all([isinstance(key, str) for key in batch_filter_parameters.keys()]):
-            raise ge_exceptions.BatchFilterError(
+            raise gx_exceptions.BatchFilterError(
                 'All batch_filter_parameters keys must strings (Python "str").'
             )
         batch_filter_parameters = IDDict(batch_filter_parameters)
@@ -75,13 +75,13 @@ def build_batch_filter(
     )
     limit: Optional[int] = data_connector_query_dict.get("limit")  # type: ignore[assignment]
     if limit and (not isinstance(limit, int) or limit < 0):
-        raise ge_exceptions.BatchFilterError(
+        raise gx_exceptions.BatchFilterError(
             f"""The type of a limit must be an integer (Python "int") that is greater than or equal to 0.  The
 type and value given are "{str(type(limit))}" and "{limit}", respectively, which is illegal.
             """
         )
     if index is not None and limit is not None:
-        raise ge_exceptions.BatchFilterError(
+        raise gx_exceptions.BatchFilterError(
             "Only one of index or limit, but not both, can be specified (specifying both is illegal)."
         )
     index = _parse_index(index=index)
@@ -102,7 +102,7 @@ def _parse_index(
         return index
     elif isinstance(index, (list, tuple)):
         if len(index) > 3:
-            raise ge_exceptions.BatchFilterError(
+            raise gx_exceptions.BatchFilterError(
                 f"""The number of index slice components must be between 1 and 3 (the given number is
 {len(index)}).
                 """
@@ -127,7 +127,7 @@ def _parse_index(
         index_as_list = [int(idx_str) if idx_str else None for idx_str in index_as_list]
         return _parse_index(index=index_as_list)
     else:
-        raise ge_exceptions.BatchFilterError(
+        raise gx_exceptions.BatchFilterError(
             f"""The type of index must be an integer (Python "int"), or a list (Python "list") or a tuple
 (Python "tuple"), or a Python "slice" object, or a string that has the format of a single integer or a slice argument.
 The type given is "{str(type(index))}", which is illegal.
