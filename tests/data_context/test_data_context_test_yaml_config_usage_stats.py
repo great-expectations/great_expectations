@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
 from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,
@@ -40,7 +40,7 @@ from tests.core.usage_statistics.util import (
 def test_test_yaml_config_usage_stats_substitution_error(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):
-    with pytest.raises(ge_exceptions.MissingConfigVariableError):
+    with pytest.raises(gx_exceptions.MissingConfigVariableError):
         _ = empty_data_context_stats_enabled.test_yaml_config(
             yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store

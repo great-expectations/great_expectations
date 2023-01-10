@@ -17,7 +17,7 @@ try:
 except (ImportError, ModuleNotFoundError):
     parse_bigquery_url = None
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import rtd_url_ge_version
 from great_expectations.cli.v012 import toolkit
 from great_expectations.cli.v012.cli_messages import NO_DATASOURCES_FOUND
@@ -432,7 +432,7 @@ def _add_pandas_datasource(
         configuration["module_name"] = "great_expectations.datasource"
         errors = DatasourceConfigSchema().validate(configuration)
         if len(errors) != 0:
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 f"Invalid Datasource configuration: {errors:s}"
             )
 
@@ -565,7 +565,7 @@ def _add_sqlalchemy_datasource(  # noqa: C901 - 21
             configuration["module_name"] = "great_expectations.datasource"
             errors = DatasourceConfigSchema().validate(configuration)
             if len(errors) != 0:
-                raise ge_exceptions.GreatExpectationsError(
+                raise gx_exceptions.GreatExpectationsError(
                     f"Invalid Datasource configuration: {errors:s}"
                 )
 
@@ -929,7 +929,7 @@ def _add_spark_datasource(
         configuration["module_name"] = "great_expectations.datasource"
         errors = DatasourceConfigSchema().validate(configuration)
         if len(errors) != 0:
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 f"Invalid Datasource configuration: {errors:s}"
             )
 
@@ -1073,7 +1073,7 @@ def get_batch_kwargs(
         )
 
     else:
-        raise ge_exceptions.DataContextError(
+        raise gx_exceptions.DataContextError(
             "Datasource {:s} is expected to be a PandasDatasource or SparkDFDatasource, but is {:s}".format(
                 datasource_name, str(type(context.get_datasource(datasource_name)))
             )

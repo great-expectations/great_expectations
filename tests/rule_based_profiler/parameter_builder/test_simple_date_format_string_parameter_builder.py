@@ -2,7 +2,7 @@ from typing import Dict
 
 import pytest
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import DataContext
@@ -63,7 +63,7 @@ def test_simple_date_format_parameter_builder_zero_batch_id_error(
         domain.id: parameter_container,
     }
 
-    with pytest.raises(ge_exceptions.ProfilerExecutionError) as e:
+    with pytest.raises(gx_exceptions.ProfilerExecutionError) as e:
         date_format_string_parameter.build_parameters(
             domain=domain,
             parameters=parameters,
