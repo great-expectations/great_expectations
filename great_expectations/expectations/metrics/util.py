@@ -11,7 +11,6 @@ from dateutil.parser import parse
 from packaging import version
 from typing_extensions import reveal_type
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchData
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.execution_engine import (
