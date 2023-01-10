@@ -27,7 +27,7 @@ import pandas as pd
 from IPython.display import HTML, display
 
 from great_expectations import __version__ as ge_version
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_types import MetricDomainTypes
@@ -330,7 +330,7 @@ class DataAssistantResult(SerializableDictDot):
             [isinstance(metric_names, str) or isinstance(metric_names, tuple)]
             for metric_names in self.metric_expectation_map.keys()
         ):
-            raise ge_exceptions.DataAssistantResultExecutionError(
+            raise gx_exceptions.DataAssistantResultExecutionError(
                 "All metric_expectation_map keys must be of type str or tuple."
             )
 
@@ -790,7 +790,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         for chart in charts:
             chart_title = DataAssistantResult._get_chart_layer_title(layer=chart)
             if chart_title is None:
-                raise ge_exceptions.DataAssistantResultExecutionError(
+                raise gx_exceptions.DataAssistantResultExecutionError(
                     "All DataAssistantResult charts must have a title."
                 )
 
@@ -3396,7 +3396,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             ):
                 expectation_plot_impl = self._get_expect_domain_values_temporal_chart
             else:
-                raise ge_exceptions.DataAssistantResultExecutionError(
+                raise gx_exceptions.DataAssistantResultExecutionError(
                     f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
                 )
 
@@ -3435,7 +3435,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             ):
                 metric_plot_impl = self._get_temporal_metrics_chart
             else:
-                raise ge_exceptions.DataAssistantResultExecutionError(
+                raise gx_exceptions.DataAssistantResultExecutionError(
                     f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
                 )
 
@@ -3611,7 +3611,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                     self._get_interactive_expect_column_values_temporal_chart
                 )
             else:
-                raise ge_exceptions.DataAssistantResultExecutionError(
+                raise gx_exceptions.DataAssistantResultExecutionError(
                     f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
                 )
 
@@ -3650,7 +3650,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             ):
                 plot_impl = self._get_interactive_temporal_metrics_chart
             else:
-                raise ge_exceptions.DataAssistantResultExecutionError(
+                raise gx_exceptions.DataAssistantResultExecutionError(
                     f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
                 )
 

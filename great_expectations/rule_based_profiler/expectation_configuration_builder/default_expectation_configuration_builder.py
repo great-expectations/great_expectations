@@ -17,7 +17,7 @@ from pyparsing import (
     opAssoc,
 )
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
@@ -63,7 +63,7 @@ expr = infixNotation(
 
 
 class ExpectationConfigurationConditionParserError(
-    ge_exceptions.GreatExpectationsError
+    gx_exceptions.GreatExpectationsError
 ):
     pass
 
@@ -119,14 +119,14 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         self._meta = meta
 
         if not isinstance(meta, dict):
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Argument "{meta}" in "{self.__class__.__name__}" must be of type "dictionary" \
 (value of type "{str(type(meta))}" was encountered).
 """
             )
 
         if condition and (not isinstance(condition, str)):
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Argument "{condition}" in "{self.__class__.__name__}" must be of type "string" \
 (value of type "{str(type(condition))}" was encountered).
 """

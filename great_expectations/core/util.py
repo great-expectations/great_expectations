@@ -31,7 +31,7 @@ import pandas as pd
 from IPython import get_ipython
 from typing_extensions import TypeAlias
 
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as gx_exceptions
 from great_expectations.alias_types import JSONValues
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -552,7 +552,7 @@ def parse_string_to_datetime(
     datetime_string: str, datetime_format_string: Optional[str] = None
 ) -> datetime.datetime:
     if not isinstance(datetime_string, str):
-        raise ge_exceptions.SorterError(
+        raise gx_exceptions.SorterError(
             f"""Source "datetime_string" must have string type (actual type is "{str(type(datetime_string))}").
             """
         )
@@ -561,7 +561,7 @@ def parse_string_to_datetime(
         return dateutil.parser.parse(timestr=datetime_string)
 
     if datetime_format_string and not isinstance(datetime_format_string, str):
-        raise ge_exceptions.SorterError(
+        raise gx_exceptions.SorterError(
             f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
 "{str(type(datetime_format_string))}").
             """

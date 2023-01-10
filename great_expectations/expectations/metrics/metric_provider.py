@@ -2,7 +2,7 @@ import logging
 from functools import wraps
 from typing import Callable, Optional, Tuple, Type, Union
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_types import (
     MetricDomainTypes,
@@ -207,7 +207,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
             try:
                 _ = get_metric_provider(metric_name + metric_suffix, execution_engine)
                 has_aggregate_fn = True
-            except ge_exceptions.MetricProviderError:
+            except gx_exceptions.MetricProviderError:
                 has_aggregate_fn = False
 
             if has_aggregate_fn:

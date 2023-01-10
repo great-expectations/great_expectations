@@ -14,7 +14,7 @@ from typing import (
     Union,
 )
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric_types import (
     MetricFunctionTypes,
@@ -41,9 +41,9 @@ IN_MEMORY_STORE_BACKEND_TABLE_METRICS: set = {
     "table.head",
 }
 
-_registered_expectations = {}
-_registered_metrics = {}
-_registered_renderers = {}
+_registered_expectations: dict = {}
+_registered_metrics: dict = {}
+_registered_renderers: dict = {}
 
 """
 {
@@ -68,7 +68,7 @@ def register_renderer(
     renderer_fn: Callable[..., Union[RenderedAtomicContent, RenderedContent]],
 ):
     # noinspection PyUnresolvedReferences
-    renderer_name = renderer_fn._renderer_type
+    renderer_name = renderer_fn._renderer_type  # type: ignore[attr-defined]
     if object_name not in _registered_renderers:
         logger.debug(f"Registering {renderer_name} for expectation_type {object_name}.")
         _registered_renderers[object_name] = {
@@ -191,11 +191,11 @@ def register_metric(
         Union[MetricFunctionTypes, MetricPartialFunctionTypes]
     ] = None,
 ) -> dict:
-    res = {}
+    res: dict = {}
     execution_engine_name = execution_engine.__name__
     logger.debug(f"Registering metric: {metric_name}")
     if metric_provider is not None and metric_fn_type is not None:
-        metric_provider.metric_fn_type = metric_fn_type
+        metric_provider.metric_fn_type = metric_fn_type  # type: ignore[attr-defined]
     if metric_name in _registered_metrics:
         metric_definition = _registered_metrics[metric_name]
         current_domain_keys = metric_definition.get("metric_domain_keys", set())
@@ -265,7 +265,7 @@ def get_metric_provider(
         metric_definition = _registered_metrics[metric_name]
         return metric_definition["providers"][type(execution_engine).__name__]
     except KeyError:
-        raise ge_exceptions.MetricProviderError(
+        raise gx_exceptions.MetricProviderError(
             f"No provider found for {metric_name} using {type(execution_engine).__name__}"
         )
 
@@ -280,7 +280,7 @@ def get_metric_function_type(
         ]
         return getattr(provider_fn, "metric_fn_type", None)
     except KeyError:
-        raise ge_exceptions.MetricProviderError(
+        raise gx_exceptions.MetricProviderError(
             f"No provider found for {metric_name} using {type(execution_engine).__name__}"
         )
 
@@ -293,7 +293,7 @@ def get_metric_kwargs(
     try:
         metric_definition = _registered_metrics.get(metric_name)
         if metric_definition is None:
-            raise ge_exceptions.MetricProviderError(
+            raise gx_exceptions.MetricProviderError(
                 f"No definition found for {metric_name}"
             )
         default_kwarg_values = metric_definition["default_kwarg_values"]
@@ -330,7 +330,7 @@ def get_metric_kwargs(
             metric_kwargs["metric_value_kwargs"] = metric_value_kwargs
         return metric_kwargs
     except KeyError:
-        raise ge_exceptions.MetricProviderError(
+        raise gx_exceptions.MetricProviderError(
             f"Incomplete definition found for {metric_name}"
         )
 
@@ -345,7 +345,7 @@ def get_domain_metrics_dict_by_name(
     }
 
 
-def get_expectation_impl(expectation_name: str):
+def get_expectation_impl(expectation_name: str) -> Type[Expectation]:
     renamed: Dict[str, str] = {
         "expect_column_values_to_be_vector": "expect_column_values_to_be_vectors",
         "expect_columns_values_confidence_for_data_label_to_be_greater_than_or_equalto_threshold": "expect_column_values_confidence_for_data_label_to_be_greater_than_or_equal_to_threshold",
@@ -360,10 +360,13 @@ def get_expectation_impl(expectation_name: str):
         )
         expectation_name = renamed[expectation_name]
 
-    if expectation_name not in _registered_expectations:
-        raise ge_exceptions.ExpectationNotFoundError(f"{expectation_name} not found")
+    expectation: Type[Expectation] | None = _registered_expectations.get(
+        expectation_name
+    )
+    if not expectation:
+        raise gx_exceptions.ExpectationNotFoundError(f"{expectation_name} not found")
 
-    return _registered_expectations.get(expectation_name)
+    return expectation
 
 
 def list_registered_expectation_implementations(

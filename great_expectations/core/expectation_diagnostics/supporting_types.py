@@ -4,7 +4,9 @@ import inspect
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Optional, Union
+from typing import List, Optional, Sequence, Union
+
+from typing_extensions import TypedDict
 
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -145,6 +147,11 @@ class ExpectationBackendTestResultCounts(SerializableDictDot):
     failing_names: Optional[List[str]]
 
 
+class ExpectationDiagnosticCheckMessageDict(TypedDict):
+    message: str
+    passed: bool
+
+
 @dataclass
 class ExpectationDiagnosticCheckMessage(SerializableDictDot):
     """Summarizes the result of a diagnostic Check. Used within the ExpectationDiagnostic object."""
@@ -152,7 +159,9 @@ class ExpectationDiagnosticCheckMessage(SerializableDictDot):
     message: str
     passed: bool
     doc_url: Optional[str] = None
-    sub_messages: List[ExpectationDiagnosticCheckMessage] = field(default_factory=list)
+    sub_messages: Sequence[
+        ExpectationDiagnosticCheckMessage | ExpectationDiagnosticCheckMessageDict
+    ] = field(default_factory=list)
 
 
 @dataclass

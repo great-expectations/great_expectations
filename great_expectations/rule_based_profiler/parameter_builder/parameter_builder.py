@@ -24,7 +24,7 @@ from typing import (
 import numpy as np
 import pandas as pd
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.domain import Domain
 from great_expectations.core.util import convert_to_json_serializable
@@ -375,7 +375,7 @@ class ParameterBuilder(ABC, Builder):
         multi-dimensional metric, whose values are being estimated, and details (to be used for metadata purposes).
         """
         if not metric_name:
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Utilizing "{self.__class__.__name__}.get_metrics()" requires valid "metric_name" to be \
 specified (empty "metric_name" value detected)."""
             )
@@ -387,7 +387,7 @@ specified (empty "metric_name" value detected)."""
             parameters=parameters,
         )
         if not batch_ids:
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of Batch identifiers."
             )
 
@@ -708,7 +708,7 @@ is not supported).
                         or isinstance(metric_value, decimal.Decimal)
                         or np.issubdtype(metric_value.dtype, np.number)
                     ):
-                        raise ge_exceptions.ProfilerExecutionError(
+                        raise gx_exceptions.ProfilerExecutionError(
                             message=f"""Applicability of {parameter_builder.__class__.__name__} is restricted to \
 numeric-valued and datetime-valued metrics (value {metric_value} of type "{str(type(metric_value))}" was computed).
 """

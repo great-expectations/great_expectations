@@ -2,7 +2,7 @@ import logging
 import os
 from typing import Iterator, List, Optional, cast
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
@@ -305,13 +305,13 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
             if any(
                 [sorter_name not in group_names for sorter_name in self.sorters.keys()]
             ):
-                raise ge_exceptions.DataConnectorError(
+                raise gx_exceptions.DataConnectorError(
                     f"""DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
 configured group_name.
                     """
                 )
             if len(group_names) < len(self.sorters):
-                raise ge_exceptions.DataConnectorError(
+                raise gx_exceptions.DataConnectorError(
                     f"""DataConnector "{self.name}" is configured with {len(group_names)} group names;
 this is fewer than number of sorters specified, which is {len(self.sorters)}.
                     """

@@ -4,7 +4,7 @@ from unittest import mock
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_types import MetricDomainTypes
@@ -139,7 +139,7 @@ def test_histogram_single_batch_parameter_builder_alice_null_bins(
         "great_expectations.expectations.metrics.column_aggregate_metrics.column_partition._get_column_partition_using_metrics",
         return_value=None,
     ):
-        with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:
+        with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
             variables: Optional[ParameterContainer] = None
             # noinspection PyUnusedLocal
             parameter_builder.build_parameters(
@@ -268,7 +268,7 @@ def test_histogram_single_batch_parameter_builder_alice_wrong_type_bins(
     assert parameter_container.parameter_nodes is None
 
     variables: Optional[ParameterContainer] = None
-    with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:
+    with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyUnusedLocal
         parameter_builder.build_parameters(
             domain=domain,

@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_types import MetricDomainTypes
@@ -71,7 +71,7 @@ def test_meta_not_dict_exception(
     condition = None
     max_user_id: int = 999999999999
 
-    with pytest.raises(ge_exceptions.ProfilerExecutionError) as e:
+    with pytest.raises(gx_exceptions.ProfilerExecutionError) as e:
         # noinspection PyTypeChecker
         DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_values_to_be_between",
@@ -137,7 +137,7 @@ def test_condition_not_string_exception(
     condition: dict = {"condition": "$variables.tolerance<0.8"}
     max_user_id: int = 999999999999
 
-    with pytest.raises(ge_exceptions.ProfilerExecutionError) as e:
+    with pytest.raises(gx_exceptions.ProfilerExecutionError) as e:
         # noinspection PyTypeChecker
         DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_values_to_be_between",

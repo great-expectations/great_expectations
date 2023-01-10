@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set
 import numpy as np
 import pandas as pd
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
@@ -138,7 +138,7 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
         ]
 
         if bins is None:
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Partitioning values for {self.__class__.__name__} by \
 {self._column_partition_metric_single_batch_parameter_builder_config.name} into bins encountered empty or non-existent \
 elements.
@@ -149,7 +149,7 @@ elements.
         bins = bins[0]
         # TODO: <Alex>ALEX</Alex>
         if not (np.issubdtype(bins.dtype, np.number) or np.all(pd.isnull(bins))):
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Partitioning values for {self.__class__.__name__} by \
 {self._column_partition_metric_single_batch_parameter_builder_config.name} did not yield bins of supported data type.
 """

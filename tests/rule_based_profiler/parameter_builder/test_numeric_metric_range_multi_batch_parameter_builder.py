@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 import scipy.stats as stats
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_types import MetricDomainTypes
 from great_expectations.data_context import DataContext
@@ -787,7 +787,7 @@ provided.
 """
     )
 
-    with pytest.raises(ge_exceptions.ProfilerExecutionError, match=error_message):
+    with pytest.raises(gx_exceptions.ProfilerExecutionError, match=error_message):
         numeric_metric_range_parameter_builder.build_parameters(
             domain=domain,
             variables=variables,

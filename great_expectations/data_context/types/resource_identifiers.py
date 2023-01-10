@@ -10,7 +10,7 @@ from uuid import UUID
 from dateutil.parser import parse
 from marshmallow import Schema, fields, post_load
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import BatchKwargs, IDDict
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
@@ -26,7 +26,7 @@ class ExpectationSuiteIdentifier(DataContextKey):
     def __init__(self, expectation_suite_name: str) -> None:
         super().__init__()
         if not isinstance(expectation_suite_name, str):
-            raise ge_exceptions.InvalidDataContextKeyError(
+            raise gx_exceptions.InvalidDataContextKeyError(
                 f"expectation_suite_name must be a string, not {type(expectation_suite_name).__name__}"
             )
         self._expectation_suite_name = expectation_suite_name
@@ -191,7 +191,7 @@ class ValidationResultIdentifier(DataContextKey):
         elif isinstance(batch_kwargs, dict):
             batch_identifier = IDDict(batch_kwargs).to_id()
         else:
-            raise ge_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(
                 "Unable to construct ValidationResultIdentifier from provided object."
             )
         return cls(
@@ -331,7 +331,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
     @classmethod
     def from_tuple(cls, tuple_):
         if len(tuple_) < 6:
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 "ValidationMetricIdentifier tuple must have at least six components."
             )
         if tuple_[2] == "__":
@@ -352,7 +352,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
         if len(tuple_) != 6:
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 "ValidationMetricIdentifier fixed length tuple must have exactly six "
                 "components."
             )
@@ -490,7 +490,7 @@ class SiteSectionIdentifier(DataContextKey):
                     **resource_identifier
                 )
         else:
-            raise ge_exceptions.InvalidDataContextKeyError(
+            raise gx_exceptions.InvalidDataContextKeyError(
                 "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"
             )
 
@@ -521,7 +521,7 @@ class SiteSectionIdentifier(DataContextKey):
                 resource_identifier=ExpectationSuiteIdentifier.from_tuple(tuple_[1:]),
             )
         else:
-            raise ge_exceptions.InvalidDataContextKeyError(
+            raise gx_exceptions.InvalidDataContextKeyError(
                 "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"
             )
 
@@ -532,7 +532,7 @@ class ConfigurationIdentifier(DataContextKey):
         if isinstance(configuration_key, UUID):
             configuration_key = str(configuration_key)
         if not isinstance(configuration_key, str):
-            raise ge_exceptions.InvalidDataContextKeyError(
+            raise gx_exceptions.InvalidDataContextKeyError(
                 f"configuration_key must be a string, not {type(configuration_key).__name__}"
             )
         self._configuration_key = configuration_key

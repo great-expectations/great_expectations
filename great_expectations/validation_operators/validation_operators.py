@@ -5,7 +5,7 @@ from typing import Optional, Union
 
 from dateutil.parser import parse
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.util import send_slack_notification
 from great_expectations.core.async_executor import AsyncExecutor
 from great_expectations.core.batch import Batch
@@ -228,7 +228,7 @@ class ActionListValidationOperator(ValidationOperator):
                 config_defaults={"module_name": module_name},
             )
             if not new_action:
-                raise ge_exceptions.ClassInstantiationError(
+                raise gx_exceptions.ClassInstantiationError(
                     module_name=module_name,
                     package_name=None,
                     class_name=config["class_name"],

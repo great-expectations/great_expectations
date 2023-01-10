@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Uni
 
 from makefun import create_function
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchRequestBase
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.data_context.types.base import BaseYamlConfig
@@ -124,7 +124,7 @@ class DataAssistantRunner:
             """
             if batch_request is None:
                 data_assistant_name: str = self._data_assistant_cls.data_assistant_type
-                raise ge_exceptions.DataAssistantExecutionError(
+                raise gx_exceptions.DataAssistantExecutionError(
                     message=f"""Utilizing "{data_assistant_name}.run()" requires valid "batch_request" to be specified \
 (empty or missing "batch_request" detected)."""
                 )

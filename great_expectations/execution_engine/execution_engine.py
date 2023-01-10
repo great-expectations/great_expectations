@@ -21,7 +21,7 @@ from uuid import UUID
 
 from marshmallow import ValidationError
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.computed_metrics.computed_metric import ComputedMetric
 from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_types import (
@@ -446,7 +446,7 @@ class ExecutionEngine(ABC):
             return domain_kwargs
 
         if filter_nan:
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 "Base ExecutionEngine does not support adding nan condition filters"
             )
 
@@ -561,7 +561,7 @@ class ExecutionEngine(ABC):
                         "metric_partial_fn"
                     )
                 except KeyError as e:
-                    raise ge_exceptions.MetricError(
+                    raise gx_exceptions.MetricError(
                         message=f'Missing metric dependency: {str(e)} for metric "{metric_to_resolve.metric_name}".'
                     )
 
@@ -690,7 +690,7 @@ class ExecutionEngine(ABC):
                     metric_configuration.id
                 ]
             else:
-                raise ge_exceptions.MetricError(
+                raise gx_exceptions.MetricError(
                     message=f'Missing metric dependency: "{metric_name}" for metric "{metric_to_resolve.metric_name}".'
                 )
 
@@ -723,7 +723,7 @@ class ExecutionEngine(ABC):
                     **metric_computation_configuration.metric_provider_kwargs
                 )
             except Exception as e:
-                raise ge_exceptions.MetricResolutionError(
+                raise gx_exceptions.MetricResolutionError(
                     message=str(e),
                     failed_metrics=(
                         metric_computation_configuration.metric_configuration,
@@ -739,7 +739,7 @@ class ExecutionEngine(ABC):
             )
             resolved_metrics.update(resolved_metric_bundle)
         except Exception as e:
-            raise ge_exceptions.MetricResolutionError(
+            raise gx_exceptions.MetricResolutionError(
                 message=str(e),
                 failed_metrics=[
                     metric_computation_configuration.metric_configuration
@@ -962,7 +962,7 @@ class ExecutionEngine(ABC):
         accessor_domain_kwargs: Dict = {}
 
         if "column" not in compute_domain_kwargs:
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 "Column not provided in compute_domain_kwargs"
             )
 
@@ -994,7 +994,7 @@ class ExecutionEngine(ABC):
         accessor_domain_kwargs: Dict = {}
 
         if not ("column_A" in domain_kwargs and "column_B" in domain_kwargs):
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 "column_A or column_B not found within domain_kwargs"
             )
 
@@ -1027,14 +1027,14 @@ class ExecutionEngine(ABC):
         accessor_domain_kwargs: Dict = {}
 
         if "column_list" not in domain_kwargs:
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 "column_list not found within domain_kwargs"
             )
 
         column_list = compute_domain_kwargs.pop("column_list")
 
         if len(column_list) < 2:
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 "column_list must contain at least 2 columns"
             )
 
