@@ -60,10 +60,10 @@ class BatchRequestError(Exception):
 class DataAsset(ExperimentalBaseModel):
     # To subclass a DataAsset one must define `type` as a Class literal explicitly on the sublass
     # as well as implementing the methods in the `Abstract Methods` section below.
-    # For example:
-    #     type: Literal["MyAssetTypeID"] = "MyAssetTypeID"
-    #     type: Literal["table"] = "table"
-    #     type: Literal["csv"] = "csv"
+    # Some examples:
+    # * type: Literal["MyAssetTypeID"] = "MyAssetTypeID",
+    # * type: Literal["table"] = "table"
+    # * type: Literal["csv"] = "csv"
     name: str
     type: str
 
@@ -260,7 +260,8 @@ class Datasource(
         Args:
             asset: The DataAsset to be added to this datasource.
         """
-        # The setter for _datasource is non-functional. See the comment there.
+        # The setter for datasource is non-functional so we access _datasource directly.
+        # See the comment in DataAsset for more information.
         asset._datasource = self
         self.assets[asset.name] = asset
         return asset
