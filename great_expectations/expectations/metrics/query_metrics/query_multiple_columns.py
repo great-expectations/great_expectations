@@ -85,8 +85,11 @@ class QueryMultipleColumns(QueryMetricProvider):
         # return [dict(element._mapping) for element in result]
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
+        # return [element._asdict() for element in result]
         # return [dict(element._asdict()) for element in result]
-        return [element._asdict() for element in result]
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        return [dict(element) for element in result]
         # TODO: <Alex>ALEX</Alex>
 
     @metric_value(engine=SparkDFExecutionEngine)

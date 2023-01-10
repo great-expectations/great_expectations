@@ -66,7 +66,10 @@ class QueryTable(QueryMetricProvider):
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
         # return [dict(element._asdict()) for element in result]
-        return [element._asdict() for element in result]
+        # return [element._asdict() for element in result]
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        return [dict(element) for element in result]
         # TODO: <Alex>ALEX</Alex>
         # </snippet>
 
