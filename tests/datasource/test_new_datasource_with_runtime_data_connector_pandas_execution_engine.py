@@ -10,7 +10,7 @@ try:
 except ImportError:
     sqlalchemy = None
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
@@ -187,7 +187,7 @@ def test_batch_data_pandas_execution_engine_incorrect_batch_identifiers(
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # raised by _validate_batch_identifiers_configuration() in RuntimeDataConnector
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         # runtime_parameters are not configured in the DataConnector
         batch_list: List[
             Batch
@@ -255,7 +255,7 @@ def test_batch_data_pandas_execution_engine_batch_identifiers_error_mostly_legal
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         batch_list: List[
             Batch
@@ -283,7 +283,7 @@ def test_batch_data_pandas_execution_engine_batch_identifiers_error_one_illegal_
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         batch_list: List[
             Batch
@@ -641,7 +641,7 @@ def test_file_path_pandas_execution_engine_batch_definition_list_from_batch_requ
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
     # raised by guess_reader_method_from_path() in ExecutionEngine
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         batch_list: List[
             Batch
         ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
@@ -668,7 +668,7 @@ def test_file_path_pandas_execution_engine_batch_definition_list_from_batch_requ
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
     # raised by _get_reader_fn() in ExecutionEngine
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         batch_list: List[
             Batch
         ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(

@@ -152,7 +152,7 @@ def run_onboarding_data_assistant_result_jupyter_notebook_with_new_cell(
     )
     from great_expectations.rule_based_profiler.data_assistant_result import DataAssistantResult
     from great_expectations.rule_based_profiler.helpers.util import get_validator_with_expectation_suite
-    import great_expectations.exceptions as ge_exceptions
+    import great_expectations.exceptions as gx_exceptions
 
     context = gx.get_context()
 

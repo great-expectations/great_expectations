@@ -7,7 +7,7 @@ import logging
 import sys
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Union
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,
@@ -183,7 +183,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             "expectation_configuration_builders",
         ):
             if attr not in rule_config:
-                raise ge_exceptions.ProfilerConfigurationError(
+                raise gx_exceptions.ProfilerConfigurationError(
                     message=f'Invalid rule "{rule_name}": missing mandatory {attr}.'
                 )
 
@@ -1121,7 +1121,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         if not RuleBasedProfiler._check_validity_of_batch_requests_in_config(
             config=config
         ):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 f'batch_data found in batch_request cannot be saved to ProfilerStore "{profiler_store.store_name}"'
             )
 
@@ -1204,13 +1204,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
             )
         try:
             profiler_config: RuleBasedProfilerConfig = profiler_store.get(key=key)
-        except ge_exceptions.InvalidKeyError as exc_ik:
+        except gx_exceptions.InvalidKeyError as exc_ik:
             id: Union[GXCloudIdentifier, ConfigurationIdentifier] = (
                 key.configuration_key
                 if isinstance(key, ConfigurationIdentifier)
                 else key
             )
-            raise ge_exceptions.ProfilerNotFoundError(
+            raise gx_exceptions.ProfilerNotFoundError(
                 message=f'Non-existent Profiler configuration named "{id}".\n\nDetails: {exc_ik}'
             )
 
@@ -1253,13 +1253,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         try:
             profiler_store.remove_key(key=key)
-        except (ge_exceptions.InvalidKeyError, KeyError) as exc_ik:
+        except (gx_exceptions.InvalidKeyError, KeyError) as exc_ik:
             id = (
                 key.configuration_key
                 if isinstance(key, ConfigurationIdentifier)
                 else key
             )
-            raise ge_exceptions.ProfilerNotFoundError(
+            raise gx_exceptions.ProfilerNotFoundError(
                 message=f'Non-existent Profiler configuration named "{id}".\n\nDetails: {exc_ik}'
             )
 
@@ -1483,6 +1483,6 @@ def _validate_builder_override_config(builder_config: dict) -> None:
             "module_name" in builder_config,
         )
     ):
-        raise ge_exceptions.ProfilerConfigurationError(
+        raise gx_exceptions.ProfilerConfigurationError(
             'Both "class_name" and "module_name" must be specified.'
         )
