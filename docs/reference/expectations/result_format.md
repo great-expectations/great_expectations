@@ -310,7 +310,7 @@ The complete `result` includes:
     'success': False,
     'result': {
         "unexpected_list" : [A list of all values that violate the expectation]
-        'unexpected_index_list': [A list of the indices of the unexpected values in the column, as defined by primary key column]
+        'unexpected_index_list': [A list of the indices of the unexpected values in the column, as defined by the columns in `unexpected_index_column_names`]
         'unexpected_index_query': [A query that can be used to retrieve all unexpected values (SQL and Spark), or the full list of unexpected indices (Pandas)]
         'element_count': The total number of values in the column (also in `SUMMARY`)
         'unexpected_count': The total count of unexpected values in the column (also in `SUMMARY`)
