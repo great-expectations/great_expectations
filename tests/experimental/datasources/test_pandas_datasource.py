@@ -6,7 +6,6 @@ import pytest
 
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.experimental.datasources import PandasDatasource
-
 from great_expectations.experimental.datasources.interfaces import BatchRequestError
 from great_expectations.experimental.datasources.pandas_datasource import CSVAsset
 
@@ -21,7 +20,6 @@ def csv_path() -> Path:
     return Path(
         file_relative_path(__file__, "../../test_sets/taxi_yellow_tripdata_samples")
     )
-    # return Path(__file__) / "../../test_sets/taxi_yellow_tripdata_samples"
 
 
 @pytest.mark.unit
