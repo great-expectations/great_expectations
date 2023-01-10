@@ -1100,9 +1100,7 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(
         )
 
     domain_records_df_index_names: List[str] = domain_records_df.index.names
-    unexpected_indices: List[int | str | tuple[int | str, ...]] = list(
-        domain_records_df.index
-    )
+    unexpected_indices: List[tuple[int | str, ...]] = list(domain_records_df.index)
 
     tuple_index: Dict[str, int] = dict()
     for column_name in unexpected_index_column_names:
