@@ -10,7 +10,7 @@ import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
@@ -129,7 +129,7 @@ def test_create_duplicate_expectation_suite(titanic_data_context):
         expectation_suite_name="titanic.test_create_expectation_suite"
     )
     # attempt to create expectation suite with name that already exists on data asset
-    with pytest.raises(ge_exceptions.DataContextError):
+    with pytest.raises(gx_exceptions.DataContextError):
         titanic_data_context.create_expectation_suite(
             expectation_suite_name="titanic.test_create_expectation_suite"
         )
@@ -913,9 +913,9 @@ def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
     os.makedirs(context_path, exist_ok=True)
     assert os.path.isdir(context_path)
     monkeypatch.chdir(context_path)
-    with pytest.raises(ge_exceptions.DataContextError) as err:
+    with pytest.raises(gx_exceptions.DataContextError) as err:
         FileDataContext.find_context_root_dir()
-    assert isinstance(err.value, ge_exceptions.ConfigNotFoundError)
+    assert isinstance(err.value, gx_exceptions.ConfigNotFoundError)
 
     shutil.copy(
         file_relative_path(
@@ -1459,14 +1459,14 @@ def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
 def test_get_batch_raises_error_when_passed_a_non_string_type_for_suite_parameter(
     titanic_data_context,
 ):
-    with pytest.raises(ge_exceptions.DataContextError):
+    with pytest.raises(gx_exceptions.DataContextError):
         titanic_data_context.get_batch({}, 99)
 
 
 def test_get_batch_raises_error_when_passed_a_non_dict_or_batch_kwarg_type_for_batch_kwarg_parameter(
     titanic_data_context,
 ):
-    with pytest.raises(ge_exceptions.BatchKwargsError):
+    with pytest.raises(gx_exceptions.BatchKwargsError):
         titanic_data_context.get_batch(99, "foo")
 
 
@@ -1559,7 +1559,7 @@ def test_get_checkpoint_raises_error_on_not_found_checkpoint(
     empty_context_with_checkpoint,
 ):
     context = empty_context_with_checkpoint
-    with pytest.raises(ge_exceptions.CheckpointNotFoundError):
+    with pytest.raises(gx_exceptions.CheckpointNotFoundError):
         context.get_checkpoint("not_a_checkpoint")
 
 
@@ -1577,7 +1577,7 @@ def test_get_checkpoint_raises_error_empty_checkpoint(
     assert os.path.isfile(checkpoint_file_path)
     assert context.list_checkpoints() == ["my_checkpoint"]
 
-    with pytest.raises(ge_exceptions.InvalidCheckpointConfigError):
+    with pytest.raises(gx_exceptions.InvalidCheckpointConfigError):
         context.get_checkpoint("my_checkpoint")
 
 
@@ -1628,7 +1628,7 @@ def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
         yaml_obj.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(ge_exceptions.CheckpointError) as e:
+    with pytest.raises(gx_exceptions.CheckpointError) as e:
         context.get_checkpoint("foo")
 
 
@@ -1649,7 +1649,7 @@ def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
         yaml_obj.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(ge_exceptions.InvalidCheckpointConfigError) as e:
+    with pytest.raises(gx_exceptions.InvalidCheckpointConfigError) as e:
         context.get_checkpoint("foo")
 
 
@@ -1676,7 +1676,7 @@ def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
         yaml_obj.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(ge_exceptions.CheckpointError) as e:
+    with pytest.raises(gx_exceptions.CheckpointError) as e:
         context.get_checkpoint("foo")
 
 
@@ -1697,7 +1697,7 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
         yaml_obj.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(ge_exceptions.CheckpointError) as e:
+    with pytest.raises(gx_exceptions.CheckpointError) as e:
         context.get_checkpoint("foo")
 
 
@@ -1748,7 +1748,7 @@ def test_run_checkpoint_new_style(
     context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
 
     with pytest.raises(
-        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
+        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
     ):
         context.run_checkpoint(checkpoint_name=checkpoint_config.name)
 

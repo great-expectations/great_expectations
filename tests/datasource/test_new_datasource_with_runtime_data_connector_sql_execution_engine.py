@@ -7,7 +7,7 @@ try:
 except ImportError:
     sqlalchemy = None
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -280,7 +280,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_mo
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         batch_list: List[
             Batch
@@ -308,7 +308,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_si
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         batch_list: List[
             Batch
