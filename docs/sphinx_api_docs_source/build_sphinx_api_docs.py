@@ -208,11 +208,16 @@ class SphinxInvokeDocsBuilder:
         for definition in definitions:
             if isinstance(definition.ast_definition, ast.ClassDef):
                 md_stub = self._create_class_md_stub(definition=definition)
-                self._write_stub(stub=md_stub, definition=definition)
+                self._write_stub(
+                    stub=md_stub,
+                    file_name=self._get_md_file_name_from_entity_name(
+                        definition=definition
+                    ),
+                )
 
-    def _write_stub(self, stub: str, definition: Definition) -> None:
+    def _write_stub(self, stub: str, file_name: str) -> None:
         """Write the markdown stub file with appropriate filename."""
-        filepath = self.base_path / self._get_md_file_name(definition=definition)
+        filepath = self.base_path / file_name
         with filepath.open("a") as f:
             f.write(stub)
 
@@ -223,16 +228,26 @@ class SphinxInvokeDocsBuilder:
 
         for definition in definitions:
             md_stub = self._create_module_md_stub(definition=definition)
-            self._write_stub(stub=md_stub, definition=definition)
+            self._write_stub(
+                stub=md_stub,
+                file_name=self._get_md_file_name_from_dotted_path_prefix(
+                    definition=definition
+                ),
+            )
 
     def _get_entity_name(self, definition: Definition):
         """Get the name of the entity (class, module, function)."""
         return definition.ast_definition.name
 
-    def _get_md_file_name(self, definition: Definition):
+    def _get_md_file_name_from_entity_name(self, definition: Definition):
         """Generate markdown file name from the entity definition."""
         snake_name = camel_to_snake(self._get_entity_name(definition=definition))
         return f"{snake_name}.md"
+
+    def _get_md_file_name_from_dotted_path_prefix(self, definition: Definition):
+        """Generate markdown file name from the dotted path prefix."""
+        dotted_path_prefix = self._get_dotted_path_prefix(definition=definition)
+        return f"{dotted_path_prefix}.md"
 
     def _get_dotted_path_to_class(self, definition: Definition):
         """Get the dotted path to a class.

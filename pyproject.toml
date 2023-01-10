@@ -133,7 +133,6 @@ exclude = [
     'expectations/metrics/column_aggregate_metrics/column_partition\.py', # 10
     'expectations/metrics/column_aggregate_metrics/column_most_common_value\.py', # 4
     'expectations/metrics/column_aggregate_metrics/column_median\.py', # 1
-    'expectations/metrics/column_aggregate_metrics/column_distinct_values\.py', # 1
     'expectations/metrics/map_metric_provider\.py',  # 57
     'expectations/metrics/metric_provider\.py',  # 12
     'expectations/regex_based_column_map_expectation\.py',  # 3
@@ -206,7 +205,6 @@ filterwarnings = [
 ]
 junit_family="xunit2"
 markers = [
-    "base_data_context: mark test as being relevant to BaseDataContext, which will be removed during refactor",
     "cloud: mark test as being relevant to Great Expectations Cloud.",
     "docs: mark a test as a docs test.",
     "e2e: mark test as an E2E test.",
