@@ -223,7 +223,7 @@ The summary `result` includes:
         'missing_count': The number of missing values in the column
         'missing_percent': The total percent of missing values in the column
         'partial_unexpected_counts': [{A list of objects with value and counts, showing the number of times each of the unexpected values occurs}
-        'partial_unexpected_index_list': [A list of up to 20 of the indices of the unexpected values in the column, as defined by the primary key column]
+        'partial_unexpected_index_list': [A list of up to 20 of the indices of the unexpected values in the column, as defined by the columns in `unexpected_index_column_names`]
     }
 }
 ```
