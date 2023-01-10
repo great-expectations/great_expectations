@@ -28,7 +28,7 @@ from great_expectations.core.domain import (
     Domain,
     SemanticDomainTypes,
 )
-from great_expectations.core.metric_types import MetricDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.expectations.core import (

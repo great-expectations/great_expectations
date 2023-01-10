@@ -1,9 +1,7 @@
 from typing import Any, Dict
 
-from great_expectations.core.metric_types import (
-    MetricDomainTypes,
-    MetricPartialFunctionTypes,
-)
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,

@@ -26,7 +26,7 @@ from great_expectations.core.evaluation_parameters import (
     build_evaluation_parameters,
     find_evaluation_parameter_dependencies,
 )
-from great_expectations.core.metric_types import MetricDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import (
     convert_to_json_serializable,

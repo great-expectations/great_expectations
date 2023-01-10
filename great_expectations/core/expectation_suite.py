@@ -30,7 +30,7 @@ from great_expectations.core.expectation_configuration import (
     ExpectationConfigurationSchema,
     expectationConfigurationSchema,
 )
-from great_expectations.core.metric_types import MetricDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import (
     convert_to_json_serializable,

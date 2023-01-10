@@ -16,7 +16,7 @@ from typing import (
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import IDDict
-from great_expectations.core.metric_types import (
+from great_expectations.core.metric_function_types import (
     MetricFunctionTypes,
     MetricPartialFunctionTypes,
 )

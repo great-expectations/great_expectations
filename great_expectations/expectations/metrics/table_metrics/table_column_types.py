@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional, cast
 
-from great_expectations.core.metric_types import MetricDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,

@@ -5,9 +5,8 @@ from unittest import mock
 import pandas as pd
 import pytest
 
-from great_expectations.core.metric_types import MetricDomainTypes
-
 # noinspection PyBroadException
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.validator.computed_metric import MetricValue
 
 try:

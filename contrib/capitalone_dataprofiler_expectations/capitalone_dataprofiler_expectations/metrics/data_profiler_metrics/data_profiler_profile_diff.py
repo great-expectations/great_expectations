@@ -1,10 +1,8 @@
 import dataprofiler as dp
 
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.metrics.metric_provider import (
-    MetricDomainTypes,
-    metric_value,
-)
+from great_expectations.expectations.metrics.metric_provider import metric_value
 
 from .data_profiler_profile_metric_provider import DataProfilerProfileMetricProvider
 
