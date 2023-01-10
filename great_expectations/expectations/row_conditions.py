@@ -157,7 +157,7 @@ def parse_condition_to_spark(
 
 def parse_condition_to_sqlalchemy(
     row_condition: str,
-) -> ColumnElement | None:
+) -> ColumnElement:
     parsed = _parse_great_expectations_condition(row_condition)
     column = parsed["column"]
     if "condition_value" in parsed:
