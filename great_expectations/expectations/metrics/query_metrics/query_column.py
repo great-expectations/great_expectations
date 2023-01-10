@@ -64,8 +64,16 @@ class QueryColumn(QueryMetricProvider):
 
         engine: sqlalchemy_engine_Engine = execution_engine.engine
         result: List[sqlalchemy_engine_Row] = engine.execute(sa.text(query)).fetchall()
+        # print(f'\n[ALEX_TEST] [WOUTPUT] WOUTPUT-RESULT:\n{result} ; TYPE: {str(type(result))}')
+        # print(f'\n[ALEX_TEST] [WOUTPUT] WOUTPUT-RESULT[0]:\n{result[0]} ; TYPE: {str(type(result[0]))}')
 
-        return [dict(element._mapping) for element in result]
+        # TODO: <Alex>ALEX</Alex>
+        # return [dict(element._mapping) for element in result]
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # return [dict(element._asdict()) for element in result]
+        return [element._asdict() for element in result]
+        # TODO: <Alex>ALEX</Alex>
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
