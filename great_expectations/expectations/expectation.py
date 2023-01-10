@@ -125,6 +125,7 @@ from great_expectations.validator.validator import ValidationDependencies, Valid
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.render.renderer_configuration import AddParamArgs, MetaNotes
+    from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 logger = logging.getLogger(__name__)
 
@@ -316,7 +317,9 @@ class Expectation(metaclass=MetaExpectation):
         "catch_exceptions",
         "result_format",
     )
-    default_kwarg_values = {
+    default_kwarg_values: dict[
+        str, bool | str | float | RuleBasedProfilerConfig | None
+    ] = {
         "include_config": True,
         "catch_exceptions": False,
         "result_format": "BASIC",
