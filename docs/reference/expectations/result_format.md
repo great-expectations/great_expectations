@@ -111,12 +111,7 @@ For example:
 ```
 
 Will return the following output:
-```python
->>> print(validation_result.success)
-False
 
->>> print(validation_result.result)
-```
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_boolean_example_output"
 ```
 
@@ -153,12 +148,7 @@ For example:
 ```
 
 Will return the following output:
-```python
->>> print(validation_result.success)
-False
 
->>> print(validation_result.result)
-```
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_basic_example_set_output"
 ```
 
@@ -182,12 +172,7 @@ For example:
 ```
 
 Will return the following output:
-```python
->>> print(validation_result.success)
-True
 
->>> print(validation_result.result)
-```
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_basic_example_agg_output"
 ```
 
@@ -227,12 +212,7 @@ For example:
 ```
 
 Will return the following output:
-```python
->>> print(validation_result.success)
-False
 
->>> print(validation_result.result) 
-```
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_summary_example_set_output"
 ```
 
@@ -257,12 +237,7 @@ For example:
 ```
 
 Will return the following output:
-```python
->>> print(validation_result.success)
-True
 
->>> print(validation_result.result)
-```
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_summary_example_agg_output"
 ```
 
@@ -301,12 +276,7 @@ For example:
 ```
 
 Will return the following output:
-```python
->>> print(validation_result.success)
-False
 
->>> print(validation_result.result)
-```
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_set_output"
 ```
 
@@ -331,11 +301,6 @@ For example:
 ```
 
 Will return the following output:
-```python
->>> print(validation_result.success)
-True
 
->>> print(validation_result.result)
-```
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_agg_output"
 ```
