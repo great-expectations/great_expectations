@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 from ruamel.yaml import YAML
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core import IDDict
 from great_expectations.core.batch import (
@@ -1199,7 +1199,7 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
     ]
 
     # Raises error due to a sorter (for_me_Me_me) not matching a group_name in `FilePathDataConnector._validate_sorters_configuration()`
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         instantiate_class_from_config(
             config=my_data_connector_yaml,
             runtime_environment={
@@ -1266,7 +1266,7 @@ def test_return_all_batch_definitions_too_many_sorters(
     ]
 
     # Raises error due to a non-existent sorter being specified in `FilePathDataConnector._validate_sorters_configuration()`
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         instantiate_class_from_config(
             config=my_data_connector_yaml,
             runtime_environment={
@@ -1461,7 +1461,7 @@ azure_options:
     config = yaml.load(yaml_string)
 
     # Raises error due to a non-existent/unknown ExecutionEngine instance.
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         my_data_connector: InferredAssetAzureDataConnector = (
             instantiate_class_from_config(

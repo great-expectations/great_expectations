@@ -7,14 +7,12 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import Batch
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import (
-    MetricPartialFunctionTypes,
 )
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
@@ -228,7 +226,7 @@ def test_column_quoted_name_type_sa(sa):
         '"Names"',
     ]:
         with pytest.raises(
-            ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError
+            gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError
         ) as eee:
             _ = get_dbms_compatible_column_names(
                 column_names=column_name,
@@ -240,7 +238,7 @@ def test_column_quoted_name_type_sa(sa):
             == f'Error: The column "{column_name}" in BatchData does not exist.'
         )
         with pytest.raises(
-            ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError
+            gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError
         ) as eee:
             _ = get_dbms_compatible_column_names(
                 column_names=column_name,
@@ -1497,7 +1495,7 @@ def test_max_metric_column_does_not_exist_pd():
         "table.columns": table_columns_metric,
     }
 
-    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
+    with pytest.raises(gx_exceptions.MetricResolutionError) as eee:
         # noinspection PyUnusedLocal
         results = engine.resolve_metrics(
             metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -1571,7 +1569,7 @@ def test_max_metric_column_does_not_exist_sa(sa):
         "table.columns": table_columns_metric,
     }
 
-    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
+    with pytest.raises(gx_exceptions.MetricResolutionError) as eee:
         # noinspection PyUnusedLocal
         results = engine.resolve_metrics(
             metrics_to_resolve=(partial_metric,), metrics=metrics
@@ -1653,7 +1651,7 @@ def test_max_metric_column_does_not_exist_spark(spark_session):
         "table.columns": table_columns_metric,
     }
 
-    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
+    with pytest.raises(gx_exceptions.MetricResolutionError) as eee:
         # noinspection PyUnusedLocal
         results = engine.resolve_metrics(
             metrics_to_resolve=(partial_metric,), metrics=metrics
@@ -2347,7 +2345,7 @@ def test_map_unique_column_does_not_exist_pd():
         "table.columns": table_columns_metric,
     }
 
-    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
+    with pytest.raises(gx_exceptions.MetricResolutionError) as eee:
         # noinspection PyUnusedLocal
         results = engine.resolve_metrics(
             metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -2478,7 +2476,7 @@ def test_map_unique_column_does_not_exist_sa(sa):
     condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
-    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
+    with pytest.raises(gx_exceptions.MetricResolutionError) as eee:
         # noinspection PyUnusedLocal
         metrics = engine.resolve_metrics(
             metrics_to_resolve=(condition_metric,), metrics=metrics
@@ -2660,7 +2658,7 @@ def test_map_unique_column_does_not_exist_spark(spark_session):
         "table.columns": table_columns_metric,
     }
 
-    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
+    with pytest.raises(gx_exceptions.MetricResolutionError) as eee:
         # noinspection PyUnusedLocal
         metrics = engine.resolve_metrics(
             metrics_to_resolve=(condition_metric,), metrics=metrics

@@ -8,7 +8,7 @@ from marshmallow import INCLUDE, Schema, fields, validates_schema
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import ConfigurationStore
@@ -146,7 +146,7 @@ def test_v3_configuration_store(tmp_path_factory):
             base_directory="unknown_base_directory",
             configuration_key=configuration_name_0,
         )
-    with pytest.raises(ge_exceptions.InvalidKeyError):
+    with pytest.raises(gx_exceptions.InvalidKeyError):
         # noinspection PyUnusedLocal
         loaded_config: BaseYamlConfig = load_config_from_filesystem(
             configuration_store_class_name="SampleConfigurationStore",

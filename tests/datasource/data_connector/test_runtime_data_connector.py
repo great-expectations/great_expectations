@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 from ruamel.yaml import YAML
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
@@ -177,7 +177,7 @@ def test_add_batch_identifiers_correct(basic_datasource_with_assets):
 
 def test_batch_identifiers_missing_completely():
     # missing from base DataConnector
-    with pytest.raises(ge_exceptions.DataConnectorError) as data_connector_error:
+    with pytest.raises(gx_exceptions.DataConnectorError) as data_connector_error:
         instantiate_class_from_config(
             config=yaml.load(
                 """
@@ -203,7 +203,7 @@ execution_engine:
 
 
 def test_batch_identifiers_missing_from_named_asset():
-    with pytest.raises(ge_exceptions.DataConnectorError) as data_connector_error:
+    with pytest.raises(gx_exceptions.DataConnectorError) as data_connector_error:
         basic_datasource: Datasource = instantiate_class_from_config(
             config=yaml.load(
                 """
@@ -335,7 +335,7 @@ def test_asset_is_named_but_batch_identifier_in_other_asset(
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
     )
-    with pytest.raises(ge_exceptions.DataConnectorError) as data_connector_error:
+    with pytest.raises(gx_exceptions.DataConnectorError) as data_connector_error:
         runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
                 datasource_name=basic_datasource_with_assets.name,
@@ -365,7 +365,7 @@ def test_asset_is_named_but_batch_identifier_not_defined_anywhere(
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
     )
-    with pytest.raises(ge_exceptions.DataConnectorError) as data_connector_error:
+    with pytest.raises(gx_exceptions.DataConnectorError) as data_connector_error:
         runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
                 datasource_name=basic_datasource_with_assets.name,
@@ -391,7 +391,7 @@ def test_named_asset_is_trying_to_use_batch_identifier_defined_in_data_connector
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
     )
-    with pytest.raises(ge_exceptions.DataConnectorError) as data_connector_error:
+    with pytest.raises(gx_exceptions.DataConnectorError) as data_connector_error:
         runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
                 datasource_name=basic_datasource_with_assets.name,
@@ -421,7 +421,7 @@ def test_runtime_batch_request_trying_to_use_batch_identifier_defined_at_asset_l
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
     )
-    with pytest.raises(ge_exceptions.DataConnectorError) as data_connector_error:
+    with pytest.raises(gx_exceptions.DataConnectorError) as data_connector_error:
         runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
                 datasource_name=basic_datasource_with_assets.name,
@@ -453,7 +453,7 @@ def test_error_checking_too_many_runtime_parameters(basic_datasource):
     )
 
     # test for too many runtime_parameters keys
-    with pytest.raises(ge_exceptions.InvalidBatchRequestError):
+    with pytest.raises(gx_exceptions.InvalidBatchRequestError):
         # noinspection PyUnusedLocal
         batch_definition_list: List[
             BatchDefinition
@@ -533,7 +533,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
-    with pytest.raises(ge_exceptions.DataConnectorError) as data_connector_error:
+    with pytest.raises(gx_exceptions.DataConnectorError) as data_connector_error:
         # noinspection PyUnusedLocal
         batch_definition_list: List[
             BatchDefinition
@@ -566,7 +566,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
-    with pytest.raises(ge_exceptions.DataConnectorError) as data_connector_error:
+    with pytest.raises(gx_exceptions.DataConnectorError) as data_connector_error:
         # noinspection PyUnusedLocal
         batch_definition_list: List[
             BatchDefinition
