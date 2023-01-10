@@ -22,6 +22,7 @@ from marshmallow import Schema, ValidationError, fields, pre_dump
 
 import great_expectations as gx
 from great_expectations import __version__ as ge_version
+from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
 )
@@ -60,13 +61,24 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+@public_api
+@deprecated_argument(argument_name="data_asset_type", version="0.14.0")
 class ExpectationSuite(SerializableDictDot):
-    """
-    This ExpectationSuite object has create, read, update, and delete functionality for its expectations:
+    """Suite of expectations plus create, read, update, and delete functionality
         -create: self.add_expectation()
         -read: self.find_expectation_indexes()
         -update: self.add_expectation() or self.patch_expectation()
         -delete: self.remove_expectation()
+
+    Attributes:
+        expectation_suite_name: Name of the Expectation Suite.
+        data_context: Data Context associated with this Expectation Suite.
+        expectations: Expectation Configurations to associate with this Expectation Suite.
+        evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
+        data_asset_type: Type of data asset to associate with this suite.
+        execution_engine_type: Name of the execution engine type.
+        meta: Metadata related to the suite.
+        ge_cloud_id: Great Expectations Cloud id for this Expectation Suite.
     """
 
     def __init__(
