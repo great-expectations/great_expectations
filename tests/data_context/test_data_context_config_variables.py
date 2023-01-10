@@ -7,7 +7,6 @@ from ruamel.yaml import YAML
 
 import great_expectations as gx
 from great_expectations.core.config_provider import _ConfigurationSubstitutor
-from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -19,6 +18,7 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.util import PasswordMasker, file_relative_path
 from great_expectations.exceptions import InvalidConfigError, MissingConfigVariableError
+from great_expectations.util import get_context
 from tests.data_context.conftest import create_data_context_files
 
 yaml = YAML()
@@ -43,7 +43,7 @@ def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
         "../test_fixtures/config_variables.yml",
     )
     shutil.copy(config_variables_path, os.path.join(root_dir, "uncommitted"))
-    return DataContext(context_root_dir=root_dir)
+    return get_context(context_root_dir=root_dir)
 
 
 def test_config_variables_on_context_without_config_variables_filepath_configured(
@@ -94,10 +94,10 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     expected_config_commented_map.pop("anonymous_usage_statistics")
 
     # instantiate data_context twice to go through cycle of loading config from file then saving
-    context = gx.data_context.DataContext(context_path)
+    context = get_context(context_root_dir=context_path)
     context._save_project_config()
     context_config_commented_map = dataContextConfigSchema.dump(
-        gx.data_context.DataContext(context_path)._project_config
+        get_context(context_root_dir=context_path)._project_config
     )
     context_config_commented_map.pop("anonymous_usage_statistics")
 
@@ -123,8 +123,8 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
         config_variables_fixture_filename="config_variables.yml",
     )
 
-    data_context = gx.data_context.DataContext(
-        context_path, runtime_environment=runtime_environment
+    data_context = get_context(
+        context_root_dir=context_path, runtime_environment=runtime_environment
     )
     config = data_context.get_config_with_variables_substituted()
 
