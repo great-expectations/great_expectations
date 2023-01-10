@@ -64,13 +64,14 @@ logger = logging.getLogger(__name__)
 @public_api
 @deprecated_argument(argument_name="data_asset_type", version="0.14.0")
 class ExpectationSuite(SerializableDictDot):
-    """Suite of expectations plus create, read, update, and delete functionality
-        -create: self.add_expectation()
-        -read: self.find_expectation_indexes()
-        -update: self.add_expectation() or self.patch_expectation()
-        -delete: self.remove_expectation()
+    """Suite of expectations plus create, read, update, and delete functionality.
 
-    Attributes:
+    - create: add_expectation(), append_expectation()
+    - read: find_expectation_indexes(), find_expectations(), show_expectations_by_domain_type(), show_expectations_by_expectation_type()
+    - update: add_expectation(), append_expectation(), patch_expectation(), replace_expectation(), add_expectation_configurations()
+    - delete: remove_expectation(), remove_all_expectations_of_type()
+
+    Args:
         expectation_suite_name: Name of the Expectation Suite.
         data_context: Data Context associated with this Expectation Suite.
         expectations: Expectation Configurations to associate with this Expectation Suite.
@@ -320,6 +321,7 @@ class ExpectationSuite(SerializableDictDot):
         """
         self.expectations.append(expectation_config)
 
+    @public_api
     def remove_expectation(
         self,
         expectation_configuration: Optional[ExpectationConfiguration] = None,
@@ -327,21 +329,23 @@ class ExpectationSuite(SerializableDictDot):
         remove_multiple_matches: bool = False,
         ge_cloud_id: Optional[Union[str, uuid.UUID]] = None,
     ) -> List[ExpectationConfiguration]:
-        """
+        """Remove an ExpectationConfiguration from the ExpectationSuite.
 
         Args:
-            expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against for
-                the removal of expectations.
+            expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against.
             match_type: This determines what kwargs to use when matching. Options are 'domain' to match based
                 on the data evaluated by that expectation, 'success' to match based on all configuration parameters
-                 that influence whether an expectation succeeds based on a given batch of data, and 'runtime' to match
-                 based on all configuration parameters
-            remove_multiple_matches: If True, will remove multiple matching expectations. If False, will raise a ValueError.
-        Returns: The list of deleted ExpectationConfigurations
+                that influence whether an expectation succeeds based on a given batch of data, and 'runtime' to match
+                based on all configuration parameters.
+            remove_multiple_matches: If True, will remove multiple matching expectations.
+            ge_cloud_id: Great Expectations Cloud id for an Expectation.
+
+        Returns:
+            The list of deleted ExpectationConfigurations.
 
         Raises:
-            No match
-            More than 1 match, if remove_multiple_matches = False
+            TypeError: Must provide either expectation_configuration or ge_cloud_id.
+            ValueError: No match or multiple matches found (and remove_multiple_matches=False).
         """
         if expectation_configuration is None and ge_cloud_id is None:
             raise TypeError(
