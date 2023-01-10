@@ -44,7 +44,7 @@ introspecting:  # illegal top-level key name
 
 datasource_yaml = datasource_yaml.replace("<CONNECTION_STRING>", CONNECTION_STRING)
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py test_yaml_config">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py test_yaml_config_2">
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 
@@ -96,7 +96,7 @@ tables:  # Each key in the "tables" section is a table_name (key name "tables" i
 
 datasource_yaml = datasource_yaml.replace("<CONNECTION_STRING>", CONNECTION_STRING)
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py test_yaml_config_2">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py test_yaml_config_3">
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 
@@ -119,7 +119,7 @@ tables:  # Each key in the "tables" section is a table_name (key name "tables" i
 
 datasource_yaml = datasource_yaml.replace("<CONNECTION_STRING>", CONNECTION_STRING)
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py test_yaml_config_3">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py test_yaml_config_4">
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 
