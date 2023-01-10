@@ -133,7 +133,6 @@ exclude = [
     'expectations/metrics/column_aggregate_metrics/column_partition\.py', # 10
     'expectations/metrics/column_aggregate_metrics/column_most_common_value\.py', # 4
     'expectations/metrics/column_aggregate_metrics/column_median\.py', # 1
-    'expectations/metrics/column_aggregate_metrics/column_distinct_values\.py', # 1
     'expectations/metrics/map_metric_provider\.py',  # 57
     'expectations/metrics/metric_provider\.py',  # 12
     'expectations/metrics/util\.py', # 11

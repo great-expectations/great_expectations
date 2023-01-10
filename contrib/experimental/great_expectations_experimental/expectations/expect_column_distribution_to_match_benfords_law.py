@@ -7,12 +7,12 @@ import pandas as pd
 
 import great_expectations
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
