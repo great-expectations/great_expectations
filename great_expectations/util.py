@@ -1791,8 +1791,7 @@ def get_context(
 
         `my_context = gx.get_context(<insert_your_parameters>)`
 
-    This method returns the appropriate Data Context based on which parameters you've passed
-    and / or your environment configuration:
+    This method returns the appropriate Data Context based on which parameters you've passed and / or your environment configuration:
 
     - FileDataContext: Configuration stored in a file.
 
