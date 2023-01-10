@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional, Union
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine.split_and_sample.data_sampler import (
     DataSampler,
@@ -130,11 +130,11 @@ class SqlAlchemyDataSampler(DataSampler):
             None
         """
         if not isinstance(n, (str, int)):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 "Please specify your sampling kwargs 'n' parameter as a string or int."
             )
         if isinstance(n, str) and not n.isdigit():
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 "If specifying your sampling kwargs 'n' parameter as a string please ensure it is "
                 "parseable as an integer."
             )

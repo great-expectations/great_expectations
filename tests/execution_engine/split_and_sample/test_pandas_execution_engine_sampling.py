@@ -4,7 +4,7 @@ import random
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.execution_engine import PandasExecutionEngine
 
@@ -26,13 +26,13 @@ from great_expectations.execution_engine import PandasExecutionEngine
             {},
             0,
             id="n missing from sampling_kwargs",
-            marks=pytest.mark.xfail(strict=True, raises=ge_exceptions.SamplerError),
+            marks=pytest.mark.xfail(strict=True, raises=gx_exceptions.SamplerError),
         ),
         pytest.param(
             None,
             0,
             id="sampling_kwargs are None",
-            marks=pytest.mark.xfail(strict=True, raises=ge_exceptions.SamplerError),
+            marks=pytest.mark.xfail(strict=True, raises=gx_exceptions.SamplerError),
         ),
     ],
 )
@@ -95,7 +95,7 @@ def test_sample_using_a_list(test_df):
 
 
 def test_sample_using_md5(test_df):
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         # noinspection PyUnusedLocal
         sampled_df = PandasExecutionEngine().get_batch_data(
             RuntimeDataBatchSpec(

@@ -9,7 +9,7 @@ import click
 from ruamel.yaml import YAML
 from ruamel.yaml.compat import StringIO
 
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.cli.v012.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.v012.datasource import get_batch_kwargs
@@ -224,13 +224,13 @@ def _raise_profiling_errors(profiling_results) -> None:
         profiling_results["error"]["code"]
         == FileDataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
     ):
-        raise ge_exceptions.DataContextError(
+        raise gx_exceptions.DataContextError(
             """Some of the data assets you specified were not found: {:s}
             """.format(
                 ",".join(profiling_results["error"]["not_found_data_assets"])
             )
         )
-    raise ge_exceptions.DataContextError(
+    raise gx_exceptions.DataContextError(
         f"Unknown profiling error code: {profiling_results['error']['code']}"
     )
 
@@ -335,7 +335,7 @@ def load_expectation_suite(
     try:
         suite = context.get_expectation_suite(suite_name)
         return suite
-    except ge_exceptions.DataContextError:
+    except gx_exceptions.DataContextError:
         exit_with_failure_message_and_stats(
             context,
             usage_event,
@@ -369,8 +369,8 @@ def load_checkpoint(
         )
         return checkpoint
     except (
-        ge_exceptions.CheckpointNotFoundError,
-        ge_exceptions.InvalidCheckpointConfigError,
+        gx_exceptions.CheckpointNotFoundError,
+        gx_exceptions.InvalidCheckpointConfigError,
     ):
         exit_with_failure_message_and_stats(
             context,
@@ -380,7 +380,7 @@ def load_checkpoint(
   - `<green>great_expectations checkpoint list</green>` to verify your checkpoint exists
   - `<green>great_expectations checkpoint new</green>` to configure a new checkpoint""",
         )
-    except ge_exceptions.CheckpointError as e:
+    except gx_exceptions.CheckpointError as e:
         exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}</red>")
 
 
@@ -445,7 +445,7 @@ def load_data_context_with_error_handling(
             if not exception_occurred and increment_version:
                 context = DataContext(context_root_dir=directory)
         return context
-    except ge_exceptions.UnsupportedConfigVersionError as err:
+    except gx_exceptions.UnsupportedConfigVersionError as err:
         directory = directory or FileDataContext.find_context_root_dir()
         ge_config_version = FileDataContext.get_ge_config_version(
             context_root_dir=directory
@@ -465,18 +465,18 @@ def load_data_context_with_error_handling(
             cli_message(f"<red>{err.message}</red>")
             sys.exit(1)
     except (
-        ge_exceptions.ConfigNotFoundError,
-        ge_exceptions.InvalidConfigError,
+        gx_exceptions.ConfigNotFoundError,
+        gx_exceptions.InvalidConfigError,
     ) as err:
         cli_message(f"<red>{err.message}</red>")
         sys.exit(1)
-    except ge_exceptions.PluginModuleNotFoundError as err:
+    except gx_exceptions.PluginModuleNotFoundError as err:
         cli_message(err.cli.v012_colored_message)
         sys.exit(1)
-    except ge_exceptions.PluginClassNotFoundError as err:
+    except gx_exceptions.PluginClassNotFoundError as err:
         cli_message(err.cli.v012_colored_message)
         sys.exit(1)
-    except ge_exceptions.InvalidConfigurationYamlError as err:
+    except gx_exceptions.InvalidConfigurationYamlError as err:
         cli_message(f"<red>{str(err)}</red>")
         sys.exit(1)
 

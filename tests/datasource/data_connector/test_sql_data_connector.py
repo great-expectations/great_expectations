@@ -165,7 +165,7 @@ def test_get_batch_definition_list_from_batch_request(
     # In this case, "date" should go inside "batch_identifiers".
     # Currently, the method ignores "date" entirely, and matches on too many partitions.
     # I don't think this is unique to ConfiguredAssetSqlDataConnector.
-    # with pytest.raises(ge_exceptions.DataConnectorError) as e:
+    # with pytest.raises(gx_exceptions.DataConnectorError) as e:
     #     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
     #         batch_request=BatchRequest(
     #             datasource_name="FAKE_Datasource_NAME",
