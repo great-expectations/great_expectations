@@ -24,7 +24,7 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
     metric_dependencies = ("query.template_values",)
 
     query = """
-                SELECT COUNT(1)
+                SELECT COUNT(*) n
                 FROM {active_batch}
                 WHERE {col} = {filter}
             """
@@ -77,7 +77,6 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
         {
             "data": [
                 {
-                    "dataset_name": "test",
                     "data": {"col1": [1, 1, 1, 2, 2, 2, 2, 2]},
                 },
             ],
