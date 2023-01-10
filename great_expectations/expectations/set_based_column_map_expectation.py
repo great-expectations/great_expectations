@@ -29,6 +29,7 @@ from great_expectations.render.renderer_configuration import (
     RendererValueType,
 )
 from great_expectations.render.util import (
+    num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
