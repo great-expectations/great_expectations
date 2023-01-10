@@ -164,7 +164,6 @@ class SlackNotificationAction(ValidationAction):
         notify_on="all",
         notify_with=None,
         show_failed_expectations=False,
-        base_url=None,
     ) -> None:
         """Construct a SlackNotificationAction
 
