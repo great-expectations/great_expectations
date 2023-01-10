@@ -206,7 +206,6 @@ filterwarnings = [
 ]
 junit_family="xunit2"
 markers = [
-    "base_data_context: mark test as being relevant to BaseDataContext, which will be removed during refactor",
     "cloud: mark test as being relevant to Great Expectations Cloud.",
     "docs: mark a test as a docs test.",
     "e2e: mark test as an E2E test.",
