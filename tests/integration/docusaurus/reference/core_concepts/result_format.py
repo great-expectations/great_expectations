@@ -27,7 +27,7 @@ dataframe = pd.DataFrame(
     {
         "pk_column": ["zero", "one", "two", "three", "four", "five", "six", "seven"],
         "my_var": ["A", "B", "B", "C", "C", "C", "D", "D"],
-        "my_numbers": [1, 2, 2, 3, 3, 3, 4, None],
+        "my_numbers": [1.0, 2.0, 2.0, 3.0, 3.0, 3.0, 4.0, 4.0],
     }
 )
 # </snippet>
@@ -86,59 +86,54 @@ my_validator: Validator = Validator(
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_boolean_example">
 validation_result = my_validator.expect_column_values_to_be_in_set(
     column="my_var",
-    value_set=["B", "C", "D"],
+    value_set=["A", "B"],
     result_format={"result_format": "BOOLEAN_ONLY"},
 )
 # </snippet>
-assert validation_result.success == False
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_boolean_example_output">
-expected_output: dict = {}
+assert validation_result.success == False
+assert validation_result.result == {}
 # </snippet>
 
-assert validation_result.result == expected_output
 
 # Snippet: result_format BASIC example with set
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_basic_example_set">
 validation_result = my_validator.expect_column_values_to_be_in_set(
-    column="my_var", value_set=["B", "C", "D"], result_format={"result_format": "BASIC"}
+    column="my_var", value_set=["A", "B"], result_format={"result_format": "BASIC"}
 )
 # </snippet>
-
-assert validation_result.success == False
-
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_basic_example_set_output">
-expected_output: dict = {
-    "element_count": 15,
-    "unexpected_count": 6,
-    "unexpected_percent": 40.0,
-    "partial_unexpected_list": ["A", "E", "E", "E", "E", "E"],
+assert validation_result.success == False
+assert validation_result.result == {
+    "element_count": 8,
+    "unexpected_count": 5,
+    "unexpected_percent": 62.5,
+    "partial_unexpected_list": ["C", "C", "C", "D", "D"],
     "missing_count": 0,
     "missing_percent": 0.0,
-    "unexpected_percent_total": 40.0,
-    "unexpected_percent_nonmissing": 40.0,
+    "unexpected_percent_total": 62.5,
+    "unexpected_percent_nonmissing": 62.5,
 }
 # </snippet>
-assert validation_result.result == expected_output
 
 # Snippet: result_format BASIC example with aggregate
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_basic_example_agg">
-validation_result = my_validator.expect_column_max_to_be_between(
+validation_result = my_validator.expect_column_mean_to_be_between(
     column="my_numbers", min_value=0.0, max_value=10.0, result_format="BASIC"
 )
 # </snippet>
-assert validation_result.success == True
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_basic_example_agg_output">
-expected_output: dict = {"observed_value": 3.5384615384615383}
+assert validation_result.success == True
+assert validation_result.result == {"observed_value": 2.75}
 # </snippet>
-assert validation_result.result == expected_output
 
 
 # Snippet: result_format SUMMARY example with set
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_summary_example_set">
 validation_result = my_validator.expect_column_values_to_be_in_set(
     column="my_var",
-    value_set=["B", "C", "D"],
+    value_set=["A", "B"],
     result_format={
         "result_format": "SUMMARY",
         "unexpected_index_column_names": ["pk_column"],
@@ -147,36 +142,31 @@ validation_result = my_validator.expect_column_values_to_be_in_set(
 )
 # </snippet>
 
-assert validation_result.success == False
-
-
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_summary_example_set_output">
-expected_validation_result: dict = {
-    "element_count": 15,
-    "unexpected_count": 6,
-    "unexpected_percent": 40.0,
-    "partial_unexpected_list": ["A", "E", "E", "E", "E", "E"],
+assert validation_result.success == False
+assert validation_result.result == {
+    "element_count": 8,
+    "unexpected_count": 5,
+    "unexpected_percent": 62.5,
+    "partial_unexpected_list": ["C", "C", "C", "D", "D"],
     "unexpected_index_column_names": ["pk_column"],
     "missing_count": 0,
     "missing_percent": 0.0,
-    "unexpected_percent_total": 40.0,
-    "unexpected_percent_nonmissing": 40.0,
+    "unexpected_percent_total": 62.5,
+    "unexpected_percent_nonmissing": 62.5,
     "partial_unexpected_index_list": [
-        {"my_var": "A", "pk_column": "zero"},
-        {"my_var": "E", "pk_column": "ten"},
-        {"my_var": "E", "pk_column": "eleven"},
-        {"my_var": "E", "pk_column": "twelve"},
-        {"my_var": "E", "pk_column": "thirteen"},
-        {"my_var": "E", "pk_column": "fourteen"},
+        {"my_var": "C", "pk_column": "three"},
+        {"my_var": "C", "pk_column": "four"},
+        {"my_var": "C", "pk_column": "five"},
+        {"my_var": "D", "pk_column": "six"},
+        {"my_var": "D", "pk_column": "seven"},
     ],
     "partial_unexpected_counts": [
-        {"value": "E", "count": 5},
-        {"value": "A", "count": 1},
+        {"value": "C", "count": 3},
+        {"value": "D", "count": 2},
     ],
 }
 # </snippet>
-
-assert validation_result.result == expected_validation_result
 
 # Snippet: result_format SUMMARY example with agg
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_summary_example_agg">
@@ -184,18 +174,17 @@ validation_result = my_validator.expect_column_mean_to_be_between(
     column="my_numbers", min_value=0.0, max_value=10.0, result_format="SUMMARY"
 )
 # </snippet>
-assert validation_result.success == True
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_summary_example_agg_output">
-expected_output: dict = {"observed_value": 3.6666666666666665}
+assert validation_result.success == True
+assert validation_result.result == {"observed_value": 2.75}
 # </snippet>
-assert validation_result.result == expected_output
 
 # Snippet: result_format COMPLETE example with set
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_set">
 validation_result = my_validator.expect_column_values_to_be_in_set(
     column="my_var",
-    value_set=["B", "C", "D"],
+    value_set=["A", "B"],
     result_format={
         "result_format": "COMPLETE",
         "unexpected_index_column_names": ["pk_column"],
@@ -203,45 +192,41 @@ validation_result = my_validator.expect_column_values_to_be_in_set(
     },
 )
 # </snippet>
-assert validation_result.success == False
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_set_output">
-expected_validation_result: dict = {
-    "element_count": 15,
-    "unexpected_count": 6,
-    "unexpected_percent": 40.0,
-    "partial_unexpected_list": ["A", "E", "E", "E", "E", "E"],
+assert validation_result.success == False
+assert validation_result.result == {
+    "element_count": 8,
+    "unexpected_count": 5,
+    "unexpected_percent": 62.5,
+    "partial_unexpected_list": ["C", "C", "C", "D", "D"],
     "unexpected_index_column_names": ["pk_column"],
     "missing_count": 0,
     "missing_percent": 0.0,
-    "unexpected_percent_total": 40.0,
-    "unexpected_percent_nonmissing": 40.0,
+    "unexpected_percent_total": 62.5,
+    "unexpected_percent_nonmissing": 62.5,
     "partial_unexpected_index_list": [
-        {"my_var": "A", "pk_column": "zero"},
-        {"my_var": "E", "pk_column": "ten"},
-        {"my_var": "E", "pk_column": "eleven"},
-        {"my_var": "E", "pk_column": "twelve"},
-        {"my_var": "E", "pk_column": "thirteen"},
-        {"my_var": "E", "pk_column": "fourteen"},
+        {"my_var": "C", "pk_column": "three"},
+        {"my_var": "C", "pk_column": "four"},
+        {"my_var": "C", "pk_column": "five"},
+        {"my_var": "D", "pk_column": "six"},
+        {"my_var": "D", "pk_column": "seven"},
     ],
     "partial_unexpected_counts": [
-        {"value": "E", "count": 5},
-        {"value": "A", "count": 1},
+        {"value": "C", "count": 3},
+        {"value": "D", "count": 2},
     ],
-    "unexpected_list": ["A", "E", "E", "E", "E", "E"],
+    "unexpected_list": ["C", "C", "C", "D", "D"],
     "unexpected_index_list": [
-        {"my_var": "A", "pk_column": "zero"},
-        {"my_var": "E", "pk_column": "ten"},
-        {"my_var": "E", "pk_column": "eleven"},
-        {"my_var": "E", "pk_column": "twelve"},
-        {"my_var": "E", "pk_column": "thirteen"},
-        {"my_var": "E", "pk_column": "fourteen"},
+        {"my_var": "C", "pk_column": "three"},
+        {"my_var": "C", "pk_column": "four"},
+        {"my_var": "C", "pk_column": "five"},
+        {"my_var": "D", "pk_column": "six"},
+        {"my_var": "D", "pk_column": "seven"},
     ],
-    "unexpected_index_query": [0, 10, 11, 12, 13, 14],
+    "unexpected_index_query": [3, 4, 5, 6, 7],
 }
 # </snippet>
-
-assert validation_result.result == expected_validation_result
 
 # Snippet: result_format COMPLETE example with agg
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_agg">
@@ -249,12 +234,11 @@ validation_result = my_validator.expect_column_mean_to_be_between(
     column="my_numbers", min_value=0.0, max_value=10.0, result_format="COMPLETE"
 )
 # </snippet>
-assert validation_result.success == True
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_agg_output">
-expected_output: dict = {"observed_value": 3.6666666666666665}
+assert validation_result.success == True
+assert validation_result.result == {"observed_value": 2.75}
 # </snippet>
-assert validation_result.result == expected_output
 
 
 # Checkpoint
@@ -266,7 +250,7 @@ expectation_config = ExpectationConfiguration(
     expectation_type="expect_column_values_to_be_in_set",
     kwargs={
         "column": "my_var",
-        "value_set": ["B", "C", "D"],
+        "value_set": ["A", "B"],
     },
 )
 test_suite.add_expectation(expectation_configuration=expectation_config)
@@ -344,22 +328,21 @@ result_index_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
     "unexpected_index_list"
 ]
 assert result_index_list == [
-    {"my_var": "A", "pk_column": "zero"},
-    {"my_var": "E", "pk_column": "ten"},
-    {"my_var": "E", "pk_column": "eleven"},
-    {"my_var": "E", "pk_column": "twelve"},
-    {"my_var": "E", "pk_column": "thirteen"},
-    {"my_var": "E", "pk_column": "fourteen"},
+    {"my_var": "C", "pk_column": "three"},
+    {"my_var": "C", "pk_column": "four"},
+    {"my_var": "C", "pk_column": "five"},
+    {"my_var": "D", "pk_column": "six"},
+    {"my_var": "D", "pk_column": "seven"},
 ]
 
 result_index_query: List[int] = evrs[0]["results"][0]["result"][
     "unexpected_index_query"
 ]
-assert result_index_query == [0, 10, 11, 12, 13, 14]
+assert result_index_query == [3, 4, 5, 6, 7]
 partial_unexpected_counts: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
     "partial_unexpected_counts"
 ]
 assert partial_unexpected_counts == [
-    {"value": "E", "count": 5},
-    {"value": "A", "count": 1},
+    {"value": "C", "count": 3},
+    {"value": "D", "count": 2},
 ]
