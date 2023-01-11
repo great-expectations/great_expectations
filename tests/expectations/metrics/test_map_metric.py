@@ -1080,7 +1080,7 @@ def test_sqlite_single_column_complete_result_format_id_pk(
         "unexpected_index_query": "SELECT animals, pk_1 \n"
         "FROM animal_names \n"
         "WHERE animals IS NOT NULL AND (animals NOT IN "
-        "('cat', 'fish', 'dog'))",
+        "('cat', 'fish', 'dog'));",
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
