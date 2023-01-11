@@ -17,7 +17,7 @@ class SlackRenderer(Renderer):
         data_docs_pages=None,
         notify_with=None,
         show_failed_expectations: bool = False,
-        cloud_url: str = None,
+        validation_result_url: str = None,
     ):
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
@@ -77,11 +77,11 @@ class SlackRenderer(Renderer):
                         validation_result["results"]
                     )
             summary_text = ""
-            if cloud_url:
-                # This adds hyperlinks to GX Cloud
-                title_hlink = f"*<{cloud_url} | GX Cloud Validation Result >*"
+            if validation_result_url:
+                # This adds hyperlinks for defined URL
+                title_hlink = f"*<{validation_result_url} | Validation Result >*"
                 batch_validation_status_hlink = (
-                    f"*Batch Validation Status*: *<{cloud_url} | {status}>*"
+                    f"*Batch Validation Status*: *<{validation_result_url} | {status}>*"
                 )
                 summary_text += f"""{title_hlink}
 {batch_validation_status_hlink}
