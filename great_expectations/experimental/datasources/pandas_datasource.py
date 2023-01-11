@@ -5,7 +5,7 @@ import logging
 import os
 import pathlib
 import re
-from typing import Dict, List, Tuple, Type, Union, TYPE_CHECKING, Pattern, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Tuple, Type, Union
 
 import pydantic
 from typing_extensions import ClassVar, Literal
@@ -15,9 +15,10 @@ from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.experimental.datasources.interfaces import (
     Batch,
     BatchRequest,
+    BatchRequestError,
     BatchRequestOptions,
     DataAsset,
-    Datasource, BatchRequestError,
+    Datasource,
 )
 
 if TYPE_CHECKING:
@@ -100,12 +101,13 @@ class CSVAsset(DataAsset):
         return template
 
     def get_batch_request(
-            self, options: Optional[BatchRequestOptions] = None
+        self, options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:
         # All regex values passed to options must be strings to be used in the regex
         option_names_to_group = self._option_name_to_regex_group_id()
-        for option, value in options.items():
-            if option in option_names_to_group and not isinstance(value, str):
+        if options:
+            for option, value in options.items():
+                if option in option_names_to_group and not isinstance(value, str):
                     raise BatchRequestError(
                         f"All regex matching options must be strings. The value of '{option}' is "
                         f"not a string: {value}"
