@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import Dict, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -25,9 +25,6 @@ from great_expectations.render.renderer_configuration import (
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import ValidationDependencies
-
-if TYPE_CHECKING:
-    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
 class ExpectTableRowCountToEqualOtherTable(TableExpectation):

@@ -412,7 +412,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         include_column_name = (
             False if runtime_configuration.get("include_column_name") is False else True
         )
-        styling = runtime_configuration.get("styling")
+        _ = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration["kwargs"],
             ["column", "quantile_ranges", "row_condition", "condition_parser"],

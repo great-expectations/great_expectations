@@ -116,7 +116,7 @@ except ImportError:
             )
             from collections import namedtuple
 
-            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
+            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))  # type: ignore[misc] # cannot infer sorted return type
             bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
     except ImportError:
         sqla_bigquery = None

@@ -292,7 +292,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
-        params_with_json_schema = {
+        params_with_json_schema = {  # noqa: F841 # unused
             "column": {"schema": {"type": "string"}, "value": params.get("column")},
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
