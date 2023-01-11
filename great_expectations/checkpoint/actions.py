@@ -242,7 +242,6 @@ class SlackNotificationAction(ValidationAction):
                     data_docs_pages = payload[action_names]
 
         # Assemble complete GX Cloud URL for a specific validation result
-        cloud_id = getattr(validation_result_suite_identifier, "cloud_id", None)
         validation_result_url = None
         if (
             isinstance(validation_result_suite_identifier, GXCloudIdentifier)
