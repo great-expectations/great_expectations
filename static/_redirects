@@ -226,6 +226,6 @@
 # /docs/api_docs/methods/great_expectations-data_context-data_context-data_context-datacontext-test_yaml_config/ /docs/reference/api/abstract_data_context
 # /docs/api_docs/methods/great_expectations-data_context-data_context-data_context-datacontext-create/ /docs/reference/api/great_expectations.util
 
-/docs/api_docs/classes/great_expectations-data_context-data_context-data_context-DataContext.md /docs/reference/api/abstract_data_context
-/docs/api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-test_yaml_config.md /docs/reference/api/abstract_data_context
-/docs/api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-create.md /docs/reference/api/great_expectations.util
+/docs/api_docs/classes/great_expectations-data_context-data_context-data_context-DataContext.md https://launch-api-docs-staging.netlify.app/docs/reference/api/abstract_data_context
+/docs/api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-test_yaml_config.md https://launch-api-docs-staging.netlify.app/docs/reference/api/abstract_data_context
+/docs/api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-create.md https://launch-api-docs-staging.netlify.app/docs/reference/api/great_expectations.util
