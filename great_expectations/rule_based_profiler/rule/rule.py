@@ -90,6 +90,7 @@ class Rule(SerializableDictDot):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
         reconciliation_directives: Optional[ReconciliationDirectives] = None,
         rule_state: Optional[RuleState] = None,
     ) -> RuleState:
@@ -102,6 +103,7 @@ class Rule(SerializableDictDot):
             batch_list: Explicit list of Batch objects to supply data at runtime
             batch_request: Explicit batch_request used to supply data at runtime
             recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
             reconciliation_directives: directives for how each rule component should be overwritten
             rule_state: holds "Rule" execution state and responds to "execution_time_property_name" ("execution_time")
 
@@ -158,6 +160,7 @@ class Rule(SerializableDictDot):
                     batch_list=batch_list,
                     batch_request=batch_request,
                     recompute_existing_parameter_values=recompute_existing_parameter_values,
+                    runtime_configuration=runtime_configuration,
                 )
 
             expectation_configuration_builders: List[
@@ -174,6 +177,7 @@ class Rule(SerializableDictDot):
                     batch_list=batch_list,
                     batch_request=batch_request,
                     recompute_existing_parameter_values=recompute_existing_parameter_values,
+                    runtime_configuration=runtime_configuration,
                 )
 
         return rule_state
