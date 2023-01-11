@@ -34,7 +34,10 @@ from typing_extensions import Literal
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core._docs_decorators import (
+    deprecated_method_or_class,
+    public_api,
+)
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,
@@ -2260,6 +2263,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         profiling_results["success"] = True
         return profiling_results
 
+    @deprecated_method_or_class(
+        version="0.14.0", message="Part of the deprecated v2 API"
+    )
     def add_batch_kwargs_generator(
         self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
     ):
