@@ -2973,7 +2973,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """Initialize the datasources in store"""
         config: DataContextConfig = self.config
         datasources: dict[str, DatasourceConfig] = cast(
-            dict[str, DatasourceConfig], config.datasources
+            Dict[str, DatasourceConfig], config.datasources
         )
 
         for datasource_name, datasource_config in datasources.items():
