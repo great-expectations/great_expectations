@@ -87,6 +87,7 @@ stages:
                 azure/*.yml
                 assets/scripts/**
                 scripts/*.py
+                scripts/*.sh
 
   - stage: lint
     dependsOn: scope_check
