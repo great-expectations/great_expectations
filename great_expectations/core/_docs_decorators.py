@@ -1,6 +1,8 @@
 from textwrap import dedent
 from typing import Any, Callable, TypeVar
 
+from docstring_parser import DocstringStyle
+
 try:
     import docstring_parser
 except ImportError:
@@ -275,11 +277,20 @@ def _add_text_below_string_docstring_argument(
             if param.description is None:
                 param.description = text
             else:
-                param.description += "\n\n" + text + "\n\n"
+                param.description += "\n\n" + text + "\n"
+
+    # Returns: includes an additional ":\n" that we need to strip out.
+    if parsed_docstring.returns:
+        parsed_docstring.returns.description = (
+            parsed_docstring.returns.description.strip(":\n")
+        )
 
     # RenderingStyle.EXPANDED used to make sure any line breaks before and
     # after the added text are included (for Sphinx html rendering).
-    return docstring_parser.compose(
+    composed_docstring = docstring_parser.compose(
         docstring=parsed_docstring,
+        style=DocstringStyle.GOOGLE,
         rendering_style=docstring_parser.RenderingStyle.EXPANDED,
     )
+
+    return composed_docstring
