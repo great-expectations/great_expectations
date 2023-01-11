@@ -175,17 +175,12 @@ class SphinxInvokeDocsBuilder:
 
                 # Process internal links
                 # Note: Currently the docusaurus link checker does not work well with
-                # anchor links, so here we remove the anchor link for internal urls.
-
-                # We also currently need to make these links absolute.
-
+                # anchor links, so we need to make these links absolute.
                 internal_refs = doc.find_all(class_="reference internal")
                 for internal_ref in internal_refs:
                     href = internal_ref["href"]
-                    defragged_href = urllib.parse.urldefrag(href).url
-                    defragged_href = self._get_base_url() + defragged_href
-
-                    internal_ref["href"] = defragged_href
+                    absolute_href = self._get_base_url() + href
+                    internal_ref["href"] = absolute_href
 
                 doc_str = str(doc)
 
