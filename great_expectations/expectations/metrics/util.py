@@ -1194,16 +1194,13 @@ def compute_unexpected_pandas_indices(
         list of unexpected_index_list values. It can either be a list of dicts or a list of numbers (if using default index).
 
     """
-    if not expectation_domain_column_name:
-        return []
-    unexpected_index_column_names: List[str] | None = None
+    unexpected_index_column_names: List[str]
+    unexpected_index_list: List[Dict[str, Any]]
     if domain_records_df.index.name is not None:
         unexpected_index_column_names = result_format.get(
             "unexpected_index_column_names", [domain_records_df.index.name]
         )
-        unexpected_index_list: Optional[
-            List[Dict[str, Any]]
-        ] = get_unexpected_indices_for_single_pandas_named_index(
+        unexpected_index_list = get_unexpected_indices_for_single_pandas_named_index(
             domain_records_df=domain_records_df,
             unexpected_index_column_names=unexpected_index_column_names,
             expectation_domain_column_name=expectation_domain_column_name,
@@ -1213,19 +1210,19 @@ def compute_unexpected_pandas_indices(
         unexpected_index_column_names = result_format.get(
             "unexpected_index_column_names", list(domain_records_df.index.names)
         )
-        unexpected_index_list: Optional[
-            List[Dict[str, Any]]
-        ] = get_unexpected_indices_for_multiple_pandas_named_indices(
-            domain_records_df=domain_records_df,
-            unexpected_index_column_names=unexpected_index_column_names,
-            expectation_domain_column_name=expectation_domain_column_name,
+        unexpected_index_list = (
+            get_unexpected_indices_for_multiple_pandas_named_indices(
+                domain_records_df=domain_records_df,
+                unexpected_index_column_names=unexpected_index_column_names,
+                expectation_domain_column_name=expectation_domain_column_name,
+            )
         )
     # named columns
     elif result_format.get("unexpected_index_column_names"):
-        unexpected_index_column_names = result_format.get(
+        unexpected_index_column_names: List[str] = result_format[
             "unexpected_index_column_names"
-        )
-        unexpected_index_list: Optional[List[Dict[str, Any]]] = []
+        ]
+        unexpected_index_list: List[Dict[str, Any]] = []
         unexpected_indices: List[int | str] = list(domain_records_df.index)
         for index in unexpected_indices:
             primary_key_dict: Dict[str, Any] = dict()
