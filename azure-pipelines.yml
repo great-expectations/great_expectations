@@ -428,7 +428,7 @@ stages:
               PYTEST+="--network=host greatexpectations/test:${DOCKER_TAG} bash -c \""
               PYTEST+="pip install --no-cache-dir --requirement requirements-dev.txt "
               PYTEST+="--requirement reqs/requirements-dev-test.txt --constraint constraints-dev.txt "
-              PYTEST+="--constraint $(python.version) && "
+              PYTEST+="--constraint $(min_constraints) && "
               PYTEST+="pytest --no-sqlalchemy --random-order --ignore=tests/cli --ignore=tests/integration/usage_statistic "
               PYTEST+="--ignore=tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py\""
               echo ${PYTEST}
