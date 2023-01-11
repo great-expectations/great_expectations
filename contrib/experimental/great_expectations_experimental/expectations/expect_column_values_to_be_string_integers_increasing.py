@@ -8,7 +8,10 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
+from great_expectations.core.metric_function_types import (
+    MetricPartialFunctionTypes,
+    MetricPartialFunctionTypeSuffixes,
+)
 from great_expectations.exceptions.exceptions import InvalidExpectationKwargsError
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -24,6 +27,7 @@ from great_expectations.expectations.metrics.import_manager import F, Window, sp
 from great_expectations.expectations.metrics.metric_provider import metric_partial
 from great_expectations.expectations.registry import get_metric_kwargs
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validator import ValidationDependencies
 
 logger = logging.getLogger(__name__)
 
@@ -222,23 +226,23 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> dict:
+    ) -> ValidationDependencies:
 
-        dependencies = super().get_validation_dependencies(
+        dependencies: ValidationDependencies = super().get_validation_dependencies(
             configuration=configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
         metric_kwargs = get_metric_kwargs(
-            metric_name="column_values.string_integers.increasing.map",
+            metric_name=f"column_values.string_integers.increasing.{MetricPartialFunctionTypeSuffixes.MAP.value}",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
 
         dependencies.set_metric_configuration(
-            metric_name="column_values.string_integers.increasing.map",
+            metric_name=f"column_values.string_integers.increasing.{MetricPartialFunctionTypeSuffixes.MAP.value}",
             metric_configuration=MetricConfiguration(
-                metric_name="column_values.string_integers.increasing.map",
+                metric_name=f"column_values.string_integers.increasing.{MetricPartialFunctionTypeSuffixes.MAP.value}",
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             ),
@@ -252,10 +256,10 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
-    ) -> Dict:
+    ) -> ExpectationValidationResult:
 
         string_integers_increasing = metrics.get(
-            "column_values.string_integers.increasing.map"
+            f"column_values.string_integers.increasing.{MetricPartialFunctionTypeSuffixes.MAP.value}"
         )
 
         success = all(string_integers_increasing[0])
