@@ -444,7 +444,7 @@ def test_slack_renderer_shows_gx_cloud_url(failed_expectation_suite_validation_r
     rendered_msg = slack_renderer.render(
         validation_result=failed_expectation_suite_validation_result,
         show_failed_expectations=True,
-        validation_result_url=cloud_url,
+        validation_result_urls=[cloud_url],
     )
 
     assert (
