@@ -263,7 +263,7 @@ and performs a simple validation against your success keys (i.e. important thres
 To do so, we'll be accessing our success keys, as well as the result of our previously-calculated Metrics.
 For example, here is the definition of a `_validate(...)` method to validate the results of our `column.custom_max` Metric against our success keys:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L196-L231
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L195-L230
 ```
 
 Running your diagnostic checklist at this point should return something like this:
