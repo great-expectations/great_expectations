@@ -410,10 +410,13 @@ stages:
         strategy:
           matrix:
             Python37:
+              python.version: '3.7'
               min_constraints: 'constraints-test/py37-min-install.txt'
             Python38:
+              python.version: '3.8'
               min_constraints: 'constraints-test/py38-min-install.txt'
             Python39:
+              python.version: '3.9'
               min_constraints: 'constraints-test/py39-min-install.txt'
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
