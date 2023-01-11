@@ -16,7 +16,7 @@ from typing import (
 
 from tqdm.auto import tqdm
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import IDDict
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
@@ -277,7 +277,7 @@ class ValidationGraph:
                 )
                 progress_bar.update(len(computable_metrics))
                 progress_bar.refresh()
-            except ge_exceptions.MetricResolutionError as err:
+            except gx_exceptions.MetricResolutionError as err:
                 if catch_exceptions:
                     exception_traceback = traceback.format_exc()
                     exception_message = str(err)

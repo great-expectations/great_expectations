@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.core import ExpectColumnValueZScoresToBeLessThan
@@ -303,7 +303,7 @@ def test_populate_dependencies_with_incorrect_metric_name():
 
     graph = ValidationGraph(execution_engine=execution_engine)
 
-    with pytest.raises(ge_exceptions.MetricProviderError) as e:
+    with pytest.raises(gx_exceptions.MetricProviderError) as e:
         graph.build_metric_dependency_graph(
             metric_configuration=MetricConfiguration(
                 metric_name="column_values.not_a_metric",
@@ -347,7 +347,7 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true():
             if failed_metric_configuration.id in [
                 metric_configuration.id for metric_configuration in metrics_to_resolve
             ]:
-                raise ge_exceptions.MetricResolutionError(
+                raise gx_exceptions.MetricResolutionError(
                     message='Error: The column "not_in_table" in BatchData does not exist.',
                     failed_metrics=[failed_metric_configuration],
                 )
