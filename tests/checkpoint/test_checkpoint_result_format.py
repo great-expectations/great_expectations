@@ -151,7 +151,7 @@ def expected_unexpected_indices_output() -> List[Dict[str, Union[str, int]]]:
 def expected_sql_query_output() -> str:
     return "SELECT animals, pk_1 \n\
 FROM animal_names \n\
-WHERE animals IS NOT NULL AND (animals NOT IN ('cat', 'fish', 'dog'))"
+WHERE animals IS NOT NULL AND (animals NOT IN ('cat', 'fish', 'dog'));"
 
 
 @pytest.fixture

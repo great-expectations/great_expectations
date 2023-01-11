@@ -1,5 +1,5 @@
 from itertools import zip_longest
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import Dict, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -18,9 +18,6 @@ from great_expectations.render.renderer_configuration import (
     RendererValueType,
 )
 from great_expectations.render.util import substitute_none_for_missing
-
-if TYPE_CHECKING:
-    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
 class ExpectTableColumnsToMatchOrderedList(TableExpectation):
@@ -158,9 +155,7 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        _ = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(configuration.kwargs, ["column_list"])
 
