@@ -349,6 +349,8 @@ def get_resolved_metrics_by_key(
             for key, metric_configurations_for_key in metric_configurations_by_key.items()
             for metric_configuration in metric_configurations_for_key
         ],
+        runtime_configuration=None,
+        min_graph_edges_pbar_enable=0,
     )
 
     # Step 2: Gather "MetricConfiguration" ID values for each key (one element per batch_id in every list).
