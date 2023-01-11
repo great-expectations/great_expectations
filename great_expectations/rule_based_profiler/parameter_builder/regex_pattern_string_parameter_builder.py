@@ -211,7 +211,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         metric_computation_result = self.get_metrics(
             metric_name="column_values.match_regex.unexpected_count",
             metric_domain_kwargs=self.metric_domain_kwargs,
-            metric_value_kwargs=self.metric_value_kwargs,
+            metric_value_kwargs=match_regex_metric_value_kwargs_list,
             limit=None,
             enforce_numeric_metric=False,
             replace_nan_with_zero=False,
