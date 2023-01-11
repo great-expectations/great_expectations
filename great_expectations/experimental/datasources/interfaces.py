@@ -24,10 +24,13 @@ from great_expectations.experimental.datasources.experimental_base_model import 
 )
 from great_expectations.experimental.datasources.metadatasource import MetaDatasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 LOGGER = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    import pandas as pd
+
     from great_expectations.core.batch import (
         BatchDataType,
         BatchDefinition,
@@ -260,3 +263,13 @@ class Batch:
     @property
     def batch_definition(self) -> BatchDefinition:
         return self._legacy_batch_definition
+
+    def head(self, n_rows: int = 5) -> pd.DataFrame:
+        self._data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
+        metric = MetricConfiguration(
+            metric_name="table.head",
+            metric_domain_kwargs={"batch_id": self.id},
+            metric_value_kwargs={"n_rows": n_rows, "fetch_all": False},
+        )
+        df = self._data.execution_engine.resolve_metrics((metric,))[metric.id]
+        return df

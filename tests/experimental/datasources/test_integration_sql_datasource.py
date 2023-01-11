@@ -1,5 +1,6 @@
 import os
 import pathlib
+from pprint import pformat as pf
 from typing import Any, Dict
 
 import pytest
@@ -61,7 +62,24 @@ def test_run_checkpoint_and_data_doc(empty_data_context, include_rendered_conten
     # Define an expectation suite
     suite_name = "my_suite"
     context.create_expectation_suite(expectation_suite_name=suite_name)
+
+    # Define a batch request and inspect the batches
     batch_request = asset.get_batch_request({"year": 2019, "month": 1})
+    batches = datasource.get_batch_list_from_batch_request(batch_request=batch_request)
+    stdout = ""
+    for batch in batches:
+        stdout += pf(batch.head())
+    assert stdout == (
+        "   vendor_id      pickup_datetime  ... total_amount  congestion_surcharge\n"
+        "0          2  2019-01-05 06:36:51  ...        15.80                   NaN\n"
+        "1          1  2019-01-23 15:22:13  ...        13.30                   0.0\n"
+        "2          2  2019-01-04 10:54:47  ...        21.36                   NaN\n"
+        "3          1  2019-01-05 12:07:08  ...         8.15                   NaN\n"
+        "4          2  2019-01-04 18:23:00  ...         6.10                   NaN\n"
+        "\n"
+        "[5 rows x 18 columns]"
+    )
+
     validator = context.get_validator(
         batch_request=batch_request,
         expectation_suite_name=suite_name,
