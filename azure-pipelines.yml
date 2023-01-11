@@ -128,7 +128,7 @@ stages:
   #       name: UnusedImportChecker
 
   - stage: docker_tests
-    dependsOn: [lint, custom_checks]
+    # dependsOn: [lint, custom_checks]
     condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
     pool:
       vmImage: 'ubuntu-latest'
