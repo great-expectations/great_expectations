@@ -1244,6 +1244,9 @@ def compute_unexpected_pandas_indices(
         unexpected_indices: List[int | str] = list(domain_records_df.index)
         for index in unexpected_indices:
             primary_key_dict: Dict[str, Any] = dict()
+            assert (
+                expectation_domain_column_name
+            ), "`expectation_domain_column_name` was not provided"
             primary_key_dict[expectation_domain_column_name] = domain_records_df.at[
                 index, expectation_domain_column_name
             ]
