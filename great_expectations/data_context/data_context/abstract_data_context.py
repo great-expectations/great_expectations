@@ -3702,6 +3702,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Returns:
             A dictionary with the names of the updated data documentation sites as keys and the the location info
             of their index.html files as values
+
+        Raises:
+            ClassInstantiationError: Site config in your Data Context config is not valid.
         """
         logger.debug("Starting DataContext.build_data_docs")
 
