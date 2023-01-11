@@ -3,6 +3,9 @@ from typing import Optional
 import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_function_types import (
+    MetricPartialFunctionTypeSuffixes,
+)
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -47,7 +50,10 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
     def _pandas_condition(
         cls, column, _metrics, threshold, double_sided, **kwargs
     ) -> pd.Series:
-        z_score, _, _ = _metrics["column_values.z_score.map"]
+        z_score: pd.Series
+        z_score, _, _ = _metrics[
+            f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+        ]
         try:
             if double_sided:
                 under_threshold = z_score.abs() < abs(threshold)
@@ -67,8 +73,9 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy_condition(cls, column, _metrics, threshold, double_sided, **kwargs):
-
-        z_score, _, _ = _metrics["column_values.z_score.map"]
+        z_score, _, _ = _metrics[
+            f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+        ]
         if double_sided:
             under_threshold = sa.func.abs(z_score) < abs(threshold)
         else:
@@ -85,7 +92,9 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark_condition(cls, column, _metrics, threshold, double_sided, **kwargs):
-        z_score, _, _ = _metrics["column_values.z_score.map"]
+        z_score, _, _ = _metrics[
+            f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+        ]
 
         if double_sided:
             threshold = abs(threshold)
@@ -110,13 +119,21 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
             runtime_configuration=runtime_configuration,
         )
 
-        if metric.metric_name == "column_values.z_score.under_threshold.condition":
-            dependencies["column_values.z_score.map"] = MetricConfiguration(
-                metric_name="column_values.z_score.map",
+        if (
+            metric.metric_name
+            == f"column_values.z_score.under_threshold.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+        ):
+            dependencies[
+                f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+            ] = MetricConfiguration(
+                metric_name=f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}",
                 metric_domain_kwargs=metric.metric_domain_kwargs,
             )
 
-        if metric.metric_name == "column_values.z_score.map":
+        if (
+            metric.metric_name
+            == f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+        ):
             dependencies["column.mean"] = MetricConfiguration(
                 metric_name="column.mean",
                 metric_domain_kwargs=metric.metric_domain_kwargs,
