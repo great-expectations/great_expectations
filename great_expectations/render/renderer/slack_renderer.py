@@ -17,7 +17,7 @@ class SlackRenderer(Renderer):
         data_docs_pages=None,
         notify_with=None,
         show_failed_expectations: bool = False,
-        validation_result_url: str = None,
+        validation_result_urls: List[str] = None,
     ):
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
@@ -77,14 +77,15 @@ class SlackRenderer(Renderer):
                         validation_result["results"]
                     )
             summary_text = ""
-            if validation_result_url:
+            if validation_result_urls:
                 # This adds hyperlinks for defined URL
-                title_hlink = f"*<{validation_result_url} | Validation Result >*"
-                batch_validation_status_hlink = (
-                    f"*Batch Validation Status*: *<{validation_result_url} | {status}>*"
+                title_hlink = f"*<Validation Result >*"
+                batch_validation_status_hlinks = "".join(
+                    f"*Batch Validation Status*: *<{validation_result_url} | {status}>*/n"
+                    for validation_result_url in validation_result_urls
                 )
                 summary_text += f"""{title_hlink}
-{batch_validation_status_hlink}
+{batch_validation_status_hlinks}
                 """
             else:
                 summary_text += f"*Batch Validation Status*: {status}"

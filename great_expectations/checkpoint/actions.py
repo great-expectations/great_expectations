@@ -242,13 +242,23 @@ class SlackNotificationAction(ValidationAction):
                     data_docs_pages = payload[action_names]
 
         # Assemble complete GX Cloud URL for a specific validation result
-        cloud_id = getattr(validation_result_suite_identifier, "cloud_id", None)
-        validation_result_url = None
+        data_docs_urls: list[
+            dict[str, str | None]
+        ] = self.data_context.get_docs_sites_urls(
+            resource_identifier=validation_result_suite_identifier
+        )
+
+        validation_result_urls: list[str] = [
+            data_docs_url["site_url"]
+            for data_docs_url in data_docs_urls
+            if data_docs_url["site_url"]
+        ]
         if (
             isinstance(validation_result_suite_identifier, GXCloudIdentifier)
             and validation_result_suite_identifier.cloud_id
         ):
             validation_result_url = f"https://app.greatexpectations.io/?validationResultId={validation_result_suite_identifier.cloud_id}"
+            validation_result_urls.append(validation_result_url)
 
         if (
             self.notify_on == "all"
@@ -262,7 +272,7 @@ class SlackNotificationAction(ValidationAction):
                 data_docs_pages,
                 self.notify_with,
                 self.show_failed_expectations,
-                validation_result_url,
+                validation_result_urls,
             )
 
             # this will actually send the POST request to the Slack webapp server
