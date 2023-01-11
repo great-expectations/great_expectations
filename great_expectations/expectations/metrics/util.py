@@ -630,10 +630,10 @@ def column_reflection_fallback(
 
 def get_dbms_compatible_column_names(
     column_names: List[str] | str,
-    batch_columns_list: List[str | quoted_name],
+    batch_columns_list: List[str],
     execution_engine: ExecutionEngine,
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
-) -> List[str | quoted_name] | (str | quoted_name):
+) -> List[str] | str:
     """
     Case non-sensitivity is expressed in upper case by common DBMS backends and in lower case by SQLAlchemy, with any
     deviations enclosed with double quotes.
@@ -667,10 +667,10 @@ def get_dbms_compatible_column_names(
         column_names_list = [column_names]
         is_list = False
 
-    typed_column_names_list: List[str | quoted_name]
+    typed_column_names_list: List[str]
     if isinstance(execution_engine, SqlAlchemyExecutionEngine):
         column_name: str
-        batch_columns_dict: Dict[str, str | quoted_name] = {
+        batch_columns_dict: Dict[str, str] = {
             str(column_name): column_name for column_name in batch_columns_list
         }
         typed_column_names_list = [
@@ -687,7 +687,7 @@ def get_dbms_compatible_column_names(
 
 def verify_column_names_exist(
     column_names: List[str] | str,
-    batch_columns_list: List[str | quoted_name],
+    batch_columns_list: List[str | Any],
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
 ) -> None:
     """
