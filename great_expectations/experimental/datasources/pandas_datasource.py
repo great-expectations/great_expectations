@@ -45,9 +45,9 @@ class CSVAsset(DataAsset):
     )
 
     def _fully_specified_batch_requests_with_path(
-        self, batch_request
+        self, batch_request: BatchRequest
     ) -> List[Tuple[BatchRequest, pathlib.Path]]:
-        """Generates a list fully specified batch requests from partial specificed batch request
+        """Generates a list fully specified batch requests from partial specified batch request
 
         Args:
             batch_request: A batch request
