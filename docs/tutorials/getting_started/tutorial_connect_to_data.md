@@ -17,7 +17,7 @@ In Step 1: Setup, we created a <TechnicalTag relative="../../" tag="data_context
 ### Create a Datasource with the CLI
 Let's create and configure your first Datasource: a connection to the data directory we've provided in the repo.  This could also be a database connection, but because our tutorial data consists of .CSV files we're just using a simple file store.
 
-Start by using the <TechnicalTag relative="../../" tag="cli" text="CLI" /> to run the following command from your `ge_tutorials` directory:
+Start by using the <TechnicalTag relative="../../" tag="cli" text="CLI" /> to run the following command from your `gx_tutorials` directory:
 
 ````console
 great_expectations datasource new
@@ -58,7 +58,7 @@ enter a path relative to your current working directory or an absolute path.
 :data
 ````
 
-The data that this tutorial uses is stored in `ge_tutorials/data`.  Since we are working from the `ge_tutorials` directory, you only need to enter `data` and hit return to continue.
+The data that this tutorial uses is stored in `gx_tutorials/data`.  Since we are working from the `gx_tutorials` directory, you only need to enter `data` and hit return to continue.
 
 This will now **open up a new Jupyter Notebook** to complete the Datasource configuration.  Your console will display a series of messages as the Jupyter Notebook is loaded, but you can disregard them.  The rest of the Datasource setup takes place in the Jupyter Notebook and we won't return to the terminal until that is done.
 
@@ -85,7 +85,7 @@ When you completed those last few steps, you told Great Expectations that:
 
 Based on that information, the CLI added the following entry into your ```great_expectations.yml``` file, under the `datasources` header:
 
-```yaml file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L24-L43
+```yaml name="tests/integration/docusaurus/tutorials/getting-started/getting_started.py datasource_yaml"
 ```
 
 Please note that due to how data is serialized, the entry in your ```great_expectations.yml``` file may not have these key/value pairs in the same order as the above example.  However, they will all have been added.

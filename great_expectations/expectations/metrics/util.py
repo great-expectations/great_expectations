@@ -8,7 +8,7 @@ import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -114,7 +114,7 @@ except ImportError:
             )
             from collections import namedtuple
 
-            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
+            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))  # type: ignore[misc] # cannot infer sorted return type
             bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
     except ImportError:
         sqla_bigquery = None
@@ -704,7 +704,7 @@ def verify_column_names_exist(
 
     for column_name in column_names_list:
         if column_name not in batch_columns_list:
-            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=error_message_template.format(column_name=column_name)
             )
 
@@ -1038,6 +1038,7 @@ def sql_statement_with_post_compile_to_string(
         params = (repr(compiled.params[name]) for name in list(compiled.params.keys()))
         query_as_string = re.sub(r"%\(.*?\)s", lambda m: next(params), str(compiled))
 
+    query_as_string += ";"
     return query_as_string
 
 
@@ -1084,7 +1085,7 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(
         List of Dicts that contain ID/PK values
     """
     if expectation_domain_column_name is None:
-        raise ge_exceptions.MetricResolutionError(
+        raise gx_exceptions.MetricResolutionError(
             message=f"Error: The domain column is currently set to None. Please check your configuration.",
             failed_metrics=["unexpected_index_list"],
         )
@@ -1095,7 +1096,7 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(
     tuple_index: Dict[str, int] = dict()
     for column_name in unexpected_index_column_names:
         if column_name not in domain_records_df_index_names:
-            raise ge_exceptions.MetricResolutionError(
+            raise gx_exceptions.MetricResolutionError(
                 message=f"Error: The column {column_name} does not exist in the named indices. Please check your configuration",
                 failed_metrics=["unexpected_index_list"],
             )
@@ -1143,7 +1144,7 @@ def get_unexpected_indices_for_single_pandas_named_index(
         len(unexpected_index_column_names) == 1
         and unexpected_index_column_names[0] == domain_records_df.index.name
     ):
-        raise ge_exceptions.MetricResolutionError(
+        raise gx_exceptions.MetricResolutionError(
             message=f"Error: The column {unexpected_index_column_names[0] if unexpected_index_column_names else '<no column specified>'} does not exist in the named indices. Please check your configuration",
             failed_metrics=["unexpected_index_list"],
         )
