@@ -7,10 +7,11 @@ from __future__ import annotations
 
 import logging
 import warnings
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, Final, Optional, Union
 from urllib.parse import urljoin
 
 from great_expectations.core import ExpectationSuiteValidationResult
+from great_expectations.data_context.cloud_constants import CLOUD_APP_DEFAULT_BASE_URL
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 
 try:
@@ -257,8 +258,8 @@ class SlackNotificationAction(ValidationAction):
             isinstance(validation_result_suite_identifier, GXCloudIdentifier)
             and validation_result_suite_identifier.cloud_id
         ):
-            cloud_base_url: str = self.data_context.ge_cloud_config.base_url
-            validation_result_url = f"{cloud_base_url}/?validationResultId={validation_result_suite_identifier.cloud_id}"
+            cloud_base_url: Final[str] = CLOUD_APP_DEFAULT_BASE_URL
+            validation_result_url = f"{cloud_base_url}?validationResultId={validation_result_suite_identifier.cloud_id}"
             validation_result_urls.append(validation_result_url)
 
         if (
