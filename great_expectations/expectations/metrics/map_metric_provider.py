@@ -12,6 +12,7 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     MetricFunctionTypes,
     MetricPartialFunctionTypes,
+    MetricPartialFunctionTypeSuffixes,
 )
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import (
@@ -3107,7 +3108,7 @@ class MapMetricProvider(MetricProvider):
                 )
                 if issubclass(engine, PandasExecutionEngine):
                     register_metric(
-                        metric_name=f"{metric_name}.condition",
+                        metric_name=f"{metric_name}.{metric_fn_type.metric_suffix}",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
@@ -3210,7 +3211,7 @@ class MapMetricProvider(MetricProvider):
                         )
                 elif issubclass(engine, SqlAlchemyExecutionEngine):
                     register_metric(
-                        metric_name=f"{metric_name}.condition",
+                        metric_name=f"{metric_name}.{metric_fn_type.metric_suffix}",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
@@ -3249,7 +3250,7 @@ class MapMetricProvider(MetricProvider):
                         if domain_type == MetricDomainTypes.COLUMN:
                             register_metric(
                                 metric_name=metric_name
-                                + f".unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+                                + f".unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
                                 metric_domain_keys=metric_domain_keys,
                                 metric_value_keys=metric_value_keys,
                                 execution_engine=engine,
@@ -3347,7 +3348,7 @@ class MapMetricProvider(MetricProvider):
                         )
                 elif issubclass(engine, SparkDFExecutionEngine):
                     register_metric(
-                        metric_name=f"{metric_name}.condition",
+                        metric_name=f"{metric_name}.{metric_fn_type.metric_suffix}",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
@@ -3386,7 +3387,7 @@ class MapMetricProvider(MetricProvider):
                         if domain_type == MetricDomainTypes.COLUMN:
                             register_metric(
                                 metric_name=metric_name
-                                + f".unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+                                + f".unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
                                 metric_domain_keys=metric_domain_keys,
                                 metric_value_keys=metric_value_keys,
                                 execution_engine=engine,
@@ -3497,7 +3498,7 @@ class MapMetricProvider(MetricProvider):
                 metric_domain_keys = cls.function_domain_keys
                 metric_value_keys = cls.function_value_keys
                 register_metric(
-                    metric_name=f"{metric_name}.map",
+                    metric_name=f"{metric_name}.{metric_fn_type.metric_suffix}",
                     metric_domain_keys=metric_domain_keys,
                     metric_value_keys=metric_value_keys,
                     execution_engine=engine,
@@ -3524,7 +3525,7 @@ class MapMetricProvider(MetricProvider):
         if metric_name.endswith(metric_suffix):
             try:
                 _ = get_metric_provider(
-                    f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+                    f"{metric_name}.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
                     execution_engine,
                 )
                 has_aggregate_fn = True
@@ -3532,20 +3533,20 @@ class MapMetricProvider(MetricProvider):
                 has_aggregate_fn = False
             if has_aggregate_fn:
                 dependencies["metric_partial_fn"] = MetricConfiguration(
-                    metric_name=f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+                    metric_name=f"{metric_name}.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
                     metric_domain_kwargs=metric.metric_domain_kwargs,
                     metric_value_kwargs=base_metric_value_kwargs,
                 )
             else:
                 dependencies["unexpected_condition"] = MetricConfiguration(
-                    metric_name=f"{metric_name[:-len(metric_suffix)]}.condition",
+                    metric_name=f"{metric_name[:-len(metric_suffix)]}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
                     metric_domain_kwargs=metric.metric_domain_kwargs,
                     metric_value_kwargs=base_metric_value_kwargs,
                 )
 
         # MapMetric uses "condition" metric to build "unexpected_count.aggregate_fn" and other listed metrics as well.
         for metric_suffix in [
-            f".unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+            f".unexpected_count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
             ".unexpected_value_counts",
             ".unexpected_index_query",
             ".unexpected_index_list",
@@ -3555,7 +3556,7 @@ class MapMetricProvider(MetricProvider):
         ]:
             if metric_name.endswith(metric_suffix):
                 dependencies["unexpected_condition"] = MetricConfiguration(
-                    metric_name=f"{metric_name[:-len(metric_suffix)]}.condition",
+                    metric_name=f"{metric_name[:-len(metric_suffix)]}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
                     metric_domain_kwargs=metric.metric_domain_kwargs,
                     metric_value_kwargs=base_metric_value_kwargs,
                 )

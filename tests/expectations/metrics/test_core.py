@@ -9,7 +9,10 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import Batch
-from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
+from great_expectations.core.metric_function_types import (
+    MetricPartialFunctionTypes,
+    MetricPartialFunctionTypeSuffixes,
+)
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -279,7 +282,7 @@ def test_column_value_lengths_min_metric_sa(sa):
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
-        metric_name=f"column_values.length.min.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column_values.length.min.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={
             "column": "names",
         },
@@ -334,7 +337,7 @@ def test_column_value_lengths_min_metric_spark(spark_session):
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
-        metric_name=f"column_values.length.min.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column_values.length.min.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={
             "column": "names",
         },
@@ -429,7 +432,7 @@ def test_column_value_lengths_max_metric_sa(sa):
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
-        metric_name=f"column_values.length.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column_values.length.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={
             "column": "names",
         },
@@ -484,7 +487,7 @@ def test_column_value_lengths_max_metric_spark(spark_session):
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
-        metric_name=f"column_values.length.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column_values.length.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={
             "column": "names",
         },
@@ -551,7 +554,7 @@ def test_quantiles_metric_sa(sa):
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
-        metric_name=f"table.row_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"table.row_count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
@@ -1029,7 +1032,7 @@ def test_column_partition_metric_sa(sa):
     metrics.update(results)
 
     partial_column_min_metric = MetricConfiguration(
-        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.min.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -1037,7 +1040,7 @@ def test_column_partition_metric_sa(sa):
         "table.columns": table_columns_metric,
     }
     partial_column_max_metric = MetricConfiguration(
-        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -1116,7 +1119,7 @@ def test_column_partition_metric_sa(sa):
     metrics.update(results)
 
     partial_column_min_metric = MetricConfiguration(
-        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.min.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
@@ -1124,7 +1127,7 @@ def test_column_partition_metric_sa(sa):
         "table.columns": table_columns_metric,
     }
     partial_column_max_metric = MetricConfiguration(
-        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
@@ -1272,7 +1275,7 @@ def test_column_partition_metric_spark(spark_session):
     metrics.update(results)
 
     partial_column_min_metric = MetricConfiguration(
-        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.min.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -1280,7 +1283,7 @@ def test_column_partition_metric_spark(spark_session):
         "table.columns": table_columns_metric,
     }
     partial_column_max_metric = MetricConfiguration(
-        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -1359,7 +1362,7 @@ def test_column_partition_metric_spark(spark_session):
     metrics.update(results)
 
     partial_column_min_metric = MetricConfiguration(
-        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.min.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
@@ -1367,7 +1370,7 @@ def test_column_partition_metric_spark(spark_session):
         "table.columns": table_columns_metric,
     }
     partial_column_max_metric = MetricConfiguration(
-        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
@@ -1519,7 +1522,7 @@ def test_max_metric_column_exists_sa(sa):
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
-        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -1561,7 +1564,7 @@ def test_max_metric_column_does_not_exist_sa(sa):
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
-        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "non_existent_column"},
         metric_value_kwargs=None,
     )
@@ -1597,7 +1600,7 @@ def test_max_metric_column_exists_spark(spark_session):
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
-        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -1643,7 +1646,7 @@ def test_max_metric_column_does_not_exist_spark(spark_session):
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
-        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "non_existent_column"},
         metric_value_kwargs=None,
     )
@@ -1675,7 +1678,7 @@ def test_map_value_set_sa(sa):
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.in_set.condition",
+        metric_name=f"column_values.in_set.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
@@ -1688,7 +1691,7 @@ def test_map_value_set_sa(sa):
 
     # Note: metric_dependencies is optional here in the config when called from a validator.
     aggregate_partial = MetricConfiguration(
-        metric_name=f"column_values.in_set.unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column_values.in_set.unexpected_count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
@@ -1754,7 +1757,7 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.in_set.condition",
+        metric_name=f"column_values.in_set.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={
             "column": "a",
         },
@@ -1772,7 +1775,7 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
 
     # Note: metric_dependencies is optional here in the config when called from a validator.
     aggregate_partial = MetricConfiguration(
-        metric_name=f"column_values.in_set.unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column_values.in_set.unexpected_count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={
             "column": "a",
         },
@@ -1814,7 +1817,7 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
     engine.load_batch_data(batch_id="my_id", batch_data=df)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.in_set.condition",
+        metric_name=f"column_values.in_set.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
@@ -1828,7 +1831,7 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
 
     # Note: metric_dependencies is optional here in the config when called from a validator.
     aggregate_partial = MetricConfiguration(
-        metric_name=f"column_values.in_set.unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column_values.in_set.unexpected_count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
@@ -1869,7 +1872,7 @@ def test_map_column_value_lengths_between_pd():
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.value_length.map",
+        metric_name=f"column_values.value_length.{MetricPartialFunctionTypeSuffixes.MAP.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -1916,7 +1919,7 @@ def test_map_column_values_increasing_pd():
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.increasing.condition",
+        metric_name=f"column_values.increasing.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "strictly": True,
@@ -2017,7 +2020,7 @@ def test_map_column_values_increasing_spark(spark_session):
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.increasing.condition",
+        metric_name=f"column_values.increasing.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "strictly": True,
@@ -2105,7 +2108,7 @@ def test_map_column_values_decreasing_pd():
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.decreasing.condition",
+        metric_name=f"column_values.decreasing.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "strictly": True,
@@ -2206,7 +2209,7 @@ def test_map_column_values_decreasing_spark(spark_session):
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.decreasing.condition",
+        metric_name=f"column_values.decreasing.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "strictly": True,
@@ -2275,7 +2278,7 @@ def test_map_unique_column_exists_pd():
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.unique.condition",
+        metric_name=f"column_values.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -2337,7 +2340,7 @@ def test_map_unique_column_does_not_exist_pd():
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.condition",
+        metric_name=f"column_values.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "non_existent_column"},
         metric_value_kwargs=None,
     )
@@ -2373,7 +2376,7 @@ def test_map_unique_column_exists_sa(sa):
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.unique.condition",
+        metric_name=f"column_values.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -2469,7 +2472,7 @@ def test_map_unique_column_does_not_exist_sa(sa):
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.unique.condition",
+        metric_name=f"column_values.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "non_existent_column"},
         metric_value_kwargs=None,
     )
@@ -2499,7 +2502,7 @@ def test_map_unique_empty_query_sa(sa):
     table_columns_metric, metrics = get_table_columns_metric(engine=engine)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.unique.condition",
+        metric_name=f"column_values.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -2548,7 +2551,7 @@ def test_map_unique_column_exists_spark(spark_session):
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.unique.condition",
+        metric_name=f"column_values.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -2650,7 +2653,7 @@ def test_map_unique_column_does_not_exist_spark(spark_session):
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.unique.condition",
+        metric_name=f"column_values.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "non_existent_column"},
         metric_value_kwargs=None,
     )
@@ -2704,7 +2707,7 @@ def test_z_score_under_threshold_pd():
     metrics.update(results)
 
     column_values_z_score_map_metric = MetricConfiguration(
-        metric_name="column_values.z_score.map",
+        metric_name=f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -2718,12 +2721,12 @@ def test_z_score_under_threshold_pd():
     )
     metrics.update(results)
     column_values_z_score_under_threshold_condition_metric = MetricConfiguration(
-        metric_name="column_values.z_score.under_threshold.condition",
+        metric_name=f"column_values.z_score.under_threshold.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
     )
     column_values_z_score_under_threshold_condition_metric.metric_dependencies = {
-        "column_values.z_score.map": column_values_z_score_map_metric,
+        f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}": column_values_z_score_map_metric,
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -2766,7 +2769,7 @@ def test_z_score_under_threshold_spark(spark_session):
     metrics.update(results)
 
     column_mean_aggregate_fn_metric = MetricConfiguration(
-        metric_name=f"column.mean.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.mean.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -2774,7 +2777,7 @@ def test_z_score_under_threshold_spark(spark_session):
         "table.columns": table_columns_metric,
     }
     column_standard_deviation_aggregate_fn_metric = MetricConfiguration(
-        metric_name=f"column.standard_deviation.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.standard_deviation.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -2814,7 +2817,7 @@ def test_z_score_under_threshold_spark(spark_session):
     metrics.update(results)
 
     column_values_z_score_map_metric = MetricConfiguration(
-        metric_name="column_values.z_score.map",
+        metric_name=f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -2828,12 +2831,12 @@ def test_z_score_under_threshold_spark(spark_session):
     )
     metrics.update(results)
     condition_metric = MetricConfiguration(
-        metric_name="column_values.z_score.under_threshold.condition",
+        metric_name=f"column_values.z_score.under_threshold.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
     )
     condition_metric.metric_dependencies = {
-        "column_values.z_score.map": column_values_z_score_map_metric,
+        f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}": column_values_z_score_map_metric,
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -2842,7 +2845,7 @@ def test_z_score_under_threshold_spark(spark_session):
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
-        metric_name=f"column_values.z_score.under_threshold.unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column_values.z_score.under_threshold.unexpected_count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
     )
@@ -2914,7 +2917,9 @@ def test_map_column_pairs_equal_metric_pd():
     metrics_save: dict = copy.deepcopy(metrics)
 
     metric_name: str = "column_pair_values.equal"
-    condition_metric_name: str = f"{metric_name}.condition"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
     unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
     unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
     unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
@@ -3103,7 +3108,7 @@ def test_table_metric_sa(sa):
     engine = build_sa_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}), sa)
 
     aggregate_fn_metric = MetricConfiguration(
-        metric_name=f"table.row_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"table.row_count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
@@ -3155,7 +3160,9 @@ def test_map_column_pairs_equal_metric_sa(sa):
     metrics_save: dict = copy.deepcopy(metrics)
 
     metric_name: str = "column_pair_values.equal"
-    condition_metric_name: str = f"{metric_name}.condition"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
     unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
     unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
     unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
@@ -3362,7 +3369,9 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
     metrics_save: dict = copy.deepcopy(metrics)
 
     metric_name: str = "column_pair_values.equal"
-    condition_metric_name: str = f"{metric_name}.condition"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
     unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
     unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
     unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
@@ -3552,7 +3561,7 @@ def test_map_column_pairs_greater_metric_pd():
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_pair_values.a_greater_than_b.condition",
+        metric_name=f"column_pair_values.a_greater_than_b.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3629,7 +3638,7 @@ def test_map_column_pairs_greater_metric_sa(sa):
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_pair_values.a_greater_than_b.condition",
+        metric_name=f"column_pair_values.a_greater_than_b.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3701,7 +3710,7 @@ def test_map_column_pairs_greater_metric_spark(spark_session):
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_pair_values.a_greater_than_b.condition",
+        metric_name=f"column_pair_values.a_greater_than_b.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3765,7 +3774,7 @@ def test_map_column_pairs_in_set_metric_pd():
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_pair_values.in_set.condition",
+        metric_name=f"column_pair_values.in_set.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3808,7 +3817,7 @@ def test_map_column_pairs_in_set_metric_sa(sa):
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_pair_values.in_set.condition",
+        metric_name=f"column_pair_values.in_set.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3859,7 +3868,7 @@ def test_map_column_pairs_in_set_metric_sa(sa):
     assert results[unexpected_values_metric.id] == [(10, 1), (9, 4)]
 
     condition_metric = MetricConfiguration(
-        metric_name="column_pair_values.in_set.condition",
+        metric_name=f"column_pair_values.in_set.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3932,7 +3941,7 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_pair_values.in_set.condition",
+        metric_name=f"column_pair_values.in_set.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3983,7 +3992,7 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
     assert results[unexpected_values_metric.id] == [(10, 1), (9, 4)]
 
     condition_metric = MetricConfiguration(
-        metric_name="column_pair_values.in_set.condition",
+        metric_name=f"column_pair_values.in_set.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -4048,7 +4057,7 @@ def test_table_metric_spark(spark_session):
     )
 
     aggregate_fn_metric = MetricConfiguration(
-        metric_name=f"table.row_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"table.row_count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
@@ -4127,7 +4136,7 @@ def test_column_median_metric_sa(sa, dataframe: pd.DataFrame, median: int):
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
-        metric_name=f"table.row_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"table.row_count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
@@ -4151,7 +4160,7 @@ def test_column_median_metric_sa(sa, dataframe: pd.DataFrame, median: int):
     metrics.update(results)
 
     column_values_null_condition_metric = MetricConfiguration(
-        metric_name="column_values.null.condition",
+        metric_name=f"column_values.null.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -4205,7 +4214,7 @@ def test_column_median_metric_spark(spark_session):
     )
 
     aggregate_fn_metric = MetricConfiguration(
-        metric_name=f"table.row_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"table.row_count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -4378,7 +4387,7 @@ def test_distinct_metric_spark(
     assert metrics[column_distinct_values_metric.id] == {1, 2, 3}
 
     column_distinct_values_count_metric_partial_fn = MetricConfiguration(
-        metric_name=f"column.distinct_values.count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.distinct_values.count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -4466,7 +4475,7 @@ def test_distinct_metric_sa(
     assert metrics[column_distinct_values_metric.id] == {1, 2, 3}
 
     column_distinct_values_count_metric_partial_fn = MetricConfiguration(
-        metric_name=f"column.distinct_values.count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.distinct_values.count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -4695,7 +4704,7 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
     metrics.update(results)
 
     desired_aggregate_fn_metric_1 = MetricConfiguration(
-        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -4703,7 +4712,7 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
         "table.columns": table_columns_metric,
     }
     desired_aggregate_fn_metric_2 = MetricConfiguration(
-        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.min.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -4711,7 +4720,7 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
         "table.columns": table_columns_metric,
     }
     desired_aggregate_fn_metric_3 = MetricConfiguration(
-        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
@@ -4719,7 +4728,7 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
         "table.columns": table_columns_metric,
     }
     desired_aggregate_fn_metric_4 = MetricConfiguration(
-        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.min.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
@@ -4825,7 +4834,7 @@ def test_batch_aggregate_metrics_spark(caplog, spark_session):
     metrics.update(results)
 
     desired_aggregate_fn_metric_1 = MetricConfiguration(
-        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -4833,7 +4842,7 @@ def test_batch_aggregate_metrics_spark(caplog, spark_session):
         "table.columns": table_columns_metric,
     }
     desired_aggregate_fn_metric_2 = MetricConfiguration(
-        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.min.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -4841,7 +4850,7 @@ def test_batch_aggregate_metrics_spark(caplog, spark_session):
         "table.columns": table_columns_metric,
     }
     desired_aggregate_fn_metric_3 = MetricConfiguration(
-        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
@@ -4849,7 +4858,7 @@ def test_batch_aggregate_metrics_spark(caplog, spark_session):
         "table.columns": table_columns_metric,
     }
     desired_aggregate_fn_metric_4 = MetricConfiguration(
-        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.min.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
@@ -4955,7 +4964,9 @@ def test_map_multicolumn_sum_equal_pd():
     metrics_save: dict = copy.deepcopy(metrics)
 
     metric_name: str = "multicolumn_sum.equal"
-    condition_metric_name: str = f"{metric_name}.condition"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
     unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
     unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
     unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
@@ -5159,7 +5170,9 @@ def test_map_multicolumn_sum_equal_sa(sa):
     metrics_save: dict = copy.deepcopy(metrics)
 
     metric_name: str = "multicolumn_sum.equal"
-    condition_metric_name: str = f"{metric_name}.condition"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
     unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
     unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
     unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
@@ -5353,7 +5366,9 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
     metrics_save: dict = copy.deepcopy(metrics)
 
     metric_name: str = "multicolumn_sum.equal"
-    condition_metric_name: str = f"{metric_name}.condition"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
     unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
     unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
     unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
@@ -5545,7 +5560,9 @@ def test_map_compound_columns_unique_pd():
     metrics_save: dict = copy.deepcopy(metrics)
 
     metric_name: str = "compound_columns.unique"
-    condition_metric_name: str = f"{metric_name}.condition"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
     unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
     unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
     unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
@@ -5742,7 +5759,9 @@ def test_map_compound_columns_unique_sa(sa):
     # Save original metrics for testing unexpected results.
     metrics_save: dict = copy.deepcopy(metrics)
 
-    prerequisite_function_metric_name: str = "compound_columns.count.map"
+    prerequisite_function_metric_name: str = (
+        f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+    )
 
     prerequisite_function_metric = MetricConfiguration(
         metric_name=prerequisite_function_metric_name,
@@ -5761,7 +5780,9 @@ def test_map_compound_columns_unique_sa(sa):
     metrics.update(results)
 
     metric_name: str = "compound_columns.unique"
-    condition_metric_name: str = f"{metric_name}.condition"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
     unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
     unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
     unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
@@ -5776,7 +5797,7 @@ def test_map_compound_columns_unique_sa(sa):
         metric_value_kwargs=None,
     )
     condition_metric.metric_dependencies = {
-        "compound_columns.count.map": prerequisite_function_metric,
+        f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}": prerequisite_function_metric,
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -5873,7 +5894,7 @@ def test_map_compound_columns_unique_sa(sa):
         metric_value_kwargs=None,
     )
     condition_metric.metric_dependencies = {
-        "compound_columns.count.map": prerequisite_function_metric,
+        f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}": prerequisite_function_metric,
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -5968,7 +5989,9 @@ def test_map_compound_columns_unique_spark(spark_session):
     metrics_save: dict = copy.deepcopy(metrics)
 
     metric_name: str = "compound_columns.unique"
-    condition_metric_name: str = f"{metric_name}.condition"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
     unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
     unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
     unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
@@ -6156,7 +6179,9 @@ def test_map_select_column_values_unique_within_record_pd():
     metrics_save: dict = copy.deepcopy(metrics)
 
     metric_name: str = "select_column_values.unique.within_record"
-    condition_metric_name: str = f"{metric_name}.condition"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
     unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
     unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
     unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
@@ -6399,7 +6424,9 @@ def test_map_select_column_values_unique_within_record_sa(sa):
     metrics_save: dict = copy.deepcopy(metrics)
 
     metric_name: str = "select_column_values.unique.within_record"
-    condition_metric_name: str = f"{metric_name}.condition"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
     unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
     unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
     unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
@@ -6605,7 +6632,9 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
     metrics_save: dict = copy.deepcopy(metrics)
 
     metric_name: str = "select_column_values.unique.within_record"
-    condition_metric_name: str = f"{metric_name}.condition"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
     unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
     unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
     unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
