@@ -27,8 +27,8 @@ from typing import (
 from dateutil.parser import parse
 from marshmallow import ValidationError
 
-from docs.sphinx_api_docs_source.tasks import public_api
 from great_expectations import __version__ as ge_version
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
     Batch,
     BatchData,
