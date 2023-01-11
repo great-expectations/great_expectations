@@ -100,7 +100,7 @@ Python in a Jupyter notebook:
     from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
     # obtain the DataContext object
-    context = gx.data_context.DataContext()
+    context = gx.get_context()
 
     # load a batch from the data asset
     batch = context.get_batch('ratings')

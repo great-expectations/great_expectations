@@ -6,12 +6,12 @@ import pandas as pd
 import scipy.stats as stats
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -23,6 +23,7 @@ from great_expectations.expectations.expectation import (
     _format_map_output,
     render_evaluation_parameter_string,
 )
+from great_expectations.expectations.metrics import column_aggregate_partial
 from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,
     column_aggregate_value,
@@ -78,31 +79,11 @@ class ColumnKurtosis(ColumnMetricProvider):
     #     # TODO: compute the value and return it
     #
     #     return column_median
-    #
-    # @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
-    # def _spark(
-    #     cls,
-    #     execution_engine: "SqlAlchemyExecutionEngine",
-    #     metric_domain_kwargs: Dict,
-    #     metric_value_kwargs: Dict,
-    #     metrics: Dict[Tuple, Any],
-    #     runtime_configuration: Dict,
-    # ):
-    #     (
-    #         df,
-    #         compute_domain_kwargs,
-    #         accessor_domain_kwargs,
-    #     ) = execution_engine.get_compute_domain(
-    #         metric_domain_kwargs, MetricDomainTypes.COLUMN
-    #     )
-    #     column = accessor_domain_kwargs["column"]
-    #
-    #     column_median = None
-    #
-    #     # TODO: compute the value and return it
-    #
-    #     return column_median
-    #
+
+    @column_aggregate_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, **kwargs):
+        return F.kurtosis(column)
+
     # @classmethod
     # def _get_evaluation_dependencies(
     #     cls,
@@ -285,6 +266,7 @@ class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
             "@lodeous",
             "@bragleg",
             "@rexboyce",
+            "@mkopec87",
         ],
     }
 

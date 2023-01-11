@@ -3,7 +3,7 @@ from typing import List
 from ruamel import yaml
 
 from great_expectations import DataContext
-from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 

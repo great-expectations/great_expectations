@@ -1,16 +1,9 @@
-import os
-from unittest import mock
 from unittest.mock import patch
 
-from click.testing import CliRunner
-
-from great_expectations import DataContext
-from great_expectations.cli import cli
 from great_expectations.cli.datasource import (
     SnowflakeAuthMethod,
     _prompt_for_snowflake_auth_method,
 )
-from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 # TODO this test errors out in CI with a bash 137. It was deemed low enough risk
 #  to comment out. A backlog task was created to address this after release.

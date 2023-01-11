@@ -42,8 +42,8 @@ def totally_empty_data_context(tmp_path_factory):
     ) as config_file:
         yaml.dump(config, config_file)
 
-    context = gx.data_context.DataContext(
-        os.path.join(project_root_dir, "great_expectations")
+    context = gx.get_context(
+        context_root_dir=os.path.join(project_root_dir, "great_expectations")
     )
     # print(json.dumps(context._project_config, indent=2))
     return context

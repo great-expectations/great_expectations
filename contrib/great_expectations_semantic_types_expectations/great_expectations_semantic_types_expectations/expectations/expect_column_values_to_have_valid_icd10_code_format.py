@@ -50,7 +50,13 @@ class ExpectColumnValuesToHaveValidICD10CodeFormat(RegexBasedColumnMapExpectatio
                     "out": {"success": False, "unexpected_index_list": [0, 1, 2, 3]},
                 },
             ],
-            "test_backends": [{"backend": "pandas", "dialects": None}],
+            "test_backends": [
+                {"backend": "pandas", "dialects": None},
+                {
+                    "backend": "spark",
+                    "dialects": None,
+                },
+            ],
         }
     ]
 
@@ -63,9 +69,7 @@ class ExpectColumnValuesToHaveValidICD10CodeFormat(RegexBasedColumnMapExpectatio
     # This object contains metadata for display in the public Gallery
     library_metadata = {
         "tags": ["typed-entities", "hackathon"],
-        "contributors": [
-            "@zachlindsey",
-        ],
+        "contributors": ["@zachlindsey", "@mkopec87"],
     }
 
 

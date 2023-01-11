@@ -25,7 +25,7 @@ In a notebook,
 
 ```python
 import great_expectations as gx
-context = gx.DataContext()
+context = gx.get_context()
 ```
 
 ### 2. Instantiate two Validators, one for each Data Asset

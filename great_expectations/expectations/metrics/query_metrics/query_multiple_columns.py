@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Union
 
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
@@ -81,7 +81,7 @@ class QueryMultipleColumns(QueryMetricProvider):
         engine: sqlalchemy_engine_Engine = execution_engine.engine
         result: List[sqlalchemy_engine_Row] = engine.execute(sa.text(query)).fetchall()
 
-        return [dict(element._mapping) for element in result]
+        return [dict(element) for element in result]
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
