@@ -37,7 +37,9 @@ class CheckpointStore(ConfigurationStore):
 
     _configuration_class = CheckpointConfig
 
-    def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Optional[Dict]:
+    def ge_cloud_response_json_to_object_dict(
+        self, response_json: Dict
+    ) -> Optional[Dict]:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object
@@ -48,9 +50,7 @@ class CheckpointStore(ConfigurationStore):
                 return None
             cp_data = cp_data[0]
         ge_cloud_checkpoint_id: str = cp_data["id"]
-        checkpoint_config_dict: dict = cp_data["attributes"][
-            "checkpoint_config"
-        ]
+        checkpoint_config_dict: dict = cp_data["attributes"]["checkpoint_config"]
         checkpoint_config_dict["ge_cloud_id"] = ge_cloud_checkpoint_id
 
         # Checkpoints accept a `ge_cloud_id` but not an `id`

@@ -160,7 +160,9 @@ class ConfigurationStore(Store):
         key: Union[GXCloudIdentifier, ConfigurationIdentifier]
         if self.ge_cloud_mode:
             key = GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.CHECKPOINT, cloud_id=ge_cloud_id, resource_name=name
+                resource_type=GXCloudRESTResource.CHECKPOINT,
+                cloud_id=ge_cloud_id,
+                resource_name=name,
             )
         else:
             key = ConfigurationIdentifier(configuration_key=name)  # type: ignore[arg-type]
