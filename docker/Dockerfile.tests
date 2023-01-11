@@ -1,4 +1,4 @@
-# PYTHON_VERSION in ["3.7", "3.8", "3.9"]
+# PYTHON_VERSION in ["3.7", "3.8", "3.9", "3.10"]
 ARG PYTHON_VERSION=3.8
 # SOURCE in ["local", "github"]
 ARG SOURCE=local
