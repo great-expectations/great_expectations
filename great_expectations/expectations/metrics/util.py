@@ -630,29 +630,29 @@ def column_reflection_fallback(
 @overload
 def get_dbms_compatible_column_names(
     column_names: str,
-    batch_columns_list: List[str],
+    batch_columns_list: List[str | sqlalchemy.sql.quoted_name],
     execution_engine: ExecutionEngine,
     error_message_template: str = ...,
-) -> str:
+) -> str | sqlalchemy.sql.quoted_name:
     ...
 
 
 @overload
 def get_dbms_compatible_column_names(
     column_names: List[str],
-    batch_columns_list: List[str],
+    batch_columns_list: List[str | sqlalchemy.sql.quoted_name],
     execution_engine: ExecutionEngine,
     error_message_template: str = ...,
-) -> List[str]:
+) -> List[str | sqlalchemy.sql.quoted_name]:
     ...
 
 
 def get_dbms_compatible_column_names(
     column_names: List[str] | str,
-    batch_columns_list: List[str],
+    batch_columns_list: List[str | sqlalchemy.sql.quoted_name],
     execution_engine: ExecutionEngine,
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
-) -> List[str] | str:
+) -> List[str | sqlalchemy.sql.quoted_name] | str | sqlalchemy.sql.quoted_name:
     """
     Case non-sensitivity is expressed in upper case by common DBMS backends and in lower case by SQLAlchemy, with any
     deviations enclosed with double quotes.
