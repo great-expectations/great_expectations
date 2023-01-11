@@ -228,7 +228,7 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
 
-        dependencies = super().get_validation_dependencies(
+        dependencies: ValidationDependencies = super().get_validation_dependencies(
             configuration=configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
