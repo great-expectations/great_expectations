@@ -124,7 +124,7 @@ from great_expectations.validator.validator import ValidationDependencies, Valid
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
-    from great_expectations.render.renderer_configuration import AddParamArgs, MetaNotes
+    from great_expectations.render.renderer_configuration import MetaNotes
     from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 logger = logging.getLogger(__name__)
@@ -1196,7 +1196,7 @@ class Expectation(metaclass=MetaExpectation):
         if not configuration:
             configuration = deepcopy(self.configuration)
 
-        # issue warnings if necesary
+        # issue warnings if necessary
         self._warn_if_result_format_config_in_runtime_configuration(
             runtime_configuration=runtime_configuration,
         )

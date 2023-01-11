@@ -5,16 +5,16 @@ from typing import Dict, Tuple, cast
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import (
     RuntimeQueryBatchSpec,
     SqlAlchemyDatasourceBatchSpec,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.data_context.util import file_relative_path
-from great_expectations.execution_engine.execution_engine import (
-    MetricPartialFunctionTypes,
+from great_expectations.core.metric_function_types import (
+    MetricPartialFunctionTypeSuffixes,
 )
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
@@ -151,7 +151,7 @@ def test_instantiation_via_credentials(sa, test_backends, test_df):
 
 
 def test_instantiation_error_states(sa, test_db_connection_string):
-    with pytest.raises(ge_exceptions.InvalidConfigError):
+    with pytest.raises(gx_exceptions.InvalidConfigError):
         SqlAlchemyExecutionEngine()
 
 
@@ -172,7 +172,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     metrics.update(results)
 
     aggregate_fn_metric_1 = MetricConfiguration(
-        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -180,7 +180,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
         "table.columns": table_columns_metric,
     }
     aggregate_fn_metric_2 = MetricConfiguration(
-        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.min.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -188,7 +188,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
         "table.columns": table_columns_metric,
     }
     aggregate_fn_metric_3 = MetricConfiguration(
-        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
@@ -196,7 +196,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
         "table.columns": table_columns_metric,
     }
     aggregate_fn_metric_4 = MetricConfiguration(
-        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column.min.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
@@ -382,7 +382,7 @@ def test_get_domain_records_with_column_domain_and_filter_conditions_raises_erro
         {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
     )
     engine = build_sa_engine(df, sa)
-    with pytest.raises(ge_exceptions.GreatExpectationsError) as e:
+    with pytest.raises(gx_exceptions.GreatExpectationsError) as e:
         data = engine.get_domain_records(
             domain_kwargs={
                 "column": "a",
@@ -778,7 +778,7 @@ def test_get_compute_domain_with_nonexistent_condition_parser(sa):
     )
 
     # Expect GreatExpectationsError because parser doesn't exist
-    with pytest.raises(ge_exceptions.GreatExpectationsError) as e:
+    with pytest.raises(gx_exceptions.GreatExpectationsError) as e:
         data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
             domain_kwargs={
                 "row_condition": "b > 24",
@@ -816,7 +816,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric(sa):
     )
 
     # Ensuring a metric provider error is raised if metric does not exist
-    with pytest.raises(ge_exceptions.MetricProviderError) as e:
+    with pytest.raises(gx_exceptions.MetricProviderError) as e:
         # noinspection PyUnusedLocal
         res = engine.resolve_metrics(
             metrics_to_resolve=(
@@ -861,7 +861,7 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(sa)
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
-        metric_name=f"column_values.length.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column_values.length.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
         metric_domain_kwargs={
             "column": "names",
             "batch_id": "1234",
@@ -874,7 +874,7 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(sa)
 
     try:
         results = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn_metric,))
-    except ge_exceptions.MetricProviderError as e:
+    except gx_exceptions.MetricProviderError as e:
         assert False, str(e)
 
     desired_metric = MetricConfiguration(
@@ -893,7 +893,7 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(sa)
             metrics_to_resolve=(desired_metric,), metrics=results
         )
         assert results == {desired_metric.id: 16}
-    except ge_exceptions.MetricProviderError as e:
+    except gx_exceptions.MetricProviderError as e:
         assert False, str(e)
 
 
@@ -946,7 +946,7 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     validate_tmp_tables()
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.unique.condition",
+        metric_name=f"column_values.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
