@@ -7,7 +7,7 @@ import traceback
 import warnings
 from datetime import datetime
 from functools import wraps
-from typing import Dict, Iterable, List, Optional
+from typing import Dict, Iterable, Optional
 
 import numpy as np
 import pandas as pd

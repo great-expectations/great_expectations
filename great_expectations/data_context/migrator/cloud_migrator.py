@@ -20,7 +20,7 @@ migrator.retry_migrate_validation_results()
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Dict, List, NamedTuple, Optional
+from typing import TYPE_CHECKING, NamedTuple, Optional
 
 import requests
 

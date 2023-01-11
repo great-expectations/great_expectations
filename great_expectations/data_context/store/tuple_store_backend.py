@@ -8,7 +8,7 @@ import random
 import re
 import shutil
 from abc import ABCMeta
-from typing import Any, List, Tuple
+from typing import Any, Tuple
 
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError

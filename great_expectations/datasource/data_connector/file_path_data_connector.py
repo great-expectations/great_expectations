@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Iterator, List, Optional, cast
+from typing import Iterator, Optional, cast
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (

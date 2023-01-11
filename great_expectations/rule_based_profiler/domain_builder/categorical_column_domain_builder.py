@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Iterable, Optional, Set, Tuple, Union
 
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.metric_domain_types import MetricDomainTypes

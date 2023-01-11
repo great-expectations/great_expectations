@@ -7,7 +7,7 @@ import subprocess
 import sys
 from json.decoder import JSONDecodeError
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Optional, Tuple, Union, cast
 
 import click
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import hashlib
-from typing import List, Union
+from typing import Union
 
 import pandas as pd
 

@@ -6,7 +6,7 @@ from datetime import datetime
 from functools import lru_cache, wraps
 from itertools import zip_longest
 from numbers import Number
-from typing import Any, List, Optional, Set, Union
+from typing import Any, Optional, Set, Union
 
 import numpy as np
 import pandas as pd

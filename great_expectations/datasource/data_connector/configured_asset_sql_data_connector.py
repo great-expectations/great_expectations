@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Dict, Iterator, List, Optional, Tuple, Union, cast
+from typing import Iterator, Optional, Tuple, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (

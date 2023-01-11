@@ -1,17 +1,7 @@
 from __future__ import annotations
 
 import itertools
-from typing import (
-    TYPE_CHECKING,
-    ClassVar,
-    Collection,
-    Dict,
-    List,
-    Optional,
-    Set,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, ClassVar, Collection, Optional, Set, TypeVar, Union
 
 import numpy as np
 

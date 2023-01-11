@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Callable, Dict, Optional, Union
+from typing import Callable, Optional, Union
 
 import numpy as np
 

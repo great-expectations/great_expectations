@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from great_expectations.datasource.data_connector.inferred_asset_file_path_data_connector import (
     InferredAssetFilePathDataConnector,

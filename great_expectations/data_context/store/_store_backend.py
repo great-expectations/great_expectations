@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import uuid
 from abc import ABCMeta, abstractmethod
-from typing import Any, List, Optional, Union
+from typing import Any, Optional, Union
 
 import pyparsing as pp
 

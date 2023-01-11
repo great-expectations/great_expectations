@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any
 
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes

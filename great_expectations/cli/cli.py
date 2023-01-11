@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import importlib
 import logging
-from typing import List, Optional
+from typing import Optional
 
 import click
 

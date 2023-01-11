@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Iterator, List, Optional
+from typing import Iterator, Optional
 
 from great_expectations.datasource.data_connector.configured_asset_aws_glue_data_catalog_data_connector import (
     ConfiguredAssetAWSGlueDataCatalogDataConnector,

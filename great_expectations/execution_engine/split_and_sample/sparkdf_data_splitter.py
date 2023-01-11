@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
-from typing import List, Union
+from typing import Union
 
 from great_expectations.exceptions import exceptions as gx_exceptions
 from great_expectations.execution_engine.split_and_sample.data_splitter import (

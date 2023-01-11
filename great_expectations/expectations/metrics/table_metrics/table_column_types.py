@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Optional, cast
+from typing import Any, Optional, cast
 
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import GreatExpectationsError

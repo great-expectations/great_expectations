@@ -1,7 +1,7 @@
 """TODO: Add docstring"""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, cast
+from typing import TYPE_CHECKING, cast
 
 from marshmallow import Schema, fields, post_dump
 

@@ -12,18 +12,7 @@ import string
 import traceback
 import warnings
 from pathlib import Path
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    List,
-    Optional,
-    Tuple,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Optional, Tuple, Union, cast
 
 from great_expectations._version import get_versions  # isort:skip
 

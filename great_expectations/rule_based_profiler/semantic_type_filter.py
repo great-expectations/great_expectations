@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 from great_expectations.core.domain import SemanticDomainTypes
 

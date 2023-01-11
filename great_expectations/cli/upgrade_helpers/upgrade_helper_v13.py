@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 import json
 import os
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Tuple, Union
 
 from ruamel.yaml.comments import CommentedMap
 

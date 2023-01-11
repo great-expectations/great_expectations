@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Mapping, Optional, Tuple, Union, cast
 
 import requests
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from copy import deepcopy
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 from marshmallow import Schema, fields, post_load, pre_dump
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Optional, Tuple
 
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.yaml_handler import YAMLHandler

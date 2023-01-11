@@ -7,7 +7,7 @@ import pickle
 import warnings
 from functools import partial
 from io import BytesIO
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union, cast
+from typing import Any, Callable, Iterable, Optional, Tuple, Union, cast
 
 import pandas as pd
 

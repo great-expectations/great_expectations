@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from typing import List, Union
+from typing import Union
 
 import numpy as np
 

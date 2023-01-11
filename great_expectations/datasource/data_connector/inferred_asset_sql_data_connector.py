@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 from great_expectations.datasource.data_connector.configured_asset_sql_data_connector import (
     ConfiguredAssetSqlDataConnector,

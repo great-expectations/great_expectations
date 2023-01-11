@@ -13,7 +13,6 @@ from typing import (
     Any,
     ClassVar,
     Dict,
-    List,
     MutableMapping,
     Optional,
     Set,

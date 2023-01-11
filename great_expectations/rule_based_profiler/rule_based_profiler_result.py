@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Optional
 
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.domain import Domain

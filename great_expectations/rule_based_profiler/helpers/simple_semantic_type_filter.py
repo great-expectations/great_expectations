@@ -1,16 +1,6 @@
 from __future__ import annotations
 
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Optional,
-    Sequence,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Optional, Sequence, Type, TypeVar, Union
 
 from typing_extensions import TypeGuard
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Optional, Type, Union
 
 from marshmallow import INCLUDE, Schema, ValidationError, fields, post_dump, post_load
 from ruamel.yaml.comments import CommentedMap

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 import sys
-from typing import List, Optional, Tuple
+from typing import Optional, Tuple
 
 import click
 from typing_extensions import Final

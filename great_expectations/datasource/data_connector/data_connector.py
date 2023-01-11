@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (

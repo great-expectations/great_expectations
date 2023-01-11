@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import List, Optional
+from typing import Optional
 
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec

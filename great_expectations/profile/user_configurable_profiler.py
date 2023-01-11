@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import math
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Callable, Dict, Optional, Union, cast
 
 from dateutil.parser import parse
 from tqdm.auto import tqdm

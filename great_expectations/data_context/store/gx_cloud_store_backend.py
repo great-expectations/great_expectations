@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import logging
 from abc import ABCMeta
-from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Dict, Optional, Set, Tuple, Union, cast
 from urllib.parse import urljoin
 
 import requests

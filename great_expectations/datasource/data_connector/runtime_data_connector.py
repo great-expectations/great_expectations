@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition, RuntimeBatchRequest

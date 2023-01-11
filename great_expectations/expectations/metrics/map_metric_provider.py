@@ -3,7 +3,7 @@ from __future__ import annotations
 import inspect
 import logging
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, Optional, Tuple, Type, Union
 
 import numpy as np
 import pandas as pd

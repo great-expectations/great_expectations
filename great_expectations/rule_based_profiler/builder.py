@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Any, ClassVar, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Optional, Set, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (

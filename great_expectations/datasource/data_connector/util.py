@@ -8,7 +8,7 @@ import sre_constants
 import sre_parse
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Generator, Optional, Tuple
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase

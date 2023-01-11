@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import copy
 import logging
-from typing import List, Optional
+from typing import Optional
 
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec

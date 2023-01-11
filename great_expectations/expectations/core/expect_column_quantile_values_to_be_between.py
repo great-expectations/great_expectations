@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from numbers import Number
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import numpy as np
 

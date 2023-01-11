@@ -12,7 +12,7 @@ This validator evaluates YAML configurations of core Great Expectations componen
 from __future__ import annotations
 
 import traceback
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Optional, Tuple, Union, cast
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap

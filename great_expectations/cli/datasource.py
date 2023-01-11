@@ -4,7 +4,7 @@ import enum
 import logging
 import os
 import sys
-from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Optional, Type, Union
 
 import click
 from typing_extensions import TypeAlias

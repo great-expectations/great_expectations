@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Iterable, Optional, Set, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain

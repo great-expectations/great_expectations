@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, Optional
+from typing import Optional
 
 import numpy as np
 

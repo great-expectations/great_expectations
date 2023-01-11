@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import asdict, dataclass
-from typing import Dict, Iterator, List, Optional, Sized
+from typing import Iterator, Optional, Sized
 
 import numpy as np
 import pandas as pd

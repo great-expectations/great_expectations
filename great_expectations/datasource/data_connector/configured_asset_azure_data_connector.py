@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import List, Optional
+from typing import Optional
 
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec

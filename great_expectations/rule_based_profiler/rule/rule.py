@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import copy
 import json
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Optional, Union
 
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.domain import Domain

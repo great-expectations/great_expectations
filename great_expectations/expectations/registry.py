@@ -2,17 +2,7 @@ from __future__ import annotations
 
 import logging
 import warnings
-from typing import (
-    TYPE_CHECKING,
-    Callable,
-    Dict,
-    List,
-    NamedTuple,
-    Optional,
-    Tuple,
-    Type,
-    Union,
-)
+from typing import TYPE_CHECKING, Callable, NamedTuple, Optional, Tuple, Type, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.id_dict import IDDict

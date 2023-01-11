@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import List, Optional
+from typing import Optional
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition

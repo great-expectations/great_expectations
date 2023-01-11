@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import copy
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List, Optional, Set, TypeVar, Union
+from typing import Any, Optional, Set, TypeVar, Union
 
 from pyparsing import (
     Literal,

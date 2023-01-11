@@ -1,16 +1,6 @@
 from __future__ import annotations
 
-from typing import (
-    TYPE_CHECKING,
-    ClassVar,
-    Iterable,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, ClassVar, Iterable, Optional, Set, Tuple, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain, SemanticDomainTypes
