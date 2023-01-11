@@ -15,10 +15,10 @@ schedules:
     - develop
   always: false # Will only trigger if the state of the codebase has changed since the last scheduled run
 
-# trigger:
-#   tags:
-#     include:
-#       - '*' # Should be SemVer for a successful release but any tag will trigger the build
+trigger:
+  tags:
+    include:
+      - '*' # Should be SemVer for a successful release but any tag will trigger the build
 
 resources:
   containers:
@@ -432,9 +432,6 @@ stages:
             Python39:
               python.version: '3.9'
               min_constraints: 'constraints-test/py39-min-install.txt'
-            Python310:
-              python.version: '3.10'
-              min_constraints: 'constraints-test/py39-min-install.txt' # to fix
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
         steps:
