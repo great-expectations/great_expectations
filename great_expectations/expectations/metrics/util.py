@@ -114,7 +114,7 @@ except ImportError:
             )
             from collections import namedtuple
 
-            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
+            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))  # type: ignore[misc] # cannot infer sorted return type
             bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
     except ImportError:
         sqla_bigquery = None
@@ -1038,6 +1038,7 @@ def sql_statement_with_post_compile_to_string(
         params = (repr(compiled.params[name]) for name in list(compiled.params.keys()))
         query_as_string = re.sub(r"%\(.*?\)s", lambda m: next(params), str(compiled))
 
+    query_as_string += ";"
     return query_as_string
 
 
