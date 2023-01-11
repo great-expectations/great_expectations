@@ -428,7 +428,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 resource_dict: dict = resource.get("attributes", {}).get(
                     attributes_key, {}
                 )
-                resource_name: Optional[str] = resource_dict.get(name_attr)
+                resource_name: str = resource_dict.get(name_attr, "")
 
                 key = (resource_type, id, resource_name)
                 keys.append(key)
