@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 import pytest
+from ruamel.yaml.error import YAMLStreamError
 
 from great_expectations.core.yaml_handler import YAMLHandler
 
@@ -44,7 +45,7 @@ def test_load_correct_input(
 
 @pytest.mark.unit
 def test_load_incorrect_input(yaml_handler: YAMLHandler) -> None:
-    with pytest.raises(TypeError):
+    with pytest.raises((TypeError, YAMLStreamError)):
         yaml_handler.load(12345)
 
 
