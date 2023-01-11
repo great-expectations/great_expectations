@@ -12,6 +12,9 @@ from great_expectations.rule_based_profiler.metric_computation_result import (
     MetricComputationResult,
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
+from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+    MetricsComputationResultFormat,
+)
 from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
@@ -124,6 +127,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -149,6 +153,8 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             limit=limit,
             enforce_numeric_metric=self.enforce_numeric_metric,
             replace_nan_with_zero=self.replace_nan_with_zero,
+            runtime_configuration=runtime_configuration,
+            result_format=MetricsComputationResultFormat.RESOLVED_METRICS,
             domain=domain,
             variables=variables,
             parameters=parameters,

@@ -28,6 +28,7 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     MetricFunctionTypes,
     MetricPartialFunctionTypes,
+    MetricPartialFunctionTypeSuffixes,
 )
 from great_expectations.core.util import (
     AzureUrl,
@@ -501,7 +502,10 @@ class ExecutionEngine(ABC):
         """
         retrieved_metrics: Dict[
             Tuple[str, str, str], MetricValue
-        ] = self._query_computed_metrics_store(metrics_to_resolve=metrics_to_resolve)
+        ] = self._query_computed_metrics_store(
+            metrics_to_resolve=metrics_to_resolve,
+            runtime_configuration=runtime_configuration,
+        )
 
         metric_to_resolve: MetricConfiguration
 
@@ -610,6 +614,7 @@ class ExecutionEngine(ABC):
     def _query_computed_metrics_store(
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
+        runtime_configuration: Optional[dict] = None,
     ) -> Dict[Tuple[str, str, str], MetricValue]:
         metrics_to_resolve = filter(
             lambda element: self._is_metric_persistable(
@@ -876,7 +881,13 @@ class ExecutionEngine(ABC):
         return split_domain_kwargs
 
     def _is_metric_persistable(self, metric_name: str) -> bool:
-        non_persistable: bool = metric_name in IN_MEMORY_STORE_BACKEND_TABLE_METRICS
+        non_persistable: bool = (
+            metric_name in IN_MEMORY_STORE_BACKEND_TABLE_METRICS
+            or metric_name.endswith(MetricPartialFunctionTypeSuffixes.CONDITION.value)
+            or metric_name.endswith(
+                MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value
+            )
+        )
         if non_persistable:
             return False
 

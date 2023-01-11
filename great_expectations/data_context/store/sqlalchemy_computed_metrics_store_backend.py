@@ -1,6 +1,9 @@
 import datetime
 import logging
 import os
+
+# TODO: <Alex>ALEX</Alex>
+import threading
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -25,6 +28,9 @@ from great_expectations.util import (
     import_make_url,
 )
 
+# TODO: <Alex>ALEX</Alex>
+
+
 logger = logging.getLogger(__name__)
 
 try:
@@ -32,6 +38,7 @@ try:
     from alembic.config import Config as AlembicConfig
     from sqlalchemy.engine import Engine
     from sqlalchemy.engine.url import URL
+    from sqlalchemy.exc import SQLAlchemyError
     from sqlalchemy.orm import scoped_session, sessionmaker
 
     make_url = import_make_url()
@@ -39,10 +46,38 @@ except ImportError:
     logger.debug("No SqlAlchemy module available.")
     sa = None
     Engine = None
+    SQLAlchemyError = None
     URL = None
     scoped_session = None
     sessionmaker = None
     AlembicConfig = None
+
+
+# TODO: <Alex>ALEX</Alex>
+class SqlAlchemyConnectionManager:
+    def __init__(self) -> None:
+        self.lock = threading.Lock()
+        self._connections: Dict[str, "Connection"] = {}  # noqa: F821
+
+    def get_engine(self, connection_string):
+        if sa is not None:
+            with self.lock:
+                if connection_string not in self._connections:
+                    try:
+                        engine = sa.create_engine(connection_string)
+                        conn = engine.connect()
+                        self._connections[connection_string] = conn
+                    except (ImportError, SQLAlchemyError) as e:
+                        print(
+                            f'Unable to establish connection with {connection_string} -- exception "{e}" occurred.'
+                        )
+                        raise
+                return self._connections[connection_string]
+        return None
+
+
+connection_manager = SqlAlchemyConnectionManager()
+# TODO: <Alex>ALEX</Alex>
 
 
 class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
@@ -79,7 +114,15 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
         elif credentials is not None:
             self._engine = self._build_engine(credentials=credentials, **kwargs)
         elif connection_string is not None:
-            self._engine = sa.create_engine(connection_string, **kwargs)
+            # TODO: <Alex>ALEX</Alex>
+            # self._engine = sa.create_engine(connection_string, **kwargs)
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            if "PYTEST_CURRENT_TEST" in os.environ:
+                self._engine = connection_manager.get_engine(connection_string)
+            else:
+                self._engine = sa.create_engine(connection_string, **kwargs)
+            # TODO: <Alex>ALEX</Alex>
         elif url is not None:
             parsed_url = make_url(url)
             self.drivername = parsed_url.drivername

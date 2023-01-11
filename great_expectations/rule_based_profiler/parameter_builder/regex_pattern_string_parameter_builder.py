@@ -18,6 +18,9 @@ from great_expectations.rule_based_profiler.metric_computation_result import (
     MetricValues,
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
+from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+    MetricsComputationResultFormat,
+)
 from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
@@ -123,6 +126,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -138,6 +142,10 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             metric_name="column_values.nonnull.count",
             metric_domain_kwargs=self.metric_domain_kwargs,
             metric_value_kwargs=self.metric_value_kwargs,
+            limit=None,
+            enforce_numeric_metric=False,
+            replace_nan_with_zero=False,
+            result_format=MetricsComputationResultFormat.RESOLVED_METRICS,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -203,10 +211,15 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             match_regex_metric_value_kwargs_list.append(match_regex_metric_value_kwargs)
 
         # Obtain resolved metrics and metadata for all metric configurations and available Batch objects simultaneously.
-        metric_computation_result = self.get_metrics(
+        metric_computation_result: MetricComputationResult = self.get_metrics(
             metric_name="column_values.match_regex.unexpected_count",
             metric_domain_kwargs=self.metric_domain_kwargs,
             metric_value_kwargs=match_regex_metric_value_kwargs_list,
+            limit=None,
+            enforce_numeric_metric=False,
+            replace_nan_with_zero=False,
+            runtime_configuration=runtime_configuration,
+            result_format=MetricsComputationResultFormat.RESOLVED_METRICS,
             domain=domain,
             variables=variables,
             parameters=parameters,

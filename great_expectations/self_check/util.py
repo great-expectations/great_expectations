@@ -516,7 +516,7 @@ BACKEND_TO_ENGINE_NAME_DICT.update({name: "sqlalchemy" for name in SQL_DIALECT_N
 class SqlAlchemyConnectionManager:
     def __init__(self) -> None:
         self.lock = threading.Lock()
-        self._connections: Dict[str, "Connection"] = {}
+        self._connections: Dict[str, "Connection"] = {}  # noqa: F821
 
     def get_engine(self, connection_string):
         if sqlalchemy is not None:
@@ -526,9 +526,9 @@ class SqlAlchemyConnectionManager:
                         engine = create_engine(connection_string)
                         conn = engine.connect()
                         self._connections[connection_string] = conn
-                    except (ImportError, SQLAlchemyError):
+                    except (ImportError, SQLAlchemyError) as e:
                         print(
-                            f"Unable to establish connection with {connection_string}"
+                            f'Unable to establish connection with {connection_string} -- exception "{e}" occurred.'
                         )
                         raise
                 return self._connections[connection_string]

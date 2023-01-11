@@ -264,6 +264,7 @@ class ParameterBuilder(ABC, Builder):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -348,6 +349,7 @@ class ParameterBuilder(ABC, Builder):
         limit: Optional[int] = None,
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
+        runtime_configuration: Optional[dict] = None,
         result_format: Union[
             str, MetricsComputationResultFormat
         ] = MetricsComputationResultFormat.RESOLVED_METRICS,
@@ -366,6 +368,7 @@ class ParameterBuilder(ABC, Builder):
         :param limit: Optional limit on number of "Batch" objects requested (supports single-Batch scenarios).
         :param enforce_numeric_metric: Flag controlling whether or not metric output must be numerically-valued.
         :param replace_nan_with_zero: Directive controlling how NaN metric values, if encountered, should be handled.
+        :param runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
         :param result_format: Directive controlling whether or not to return only unresolved "ValidationGraph".
         :param domain: "Domain" object scoping "$variable"/"$parameter"-style references in configuration and runtime.
         :param variables: Part of the "rule state" available for "$variable"-style references.
@@ -478,7 +481,7 @@ specified (empty "metric_name" value detected)."""
         graph: ValidationGraph = (
             validator.metrics_calculator.build_metric_dependency_graph(
                 metric_configurations=metrics_to_resolve,
-                runtime_configuration=None,
+                runtime_configuration=runtime_configuration,
             )
         )
 
@@ -543,7 +546,7 @@ is not supported).
             aborted_metrics_info,
         ) = validator.metrics_calculator.resolve_validation_graph_and_handle_aborted_metrics_info(
             graph=graph,
-            runtime_configuration=None,
+            runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=0,
         )
 
