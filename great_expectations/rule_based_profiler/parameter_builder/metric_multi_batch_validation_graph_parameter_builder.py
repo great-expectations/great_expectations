@@ -105,6 +105,7 @@ class MetricMultiBatchValidationGraphParameterBuilder(ParameterBuilder):
             limit=None,
             enforce_numeric_metric=False,
             replace_nan_with_zero=False,
+            runtime_configuration=runtime_configuration,
             result_format=MetricsComputationResultFormat.VALIDATION_GRAPH,
             domain=domain,
             variables=variables,

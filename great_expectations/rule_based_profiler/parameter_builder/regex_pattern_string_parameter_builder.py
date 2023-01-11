@@ -145,6 +145,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             limit=None,
             enforce_numeric_metric=False,
             replace_nan_with_zero=False,
+            runtime_configuration=runtime_configuration,
             result_format=MetricsComputationResultFormat.RESOLVED_METRICS,
             domain=domain,
             variables=variables,

@@ -29,7 +29,10 @@ class MetricMultiBatchValidationGraphBuilder:
         self._metric_configurations = metric_configurations
         self._validator = validator
 
-    def run(self) -> Dict[Domain, Dict[str, ParameterNode]]:
+    def run(
+        self,
+        runtime_configuration: Optional[dict] = None,
+    ) -> Dict[Domain, Dict[str, ParameterNode]]:
         domain_metric_multi_batch_parameter_builders_map: Dict[
             Domain, List[ParameterBuilder]
         ] = self._build_domain_metric_multi_batch_parameter_builders_map()
@@ -66,6 +69,7 @@ class MetricMultiBatchValidationGraphBuilder:
                     batch_list=list(self._validator.batches.values()),
                     batch_request=None,
                     recompute_existing_parameter_values=False,
+                    runtime_configuration=runtime_configuration,
                 )
 
             parameter_values_for_fully_qualified_parameter_names: Dict[

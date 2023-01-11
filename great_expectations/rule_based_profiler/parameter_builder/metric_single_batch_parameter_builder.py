@@ -101,6 +101,7 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             parameters=parameters,
             parameter_computation_impl=super()._build_parameters,
             recompute_existing_parameter_values=recompute_existing_parameter_values,
+            runtime_configuration=runtime_configuration,
         )
 
         # Retrieve metric values for one Batch object (expressed as list of Batch objects).

@@ -1159,7 +1159,7 @@ class Validator:
                     metrics_by_domain = MetricMultiBatchValidationGraphBuilder(
                         validator=self,
                         metric_configurations=validation_dependencies.get_metric_configurations(),
-                    ).run()
+                    ).run(runtime_configuration=runtime_configuration)
                     for (
                         domain,
                         parameter_values_for_fully_qualified_parameter_names,

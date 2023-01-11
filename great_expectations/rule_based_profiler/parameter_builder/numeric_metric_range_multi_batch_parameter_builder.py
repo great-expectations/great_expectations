@@ -359,6 +359,7 @@ detected.
                 parameters=parameters,
                 parameter_computation_impl=super()._build_parameters,
                 recompute_existing_parameter_values=recompute_existing_parameter_values,
+                runtime_configuration=runtime_configuration,
             )
             parameter_reference = self.raw_fully_qualified_parameter_name
 

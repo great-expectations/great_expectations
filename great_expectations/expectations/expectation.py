@@ -1058,7 +1058,9 @@ class Expectation(metaclass=MetaExpectation):
             ] = MetricMultiBatchValuesCalculator(
                 validator=validator,
                 metric_configurations=validation_dependencies.get_metric_configurations(),
-            ).run()
+            ).run(
+                runtime_configuration=runtime_configuration
+            )
 
             metric_configuration: MetricConfiguration
 
