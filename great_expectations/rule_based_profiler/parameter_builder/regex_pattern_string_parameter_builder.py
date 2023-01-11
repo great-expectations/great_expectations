@@ -212,7 +212,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             match_regex_metric_value_kwargs_list.append(match_regex_metric_value_kwargs)
 
         # Obtain resolved metrics and metadata for all metric configurations and available Batch objects simultaneously.
-        metric_computation_result: MetricComputationResult = self.get_metrics(
+        metric_computation_result = self.get_metrics(
             metric_name="column_values.match_regex.unexpected_count",
             metric_domain_kwargs=self.metric_domain_kwargs,
             metric_value_kwargs=match_regex_metric_value_kwargs_list,
