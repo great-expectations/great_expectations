@@ -391,8 +391,8 @@ class Validator:
         """Return the first several rows or records from a Batch of data.
 
         Args:
-            n_rows: the number of rows to return.
-            domain_kwargs: if provided, the domain for which to return records.
+            n_rows: The number of rows to return.
+            domain_kwargs: If provided, the domain for which to return records.
             fetch_all: If True, ignore n_rows and return the entire batch.
 
         Returns:
