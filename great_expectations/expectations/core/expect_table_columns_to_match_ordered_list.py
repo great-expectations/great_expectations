@@ -9,11 +9,14 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     InvalidExpectationConfigurationError,
     TableExpectation,
-    add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import substitute_none_for_missing
 
 
@@ -79,7 +82,7 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
     args_keys = ("column_list",)
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -111,45 +114,35 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        renderer_configuration.add_param(
+            name="column_list", param_type=RendererValueType.ARRAY
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(configuration.kwargs, ["column_list"])
+        params = renderer_configuration.params
 
-        if params["column_list"] is None:
+        if not params.column_list:
             template_str = "Must have a list of columns in a specific order, but that order is not specified."
-
         else:
             template_str = "Must have these columns in this order: "
-            for idx in range(len(params["column_list"]) - 1):
-                template_str += f"$column_list_{str(idx)}, "
-                params[f"column_list_{str(idx)}"] = params["column_list"][idx]
+            array_param_name = "column_list"
+            param_prefix = "column_list_"
+            renderer_configuration = cls._add_array_params(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
+            )
+            template_str += cls._get_array_string(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
+            )
 
-            last_idx = len(params["column_list"]) - 1
-            template_str += f"$column_list_{str(last_idx)}"
-            params[f"column_list_{str(last_idx)}"] = params["column_list"][last_idx]
+        renderer_configuration.template_str = template_str
 
-        params_with_json_schema = {
-            "column_list": {
-                "schema": {"type": "array"},
-                "value": params.get("column_list"),
-            },
-        }
-        params_with_json_schema = add_values_with_json_schema_from_list_in_params(
-            params=params,
-            params_with_json_schema=params_with_json_schema,
-            param_key_with_list="column_list",
-        )
-        return template_str, params_with_json_schema, None, styling
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
@@ -162,9 +155,7 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        _ = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(configuration.kwargs, ["column_list"])
 

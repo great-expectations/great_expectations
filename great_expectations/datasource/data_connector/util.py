@@ -10,7 +10,7 @@ import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.types.base import assetConfigSchema
@@ -540,7 +540,7 @@ def _build_asset_from_config(
         config_defaults={},
     )
     if not asset:
-        raise ge_exceptions.ClassInstantiationError(
+        raise gx_exceptions.ClassInstantiationError(
             module_name="great_expectations.datasource.data_connector.asset",
             package_name=None,
             class_name=config["class_name"],

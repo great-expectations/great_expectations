@@ -4,7 +4,7 @@ from typing import Optional, Union
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
@@ -45,7 +45,7 @@ class ConfigurationStore(Store):
         runtime_environment: Optional[dict] = None,
     ) -> None:
         if not issubclass(self._configuration_class, BaseYamlConfig):
-            raise ge_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(
                 "Invalid configuration: A configuration_class needs to inherit from the BaseYamlConfig class."
             )
 
@@ -104,7 +104,7 @@ class ConfigurationStore(Store):
             config: CommentedMap = yaml.load(value)
         try:
             return self._configuration_class.from_commented_map(commented_map=config)
-        except ge_exceptions.InvalidBaseYamlConfigError:
+        except gx_exceptions.InvalidBaseYamlConfigError:
             # Just to be explicit about what we intended to catch
             raise
 

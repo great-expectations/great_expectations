@@ -1,6 +1,6 @@
 import logging
 from abc import ABC
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -25,11 +25,19 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 from great_expectations.expectations.metrics.util import get_dialect_regex_expression
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import (
+    num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
 from great_expectations.util import camel_to_snake
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +76,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         map_metric = "column_values.match_" + regex_snake_name + "_regex"
 
         # Define the class using `type`. This allows us to name it dynamically.
-        new_column_regex_metric_provider = type(
+        new_column_regex_metric_provider = type(  # noqa: F841 # never used
             f"(ColumnValuesMatch{regex_camel_name}Regex",
             (RegexColumnMapMetricProvider,),
             {
@@ -79,7 +87,9 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
         return map_metric
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ):
         super().validate_configuration(configuration)
         try:
             assert (
@@ -148,68 +158,41 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                 return f'Less than {mostly * 100}% of values in column "{column}" match the regular expression {regex}.'
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
+        renderer_configuration: RendererConfiguration,
     ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        add_param_args: AddParamArgs = (
+            ("column", RendererValueType.STRING),
+            ("mostly", RendererValueType.NUMBER),
+            ("regex", RendererValueType.STRING),
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            ["column", "regex", "mostly", "row_condition", "condition_parser"],
-        )
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
-            "mostly_pct": {
-                "schema": {"type": "number"},
-                "value": params.get("mostly_pct"),
-            },
-            "regex": {"schema": {"type": "string"}, "value": params.get("regex")},
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-        }
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
-        if not params.get("regex"):
+        params = renderer_configuration.params
+
+        if not params.regex:
             template_str = (
                 "values must match a regular expression but none was specified."
             )
         else:
             template_str = "values must match this regular expression: $regex"
-            if params["mostly"] is not None:
-                params_with_json_schema["mostly_pct"]["value"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
+
+            if params.mostly and params.mostly.value < 1.0:
+                renderer_configuration = cls._add_mostly_pct_param(
+                    renderer_configuration=renderer_configuration
                 )
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."
 
-        if include_column_name:
+        if renderer_configuration.include_column_name:
             template_str = "$column " + template_str
 
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
-            )
-            template_str = conditional_template_str + ", then " + template_str
-            params_with_json_schema.update(conditional_params)
+        renderer_configuration.template_str = template_str
 
-        return template_str, params_with_json_schema, None, styling
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -257,7 +240,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
 
-        params_with_json_schema = {
+        params_with_json_schema = {  # noqa: F841 # never used
             "column": {"schema": {"type": "string"}, "value": params.get("column")},
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
