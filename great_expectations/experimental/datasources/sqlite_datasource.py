@@ -61,11 +61,11 @@ class SqliteTableAsset(TableAsset):
 @pydantic_dc.dataclass(frozen=True)
 class SqliteYearMonthSplitter(ColumnSplitter):
     method_name: Literal["split_on_year_and_month"] = "split_on_year_and_month"
-    param_names: List[Literal["year", "month"]] = pydantic.Field(
+    param_names: list[Literal["year", "month"]] = pydantic.Field(
         default_factory=lambda: ["year", "month"]
     )
 
-    def param_defaults(self, table_asset: TableAsset) -> Dict[str, List]:
+    def param_defaults(self, table_asset: TableAsset) -> dict[str, List]:
         """Query sqlite database to get the years and months to split over.
 
         Args:
@@ -102,14 +102,14 @@ class SqliteDatasource(SQLDatasource):
     """
 
     # class var definitions
-    asset_types: ClassVar[List[Type[DataAsset]]] = [SqliteTableAsset]
+    asset_types: ClassVar[list[Type[DataAsset]]] = [SqliteTableAsset]
 
     # Subclass instance var overrides
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
     type: Literal["sqlite"] = "sqlite"  # type: ignore[assignment]
     connection_string: SqliteConnectionString
-    assets: Dict[str, SqliteTableAsset] = {}  # type: ignore[assignment]
+    assets: dict[str, SqliteTableAsset] = {}  # type: ignore[assignment]
 
     def add_table_asset(
         self,

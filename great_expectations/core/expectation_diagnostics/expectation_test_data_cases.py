@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from great_expectations.types import SerializableDictDot
 
@@ -24,7 +24,7 @@ class Backend(Enum):
 @dataclass
 class TestBackend:
     backend: str
-    dialects: List[str]
+    dialects: list[str]
 
     __test__ = False  # Tell pytest not to try to collect this class as a test
 
@@ -57,12 +57,12 @@ class ExpectationTestCase(SerializableDictDot):
     """A single test case, with input arguments and output"""
 
     title: str
-    input: Dict[str, Any]
-    output: Dict[str, Any]
+    input: dict[str, Any]
+    output: dict[str, Any]
     exact_match_out: bool
-    suppress_test_for: List[str] = field(default_factory=list)
+    suppress_test_for: list[str] = field(default_factory=list)
     include_in_gallery: bool = False
-    only_for: Optional[List[str]] = None
+    only_for: Optional[list[str]] = None
 
 
 class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
@@ -99,7 +99,7 @@ class ExpectationTestDataCases(SerializableDictDot):
     """Pairs a test dataset and a list of test cases to execute against that data."""
 
     data: TestData
-    tests: List[ExpectationTestCase]
-    schemas: Dict[Backend, Dict[str, str]] = field(default_factory=dict)
-    test_backends: Optional[List[TestBackend]] = None
+    tests: list[ExpectationTestCase]
+    schemas: dict[Backend, dict[str, str]] = field(default_factory=dict)
+    test_backends: Optional[list[TestBackend]] = None
     data_alt: Optional[TestData] = None

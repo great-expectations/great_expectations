@@ -65,7 +65,7 @@ def column_aggregate_value(
                 execution_engine: PandasExecutionEngine,
                 metric_domain_kwargs: dict,
                 metric_value_kwargs: dict,
-                metrics: Dict[str, Any],
+                metrics: dict[str, Any],
                 runtime_configuration: dict,
             ):
                 filter_column_isnull = kwargs.get(
@@ -129,7 +129,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 execution_engine: SqlAlchemyExecutionEngine,
                 metric_domain_kwargs: dict,
                 metric_value_kwargs: dict,
-                metrics: Dict[str, Any],
+                metrics: dict[str, Any],
                 runtime_configuration: dict,
             ):
                 filter_column_isnull = kwargs.get(
@@ -191,7 +191,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 execution_engine: SparkDFExecutionEngine,
                 metric_domain_kwargs: dict,
                 metric_value_kwargs: dict,
-                metrics: Dict[str, Any],
+                metrics: dict[str, Any],
                 runtime_configuration: dict,
             ):
                 filter_column_isnull = kwargs.get(

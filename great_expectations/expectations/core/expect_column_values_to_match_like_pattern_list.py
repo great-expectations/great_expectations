@@ -25,7 +25,7 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
     Args:
         column (str): \
             The column name.
-        like_pattern_list (List[str]): \
+        like_pattern_list (list[str]): \
             The list of like pattern expressions the column entries should match.
 
     Keyword Args:

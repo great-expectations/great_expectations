@@ -158,7 +158,7 @@ class DataConnector:
 
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
-    ) -> List[str]:
+    ) -> list[str]:
         """
         List objects in the underlying data store to create a list of data_references.
         This method is used to refresh the cache by classes that extend this base DataConnector class
@@ -171,7 +171,7 @@ class DataConnector:
 
     def _get_data_reference_list_from_cache_by_data_asset_name(
         self, data_asset_name: str
-    ) -> List[Any]:
+    ) -> list[Any]:
         """
         Fetch data_references corresponding to data_asset_name from the cache.
         """
@@ -180,10 +180,10 @@ class DataConnector:
     def get_data_reference_list_count(self) -> int:
         raise NotImplementedError
 
-    def get_unmatched_data_references(self) -> List[Any]:
+    def get_unmatched_data_references(self) -> list[Any]:
         raise NotImplementedError
 
-    def get_available_data_asset_names(self) -> List[str]:
+    def get_available_data_asset_names(self) -> list[str]:
         """Return the list of asset names known by this data connector.
 
         Returns:
@@ -191,7 +191,7 @@ class DataConnector:
         """
         raise NotImplementedError
 
-    def get_available_data_asset_names_and_types(self) -> List[Tuple[str, str]]:
+    def get_available_data_asset_names_and_types(self) -> list[Tuple[str, str]]:
         """
         Return the list of asset names and types known by this DataConnector.
 
@@ -204,12 +204,12 @@ class DataConnector:
     def get_batch_definition_list_from_batch_request(
         self,
         batch_request: BatchRequestBase,
-    ) -> List[BatchDefinition]:
+    ) -> list[BatchDefinition]:
         raise NotImplementedError
 
     def _map_data_reference_to_batch_definition_list(
         self, data_reference: Any, data_asset_name: Optional[str] = None
-    ) -> Optional[List[BatchDefinition]]:
+    ) -> Optional[list[BatchDefinition]]:
         raise NotImplementedError
 
     def _map_batch_definition_to_data_reference(
@@ -361,7 +361,7 @@ class DataConnector:
         if pretty_print:
             print("\n\t\tFetching batch data...")
 
-        batch_definition_list: List[
+        batch_definition_list: list[
             BatchDefinition
         ] = self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
             data_reference=example_data_reference,

@@ -639,7 +639,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
 
         # Filtering by filter_conditions
-        filter_conditions: List[RowCondition] = domain_kwargs.get(
+        filter_conditions: list[RowCondition] = domain_kwargs.get(
             "filter_conditions", []
         )
         # For SqlAlchemyExecutionEngine only one filter condition is allowed
@@ -940,7 +940,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def resolve_metric_bundle(
         self,
         metric_fn_bundle: Iterable[MetricComputationConfiguration],
-    ) -> Dict[Tuple[str, str, str], MetricValue]:
+    ) -> dict[Tuple[str, str, str], MetricValue]:
         """For every metric in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds
         bundles of the metrics into one large query dictionary so that they are all executed simultaneously. Will fail
         if bundling the metrics together is not possible.
@@ -954,12 +954,12 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             Returns:
                 A dictionary of "MetricConfiguration" IDs and their corresponding now-queried (fully resolved) values.
         """
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+        resolved_metrics: dict[Tuple[str, str, str], MetricValue] = {}
 
-        res: List[Row]
+        res: list[Row]
 
         # We need a different query for each domain (where clause).
-        queries: Dict[Tuple[str, str, str], dict] = {}
+        queries: dict[Tuple[str, str, str], dict] = {}
 
         query: dict
 
@@ -1094,7 +1094,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
         return self._data_splitter.get_splitter_method(splitter_method_name)
 
-    def execute_split_query(self, split_query: Selectable) -> List[Row]:
+    def execute_split_query(self, split_query: Selectable) -> list[Row]:
         """Use the execution engine to run the split query and fetch all of the results.
 
         Args:
@@ -1118,7 +1118,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def get_data_for_batch_identifiers(
         self, table_name: str, splitter_method_name: str, splitter_kwargs: dict
-    ) -> List[dict]:
+    ) -> list[dict]:
         """Build data used to construct batch identifiers for the input table using the provided splitter config.
 
         Sql splitter configurations yield the unique values that comprise a batch by introspecting your data.

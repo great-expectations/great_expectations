@@ -52,7 +52,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     A DataConnector that requires explicit listing of SQL tables you want to connect to.
     """
 
-    SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING: Dict[str, Optional[Sorter]] = {
+    SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING: dict[str, Optional[Sorter]] = {
         SplitterMethod.SPLIT_ON_YEAR: DictionarySorter,
         SplitterMethod.SPLIT_ON_YEAR_AND_MONTH: DictionarySorter,
         SplitterMethod.SPLIT_ON_YEAR_AND_MONTH_AND_DAY: DictionarySorter,
@@ -77,7 +77,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         sorters: Optional[list] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[dict] = None,
-        assets: Optional[Dict[str, dict]] = None,
+        assets: Optional[dict[str, dict]] = None,
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
@@ -153,7 +153,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         return self._sampling_kwargs
 
     @property
-    def assets(self) -> Optional[Dict[str, dict]]:
+    def assets(self) -> Optional[dict[str, dict]]:
         return self._assets
 
     def add_data_asset(
@@ -188,7 +188,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
 
-        batch_definition_list: List[BatchDefinition] = []
+        batch_definition_list: list[BatchDefinition] = []
         try:
             sub_cache = self._get_data_reference_list_from_cache_by_data_asset_name(
                 data_asset_name=batch_request.data_asset_name
@@ -209,12 +209,12 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             if batch_definition_matches_batch_request(batch_definition, batch_request):
                 batch_definition_list.append(batch_definition)
 
-        data_asset: Dict[str, Union[str, list, None]] = self.assets[
+        data_asset: dict[str, Union[str, list, None]] = self.assets[
             batch_request.data_asset_name
         ]
         data_asset_splitter_method: Optional[str] = data_asset.get("splitter_method")
         data_asset_splitter_kwargs: Optional[
-            Dict[str, Union[str, list]]
+            dict[str, Union[str, list]]
         ] = data_asset.get("splitter_kwargs")
         data_asset_sorters: Optional[dict] = data_asset.get("sorters")
 
@@ -252,7 +252,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         return batch_definition_list
 
-    def get_available_data_asset_names(self) -> List[str]:
+    def get_available_data_asset_names(self) -> list[str]:
         """
         Return the list of asset names known by this DataConnector.
 
@@ -261,7 +261,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         """
         return list(self.assets.keys())
 
-    def get_unmatched_data_references(self) -> List[str]:
+    def get_unmatched_data_references(self) -> list[str]:
         """
         Returns the list of data_references unmatched by configuration by looping through items in _data_references_cache
         and returning data_reference that do not have an associated data_asset.
@@ -271,7 +271,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         """
         return []
 
-    def get_available_data_asset_names_and_types(self) -> List[Tuple[str, str]]:
+    def get_available_data_asset_names_and_types(self) -> list[Tuple[str, str]]:
         """
         Return the list of asset names and types known by this DataConnector.
 
@@ -319,8 +319,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         return SqlAlchemyDatasourceBatchSpec(batch_spec)
 
     def _get_sorters_from_splitter_method_name(
-        self, splitter_method_name: str, splitter_kwargs: Dict[str, Union[str, list]]
-    ) -> List[Sorter]:
+        self, splitter_method_name: str, splitter_kwargs: dict[str, Union[str, list]]
+    ) -> list[Sorter]:
         """Given a splitter method and its kwargs, return an appropriately instantiated list of Sorters.
 
         Args:
@@ -330,7 +330,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         Returns:
             an ordered list of sorters required to sort splitter batches.
         """
-        splitter_method_to_sorter_method_mapping: Dict[
+        splitter_method_to_sorter_method_mapping: dict[
             str, Optional[Sorter]
         ] = self.SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING
         splitter_method_name: str = self._get_splitter_method_name(
@@ -384,7 +384,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 and sorters is not None
                 and len(sorters) > 0
             ):
-                splitter_group_names: List[str]
+                splitter_group_names: list[str]
                 if "column_names" in splitter_kwargs:
                     splitter_group_names = splitter_kwargs["column_names"]
                 else:
@@ -425,11 +425,11 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
 
     def _sort_batch_definition_list(
         self,
-        batch_definition_list: List[BatchDefinition],
+        batch_definition_list: list[BatchDefinition],
         splitter_method_name: Optional[str],
-        splitter_kwargs: Optional[Dict[str, Union[str, dict, None]]],
+        splitter_kwargs: Optional[dict[str, Union[str, dict, None]]],
         sorters: Optional[dict],
-    ) -> List[BatchDefinition]:
+    ) -> list[BatchDefinition]:
         """Sort a list of batch definitions given the splitter method used to define them.
 
         Args:
@@ -461,7 +461,7 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
 
     def _refresh_data_assets_cache(
         self,
-        assets: Optional[Dict[str, dict]] = None,
+        assets: Optional[dict[str, dict]] = None,
     ) -> None:
         self._assets = {}
 
@@ -564,7 +564,7 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
                 "splitter_method"
             )
             data_asset_splitter_kwargs: Optional[
-                Dict[str, Union[str, list]]
+                dict[str, Union[str, list]]
             ] = data_asset_config.get("splitter_kwargs")
             data_asset_sorters: Optional[dict] = data_asset_config.get("sorters")
 
@@ -593,14 +593,14 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
         self,
         data_asset_name: str,
         data_asset_config: dict,
-    ) -> List[dict]:
+    ) -> list[dict]:
         table_name: str = data_asset_config.get("table_name", data_asset_name)
 
         schema_name: str = data_asset_config.get("schema_name")
         if schema_name is not None:
             table_name = f"{schema_name}.{table_name}"
 
-        batch_identifiers_list: List[dict]
+        batch_identifiers_list: list[dict]
         splitter_method_name: Optional[str] = data_asset_config.get("splitter_method")
         if splitter_method_name is not None:
             splitter_kwargs: Optional[dict] = data_asset_config.get("splitter_kwargs")
@@ -618,7 +618,7 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
 
     def _get_data_reference_list_from_cache_by_data_asset_name(
         self, data_asset_name: str
-    ) -> List[dict]:
+    ) -> list[dict]:
         return self._data_references_cache[data_asset_name]
 
     def _generate_batch_spec_parameters_from_batch_definition(
@@ -670,7 +670,7 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
 
     def _map_data_reference_to_batch_definition_list(
         self, data_reference, data_asset_name: Optional[str] = None  #: Any,
-    ) -> Optional[List[BatchDefinition]]:
+    ) -> Optional[list[BatchDefinition]]:
         # Note: This is a bit hacky, but it works. In sql_data_connectors, data references *are* dictionaries,
         # allowing us to invoke `IDDict(data_reference)`
         return [

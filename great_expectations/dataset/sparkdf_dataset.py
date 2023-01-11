@@ -639,7 +639,7 @@ class SparkDFDataset(MetaSparkDFDataset):
     def get_column_count(self):
         return len(self.spark_df.columns)
 
-    def get_table_columns(self) -> List[str]:
+    def get_table_columns(self) -> list[str]:
         return self.spark_df.columns
 
     def get_column_nonnull_count(self, column):
@@ -848,7 +848,7 @@ class SparkDFDataset(MetaSparkDFDataset):
     def expect_column_values_to_be_in_set(
         self,
         column,  # pyspark.sql.DataFrame
-        value_set,  # List[Any]
+        value_set,  # list[Any]
         mostly=None,
         parse_strings_as_datetimes=None,
         result_format=None,
@@ -879,7 +879,7 @@ class SparkDFDataset(MetaSparkDFDataset):
     def expect_column_values_to_not_be_in_set(
         self,
         column,  # pyspark.sql.DataFrame
-        value_set,  # List[Any]
+        value_set,  # list[Any]
         mostly=None,
         result_format=None,
         include_config=True,
@@ -1209,7 +1209,7 @@ class SparkDFDataset(MetaSparkDFDataset):
     def expect_column_values_to_be_in_type_list(
         self,
         column,
-        type_list: List[str],
+        type_list: list[str],
         mostly=None,
         result_format=None,
         include_config=True,
@@ -1397,7 +1397,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         self,
         column_A,
         column_B,
-        value_pairs_set,  # List[List]
+        value_pairs_set,  # list[List]
         ignore_row_if="both_values_are_missing",
         result_format=None,
         include_config=True,
@@ -1643,7 +1643,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         column_list, and equal to the specific value, sum_total.
 
         Args:
-            column_list (List[str]): \
+            column_list (list[str]): \
                 Set of columns to be checked
             sum_total (int): \
                 expected sum of columns

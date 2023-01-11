@@ -42,20 +42,20 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
 
     def __init__(
         self,
-        include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
-        exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
-        include_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
-        exclude_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
+        include_column_names: Optional[Union[str, Optional[list[str]]]] = None,
+        exclude_column_names: Optional[Union[str, Optional[list[str]]]] = None,
+        include_column_name_suffixes: Optional[Union[str, Iterable, list[str]]] = None,
+        exclude_column_name_suffixes: Optional[Union[str, Iterable, list[str]]] = None,
         semantic_type_filter_module_name: Optional[str] = None,
         semantic_type_filter_class_name: Optional[str] = None,
         include_semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+            Union[str, SemanticDomainTypes, list[Union[str, SemanticDomainTypes]]]
         ] = None,
         exclude_semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+            Union[str, SemanticDomainTypes, list[Union[str, SemanticDomainTypes]]]
         ] = None,
         allowed_semantic_types_passthrough: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+            Union[str, SemanticDomainTypes, list[Union[str, SemanticDomainTypes]]]
         ] = None,
         cardinality_limit_mode: Optional[Union[str, CardinalityLimitMode, dict]] = None,
         max_unique_values: Optional[Union[str, int]] = None,
@@ -151,7 +151,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
     def allowed_semantic_types_passthrough(
         self,
     ) -> Optional[
-        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+        Union[str, SemanticDomainTypes, list[Union[str, SemanticDomainTypes]]]
     ]:
         return self._allowed_semantic_types_passthrough
 
@@ -159,7 +159,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
     def allowed_semantic_types_passthrough(
         self,
         value: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+            Union[str, SemanticDomainTypes, list[Union[str, SemanticDomainTypes]]]
         ],
     ) -> None:
         self._allowed_semantic_types_passthrough = value
@@ -192,7 +192,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         self,
         rule_name: str,
         variables: Optional[ParameterContainer] = None,
-    ) -> List[Domain]:
+    ) -> list[Domain]:
         """Return domains matching the selected cardinality_limit_mode.
 
         Args:
@@ -202,11 +202,11 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         Returns:
             List of domains that match the desired cardinality.
         """
-        batch_ids: List[str] = self.get_batch_ids(variables=variables)
+        batch_ids: list[str] = self.get_batch_ids(variables=variables)
 
         validator: Validator = self.get_validator(variables=variables)
 
-        effective_column_names: List[str] = self.get_effective_column_names(
+        effective_column_names: list[str] = self.get_effective_column_names(
             batch_ids=batch_ids,
             validator=validator,
             variables=variables,
@@ -257,7 +257,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
 
         # Obtain allowed_semantic_types_passthrough from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         allowed_semantic_types_passthrough: Union[
-            str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]
+            str, SemanticDomainTypes, list[Union[str, SemanticDomainTypes]]
         ] = get_parameter_value_and_validate_return_type(
             domain=None,
             parameter_reference=self.allowed_semantic_types_passthrough,
@@ -273,7 +273,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
 
         column_name: str
 
-        allowed_column_names_passthrough: List[str] = [
+        allowed_column_names_passthrough: list[str] = [
             column_name
             for column_name in effective_column_names
             if self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[
@@ -288,13 +288,13 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             if column_name not in allowed_column_names_passthrough
         ]
 
-        metrics_for_cardinality_check: Dict[
-            str, List[MetricConfiguration]
+        metrics_for_cardinality_check: dict[
+            str, list[MetricConfiguration]
         ] = self._generate_metric_configurations_to_check_cardinality(
             batch_ids=batch_ids, column_names=effective_column_names
         )
 
-        candidate_column_names: List[
+        candidate_column_names: list[
             str
         ] = self._column_names_meeting_cardinality_limit(
             validator=validator,
@@ -303,7 +303,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         candidate_column_names.extend(allowed_column_names_passthrough)
 
         column_name: str
-        domains: List[Domain] = build_domains_from_column_names(
+        domains: list[Domain] = build_domains_from_column_names(
             rule_name=rule_name,
             column_names=candidate_column_names,
             domain_type=self.domain_type,
@@ -314,9 +314,9 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
 
     def _generate_metric_configurations_to_check_cardinality(
         self,
-        batch_ids: List[str],
-        column_names: List[str],
-    ) -> Dict[str, List[MetricConfiguration]]:
+        batch_ids: list[str],
+        column_names: list[str],
+    ) -> dict[str, list[MetricConfiguration]]:
         """Generate metric configurations used to compute metrics for checking cardinality.
 
         Args:
@@ -325,7 +325,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
 
         Returns:
             Dictionary of the form {
-                "my_column_name": List[MetricConfiguration],
+                "my_column_name": list[MetricConfiguration],
             }
         """
 
@@ -334,7 +334,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         ] = self.cardinality_checker.cardinality_limit_mode
 
         batch_id: str
-        metric_configurations: Dict[str, List[MetricConfiguration]] = {
+        metric_configurations: dict[str, list[MetricConfiguration]] = {
             column_name: [
                 MetricConfiguration(
                     metric_name=cardinality_limit_mode.metric_name_defining_limit,
@@ -354,8 +354,8 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
     def _column_names_meeting_cardinality_limit(
         self,
         validator: Validator,
-        metrics_for_cardinality_check: Dict[str, List[MetricConfiguration]],
-    ) -> List[str]:
+        metrics_for_cardinality_check: dict[str, list[MetricConfiguration]],
+    ) -> list[str]:
         """Compute cardinality and return column names meeting cardinality limit.
 
         Args:
@@ -366,17 +366,17 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             List of column names meeting cardinality.
         """
         column_name: str
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
+        resolved_metrics: dict[Tuple[str, str, str], MetricValue]
         metric_value: Any
 
-        resolved_metrics_by_column_name: Dict[
-            str, Dict[Tuple[str, str, str], MetricValue]
+        resolved_metrics_by_column_name: dict[
+            str, dict[Tuple[str, str, str], MetricValue]
         ] = get_resolved_metrics_by_key(
             validator=validator,
             metric_configurations_by_key=metrics_for_cardinality_check,
         )
 
-        candidate_column_names: List[str] = [
+        candidate_column_names: list[str] = [
             column_name
             for column_name, resolved_metrics in resolved_metrics_by_column_name.items()
             if all(

@@ -5,7 +5,7 @@ import os
 import re
 from collections import defaultdict
 from dataclasses import asdict, dataclass
-from typing import List, Sequence, Tuple, Union
+from typing import Sequence, Tuple, Union
 
 from typing_extensions import Final
 
@@ -58,8 +58,8 @@ class ExpectationDiagnostics(SerializableDictDot):
     """
 
     # This object is taken directly from the Expectation class, without modification
-    examples: List[ExpectationTestDataCases]
-    gallery_examples: List[ExpectationTestDataCases]
+    examples: list[ExpectationTestDataCases]
+    gallery_examples: list[ExpectationTestDataCases]
 
     # These objects are derived from the Expectation class
     # They're a combination of direct introspection of existing properties,
@@ -73,11 +73,11 @@ class ExpectationDiagnostics(SerializableDictDot):
     description: ExpectationDescriptionDiagnostics
     execution_engines: ExpectationExecutionEngineDiagnostics
 
-    renderers: List[ExpectationRendererDiagnostics]
-    metrics: List[ExpectationMetricDiagnostics]
-    tests: List[ExpectationTestDiagnostics]
-    backend_test_result_counts: List[ExpectationBackendTestResultCounts]
-    errors: List[ExpectationErrorDiagnostics]
+    renderers: list[ExpectationRendererDiagnostics]
+    metrics: list[ExpectationMetricDiagnostics]
+    tests: list[ExpectationTestDiagnostics]
+    backend_test_result_counts: list[ExpectationBackendTestResultCounts]
+    errors: list[ExpectationErrorDiagnostics]
     maturity_checklist: ExpectationDiagnosticMaturityMessages
     coverage_score: float
 
@@ -155,8 +155,8 @@ class ExpectationDiagnostics(SerializableDictDot):
     @classmethod
     def _check_example_cases(
         cls,
-        examples: List[ExpectationTestDataCases],
-        tests: List[ExpectationTestDiagnostics],
+        examples: list[ExpectationTestDataCases],
+        tests: list[ExpectationTestDiagnostics],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether this Expectation has at least one positive and negative example case (and all test cases return the expected output)"""
 
@@ -179,11 +179,11 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _check_core_logic_for_at_least_one_execution_engine(
-        backend_test_result_counts: List[ExpectationBackendTestResultCounts],
+        backend_test_result_counts: list[ExpectationBackendTestResultCounts],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether core logic for this Expectation exists and passes tests on at least one Execution Engine"""
 
-        sub_messages: List[ExpectationDiagnosticCheckMessageDict] = []
+        sub_messages: list[ExpectationDiagnosticCheckMessageDict] = []
         passed = False
         message = "Has core logic and passes tests on at least one Execution Engine"
         all_passing = [
@@ -219,12 +219,12 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _get_backends_from_test_results(
-        test_results: List[ExpectationTestDiagnostics],
-    ) -> List[ExpectationBackendTestResultCounts]:
+        test_results: list[ExpectationTestDiagnostics],
+    ) -> list[ExpectationBackendTestResultCounts]:
         """Has each tested backend and the number of passing/failing tests"""
         backend_results = defaultdict(list)
         backend_failing_names = defaultdict(list)
-        results: List[ExpectationBackendTestResultCounts] = []
+        results: list[ExpectationBackendTestResultCounts] = []
 
         for test_result in test_results:
             backend_results[test_result.backend].append(test_result.test_passed)
@@ -246,7 +246,7 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _check_core_logic_for_all_applicable_execution_engines(
-        backend_test_result_counts: List[ExpectationBackendTestResultCounts],
+        backend_test_result_counts: list[ExpectationBackendTestResultCounts],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether core logic for this Expectation exists and passes tests on all applicable Execution Engines"""
 
@@ -306,7 +306,7 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _count_positive_and_negative_example_cases(
-        examples: List[ExpectationTestDataCases],
+        examples: list[ExpectationTestDataCases],
     ) -> Tuple[int, int]:
         """Scans examples and returns a 2-ple with the numbers of cases with success == True and success == False"""
 
@@ -372,7 +372,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     @staticmethod
     def _check_input_validation(
         expectation_instance,
-        examples: List[ExpectationTestDataCases],
+        examples: list[ExpectationTestDataCases],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check that the validate_configuration exists and doesn't raise a config error"""
         passed = False
@@ -457,7 +457,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     @staticmethod
     def _check_linting(expectation_instance) -> ExpectationDiagnosticCheckMessage:
         """Check if linting checks pass for Expectation"""
-        sub_messages: List[ExpectationDiagnosticCheckMessageDict] = []
+        sub_messages: list[ExpectationDiagnosticCheckMessageDict] = []
         message: str = "Passes all linting checks"
         passed: bool = False
         black_ok: bool = False

@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from abc import ABC, abstractmethod
 from hashlib import md5
-from typing import Any, List, Optional, Tuple
+from typing import Any, Optional, Tuple
 
 from great_expectations.core.usage_statistics.util import (
     aggregate_all_core_expectation_types,
@@ -41,7 +41,7 @@ class BaseAnonymizer(ABC):
 
     @staticmethod
     def get_parent_class(
-        classes_to_check: Optional[List[type]] = None,
+        classes_to_check: Optional[list[type]] = None,
         object_: Optional[object] = None,
         object_class: Optional[type] = None,
         object_config: Optional[dict] = None,
@@ -177,7 +177,7 @@ class BaseAnonymizer(ABC):
                 #
                 # In the presence of multiple valid parents, we generate a comma-delimited list.
 
-                parent_class_list: List[str] = []
+                parent_class_list: list[str] = []
 
                 parent_class: type
                 for parent_class in parents:

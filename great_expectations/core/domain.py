@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import Any, Dict, Optional, TypeVar, Union
+from typing import Any, Optional, TypeVar, Union
 
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -34,7 +34,7 @@ class SemanticDomainTypes(Enum):
 @dataclass
 class InferredSemanticDomainType(SerializableDictDot):
     semantic_domain_type: Optional[Union[str, SemanticDomainTypes]] = None
-    details: Optional[Dict[str, Any]] = None
+    details: Optional[dict[str, Any]] = None
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -56,8 +56,8 @@ class Domain(SerializableDotDict):
     def __init__(
         self,
         domain_type: Union[str, MetricDomainTypes],
-        domain_kwargs: Optional[Union[Dict[str, Any], DomainKwargs]] = None,
-        details: Optional[Dict[str, Any]] = None,
+        domain_kwargs: Optional[Union[dict[str, Any], DomainKwargs]] = None,
+        details: Optional[dict[str, Any]] = None,
         rule_name: Optional[str] = None,
     ) -> None:
         if isinstance(domain_type, str):
@@ -89,7 +89,7 @@ not supported).
             details = {}
 
         inferred_semantic_domain_type: Optional[
-            Dict[str, Union[str, SemanticDomainTypes]]
+            dict[str, Union[str, SemanticDomainTypes]]
         ] = details.get(INFERRED_SEMANTIC_TYPE_KEY)
         if inferred_semantic_domain_type:
             semantic_domain_key: str

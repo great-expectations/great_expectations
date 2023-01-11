@@ -43,7 +43,7 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs: Dict[str, str],
+        metric_domain_kwargs: dict[str, str],
         **kwargs,
     ) -> Set[Any]:
         """
@@ -52,7 +52,7 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         in-memory operations.
         """
         selectable: sa_sql_expression_Selectable
-        accessor_domain_kwargs: Dict[str, str]
+        accessor_domain_kwargs: dict[str, str]
         (selectable, _, accessor_domain_kwargs,) = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
@@ -60,7 +60,7 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         column: sa_sql_expression_ColumnClause = sa.column(column_name)
         sqlalchemy_engine = execution_engine.engine
 
-        distinct_values: List[sqlalchemy_engine_Engine]
+        distinct_values: list[sqlalchemy_engine_Engine]
         if hasattr(column, "is_not"):
             distinct_values = sqlalchemy_engine.execute(
                 sa.select([column])
@@ -82,7 +82,7 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
     def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
-        metric_domain_kwargs: Dict[str, str],
+        metric_domain_kwargs: dict[str, str],
         **kwargs,
     ) -> Set[Any]:
         """
@@ -91,12 +91,12 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         in-memory operations.
         """
         df: pyspark_sql_DataFrame
-        accessor_domain_kwargs: Dict[str, str]
+        accessor_domain_kwargs: dict[str, str]
         (df, _, accessor_domain_kwargs,) = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
         column_name: str = accessor_domain_kwargs["column"]
-        distinct_values: List[pyspark_sql_Row] = (
+        distinct_values: list[pyspark_sql_Row] = (
             df.select(F.col(column_name))
             .distinct()
             .where(F.col(column_name).isNotNull())
@@ -151,8 +151,8 @@ class ColumnDistinctValuesCountUnderThreshold(ColumnAggregateMetricProvider):
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
-        metric_value_kwargs: Dict[str, int],
-        metrics: Dict[str, int],
+        metric_value_kwargs: dict[str, int],
+        metrics: dict[str, int],
         **kwargs,
     ) -> bool:
         return (
@@ -162,8 +162,8 @@ class ColumnDistinctValuesCountUnderThreshold(ColumnAggregateMetricProvider):
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
-        metric_value_kwargs: Dict[str, int],
-        metrics: Dict[str, int],
+        metric_value_kwargs: dict[str, int],
+        metrics: dict[str, int],
         **kwargs,
     ) -> bool:
         return (

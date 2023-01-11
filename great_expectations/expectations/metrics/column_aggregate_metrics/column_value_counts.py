@@ -36,8 +36,8 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
     def _pandas(
         cls,
         execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: Dict[str, str],
-        metric_value_kwargs: Dict[str, Optional[str]],
+        metric_domain_kwargs: dict[str, str],
+        metric_value_kwargs: dict[str, Optional[str]],
         **kwargs,
     ) -> pd.Series:
         sort: str = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
@@ -51,7 +51,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
             raise ValueError("collate parameter is not supported in PandasDataset")
 
         df: pd.DataFrame
-        accessor_domain_kwargs: Dict[str, str]
+        accessor_domain_kwargs: dict[str, str]
         df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
@@ -77,8 +77,8 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs: Dict[str, str],
-        metric_value_kwargs: Dict[str, Optional[str]],
+        metric_domain_kwargs: dict[str, str],
+        metric_value_kwargs: dict[str, Optional[str]],
         **kwargs,
     ) -> pd.Series:
         sort: str = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
@@ -92,7 +92,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
             raise ValueError("collate parameter is not supported in PandasDataset")
 
         selectable: sa_sql_expression_Selectable
-        accessor_domain_kwargs: Dict[str, str]
+        accessor_domain_kwargs: dict[str, str]
         selectable, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
@@ -131,7 +131,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
                 query = query.order_by(sa.column(column))
         elif sort == "count":
             query = query.order_by(sa.column("count").desc())
-        results: List[sqlalchemy_engine_Row] = execution_engine.engine.execute(
+        results: list[sqlalchemy_engine_Row] = execution_engine.engine.execute(
             query.select_from(selectable)
         ).fetchall()
         # Numpy does not always infer the correct DataTypes for SqlAlchemy Row, so we cannot use vectorized approach.
@@ -146,8 +146,8 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
     def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
-        metric_domain_kwargs: Dict[str, str],
-        metric_value_kwargs: Dict[str, Optional[str]],
+        metric_domain_kwargs: dict[str, str],
+        metric_value_kwargs: dict[str, Optional[str]],
         **kwargs,
     ) -> pd.Series:
         sort: str = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
@@ -161,7 +161,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
             raise ValueError("collate parameter is not supported in SparkDFDataset")
 
         df: pyspark_sql_DataFrame
-        accessor_domain_kwargs: Dict[str, str]
+        accessor_domain_kwargs: dict[str, str]
         df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
@@ -176,11 +176,11 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         elif sort == "count":
             value_counts_df = value_counts_df.orderBy(F.desc("count"))
 
-        value_counts: List[pyspark_sql_Row] = value_counts_df.collect()
+        value_counts: list[pyspark_sql_Row] = value_counts_df.collect()
 
         # Numpy does not always infer the correct DataTypes for Spark df, so we cannot use vectorized approach.
-        values: List[Any]
-        counts: List[int]
+        values: list[Any]
+        counts: list[int]
         if len(value_counts) > 0:
             values, counts = zip(*value_counts)
         else:

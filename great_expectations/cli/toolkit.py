@@ -86,7 +86,7 @@ def get_or_create_expectation_suite(
     usage_event: Optional[str] = None,
     suppress_usage_message: bool = False,
     batch_request: Optional[
-        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+        Union[str, dict[str, Union[str, int, dict[str, Any]]]]
     ] = None,
     create_if_not_exist: bool = True,
 ) -> ExpectationSuite:
@@ -136,7 +136,7 @@ def get_or_create_expectation_suite(
 def get_default_expectation_suite_name(
     data_asset_name: Optional[str],
     batch_request: Optional[
-        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+        Union[str, dict[str, Union[str, int, dict[str, Any]]]]
     ] = None,
 ) -> str:
     suite_name: str
@@ -363,8 +363,8 @@ def select_datasource(
     data_source: Union[BaseDatasource, LegacyDatasource, XDatasource, None] = None
 
     if datasource_name is None:
-        data_sources: List[BaseDatasource] = cast(
-            List[BaseDatasource],
+        data_sources: list[BaseDatasource] = cast(
+            list[BaseDatasource],
             list(
                 sorted(
                     context.datasources.values(), key=lambda x: (len(x.name), x.name)
@@ -944,7 +944,7 @@ def load_json_file_into_dict(
     filepath: str,
     data_context: FileDataContext,
     usage_event: Optional[str] = None,
-) -> Optional[Dict[str, Union[str, int, Dict[str, Any]]]]:
+) -> Optional[dict[str, Union[str, int, dict[str, Any]]]]:
     suppress_usage_message: bool = (usage_event is None) or (data_context is None)
 
     error_message: str
@@ -980,7 +980,7 @@ def load_json_file_into_dict(
             message=f"<red>{error_message}</red>",
         )
 
-    batch_request: Optional[Dict[str, Union[str, int, Dict[str, Any]]]] = None
+    batch_request: Optional[dict[str, Union[str, int, dict[str, Any]]]] = None
     if contents:
         try:
             batch_request = json.loads(contents)
@@ -1008,17 +1008,17 @@ def load_json_file_into_dict(
 
 def get_batch_request_from_citations(
     expectation_suite: Optional[ExpectationSuite] = None,
-) -> Optional[Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]]:
+) -> Optional[Union[str, dict[str, Union[str, int, dict[str, Any]]]]]:
     batch_request_from_citation: Optional[
-        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+        Union[str, dict[str, Union[str, int, dict[str, Any]]]]
     ] = None
 
     if expectation_suite is not None:
-        citations: List[Dict[str, Any]] = expectation_suite.get_citations(
+        citations: list[dict[str, Any]] = expectation_suite.get_citations(
             require_batch_request=True
         )
         if citations:
-            citation: Dict[str, Any] = citations[-1]
+            citation: dict[str, Any] = citations[-1]
             batch_request_from_citation = citation.get("batch_request")
 
     return batch_request_from_citation
@@ -1027,7 +1027,7 @@ def get_batch_request_from_citations(
 def add_citation_with_batch_request(
     data_context: FileDataContext,
     expectation_suite: ExpectationSuite,
-    batch_request: Optional[Dict[str, Union[str, int, Dict[str, Any]]]] = None,
+    batch_request: Optional[dict[str, Union[str, int, dict[str, Any]]]] = None,
 ) -> None:
     if (
         expectation_suite is not None
@@ -1047,9 +1047,9 @@ def get_batch_request_from_json_file(
     data_context: FileDataContext,
     usage_event: Optional[str] = None,
     suppress_usage_message: bool = False,
-) -> Optional[Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]]:
+) -> Optional[Union[str, dict[str, Union[str, int, dict[str, Any]]]]]:
     batch_request: Optional[
-        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+        Union[str, dict[str, Union[str, int, dict[str, Any]]]]
     ] = load_json_file_into_dict(
         filepath=batch_request_json_file_path,
         data_context=data_context,
@@ -1079,9 +1079,9 @@ def get_batch_request_using_datasource_name(
     usage_event: Optional[str] = None,
     suppress_usage_message: bool = False,
     additional_batch_request_args: Optional[
-        Dict[str, Union[str, int, Dict[str, Any]]]
+        dict[str, Union[str, int, dict[str, Any]]]
     ] = None,
-) -> Optional[Dict[str, Union[str, int, Dict[str, Any]]]]:
+) -> Optional[dict[str, Union[str, int, dict[str, Any]]]]:
     cli_message(
         string="\nA batch of data is required to edit the suite - let's help you to specify it.\n"
     )
@@ -1100,7 +1100,7 @@ def get_batch_request_using_datasource_name(
             )
         sys.exit(1)
 
-    batch_request: Dict[str, Union[str, int, Dict[str, Any]]] = get_batch_request(
+    batch_request: dict[str, Union[str, int, dict[str, Any]]] = get_batch_request(
         datasource=datasource,  # type: ignore[arg-type] # could be LegacyDatasource
         additional_batch_request_args=additional_batch_request_args,
     )

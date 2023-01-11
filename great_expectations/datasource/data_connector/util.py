@@ -115,9 +115,9 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
     data_connector_name: str,
     data_reference: str,
     regex_pattern: str,
-    group_names: List[str],
+    group_names: list[str],
     data_asset_name: Optional[str] = None,
-) -> Optional[List[BatchDefinition]]:
+) -> Optional[list[BatchDefinition]]:
     processed_data_reference: Optional[
         Tuple[str, IDDict]
     ] = convert_data_reference_string_to_batch_identifiers_using_regex(
@@ -145,7 +145,7 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
 def convert_data_reference_string_to_batch_identifiers_using_regex(
     data_reference: str,
     regex_pattern: str,
-    group_names: List[str],
+    group_names: list[str],
 ) -> Optional[Tuple[str, IDDict]]:
     # noinspection PyUnresolvedReferences
     pattern = re.compile(regex_pattern)
@@ -172,7 +172,7 @@ def convert_data_reference_string_to_batch_identifiers_using_regex(
 
 
 def _determine_batch_identifiers_using_named_groups(
-    match_dict: dict, group_names: List[str]
+    match_dict: dict, group_names: list[str]
 ) -> IDDict:
     batch_identifiers = IDDict()
     for key, value in match_dict.items():
@@ -188,7 +188,7 @@ def _determine_batch_identifiers_using_named_groups(
 def map_batch_definition_to_data_reference_string_using_regex(
     batch_definition: BatchDefinition,
     regex_pattern: str,
-    group_names: List[str],
+    group_names: list[str],
 ) -> str:
     if not isinstance(batch_definition, BatchDefinition):
         raise TypeError(
@@ -212,7 +212,7 @@ def map_batch_definition_to_data_reference_string_using_regex(
 def convert_batch_identifiers_to_data_reference_string_using_regex(
     batch_identifiers: IDDict,
     regex_pattern: str,
-    group_names: List[str],
+    group_names: list[str],
     data_asset_name: Optional[str] = None,
 ) -> str:
     if not isinstance(batch_identifiers, IDDict):
@@ -235,7 +235,7 @@ def convert_batch_identifiers_to_data_reference_string_using_regex(
 # noinspection PyUnresolvedReferences
 def _invert_regex_to_data_reference_template(
     regex_pattern: str,
-    group_names: List[str],
+    group_names: list[str],
 ) -> str:
     r"""Create a string template based on a regex and corresponding list of group names.
 
@@ -316,7 +316,7 @@ def normalize_directory_path(
 
 def get_filesystem_one_level_directory_glob_path_list(
     base_directory_path: str, glob_directive: str
-) -> List[str]:
+) -> list[str]:
     """
     List file names, relative to base_directory_path one level deep, with expansion specified by glob_directive.
     :param base_directory_path -- base directory path, relative to which file paths will be collected
@@ -324,7 +324,7 @@ def get_filesystem_one_level_directory_glob_path_list(
     :returns -- list of relative file paths
     """
     globbed_paths = Path(base_directory_path).glob(glob_directive)
-    path_list: List[str] = [
+    path_list: list[str] = [
         os.path.relpath(str(posix_path), base_directory_path)
         for posix_path in globbed_paths
     ]
@@ -335,7 +335,7 @@ def list_azure_keys(
     azure,
     query_options: dict,
     recursive: bool = False,
-) -> List[str]:
+) -> list[str]:
     """
     Utilizes the Azure Blob Storage connection object to retrieve blob names based on user-provided criteria.
 
@@ -358,7 +358,7 @@ def list_azure_keys(
     container: str = query_options["container"]
     container_client = azure.get_container_client(container)
 
-    path_list: List[str] = []
+    path_list: list[str] = []
 
     def _walk_blob_hierarchy(name_starts_with: str) -> None:
         for item in container_client.walk_blobs(name_starts_with=name_starts_with):
@@ -378,7 +378,7 @@ def list_gcs_keys(
     gcs,
     query_options: dict,
     recursive: bool = False,
-) -> List[str]:
+) -> list[str]:
     """
     Utilizes the GCS connection object to retrieve blob names based on user-provided criteria.
 
@@ -425,7 +425,7 @@ def list_gcs_keys(
         )
         query_options["delimiter"] = None
 
-    keys: List[str] = []
+    keys: list[str] = []
     for blob in gcs.list_blobs(**query_options):
         name: str = blob.name
         if name.endswith("/"):  # GCS includes directories in blob output
@@ -465,12 +465,12 @@ def list_s3_keys(
         raise ValueError("S3 query may not have been configured correctly.")
 
     if "Contents" in s3_objects_info:
-        keys: List[str] = [
+        keys: list[str] = [
             item["Key"] for item in s3_objects_info["Contents"] if item["Size"] > 0
         ]
         yield from keys
     if recursive and "CommonPrefixes" in s3_objects_info:
-        common_prefixes: List[Dict[str, Any]] = s3_objects_info["CommonPrefixes"]
+        common_prefixes: list[dict[str, Any]] = s3_objects_info["CommonPrefixes"]
         for prefix_info in common_prefixes:
             query_options_tmp: dict = copy.deepcopy(query_options)
             query_options_tmp.update({"Prefix": prefix_info["Prefix"]})
@@ -500,8 +500,8 @@ def list_s3_keys(
 # As a rule, this method should not be in "util", but in the specific high-level "DataConnector" class, where it is
 # called (and declared as private in that class).  Currently, this is "FilePathDataConnector".  However, since this
 # method is also used in tests, it can remain in the present "util" module (as an exception to the above stated rule).
-def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dict]:
-    sorter_dict: Dict[str, Sorter] = {}
+def build_sorters_from_config(config_list: list[dict[str, Any]]) -> Optional[dict]:
+    sorter_dict: dict[str, Sorter] = {}
     if config_list is not None:
         for sorter_config in config_list:
             # if sorters were not configured
@@ -515,7 +515,7 @@ def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dic
     return sorter_dict
 
 
-def _build_sorter_from_config(sorter_config: Dict[str, Any]) -> Sorter:
+def _build_sorter_from_config(sorter_config: dict[str, Any]) -> Sorter:
     """Build a Sorter using the provided configuration and return the newly-built Sorter."""
     runtime_environment: dict = {"name": sorter_config["name"]}
     sorter: Sorter = instantiate_class_from_config(
@@ -532,7 +532,7 @@ def _build_asset_from_config(
     runtime_environment: "DataConnector", config: dict
 ) -> Asset:
     """Build Asset from configuration and return asset. Used by both ConfiguredAssetDataConnector and RuntimeDataConnector"""
-    runtime_environment_dict: Dict[str, "DataConnector"] = {
+    runtime_environment_dict: dict[str, "DataConnector"] = {
         "data_connector": runtime_environment
     }
     config = assetConfigSchema.load(config)

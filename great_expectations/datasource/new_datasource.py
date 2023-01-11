@@ -113,7 +113,7 @@ class BaseDatasource:
     def get_single_batch_from_batch_request(
         self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
     ) -> Batch:
-        batch_list: List[Batch] = self.get_batch_list_from_batch_request(batch_request)
+        batch_list: list[Batch] = self.get_batch_list_from_batch_request(batch_request)
         if len(batch_list) != 1:
             raise ValueError(
                 f"Got {len(batch_list)} batches instead of a single batch."
@@ -122,7 +122,7 @@ class BaseDatasource:
 
     def get_batch_definition_list_from_batch_request(
         self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
-    ) -> List[BatchDefinition]:
+    ) -> list[BatchDefinition]:
         """
         Validates batch request and utilizes the classes'
         Data Connectors' property to get a list of batch definition given a batch request
@@ -141,7 +141,7 @@ class BaseDatasource:
 
     def get_batch_list_from_batch_request(
         self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
-    ) -> List[Batch]:
+    ) -> list[Batch]:
         """
         Processes batch_request and returns the (possibly empty) list of batch objects.
 
@@ -155,7 +155,7 @@ class BaseDatasource:
             batch_request.data_connector_name
         ]
 
-        batch_definition_list: List[
+        batch_definition_list: list[
             BatchDefinition
         ] = data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
@@ -192,7 +192,7 @@ class BaseDatasource:
 
             return [new_batch]
         else:
-            batches: List[Batch] = []
+            batches: list[Batch] = []
             for batch_definition in batch_definition_list:
                 batch_definition.batch_spec_passthrough = (
                     batch_request.batch_spec_passthrough
@@ -220,7 +220,7 @@ class BaseDatasource:
     def _build_data_connector_from_config(
         self,
         name: str,
-        config: Dict[str, Any],
+        config: dict[str, Any],
     ) -> DataConnector:
         """Build a DataConnector using the provided configuration and return the newly-built DataConnector."""
         new_data_connector: DataConnector = instantiate_class_from_config(
@@ -243,7 +243,7 @@ class BaseDatasource:
 
     def get_available_data_asset_names(
         self, data_connector_names: Optional[Union[list, str]] = None
-    ) -> Dict[str, List[str]]:
+    ) -> dict[str, list[str]]:
         """
         Returns a dictionary of data_asset_names that the specified data
         connector can provide. Note that some data_connectors may not be
@@ -281,7 +281,7 @@ class BaseDatasource:
 
     def get_available_data_asset_names_and_types(
         self, data_connector_names: Optional[Union[list, str]] = None
-    ) -> Dict[str, List[Tuple[str, str]]]:
+    ) -> dict[str, list[Tuple[str, str]]]:
         """
         Returns a dictionary of data_asset_names that the specified data
         connector can provide. Note that some data_connectors may not be
@@ -320,7 +320,7 @@ class BaseDatasource:
 
     def get_available_batch_definitions(
         self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
-    ) -> List[BatchDefinition]:
+    ) -> list[BatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
 
         data_connector: DataConnector = self.data_connectors[
@@ -456,7 +456,7 @@ class Datasource(BaseDatasource):
 
     def _init_data_connectors(
         self,
-        data_connector_configs: Dict[str, Dict[str, Any]],
+        data_connector_configs: dict[str, dict[str, Any]],
     ) -> None:
         for name, config in data_connector_configs.items():
             self._build_data_connector_from_config(

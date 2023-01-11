@@ -723,7 +723,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self.config.datasources[datasource_name] = datasource_config  # type: ignore[assignment,index]
         self._cached_datasources[datasource_name] = datasource_config
 
-    def get_site_names(self) -> List[str]:
+    def get_site_names(self) -> list[str]:
         """Get a list of configured site names."""
         return list(self.variables.data_docs_sites.keys())  # type: ignore[union-attr]
 
@@ -983,7 +983,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         This method attempts to return exactly one batch.
         If 0 or more than 1 batches would be returned, it raises an error.
         """
-        batch_list: List[Batch] = self.get_batch_list(
+        batch_list: list[Batch] = self.get_batch_list(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
@@ -1019,7 +1019,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
         return batch_list[0]
 
-    def list_stores(self) -> List[Store]:
+    def list_stores(self) -> list[Store]:
         """List currently-configured Stores on this context"""
         stores = []
         for (
@@ -1032,7 +1032,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             stores.append(masked_config)
         return stores  # type: ignore[return-value]
 
-    def list_active_stores(self) -> List[Store]:
+    def list_active_stores(self) -> list[Store]:
         """
         List active Stores on this context. Active stores are identified by setting the following parameters:
             expectations_store_name,
@@ -1041,7 +1041,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             checkpoint_store_name
             profiler_store_name
         """
-        active_store_names: List[str] = [
+        active_store_names: list[str] = [
             self.expectations_store_name,  # type: ignore[list-item]
             self.validations_store_name,  # type: ignore[list-item]
             self.evaluation_parameter_store_name,  # type: ignore[list-item]
@@ -1067,10 +1067,10 @@ class AbstractDataContext(ConfigPeer, ABC):
             if store.get("name") in active_store_names  # type: ignore[arg-type,operator]
         ]
 
-    def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+    def list_checkpoints(self) -> Union[list[str], list[ConfigurationIdentifier]]:
         return self.checkpoint_store.list_checkpoints()
 
-    def list_profilers(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+    def list_profilers(self) -> Union[list[str], list[ConfigurationIdentifier]]:
         return RuleBasedProfiler.list_profilers(self.profiler_store)
 
     def save_profiler(
@@ -1169,13 +1169,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         self.config.stores[store_name] = store_config  # type: ignore[index]
         return self._build_store_from_config(store_name, store_config)
 
-    def list_datasources(self) -> List[dict]:
+    def list_datasources(self) -> list[dict]:
         """List currently-configured datasources on this context. Masks passwords.
 
         Returns:
             List(dict): each dictionary includes "name", "class_name", and "module_name" keys
         """
-        datasources: List[dict] = []
+        datasources: list[dict] = []
 
         datasource_name: str
         datasource_config: Union[dict, DatasourceConfig]
@@ -1232,19 +1232,19 @@ class AbstractDataContext(ConfigPeer, ABC):
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[list[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
-        profilers: Optional[List[dict]] = None,
+        validations: Optional[list[dict]] = None,
+        profilers: Optional[list[dict]] = None,
         # Next two fields are for LegacyCheckpoint configuration
         validation_operator_name: Optional[str] = None,
-        batches: Optional[List[dict]] = None,
+        batches: Optional[list[dict]] = None,
         # the following four arguments are used by SimpleCheckpoint
-        site_names: Optional[Union[str, List[str]]] = None,
+        site_names: Optional[Union[str, list[str]]] = None,
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
-        notify_with: Optional[Union[str, List[str]]] = None,
+        notify_with: Optional[Union[str, list[str]]] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
@@ -1322,11 +1322,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[BatchRequestBase] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[list[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
-        profilers: Optional[List[dict]] = None,
+        validations: Optional[list[dict]] = None,
+        profilers: Optional[list[dict]] = None,
         run_id: Optional[Union[str, int, float]] = None,
         run_name: Optional[str] = None,
         run_time: Optional[datetime.datetime] = None,
@@ -1400,7 +1400,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             target_store_name,
         )
 
-    def list_expectation_suite_names(self) -> List[str]:
+    def list_expectation_suite_names(self) -> list[str]:
         """
         Lists the available expectation suite names.
         """
@@ -1412,7 +1412,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def list_expectation_suites(
         self,
-    ) -> Optional[Union[List[str], List[GXCloudIdentifier]]]:
+    ) -> Optional[Union[list[str], list[GXCloudIdentifier]]]:
         """Return a list of available expectation suite keys."""
         try:
             keys = self.expectations_store.list_keys()
@@ -1428,9 +1428,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
         batch: Optional[Batch] = None,
-        batch_list: Optional[List[Batch]] = None,
+        batch_list: Optional[list[Batch]] = None,
         batch_request: Optional[BatchRequestBase] = None,
-        batch_request_list: Optional[List[BatchRequestBase]] = None,
+        batch_request_list: Optional[list[BatchRequestBase]] = None,
         batch_data: Optional[Any] = None,
         data_connector_query: Optional[Union[IDDict, dict]] = None,
         batch_identifiers: Optional[dict] = None,
@@ -1638,7 +1638,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         batch_filter_parameters: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
         **kwargs: Optional[dict],
-    ) -> List[Batch]:
+    ) -> list[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
         This method applies only to the new (V3) Datasource schema.
 
@@ -1819,7 +1819,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str,
         config_version: float,
-        rules: Dict[str, dict],
+        rules: dict[str, dict],
         variables: Optional[dict] = None,
     ) -> RuleBasedProfiler:
         config_data = {
@@ -1872,7 +1872,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     )
     def run_profiler_with_dynamic_arguments(
         self,
-        batch_list: Optional[List[Batch]] = None,
+        batch_list: Optional[list[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
@@ -1912,7 +1912,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     )
     def run_profiler_on_data(
         self,
-        batch_list: Optional[List[Batch]] = None,
+        batch_list: Optional[list[Batch]] = None,
         batch_request: Optional[BatchRequestBase] = None,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
@@ -2419,12 +2419,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 open all docs found in the project.
             only_if_exists: Optionally specify flag to pass to "self.get_docs_sites_urls()".
         """
-        data_docs_urls: List[Dict[str, str]] = self.get_docs_sites_urls(
+        data_docs_urls: list[dict[str, str]] = self.get_docs_sites_urls(
             resource_identifier=resource_identifier,
             site_name=site_name,
             only_if_exists=only_if_exists,
         )
-        urls_to_open: List[str] = [site["site_url"] for site in data_docs_urls]
+        urls_to_open: list[str] = [site["site_url"] for site in data_docs_urls]
 
         for url in urls_to_open:
             if url is not None:
@@ -2436,8 +2436,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         resource_identifier=None,
         site_name: Optional[str] = None,
         only_if_exists=True,
-        site_names: Optional[List[str]] = None,
-    ) -> List[Dict[str, str]]:
+        site_names: Optional[list[str]] = None,
+    ) -> list[dict[str, str]]:
         """
         Get URLs for a resource for all data docs sites.
 
@@ -2611,7 +2611,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     @staticmethod
     def _get_metric_configuration_tuples(
         metric_configuration: Union[str, dict], base_kwargs: Optional[dict] = None
-    ) -> List[Tuple[str, Union[dict, Any]]]:
+    ) -> list[Tuple[str, Union[dict, Any]]]:
         if base_kwargs is None:
             base_kwargs = {}
 
@@ -2906,12 +2906,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     @property
     def datasources(
         self,
-    ) -> Dict[str, Union[LegacyDatasource, BaseDatasource, XDatasource]]:
+    ) -> dict[str, Union[LegacyDatasource, BaseDatasource, XDatasource]]:
         """A single holder for all Datasources in this context"""
         return self._cached_datasources
 
     @property
-    def xdatasources(self) -> Dict[str, XDatasource]:
+    def xdatasources(self) -> dict[str, XDatasource]:
         return {
             name: ds
             for (name, ds) in self.datasources.items()
@@ -2922,7 +2922,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def data_context_id(self) -> str:
         return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
 
-    def _init_stores(self, store_configs: Dict[str, dict]) -> None:
+    def _init_stores(self, store_configs: dict[str, dict]) -> None:
         """Initialize all Stores for this DataContext.
 
         Stores are a good fit for reading/writing objects that:
@@ -2972,8 +2972,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""
         config: DataContextConfig = self.config
-        datasources: Dict[str, DatasourceConfig] = cast(
-            Dict[str, DatasourceConfig], config.datasources
+        datasources: dict[str, DatasourceConfig] = cast(
+            dict[str, DatasourceConfig], config.datasources
         )
 
         for datasource_name, datasource_config in datasources.items():
@@ -3881,7 +3881,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             logger.info(f"Loaded '{ds_name}' from ZEP config")
             self._attach_datasource_to_context(datasource)
 
-    def _synchronize_zep_datasources(self) -> Dict[str, XDatasource]:
+    def _synchronize_zep_datasources(self) -> dict[str, XDatasource]:
         """
         Update `self.zep_config.xdatasources` with any newly added datasources.
         Should be called before serializing `zep_config`.

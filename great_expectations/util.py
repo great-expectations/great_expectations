@@ -111,7 +111,7 @@ class bidict(dict):
     Bi-directional hashmap: https://stackoverflow.com/a/21894086
     """
 
-    def __init__(self, *args: List[Any], **kwargs: Dict[str, Any]) -> None:
+    def __init__(self, *args: list[Any], **kwargs: dict[str, Any]) -> None:
         super().__init__(*args, **kwargs)
         self.inverse: Dict = {}
         for key, value in self.items():
@@ -1388,7 +1388,7 @@ def deep_filter_properties_iterable(
             )
 
         # Upon unwinding the call stack, do a sanity check to ensure cleaned properties.
-        keys_to_delete: List[str] = list(
+        keys_to_delete: list[str] = list(
             filter(
                 lambda k: k not in keep_fields  # type: ignore[arg-type]
                 and _is_to_be_removed_from_deep_filter_properties_iterable(
@@ -1970,7 +1970,7 @@ def is_sane_slack_webhook(url: str) -> bool:
     return url.strip().startswith("https://hooks.slack.com/")
 
 
-def is_list_of_strings(_list) -> TypeGuard[List[str]]:
+def is_list_of_strings(_list) -> TypeGuard[list[str]]:
     return isinstance(_list, list) and all([isinstance(site, str) for site in _list])
 
 

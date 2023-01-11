@@ -58,7 +58,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
+            list[ParameterBuilderConfig]
         ] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
@@ -90,7 +90,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        parameters: Optional[dict[str, ParameterContainer]] = None,
         recompute_existing_parameter_values: bool = False,
     ) -> Attributes:
         """
@@ -121,7 +121,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
         ]
 
         one_batch_table_columns_names_value: MetricValue
-        multi_batch_table_columns_names_sets_as_list: List[Set[str]] = [
+        multi_batch_table_columns_names_sets_as_list: list[Set[str]] = [
             set(one_batch_table_columns_names_value)  # type: ignore[arg-type] # could be dict
             for one_batch_table_columns_names_value in table_columns_names_multi_batch_value  # type: ignore[union-attr] # not all iterable
         ]

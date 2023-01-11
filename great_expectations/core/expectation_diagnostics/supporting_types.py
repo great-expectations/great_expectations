@@ -4,7 +4,7 @@ import inspect
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Optional, Sequence, Union
+from typing import Optional, Sequence, Union
 
 from typing_extensions import TypedDict
 
@@ -28,13 +28,13 @@ class AugmentedLibraryMetadata(SerializableDictDot):
     """An augmented version of the Expectation.library_metadata object, used within ExpectationDiagnostics"""
 
     maturity: Maturity
-    tags: List[str]
-    contributors: List[str]
-    requirements: List[str]
+    tags: list[str]
+    contributors: list[str]
+    requirements: list[str]
     library_metadata_passed_checks: bool
     has_full_test_suite: bool
     manually_reviewed_code: bool
-    problems: List[str] = field(default_factory=list)
+    problems: list[str] = field(default_factory=list)
 
     legacy_maturity_level_substitutions = {
         "experimental": "EXPERIMENTAL",
@@ -97,7 +97,7 @@ class ExpectationRendererDiagnostics(SerializableDictDot):
     name: str
     is_supported: bool
     is_standard: bool
-    samples: List[RendererTestDiagnostics]
+    samples: list[RendererTestDiagnostics]
 
 
 @dataclass
@@ -144,7 +144,7 @@ class ExpectationBackendTestResultCounts(SerializableDictDot):
     backend: str
     num_passed: int
     num_failed: int
-    failing_names: Optional[List[str]]
+    failing_names: Optional[list[str]]
 
 
 class ExpectationDiagnosticCheckMessageDict(TypedDict):
@@ -168,6 +168,6 @@ class ExpectationDiagnosticCheckMessage(SerializableDictDot):
 class ExpectationDiagnosticMaturityMessages(SerializableDictDot):
     """A holder for ExpectationDiagnosticCheckMessages, grouping them by maturity level. Used within the ExpectationDiagnostic object."""
 
-    experimental: List[ExpectationDiagnosticCheckMessage]
-    beta: List[ExpectationDiagnosticCheckMessage]
-    production: List[ExpectationDiagnosticCheckMessage]
+    experimental: list[ExpectationDiagnosticCheckMessage]
+    beta: list[ExpectationDiagnosticCheckMessage]
+    production: list[ExpectationDiagnosticCheckMessage]

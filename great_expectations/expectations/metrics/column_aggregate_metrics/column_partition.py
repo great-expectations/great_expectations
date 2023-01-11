@@ -34,7 +34,7 @@ class ColumnPartition(ColumnAggregateMetricProvider):
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
     ):
         bins = metric_value_kwargs.get("bins", cls.default_kwarg_values["bins"])
@@ -49,7 +49,7 @@ class ColumnPartition(ColumnAggregateMetricProvider):
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
     ):
         bins = metric_value_kwargs.get("bins", cls.default_kwarg_values["bins"])
@@ -64,7 +64,7 @@ class ColumnPartition(ColumnAggregateMetricProvider):
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
     ):
         bins = metric_value_kwargs.get("bins", cls.default_kwarg_values["bins"])
@@ -223,7 +223,7 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
 
 def _determine_bins_using_proper_units(
     ndarray_is_datetime_type: bool, n_bins: int, min_: Any, max_: Any
-) -> Optional[List[Any]]:
+) -> Optional[list[Any]]:
     if ndarray_is_datetime_type:
         if n_bins == 0:
             bins = [min_]

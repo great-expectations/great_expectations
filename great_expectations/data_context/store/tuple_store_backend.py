@@ -343,7 +343,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
         return False
 
-    def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
+    def list_keys(self, prefix: Tuple = ()) -> list[Tuple]:
         key_list = []
         for root, dirs, files in os.walk(
             os.path.join(self.full_base_directory, *prefix)
@@ -596,7 +596,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
         s3.Object(self.bucket, source_filepath).delete()
 
-    def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
+    def list_keys(self, prefix: Tuple = ()) -> list[Tuple]:
         # Note that the prefix arg is only included to maintain consistency with the parent class signature
         s3 = self._create_client()
         paginator = s3.get_paginator("list_objects_v2")
@@ -876,7 +876,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         blob = bucket.blob(source_filepath)
         _ = bucket.rename_blob(blob, dest_filepath)
 
-    def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
+    def list_keys(self, prefix: Tuple = ()) -> list[Tuple]:
         # Note that the prefix arg is only included to maintain consistency with the parent class signature
         key_list = []
 
@@ -1061,7 +1061,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             )
         return az_blob_key
 
-    def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
+    def list_keys(self, prefix: Tuple = ()) -> list[Tuple]:
         # Note that the prefix arg is only included to maintain consistency with the parent class signature
         key_list = []
 

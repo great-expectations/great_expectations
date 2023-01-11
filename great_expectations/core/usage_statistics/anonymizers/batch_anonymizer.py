@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, Optional, Tuple, Union
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 
@@ -62,7 +62,7 @@ class BatchAnonymizer(BaseAnonymizer):
 
         return anonymized_info_dict
 
-    def _anonymize_batch_kwargs(self, batch_kwargs: dict) -> List[str]:
+    def _anonymize_batch_kwargs(self, batch_kwargs: dict) -> list[str]:
         ge_batch_kwarg_keys = [
             "datasource",
             "reader_method",

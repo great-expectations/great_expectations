@@ -97,7 +97,7 @@ def register_renderer(
         return
 
 
-def get_renderer_names(expectation_or_metric_type: str) -> List[str]:
+def get_renderer_names(expectation_or_metric_type: str) -> list[str]:
     """Gets renderer names for a given Expectation or Metric.
 
     Args:
@@ -111,8 +111,8 @@ def get_renderer_names(expectation_or_metric_type: str) -> List[str]:
 
 def get_renderer_names_with_renderer_types(
     expectation_or_metric_type: str,
-    renderer_types: List[AtomicRendererType],
-) -> List[Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]]:
+    renderer_types: list[AtomicRendererType],
+) -> list[Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]]:
     """Gets renderer names of a given type, for a given Expectation or Metric.
 
     Args:
@@ -133,7 +133,7 @@ def get_renderer_names_with_renderer_types(
     ]
 
 
-def get_renderer_impls(object_name: str) -> List[str]:
+def get_renderer_impls(object_name: str) -> list[str]:
     return list(_registered_renderers.get(object_name, {}).values())
 
 
@@ -331,7 +331,7 @@ def get_metric_kwargs(
 
 
 def get_domain_metrics_dict_by_name(
-    metrics: Dict[Tuple[str, str, str], MetricValue], metric_domain_kwargs: IDDict
+    metrics: dict[Tuple[str, str, str], MetricValue], metric_domain_kwargs: IDDict
 ):
     return {
         metric_edge_key_id_tuple[0]: metric_value
@@ -341,7 +341,7 @@ def get_domain_metrics_dict_by_name(
 
 
 def get_expectation_impl(expectation_name: str) -> Type[Expectation]:
-    renamed: Dict[str, str] = {
+    renamed: dict[str, str] = {
         "expect_column_values_to_be_vector": "expect_column_values_to_be_vectors",
         "expect_columns_values_confidence_for_data_label_to_be_greater_than_or_equalto_threshold": "expect_column_values_confidence_for_data_label_to_be_greater_than_or_equal_to_threshold",
         "expect_column_values_to_be_greater_than_or_equal_to_threshold": "expect_column_values_to_be_probabilistically_greater_than_or_equal_to_threshold",
@@ -366,7 +366,7 @@ def get_expectation_impl(expectation_name: str) -> Type[Expectation]:
 
 def list_registered_expectation_implementations(
     expectation_root: Optional[Type[Expectation]] = None,
-) -> List[str]:
+) -> list[str]:
     registered_expectation_implementations = []
     for (
         expectation_name,

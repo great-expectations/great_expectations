@@ -142,9 +142,9 @@ _TEST_DEFS_DIR = os.path.join(
 def render_evaluation_parameter_string(render_func) -> Callable:
     def inner_func(
         *args: Tuple[MetaExpectation], **kwargs: dict
-    ) -> Union[List[RenderedStringTemplateContent], RenderedAtomicContent]:
+    ) -> Union[list[RenderedStringTemplateContent], RenderedAtomicContent]:
         rendered_string_template: Union[
-            List[RenderedStringTemplateContent], RenderedAtomicContent
+            list[RenderedStringTemplateContent], RenderedAtomicContent
         ] = render_func(*args, **kwargs)
         current_expectation_params = list()
         app_template_str = (
@@ -253,7 +253,7 @@ class MetaExpectation(ABCMeta):
     attribute, or, if that is not set, by snake-casing the name of the class.
     """
 
-    default_kwarg_values: Dict[str, object] = {}
+    default_kwarg_values: dict[str, object] = {}
 
     def __new__(cls, clsname, bases, attrs):
         newclass = super().__new__(cls, clsname, bases, attrs)
@@ -327,7 +327,7 @@ class Expectation(metaclass=MetaExpectation):
     args_keys: Tuple[str, ...] = ()
 
     expectation_type: str
-    examples: List[dict] = []
+    examples: list[dict] = []
 
     def __init__(
         self, configuration: Optional[ExpectationConfiguration] = None
@@ -519,7 +519,7 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> List[RenderedStringTemplateContent]:
+    ) -> list[RenderedStringTemplateContent]:
         renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
@@ -553,7 +553,7 @@ class Expectation(metaclass=MetaExpectation):
     def _diagnostic_meta_properties_renderer(
         cls,
         result: Optional[ExpectationValidationResult] = None,
-    ) -> Union[list, List[str], List[list]]:
+    ) -> Union[list, list[str], list[list]]:
         """
             Render function used to add custom meta to Data Docs
             It gets a column set in the `properties_to_render` dictionary within `meta` and adds columns in Data Docs with the values that were set.
@@ -693,7 +693,7 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> List[Union[RenderedStringTemplateContent, CollapseContent]]:
+    ) -> list[Union[RenderedStringTemplateContent, CollapseContent]]:
         assert result, "Must provide a result object."
         success: Optional[bool] = result.success
         result_dict: dict = result.result
@@ -797,7 +797,7 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> Optional[List[Union[RenderedTableContent, CollapseContent]]]:
+    ) -> Optional[list[Union[RenderedTableContent, CollapseContent]]]:
         if result is None:
             return None
 
@@ -810,13 +810,13 @@ class Expectation(metaclass=MetaExpectation):
             "partial_unexpected_counts"
         ):
             return None
-        table_rows: List[Any] = []
+        table_rows: list[Any] = []
 
-        partial_unexpected_counts: Optional[List[dict]] = result_dict.get(
+        partial_unexpected_counts: Optional[list[dict]] = result_dict.get(
             "partial_unexpected_counts"
         )
         # this means the result_format is COMPLETE and we have the full set of unexpected indices
-        unexpected_index_list: Optional[List[dict]] = result_dict.get(
+        unexpected_index_list: Optional[list[dict]] = result_dict.get(
             "unexpected_index_list"
         )
         unexpected_count: int = result_dict["unexpected_count"]
@@ -825,8 +825,8 @@ class Expectation(metaclass=MetaExpectation):
             # accounted for in our count, and include counts if we do. If we do not,
             # we will use this as simply a better (non-repeating) source of
             # "sampled" unexpected values
-            unexpected_list: Optional[List[dict]] = result_dict.get("unexpected_list")
-            unexpected_index_column_names: Optional[List[str]] = result_dict.get(
+            unexpected_list: Optional[list[dict]] = result_dict.get("unexpected_list")
+            unexpected_index_column_names: Optional[list[str]] = result_dict.get(
                 "unexpected_index_column_names"
             )
             if unexpected_index_list:
@@ -846,7 +846,7 @@ class Expectation(metaclass=MetaExpectation):
         else:
             header_row = ["Sampled Unexpected Values"]
             sampled_values_set = set()
-            partial_unexpected_list: Optional[List[Any]] = result_dict.get(
+            partial_unexpected_list: Optional[list[Any]] = result_dict.get(
                 "partial_unexpected_list"
             )
             if partial_unexpected_list:
@@ -998,7 +998,7 @@ class Expectation(metaclass=MetaExpectation):
 
     @classmethod
     def get_allowed_config_keys(cls) -> Union[Tuple[str, ...], Tuple[str]]:
-        key_list: Union[list, List[str]] = []
+        key_list: Union[list, list[str]] = []
         if len(cls.domain_keys) > 0:
             key_list.extend(list(cls.domain_keys))
         if len(cls.success_keys) > 0:
@@ -1033,7 +1033,7 @@ class Expectation(metaclass=MetaExpectation):
 
         metric_name: str
         metric_configuration: MetricConfiguration
-        provided_metrics: Dict[str, MetricValue] = {
+        provided_metrics: dict[str, MetricValue] = {
             metric_name: metrics[metric_configuration.id]
             for metric_name, metric_configuration in validation_dependencies.metric_configurations.items()
         }
@@ -1093,8 +1093,8 @@ class Expectation(metaclass=MetaExpectation):
 
     def get_domain_kwargs(
         self, configuration: ExpectationConfiguration
-    ) -> Dict[str, Optional[str]]:
-        domain_kwargs: Dict[str, Optional[str]] = {
+    ) -> dict[str, Optional[str]]:
+        domain_kwargs: dict[str, Optional[str]] = {
             key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
             for key in self.domain_keys
         }
@@ -1109,14 +1109,14 @@ class Expectation(metaclass=MetaExpectation):
 
     def get_success_kwargs(
         self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if not configuration:
             configuration = self.configuration
 
-        domain_kwargs: Dict[str, Optional[str]] = self.get_domain_kwargs(
+        domain_kwargs: dict[str, Optional[str]] = self.get_domain_kwargs(
             configuration=configuration
         )
-        success_kwargs: Dict[str, Any] = {
+        success_kwargs: dict[str, Any] = {
             key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
             for key in self.success_keys
         }
@@ -1153,14 +1153,14 @@ class Expectation(metaclass=MetaExpectation):
         self,
         configuration: ExpectationConfiguration,
         runtime_configuration: Optional[dict] = None,
-    ) -> Union[Dict[str, Union[str, int, bool, List[str], None]], str]:
+    ) -> Union[dict[str, Union[str, int, bool, list[str], None]], str]:
         default_result_format: Optional[Any] = self.default_kwarg_values.get(
             "result_format"
         )
         configuration_result_format: Union[
-            Dict[str, Union[str, int, bool, List[str], None]], str
+            dict[str, Union[str, int, bool, list[str], None]], str
         ] = configuration.kwargs.get("result_format", default_result_format)
-        result_format: Union[Dict[str, Union[str, int, bool, List[str], None]], str]
+        result_format: Union[dict[str, Union[str, int, bool, list[str], None]], str]
         if runtime_configuration:
             result_format = runtime_configuration.get(
                 "result_format",
@@ -1230,7 +1230,7 @@ class Expectation(metaclass=MetaExpectation):
         ignore_suppress: bool = False,
         ignore_only_for: bool = False,
         debug_logger: Optional[logging.Logger] = None,
-        only_consider_these_backends: Optional[List[str]] = None,
+        only_consider_these_backends: Optional[list[str]] = None,
         context: Optional[AbstractDataContext] = None,
     ) -> ExpectationDiagnostics:
         """Produce a diagnostic report about this Expectation.
@@ -1264,10 +1264,10 @@ class Expectation(metaclass=MetaExpectation):
         library_metadata: AugmentedLibraryMetadata = (
             self._get_augmented_library_metadata()
         )
-        examples: List[ExpectationTestDataCases] = self._get_examples(
+        examples: list[ExpectationTestDataCases] = self._get_examples(
             return_only_gallery_examples=False
         )
-        gallery_examples: List[ExpectationTestDataCases] = []
+        gallery_examples: list[ExpectationTestDataCases] = []
         for example in examples:
             _tests_to_include = [
                 test for test in example.tests if test.include_in_gallery
@@ -1289,7 +1289,7 @@ class Expectation(metaclass=MetaExpectation):
                 f"Was NOT able to get Expectation configuration for {self.expectation_type}. "
                 "Is there at least one sample test where 'success' is True?"
             )
-        metric_diagnostics_list: List[
+        metric_diagnostics_list: list[
             ExpectationMetricDiagnostics
         ] = self._get_metric_diagnostics_list(
             expectation_config=_expectation_config,
@@ -1303,7 +1303,7 @@ class Expectation(metaclass=MetaExpectation):
         )
 
         _debug("Getting test results")
-        test_results: List[ExpectationTestDiagnostics] = self._get_test_results(
+        test_results: list[ExpectationTestDiagnostics] = self._get_test_results(
             expectation_type=description_diagnostics.snake_name,
             test_data_cases=examples,
             execution_engine_diagnostics=introspected_execution_engines,
@@ -1315,11 +1315,11 @@ class Expectation(metaclass=MetaExpectation):
             context=context,
         )
 
-        backend_test_result_counts: List[
+        backend_test_result_counts: list[
             ExpectationBackendTestResultCounts
         ] = ExpectationDiagnostics._get_backends_from_test_results(test_results)
 
-        renderers: List[
+        renderers: list[
             ExpectationRendererDiagnostics
         ] = self._get_renderer_diagnostics(
             expectation_type=description_diagnostics.snake_name,
@@ -1457,7 +1457,7 @@ class Expectation(metaclass=MetaExpectation):
 
     def _get_examples(
         self, return_only_gallery_examples: bool = True
-    ) -> List[ExpectationTestDataCases]:
+    ) -> list[ExpectationTestDataCases]:
         """
         Get a list of examples from the object's `examples` member variable.
 
@@ -1467,7 +1467,7 @@ class Expectation(metaclass=MetaExpectation):
         :return: list of examples or [], if no examples exist
         """
         # Currently, only community contrib expectations have an examples attribute
-        all_examples: List[dict] = self.examples or self._get_examples_from_json()
+        all_examples: list[dict] = self.examples or self._get_examples_from_json()
 
         included_examples = []
         for example in all_examples:
@@ -1549,7 +1549,7 @@ class Expectation(metaclass=MetaExpectation):
 
     def _get_expectation_configuration_from_examples(
         self,
-        examples: List[ExpectationTestDataCases],
+        examples: list[ExpectationTestDataCases],
     ) -> Optional[ExpectationConfiguration]:
         """Return an ExpectationConfiguration instance using test input expected to succeed"""
         if examples:
@@ -1698,7 +1698,7 @@ class Expectation(metaclass=MetaExpectation):
 
     @staticmethod
     def _choose_example(
-        examples: List[ExpectationTestDataCases],
+        examples: list[ExpectationTestDataCases],
     ) -> Tuple[TestData, ExpectationTestCase]:
         """Choose examples to use for run_diagnostics.
 
@@ -1715,7 +1715,7 @@ class Expectation(metaclass=MetaExpectation):
     def _get_registered_renderers(
         expectation_type: str,
         registered_renderers: dict,
-    ) -> List[str]:
+    ) -> list[str]:
         """Get a list of supported renderers for this Expectation, in sorted order."""
         supported_renderers = list(registered_renderers[expectation_type].keys())
         supported_renderers.sort()
@@ -1725,15 +1725,15 @@ class Expectation(metaclass=MetaExpectation):
     def _get_test_results(
         cls,
         expectation_type: str,
-        test_data_cases: List[ExpectationTestDataCases],
+        test_data_cases: list[ExpectationTestDataCases],
         execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
         raise_exceptions_for_backends: bool = False,
         ignore_suppress: bool = False,
         ignore_only_for: bool = False,
         debug_logger: Optional[logging.Logger] = None,
-        only_consider_these_backends: Optional[List[str]] = None,
+        only_consider_these_backends: Optional[list[str]] = None,
         context: Optional[AbstractDataContext] = None,
-    ) -> List[ExpectationTestDiagnostics]:
+    ) -> list[ExpectationTestDiagnostics]:
         """Generate test results. This is an internal method for run_diagnostics."""
 
         if debug_logger is not None:
@@ -1902,12 +1902,12 @@ class Expectation(metaclass=MetaExpectation):
     def _get_renderer_diagnostics(
         self,
         expectation_type: str,
-        test_diagnostics: List[ExpectationTestDiagnostics],
-        registered_renderers: List[str],
+        test_diagnostics: list[ExpectationTestDiagnostics],
+        registered_renderers: list[str],
         standard_renderers: Optional[
-            List[Union[str, LegacyRendererType, LegacyDiagnosticRendererType]]
+            list[Union[str, LegacyRendererType, LegacyDiagnosticRendererType]]
         ] = None,
-    ) -> List[ExpectationRendererDiagnostics]:
+    ) -> list[ExpectationRendererDiagnostics]:
         """Generate Renderer diagnostics for this Expectation, based primarily on a list of ExpectationTestDiagnostics."""
 
         if not standard_renderers:
@@ -1980,9 +1980,9 @@ class Expectation(metaclass=MetaExpectation):
 
     @staticmethod
     def _get_execution_engine_diagnostics(
-        metric_diagnostics_list: List[ExpectationMetricDiagnostics],
+        metric_diagnostics_list: list[ExpectationMetricDiagnostics],
         registered_metrics: dict,
-        execution_engine_names: Optional[List[str]] = None,
+        execution_engine_names: Optional[list[str]] = None,
     ) -> ExpectationExecutionEngineDiagnostics:
         """Check to see which execution_engines are fully supported for this Expectation.
 
@@ -2023,7 +2023,7 @@ class Expectation(metaclass=MetaExpectation):
     def _get_metric_diagnostics_list(
         self,
         expectation_config: Optional[ExpectationConfiguration],
-    ) -> List[ExpectationMetricDiagnostics]:
+    ) -> list[ExpectationMetricDiagnostics]:
         """Check to see which Metrics are upstream validation_dependencies for this Expectation."""
 
         # NOTE: Abe 20210102: Strictly speaking, identifying upstream metrics shouldn't need to rely on an expectation config.
@@ -2037,7 +2037,7 @@ class Expectation(metaclass=MetaExpectation):
         )
 
         metric_name: str
-        metric_diagnostics_list: List[ExpectationMetricDiagnostics] = [
+        metric_diagnostics_list: list[ExpectationMetricDiagnostics] = [
             ExpectationMetricDiagnostics(
                 name=metric_name,
                 has_question_renderer=False,
@@ -2098,9 +2098,9 @@ class Expectation(metaclass=MetaExpectation):
             AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
         ],
         description: ExpectationDescriptionDiagnostics,
-        examples: List[ExpectationTestDataCases],
-        tests: List[ExpectationTestDiagnostics],
-        backend_test_result_counts: List[ExpectationBackendTestResultCounts],
+        examples: list[ExpectationTestDataCases],
+        tests: list[ExpectationTestDiagnostics],
+        backend_test_result_counts: list[ExpectationBackendTestResultCounts],
         execution_engines: ExpectationExecutionEngineDiagnostics,
     ) -> ExpectationDiagnosticMaturityMessages:
         """Generate maturity checklist messages"""
@@ -2239,7 +2239,7 @@ class TableExpectation(Expectation, ABC):
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
-    ) -> Dict[str, Union[bool, Dict[str, Any]]]:
+    ) -> dict[str, Union[bool, dict[str, Any]]]:
         metric_value: Optional[Any] = metrics.get(metric_name)
 
         if metric_value is None:
@@ -2673,7 +2673,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         result_format: Union[
-            Dict[str, Union[int, str, bool, List[str], None]], str
+            dict[str, Union[int, str, bool, list[str], None]], str
         ] = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
@@ -2696,10 +2696,10 @@ class ColumnMapExpectation(TableExpectation, ABC):
         unexpected_count: Optional[int] = metrics.get(
             f"{self.map_metric}.unexpected_count"
         )
-        unexpected_values: Optional[List[Any]] = metrics.get(
+        unexpected_values: Optional[list[Any]] = metrics.get(
             f"{self.map_metric}.unexpected_values"
         )
-        unexpected_index_list: Optional[List[int]] = metrics.get(
+        unexpected_index_list: Optional[list[int]] = metrics.get(
             f"{self.map_metric}.unexpected_index_list"
         )
         unexpected_index_query: Optional[str] = metrics.get(
@@ -2912,7 +2912,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         result_format: Union[
-            Dict[str, Union[str, int, bool, List[str], None]], str
+            dict[str, Union[str, int, bool, list[str], None]], str
         ] = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
@@ -2923,7 +2923,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         unexpected_values: Optional[Any] = metrics.get(
             f"{self.map_metric}.unexpected_values"
         )
-        unexpected_index_list: Optional[List[int]] = metrics.get(
+        unexpected_index_list: Optional[list[int]] = metrics.get(
             f"{self.map_metric}.unexpected_index_list"
         )
         filtered_row_count: Optional[int] = metrics.get(
@@ -3140,7 +3140,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         unexpected_values: Optional[Any] = metrics.get(
             f"{self.map_metric}.unexpected_values"
         )
-        unexpected_index_list: Optional[List[int]] = metrics.get(
+        unexpected_index_list: Optional[list[int]] = metrics.get(
             f"{self.map_metric}.unexpected_index_list"
         )
         filtered_row_count: Optional[int] = metrics.get(
@@ -3182,11 +3182,11 @@ def _format_map_output(
     element_count: Optional[int] = None,
     nonnull_count: Optional[int] = None,
     unexpected_count: Optional[int] = None,
-    unexpected_list: Optional[List[Any]] = None,
-    unexpected_index_list: Optional[List[int]] = None,
+    unexpected_list: Optional[list[Any]] = None,
+    unexpected_index_list: Optional[list[int]] = None,
     unexpected_index_query: Optional[str] = None,
-    # Actually Optional[List[str]], but this is necessary to keep the typechecker happy
-    unexpected_index_column_names: Optional[Union[int, str, List[str]]] = None,
+    # Actually Optional[list[str]], but this is necessary to keep the typechecker happy
+    unexpected_index_column_names: Optional[Union[int, str, list[str]]] = None,
     unexpected_rows=None,
 ) -> Dict:
     """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
@@ -3203,7 +3203,7 @@ def _format_map_output(
 
     # NB: unexpected_count parameter is explicit some implementing classes may limit the length of unexpected_list
     # Incrementally add to result and return when all values for the specified level are present
-    return_obj: Dict[str, Any] = {"success": success}
+    return_obj: dict[str, Any] = {"success": success}
 
     if result_format["result_format"] == "BOOLEAN_ONLY":
         return return_obj
@@ -3279,7 +3279,7 @@ def _format_map_output(
     partial_unexpected_count: Optional[int] = result_format.get(
         "partial_unexpected_count"
     )
-    partial_unexpected_counts: Optional[List[Dict[str, Any]]] = None
+    partial_unexpected_counts: Optional[list[dict[str, Any]]] = None
     if partial_unexpected_count is not None and 0 < partial_unexpected_count:
         try:
             partial_unexpected_counts = [

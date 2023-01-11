@@ -75,7 +75,7 @@ class RuntimeDataConnector(DataConnector):
     def assets(self):
         return self._assets
 
-    def _build_assets_from_config(self, config: Dict[str, dict]) -> None:
+    def _build_assets_from_config(self, config: dict[str, dict]) -> None:
         """
         Read in asset configurations from RuntimeDataConnector. Build and load into assets property, and load
         batch_identifiers.
@@ -104,7 +104,7 @@ class RuntimeDataConnector(DataConnector):
 
     def _add_batch_identifiers(
         self,
-        batch_identifiers: List[str],
+        batch_identifiers: list[str],
         data_asset_name: Optional[str] = None,
     ) -> None:
         """
@@ -139,7 +139,7 @@ class RuntimeDataConnector(DataConnector):
 
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
-    ) -> List[str]:
+    ) -> list[str]:
         """
         List objects in the cache to create a list of data_references. If data_asset_name is passed in, method will
         return all data_references for the named data_asset. If no data_asset_name is passed in, will return a list of
@@ -171,7 +171,7 @@ class RuntimeDataConnector(DataConnector):
 
     def _get_data_reference_list_from_cache_by_data_asset_name(
         self, data_asset_name: str
-    ) -> List[str]:
+    ) -> list[str]:
         """Fetch data_references corresponding to data_asset_name from the cache."""
         data_references_for_data_asset_name = self._data_references_cache.get(
             data_asset_name
@@ -181,16 +181,16 @@ class RuntimeDataConnector(DataConnector):
         else:
             return []
 
-    def get_unmatched_data_references(self) -> List[str]:
+    def get_unmatched_data_references(self) -> list[str]:
         return []
 
-    def get_available_data_asset_names(self) -> List[str]:
+    def get_available_data_asset_names(self) -> list[str]:
         """Returns a list of data_assets that are both defined at runtime, and defined in DataConnector configuration"""
-        defined_assets: List[str] = list(self.assets.keys())
-        data_reference_keys: List[str] = list(self._data_references_cache.keys())
-        available_assets: List[str] = list(set(defined_assets + data_reference_keys))
+        defined_assets: list[str] = list(self.assets.keys())
+        data_reference_keys: list[str] = list(self._data_references_cache.keys())
+        available_assets: list[str] = list(set(defined_assets + data_reference_keys))
 
-        sorted_available_assets: List[str] = sorted(available_assets)
+        sorted_available_assets: list[str] = sorted(available_assets)
         return sorted_available_assets
 
     # noinspection PyMethodOverriding
@@ -216,7 +216,7 @@ class RuntimeDataConnector(DataConnector):
     def get_batch_definition_list_from_batch_request(  # type: ignore[override] # BatchRequestBase
         self,
         batch_request: RuntimeBatchRequest,
-    ) -> List[BatchDefinition]:
+    ) -> list[BatchDefinition]:
         return self._get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
@@ -224,7 +224,7 @@ class RuntimeDataConnector(DataConnector):
     def _get_batch_definition_list_from_batch_request(
         self,
         batch_request: RuntimeBatchRequest,
-    ) -> List[BatchDefinition]:
+    ) -> list[BatchDefinition]:
         """
         <Will> 202103. The following behavior of the _data_references_cache follows a pattern that we are using for
         other data_connectors, including variations of FilePathDataConnector. When BatchRequest contains batch_data
@@ -250,7 +250,7 @@ class RuntimeDataConnector(DataConnector):
                 "Passed in a RuntimeBatchRequest with no batch_identifiers"
             )
 
-        batch_definition_list: List[BatchDefinition]
+        batch_definition_list: list[BatchDefinition]
         batch_definition = BatchDefinition(
             datasource_name=self.datasource_name,
             data_connector_name=self.name,
@@ -347,7 +347,7 @@ class RuntimeDataConnector(DataConnector):
         "{str(type(runtime_parameters))}", which is illegal.
                         """
             )
-        keys_present: List[str] = [
+        keys_present: list[str] = [
             key
             for key, val in runtime_parameters.items()
             if val is not None and key in ["batch_data", "query", "path"]
@@ -399,7 +399,7 @@ class RuntimeDataConnector(DataConnector):
             data_asset_name: name specified by RuntimeBatchRequest
             batch_identifiers: identifiers to validate
         """
-        configured_asset_names: List[str] = list(self.assets.keys())
+        configured_asset_names: list[str] = list(self.assets.keys())
         if data_asset_name in configured_asset_names:
             self._validate_asset_level_batch_identifiers(
                 data_asset_name=data_asset_name, batch_identifiers=batch_identifiers
@@ -416,7 +416,7 @@ class RuntimeDataConnector(DataConnector):
         Check that batch_identifiers passed in are an exact match to the ones configured at the Asset-level
         """
         asset: Asset = self.assets[data_asset_name]
-        batch_identifiers_keys: List[str] = list(batch_identifiers.keys())
+        batch_identifiers_keys: list[str] = list(batch_identifiers.keys())
         if not set(batch_identifiers_keys) == set(asset.batch_identifiers):  # type: ignore[arg-type]
             raise gx_exceptions.DataConnectorError(
                 f"""
@@ -434,7 +434,7 @@ class RuntimeDataConnector(DataConnector):
         """
         Check that batch_identifiers passed in are a subset of the ones configured at the DataConnector-level
         """
-        batch_identifiers_keys: List[str] = list(batch_identifiers.keys())
+        batch_identifiers_keys: list[str] = list(batch_identifiers.keys())
         if not set(batch_identifiers_keys) <= set(self._batch_identifiers[self.name]):
             raise gx_exceptions.DataConnectorError(
                 f"""RuntimeDataConnector {self.name} was invoked with one or more batch identifiers that do not
@@ -469,7 +469,7 @@ class RuntimeDataConnector(DataConnector):
 
         if pretty_print:
             print(f"\t{self.name}:{self.__class__.__name__}\n")
-        asset_names: List[str] = self.get_available_data_asset_names()
+        asset_names: list[str] = self.get_available_data_asset_names()
         len_asset_names: int = len(asset_names)
 
         if len_asset_names > 0:
@@ -491,7 +491,7 @@ class RuntimeDataConnector(DataConnector):
                     + "Note : RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
                 )
 
-            unmatched_data_references: List[str] = self.get_unmatched_data_references()
+            unmatched_data_references: list[str] = self.get_unmatched_data_references()
             len_unmatched_data_references: int = len(unmatched_data_references)
 
             if pretty_print:

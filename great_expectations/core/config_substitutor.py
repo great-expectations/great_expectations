@@ -6,7 +6,7 @@ import logging
 import re
 from collections import OrderedDict
 from functools import lru_cache
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.types.base import BaseYamlConfig
@@ -58,7 +58,7 @@ class _ConfigurationSubstitutor:
     def substitute_all_config_variables(
         self,
         data: Any,
-        replace_variables_dict: Dict[str, str],
+        replace_variables_dict: dict[str, str],
         dollar_sign_escape_string: str = r"\$",
     ) -> Any:
         """
@@ -92,7 +92,7 @@ class _ConfigurationSubstitutor:
     def substitute_config_variable(
         self,
         template_str: str,
-        config_variables_dict: Dict[str, str],
+        config_variables_dict: dict[str, str],
         dollar_sign_escape_string: str = r"\$",
     ) -> Optional[str]:
         """

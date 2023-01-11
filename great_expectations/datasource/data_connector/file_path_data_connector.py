@@ -84,13 +84,13 @@ class FilePathDataConnector(DataConnector):
 
     def _get_data_reference_list_from_cache_by_data_asset_name(
         self, data_asset_name: str
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Fetch data_references corresponding to data_asset_name from the cache.
         """
         regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
         pattern: str = regex_config["pattern"]
-        group_names: List[str] = regex_config["group_names"]
+        group_names: list[str] = regex_config["group_names"]
 
         batch_definition_list = self._get_batch_definition_list_from_batch_request(
             batch_request=BatchRequestBase(
@@ -105,7 +105,7 @@ class FilePathDataConnector(DataConnector):
                 batch_definition_list=batch_definition_list
             )
 
-        path_list: List[str] = [
+        path_list: list[str] = [
             map_batch_definition_to_data_reference_string_using_regex(
                 batch_definition=batch_definition,
                 regex_pattern=pattern,
@@ -119,7 +119,7 @@ class FilePathDataConnector(DataConnector):
     def get_batch_definition_list_from_batch_request(  # type: ignore[override] # BaseBatchRequest
         self,
         batch_request: BatchRequest,
-    ) -> List[BatchDefinition]:
+    ) -> list[BatchDefinition]:
         """
         Retrieve batch_definitions and that match batch_request.
 
@@ -142,7 +142,7 @@ class FilePathDataConnector(DataConnector):
     def _get_batch_definition_list_from_batch_request(
         self,
         batch_request: BatchRequestBase,
-    ) -> List[BatchDefinition]:
+    ) -> list[BatchDefinition]:
         """
         Retrieve batch_definitions that match batch_request.
 
@@ -163,7 +163,7 @@ class FilePathDataConnector(DataConnector):
             self._refresh_data_references_cache()
 
         # Use a combination of a list and set to preserve iteration order
-        batch_definition_list: List[BatchDefinition] = list()
+        batch_definition_list: list[BatchDefinition] = list()
         batch_definition_set = set()
         for batch_definition in self._get_batch_definition_list_from_cache():
             if (
@@ -199,8 +199,8 @@ class FilePathDataConnector(DataConnector):
         return batch_definition_list
 
     def _sort_batch_definition_list(
-        self, batch_definition_list: List[BatchDefinition]
-    ) -> List[BatchDefinition]:
+        self, batch_definition_list: list[BatchDefinition]
+    ) -> list[BatchDefinition]:
         """
         Use configured sorters to sort batch_definition
 
@@ -220,10 +220,10 @@ class FilePathDataConnector(DataConnector):
 
     def _map_data_reference_to_batch_definition_list(
         self, data_reference: str, data_asset_name: Optional[str] = None
-    ) -> Optional[List[BatchDefinition]]:
+    ) -> Optional[list[BatchDefinition]]:
         regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
         pattern: str = regex_config["pattern"]
-        group_names: List[str] = regex_config["group_names"]
+        group_names: list[str] = regex_config["group_names"]
         return map_data_reference_string_to_batch_definition_list_using_regex(
             datasource_name=self.datasource_name,
             data_connector_name=self.name,
@@ -239,7 +239,7 @@ class FilePathDataConnector(DataConnector):
         data_asset_name: str = batch_definition.data_asset_name
         regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
         pattern: str = regex_config["pattern"]
-        group_names: List[str] = regex_config["group_names"]
+        group_names: list[str] = regex_config["group_names"]
         return map_batch_definition_to_data_reference_string_using_regex(
             batch_definition=batch_definition,
             regex_pattern=pattern,
@@ -303,7 +303,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         if self.sorters is not None and len(self.sorters) > 0:
             # data_asset_name: str = batch_request.data_asset_name
             regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
-            group_names: List[str] = regex_config["group_names"]
+            group_names: list[str] = regex_config["group_names"]
             if any(
                 [sorter_name not in group_names for sorter_name in self.sorters.keys()]
             ):
@@ -319,7 +319,7 @@ this is fewer than number of sorters specified, which is {len(self.sorters)}.
                     """
                 )
 
-    def _get_batch_definition_list_from_cache(self) -> List[BatchDefinition]:
+    def _get_batch_definition_list_from_cache(self) -> list[BatchDefinition]:
         raise NotImplementedError
 
     def _get_regex_config(self, data_asset_name: Optional[str] = None) -> dict:

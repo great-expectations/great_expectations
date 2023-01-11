@@ -48,9 +48,9 @@ class DomainBuilder(ABC, Builder):
         self,
         rule_name: str,
         variables: Optional[ParameterContainer] = None,
-        batch_list: Optional[List[Batch]] = None,
+        batch_list: Optional[list[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-    ) -> List[Domain]:
+    ) -> list[Domain]:
         """
         Args:
             rule_name: name of Rule object, for which "Domain" objects are obtained.
@@ -81,7 +81,7 @@ class DomainBuilder(ABC, Builder):
         self,
         rule_name: str,
         variables: Optional[ParameterContainer] = None,
-    ) -> List[Domain]:
+    ) -> list[Domain]:
         """
         _get_domains is the primary workhorse for the DomainBuilder
         """
@@ -91,9 +91,9 @@ class DomainBuilder(ABC, Builder):
     def get_table_row_counts(
         self,
         validator: Optional[Validator] = None,
-        batch_ids: Optional[List[str]] = None,
+        batch_ids: Optional[list[str]] = None,
         variables: Optional[ParameterContainer] = None,
-    ) -> Dict[str, int]:
+    ) -> dict[str, int]:
         if validator is None:
             validator = self.get_validator(variables=variables)
 
@@ -102,7 +102,7 @@ class DomainBuilder(ABC, Builder):
 
         batch_id: str
 
-        metric_configurations_by_batch_id: Dict[str, List[MetricConfiguration]] = {
+        metric_configurations_by_batch_id: dict[str, list[MetricConfiguration]] = {
             batch_id: [
                 MetricConfiguration(
                     metric_name="table.row_count",
@@ -117,20 +117,20 @@ class DomainBuilder(ABC, Builder):
             for batch_id in batch_ids  # type: ignore[union-attr] # could be None
         }
 
-        resolved_metrics_by_batch_id: Dict[
-            str, Dict[Tuple[str, str, str], MetricValue]
+        resolved_metrics_by_batch_id: dict[
+            str, dict[Tuple[str, str, str], MetricValue]
         ] = get_resolved_metrics_by_key(
             validator=validator,  # type: ignore[arg-type] # could be None
             metric_configurations_by_key=metric_configurations_by_batch_id,
         )
 
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
+        resolved_metrics: dict[Tuple[str, str, str], MetricValue]
         metric_value: Any
-        table_row_count_lists_by_batch_id: Dict[str, List[int]] = {
+        table_row_count_lists_by_batch_id: dict[str, list[int]] = {
             batch_id: [metric_value for metric_value in resolved_metrics.values()]  # type: ignore[misc] # incompatible values
             for batch_id, resolved_metrics in resolved_metrics_by_batch_id.items()
         }
-        table_row_counts_by_batch_id: Dict[str, int] = {
+        table_row_counts_by_batch_id: dict[str, int] = {
             batch_id: metric_value[0]
             for batch_id, metric_value in table_row_count_lists_by_batch_id.items()
         }
@@ -154,7 +154,7 @@ class DomainBuilder(ABC, Builder):
     def get_batch_ids(
         self,
         variables: Optional[ParameterContainer] = None,
-    ) -> Optional[List[str]]:
+    ) -> Optional[list[str]]:
         return get_batch_ids_from_batch_list_or_batch_request(
             data_context=self.data_context,
             batch_list=self.batch_list,

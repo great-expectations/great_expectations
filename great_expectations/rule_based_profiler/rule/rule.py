@@ -44,11 +44,11 @@ class Rule(SerializableDictDot):
     def __init__(
         self,
         name: str,
-        variables: Optional[Union[ParameterContainer, Dict[str, Any]]] = None,
+        variables: Optional[Union[ParameterContainer, dict[str, Any]]] = None,
         domain_builder: Optional[DomainBuilder] = None,
-        parameter_builders: Optional[List[ParameterBuilder]] = None,
+        parameter_builders: Optional[list[ParameterBuilder]] = None,
         expectation_configuration_builders: Optional[
-            List[ExpectationConfigurationBuilder]
+            list[ExpectationConfigurationBuilder]
         ] = None,
     ) -> None:
         """
@@ -89,7 +89,7 @@ class Rule(SerializableDictDot):
     def run(
         self,
         variables: Optional[ParameterContainer] = None,
-        batch_list: Optional[List[Batch]] = None,
+        batch_list: Optional[list[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         recompute_existing_parameter_values: bool = False,
         reconciliation_directives: Optional[ReconciliationDirectives] = None,
@@ -124,7 +124,7 @@ class Rule(SerializableDictDot):
         if rule_state is None:
             rule_state = RuleState()
 
-        domains: List[Domain] = self._get_rule_domains(
+        domains: list[Domain] = self._get_rule_domains(
             variables=variables,
             batch_list=batch_list,
             batch_request=batch_request,
@@ -149,7 +149,7 @@ class Rule(SerializableDictDot):
         ):
             rule_state.initialize_parameter_container_for_domain(domain=domain)
 
-            parameter_builders: List[ParameterBuilder] = self.parameter_builders or []
+            parameter_builders: list[ParameterBuilder] = self.parameter_builders or []
             parameter_builder: ParameterBuilder
             for parameter_builder in parameter_builders:
                 parameter_builder.build_parameters(
@@ -162,7 +162,7 @@ class Rule(SerializableDictDot):
                     recompute_existing_parameter_values=recompute_existing_parameter_values,
                 )
 
-            expectation_configuration_builders: List[
+            expectation_configuration_builders: list[
                 ExpectationConfigurationBuilder
             ] = (self.expectation_configuration_builders or [])
 
@@ -202,19 +202,19 @@ class Rule(SerializableDictDot):
         return self._domain_builder
 
     @property
-    def parameter_builders(self) -> Optional[List[ParameterBuilder]]:
+    def parameter_builders(self) -> Optional[list[ParameterBuilder]]:
         return self._parameter_builders
 
     @property
     def expectation_configuration_builders(
         self,
-    ) -> Optional[List[ExpectationConfigurationBuilder]]:
+    ) -> Optional[list[ExpectationConfigurationBuilder]]:
         return self._expectation_configuration_builders
 
     def to_dict(self) -> dict:
-        parameter_builder_configs: Optional[List[dict]] = None
+        parameter_builder_configs: Optional[list[dict]] = None
         parameter_builders: Optional[
-            Dict[str, ParameterBuilder]
+            dict[str, ParameterBuilder]
         ] = self._get_parameter_builders_as_dict()
         parameter_builder: ParameterBuilder
         if parameter_builders is not None:
@@ -224,9 +224,9 @@ class Rule(SerializableDictDot):
                 for parameter_builder in parameter_builders.values()
             ]
 
-        expectation_configuration_builder_configs: Optional[List[dict]] = None
+        expectation_configuration_builder_configs: Optional[list[dict]] = None
         expectation_configuration_builders: Optional[
-            Dict[str, ExpectationConfigurationBuilder]
+            dict[str, ExpectationConfigurationBuilder]
         ] = self._get_expectation_configuration_builders_as_dict()
         expectation_configuration_builder: ExpectationConfigurationBuilder
         if expectation_configuration_builders is not None:
@@ -260,7 +260,7 @@ class Rule(SerializableDictDot):
         make this refactoring infeasible at the present time.
         """
         dict_obj: dict = self.to_dict()
-        variables_dict: Optional[Dict[str, Any]] = convert_variables_to_dict(
+        variables_dict: Optional[dict[str, Any]] = convert_variables_to_dict(
             variables=self.variables
         )
         dict_obj["variables"] = variables_dict
@@ -292,8 +292,8 @@ class Rule(SerializableDictDot):
         """
         return self.__repr__()
 
-    def _get_parameter_builders_as_dict(self) -> Dict[str, ParameterBuilder]:
-        parameter_builders: List[ParameterBuilder] = self.parameter_builders or []
+    def _get_parameter_builders_as_dict(self) -> dict[str, ParameterBuilder]:
+        parameter_builders: list[ParameterBuilder] = self.parameter_builders or []
 
         parameter_builder: ParameterBuilder
         return {
@@ -303,8 +303,8 @@ class Rule(SerializableDictDot):
 
     def _get_expectation_configuration_builders_as_dict(
         self,
-    ) -> Dict[str, ExpectationConfigurationBuilder]:
-        expectation_configuration_builders: List[ExpectationConfigurationBuilder] = (
+    ) -> dict[str, ExpectationConfigurationBuilder]:
+        expectation_configuration_builders: list[ExpectationConfigurationBuilder] = (
             self.expectation_configuration_builders or []
         )
 
@@ -323,11 +323,11 @@ class Rule(SerializableDictDot):
     def _get_rule_domains(
         self,
         variables: Optional[ParameterContainer] = None,
-        batch_list: Optional[List[Batch]] = None,
+        batch_list: Optional[list[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         rule_state: Optional[RuleState] = None,
-    ) -> List[Domain]:
-        domains: List[Domain] = (
+    ) -> list[Domain]:
+        domains: list[Domain] = (
             []
             if self.domain_builder is None
             else self.domain_builder.get_domains(

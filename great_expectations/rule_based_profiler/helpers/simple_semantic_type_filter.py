@@ -42,9 +42,9 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
 
     def __init__(
         self,
-        batch_ids: Optional[List[str]] = None,
+        batch_ids: Optional[list[str]] = None,
         validator: Optional[Validator] = None,
-        column_names: Optional[List[str]] = None,
+        column_names: Optional[list[str]] = None,
     ) -> None:
         self._build_table_column_name_to_inferred_semantic_domain_type_map(
             batch_ids=batch_ids,  # type: ignore[arg-type] # could be None
@@ -55,15 +55,15 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
     @property
     def table_column_name_to_inferred_semantic_domain_type_map(
         self,
-    ) -> Dict[str, SemanticDomainTypes]:
+    ) -> dict[str, SemanticDomainTypes]:
         return self._table_column_name_to_inferred_semantic_domain_type_map  # type: ignore[return-value] # could be None
 
     def parse_semantic_domain_type_argument(
         self,
         semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+            Union[str, SemanticDomainTypes, list[Union[str, SemanticDomainTypes]]]
         ] = None,
-    ) -> List[SemanticDomainTypes]:
+    ) -> list[SemanticDomainTypes]:
         if semantic_types is None:
             return []
 
@@ -98,11 +98,11 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
 
     def _build_table_column_name_to_inferred_semantic_domain_type_map(
         self,
-        batch_ids: List[str],
+        batch_ids: list[str],
         validator: Validator,
-        column_names: List[str],
+        column_names: list[str],
     ) -> None:
-        column_types_dict_list: List[Dict[str, Any]] = validator.get_metric(
+        column_types_dict_list: list[dict[str, Any]] = validator.get_metric(
             metric=MetricConfiguration(
                 metric_name="table.column_types",
                 metric_domain_kwargs={
@@ -125,7 +125,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
 
     @staticmethod
     def _infer_semantic_domain_type_from_table_column_type(
-        column_types_dict_list: List[Dict[str, Any]],
+        column_types_dict_list: list[dict[str, Any]],
         column_name: str,
     ) -> InferredSemanticDomainType:
         # Note: As of Python 3.8, specifying argument type in Lambda functions is not supported by Lambda syntax.

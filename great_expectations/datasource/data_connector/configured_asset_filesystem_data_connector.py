@@ -73,7 +73,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
         self._base_directory = base_directory
         self._glob_directive = glob_directive
 
-    def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
+    def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> list[str]:
         base_directory: str = self.base_directory
         glob_directive: str = self._glob_directive
 
@@ -85,7 +85,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
             if asset.glob_directive:
                 glob_directive = asset.glob_directive
 
-        path_list: List[str] = get_filesystem_one_level_directory_glob_path_list(
+        path_list: list[str] = get_filesystem_one_level_directory_glob_path_list(
             base_directory_path=base_directory, glob_directive=glob_directive
         )
 

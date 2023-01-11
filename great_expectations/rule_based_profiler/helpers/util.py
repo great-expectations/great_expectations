@@ -79,11 +79,11 @@ def get_validator(
     purpose: str,
     *,
     data_context: Optional[AbstractDataContext] = None,
-    batch_list: Optional[List[Batch]] = None,
+    batch_list: Optional[list[Batch]] = None,
     batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
-    parameters: Optional[Dict[str, ParameterContainer]] = None,
+    parameters: Optional[dict[str, ParameterContainer]] = None,
 ) -> Optional[Validator]:
     validator: Optional[Validator]
 
@@ -134,13 +134,13 @@ def get_validator(
 
 def get_batch_ids(
     data_context: Optional[AbstractDataContext] = None,
-    batch_list: Optional[List[Batch]] = None,
+    batch_list: Optional[list[Batch]] = None,
     batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     limit: Optional[int] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
-    parameters: Optional[Dict[str, ParameterContainer]] = None,
-) -> Optional[List[str]]:
+    parameters: Optional[dict[str, ParameterContainer]] = None,
+) -> Optional[list[str]]:
     batch: Batch
     if batch_list is None or all([batch is None for batch in batch_list]):
         if batch_request is None:
@@ -155,7 +155,7 @@ def get_batch_ids(
 
         batch_list = data_context.get_batch_list(batch_request=batch_request)
 
-    batch_ids: List[str] = [batch.id for batch in batch_list]
+    batch_ids: list[str] = [batch.id for batch in batch_list]
 
     num_batch_ids: int = len(batch_ids)
 
@@ -182,7 +182,7 @@ def build_batch_request(
     batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
-    parameters: Optional[Dict[str, ParameterContainer]] = None,
+    parameters: Optional[dict[str, ParameterContainer]] = None,
 ) -> Optional[Union[BatchRequest, RuntimeBatchRequest]]:
     if batch_request is None:
         return None
@@ -209,7 +209,7 @@ def build_metric_domain_kwargs(
     metric_domain_kwargs: Optional[Union[str, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
-    parameters: Optional[Dict[str, ParameterContainer]] = None,
+    parameters: Optional[dict[str, ParameterContainer]] = None,
 ):
     # Obtain domain kwargs from "rule state" (i.e., variables and parameters); from instance variable otherwise.
     metric_domain_kwargs = get_parameter_value_and_validate_return_type(
@@ -235,7 +235,7 @@ def get_parameter_value_and_validate_return_type(
     parameter_reference: Optional[Union[Any, str]] = None,
     expected_return_type: Optional[Union[type, tuple]] = None,
     variables: Optional[ParameterContainer] = None,
-    parameters: Optional[Dict[str, ParameterContainer]] = None,
+    parameters: Optional[dict[str, ParameterContainer]] = None,
 ) -> Any:
     """
     This method allows for the parameter_reference to be specified as an object (literal, dict, any typed object, etc.)
@@ -266,7 +266,7 @@ def get_parameter_value(
     domain: Optional[Domain] = None,
     parameter_reference: Optional[Union[Any, str]] = None,
     variables: Optional[ParameterContainer] = None,
-    parameters: Optional[Dict[str, ParameterContainer]] = None,
+    parameters: Optional[dict[str, ParameterContainer]] = None,
 ) -> Optional[Any]:
     """
     This method allows for the parameter_reference to be specified as an object (literal, dict, any typed object, etc.)
@@ -318,8 +318,8 @@ def get_parameter_value(
 
 def get_resolved_metrics_by_key(
     validator: Validator,
-    metric_configurations_by_key: Dict[str, List[MetricConfiguration]],
-) -> Dict[str, Dict[Tuple[str, str, str], MetricValue]]:
+    metric_configurations_by_key: dict[str, list[MetricConfiguration]],
+) -> dict[str, dict[Tuple[str, str, str], MetricValue]]:
     """
     Compute (resolve) metrics for every column name supplied on input.
 
@@ -327,21 +327,21 @@ def get_resolved_metrics_by_key(
         validator: Validator used to compute column cardinality.
         metric_configurations_by_key: metric configurations used to compute figures of merit.
         Dictionary of the form {
-            "my_key": List[MetricConfiguration],  # examples of "my_key" are: "my_column_name", "my_batch_id", etc.
+            "my_key": list[MetricConfiguration],  # examples of "my_key" are: "my_column_name", "my_batch_id", etc.
         }
 
     Returns:
         Dictionary of the form {
-            "my_key": Dict[Tuple[str, str, str], MetricValue],
+            "my_key": dict[Tuple[str, str, str], MetricValue],
         }
     """
     key: str
     metric_configuration: MetricConfiguration
-    metric_configurations_for_key: List[MetricConfiguration]
+    metric_configurations_for_key: list[MetricConfiguration]
 
     # Step 1: Gather "MetricConfiguration" objects corresponding to all possible key values/combinations.
     # and compute all metric values (resolve "MetricConfiguration" objects ) using a single method call.
-    resolved_metrics: Dict[
+    resolved_metrics: dict[
         Tuple[str, str, str], MetricValue
     ] = validator.compute_metrics(
         metric_configurations=[
@@ -352,7 +352,7 @@ def get_resolved_metrics_by_key(
     )
 
     # Step 2: Gather "MetricConfiguration" ID values for each key (one element per batch_id in every list).
-    metric_configuration_ids_by_key: Dict[str, List[Tuple[str, str, str]]] = {
+    metric_configuration_ids_by_key: dict[str, list[Tuple[str, str, str]]] = {
         key: [
             metric_configuration.id
             for metric_configuration in metric_configurations_for_key
@@ -360,9 +360,9 @@ def get_resolved_metrics_by_key(
         for key, metric_configurations_for_key in metric_configurations_by_key.items()
     }
 
-    metric_configuration_ids: List[Tuple[str, str, str]]
+    metric_configuration_ids: list[Tuple[str, str, str]]
     # Step 3: Obtain flattened list of "MetricConfiguration" ID values across all key values/combinations.
-    metric_configuration_ids_all_keys: List[Tuple[str, str, str]] = list(
+    metric_configuration_ids_all_keys: list[Tuple[str, str, str]] = list(
         itertools.chain(
             *[
                 metric_configuration_ids
@@ -382,12 +382,12 @@ def get_resolved_metrics_by_key(
     }
 
     # Step 5: Gather "MetricConfiguration" ID values for effective collection of resolved metrics.
-    metric_configuration_ids_resolved_metrics: List[Tuple[str, str, str]] = list(
+    metric_configuration_ids_resolved_metrics: list[Tuple[str, str, str]] = list(
         resolved_metrics.keys()
     )
 
     # Step 6: Produce "key" list, corresponding to effective "MetricConfiguration" ID values.
-    candidate_keys: List[str] = [
+    candidate_keys: list[str] = [
         key
         for key, metric_configuration_ids in metric_configuration_ids_by_key.items()
         if all(
@@ -398,7 +398,7 @@ def get_resolved_metrics_by_key(
         )
     ]
 
-    resolved_metrics_by_key: Dict[str, Dict[Tuple[str, str, str], MetricValue]] = {
+    resolved_metrics_by_key: dict[str, dict[Tuple[str, str, str], MetricValue]] = {
         key: {
             metric_configuration.id: resolved_metrics[metric_configuration.id]
             for metric_configuration in metric_configurations_by_key[key]
@@ -411,12 +411,12 @@ def get_resolved_metrics_by_key(
 
 def build_domains_from_column_names(
     rule_name: str,
-    column_names: List[str],
+    column_names: list[str],
     domain_type: MetricDomainTypes,
     table_column_name_to_inferred_semantic_domain_type_map: Optional[
-        Dict[str, SemanticDomainTypes]
+        dict[str, SemanticDomainTypes]
     ] = None,
-) -> List[Domain]:
+) -> list[Domain]:
     """
     This utility method builds "simple" Domain objects (i.e., required fields only, no "details" metadata accepted).
 
@@ -427,7 +427,7 @@ def build_domains_from_column_names(
     :return: list of resulting Domain objects
     """
     column_name: str
-    domains: List[Domain] = [
+    domains: list[Domain] = [
         Domain(
             domain_type=domain_type,
             domain_kwargs={
@@ -452,9 +452,9 @@ def build_domains_from_column_names(
 
 def convert_variables_to_dict(
     variables: Optional[ParameterContainer] = None,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     variables_as_dict: Optional[
-        Union[ParameterNode, Dict[str, Any]]
+        Union[ParameterNode, dict[str, Any]]
     ] = get_parameter_value_and_validate_return_type(
         domain=None,
         parameter_reference=VARIABLES_PREFIX,
@@ -489,7 +489,7 @@ def integer_semantic_domain_type(domain: Domain) -> bool:
 
     """
 
-    inferred_semantic_domain_type: Dict[str, SemanticDomainTypes] = domain.details.get(
+    inferred_semantic_domain_type: dict[str, SemanticDomainTypes] = domain.details.get(
         INFERRED_SEMANTIC_TYPE_KEY
     )
 
@@ -520,7 +520,7 @@ def datetime_semantic_domain_type(domain: Domain) -> bool:
         Boolean value indicating whether or not specified "Domain" is inferred as "SemanticDomainTypes.DATETIME"
     """
 
-    inferred_semantic_domain_type: Dict[str, SemanticDomainTypes] = domain.details.get(
+    inferred_semantic_domain_type: dict[str, SemanticDomainTypes] = domain.details.get(
         INFERRED_SEMANTIC_TYPE_KEY
     )
 
@@ -537,7 +537,7 @@ def get_false_positive_rate_from_rule_state(
     false_positive_rate: Union[str, float],
     domain: Domain,
     variables: Optional[ParameterContainer] = None,
-    parameters: Optional[Dict[str, ParameterContainer]] = None,
+    parameters: Optional[dict[str, ParameterContainer]] = None,
 ) -> Union[float, np.float64]:
     """
     This method obtains false_positive_rate from "rule state" (i.e., variables and parameters) and validates the result.
@@ -582,7 +582,7 @@ def get_quantile_statistic_interpolation_method_from_rule_state(
     round_decimals: int,
     domain: Domain,
     variables: Optional[ParameterContainer] = None,
-    parameters: Optional[Dict[str, ParameterContainer]] = None,
+    parameters: Optional[dict[str, ParameterContainer]] = None,
 ) -> str:
     """
     This method obtains quantile_statistic_interpolation_method from "rule state" (i.e., variables and parameters) and
@@ -959,7 +959,7 @@ def convert_metric_values_to_float_dtype_best_effort(
 
 def get_validator_with_expectation_suite(
     data_context: AbstractDataContext,
-    batch_list: Optional[List[Batch]] = None,
+    batch_list: Optional[list[Batch]] = None,
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
     expectation_suite: Optional[ExpectationSuite] = None,
     expectation_suite_name: Optional[str] = None,

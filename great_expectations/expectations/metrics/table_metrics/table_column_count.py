@@ -25,7 +25,7 @@ class TableColumnCount(TableMetricProvider):
         execution_engine: "ExecutionEngine",
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
     ):
         columns = metrics.get("table.columns")
@@ -37,7 +37,7 @@ class TableColumnCount(TableMetricProvider):
         execution_engine: "ExecutionEngine",
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
     ):
         columns = metrics.get("table.columns")
@@ -49,7 +49,7 @@ class TableColumnCount(TableMetricProvider):
         execution_engine: "ExecutionEngine",
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
     ):
         columns = metrics.get("table.columns")

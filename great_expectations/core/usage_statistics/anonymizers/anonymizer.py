@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type
+from typing import TYPE_CHECKING, Any, Callable, Optional, Type
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 
@@ -54,7 +54,7 @@ class Anonymizer(BaseAnonymizer):
             ValidationOperatorAnonymizer,
         )
 
-        self._strategies: List[Type[BaseAnonymizer]] = [
+        self._strategies: list[Type[BaseAnonymizer]] = [
             CheckpointAnonymizer,
             ProfilerAnonymizer,
             DatasourceAnonymizer,
@@ -70,7 +70,7 @@ class Anonymizer(BaseAnonymizer):
         ]
 
         # noinspection PyArgumentList
-        self._anonymizers: Dict[Type[BaseAnonymizer], BaseAnonymizer] = {
+        self._anonymizers: dict[Type[BaseAnonymizer], BaseAnonymizer] = {
             strategy: strategy(salt=self._salt, aggregate_anonymizer=self)
             for strategy in self._strategies
         }
@@ -99,9 +99,9 @@ class Anonymizer(BaseAnonymizer):
 
         return None
 
-    def anonymize_init_payload(self, init_payload: Dict[str, Any]) -> Dict[str, Any]:
-        anonymized_init_payload: Dict[str, Any] = {}
-        anonymizer_funcs: Dict[str, Any] = {
+    def anonymize_init_payload(self, init_payload: dict[str, Any]) -> dict[str, Any]:
+        anonymized_init_payload: dict[str, Any] = {}
+        anonymizer_funcs: dict[str, Any] = {
             "datasources": self._anonymize_datasources_init_payload,
             "stores": self._anonymize_stores_init_payload,
             "validation_operators": self._anonymize_validation_operator_init_payload,
@@ -119,14 +119,14 @@ class Anonymizer(BaseAnonymizer):
                 anonymized_init_payload[key] = val
         return anonymized_init_payload
 
-    def _anonymize_datasources_init_payload(self, payload: dict) -> List[dict]:
+    def _anonymize_datasources_init_payload(self, payload: dict) -> list[dict]:
         from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
             DatasourceAnonymizer,
         )
 
         anonymizer = self._anonymizers[DatasourceAnonymizer]
 
-        anonymized_values: List[dict] = []
+        anonymized_values: list[dict] = []
         for name, config in payload.items():
             anonymize_value: dict = anonymizer._anonymize_datasource_info(
                 name=name, config=config
@@ -135,14 +135,14 @@ class Anonymizer(BaseAnonymizer):
 
         return anonymized_values
 
-    def _anonymize_stores_init_payload(self, payload: Dict[str, "Store"]) -> List[dict]:
+    def _anonymize_stores_init_payload(self, payload: dict[str, "Store"]) -> list[dict]:
         from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
             StoreAnonymizer,
         )
 
         anonymizer = self._anonymizers[StoreAnonymizer]
 
-        anonymized_values: List[dict] = []
+        anonymized_values: list[dict] = []
         for store_name, store_obj in payload.items():
             anonymize_value: dict = anonymizer.anonymize(
                 store_name=store_name,
@@ -153,8 +153,8 @@ class Anonymizer(BaseAnonymizer):
         return anonymized_values
 
     def _anonymize_validation_operator_init_payload(
-        self, payload: Optional[Dict[str, "ValidationOperator"]] = None
-    ) -> List[dict]:
+        self, payload: Optional[dict[str, "ValidationOperator"]] = None
+    ) -> list[dict]:
 
         from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import (
             ValidationOperatorAnonymizer,
@@ -165,7 +165,7 @@ class Anonymizer(BaseAnonymizer):
 
         anonymizer = self._anonymizers[ValidationOperatorAnonymizer]
 
-        anonymized_values: List[dict] = []
+        anonymized_values: list[dict] = []
         for validation_operator_name, validation_operator_obj in payload.items():
             anonymize_value: dict = anonymizer.anonymize(
                 validation_operator_name=validation_operator_name,
@@ -176,15 +176,15 @@ class Anonymizer(BaseAnonymizer):
         return anonymized_values
 
     def _anonymize_data_docs_sites_init_payload(
-        self, payload: Dict[str, dict]
-    ) -> List[dict]:
+        self, payload: dict[str, dict]
+    ) -> list[dict]:
         from great_expectations.core.usage_statistics.anonymizers.data_docs_anonymizer import (
             DataDocsAnonymizer,
         )
 
         anonymizer = self._anonymizers[DataDocsAnonymizer]
 
-        anonymized_values: List[dict] = []
+        anonymized_values: list[dict] = []
         for site_name, site_config in payload.items():
             anonymize_value: dict = anonymizer.anonymize(
                 site_name=site_name, site_config=site_config
@@ -194,15 +194,15 @@ class Anonymizer(BaseAnonymizer):
         return anonymized_values
 
     def _anonymize_expectation_suite_init_payload(
-        self, payload: List["ExpectationSuite"]
-    ) -> List[dict]:
+        self, payload: list["ExpectationSuite"]
+    ) -> list[dict]:
         from great_expectations.core.usage_statistics.anonymizers.expectation_anonymizer import (
             ExpectationSuiteAnonymizer,
         )
 
         anonymizer = self._anonymizers[ExpectationSuiteAnonymizer]
 
-        anonymized_values: List[dict] = []
+        anonymized_values: list[dict] = []
         for suite in payload:
             anonymize_value: dict = anonymizer.anonymize(obj=suite)
             anonymized_values.append(anonymize_value)

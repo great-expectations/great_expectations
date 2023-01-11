@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections import OrderedDict
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core.batch import (
     Batch,
@@ -24,7 +24,7 @@ class BatchManager:
     def __init__(
         self,
         execution_engine: ExecutionEngine,
-        batch_list: Optional[List[Batch]] = None,
+        batch_list: Optional[list[Batch]] = None,
     ) -> None:
         """
         Args:
@@ -39,18 +39,18 @@ class BatchManager:
         if batch_list is None:
             batch_list = []
 
-        self._batch_cache: Dict[str, Batch] = OrderedDict()
-        self._batch_data_cache: Dict[str, BatchDataType] = {}
+        self._batch_cache: dict[str, Batch] = OrderedDict()
+        self._batch_data_cache: dict[str, BatchDataType] = {}
 
         self.load_batch_list(batch_list=batch_list)
 
     @property
-    def batch_data_cache(self) -> Dict[str, BatchDataType]:
+    def batch_data_cache(self) -> dict[str, BatchDataType]:
         """Dictionary of loaded BatchData objects."""
         return self._batch_data_cache
 
     @property
-    def loaded_batch_ids(self) -> List[str]:
+    def loaded_batch_ids(self) -> list[str]:
         """IDs of loaded BatchData objects."""
         return list(self._batch_data_cache.keys())
 
@@ -83,7 +83,7 @@ class BatchManager:
         return self._batch_data_cache.get(self.active_batch_data_id)
 
     @property
-    def batch_cache(self) -> Dict[str, Batch]:
+    def batch_cache(self) -> dict[str, Batch]:
         """Getter for ordered dictionary (cache) of "Batch" objects in use (with batch_id as key)."""
         return self._batch_cache
 
@@ -144,7 +144,7 @@ class BatchManager:
         self._batch_cache = OrderedDict()
         self._active_batch_id = None
 
-    def load_batch_list(self, batch_list: Optional[List[Batch]]) -> None:
+    def load_batch_list(self, batch_list: Optional[list[Batch]]) -> None:
         if batch_list is None:
             batch_list = []
 

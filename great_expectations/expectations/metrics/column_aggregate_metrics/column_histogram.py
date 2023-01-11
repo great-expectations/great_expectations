@@ -36,7 +36,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
     ):
         df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
@@ -56,7 +56,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
     ):
         """return a list of counts corresponding to bins
@@ -234,7 +234,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
     ):
         df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(

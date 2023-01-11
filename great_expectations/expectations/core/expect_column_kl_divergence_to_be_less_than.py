@@ -241,7 +241,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                     execution_engine=execution_engine,
                     show_progress_bars=True,
                 )
-                resolved_metrics: Dict[
+                resolved_metrics: dict[
                     Tuple[str, str, str], MetricValue
                 ] = metrics_calculator.compute_metrics(
                     metric_configurations=[partition_metric_configuration],

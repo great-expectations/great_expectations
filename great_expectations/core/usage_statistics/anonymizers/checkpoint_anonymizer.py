@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 import logging
 from numbers import Number
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 from ruamel.yaml.comments import CommentedMap
 
@@ -76,7 +76,7 @@ class CheckpointAnonymizer(BaseAnonymizer):
         attribute_value: Optional[Union[str, dict]]
         validation_obj: dict
 
-        checkpoint_optional_top_level_keys: List[str] = []
+        checkpoint_optional_top_level_keys: list[str] = []
 
         name: Optional[str] = kwargs.get("name")
         anonymized_name: Optional[str] = self._anonymize_string(name)
@@ -105,11 +105,11 @@ class CheckpointAnonymizer(BaseAnonymizer):
             batch_request = {}
 
         anonymized_batch_request: Optional[
-            Dict[str, List[str]]
+            dict[str, list[str]]
         ] = self._aggregate_anonymizer.anonymize(*(), **batch_request)
 
-        action_list: Optional[List[dict]] = kwargs.get("action_list")
-        anonymized_action_list: Optional[List[dict]] = None
+        action_list: Optional[list[dict]] = kwargs.get("action_list")
+        anonymized_action_list: Optional[list[dict]] = None
         if action_list:
             # noinspection PyBroadException
             try:
@@ -125,8 +125,8 @@ class CheckpointAnonymizer(BaseAnonymizer):
                     "anonymize_checkpoint_run: Unable to create anonymized_action_list payload field"
                 )
 
-        validations: Optional[List[dict]] = kwargs.get("validations")
-        anonymized_validations: Optional[List[dict]] = []
+        validations: Optional[list[dict]] = kwargs.get("validations")
+        anonymized_validations: Optional[list[dict]] = []
         if validations:
             for validation_obj in validations:
                 validation_batch_request: Optional[
@@ -140,7 +140,7 @@ class CheckpointAnonymizer(BaseAnonymizer):
                 )
 
                 anonymized_validation_batch_request: Optional[
-                    Optional[Dict[str, List[str]]]
+                    Optional[dict[str, list[str]]]
                 ] = self._aggregate_anonymizer.anonymize(
                     *(), **validation_batch_request
                 )
@@ -152,10 +152,10 @@ class CheckpointAnonymizer(BaseAnonymizer):
                     str
                 ] = self._anonymize_string(validation_expectation_suite_name)
 
-                validation_action_list: Optional[List[dict]] = validation_obj.get(
+                validation_action_list: Optional[list[dict]] = validation_obj.get(
                     "action_list"
                 )
-                anonymized_validation_action_list: Optional[List[dict]] = None
+                anonymized_validation_action_list: Optional[list[dict]] = None
                 if validation_action_list:
                     # noinspection PyBroadException
                     try:
@@ -171,8 +171,8 @@ class CheckpointAnonymizer(BaseAnonymizer):
                             "anonymize_checkpoint_run: Unable to create anonymized_validation_action_list payload field"
                         )
 
-                anonymized_validation: Dict[
-                    str, Union[str, Dict[str, Any], List[Dict[str, Any]]]
+                anonymized_validation: dict[
+                    str, Union[str, dict[str, Any], list[dict[str, Any]]]
                 ] = {}
 
                 if anonymized_validation_batch_request:
@@ -190,7 +190,7 @@ class CheckpointAnonymizer(BaseAnonymizer):
                         "anonymized_action_list"
                     ] = anonymized_validation_action_list
 
-                anonymized_validation: Dict[str, Dict[str, Any]] = {
+                anonymized_validation: dict[str, dict[str, Any]] = {
                     "anonymized_batch_request": anonymized_validation_batch_request,
                     "anonymized_expectation_suite_name": anonymized_validation_expectation_suite_name,
                     "anonymized_action_list": anonymized_validation_action_list,
@@ -235,7 +235,7 @@ class CheckpointAnonymizer(BaseAnonymizer):
             if attribute_value:
                 checkpoint_optional_top_level_keys.append(attribute_name)
 
-        anonymized_checkpoint_run_properties_dict: Dict[str, List[str]] = {
+        anonymized_checkpoint_run_properties_dict: dict[str, list[str]] = {
             "anonymized_name": anonymized_name,
             "config_version": config_version,
             "anonymized_template_name": anonymized_template_name,

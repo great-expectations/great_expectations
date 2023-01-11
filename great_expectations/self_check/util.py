@@ -516,7 +516,7 @@ BACKEND_TO_ENGINE_NAME_DICT.update({name: "sqlalchemy" for name in SQL_DIALECT_N
 class SqlAlchemyConnectionManager:
     def __init__(self) -> None:
         self.lock = threading.Lock()
-        self._connections: Dict[str, "Connection"] = {}
+        self._connections: dict[str, "Connection"] = {}
 
     def get_engine(self, connection_string):
         if sqlalchemy is not None:
@@ -1360,7 +1360,7 @@ def get_test_validator_with_data(  # noqa: C901 - 31
                     type_ = schema[col]
                     if type_ in ["IntegerType", "LongType"]:
                         # Ints cannot be None...but None can be valid in Spark (as Null)
-                        vals: List[Union[str, int, float, None]] = []
+                        vals: list[Union[str, int, float, None]] = []
                         for val in data[col]:
                             if val is None:
                                 vals.append(val)
@@ -1472,7 +1472,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     if debug_logger:
         _debug = lambda x: debug_logger.debug(f"(build_sa_validator_with_data) {x}")  # type: ignore[union-attr] # noqa: E731
 
-    dialect_classes: Dict[str, Type] = {}
+    dialect_classes: dict[str, Type] = {}
     dialect_types = {}
     try:
         dialect_classes["sqlite"] = sqlitetypes.dialect
@@ -1826,7 +1826,7 @@ def build_spark_engine(
 
     if isinstance(df, pd.DataFrame):
         if schema is None:
-            data: Union[pd.DataFrame, List[tuple]] = [
+            data: Union[pd.DataFrame, list[tuple]] = [
                 tuple(
                     None if isinstance(x, (float, int)) and np.isnan(x) else x
                     for x in record.tolist()
@@ -1840,7 +1840,7 @@ def build_spark_engine(
         df = spark.createDataFrame(data=data, schema=schema)
 
     conf: Iterable[Tuple[str, str]] = spark.sparkContext.getConf().getAll()
-    spark_config: Dict[str, str] = dict(conf)
+    spark_config: dict[str, str] = dict(conf)
     execution_engine = SparkDFExecutionEngine(
         spark_config=spark_config,
         batch_data_dict={
@@ -2083,7 +2083,7 @@ def build_test_backends_list(  # noqa: C901 - 48
     include_athena=False,
     include_snowflake=False,
     raise_exceptions_for_backends: bool = True,
-) -> List[str]:
+) -> list[str]:
     """Attempts to identify supported backends by checking which imports are available."""
 
     test_backends = []
@@ -2329,13 +2329,13 @@ def build_test_backends_list(  # noqa: C901 - 48
 
 def generate_expectation_tests(  # noqa: C901 - 43
     expectation_type: str,
-    test_data_cases: List[ExpectationTestDataCases],
+    test_data_cases: list[ExpectationTestDataCases],
     execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
     raise_exceptions_for_backends: bool = False,
     ignore_suppress: bool = False,
     ignore_only_for: bool = False,
     debug_logger: Optional[logging.Logger] = None,
-    only_consider_these_backends: Optional[List[str]] = None,
+    only_consider_these_backends: Optional[list[str]] = None,
     context: Optional[AbstractDataContext] = None,  # noqa: F821
 ):
     """Determine tests to run

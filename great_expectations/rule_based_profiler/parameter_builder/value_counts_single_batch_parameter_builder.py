@@ -51,7 +51,7 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
         self,
         name: str,
         evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
+            list[ParameterBuilderConfig]
         ] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
@@ -116,7 +116,7 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        parameters: Optional[dict[str, ParameterContainer]] = None,
         recompute_existing_parameter_values: bool = False,
     ) -> Attributes:
         """

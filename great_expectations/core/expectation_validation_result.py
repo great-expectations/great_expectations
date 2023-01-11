@@ -4,7 +4,7 @@ import datetime
 import json
 import logging
 from copy import deepcopy
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 from uuid import UUID
 
 from marshmallow import Schema, fields, post_dump, post_load, pre_dump
@@ -231,11 +231,11 @@ class ExpectationValidationResult(SerializableDictDot):
                 class_name=inline_renderer_config["class_name"],
             )
 
-        rendered_content: List[
+        rendered_content: list[
             RenderedAtomicContent
         ] = inline_renderer.get_rendered_content()
 
-        diagnostic_rendered_content: List[RenderedAtomicContent] = [
+        diagnostic_rendered_content: list[RenderedAtomicContent] = [
             content_block
             for content_block in rendered_content
             if content_block.name.startswith(AtomicRendererType.DIAGNOSTIC)
@@ -249,7 +249,7 @@ class ExpectationValidationResult(SerializableDictDot):
             )
         )
 
-        prescriptive_rendered_content: List[RenderedAtomicContent] = [
+        prescriptive_rendered_content: list[RenderedAtomicContent] = [
             content_block
             for content_block in rendered_content
             if content_block.name.startswith(AtomicRendererType.PRESCRIPTIVE)

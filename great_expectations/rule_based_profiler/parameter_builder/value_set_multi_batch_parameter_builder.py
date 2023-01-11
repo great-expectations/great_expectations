@@ -81,7 +81,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
+            list[ParameterBuilderConfig]
         ] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
@@ -113,7 +113,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        parameters: Optional[dict[str, ParameterContainer]] = None,
         recompute_existing_parameter_values: bool = False,
     ) -> Attributes:
         """
@@ -186,7 +186,7 @@ def _get_unique_values_from_nested_collection_of_sets(
         Single flattened set containing unique values.
     """
 
-    flattened: Union[List[Set[V]], Set[V]] = list(
+    flattened: Union[list[Set[V]], Set[V]] = list(
         itertools.chain.from_iterable(collection)
     )
     element: V

@@ -15,14 +15,14 @@ if TYPE_CHECKING:
 def build_docs(
     context: FileDataContext,
     usage_stats_event: str,
-    site_names: Optional[List[str]] = None,
+    site_names: Optional[list[str]] = None,
     view: bool = True,
     assume_yes: bool = False,
 ) -> None:
     """Build documentation in a context"""
     logger.debug("Starting cli.datasource.build_docs")
 
-    index_page_locator_infos: Dict[str, str] = context.build_data_docs(
+    index_page_locator_infos: dict[str, str] = context.build_data_docs(
         site_names=site_names, dry_run=True
     )
 

@@ -105,8 +105,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
     )
 
     Then:
-        metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]] = result.metrics_by_domain
-        expectation_configurations: List[ExpectationConfiguration] = result.expectation_configurations
+        metrics_by_domain: dict[Domain, dict[str, ParameterNode]] = result.metrics_by_domain
+        expectation_configurations: list[ExpectationConfiguration] = result.expectation_configurations
         profiler_config: RuleBasedProfilerConfig = result.profiler_config
         ...
     """
@@ -383,7 +383,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             suffix: Optional[str] = None,
             metric_value_kwargs: Optional[Union[str, dict]] = None,
             evaluation_parameter_builder_configs: Optional[
-                List[ParameterBuilderConfig]
+                list[ParameterBuilderConfig]
             ] = None,
         ) -> ParameterBuilder:
             """
@@ -486,7 +486,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             self._data_context = self._validator.data_context
             self._batches = self._validator.batches
 
-        variables: Optional[Dict[str, Any]] = self.get_variables() or {}
+        variables: Optional[dict[str, Any]] = self.get_variables() or {}
         self._profiler = RuleBasedProfiler(
             name=self.name,
             config_version=1.0,
@@ -496,7 +496,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         self._metrics_parameter_builders_by_domain = {}
 
-        rules: Optional[List[Rule]] = self.get_rules() or []
+        rules: Optional[list[Rule]] = self.get_rules() or []
 
         rule: Rule
         for rule in rules:
@@ -512,13 +512,13 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
     def run(
         self,
-        variables: Optional[Dict[str, Any]] = None,
-        rules: Optional[Dict[str, Dict[str, Any]]] = None,
+        variables: Optional[dict[str, Any]] = None,
+        rules: Optional[dict[str, dict[str, Any]]] = None,
         variables_directives_list: Optional[
-            List[RuntimeEnvironmentVariablesDirectives]
+            list[RuntimeEnvironmentVariablesDirectives]
         ] = None,
         domain_type_directives_list: Optional[
-            List[RuntimeEnvironmentDomainTypeDirectives]
+            list[RuntimeEnvironmentDomainTypeDirectives]
         ] = None,
     ) -> DataAssistantResult:
         """
@@ -539,7 +539,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         else:
             usage_statistics_handler = self._data_context._usage_statistics_handler
 
-        batches: Dict[str, Batch] = self._batches
+        batches: dict[str, Batch] = self._batches
         if batches is None:
             batches = {}
 
@@ -581,7 +581,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         return isabstract(cls)
 
     @abstractmethod
-    def get_variables(self) -> Optional[Dict[str, Any]]:
+    def get_variables(self) -> Optional[dict[str, Any]]:
         """
         Returns:
             Optional "variables" configuration attribute name/value pairs (overrides), commonly-used in Builder objects.
@@ -589,7 +589,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         pass
 
     @abstractmethod
-    def get_rules(self) -> Optional[List[Rule]]:
+    def get_rules(self) -> Optional[list[Rule]]:
         """
         Returns:
             Optional custom list of "Rule" objects (overrides) can be added by subclasses (return "None" if not needed).
@@ -613,7 +613,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         pass
 
     # noinspection PyShadowingNames
-    def get_metrics_by_domain(self) -> Dict[Domain, Dict[str, ParameterNode]]:
+    def get_metrics_by_domain(self) -> dict[Domain, dict[str, ParameterNode]]:
         """
         Obtain subset of all parameter values for fully-qualified parameter names by domain, available from entire
         "RuleBasedProfiler" state, where "Domain" objects are among keys included in provisions as proscribed by value
@@ -626,8 +626,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
         domain_key: Domain
 
         # noinspection PyTypeChecker
-        parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
-            Domain, Dict[str, ParameterNode]
+        parameter_values_for_fully_qualified_parameter_names_by_domain: dict[
+            Domain, dict[str, ParameterNode]
         ] = dict(
             filter(
                 lambda element: any(
@@ -642,9 +642,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         domain: Domain
 
-        parameter_builders: List[ParameterBuilder]
+        parameter_builders: list[ParameterBuilder]
         parameter_builder: ParameterBuilder
-        fully_qualified_metrics_parameter_names_by_domain: Dict[Domain, List[str]] = {
+        fully_qualified_metrics_parameter_names_by_domain: dict[Domain, list[str]] = {
             domain: [
                 parameter_builder.json_serialized_fully_qualified_parameter_name
                 for parameter_builder in parameter_builders
@@ -656,8 +656,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
             for domain, parameter_builders in self._metrics_parameter_builders_by_domain.items()
         }
 
-        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
-        fully_qualified_metrics_parameter_names: List[str]
+        parameter_values_for_fully_qualified_parameter_names: dict[str, ParameterNode]
+        fully_qualified_metrics_parameter_names: list[str]
 
         # noinspection PyTypeChecker
         parameter_values_for_fully_qualified_parameter_names_by_domain = {
@@ -677,11 +677,11 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
     def _batch_id_to_batch_identifier_display_name_map(
         self,
-    ) -> Dict[str, Set[Tuple[str, Any]]]:
+    ) -> dict[str, Set[Tuple[str, Any]]]:
         """
         This method uses loaded "Batch" objects to return the mapping between unique "batch_id" and "batch_identifiers".
         """
-        batches: Dict[str, Batch] = self._batches
+        batches: dict[str, Batch] = self._batches
         if batches is None:
             batches = {}
 
@@ -706,15 +706,15 @@ def run_profiler_on_data(
     data_assistant: DataAssistant,
     data_assistant_result: DataAssistantResult,
     profiler: BaseRuleBasedProfiler,
-    variables: Optional[Dict[str, Any]] = None,
-    rules: Optional[Dict[str, Dict[str, Any]]] = None,
-    batch_list: Optional[List[Batch]] = None,
+    variables: Optional[dict[str, Any]] = None,
+    rules: Optional[dict[str, dict[str, Any]]] = None,
+    batch_list: Optional[list[Batch]] = None,
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
     variables_directives_list: Optional[
-        List[RuntimeEnvironmentVariablesDirectives]
+        list[RuntimeEnvironmentVariablesDirectives]
     ] = None,
     domain_type_directives_list: Optional[
-        List[RuntimeEnvironmentDomainTypeDirectives]
+        list[RuntimeEnvironmentDomainTypeDirectives]
     ] = None,
 ) -> None:
     """
@@ -735,7 +735,7 @@ def run_profiler_on_data(
         rules = []
 
     rule: Rule
-    rules_configs: Optional[Dict[str, Dict[str, Any]]] = {
+    rules_configs: Optional[dict[str, dict[str, Any]]] = {
         rule.name: rule.to_json_dict() for rule in rules
     }
     comment: str = f"""Created by effective Rule-Based Profiler of {data_assistant.__class__.__name__} with the \
@@ -773,17 +773,17 @@ def build_map_metric_rule(
     total_count_metric_multi_batch_parameter_builder_for_evaluations: Optional[
         ParameterBuilder
     ] = None,
-    include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
-    exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
-    include_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
-    exclude_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
+    include_column_names: Optional[Union[str, Optional[list[str]]]] = None,
+    exclude_column_names: Optional[Union[str, Optional[list[str]]]] = None,
+    include_column_name_suffixes: Optional[Union[str, Iterable, list[str]]] = None,
+    exclude_column_name_suffixes: Optional[Union[str, Iterable, list[str]]] = None,
     semantic_type_filter_module_name: Optional[str] = None,
     semantic_type_filter_class_name: Optional[str] = None,
     include_semantic_types: Optional[
-        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+        Union[str, SemanticDomainTypes, list[Union[str, SemanticDomainTypes]]]
     ] = None,
     exclude_semantic_types: Optional[
-        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+        Union[str, SemanticDomainTypes, list[Union[str, SemanticDomainTypes]]]
     ] = None,
     max_unexpected_values: Union[str, int] = 0,
     max_unexpected_ratio: Optional[Union[str, float]] = None,
@@ -815,7 +815,7 @@ def build_map_metric_rule(
 
     # Step-2: Declare "ParameterBuilder" for every relevant metric of interest.
 
-    parameter_builders: List[ParameterBuilder] = []
+    parameter_builders: list[ParameterBuilder] = []
 
     column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations: Optional[
         ParameterBuilder
@@ -863,7 +863,7 @@ def build_map_metric_rule(
             DataAssistant.commonly_used_parameter_builders.get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder()
         )
 
-    evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
+    evaluation_parameter_builder_configs: Optional[list[ParameterBuilderConfig]] = [
         ParameterBuilderConfig(
             **total_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
         ),
@@ -884,7 +884,7 @@ def build_map_metric_rule(
 
     # Step-4: Pass "MeanUnexpectedMapMetricMultiBatchParameterBuilder" as "validation" "ParameterBuilder" for "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
 
-    validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
+    validation_parameter_builder_configs: Optional[list[ParameterBuilderConfig]] = [
         ParameterBuilderConfig(
             **column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations.to_json_dict()
         ),
@@ -905,7 +905,7 @@ def build_map_metric_rule(
         "success_ratio": 7.5e-1,
     }
 
-    expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
+    expectation_configuration_builders: list[ExpectationConfigurationBuilder] = [
         expect_column_values_to_be_attribute_expectation_configuration_builder,
     ]
     rule = Rule(

@@ -7,7 +7,7 @@ import math
 import operator
 import traceback
 from collections import namedtuple
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Optional, Tuple, Union
 
 import dateutil
 from pyparsing import (
@@ -333,7 +333,7 @@ def find_evaluation_parameter_dependencies(parameter_expression):
 
 def parse_evaluation_parameter(  # noqa: C901 - complexity 19
     parameter_expression: str,
-    evaluation_parameters: Optional[Dict[str, Any]] = None,
+    evaluation_parameters: Optional[dict[str, Any]] = None,
     data_context: Optional[AbstractDataContext] = None,
 ) -> Any:
     """Use the provided evaluation_parameters dict to parse a given parameter expression.

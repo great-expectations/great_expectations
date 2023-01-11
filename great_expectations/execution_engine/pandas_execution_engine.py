@@ -115,9 +115,9 @@ Notes:
         self.discard_subset_failing_expectations = kwargs.pop(
             "discard_subset_failing_expectations", False
         )
-        boto3_options: Dict[str, dict] = kwargs.pop("boto3_options", {})
-        azure_options: Dict[str, dict] = kwargs.pop("azure_options", {})
-        gcs_options: Dict[str, dict] = kwargs.pop("gcs_options", {})
+        boto3_options: dict[str, dict] = kwargs.pop("boto3_options", {})
+        azure_options: dict[str, dict] = kwargs.pop("azure_options", {})
+        gcs_options: dict[str, dict] = kwargs.pop("gcs_options", {})
 
         # Instantiate cloud provider clients as None at first.
         # They will be instantiated if/when passed cloud-specific in BatchSpec is passed in
@@ -448,7 +448,7 @@ not {batch_spec.__class__.__name__}"""
 
     def resolve_metric_bundle(
         self, metric_fn_bundle
-    ) -> Dict[Tuple[str, str, str], Any]:
+    ) -> dict[Tuple[str, str, str], Any]:
         """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
         return (
             {}

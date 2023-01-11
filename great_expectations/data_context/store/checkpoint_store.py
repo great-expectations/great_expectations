@@ -107,8 +107,8 @@ class CheckpointStore(ConfigurationStore):
 
     def list_checkpoints(
         self, ge_cloud_mode: bool = False
-    ) -> Union[List[str], List[ConfigurationIdentifier]]:
-        keys: Union[List[str], List[ConfigurationIdentifier]] = self.list_keys()  # type: ignore[assignment]
+    ) -> Union[list[str], list[ConfigurationIdentifier]]:
+        keys: Union[list[str], list[ConfigurationIdentifier]] = self.list_keys()  # type: ignore[assignment]
         if ge_cloud_mode:
             return keys
         return [k.configuration_key for k in keys]  # type: ignore[union-attr]

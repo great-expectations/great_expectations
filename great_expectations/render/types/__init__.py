@@ -130,8 +130,8 @@ class RenderedAtomicValue(RenderedAtomicValueRender):
         header: Optional[RenderedAtomicValueRender] = None,
         template: Optional[str] = None,
         params: Optional[dict] = None,
-        header_row: Optional[List[RendererTableValueRender]] = None,
-        table: Optional[List[List[RendererTableValueRender]]] = None,
+        header_row: Optional[list[RendererTableValueRender]] = None,
+        table: Optional[list[list[RendererTableValueRender]]] = None,
         graph: Optional[dict] = None,
     ):
         warnings.warn(

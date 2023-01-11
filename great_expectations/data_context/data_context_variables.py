@@ -364,7 +364,7 @@ class FileDataContextVariables(DataContextVariables):
         NOTE: This could be generalized into a stand-alone context manager function,
         but it would need to take in the data_context containing the zep objects.
         """
-        config_xdatasources_stash: Dict[
+        config_xdatasources_stash: dict[
             str, XDatasource
         ] = self.data_context._synchronize_zep_datasources()
         try:

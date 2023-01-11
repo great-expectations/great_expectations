@@ -89,10 +89,10 @@ class RuleStats(SerializableDictDot):
     """
 
     num_domains: int = 0
-    domains_count_by_domain_type: Dict[MetricDomainTypes, int] = field(
+    domains_count_by_domain_type: dict[MetricDomainTypes, int] = field(
         default_factory=dict
     )
-    domains_by_domain_type: Dict[MetricDomainTypes, List[dict]] = field(
+    domains_by_domain_type: dict[MetricDomainTypes, list[dict]] = field(
         default_factory=dict
     )
     num_parameter_builders: int = 0
@@ -138,33 +138,33 @@ class DataAssistantResult(SerializableDictDot):
     }
 
     _batch_id_to_batch_identifier_display_name_map: Optional[
-        Dict[str, Set[Tuple[str, Any]]]
+        dict[str, Set[Tuple[str, Any]]]
     ] = field(default=None)
     profiler_config: Optional[RuleBasedProfilerConfig] = None
     profiler_execution_time: Optional[
         float
     ] = None  # Effective Rule-Based Profiler overall execution time (in seconds).
     rule_domain_builder_execution_time: Optional[
-        Dict[str, float]
+        dict[str, float]
     ] = None  # Effective Rule-Based Profiler per-Rule DomainBuilder execution time (in seconds).
     rule_execution_time: Optional[
-        Dict[str, float]
+        dict[str, float]
     ] = None  # Effective Rule-Based Profiler per-Rule total execution time (in seconds).
-    metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = None
-    expectation_configurations: Optional[List[ExpectationConfiguration]] = None
+    metrics_by_domain: Optional[dict[Domain, dict[str, ParameterNode]]] = None
+    expectation_configurations: Optional[list[ExpectationConfiguration]] = None
     citation: Optional[dict] = None
     # Reference to "UsageStatisticsHandler" object for this "DataAssistantResult" object (if configured).
     _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
 
     @property
-    def metric_expectation_map(self) -> Dict[Union[str, Tuple[str, ...]], str]:
+    def metric_expectation_map(self) -> dict[Union[str, Tuple[str, ...]], str]:
         """
         A mapping is defined for which metrics to plot and their associated expectations.
         """
         raise NotImplementedError("Subclasses must implement this property.")
 
     @property
-    def metric_types(self) -> Dict[str, AltairDataTypes]:
+    def metric_types(self) -> dict[str, AltairDataTypes]:
         """
         A mapping is defined for the Altair data type associated with each metric.
         """
@@ -227,7 +227,7 @@ class DataAssistantResult(SerializableDictDot):
         Returns: This DataAssistantResult as dictionary (JSON-serializable dictionary for DataAssistantResult objects).
         """
         domain: Domain
-        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
+        parameter_values_for_fully_qualified_parameter_names: dict[str, ParameterNode]
         expectation_configuration: ExpectationConfiguration
         return {
             "_batch_id_to_batch_identifier_display_name_map": convert_to_json_serializable(
@@ -266,7 +266,7 @@ class DataAssistantResult(SerializableDictDot):
         """
         return self.to_dict()
 
-    def __dir__(self) -> List[str]:
+    def __dir__(self) -> list[str]:
         """
         This custom magic method is used to enable tab completion on "DataAssistantResult" objects.
         """
@@ -325,7 +325,7 @@ class DataAssistantResult(SerializableDictDot):
         json_dict.update(auxiliary_profiler_execution_details)
         return json.dumps(json_dict, indent=2)
 
-    def _get_metric_expectation_map(self) -> Dict[Tuple[str], str]:
+    def _get_metric_expectation_map(self) -> dict[Tuple[str], str]:
         if not all(
             [isinstance(metric_names, str) or isinstance(metric_names, tuple)]
             for metric_names in self.metric_expectation_map.keys()
@@ -352,12 +352,12 @@ class DataAssistantResult(SerializableDictDot):
         }
 
         if verbose:
-            rule_name_to_rule_stats_map: Dict[str, RuleStats] = {}
+            rule_name_to_rule_stats_map: dict[str, RuleStats] = {}
 
-            rule_domains: List[Domain] = list(self.metrics_by_domain.keys())
+            rule_domains: list[Domain] = list(self.metrics_by_domain.keys())
 
             rule_stats: RuleStats
-            domains: List[Domain]
+            domains: list[Domain]
             domain: Domain
             domain_as_json_dict: dict
             num_domains: int
@@ -462,7 +462,7 @@ class DataAssistantResult(SerializableDictDot):
             overwrite_existing=True,
         )
 
-        citation: Dict[str, Any]
+        citation: dict[str, Any]
         if include_profiler_config:
             citation = self.citation
         else:
@@ -481,9 +481,9 @@ class DataAssistantResult(SerializableDictDot):
     def plot_metrics(
         self,
         sequential: bool = True,
-        theme: Optional[Dict[str, Any]] = None,
-        include_column_names: Optional[List[str]] = None,
-        exclude_column_names: Optional[List[str]] = None,
+        theme: Optional[dict[str, Any]] = None,
+        include_column_names: Optional[list[str]] = None,
+        exclude_column_names: Optional[list[str]] = None,
     ) -> PlotResult:
         """
         Use contents of "DataAssistantResult" object to display metrics for visualization purposes.
@@ -511,9 +511,9 @@ class DataAssistantResult(SerializableDictDot):
     def plot_expectations_and_metrics(
         self,
         sequential: bool = True,
-        theme: Optional[Dict[str, Any]] = None,
-        include_column_names: Optional[List[str]] = None,
-        exclude_column_names: Optional[List[str]] = None,
+        theme: Optional[dict[str, Any]] = None,
+        include_column_names: Optional[list[str]] = None,
+        exclude_column_names: Optional[list[str]] = None,
     ) -> PlotResult:
         """
         Use contents of "DataAssistantResult" object to display metrics and expectations for visualization purposes.
@@ -542,9 +542,9 @@ class DataAssistantResult(SerializableDictDot):
         self,
         plot_mode: PlotMode,
         sequential: bool,
-        theme: Optional[Dict[str, Any]] = None,
-        include_column_names: Optional[List[str]] = None,
-        exclude_column_names: Optional[List[str]] = None,
+        theme: Optional[dict[str, Any]] = None,
+        include_column_names: Optional[list[str]] = None,
+        exclude_column_names: Optional[list[str]] = None,
     ) -> PlotResult:
         """
         VolumeDataAssistant-specific plots are defined with Altair and passed to "_display()" for presentation.
@@ -569,14 +569,14 @@ class DataAssistantResult(SerializableDictDot):
                 "You may either use `include_column_names` or `exclude_column_names` (but not both)."
             )
 
-        display_charts: List[Union[alt.Chart, alt.LayerChart, alt.VConcatChart]] = []
-        return_charts: List[Union[alt.Chart, alt.LayerChart]] = []
+        display_charts: list[Union[alt.Chart, alt.LayerChart, alt.VConcatChart]] = []
+        return_charts: list[Union[alt.Chart, alt.LayerChart]] = []
 
-        expectation_configurations: List[
+        expectation_configurations: list[
             ExpectationConfiguration
         ] = self.expectation_configurations
 
-        table_domain_charts: List[
+        table_domain_charts: list[
             Union[alt.Chart, alt.LayerChart]
         ] = self._plot_table_domain_charts(
             expectation_configurations=expectation_configurations,
@@ -588,8 +588,8 @@ class DataAssistantResult(SerializableDictDot):
         display_charts.extend(table_domain_charts)
         return_charts.extend(table_domain_charts)
 
-        column_domain_display_charts: List[alt.VConcatChart]
-        column_domain_return_charts: List[alt.Chart]
+        column_domain_display_charts: list[alt.VConcatChart]
+        column_domain_return_charts: list[alt.Chart]
         (
             column_domain_display_charts,
             column_domain_return_charts,
@@ -610,9 +610,9 @@ class DataAssistantResult(SerializableDictDot):
 
     def _display(
         self,
-        charts: Union[List[alt.Chart], List[alt.VConcatChart]],
+        charts: Union[list[alt.Chart], list[alt.VConcatChart]],
         plot_mode: PlotMode,
-        theme: Optional[Dict[str, Any]] = None,
+        theme: Optional[dict[str, Any]] = None,
     ) -> None:
         """
         Display each chart passed by DataAssistantResult.plot()
@@ -624,17 +624,17 @@ class DataAssistantResult(SerializableDictDot):
             charts: A list of Altair chart objects to display
             theme: An Optional Altair top-level chart configuration dictionary to apply over the default theme
         """
-        altair_theme: Dict[str, Any]
+        altair_theme: dict[str, Any]
         if theme:
             altair_theme = self._get_theme(theme=theme)
         else:
             altair_theme = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
 
-        themed_charts: List[alt.Chart] = self._apply_theme(
+        themed_charts: list[alt.Chart] = self._apply_theme(
             charts=charts, theme=altair_theme
         )
 
-        chart_titles: List[str] = self._get_chart_titles(charts=themed_charts)
+        chart_titles: list[str] = self._get_chart_titles(charts=themed_charts)
 
         if len(chart_titles) > 0:
             metric_plot_count = self._get_metric_plot_count(charts=themed_charts)
@@ -653,7 +653,7 @@ DataAssistantResult.show_expectations_by_expectation_type() to show all produced
 Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 )
 
-            display_chart_dict: Dict[str, Union[alt.Chart, alt.LayerChart]] = {
+            display_chart_dict: dict[str, Union[alt.Chart, alt.LayerChart]] = {
                 " ": None
             }
             for idx in range(len(chart_titles)):
@@ -754,7 +754,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
     @staticmethod
     def _display_chart_from_dict(
-        display_chart_dict: Dict[str, Union[alt.Chart, alt.LayerChart]],
+        display_chart_dict: dict[str, Union[alt.Chart, alt.LayerChart]],
         chart_title: str,
     ) -> None:
         display_chart_dict[chart_title].display()
@@ -783,9 +783,9 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         return chart_title
 
     @staticmethod
-    def _get_chart_titles(charts: List[Union[alt.Chart, alt.LayerChart]]) -> List[str]:
+    def _get_chart_titles(charts: list[Union[alt.Chart, alt.LayerChart]]) -> list[str]:
         """Recursively searches through each chart layer for a title and returns a list of titles."""
-        chart_titles: List[str] = []
+        chart_titles: list[str] = []
         chart_title: Optional[str]
         for chart in charts:
             chart_title = DataAssistantResult._get_chart_layer_title(layer=chart)
@@ -799,7 +799,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         return chart_titles
 
     @staticmethod
-    def _get_metric_plot_count(charts: List[Union[alt.Chart, alt.LayerChart]]) -> int:
+    def _get_metric_plot_count(charts: list[Union[alt.Chart, alt.LayerChart]]) -> int:
         plot_count = 0
         for chart in charts:
             if "column" in chart.data.columns:
@@ -810,9 +810,9 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
     @staticmethod
     def _apply_theme(
-        charts: List[alt.Chart],
-        theme: Optional[Dict[str, Any]],
-    ) -> List[alt.Chart]:
+        charts: list[alt.Chart],
+        theme: Optional[dict[str, Any]],
+    ) -> list[alt.Chart]:
         """
         Apply the Great Expectations default theme and any user-provided theme overrides to each chart
 
@@ -836,7 +836,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         col_has_list: pd.DataFrame = pd.DataFrame(
             {"column_name": df.columns, "has_list": (df.applymap(type) == list).any()}
         )
-        list_column_names: List[str] = list(
+        list_column_names: list[str] = list(
             col_has_list[col_has_list["has_list"]]["column_name"]
         )
 
@@ -847,7 +847,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             df_transformed = df.iloc[:1]
         else:
             column_name: str
-            cols_flat: List[List[str]] = []
+            cols_flat: list[list[str]] = []
             for idx, column_name in enumerate(list_column_names):
                 # explode list of column names into separate rows for each name in list
                 # flatten columns of lists
@@ -856,11 +856,11 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 )
 
             # row numbers to repeat
-            ilocations: List[int] = list(
+            ilocations: list[int] = list(
                 np.repeat(range(df.shape[0]), df[list_column_names[0]].apply(len))
             )
             # replicate rows and add flattened column of lists
-            columns: List[int] = [
+            columns: list[int] = [
                 idx
                 for idx, col in enumerate(df.columns)
                 if col not in list_column_names
@@ -888,7 +888,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         return df_transformed
 
     @staticmethod
-    def _get_column_set_text(column_set: List[str]) -> Tuple[str, int]:
+    def _get_column_set_text(column_set: list[str]) -> Tuple[str, int]:
         dy: int
         if len(column_set) > 50:
             text = f"All batches have the same set of columns. The number of columns ({len(column_set)}) is too long to list here."
@@ -925,7 +925,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             An altair chart for nominal metrics
         """
         batch_name: str = "batch"
-        batch_identifiers: List[str] = [
+        batch_identifiers: list[str] = [
             column
             for column in df.columns
             if column not in (sanitized_metric_names | {batch_name})
@@ -942,9 +942,9 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         )
 
         metric_type: alt.StandardType = AltairDataTypes.NOMINAL.value
-        column_set: Optional[List[str]] = None
+        column_set: Optional[list[str]] = None
         metric_plot_component: MetricPlotComponent
-        metric_plot_components: List[MetricPlotComponent] = []
+        metric_plot_components: list[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
             if sanitized_metric_name == "table_columns" and len(df.index) == 1:
                 column_set = df[sanitized_metric_name].iloc[0]
@@ -1008,7 +1008,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             An altair chart for nominal metrics
         """
         batch_name: str = "batch"
-        batch_identifiers: List[str] = [
+        batch_identifiers: list[str] = [
             column
             for column in df.columns
             if column not in (sanitized_metric_names | {batch_name})
@@ -1025,9 +1025,9 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         )
 
         metric_type: alt.StandardType = AltairDataTypes.NOMINAL.value
-        column_set: Optional[List[str]] = None
+        column_set: Optional[list[str]] = None
         metric_plot_component: MetricPlotComponent
-        metric_plot_components: List[MetricPlotComponent] = []
+        metric_plot_components: list[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
             if sanitized_metric_name == "table_columns" and len(df.index) == 1:
                 column_set = df[sanitized_metric_name].iloc[0]
@@ -1076,11 +1076,11 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     @staticmethod
     def _get_sequential_isotype_chart(
         df: pd.DataFrame,
-        metric_plot_components: List[MetricPlotComponent],
+        metric_plot_components: list[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         column_number_plot_component: PlotComponent,
-        column_set: Optional[List[str]],
+        column_set: Optional[list[str]],
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
             metric_plot_components=metric_plot_components,
@@ -1088,7 +1088,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             domain_plot_component=domain_plot_component,
         )
 
-        tooltip: List[alt.Tooltip] = batch_plot_component.generate_tooltip() + [
+        tooltip: list[alt.Tooltip] = batch_plot_component.generate_tooltip() + [
             metric_plot_component.generate_tooltip()
             for metric_plot_component in metric_plot_components
         ]
@@ -1147,11 +1147,11 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     @staticmethod
     def _get_nonsequential_isotype_chart(
         df: pd.DataFrame,
-        metric_plot_components: List[MetricPlotComponent],
+        metric_plot_components: list[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         column_number_plot_component: PlotComponent,
-        column_set: Optional[List[str]],
+        column_set: Optional[list[str]],
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
             metric_plot_components=metric_plot_components,
@@ -1159,7 +1159,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             domain_plot_component=domain_plot_component,
         )
 
-        tooltip: List[alt.Tooltip] = batch_plot_component.generate_tooltip() + [
+        tooltip: list[alt.Tooltip] = batch_plot_component.generate_tooltip() + [
             metric_plot_component.generate_tooltip()
             for metric_plot_component in metric_plot_components
         ]
@@ -1219,11 +1219,11 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     def _get_sequential_expect_domain_values_to_match_set_isotype_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_plot_components: List[MetricPlotComponent],
+        metric_plot_components: list[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         column_number_plot_component: PlotComponent,
-        column_set: Optional[List[str]],
+        column_set: Optional[list[str]],
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
             expectation_type=expectation_type,
@@ -1247,11 +1247,11 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     def _get_nonsequential_expect_domain_values_to_match_set_isotype_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_plot_components: List[MetricPlotComponent],
+        metric_plot_components: list[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         column_number_plot_component: PlotComponent,
-        column_set: Optional[List[str]],
+        column_set: Optional[list[str]],
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
             expectation_type=expectation_type,
@@ -1290,7 +1290,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         """
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         metric_plot_component: MetricPlotComponent
-        metric_plot_components: List[MetricPlotComponent] = []
+        metric_plot_components: list[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
             metric_plot_component = MetricPlotComponent(
                 name=sanitized_metric_name, alt_type=metric_type
@@ -1298,7 +1298,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             metric_plot_components.append(metric_plot_component)
 
         batch_name: str = "batch"
-        batch_identifiers: List[str] = [
+        batch_identifiers: list[str] = [
             column
             for column in df.columns
             if column not in (sanitized_metric_names | {batch_name})
@@ -1375,7 +1375,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         strict_min: str = "strict_min"
         quantiles: str = "quantiles"
         allow_relative_error: str = "allow_relative_error"
-        batch_identifiers: List[str] = [
+        batch_identifiers: list[str] = [
             column
             for column in df.columns
             if column
@@ -1412,7 +1412,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             y_axis_title = list(sanitized_metric_names)[0].replace("_", " ").title()
 
         metric_plot_component: MetricPlotComponent
-        metric_plot_components: List[MetricPlotComponent] = []
+        metric_plot_components: list[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
             metric_plot_component = MetricPlotComponent(
                 name=sanitized_metric_name,
@@ -1421,7 +1421,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             )
             metric_plot_components.append(metric_plot_component)
 
-        expectation_kwarg_plot_components: List[ExpectationKwargPlotComponent] = []
+        expectation_kwarg_plot_components: list[ExpectationKwargPlotComponent] = []
 
         expectation_kwarg_plot_components.append(
             ExpectationKwargPlotComponent(
@@ -1439,7 +1439,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         )
 
         domain_plot_component: DomainPlotComponent
-        tooltip: List[alt.Tooltip]
+        tooltip: list[alt.Tooltip]
         if domain_type == MetricDomainTypes.COLUMN:
             domain_plot_component = DomainPlotComponent(
                 name=column_name,
@@ -1518,7 +1518,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
     @staticmethod
     def _get_interactive_metrics_chart(
-        column_dfs: List[ColumnDataFrame],
+        column_dfs: list[ColumnDataFrame],
         sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> Union[alt.Chart, alt.LayerChart]:
@@ -1536,10 +1536,10 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         )
 
         batch_name: str = "batch"
-        all_columns: List[str] = DataAssistantResult._get_all_columns_from_column_dfs(
+        all_columns: list[str] = DataAssistantResult._get_all_columns_from_column_dfs(
             column_dfs=column_dfs
         )
-        batch_identifiers: List[str] = [
+        batch_identifiers: list[str] = [
             column
             for column in all_columns
             if column not in (sanitized_metric_names | {batch_name})
@@ -1556,7 +1556,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         )
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         metric_plot_component: MetricPlotComponent
-        metric_plot_components: List[MetricPlotComponent] = []
+        metric_plot_components: list[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
             metric_plot_component = MetricPlotComponent(
                 name=sanitized_metric_name, alt_type=metric_type
@@ -1569,7 +1569,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             alt_type=AltairDataTypes.NOMINAL.value,
         )
 
-        df_columns: List[str] = (
+        df_columns: list[str] = (
             [batch_name, domain_name] + list(sanitized_metric_names) + batch_identifiers
         )
 
@@ -1606,7 +1606,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     @staticmethod  # noqa: C901 - complexity 16
     def _get_interactive_expect_column_values_to_be_between_chart(
         expectation_type: str,
-        column_dfs: List[ColumnDataFrame],
+        column_dfs: list[ColumnDataFrame],
         sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> Union[alt.LayerChart, alt.VConcatChart]:
@@ -1633,10 +1633,10 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         allow_relative_error: str = "allow_relative_error"
 
         batch_name: str = "batch"
-        all_columns: List[str] = DataAssistantResult._get_all_columns_from_column_dfs(
+        all_columns: list[str] = DataAssistantResult._get_all_columns_from_column_dfs(
             column_dfs=column_dfs
         )
-        batch_identifiers: List[str] = [
+        batch_identifiers: list[str] = [
             column
             for column in all_columns
             if column
@@ -1672,7 +1672,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             y_axis_title = None
 
         metric_plot_component: MetricPlotComponent
-        metric_plot_components: List[MetricPlotComponent] = []
+        metric_plot_components: list[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
             metric_plot_component = MetricPlotComponent(
                 name=sanitized_metric_name,
@@ -1686,7 +1686,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             alt_type=AltairDataTypes.NOMINAL.value,
         )
 
-        expectation_kwarg_plot_components: List[ExpectationKwargPlotComponent] = []
+        expectation_kwarg_plot_components: list[ExpectationKwargPlotComponent] = []
 
         expectation_kwarg_plot_components.append(
             ExpectationKwargPlotComponent(
@@ -1703,7 +1703,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             )
         )
 
-        possible_df_columns: List[str] = (
+        possible_df_columns: list[str] = (
             [
                 batch_name,
             ]
@@ -1773,7 +1773,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         # encode point color based on anomalies
         min_value_predicate: Union[bool, int]
         max_value_predicate: Union[bool, int]
-        predicates: List[Union[bool, int]] = []
+        predicates: list[Union[bool, int]] = []
         for metric_plot_component in metric_plot_components:
             if strict_min_predicate:
                 min_value_predicate = (
@@ -1830,7 +1830,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     @staticmethod
     def _get_line_chart(
         df: pd.DataFrame,
-        metric_plot_components: List[MetricPlotComponent],
+        metric_plot_components: list[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
     ) -> alt.LayerChart:
@@ -1840,13 +1840,13 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             domain_plot_component=domain_plot_component,
         )
 
-        tooltip: List[alt.Tooltip] = batch_plot_component.generate_tooltip() + [
+        tooltip: list[alt.Tooltip] = batch_plot_component.generate_tooltip() + [
             metric_plot_component.generate_tooltip(format=",")
             for metric_plot_component in metric_plot_components
         ]
 
         quantiles: str = "quantiles"
-        lines_and_points_list: List[alt.Chart] = []
+        lines_and_points_list: list[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
             if quantiles in df.columns:
                 line: alt.Chart = (
@@ -1887,7 +1887,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     @staticmethod
     def _get_bar_chart(
         df: pd.DataFrame,
-        metric_plot_components: List[MetricPlotComponent],
+        metric_plot_components: list[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
     ) -> alt.LayerChart:
@@ -1897,13 +1897,13 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             domain_plot_component=domain_plot_component,
         )
 
-        tooltip: List[alt.Tooltip] = batch_plot_component.generate_tooltip() + [
+        tooltip: list[alt.Tooltip] = batch_plot_component.generate_tooltip() + [
             metric_plot_component.generate_tooltip(format=",")
             for metric_plot_component in metric_plot_components
         ]
 
         bars: alt.Chart
-        bars_list: List[alt.Chart] = []
+        bars_list: list[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
             bars = (
                 alt.Chart(data=df, title=title)
@@ -1927,7 +1927,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     @staticmethod
     def _get_range_chart(
         df: pd.DataFrame,
-        metric_plot_components: List[MetricPlotComponent],
+        metric_plot_components: list[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
     ) -> alt.LayerChart:
@@ -1937,12 +1937,12 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             domain_plot_component=domain_plot_component,
         )
 
-        tooltip: List[alt.Tooltip] = batch_plot_component.generate_tooltip() + [
+        tooltip: list[alt.Tooltip] = batch_plot_component.generate_tooltip() + [
             metric_plot_component.generate_tooltip(format=",")
             for metric_plot_component in metric_plot_components
         ]
 
-        lines_and_points_list: List[alt.Chart] = []
+        lines_and_points_list: list[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
             line: alt.Chart = (
                 alt.Chart(data=df, title=title)
@@ -1982,10 +1982,10 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     @staticmethod
     def _get_expect_domain_values_to_be_between_line_chart(
         df: pd.DataFrame,
-        metric_plot_components: List[MetricPlotComponent],
+        metric_plot_components: list[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
-        expectation_kwarg_plot_components: List[ExpectationKwargPlotComponent],
+        expectation_kwarg_plot_components: list[ExpectationKwargPlotComponent],
         expectation_type: Optional[str] = None,
     ) -> alt.Chart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
@@ -2000,7 +2000,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             domain_plot_component=domain_plot_component,
         )
 
-        expectation_kwarg_tooltips: List[alt.Tooltip] = []
+        expectation_kwarg_tooltips: list[alt.Tooltip] = []
         min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
         max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
         for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
@@ -2013,7 +2013,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             elif expectation_kwarg_plot_component.name == "max_value":
                 max_value_plot_component = expectation_kwarg_plot_component
 
-        tooltip: List[alt.Tooltip] = []
+        tooltip: list[alt.Tooltip] = []
         if domain_plot_component.name is not None:
             tooltip.append(domain_plot_component.generate_tooltip())
 
@@ -2069,7 +2069,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         metric_name: str
         predicate: Union[bool, int]
         anomaly_coded_line: alt.Chart
-        anomaly_coded_lines: List[alt.Chart] = []
+        anomaly_coded_lines: list[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
             # encode point color based on anomalies
             metric_name = metric_plot_component.name
@@ -2110,10 +2110,10 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     @staticmethod
     def _get_expect_domain_values_to_be_between_bar_chart(
         df: pd.DataFrame,
-        metric_plot_components: List[MetricPlotComponent],
+        metric_plot_components: list[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
-        expectation_kwarg_plot_components: List[ExpectationKwargPlotComponent],
+        expectation_kwarg_plot_components: list[ExpectationKwargPlotComponent],
         expectation_type: Optional[str] = None,
     ) -> alt.LayerChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
@@ -2128,7 +2128,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             domain_plot_component=domain_plot_component,
         )
 
-        expectation_kwarg_tooltips: List[alt.Tooltip] = []
+        expectation_kwarg_tooltips: list[alt.Tooltip] = []
         min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
         max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
         for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
@@ -2141,7 +2141,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             elif expectation_kwarg_plot_component.name == "max_value":
                 max_value_plot_component = expectation_kwarg_plot_component
 
-        tooltip: List[alt.Tooltip] = []
+        tooltip: list[alt.Tooltip] = []
         if domain_plot_component.name is not None:
             tooltip.append(domain_plot_component.generate_tooltip())
 
@@ -2207,7 +2207,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         metric_name: str
         predicate: Union[bool, int]
         anomaly_coded_bar: alt.Chart
-        anomaly_coded_bars: List[alt.Chart] = []
+        anomaly_coded_bars: list[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
             # encode bar color based on anomalies
             metric_name = metric_plot_component.name
@@ -2239,10 +2239,10 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     @staticmethod
     def _get_expect_domain_values_to_be_between_range_chart(
         df: pd.DataFrame,
-        metric_plot_components: List[MetricPlotComponent],
+        metric_plot_components: list[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
-        expectation_kwarg_plot_components: List[ExpectationKwargPlotComponent],
+        expectation_kwarg_plot_components: list[ExpectationKwargPlotComponent],
         expectation_type: Optional[str] = None,
     ) -> alt.Chart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
@@ -2257,7 +2257,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             domain_plot_component=domain_plot_component,
         )
 
-        expectation_kwarg_tooltips: List[alt.Tooltip] = []
+        expectation_kwarg_tooltips: list[alt.Tooltip] = []
         min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
         max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
         for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
@@ -2270,7 +2270,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             elif expectation_kwarg_plot_component.name == "max_value":
                 max_value_plot_component = expectation_kwarg_plot_component
 
-        tooltip: List[alt.Tooltip] = []
+        tooltip: list[alt.Tooltip] = []
         if domain_plot_component.name is not None:
             tooltip.append(domain_plot_component.generate_tooltip())
 
@@ -2336,7 +2336,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         metric_name: str
         predicate: Union[bool, int]
         anomaly_coded_line: alt.Chart
-        anomaly_coded_lines: List[alt.Chart] = []
+        anomaly_coded_lines: list[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
             # encode point color based on anomalies
             metric_name = metric_plot_component.name
@@ -2385,7 +2385,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     @staticmethod
     def _get_interactive_line_chart(
         df: pd.DataFrame,
-        metric_plot_components: List[MetricPlotComponent],
+        metric_plot_components: list[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         expectation_type: Optional[str] = None,
@@ -2397,7 +2397,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             domain_plot_component=domain_plot_component,
         )
 
-        tooltip: List[alt.Tooltip] = (
+        tooltip: list[alt.Tooltip] = (
             [domain_plot_component.generate_tooltip()]
             + batch_plot_component.generate_tooltip()
             + [
@@ -2406,7 +2406,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             ]
         )
 
-        columns: List[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
+        columns: list[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
             options=columns, name="Select Column: "
         )
@@ -2417,7 +2417,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         )
 
         quantiles: str = "quantiles"
-        line_and_points_list: List[alt.Chart] = []
+        line_and_points_list: list[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
             if quantiles in df.columns:
                 line: alt.Chart = (
@@ -2466,7 +2466,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     @staticmethod
     def _get_interactive_bar_chart(
         df: pd.DataFrame,
-        metric_plot_components: List[MetricPlotComponent],
+        metric_plot_components: list[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         expectation_type: Optional[str] = None,
@@ -2478,7 +2478,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             domain_plot_component=domain_plot_component,
         )
 
-        tooltip: List[alt.Tooltip] = (
+        tooltip: list[alt.Tooltip] = (
             [domain_plot_component.generate_tooltip()]
             + batch_plot_component.generate_tooltip()
             + [
@@ -2487,7 +2487,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             ]
         )
 
-        columns: List[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
+        columns: list[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
             options=columns, name="Select Column: "
         )
@@ -2498,7 +2498,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         )
 
         bars: alt.Chart
-        bars_list: List[alt.Chart] = []
+        bars_list: list[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
             bars: alt.Chart = (
                 alt.Chart(data=df, title=title)
@@ -2524,7 +2524,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     @staticmethod
     def _get_interactive_range_chart(
         df: pd.DataFrame,
-        metric_plot_components: List[MetricPlotComponent],
+        metric_plot_components: list[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         expectation_type: Optional[str] = None,
@@ -2536,7 +2536,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             domain_plot_component=domain_plot_component,
         )
 
-        tooltip: List[alt.Tooltip] = (
+        tooltip: list[alt.Tooltip] = (
             [domain_plot_component.generate_tooltip()]
             + batch_plot_component.generate_tooltip()
             + [
@@ -2545,7 +2545,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             ]
         )
 
-        columns: List[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
+        columns: list[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
             options=columns, name="Select Column: "
         )
@@ -2555,7 +2555,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             fields=[domain_plot_component.name],
         )
 
-        line_and_points_list: List[alt.Chart] = []
+        line_and_points_list: list[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
             line: alt.Chart = (
                 alt.Chart(data=df, title=title)
@@ -2604,19 +2604,19 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     def _get_interactive_expect_column_values_to_be_between_line_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_plot_components: List[MetricPlotComponent],
+        metric_plot_components: list[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
-        expectation_kwarg_plot_components: List[ExpectationKwargPlotComponent],
-        predicates: List[Union[bool, int]],
+        expectation_kwarg_plot_components: list[ExpectationKwargPlotComponent],
+        predicates: list[Union[bool, int]],
     ) -> alt.LayerChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
             TintsAndShades.ROYAL_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
-        expectation_kwargs_tooltip: List[alt.Tooltip] = []
-        expectation_kwargs_initial_dropdown_state: List[str] = []
+        expectation_kwargs_tooltip: list[alt.Tooltip] = []
+        expectation_kwargs_initial_dropdown_state: list[str] = []
         min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
         max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
         for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
@@ -2632,7 +2632,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             elif expectation_kwarg_plot_component.name == "max_value":
                 max_value_plot_component = expectation_kwarg_plot_component
 
-        tooltip: List[alt.Tooltip] = (
+        tooltip: list[alt.Tooltip] = (
             [domain_plot_component.generate_tooltip()]
             + batch_plot_component.generate_tooltip()
             + expectation_kwargs_tooltip
@@ -2642,7 +2642,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             ]
         )
 
-        columns: List[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
+        columns: list[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
             options=columns, name="Select Column: "
         )
@@ -2755,19 +2755,19 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     def _get_interactive_expect_column_values_to_be_between_bar_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_plot_components: List[MetricPlotComponent],
+        metric_plot_components: list[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
-        expectation_kwarg_plot_components: List[ExpectationKwargPlotComponent],
-        predicates: List[Union[bool, int]],
+        expectation_kwarg_plot_components: list[ExpectationKwargPlotComponent],
+        predicates: list[Union[bool, int]],
     ) -> alt.VConcatChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
             TintsAndShades.ROYAL_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
-        expectation_kwargs_tooltip: List[alt.Tooltip] = []
-        expectation_kwargs_initial_dropdown_state: List[str] = []
+        expectation_kwargs_tooltip: list[alt.Tooltip] = []
+        expectation_kwargs_initial_dropdown_state: list[str] = []
         min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
         max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
         for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
@@ -2783,7 +2783,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             elif expectation_kwarg_plot_component.name == "max_value":
                 max_value_plot_component = expectation_kwarg_plot_component
 
-        tooltip: List[alt.Tooltip] = (
+        tooltip: list[alt.Tooltip] = (
             [domain_plot_component.generate_tooltip()]
             + batch_plot_component.generate_tooltip()
             + expectation_kwargs_tooltip
@@ -2793,7 +2793,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             ]
         )
 
-        columns: List[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
+        columns: list[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
             options=columns, name="Select Column: "
         )
@@ -2893,19 +2893,19 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     def _get_interactive_expect_column_values_to_be_between_range_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_plot_components: List[MetricPlotComponent],
+        metric_plot_components: list[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
-        expectation_kwarg_plot_components: List[ExpectationKwargPlotComponent],
-        predicates: List[Union[bool, int]],
+        expectation_kwarg_plot_components: list[ExpectationKwargPlotComponent],
+        predicates: list[Union[bool, int]],
     ) -> alt.LayerChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
             TintsAndShades.ROYAL_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
-        expectation_kwargs_tooltip: List[alt.Tooltip] = []
-        expectation_kwargs_initial_dropdown_state: List[str] = []
+        expectation_kwargs_tooltip: list[alt.Tooltip] = []
+        expectation_kwargs_initial_dropdown_state: list[str] = []
         min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
         max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
         for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
@@ -2921,7 +2921,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             elif expectation_kwarg_plot_component.name == "max_value":
                 max_value_plot_component = expectation_kwarg_plot_component
 
-        tooltip: List[alt.Tooltip] = (
+        tooltip: list[alt.Tooltip] = (
             [domain_plot_component.generate_tooltip()]
             + batch_plot_component.generate_tooltip()
             + expectation_kwargs_tooltip
@@ -2931,7 +2931,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             ]
         )
 
-        columns: List[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
+        columns: list[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
             options=columns, name="Select Column: "
         )
@@ -3043,8 +3043,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         ).add_selection(selection)
 
     @staticmethod
-    def _get_theme(theme: Optional[Dict[str, Any]]) -> Dict[str, Any]:
-        default_theme: Dict[str, Any] = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
+    def _get_theme(theme: Optional[dict[str, Any]]) -> dict[str, Any]:
+        default_theme: dict[str, Any] = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
         if theme:
             return nested_update(default_theme, theme)
         else:
@@ -3052,37 +3052,37 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
     def _plot_table_domain_charts(
         self,
-        expectation_configurations: List[ExpectationConfiguration],
-        include_column_names: Optional[List[str]],
-        exclude_column_names: Optional[List[str]],
+        expectation_configurations: list[ExpectationConfiguration],
+        include_column_names: Optional[list[str]],
+        exclude_column_names: Optional[list[str]],
         plot_mode: PlotMode,
         sequential: bool,
-    ) -> List[Union[alt.Chart, alt.LayerChart]]:
-        metric_expectation_map: Dict[
+    ) -> list[Union[alt.Chart, alt.LayerChart]]:
+        metric_expectation_map: dict[
             Tuple[str], str
         ] = self._get_metric_expectation_map()
 
-        table_based_expectations: List[str] = [
+        table_based_expectations: list[str] = [
             expectation
             for expectation in metric_expectation_map.values()
             if expectation.startswith("expect_table_")
         ]
-        table_based_expectation_configurations: List[ExpectationConfiguration] = list(
+        table_based_expectation_configurations: list[ExpectationConfiguration] = list(
             filter(
                 lambda e: e.expectation_type in table_based_expectations,
                 expectation_configurations,
             )
         )
 
-        attributed_metrics_by_table_domain: Dict[
-            Domain, Dict[str, List[ParameterNode]]
+        attributed_metrics_by_table_domain: dict[
+            Domain, dict[str, list[ParameterNode]]
         ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.TABLE)
 
         table_domain = Domain(
             domain_type=MetricDomainTypes.TABLE, rule_name="table_rule"
         )
-        attributed_metrics: Dict[
-            str, List[ParameterNode]
+        attributed_metrics: dict[
+            str, list[ParameterNode]
         ] = attributed_metrics_by_table_domain[table_domain]
 
         table_based_metric_names: Set[Union[Tuple[str], str]] = set()
@@ -3090,9 +3090,9 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             if all([metric.startswith("table") for metric in metrics]):
                 table_based_metric_names.add(metrics)
 
-        charts: List[alt.Chart] = []
+        charts: list[alt.Chart] = []
         metric_names: Tuple[str]
-        attributed_values: List[List[ParameterNode]]
+        attributed_values: list[list[ParameterNode]]
         expectation_type: str
         expectation_configuration: ExpectationConfiguration
         for metric_names in table_based_metric_names:
@@ -3134,7 +3134,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 charts.append(table_domain_chart)
 
         # we want the table row count chart to be displayed first if it exists
-        chart_titles: List[str] = self._get_chart_titles(charts=charts)
+        chart_titles: list[str] = self._get_chart_titles(charts=charts)
         first_chart_idx: int = 0
         for idx, chart_title in enumerate(chart_titles):
             if (
@@ -3144,7 +3144,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 first_chart_idx = idx
 
         # return the sorted charts
-        sorted_charts: List[alt.Chart]
+        sorted_charts: list[alt.Chart]
         if len(charts) > 1:
             sorted_charts = [charts[first_chart_idx]] + [
                 chart
@@ -3158,28 +3158,28 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
     def _plot_column_domain_charts(
         self,
-        expectation_configurations: List[ExpectationConfiguration],
-        include_column_names: Optional[List[str]],
-        exclude_column_names: Optional[List[str]],
+        expectation_configurations: list[ExpectationConfiguration],
+        include_column_names: Optional[list[str]],
+        exclude_column_names: Optional[list[str]],
         plot_mode: PlotMode,
         sequential: bool,
-    ) -> Tuple[List[alt.VConcatChart], List[alt.Chart]]:
-        metric_expectation_map: Dict[
+    ) -> Tuple[list[alt.VConcatChart], list[alt.Chart]]:
+        metric_expectation_map: dict[
             Tuple[str], str
         ] = self._get_metric_expectation_map()
 
-        column_based_expectation_configurations_by_type: Dict[
-            str, List[ExpectationConfiguration]
+        column_based_expectation_configurations_by_type: dict[
+            str, list[ExpectationConfiguration]
         ] = self._filter_expectation_configurations_by_column_type(
             expectation_configurations, include_column_names, exclude_column_names
         )
 
-        attributed_metrics_by_domain: Dict[
-            Domain, Dict[str, List[ParameterNode]]
+        attributed_metrics_by_domain: dict[
+            Domain, dict[str, list[ParameterNode]]
         ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.COLUMN)
 
-        attributed_metrics_by_column_domain: Dict[
-            Domain, Dict[str, List[ParameterNode]]
+        attributed_metrics_by_column_domain: dict[
+            Domain, dict[str, list[ParameterNode]]
         ] = self._filter_attributed_metrics_by_column_names(
             attributed_metrics_by_domain,
             include_column_names,
@@ -3195,12 +3195,12 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                     for metric in metrics:
                         column_based_metric_names.add((metric,))
 
-        filtered_attributed_metrics_by_column_domain: Dict[
-            Domain, Dict[str, List[ParameterNode]]
+        filtered_attributed_metrics_by_column_domain: dict[
+            Domain, dict[str, list[ParameterNode]]
         ]
-        column_based_expectation_configurations: List[ExpectationConfiguration]
-        display_charts: List[alt.VConcatChart] = []
-        return_charts: List[Optional[alt.Chart]] = []
+        column_based_expectation_configurations: list[ExpectationConfiguration]
+        display_charts: list[alt.VConcatChart] = []
+        return_charts: list[Optional[alt.Chart]] = []
         expectation_type: Optional[str]
         for metric_names in column_based_metric_names:
             expectation_type = metric_expectation_map[metric_names]
@@ -3244,11 +3244,11 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
     def _filter_expectation_configurations_by_column_type(
         self,
-        expectation_configurations: List[ExpectationConfiguration],
-        include_column_names: Optional[List[str]],
-        exclude_column_names: Optional[List[str]],
-    ) -> Dict[str, List[ExpectationConfiguration]]:
-        metric_expectation_map: Dict[
+        expectation_configurations: list[ExpectationConfiguration],
+        include_column_names: Optional[list[str]],
+        exclude_column_names: Optional[list[str]],
+    ) -> dict[str, list[ExpectationConfiguration]]:
+        metric_expectation_map: dict[
             Tuple[str], str
         ] = self._get_metric_expectation_map()
 
@@ -3271,15 +3271,15 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
             return True
 
-        column_based_expectation_configurations: List[ExpectationConfiguration] = list(
+        column_based_expectation_configurations: list[ExpectationConfiguration] = list(
             filter(
                 lambda e: _filter(e, column_based_expectations),
                 expectation_configurations,
             )
         )
 
-        column_based_expectation_configurations_by_type: Dict[
-            str, List[ExpectationConfiguration]
+        column_based_expectation_configurations_by_type: dict[
+            str, list[ExpectationConfiguration]
         ] = defaultdict(list)
         for expectation_configuration in column_based_expectation_configurations:
             type_: str = expectation_configuration.expectation_type
@@ -3291,10 +3291,10 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
     @staticmethod
     def _filter_attributed_metrics_by_column_names(
-        attributed_metrics: Dict[Domain, Dict[str, List[ParameterNode]]],
-        include_column_names: Optional[List[str]],
-        exclude_column_names: Optional[List[str]],
-    ) -> Dict[Domain, Dict[str, List[ParameterNode]]]:
+        attributed_metrics: dict[Domain, dict[str, list[ParameterNode]]],
+        include_column_names: Optional[list[str]],
+        exclude_column_names: Optional[list[str]],
+    ) -> dict[Domain, dict[str, list[ParameterNode]]]:
         def _filter(domain: Domain) -> bool:
             column_name: str = domain.domain_kwargs.column
             if exclude_column_names and column_name in exclude_column_names:
@@ -3308,7 +3308,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         domains: Set[Domain] = set(
             filter(lambda m: _filter(m), list(attributed_metrics.keys()))
         )
-        filtered_attributed_metrics: Dict[Domain, Dict[str, List[ParameterNode]]] = {
+        filtered_attributed_metrics: dict[Domain, dict[str, list[ParameterNode]]] = {
             domain: attributed_metrics[domain] for domain in domains
         }
 
@@ -3316,11 +3316,11 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
     @staticmethod
     def _filter_attributed_metrics_by_metric_names(
-        attributed_metrics: Dict[Domain, Dict[str, List[ParameterNode]]],
+        attributed_metrics: dict[Domain, dict[str, list[ParameterNode]]],
         metric_names: Tuple[str],
-    ) -> Dict[Domain, Dict[str, List[ParameterNode]]]:
+    ) -> dict[Domain, dict[str, list[ParameterNode]]]:
         domain: Domain
-        filtered_attributed_metrics: Dict[Domain, Dict[str, List[ParameterNode]]] = {}
+        filtered_attributed_metrics: dict[Domain, dict[str, list[ParameterNode]]] = {}
         for domain, attributed_metric_values in attributed_metrics.items():
             filtered_attributed_metrics[domain] = {}
             for metric_name in metric_names:
@@ -3449,13 +3449,13 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     def _create_display_chart_for_column_domain_expectation(
         self,
         expectation_type: str,
-        expectation_configurations: List[ExpectationConfiguration],
+        expectation_configurations: list[ExpectationConfiguration],
         metric_names: Tuple[str],
-        attributed_metrics_by_domain: Dict[Domain, Dict[str, List[ParameterNode]]],
+        attributed_metrics_by_domain: dict[Domain, dict[str, list[ParameterNode]]],
         plot_mode: PlotMode,
         sequential: bool,
-    ) -> List[Optional[alt.VConcatChart]]:
-        column_dfs: List[ColumnDataFrame] = self._create_column_dfs_for_charting(
+    ) -> list[Optional[alt.VConcatChart]]:
+        column_dfs: list[ColumnDataFrame] = self._create_column_dfs_for_charting(
             metric_names=metric_names,
             attributed_metrics_by_domain=attributed_metrics_by_domain,
             expectation_configurations=expectation_configurations,
@@ -3478,13 +3478,13 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     def _create_return_charts_for_column_domain_expectation(
         self,
         expectation_type: str,
-        expectation_configurations: List[ExpectationConfiguration],
+        expectation_configurations: list[ExpectationConfiguration],
         metric_names: Tuple[str],
-        attributed_metrics_by_domain: Dict[Domain, Dict[str, List[ParameterNode]]],
+        attributed_metrics_by_domain: dict[Domain, dict[str, list[ParameterNode]]],
         plot_mode: PlotMode,
         sequential: bool,
-    ) -> List[alt.Chart]:
-        metric_expectation_map: Dict[
+    ) -> list[alt.Chart]:
+        metric_expectation_map: dict[
             Tuple[str], str
         ] = self._get_metric_expectation_map()
 
@@ -3495,11 +3495,11 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         )
 
         expectation_configuration: ExpectationConfiguration
-        attributed_metrics: Dict[str, List[ParameterNode]]
+        attributed_metrics: dict[str, list[ParameterNode]]
         df: pd.DataFrame
-        attributed_values: List[ParameterNode]
+        attributed_values: list[ParameterNode]
         metric_df: pd.DataFrame
-        return_charts: List[alt.Chart] = []
+        return_charts: list[alt.Chart] = []
         for domain, attributed_metrics in attributed_metrics_by_domain.items():
             for expectation_configuration in expectation_configurations:
                 if (
@@ -3549,11 +3549,11 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     def _chart_column_values(
         self,
         expectation_type: str,
-        column_dfs: List[ColumnDataFrame],
+        column_dfs: list[ColumnDataFrame],
         metric_names: Tuple[str],
         plot_mode: PlotMode,
         sequential: bool,
-    ) -> List[Optional[alt.VConcatChart]]:
+    ) -> list[Optional[alt.VConcatChart]]:
         sanitized_metric_names: Set[
             str
         ] = DataAssistantResult._get_sanitized_metric_names_from_metric_names(
@@ -3579,7 +3579,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             expectation_plot_impl: Callable[
                 [
                     str,
-                    List[ColumnDataFrame],
+                    list[ColumnDataFrame],
                     Set[str],
                     bool,
                 ],
@@ -3626,7 +3626,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         else:
             plot_impl: Callable[
                 [
-                    List[ColumnDataFrame],
+                    list[ColumnDataFrame],
                     Set[str],
                     bool,
                 ],
@@ -3665,7 +3665,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     def _create_df_for_charting(
         self,
         metric_name: str,
-        attributed_values: List[ParameterNode],
+        attributed_values: list[ParameterNode],
         expectation_configuration: Optional[ExpectationConfiguration],
         plot_mode: PlotMode,
     ) -> pd.DataFrame:
@@ -3685,14 +3685,14 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             metric_name == "column.quantile_values"
             and plot_mode == PlotMode.DESCRIPTIVE
         ):
-            quantiles: Union[List[float], float] = attributed_values[
+            quantiles: Union[list[float], float] = attributed_values[
                 1
             ].metric_configuration.metric_value_kwargs.quantiles
             if len(quantiles) == 1:
                 quantiles = quantiles[0]
             df["quantiles"] = [quantiles for idx in df.index]
 
-        batch_identifier_list: List[Set[Tuple[str, str]]] = [
+        batch_identifier_list: list[Set[Tuple[str, str]]] = [
             self._batch_id_to_batch_identifier_display_name_map[batch_id]
             for batch_id in batch_ids
         ]
@@ -3703,7 +3703,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         batch_identifier_value: str
         batch_identifier_keys: Set[str] = set()
         batch_identifier_record: List
-        batch_identifier_records: List[List] = []
+        batch_identifier_records: list[List] = []
         for batch_identifier_set in batch_identifier_list:
             # make sure batch_identifier keys are sorted the same from batch to batch
             # e.g. prevent batch 1 from displaying keys "month", "year" and batch 2 from displaying keys "year", "month"
@@ -3729,13 +3729,13 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
             batch_identifier_records.append(batch_identifier_record)
 
-        batch_identifier_keys_sorted: List[str] = sorted(batch_identifier_keys)
+        batch_identifier_keys_sorted: list[str] = sorted(batch_identifier_keys)
         batch_identifier_df: pd.DataFrame = pd.DataFrame(
             batch_identifier_records, columns=batch_identifier_keys_sorted
         )
 
         idx: int
-        batch_numbers: List[int] = [idx + 1 for idx in range(len(batch_identifier_df))]
+        batch_numbers: list[int] = [idx + 1 for idx in range(len(batch_identifier_df))]
         df["batch"] = batch_numbers
 
         df = pd.concat([df, batch_identifier_df], axis=1)
@@ -3775,10 +3775,10 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     def _create_column_dfs_for_charting(
         self,
         metric_names: Tuple[str],
-        attributed_metrics_by_domain: Dict[Domain, Dict[str, List[ParameterNode]]],
-        expectation_configurations: List[ExpectationConfiguration],
+        attributed_metrics_by_domain: dict[Domain, dict[str, list[ParameterNode]]],
+        expectation_configurations: list[ExpectationConfiguration],
         plot_mode: PlotMode,
-    ) -> List[ColumnDataFrame]:
+    ) -> list[ColumnDataFrame]:
         sanitized_metric_names: Set[
             str
         ] = self._get_sanitized_metric_names_from_metric_names(
@@ -3790,13 +3790,13 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         column_name: str
         column_domain: Domain
         metric_df: pd.DataFrame
-        join_keys: List[str]
+        join_keys: list[str]
         df: pd.DataFrame
         column_df: ColumnDataFrame
-        column_dfs: List[ColumnDataFrame] = []
+        column_dfs: list[ColumnDataFrame] = []
         for metric_domain in metric_domains:
-            attributed_values_by_metric_name: Dict[
-                str, List[ParameterNode]
+            attributed_values_by_metric_name: dict[
+                str, list[ParameterNode]
             ] = attributed_metrics_by_domain[metric_domain]
             column_name = metric_domain.domain_kwargs.column
 
@@ -3836,9 +3836,9 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         expectation_type: str,
         expectation_configuration: Optional[ExpectationConfiguration],
         metric_names: Tuple[str],
-        attributed_values: List[List[ParameterNode]],
-        include_column_names: Optional[List[str]],
-        exclude_column_names: Optional[List[str]],
+        attributed_values: list[list[ParameterNode]],
+        include_column_names: Optional[list[str]],
+        exclude_column_names: Optional[list[str]],
         plot_mode: PlotMode,
         sequential: bool,
     ) -> alt.Chart:
@@ -3868,9 +3868,9 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 df = df.merge(metric_df, on=join_keys).reset_index(drop=True)
 
         # If columns are included/excluded we need to filter them out for table level metrics here
-        table_column_metrics: List[str] = ["table_columns"]
-        new_column_list: List[str]
-        new_record_list: List[List[str]] = []
+        table_column_metrics: list[str] = ["table_columns"]
+        new_column_list: list[str]
+        new_record_list: list[list[str]] = []
         if all(
             sanitized_metric_name in table_column_metrics
             for sanitized_metric_name in sanitized_metric_names
@@ -3905,13 +3905,13 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
     def _get_attributed_metrics_by_domain(
         self,
-    ) -> Dict[Domain, Dict[str, List[ParameterNode]]]:
+    ) -> dict[Domain, dict[str, list[ParameterNode]]]:
         domain: Domain
-        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
+        parameter_values_for_fully_qualified_parameter_names: dict[str, ParameterNode]
         fully_qualified_parameter_name: str
         parameter_node: ParameterNode
-        metrics_attributed_values_by_domain: Dict[
-            Domain, Dict[str, List[ParameterNode]]
+        metrics_attributed_values_by_domain: dict[
+            Domain, dict[str, list[ParameterNode]]
         ] = {}
         for (
             domain,
@@ -3961,10 +3961,10 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
     def _determine_attributed_metrics_by_domain_type(
         self, metric_domain_type: MetricDomainTypes
-    ) -> Dict[Domain, Dict[str, List[ParameterNode]]]:
+    ) -> dict[Domain, dict[str, list[ParameterNode]]]:
         # noinspection PyTypeChecker
-        attributed_metrics_by_domain: Dict[
-            Domain, Dict[str, List[ParameterNode]]
+        attributed_metrics_by_domain: dict[
+            Domain, dict[str, list[ParameterNode]]
         ] = dict(
             filter(
                 lambda element: element[0].domain_type == metric_domain_type,
@@ -3976,7 +3976,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     def _get_sanitized_metric_names_from_altair_type(
         self, altair_type: AltairDataTypes
     ) -> Set[str]:
-        metric_types: Dict[str, AltairDataTypes] = self.metric_types
+        metric_types: dict[str, AltairDataTypes] = self.metric_types
         return {
             sanitize_parameter_name(name=metric, suffix=None)
             for metric in metric_types.keys()
@@ -4000,8 +4000,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
     @staticmethod
     def _get_all_columns_from_column_dfs(
-        column_dfs: List[ColumnDataFrame],
-    ) -> List[str]:
+        column_dfs: list[ColumnDataFrame],
+    ) -> list[str]:
         column_set: Set[str] = set()
         for column_df in column_dfs:
             column_set.update(column_df.df.columns)
@@ -4009,10 +4009,10 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
     @staticmethod
     def _clean_quantitative_metrics_column_dfs(
-        column_dfs: List[ColumnDataFrame],
+        column_dfs: list[ColumnDataFrame],
         sanitized_metric_names: Set[str],
-    ) -> List[ColumnDataFrame]:
-        cleaned_column_dfs: List[ColumnDataFrame] = []
+    ) -> list[ColumnDataFrame]:
+        cleaned_column_dfs: list[ColumnDataFrame] = []
         for idx, (column_name, column_df) in enumerate(column_dfs):
             cleaned_column_df = DataAssistantResult._clean_quantitative_metrics_df(
                 df=column_df, sanitized_metric_names=sanitized_metric_names
@@ -4097,7 +4097,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     @staticmethod
     def _get_interactive_expect_column_values_nominal_chart(
         expectation_type: str,
-        column_dfs: List[ColumnDataFrame],
+        column_dfs: list[ColumnDataFrame],
         sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.VConcatChart:
@@ -4108,7 +4108,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     @staticmethod
     def _get_interactive_expect_column_values_ordinal_chart(
         expectation_type: str,
-        column_dfs: List[ColumnDataFrame],
+        column_dfs: list[ColumnDataFrame],
         sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.VConcatChart:
@@ -4122,7 +4122,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     @staticmethod
     def _get_interactive_expect_column_values_temporal_chart(
         expectation_type: str,
-        column_dfs: List[ColumnDataFrame],
+        column_dfs: list[ColumnDataFrame],
         sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.VConcatChart:
@@ -4135,7 +4135,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
     @staticmethod
     def _get_interactive_nominal_metrics_chart(
-        column_dfs: List[ColumnDataFrame],
+        column_dfs: list[ColumnDataFrame],
         sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.VConcatChart:
@@ -4145,7 +4145,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
     @staticmethod
     def _get_interactive_ordinal_metrics_chart(
-        column_dfs: List[ColumnDataFrame],
+        column_dfs: list[ColumnDataFrame],
         sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.LayerChart:
@@ -4157,7 +4157,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
     @staticmethod
     def _get_interactive_temporal_metrics_chart(
-        column_dfs: List[ColumnDataFrame],
+        column_dfs: list[ColumnDataFrame],
         sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.LayerChart:

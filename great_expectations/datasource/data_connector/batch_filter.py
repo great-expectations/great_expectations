@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 def build_batch_filter(
     data_connector_query_dict: Optional[
-        Dict[
+        dict[
             str,
             Optional[
                 Union[
@@ -118,7 +118,7 @@ def _parse_index(
     elif isinstance(index, str):
         if is_int(value=index):
             return _parse_index(index=int(index))
-        index_as_list: List[Union[str, int, None]]
+        index_as_list: list[Union[str, int, None]]
         if index:
             index_as_list = index.split(":")  # type: ignore[assignment]
             if len(index_as_list) == 1:
@@ -184,8 +184,8 @@ class BatchFilter:
         return str(doc_fields_dict)
 
     def select_from_data_connector_query(
-        self, batch_definition_list: Optional[List[BatchDefinition]] = None
-    ) -> List[BatchDefinition]:
+        self, batch_definition_list: Optional[list[BatchDefinition]] = None
+    ) -> list[BatchDefinition]:
         if batch_definition_list is None:
             return []
         filter_function: Callable
@@ -193,7 +193,7 @@ class BatchFilter:
             filter_function = self.custom_filter_function
         else:
             filter_function = self.best_effort_batch_definition_matcher()
-        selected_batch_definitions: List[BatchDefinition]
+        selected_batch_definitions: list[BatchDefinition]
         selected_batch_definitions = list(
             filter(
                 lambda batch_definition: filter_function(

@@ -45,7 +45,7 @@ class GXSqlDialect(Enum):
             return super()._missing_(value)
 
     @classmethod
-    def get_all_dialect_names(cls) -> List[str]:
+    def get_all_dialect_names(cls) -> list[str]:
         """Get dialect names for all SQL dialects."""
         return [
             dialect_name.value
@@ -54,6 +54,6 @@ class GXSqlDialect(Enum):
         ]
 
     @classmethod
-    def get_all_dialects(cls) -> List[GXSqlDialect]:
+    def get_all_dialects(cls) -> list[GXSqlDialect]:
         """Get all dialects."""
         return [dialect for dialect in cls if dialect != GXSqlDialect.OTHER]

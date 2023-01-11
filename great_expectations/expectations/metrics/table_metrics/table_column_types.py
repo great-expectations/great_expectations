@@ -36,7 +36,7 @@ class ColumnTypes(TableMetricProvider):
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
     ):
         df, _, _ = execution_engine.get_compute_domain(
@@ -53,7 +53,7 @@ class ColumnTypes(TableMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
     ):
         batch_id: Optional[str] = metric_domain_kwargs.get("batch_id")
@@ -83,7 +83,7 @@ class ColumnTypes(TableMetricProvider):
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
     ):
         df, _, _ = execution_engine.get_compute_domain(

@@ -111,7 +111,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         threshold: Union[str, float] = 1.0,
         candidate_strings: Optional[Union[Iterable[str], str]] = None,
         evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
+            list[ParameterBuilderConfig]
         ] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
@@ -165,14 +165,14 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     @property
     def candidate_strings(
         self,
-    ) -> Union[str, Union[List[str], Set[str]]]:
+    ) -> Union[str, Union[list[str], Set[str]]]:
         return self._candidate_strings
 
     def _build_parameters(
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        parameters: Optional[dict[str, ParameterContainer]] = None,
         recompute_existing_parameter_values: bool = False,
     ) -> Attributes:
         """
@@ -223,7 +223,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         # Obtain candidate_strings from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         candidate_strings: Union[
-            List[str],
+            list[str],
             Set[str],
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
@@ -235,7 +235,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         # Gather "metric_value_kwargs" for all candidate "strftime_format" strings.
         format_string: str
-        match_strftime_metric_value_kwargs_list: List[dict] = []
+        match_strftime_metric_value_kwargs_list: list[dict] = []
         match_strftime_metric_value_kwargs: dict
         for format_string in candidate_strings:
             if self.metric_value_kwargs:

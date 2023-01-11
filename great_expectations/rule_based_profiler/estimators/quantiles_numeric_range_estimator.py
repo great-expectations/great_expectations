@@ -56,7 +56,7 @@ class QuantilesNumericRangeEstimator(NumericRangeEstimator):
         metric_values: np.ndarray,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        parameters: Optional[dict[str, ParameterContainer]] = None,
     ) -> NumericRangeEstimationResult:
         false_positive_rate: np.float64 = get_false_positive_rate_from_rule_state(  # type: ignore[assignment] # could be float
             false_positive_rate=self.configuration.false_positive_rate,  # type: ignore[union-attr] # configuration could be None

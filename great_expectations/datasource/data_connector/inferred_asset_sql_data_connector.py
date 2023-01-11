@@ -178,8 +178,8 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         self,
         schema_name: Union[str, None] = None,
         ignore_information_schemas_and_system_tables: bool = True,
-        information_schemas: Optional[List[str]] = None,
-        system_tables: Optional[List[str]] = None,
+        information_schemas: Optional[list[str]] = None,
+        system_tables: Optional[list[str]] = None,
         include_views=True,
     ):
         if information_schemas is None:
@@ -199,8 +199,8 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
 
         selected_schema_name = schema_name
 
-        tables: List[Dict[str, str]] = []
-        schema_names: List[str] = inspector.get_schema_names()
+        tables: list[dict[str, str]] = []
+        schema_names: list[str] = inspector.get_schema_names()
         for schema_name in schema_names:
             if (
                 ignore_information_schemas_and_system_tables
@@ -211,7 +211,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             if selected_schema_name is not None and schema_name != selected_schema_name:
                 continue
 
-            table_names: List[str] = inspector.get_table_names(schema=schema_name)
+            table_names: list[str] = inspector.get_table_names(schema=schema_name)
             for table_name in table_names:
                 if ignore_information_schemas_and_system_tables and (
                     table_name in system_tables

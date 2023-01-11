@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 from abc import ABCMeta
-from typing import List
 
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.exceptions import InvalidBatchIdError, InvalidBatchSpecError
@@ -145,5 +144,5 @@ class GlueDataCatalogBatchSpec(BatchSpec):
         return self.get("reader_options", {})
 
     @property
-    def partitions(self) -> List[str]:
+    def partitions(self) -> list[str]:
         return self.get("partitions", [])

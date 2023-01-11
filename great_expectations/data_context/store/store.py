@@ -177,7 +177,7 @@ class Store:
             self.key_to_tuple(key), self.serialize(value), **kwargs
         )
 
-    def list_keys(self) -> List[DataContextKey]:
+    def list_keys(self) -> list[DataContextKey]:
         keys_without_store_backend_id = [
             key
             for key in self._store_backend.list_keys()

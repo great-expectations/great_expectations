@@ -43,7 +43,7 @@ if TYPE_CHECKING:
 # splitter and we want to query all months in the year 2020, the batch request options
 # would look like:
 #   options = { "year": 2020 }
-BatchRequestOptions: TypeAlias = Dict[str, Any]
+BatchRequestOptions: TypeAlias = dict[str, Any]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -81,7 +81,7 @@ class Datasource(
     ExperimentalBaseModel, Generic[DataAssetType], metaclass=MetaDatasource
 ):
     # class attrs
-    asset_types: ClassVar[List[Type[DataAsset]]] = []
+    asset_types: ClassVar[list[Type[DataAsset]]] = []
     # Datasource instance attrs but these will be fed into the `execution_engine` constructor
     _excluded_eng_args: ClassVar[Set[str]] = {
         "name",
@@ -117,9 +117,9 @@ class Datasource(
 
     @pydantic.validator("assets", pre=True)
     @classmethod
-    def _load_asset_subtype(cls, v: Dict[str, dict]):
+    def _load_asset_subtype(cls, v: dict[str, dict]):
         LOGGER.info(f"Loading 'assets' ->\n{pf(v, depth=3)}")
-        loaded_assets: Dict[str, DataAssetType] = {}
+        loaded_assets: dict[str, DataAssetType] = {}
 
         # TODO (kilo59): catch key errors
         for asset_name, config in v.items():
@@ -145,7 +145,7 @@ class Datasource(
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
-    ) -> List[Batch]:
+    ) -> list[Batch]:
         """Processes a batch request and returns a list of batches.
 
         Args:
@@ -178,7 +178,7 @@ class Batch:
     _id: str
     # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata
     # to a batch so developers may want to namespace any custom metadata they add.
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
     # TODO: These legacy fields are currently required. They are only used in usage stats so we
     #       should figure out a better way to anonymize and delete them.
@@ -199,7 +199,7 @@ class Batch:
         legacy_batch_spec: BatchSpec,
         legacy_batch_definition: BatchDefinition,
         # Optional arguments
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: Optional[dict[str, Any]] = None,
     ) -> None:
         """This represents a batch of data.
 

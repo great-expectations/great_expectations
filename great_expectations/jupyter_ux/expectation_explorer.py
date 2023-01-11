@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class ExpectationExplorer:
     def __init__(self) -> None:
-        self.state: Dict[str, Dict] = {"data_assets": {}}
+        self.state: dict[str, Dict] = {"data_assets": {}}
         self.expectation_kwarg_field_names = {
             "expect_column_values_to_be_unique": ["mostly"],
             "expect_column_unique_value_count_to_be_between": [

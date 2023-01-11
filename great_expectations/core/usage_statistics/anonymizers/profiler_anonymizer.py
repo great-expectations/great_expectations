@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
@@ -61,8 +61,8 @@ class ProfilerAnonymizer(BaseAnonymizer):
 
         config_version: float = profiler_config.config_version
 
-        rules: Dict[str, dict] = profiler_config.rules
-        anonymized_rules: List[dict] = self._anonymize_rules(rules=rules)
+        rules: dict[str, dict] = profiler_config.rules
+        anonymized_rules: list[dict] = self._anonymize_rules(rules=rules)
         rule_count: int = len(rules)
 
         variables: dict = profiler_config.variables or {}
@@ -84,8 +84,8 @@ class ProfilerAnonymizer(BaseAnonymizer):
 
         return anonymized_profiler_run_properties_dict
 
-    def _anonymize_rules(self, rules: Dict[str, dict]) -> List[dict]:
-        anonymized_rules: List[dict] = []
+    def _anonymize_rules(self, rules: dict[str, dict]) -> list[dict]:
+        anonymized_rules: list[dict] = []
 
         for name, rule in rules.items():
             anonymized_rule: dict = self._anonymize_rule(name, rule)
@@ -104,12 +104,12 @@ class ProfilerAnonymizer(BaseAnonymizer):
                 "anonymized_domain_builder"
             ] = self._anonymize_domain_builder(domain_builder)
 
-        parameter_builders: List[dict] = rule.get("parameter_builders", [])
+        parameter_builders: list[dict] = rule.get("parameter_builders", [])
         anonymized_rule[
             "anonymized_parameter_builders"
         ] = self._anonymize_parameter_builders(parameter_builders)
 
-        expectation_configuration_builders: List[dict] = rule.get(
+        expectation_configuration_builders: list[dict] = rule.get(
             "expectation_configuration_builders", []
         )
         anonymized_rule[
@@ -142,9 +142,9 @@ class ProfilerAnonymizer(BaseAnonymizer):
         return anonymized_domain_builder
 
     def _anonymize_parameter_builders(
-        self, parameter_builders: List[dict]
-    ) -> List[dict]:
-        anonymized_parameter_builders: List[dict] = []
+        self, parameter_builders: list[dict]
+    ) -> list[dict]:
+        anonymized_parameter_builders: list[dict] = []
 
         for parameter_builder in parameter_builders:
             anonymized_parameter_builder: dict = self._anonymize_parameter_builder(
@@ -180,9 +180,9 @@ class ProfilerAnonymizer(BaseAnonymizer):
         return anonymized_parameter_builder
 
     def _anonymize_expectation_configuration_builders(
-        self, expectation_configuration_builders: List[dict]
-    ) -> List[dict]:
-        anonymized_expectation_configuration_builders: List[dict] = []
+        self, expectation_configuration_builders: list[dict]
+    ) -> list[dict]:
+        anonymized_expectation_configuration_builders: list[dict] = []
 
         for expectation_configuration_builder in expectation_configuration_builders:
             anonymized_expectation_configuration_builder: dict = (

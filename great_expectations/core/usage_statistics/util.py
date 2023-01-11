@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Optional, Set, Union
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
@@ -44,11 +44,11 @@ def aggregate_all_core_expectation_types() -> Set[str]:
         list_registered_expectation_implementations,
     )
 
-    v2_batchkwargs_api_supported_expectation_types: List[str] = [
+    v2_batchkwargs_api_supported_expectation_types: list[str] = [
         el for el in Dataset.__dict__.keys() if el.startswith("expect_")
     ]
 
-    v3_batchrequest_api_supported_expectation_types: List[
+    v3_batchrequest_api_supported_expectation_types: list[
         str
     ] = list_registered_expectation_implementations()
 

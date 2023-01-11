@@ -18,9 +18,9 @@ class Asset:
         base_directory: Optional[str] = None,
         glob_directive: Optional[str] = None,
         pattern: Optional[str] = None,
-        group_names: Optional[List[str]] = None,
+        group_names: Optional[list[str]] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        batch_identifiers: Optional[List[str]] = None,
+        batch_identifiers: Optional[list[str]] = None,
         # S3
         bucket: Optional[str] = None,
         max_keys: Optional[int] = None,
@@ -82,7 +82,7 @@ class Asset:
         return self._pattern
 
     @property
-    def group_names(self) -> Optional[List[str]]:
+    def group_names(self) -> Optional[list[str]]:
         return self._group_names
 
     @property
@@ -122,5 +122,5 @@ class Asset:
         return self._delimiter
 
     @property
-    def batch_identifiers(self) -> Optional[List[str]]:
+    def batch_identifiers(self) -> Optional[list[str]]:
         return self._batch_identifiers

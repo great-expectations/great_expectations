@@ -106,7 +106,7 @@ class DataSplitter(abc.ABC):
             return splitter_method_name
 
     @staticmethod
-    def _convert_date_parts(date_parts: List[DatePart] | List[str]) -> List[DatePart]:
+    def _convert_date_parts(date_parts: list[DatePart] | list[str]) -> list[DatePart]:
         """Convert a list of date parts to DatePart objects.
 
         Args:
@@ -121,7 +121,7 @@ class DataSplitter(abc.ABC):
         ]
 
     @staticmethod
-    def _validate_date_parts(date_parts: List[DatePart] | List[str]) -> None:
+    def _validate_date_parts(date_parts: list[DatePart] | list[str]) -> None:
         """Validate that date parts exist and are of the correct type.
 
         Args:
@@ -142,7 +142,7 @@ class DataSplitter(abc.ABC):
             )
 
     @staticmethod
-    def _verify_all_strings_are_valid_date_parts(date_part_strings: List[str]) -> None:
+    def _verify_all_strings_are_valid_date_parts(date_part_strings: list[str]) -> None:
         """Verify date part strings by trying to load as DatePart instances.
 
         Args:
@@ -161,7 +161,7 @@ class DataSplitter(abc.ABC):
     def _convert_datetime_batch_identifiers_to_date_parts_dict(
         self,
         column_batch_identifiers: datetime.datetime | str | dict,
-        date_parts: List[DatePart],
+        date_parts: list[DatePart],
     ) -> dict:
         """Convert batch identifiers to a dict of {date_part as str: date_part value}.
 

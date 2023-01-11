@@ -54,7 +54,7 @@ class KdeNumericRangeEstimator(NumericRangeEstimator):
         metric_values: np.ndarray,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        parameters: Optional[dict[str, ParameterContainer]] = None,
     ) -> NumericRangeEstimationResult:
         if is_ndarray_datetime_dtype(
             data=metric_values,

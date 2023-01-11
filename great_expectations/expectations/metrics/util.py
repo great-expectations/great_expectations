@@ -336,20 +336,20 @@ def is_column_present_in_table(
     schema_name: Optional[str] = None,
 ) -> bool:
     all_columns_metadata: Optional[
-        List[Dict[str, Any]]
+        list[dict[str, Any]]
     ] = get_sqlalchemy_column_metadata(
         engine=engine, table_selectable=table_selectable, schema_name=schema_name
     )
     # Purposefully do not check for a NULL "all_columns_metadata" to insure that it must never happen.
-    column_names: List[str] = [col_md["name"] for col_md in all_columns_metadata]
+    column_names: list[str] = [col_md["name"] for col_md in all_columns_metadata]
     return column_name in column_names
 
 
 def get_sqlalchemy_column_metadata(
     engine: Engine, table_selectable: Select, schema_name: Optional[str] = None
-) -> Optional[List[Dict[str, Any]]]:
+) -> Optional[list[dict[str, Any]]]:
     try:
-        columns: List[Dict[str, Any]]
+        columns: list[dict[str, Any]]
 
         inspector: reflection.Inspector = get_sqlalchemy_inspector(engine)
         try:
@@ -394,9 +394,9 @@ def get_sqlalchemy_column_metadata(
 
 def column_reflection_fallback(
     selectable: Select, dialect: Dialect, sqlalchemy_engine: Engine
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     """If we can't reflect the table, use a query to at least get column names."""
-    col_info_dict_list: List[Dict[str, str]]
+    col_info_dict_list: list[dict[str, str]]
     # noinspection PyUnresolvedReferences
     if dialect.name.lower() == "mssql":
         # Get column names and types from the database
@@ -500,11 +500,11 @@ def column_reflection_fallback(
                 columns_table_query.c.column_id.asc(),
             )
         )
-        col_info_tuples_list: List[tuple] = sqlalchemy_engine.execute(
+        col_info_tuples_list: list[tuple] = sqlalchemy_engine.execute(
             col_info_query
         ).fetchall()
         # type_module = _get_dialect_type_module(dialect=dialect)
-        col_info_dict_list: List[Dict[str, str]] = [
+        col_info_dict_list: list[dict[str, str]] = [
             {
                 "name": column_name,
                 # "type": getattr(type_module, column_data_type.upper())(),
@@ -591,11 +591,11 @@ def column_reflection_fallback(
             )
             .alias("column_info")
         )
-        col_info_tuples_list: List[tuple] = sqlalchemy_engine.execute(
+        col_info_tuples_list: list[tuple] = sqlalchemy_engine.execute(
             col_info_query
         ).fetchall()
         # type_module = _get_dialect_type_module(dialect=dialect)
-        col_info_dict_list: List[Dict[str, str]] = [
+        col_info_dict_list: list[dict[str, str]] = [
             {
                 "name": column_name,
                 "type": column_data_type.upper(),
@@ -619,17 +619,17 @@ def column_reflection_fallback(
                 )
         result_object = sqlalchemy_engine.execute(query)
         # noinspection PyProtectedMember
-        col_names: List[str] = result_object._metadata.keys
+        col_names: list[str] = result_object._metadata.keys
         col_info_dict_list = [{"name": col_name} for col_name in col_names]
     return col_info_dict_list
 
 
 def get_dbms_compatible_column_names(
-    column_names: Union[List[str], str],
-    batch_columns_list: List[Union[str, quoted_name]],
+    column_names: Union[list[str], str],
+    batch_columns_list: list[Union[str, quoted_name]],
     execution_engine: ExecutionEngine,
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
-) -> Union[List[Union[str, quoted_name]], Union[str, quoted_name]]:
+) -> Union[list[Union[str, quoted_name]], Union[str, quoted_name]]:
     """
     Case non-sensitivity is expressed in upper case by common DBMS backends and in lower case by SQLAlchemy, with any
     deviations enclosed with double quotes.
@@ -654,7 +654,7 @@ def get_dbms_compatible_column_names(
         error_message_template=error_message_template,
     )
 
-    column_names_list: List[str]
+    column_names_list: list[str]
     is_list: bool
     if isinstance(column_names, list):
         column_names_list = column_names
@@ -663,10 +663,10 @@ def get_dbms_compatible_column_names(
         column_names_list = [column_names]
         is_list = False
 
-    typed_column_names_list: List[Union[str, quoted_name]]
+    typed_column_names_list: list[Union[str, quoted_name]]
     if isinstance(execution_engine, SqlAlchemyExecutionEngine):
         column_name: str
-        batch_columns_dict: Dict[str, Union[str, quoted_name]] = {
+        batch_columns_dict: dict[str, Union[str, quoted_name]] = {
             str(column_name): column_name for column_name in batch_columns_list
         }
         typed_column_names_list = [
@@ -682,8 +682,8 @@ def get_dbms_compatible_column_names(
 
 
 def verify_column_names_exist(
-    column_names: Union[List[str], str],
-    batch_columns_list: List[Union[str, quoted_name]],
+    column_names: Union[list[str], str],
+    batch_columns_list: list[Union[str, quoted_name]],
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
 ) -> None:
     """
@@ -694,7 +694,7 @@ def verify_column_names_exist(
         batch_columns_list: Properly typed column names (output of "table.columns" metric)
         error_message_template: String template to output error message if any column cannot be found in "Batch" object.
     """
-    column_names_list: List[str]
+    column_names_list: list[str]
     if isinstance(column_names, list):
         column_names_list = column_names
     else:
@@ -1072,9 +1072,9 @@ def get_sqlalchemy_source_table_and_schema(
 
 def get_unexpected_indices_for_multiple_pandas_named_indices(
     domain_records_df: pd.DataFrame,
-    unexpected_index_column_names: List[str],
+    unexpected_index_column_names: list[str],
     expectation_domain_column_name: Union[str, None] = None,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """
     Builds unexpected_index list for Pandas Dataframe in situation where the named
     columns is also a named index. This method handles the case when there are multiple named indices.
@@ -1092,10 +1092,10 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(
             failed_metrics=["unexpected_index_list"],
         )
 
-    domain_records_df_index_names: List[str] = domain_records_df.index.names
-    unexpected_indices: List[Union[int, str]] = list(domain_records_df.index)
+    domain_records_df_index_names: list[str] = domain_records_df.index.names
+    unexpected_indices: list[Union[int, str]] = list(domain_records_df.index)
 
-    tuple_index: Dict[str, int] = dict()
+    tuple_index: dict[str, int] = dict()
     for column_name in unexpected_index_column_names:
         if column_name not in domain_records_df_index_names:
             raise gx_exceptions.MetricResolutionError(
@@ -1107,10 +1107,10 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(
                 column_name, 0
             )
 
-    unexpected_index_list: List[Dict[str, Any]] = list()
+    unexpected_index_list: list[dict[str, Any]] = list()
 
     for index in unexpected_indices:
-        primary_key_dict: Dict[str, Any] = dict()
+        primary_key_dict: dict[str, Any] = dict()
         # domain column first
         primary_key_dict[expectation_domain_column_name] = domain_records_df.at[
             index, expectation_domain_column_name
@@ -1123,9 +1123,9 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(
 
 def get_unexpected_indices_for_single_pandas_named_index(
     domain_records_df: pd.DataFrame,
-    unexpected_index_column_names: List[str],
+    unexpected_index_column_names: list[str],
     expectation_domain_column_name: Union[str, None] = None,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """
     Builds unexpected_index list for Pandas Dataframe in situation where the named
     columns is also a named index. This method handles the case when there is a single named index.
@@ -1138,10 +1138,10 @@ def get_unexpected_indices_for_single_pandas_named_index(
         List of Dicts that contain ID/PK values
 
     """
-    unexpected_index_values_by_named_index: List[Union[int, str]] = list(
+    unexpected_index_values_by_named_index: list[Union[int, str]] = list(
         domain_records_df.index
     )
-    unexpected_index_list: List[Dict[str, Any]] = list()
+    unexpected_index_list: list[dict[str, Any]] = list()
     if not (
         len(unexpected_index_column_names) == 1
         and unexpected_index_column_names[0] == domain_records_df.index.name
@@ -1152,7 +1152,7 @@ def get_unexpected_indices_for_single_pandas_named_index(
         )
 
     for index in unexpected_index_values_by_named_index:
-        primary_key_dict: Dict[str, Any] = dict()
+        primary_key_dict: dict[str, Any] = dict()
         # domain column first
         primary_key_dict[expectation_domain_column_name] = domain_records_df.at[
             index, expectation_domain_column_name
@@ -1165,11 +1165,11 @@ def get_unexpected_indices_for_single_pandas_named_index(
 
 def compute_unexpected_pandas_indices(
     domain_records_df: pd.DataFrame,
-    result_format: Dict[str, Any],
+    result_format: dict[str, Any],
     execution_engine: PandasExecutionEngine,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     expectation_domain_column_name: Union[str, None] = None,
-) -> Union[List[int], List[Dict[str, Any]]]:
+) -> Union[list[int], list[dict[str, Any]]]:
     """
     Helper method to compute unexpected_index_list for PandasExecutionEngine. Handles logic needed for named indices.
 
@@ -1185,11 +1185,11 @@ def compute_unexpected_pandas_indices(
 
     """
     if domain_records_df.index.name is not None:
-        unexpected_index_column_names: List[str] = result_format.get(
+        unexpected_index_column_names: list[str] = result_format.get(
             "unexpected_index_column_names", [domain_records_df.index.name]
         )
         unexpected_index_list: Optional[
-            List[Dict[str, Any]]
+            list[dict[str, Any]]
         ] = get_unexpected_indices_for_single_pandas_named_index(
             domain_records_df=domain_records_df,
             unexpected_index_column_names=unexpected_index_column_names,
@@ -1197,11 +1197,11 @@ def compute_unexpected_pandas_indices(
         )
     # multiple named indices
     elif domain_records_df.index.names[0] is not None:
-        unexpected_index_column_names: Union[List[str], None] = result_format.get(
+        unexpected_index_column_names: Union[list[str], None] = result_format.get(
             "unexpected_index_column_names", list(domain_records_df.index.names)
         )
         unexpected_index_list: Optional[
-            List[Dict[str, Any]]
+            list[dict[str, Any]]
         ] = get_unexpected_indices_for_multiple_pandas_named_indices(
             domain_records_df=domain_records_df,
             unexpected_index_column_names=unexpected_index_column_names,
@@ -1209,13 +1209,13 @@ def compute_unexpected_pandas_indices(
         )
     # named columns
     elif result_format.get("unexpected_index_column_names"):
-        unexpected_index_column_names: List[str] = result_format.get(
+        unexpected_index_column_names: list[str] = result_format.get(
             "unexpected_index_column_names"
         )
-        unexpected_index_list: Optional[List[Dict[str, Any]]] = []
-        unexpected_indices: List[Union[int, str]] = list(domain_records_df.index)
+        unexpected_index_list: Optional[list[dict[str, Any]]] = []
+        unexpected_indices: list[Union[int, str]] = list(domain_records_df.index)
         for index in unexpected_indices:
-            primary_key_dict: Dict[str, Any] = dict()
+            primary_key_dict: dict[str, Any] = dict()
             primary_key_dict[expectation_domain_column_name] = domain_records_df.at[
                 index, expectation_domain_column_name
             ]

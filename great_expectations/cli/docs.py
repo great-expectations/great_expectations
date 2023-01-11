@@ -178,7 +178,7 @@ def docs_clean(
         )
 
 
-def _build_intro_string(docs_sites_strings: List[str]) -> str:
+def _build_intro_string(docs_sites_strings: list[str]) -> str:
     doc_string_count = len(docs_sites_strings)
     if doc_string_count == 1:
         list_intro_string = "1 Data Docs site configured:"

@@ -131,7 +131,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         )
         return S3BatchSpec(batch_spec)
 
-    def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
+    def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> list[str]:
         query_options: dict = {
             "Bucket": self._bucket,
             "Prefix": self._prefix,
@@ -148,7 +148,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             if asset.max_keys:
                 query_options["MaxKeys"] = asset.max_keys
 
-        path_list: List[str] = [
+        path_list: list[str] = [
             key
             for key in list_s3_keys(
                 s3=self._s3,

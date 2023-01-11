@@ -137,7 +137,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
 
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
-    ) -> List[str]:
+    ) -> list[str]:
         query_options: dict = {
             "bucket_or_name": self._bucket_or_name,
             "prefix": self._prefix,
@@ -145,7 +145,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
             "max_results": self._max_results,
         }
 
-        path_list: List[str] = [
+        path_list: list[str] = [
             key
             for key in list_gcs_keys(
                 gcs=self._gcs,

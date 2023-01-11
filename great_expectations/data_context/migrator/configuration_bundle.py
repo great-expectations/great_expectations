@@ -44,15 +44,15 @@ class ConfigurationBundle:
 
         self._data_context_variables: DataContextVariables = context.variables
 
-        self._datasources: List[DatasourceConfig] = self._get_all_datasources()
-        self._expectation_suites: List[
+        self._datasources: list[DatasourceConfig] = self._get_all_datasources()
+        self._expectation_suites: list[
             ExpectationSuite
         ] = self._get_all_expectation_suites()
-        self._checkpoints: List[CheckpointConfig] = self._get_all_checkpoints()
-        self._profilers: List[RuleBasedProfilerConfig] = self._get_all_profilers()
+        self._checkpoints: list[CheckpointConfig] = self._get_all_checkpoints()
+        self._profilers: list[RuleBasedProfilerConfig] = self._get_all_profilers()
 
         # Treated slightly differently as we require the keys downstream when printing migration status.
-        self._validation_results: Dict[
+        self._validation_results: dict[
             str, ExpectationSuiteValidationResult
         ] = self._get_all_validation_results()
 
@@ -78,32 +78,32 @@ class ConfigurationBundle:
         return self._data_context_variables
 
     @property
-    def datasources(self) -> List[DatasourceConfig]:
+    def datasources(self) -> list[DatasourceConfig]:
         return self._datasources
 
     @property
-    def expectation_suites(self) -> List[ExpectationSuite]:
+    def expectation_suites(self) -> list[ExpectationSuite]:
         return self._expectation_suites
 
     @property
-    def checkpoints(self) -> List[CheckpointConfig]:
+    def checkpoints(self) -> list[CheckpointConfig]:
         return self._checkpoints
 
     @property
-    def profilers(self) -> List[RuleBasedProfilerConfig]:
+    def profilers(self) -> list[RuleBasedProfilerConfig]:
         return self._profilers
 
     @property
-    def validation_results(self) -> Dict[str, ExpectationSuiteValidationResult]:
+    def validation_results(self) -> dict[str, ExpectationSuiteValidationResult]:
         return self._validation_results
 
-    def _get_all_datasources(self) -> List[DatasourceConfig]:
+    def _get_all_datasources(self) -> list[DatasourceConfig]:
 
-        datasource_names: List[str] = list(self._context.datasources.keys())
+        datasource_names: list[str] = list(self._context.datasources.keys())
 
         # Note: we are accessing the protected _datasource_store to not add a public property
         # to all Data Contexts.
-        datasource_configs: List[DatasourceConfig] = []
+        datasource_configs: list[DatasourceConfig] = []
         for datasource_name in datasource_names:
             datasource_config = self._context._datasource_store.retrieve_by_name(  # type: ignore[attr-defined]
                 datasource_name=datasource_name
@@ -113,16 +113,16 @@ class ConfigurationBundle:
 
         return datasource_configs
 
-    def _get_all_expectation_suites(self) -> List[ExpectationSuite]:
+    def _get_all_expectation_suites(self) -> list[ExpectationSuite]:
         return [
             self._context.get_expectation_suite(name)
             for name in self._context.list_expectation_suite_names()
         ]
 
-    def _get_all_checkpoints(self) -> List[CheckpointConfig]:
+    def _get_all_checkpoints(self) -> list[CheckpointConfig]:
         return [self._context.checkpoint_store.get_checkpoint(name=checkpoint_name, ge_cloud_id=None) for checkpoint_name in self._context.list_checkpoints()]  # type: ignore[arg-type]
 
-    def _get_all_profilers(self) -> List[RuleBasedProfilerConfig]:
+    def _get_all_profilers(self) -> list[RuleBasedProfilerConfig]:
         def round_trip_profiler_config(
             profiler_config: RuleBasedProfilerConfig,
         ) -> RuleBasedProfilerConfig:
@@ -137,7 +137,7 @@ class ConfigurationBundle:
 
     def _get_all_validation_results(
         self,
-    ) -> Dict[str, ExpectationSuiteValidationResult]:
+    ) -> dict[str, ExpectationSuiteValidationResult]:
         validation_results = {
             str(key): cast(
                 ExpectationSuiteValidationResult,

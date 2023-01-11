@@ -162,7 +162,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         round_decimals=f"{VARIABLES_KEY}round_decimals",
         evaluation_parameter_builder_configs=None,
     )
-    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
+    validation_parameter_builder_configs: list[ParameterBuilderConfig] = [
         column_min_range_estimator_parameter_builder_config,
         column_max_range_estimator_parameter_builder_config,
     ]

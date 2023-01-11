@@ -39,7 +39,7 @@ class Builder(SerializableDictDot):
         Args:
             data_context: AbstractDataContext associated with this Builder
         """
-        self._batch_list: Optional[List[Batch]] = None
+        self._batch_list: Optional[list[Batch]] = None
         self._batch_request: Union[BatchRequestBase, dict, None] = None
         self._data_context: Optional[AbstractDataContext] = data_context
 
@@ -48,11 +48,11 @@ class Builder(SerializableDictDot):
     """
 
     @property
-    def batch_list(self) -> Optional[List[Batch]]:
+    def batch_list(self) -> Optional[list[Batch]]:
         return self._batch_list
 
     @batch_list.setter
-    def batch_list(self, value: List[Batch]) -> None:
+    def batch_list(self, value: list[Batch]) -> None:
         self._batch_list = value
 
     @property
@@ -72,7 +72,7 @@ class Builder(SerializableDictDot):
 
     def set_batch_list_if_null_batch_request(
         self,
-        batch_list: Optional[List[Batch]] = None,
+        batch_list: Optional[list[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
     ) -> None:
         """
@@ -87,7 +87,7 @@ class Builder(SerializableDictDot):
 
     def set_batch_data(
         self,
-        batch_list: Optional[List[Batch]] = None,
+        batch_list: Optional[list[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
     ) -> None:
         arg: Any

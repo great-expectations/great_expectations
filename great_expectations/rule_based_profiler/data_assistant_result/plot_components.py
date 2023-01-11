@@ -126,10 +126,10 @@ class DomainPlotComponent(PlotComponent):
 
 @dataclass(frozen=True)
 class BatchPlotComponent(PlotComponent):
-    batch_identifiers: Optional[List[str]] = None
+    batch_identifiers: Optional[list[str]] = None
 
     @property
-    def titles(self) -> List[str]:
+    def titles(self) -> list[str]:
         return [
             batch_identifier.replace("_", " ").title().replace("Id", "ID")
             for batch_identifier in self.batch_identifiers
@@ -145,7 +145,7 @@ class BatchPlotComponent(PlotComponent):
             title=self.title,
         )
 
-    def generate_tooltip(self, format: str = "") -> List[alt.Tooltip]:
+    def generate_tooltip(self, format: str = "") -> list[alt.Tooltip]:
         """Wrapper around alt.Tooltip creation.
 
         Args:
@@ -205,7 +205,7 @@ class ExpectationKwargPlotComponent(PlotComponent):
 
 
 def determine_plot_title(
-    metric_plot_components: List[MetricPlotComponent],
+    metric_plot_components: list[MetricPlotComponent],
     batch_plot_component: BatchPlotComponent,
     domain_plot_component: DomainPlotComponent,
     expectation_type: Optional[str] = None,

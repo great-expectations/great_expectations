@@ -86,7 +86,7 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
     ):
         parse_strings_as_datetimes: bool = (

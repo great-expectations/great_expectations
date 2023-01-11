@@ -23,7 +23,7 @@ class NumericRangeEstimationResult(DictDot):
     """
 
     estimation_histogram: np.ndarray
-    value_range: Union[np.ndarray, List[np.float64]]
+    value_range: Union[np.ndarray, list[np.float64]]
 
     def to_dict(self) -> dict:
         """Returns: this NumericRangeEstimationResult as a dictionary"""

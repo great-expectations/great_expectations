@@ -20,7 +20,7 @@ programmatically create new enum values if run as a module.
         )
 
         In a test to retrieve all event names:
-        all_event_names: List[str] = UsageStatsEvents.get_all_event_names()
+        all_event_names: list[str] = UsageStatsEvents.get_all_event_names()
 
         To retrieve CLI event names:
         (
@@ -35,7 +35,7 @@ programmatically create new enum values if run as a module.
 from __future__ import annotations
 
 import enum
-from typing import List, Optional
+from typing import Optional
 
 
 class UsageStatsEvents(str, enum.Enum):
@@ -150,7 +150,7 @@ class UsageStatsEvents(str, enum.Enum):
 
     @classmethod
     def get_cli_event_name(
-        cls, noun: str, verb: str, other_items: Optional[List[str]] = None
+        cls, noun: str, verb: str, other_items: Optional[list[str]] = None
     ) -> str:
         """Return the appropriate event name from the appropriate enum based on inputs.
 
@@ -174,7 +174,7 @@ class UsageStatsEvents(str, enum.Enum):
         return getattr(cls, enum_name).value
 
     @classmethod
-    def get_cli_begin_and_end_event_names(cls, noun: str, verb: str) -> List[str]:
+    def get_cli_begin_and_end_event_names(cls, noun: str, verb: str) -> list[str]:
         """Return the appropriate list of event names from the appropriate enums based on inputs.
 
         Args:
@@ -184,8 +184,8 @@ class UsageStatsEvents(str, enum.Enum):
         Returns:
             List of strings from enum value for event
         """
-        other_items_list: List[List[str]] = [["begin"], ["end"]]
-        event_names: List[str] = [
+        other_items_list: list[list[str]] = [["begin"], ["end"]]
+        event_names: list[str] = [
             cls.get_cli_event_name(noun, verb, other_items=other_items)
             for other_items in other_items_list
         ]

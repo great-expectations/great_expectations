@@ -59,7 +59,7 @@ class NumericRangeEstimator(ABC, SerializableDictDot):
         metric_values: np.ndarray,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        parameters: Optional[dict[str, ParameterContainer]] = None,
     ) -> NumericRangeEstimationResult:
         """
         Method that invokes implementation of the estimation algorithm that is the subject of the inherited class.
@@ -85,7 +85,7 @@ class NumericRangeEstimator(ABC, SerializableDictDot):
         metric_values: np.ndarray,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        parameters: Optional[dict[str, ParameterContainer]] = None,
     ) -> NumericRangeEstimationResult:
         """
         Essentials of the estimation algorithm (all subclasses must implement this method).

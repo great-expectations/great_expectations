@@ -76,10 +76,10 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     def __init__(
         self,
         expectation_type: str,
-        meta: Optional[Dict[str, Any]] = None,
+        meta: Optional[dict[str, Any]] = None,
         condition: Optional[str] = None,
         validation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
+            list[ParameterBuilderConfig]
         ] = None,
         data_context: Optional[AbstractDataContext] = None,
         **kwargs,
@@ -142,7 +142,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     @property
     def validation_parameter_builder_configs(
         self,
-    ) -> Optional[List[ParameterBuilderConfig]]:
+    ) -> Optional[list[ParameterBuilderConfig]]:
         return self._validation_parameter_builder_configs
 
     @property
@@ -173,7 +173,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         term_list: Union[str, ParseResults],
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        parameters: Optional[dict[str, ParameterContainer]] = None,
     ) -> ParseResults:
         """Recursively substitute all parameters and variables in term list
 
@@ -209,7 +209,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             term_list (Union[str, ParseResults): the ParseResults object returned from self._parse_condition
             domain (Domain): The domain of the ExpectationConfiguration
             variables (Optional[ParameterContainer]): The variables set for this ExpectationConfiguration
-            parameters (Optional[Dict[str, ParameterContainer]]): The parameters set for this ExpectationConfiguration
+            parameters (Optional[dict[str, ParameterContainer]]): The parameters set for this ExpectationConfiguration
 
         Returns:
             ParseResults: a ParseResults object identical to the one returned by self._parse_condition except with
@@ -219,7 +219,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         token: Union[str, ParseResults]
         for idx, token in enumerate(term_list):
             if isinstance(token, str) and token.startswith("$"):
-                term_list[idx]: Dict[
+                term_list[idx]: dict[
                     str, Any
                 ] = get_parameter_value_and_validate_return_type(
                     domain=domain,
@@ -283,7 +283,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
 
     def _build_boolean_result(
         self,
-        binary_list: Union[ParseResults, List[Union[bool, str]]],
+        binary_list: Union[ParseResults, list[Union[bool, str]]],
     ) -> bool:
         """Recursively build boolean result from binary list
 
@@ -299,7 +299,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
                 return True
 
         Args:
-            binary_list (List[Union[bool, str]]): the ParseResults object returned from
+            binary_list (list[Union[bool, str]]): the ParseResults object returned from
                                                    self._substitute_parameters_and_variables
 
         Returns:
@@ -326,7 +326,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         parsed_condition: ParseResults,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        parameters: Optional[dict[str, ParameterContainer]] = None,
     ) -> bool:
         """Evaluates the parsed condition to True/False and returns the boolean result"""
         substituted_term_list: ParseResults = self._substitute_parameters_and_variables(
@@ -347,12 +347,12 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        parameters: Optional[dict[str, ParameterContainer]] = None,
     ) -> Optional[ExpectationConfiguration]:
         """Returns either and ExpectationConfiguration object or None depending on evaluation of condition"""
         parameter_name: str
         fully_qualified_parameter_name: str
-        expectation_kwargs: Dict[str, Any] = {
+        expectation_kwargs: dict[str, Any] = {
             parameter_name: get_parameter_value_and_validate_return_type(
                 domain=domain,
                 parameter_reference=fully_qualified_parameter_name,
@@ -362,7 +362,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             )
             for parameter_name, fully_qualified_parameter_name in self.kwargs.items()
         }
-        meta: Dict[str, Any] = get_parameter_value_and_validate_return_type(
+        meta: dict[str, Any] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.meta,
             expected_return_type=dict,

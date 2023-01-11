@@ -17,7 +17,7 @@ class DictionarySorter(Sorter):
         name: str,
         orderby: str = "asc",
         order_keys_by: str = "asc",
-        key_reference_list: Optional[List[Any]] = None,
+        key_reference_list: Optional[list[Any]] = None,
     ) -> None:
         """Defines sorting behavior for batch definitions based on batch identifiers in nested dictionary form.
 
@@ -48,7 +48,7 @@ class DictionarySorter(Sorter):
 
     def get_batch_key(self, batch_definition: BatchDefinition) -> Any:
         batch_identifiers: dict = batch_definition.batch_identifiers
-        batch_keys: Optional[List[Any]]
+        batch_keys: Optional[list[Any]]
         if self._key_reference_list is None:
             batch_keys = sorted(
                 batch_identifiers[self.name].keys(), reverse=self.reverse_keys
@@ -59,7 +59,7 @@ class DictionarySorter(Sorter):
                 for key in self.key_reference_list
                 if key in batch_identifiers[self.name].keys()
             ]
-        batch_values: List[Any] = [
+        batch_values: list[Any] = [
             batch_identifiers[self.name][key] for key in batch_keys
         ]
         return batch_values
@@ -79,5 +79,5 @@ class DictionarySorter(Sorter):
         return self._reverse_keys
 
     @property
-    def key_reference_list(self) -> List[Any]:
+    def key_reference_list(self) -> list[Any]:
         return self._key_reference_list  # type: ignore[return-value]

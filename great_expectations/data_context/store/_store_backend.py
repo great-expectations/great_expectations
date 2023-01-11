@@ -184,7 +184,7 @@ class StoreBackend(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def list_keys(self, prefix=()) -> Union[List[str], List[tuple]]:
+    def list_keys(self, prefix=()) -> Union[list[str], list[tuple]]:
         raise NotImplementedError
 
     @abstractmethod

@@ -53,9 +53,9 @@ class CheckpointResult(SerializableDictDot):
     def __init__(
         self,
         run_id: RunIdentifier,
-        run_results: Dict[
+        run_results: dict[
             ValidationResultIdentifier,
-            Dict[str, Union[ExpectationSuiteValidationResult, dict, str]],
+            dict[str, Union[ExpectationSuiteValidationResult, dict, str]],
         ],
         checkpoint_config: CheckpointConfig,
         success: Optional[bool] = None,
@@ -97,9 +97,9 @@ class CheckpointResult(SerializableDictDot):
     @property
     def run_results(
         self,
-    ) -> Dict[
+    ) -> dict[
         ValidationResultIdentifier,
-        Dict[str, Union[ExpectationSuiteValidationResult, dict]],
+        dict[str, Union[ExpectationSuiteValidationResult, dict]],
     ]:
         return self._run_results
 
@@ -111,7 +111,7 @@ class CheckpointResult(SerializableDictDot):
     def success(self) -> bool:
         return self._success
 
-    def list_batch_identifiers(self) -> List[str]:
+    def list_batch_identifiers(self) -> list[str]:
         if self._batch_identifiers is None:
             self._batch_identifiers = list(
                 {
@@ -121,7 +121,7 @@ class CheckpointResult(SerializableDictDot):
             )
         return self._batch_identifiers
 
-    def list_data_asset_names(self) -> List[str]:
+    def list_data_asset_names(self) -> list[str]:
         if self._data_asset_names is None:
             self._data_asset_names = list(
                 {
@@ -131,7 +131,7 @@ class CheckpointResult(SerializableDictDot):
             )
         return self._data_asset_names
 
-    def list_expectation_suite_names(self) -> List[str]:
+    def list_expectation_suite_names(self) -> list[str]:
         if self._expectation_suite_names is None:
             self._expectation_suite_names = list(
                 {
@@ -141,14 +141,14 @@ class CheckpointResult(SerializableDictDot):
             )
         return self._expectation_suite_names
 
-    def list_validation_result_identifiers(self) -> List[ValidationResultIdentifier]:
+    def list_validation_result_identifiers(self) -> list[ValidationResultIdentifier]:
         if self._validation_result_identifiers is None:
             self._validation_result_identifiers = list(self._run_results.keys())
         return self._validation_result_identifiers
 
     def list_validation_results(
         self, group_by=None
-    ) -> Union[List[ExpectationSuiteValidationResult], dict]:
+    ) -> Union[list[ExpectationSuiteValidationResult], dict]:
         if group_by is None:
             if self._validation_results is None:
                 self._validation_results = [
@@ -208,7 +208,7 @@ class CheckpointResult(SerializableDictDot):
 
     def list_data_assets_validated(
         self, group_by: Optional[str] = None
-    ) -> Union[List[dict], dict]:
+    ) -> Union[list[dict], dict]:
         if group_by is None:
             if self._data_assets_validated is None:
                 self._data_assets_validated = list(
@@ -276,7 +276,7 @@ class CheckpointResult(SerializableDictDot):
 
         return self._statistics
 
-    def _list_validation_statistics(self) -> Dict[ValidationResultIdentifier, dict]:
+    def _list_validation_statistics(self) -> dict[ValidationResultIdentifier, dict]:
         if self._validation_statistics is None:
             self._validation_statistics = {
                 validation_result_identifier: run_result["validation_result"].statistics

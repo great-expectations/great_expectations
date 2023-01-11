@@ -98,11 +98,11 @@ class BaseCheckpoint(ConfigPeer):
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[list[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
-        profilers: Optional[List[dict]] = None,
+        validations: Optional[list[dict]] = None,
+        profilers: Optional[list[dict]] = None,
         run_id: Optional[Union[str, RunIdentifier]] = None,
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
@@ -176,7 +176,7 @@ class BaseCheckpoint(ConfigPeer):
             self.data_context.concurrency, max_workers=len(validations)
         ) as async_executor:
             # noinspection PyUnresolvedReferences
-            async_validation_operator_results: List[
+            async_validation_operator_results: list[
                 AsyncResult[ValidationOperatorResult]
             ] = []
             if len(validations) > 0:
@@ -301,7 +301,7 @@ class BaseCheckpoint(ConfigPeer):
     def _run_validation(
         self,
         substituted_runtime_config: dict,
-        async_validation_operator_results: List[AsyncResult],
+        async_validation_operator_results: list[AsyncResult],
         async_executor: AsyncExecutor,
         result_format: Optional[dict],
         run_id: Optional[Union[str, RunIdentifier]],
@@ -474,14 +474,14 @@ is run), with each validation having its own defined "action_list" attribute.
             return None
 
     @property
-    def action_list(self) -> List[Dict]:
+    def action_list(self) -> list[Dict]:
         try:
             return self.config.action_list
         except AttributeError:
             return []
 
     @property
-    def validations(self) -> List[CheckpointValidationConfig]:
+    def validations(self) -> list[CheckpointValidationConfig]:
         try:
             return self.config.validations
         except AttributeError:
@@ -542,13 +542,13 @@ class Checkpoint(BaseCheckpoint):
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[list[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
-        profilers: Optional[List[dict]] = None,
+        validations: Optional[list[dict]] = None,
+        profilers: Optional[list[dict]] = None,
         validation_operator_name: Optional[str] = None,
-        batches: Optional[List[dict]] = None,
+        batches: Optional[list[dict]] = None,
         ge_cloud_id: Optional[UUID] = None,
         expectation_suite_ge_cloud_id: Optional[UUID] = None,
         default_validation_id: Optional[str] = None,
@@ -597,11 +597,11 @@ constructor arguments.
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[list[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
-        profilers: Optional[List[dict]] = None,
+        validations: Optional[list[dict]] = None,
+        profilers: Optional[list[dict]] = None,
         run_id: Optional[Union[str, int, float]] = None,
         run_name: Optional[str] = None,
         run_time: Optional[datetime.datetime] = None,
@@ -678,19 +678,19 @@ constructor arguments.
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[list[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
-        profilers: Optional[List[dict]] = None,
+        validations: Optional[list[dict]] = None,
+        profilers: Optional[list[dict]] = None,
         # Next two fields are for LegacyCheckpoint configuration
         validation_operator_name: Optional[str] = None,
-        batches: Optional[List[dict]] = None,
+        batches: Optional[list[dict]] = None,
         # the following four arguments are used by SimpleCheckpoint
-        site_names: Optional[Union[str, List[str]]] = None,
+        site_names: Optional[Union[str, list[str]]] = None,
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
-        notify_with: Optional[Union[str, List[str]]] = None,
+        notify_with: Optional[Union[str, list[str]]] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
@@ -904,7 +904,7 @@ class LegacyCheckpoint(Checkpoint):
         name: str,
         data_context,
         validation_operator_name: Optional[str] = None,
-        batches: Optional[List[dict]] = None,
+        batches: Optional[list[dict]] = None,
     ) -> None:
         super().__init__(
             name=name,
@@ -921,7 +921,7 @@ class LegacyCheckpoint(Checkpoint):
         return self._validation_operator_name
 
     @property
-    def batches(self) -> Optional[List[dict]]:
+    def batches(self) -> Optional[list[dict]]:
         return self._batches
 
     def _run_default_validation_operator(
@@ -1072,17 +1072,17 @@ class SimpleCheckpoint(Checkpoint):
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[list[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
-        profilers: Optional[List[dict]] = None,
+        validations: Optional[list[dict]] = None,
+        profilers: Optional[list[dict]] = None,
         ge_cloud_id: Optional[UUID] = None,
         # the following four arguments are used by SimpleCheckpointConfigurator
-        site_names: Union[str, List[str]] = "all",
+        site_names: Union[str, list[str]] = "all",
         slack_webhook: Optional[str] = None,
         notify_on: str = "all",
-        notify_with: Union[str, List[str]] = "all",
+        notify_with: Union[str, list[str]] = "all",
         expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> None:
@@ -1130,20 +1130,20 @@ class SimpleCheckpoint(Checkpoint):
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[list[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
-        profilers: Optional[List[dict]] = None,
+        validations: Optional[list[dict]] = None,
+        profilers: Optional[list[dict]] = None,
         run_id: Optional[Union[str, RunIdentifier]] = None,
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
         result_format: Optional[str] = None,
         # the following four arguments are specific to SimpleCheckpoint
-        site_names: Union[str, List[str]] = "all",
+        site_names: Union[str, list[str]] = "all",
         slack_webhook: Optional[str] = None,
         notify_on: str = "all",
-        notify_with: Union[str, List[str]] = "all",
+        notify_with: Union[str, list[str]] = "all",
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> CheckpointResult:
         new_baseline_config = None

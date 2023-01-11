@@ -68,7 +68,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         self._data_references_cache = {}
 
         for data_reference in self._get_data_reference_list():
-            mapped_batch_definition_list: List[
+            mapped_batch_definition_list: list[
                 BatchDefinition
             ] = self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
                 data_reference=data_reference, data_asset_name=None
@@ -85,7 +85,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         """
         return len(self._data_references_cache)
 
-    def get_unmatched_data_references(self) -> List[str]:
+    def get_unmatched_data_references(self) -> list[str]:
         """
         Returns the list of data_references unmatched by configuration by looping through items in _data_references_cache
         and returning data_references that do not have an associated data_asset.
@@ -95,7 +95,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         """
         return [k for k, v in self._data_references_cache.items() if v is None]
 
-    def get_available_data_asset_names(self) -> List[str]:
+    def get_available_data_asset_names(self) -> list[str]:
         """
         Return the list of asset names known by this DataConnector
 
@@ -106,7 +106,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             self._refresh_data_references_cache()
 
         # This will fetch ALL batch_definitions in the cache
-        batch_definition_list: List[
+        batch_definition_list: list[
             BatchDefinition
         ] = self._get_batch_definition_list_from_batch_request(
             batch_request=BatchRequestBase(
@@ -116,7 +116,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             )
         )
 
-        data_asset_names: List[str] = [
+        data_asset_names: list[str] = [
             batch_definition.data_asset_name
             for batch_definition in batch_definition_list
         ]
@@ -139,8 +139,8 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
 
         return PathBatchSpec(batch_spec)
 
-    def _get_batch_definition_list_from_cache(self) -> List[BatchDefinition]:
-        batch_definition_list: List[BatchDefinition] = [
+    def _get_batch_definition_list_from_cache(self) -> list[BatchDefinition]:
+        batch_definition_list: list[BatchDefinition] = [
             batch_definitions[0]
             for batch_definitions in self._data_references_cache.values()
             if batch_definitions is not None

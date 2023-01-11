@@ -14,7 +14,7 @@ import time
 from functools import wraps
 from queue import Queue
 from types import FrameType
-from typing import TYPE_CHECKING, Callable, List, Optional
+from typing import TYPE_CHECKING, Callable, Optional
 
 import jsonschema
 import requests
@@ -131,7 +131,7 @@ class UsageStatisticsHandler:
     def build_init_payload(self) -> dict:
         """Adds information that may be available only after full data context construction, but is useful to
         calculate only one time (for example, anonymization)."""
-        expectation_suites: List[ExpectationSuite] = [
+        expectation_suites: list[ExpectationSuite] = [
             self._data_context.get_expectation_suite(expectation_suite_name)
             for expectation_suite_name in self._data_context.list_expectation_suite_names()
         ]
@@ -159,14 +159,14 @@ class UsageStatisticsHandler:
         return anonymized_init_payload
 
     @staticmethod
-    def _get_serialized_dependencies() -> List[dict]:
+    def _get_serialized_dependencies() -> list[dict]:
         """Get the serialized dependencies from the GXExecutionEnvironment."""
         ge_execution_environment = GXExecutionEnvironment()
-        dependencies: List[PackageInfo] = ge_execution_environment.dependencies
+        dependencies: list[PackageInfo] = ge_execution_environment.dependencies
 
         schema = PackageInfoSchema()
 
-        serialized_dependencies: List[dict] = [
+        serialized_dependencies: list[dict] = [
             schema.dump(package_info) for package_info in dependencies
         ]
 

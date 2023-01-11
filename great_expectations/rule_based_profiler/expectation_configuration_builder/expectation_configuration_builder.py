@@ -36,7 +36,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         self,
         expectation_type: str,
         validation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
+            list[ParameterBuilderConfig]
         ] = None,
         data_context: Optional[AbstractDataContext] = None,
         **kwargs,
@@ -77,8 +77,8 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-        batch_list: Optional[List[Batch]] = None,
+        parameters: Optional[dict[str, ParameterContainer]] = None,
+        batch_list: Optional[list[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
     ) -> ExpectationConfiguration:
         """
@@ -108,12 +108,12 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-        batch_list: Optional[List[Batch]] = None,
+        parameters: Optional[dict[str, ParameterContainer]] = None,
+        batch_list: Optional[list[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         recompute_existing_parameter_values: bool = False,
     ) -> None:
-        validation_parameter_builders: List[ParameterBuilder] = (
+        validation_parameter_builders: list[ParameterBuilder] = (
             self.validation_parameter_builders or []
         )
 
@@ -134,7 +134,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        parameters: Optional[dict[str, ParameterContainer]] = None,
     ) -> ExpectationConfiguration:
         pass
 
@@ -143,14 +143,14 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         return self._expectation_type
 
     @property
-    def validation_parameter_builders(self) -> Optional[List[ParameterBuilder]]:
+    def validation_parameter_builders(self) -> Optional[list[ParameterBuilder]]:
         return self._validation_parameter_builders
 
 
 def init_rule_expectation_configuration_builders(
-    expectation_configuration_builder_configs: List[dict],
+    expectation_configuration_builder_configs: list[dict],
     data_context: Optional[AbstractDataContext] = None,
-) -> List[ExpectationConfigurationBuilder]:
+) -> list[ExpectationConfigurationBuilder]:
     expectation_configuration_builder_config: dict
     return [
         init_expectation_configuration_builder(

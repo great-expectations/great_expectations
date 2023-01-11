@@ -18,7 +18,7 @@ class GreatExpectationsError(Exception):
 class GreatExpectationsValidationError(ValidationError, GreatExpectationsError):
     def __init__(self, message, validation_error=None) -> None:
         self.message = message
-        self.messages: Union[List[str], List[Any], Dict] = []
+        self.messages: Union[list[str], list[Any], Dict] = []
         if validation_error is not None:
             self.messages = validation_error.messages
 

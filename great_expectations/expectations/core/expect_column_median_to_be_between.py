@@ -131,7 +131,7 @@ class ExpectColumnMedianToBeBetween(ColumnExpectation):
         round_decimals=f"{VARIABLES_KEY}round_decimals",
         evaluation_parameter_builder_configs=None,
     )
-    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
+    validation_parameter_builder_configs: list[ParameterBuilderConfig] = [
         median_range_estimator_parameter_builder_config,
     ]
     default_profiler_config = RuleBasedProfilerConfig(

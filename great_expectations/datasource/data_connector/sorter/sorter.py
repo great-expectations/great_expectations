@@ -24,10 +24,10 @@ class Sorter:
         self._reverse = reverse
 
     def get_sorted_batch_definitions(
-        self, batch_definitions: List[BatchDefinition]
-    ) -> List[BatchDefinition]:
-        none_batches: List[int] = []
-        value_batches: List[int] = []
+        self, batch_definitions: list[BatchDefinition]
+    ) -> list[BatchDefinition]:
+        none_batches: list[int] = []
+        value_batches: list[int] = []
         for idx, batch_definition in enumerate(batch_definitions):
             # if the batch_identifiers take the form of a nested dictionary, we need to extract the values of the
             # inner dict to check for special case sorting of None
@@ -46,10 +46,10 @@ class Sorter:
             else:
                 value_batches.append(idx)
 
-        none_batch_definitions: List[BatchDefinition] = [
+        none_batch_definitions: list[BatchDefinition] = [
             batch_definitions[idx] for idx in none_batches
         ]
-        value_batch_definitions: List[BatchDefinition] = sorted(
+        value_batch_definitions: list[BatchDefinition] = sorted(
             [batch_definitions[idx] for idx in value_batches],
             key=self.get_batch_key,
             reverse=self.reverse,

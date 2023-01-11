@@ -66,11 +66,11 @@ class UserConfigurableProfiler:
     def __init__(
         self,
         profile_dataset: Union[Batch, Dataset, Validator],
-        excluded_expectations: Optional[List[str]] = None,
-        ignored_columns: Optional[List[str]] = None,
+        excluded_expectations: Optional[list[str]] = None,
+        ignored_columns: Optional[list[str]] = None,
         not_null_only: bool = False,
-        primary_or_compound_key: Optional[List[str]] = None,
-        semantic_types_dict: Optional[Dict[str, List[str]]] = None,
+        primary_or_compound_key: Optional[list[str]] = None,
+        semantic_types_dict: Optional[dict[str, list[str]]] = None,
         table_expectations_only: bool = False,
         value_set_threshold: str = "MANY",
     ) -> None:

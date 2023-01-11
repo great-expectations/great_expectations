@@ -4,7 +4,7 @@ import dataclasses
 import datetime
 import json
 import logging
-from typing import Any, Callable, Dict, Optional, Set, Union
+from typing import Any, Callable, Optional, Set, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
@@ -932,9 +932,9 @@ def get_batch_request_from_acceptable_arguments(  # noqa: C901 - complexity 21
 
 
 def standardize_batch_request_display_ordering(
-    batch_request: Dict[str, Union[str, int, Dict[str, Any]]]
-) -> Dict[str, Union[str, Dict[str, Any]]]:
-    batch_request_as_dict: Union[str, Dict[str, Any]] = safe_deep_copy(
+    batch_request: dict[str, Union[str, int, dict[str, Any]]]
+) -> dict[str, Union[str, dict[str, Any]]]:
+    batch_request_as_dict: Union[str, dict[str, Any]] = safe_deep_copy(
         data=batch_request
     )
     datasource_name: str = batch_request_as_dict["datasource_name"]

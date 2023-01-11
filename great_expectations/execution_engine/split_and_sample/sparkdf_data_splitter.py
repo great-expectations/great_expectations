@@ -120,7 +120,7 @@ class SparkDataSplitter(DataSplitter):
         df: DataFrame,
         column_name: str,
         batch_identifiers: dict,
-        date_parts: Union[List[DatePart], List[str]],
+        date_parts: Union[list[DatePart], list[str]],
     ) -> DataFrame:
         """Split on date_part values in column_name.
 

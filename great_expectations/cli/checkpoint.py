@@ -179,7 +179,7 @@ def checkpoint_list(ctx: click.Context) -> None:
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
-    checkpoints: List[str] = context.list_checkpoints()
+    checkpoints: list[str] = context.list_checkpoints()
     if not checkpoints:
         cli_message(
             "No Checkpoints found.\n"

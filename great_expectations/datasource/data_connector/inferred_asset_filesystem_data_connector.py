@@ -72,13 +72,13 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
 
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
-    ) -> List[str]:
+    ) -> list[str]:
         """
         List objects in the underlying data store to create a list of data_references.
 
         This method is used to refresh the cache.
         """
-        path_list: List[str] = get_filesystem_one_level_directory_glob_path_list(
+        path_list: list[str] = get_filesystem_one_level_directory_glob_path_list(
             base_directory_path=self.base_directory, glob_directive=self._glob_directive
         )
         return sorted(path_list)

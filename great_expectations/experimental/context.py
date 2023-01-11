@@ -27,7 +27,7 @@ class DataContext:
     _context: ClassVar[Optional[DataContext]] = None
     _config: ClassVar[Optional[GxConfig]] = None  # (kilo59) should this live  here?
 
-    _datasources: Dict[str, Datasource]
+    _datasources: dict[str, Datasource]
     root_directory: Union[DirectoryPath, str, None]
 
     @classmethod
@@ -55,7 +55,7 @@ class DataContext:
     def __init__(self, context_root_dir: Optional[DirectoryPath] = None) -> None:
         self.root_directory = context_root_dir
         self._sources: _SourceFactories = _SourceFactories(self)
-        self._datasources: Dict[str, Datasource] = {}
+        self._datasources: dict[str, Datasource] = {}
         LOGGER.info(f"4a. Available Factories - {self._sources.factories}")
         LOGGER.debug(f"4b. `type_lookup` mapping ->\n{pf(self._sources.type_lookup)}")
 

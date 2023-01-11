@@ -198,7 +198,7 @@ class _YamlConfigValidator:
             class_name = config["class_name"]
 
         instantiated_class: Any = None
-        usage_stats_event_payload: Dict[str, Union[str, List[str]]] = {}
+        usage_stats_event_payload: dict[str, Union[str, list[str]]] = {}
 
         if pretty_print:
             print("Attempting to instantiate class from config...")

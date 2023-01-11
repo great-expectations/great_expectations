@@ -36,7 +36,7 @@ except ImportError:
     sqlalchemy = None
     Inspector = None
 
-DEFAULT_DATA_CONNECTOR_NAMES: Final[List[str]] = [
+DEFAULT_DATA_CONNECTOR_NAMES: Final[list[str]] = [
     "default_runtime_data_connector_name",
     "default_inferred_data_connector_name",
 ]
@@ -44,8 +44,8 @@ DEFAULT_DATA_CONNECTOR_NAMES: Final[List[str]] = [
 
 def get_batch_request(
     datasource: BaseDatasource,
-    additional_batch_request_args: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Union[str, int, Dict[str, Any]]]:
+    additional_batch_request_args: Optional[dict[str, Any]] = None,
+) -> dict[str, Union[str, int, dict[str, Any]]]:
     """
     This method manages the interaction with user necessary to obtain batch_request for a batch of a data asset.
 
@@ -64,14 +64,14 @@ def get_batch_request(
     # :param additional_batch_request_args:
     # :return: batch_request
     """
-    available_data_asset_names_by_data_connector_dict: Dict[
-        str, List[str]
+    available_data_asset_names_by_data_connector_dict: dict[
+        str, list[str]
     ] = datasource.get_available_data_asset_names()
     data_connector_name: Optional[str] = select_data_connector_name(
         available_data_asset_names_by_data_connector_dict=available_data_asset_names_by_data_connector_dict,
     )
 
-    batch_request: Dict[str, Union[str, int, Dict[str, Any]]] = {
+    batch_request: dict[str, Union[str, int, dict[str, Any]]] = {
         "datasource_name": datasource.name,
         "data_connector_name": data_connector_name,  # type: ignore[dict-item] # name could be None
     }
@@ -111,7 +111,7 @@ def get_batch_request(
         batch_request.update(additional_batch_request_args)
 
     batch_spec_passthrough: Optional[
-        Dict[str, Union[str, Dict[str, Any]]]
+        dict[str, Union[str, dict[str, Any]]]
     ] = batch_request.get(  # type: ignore[assignment] # can't guarantee shape of 'batch_spec_passthrough'
         "batch_spec_passthrough"
     )
@@ -128,7 +128,7 @@ def get_batch_request(
 
 def select_data_connector_name(
     available_data_asset_names_by_data_connector_dict: Optional[
-        Dict[str, List[str]]
+        dict[str, list[str]]
     ] = None,
 ) -> Optional[str]:
     msg_prompt_select_data_connector_name = "Select data_connector"
@@ -154,7 +154,7 @@ def select_data_connector_name(
         if default_data_connector:
             return default_data_connector
 
-    data_connector_names: List[str] = list(
+    data_connector_names: list[str] = list(
         available_data_asset_names_by_data_connector_dict.keys()
     )
     choices: str = "\n".join(
@@ -194,12 +194,12 @@ def _get_data_asset_name_from_data_connector(
 
     """
 
-    available_data_asset_names_by_data_connector_dict: Dict[
-        str, List[str]
+    available_data_asset_names_by_data_connector_dict: dict[
+        str, list[str]
     ] = datasource.get_available_data_asset_names(
         data_connector_names=data_connector_name
     )
-    available_data_asset_names: List[str] = sorted(
+    available_data_asset_names: list[str] = sorted(
         available_data_asset_names_by_data_connector_dict[data_connector_name],
         key=lambda x: x,
     )
@@ -236,16 +236,16 @@ def _get_data_asset_name_from_data_connector(
 
 
 def _list_available_data_asset_names(
-    available_data_asset_names: List[str],
+    available_data_asset_names: list[str],
     msg_prompt_enter_data_asset_name: str,
 ) -> Optional[str]:
-    available_data_asset_names_str: List[str] = [
+    available_data_asset_names_str: list[str] = [
         f"{name}" for name in available_data_asset_names
     ]
     PAGE_SIZE = 50
 
     # Organize available data assets into pages of 50
-    data_asset_pages: List[List[str]] = [
+    data_asset_pages: list[list[str]] = [
         available_data_asset_names_str[i : i + PAGE_SIZE]
         for i in range(0, len(available_data_asset_names_str), PAGE_SIZE)
     ]
@@ -294,12 +294,12 @@ def _list_available_data_asset_names(
 
 
 def _search_through_available_data_asset_names(
-    available_data_asset_names: List[str],
+    available_data_asset_names: list[str],
     msg_prompt_enter_data_asset_name: str,
 ) -> Optional[str]:
     data_asset_name: Optional[str] = None
     while data_asset_name is None:
-        available_data_asset_names_str: List[str] = [
+        available_data_asset_names_str: list[str] = [
             f"{name}" for name in available_data_asset_names
         ]
         choices: str = "\n".join(
@@ -401,7 +401,7 @@ def _get_default_schema(datasource: SimpleSqlalchemyDatasource) -> str:
 
 
 def _check_default_data_connectors(
-    available_data_asset_names_by_data_connector_dict: Dict[str, List[str]]
+    available_data_asset_names_by_data_connector_dict: dict[str, list[str]]
 ) -> Optional[str]:
     if all(
         data_connector_name in available_data_asset_names_by_data_connector_dict
@@ -414,8 +414,8 @@ def _check_default_data_connectors(
 
 def _get_batch_spec_passthrough(
     datasource: BaseDatasource,
-) -> Dict[str, Union[str, Dict[str, Any]]]:
-    batch_spec_passthrough: Dict[str, Union[str, Dict[str, Any]]] = {}
+) -> dict[str, Union[str, dict[str, Any]]]:
+    batch_spec_passthrough: dict[str, Union[str, dict[str, Any]]] = {}
 
     if isinstance(datasource, Datasource):
         pass  # TODO: <Alex>Add parameters for Pandas, Spark, and other SQL as CLI functionality expands.</Alex>

@@ -112,7 +112,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
 
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
-    ) -> List[str]:
+    ) -> list[str]:
         """
         List objects in the underlying data store to create a list of data_references.
 
@@ -125,7 +125,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
             "MaxKeys": self._max_keys,
         }
 
-        path_list: List[str] = [
+        path_list: list[str] = [
             key
             for key in list_s3_keys(
                 s3=self._s3,

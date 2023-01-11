@@ -67,7 +67,7 @@ class CLIState:
 
 
 class CLI(click.MultiCommand):
-    def list_commands(self, ctx: click.Context) -> List[str]:
+    def list_commands(self, ctx: click.Context) -> list[str]:
         # note that if --help is called this method is invoked before any flags
         # are parsed or context set.
         commands = [

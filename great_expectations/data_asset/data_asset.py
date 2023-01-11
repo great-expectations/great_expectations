@@ -418,7 +418,7 @@ class DataAsset:
         self,
         expectation_configuration: ExpectationConfiguration,
         match_type: str = "domain",
-    ) -> List[int]:
+    ) -> list[int]:
         """This method is a thin wrapper for ExpectationSuite.find_expectation_indexes"""
         # deprecated-v0.12.0
         warnings.warn(
@@ -434,7 +434,7 @@ class DataAsset:
         self,
         expectation_configuration: ExpectationConfiguration,
         match_type: str = "domain",
-    ) -> List[ExpectationConfiguration]:
+    ) -> list[ExpectationConfiguration]:
         """This method is a thin wrapper for ExpectationSuite.find_expectations()"""
         # deprecated-v0.12.0
         warnings.warn(
@@ -451,7 +451,7 @@ class DataAsset:
         expectation_configuration: ExpectationConfiguration,
         match_type: str = "domain",
         remove_multiple_matches: bool = False,
-    ) -> List[ExpectationConfiguration]:
+    ) -> list[ExpectationConfiguration]:
         """This method is a thin wrapper for ExpectationSuite.remove()"""
         # deprecated-v0.12.0
         warnings.warn(
@@ -1182,7 +1182,7 @@ class DataAsset:
         partial_unexpected_count: Optional[int] = result_format.get(
             "partial_unexpected_count"
         )
-        partial_unexpected_counts: Optional[List[Dict[str, Any]]] = None
+        partial_unexpected_counts: Optional[list[dict[str, Any]]] = None
 
         if partial_unexpected_count is not None and 0 < partial_unexpected_count:
             try:

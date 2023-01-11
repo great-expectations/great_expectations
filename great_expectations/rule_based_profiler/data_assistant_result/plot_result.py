@@ -25,7 +25,7 @@ class PlotResult:
         charts: The list of Altair charts rendered through `DataAssistantResult.plot()`
     """
 
-    charts: List[alt.Chart]
+    charts: list[alt.Chart]
 
     def __repr__(self):
         return ""

@@ -125,7 +125,7 @@ class JsonSchemaProfiler(Profiler):
         )
         return suite
 
-    def _get_object_types(self, details: dict) -> List[str]:
+    def _get_object_types(self, details: dict) -> list[str]:
         type_ = details.get("type", None)
         any_of = details.get("anyOf", None)
 
@@ -145,7 +145,7 @@ class JsonSchemaProfiler(Profiler):
 
         return types_list
 
-    def _get_enum_list(self, details: dict) -> Optional[List[str]]:
+    def _get_enum_list(self, details: dict) -> Optional[list[str]]:
         enum = details.get("enum", None)
         any_of = details.get("anyOf", None)
 
@@ -266,7 +266,7 @@ class JsonSchemaProfiler(Profiler):
         ):
             return None
 
-        kwargs: Dict[str, Any] = {"column": key}
+        kwargs: dict[str, Any] = {"column": key}
         if minimum is not None:
             kwargs["min_value"] = minimum
         if maximum is not None:

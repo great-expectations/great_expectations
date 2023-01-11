@@ -118,7 +118,7 @@ class InlineStoreBackend(StoreBackend):
             "InlineStoreBackend does not support moving of keys; the DataContext's config variables schema is immutable"
         )
 
-    def list_keys(self, prefix: Tuple[str, ...] = ()) -> List[str]:
+    def list_keys(self, prefix: Tuple[str, ...] = ()) -> list[str]:
         """
         See `StoreBackend.list_keys` for more information.
 
@@ -133,7 +133,7 @@ class InlineStoreBackend(StoreBackend):
         if prefix:
             config_section = prefix[0]
 
-        keys: List[str]
+        keys: list[str]
         config_dict: dict = self._data_context.config.to_dict()
         if config_section is None:
             keys = list(key for key in config_dict.keys())

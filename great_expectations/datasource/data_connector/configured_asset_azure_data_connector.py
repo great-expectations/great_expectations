@@ -139,7 +139,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         )
         return AzureBatchSpec(batch_spec)
 
-    def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
+    def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> list[str]:
         query_options: dict = {
             "container": self._container,
             "name_starts_with": self._name_starts_with,
@@ -153,7 +153,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
             if asset.delimiter:
                 query_options["delimiter"] = asset.delimiter
 
-        path_list: List[str] = list_azure_keys(
+        path_list: list[str] = list_azure_keys(
             azure=self._azure,
             query_options=query_options,
             recursive=False,

@@ -130,7 +130,7 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
 
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
-    ) -> List[str]:
+    ) -> list[str]:
         """
         List objects in the underlying data store to create a list of data_references.
 
@@ -142,7 +142,7 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
             "delimiter": self._delimiter,
         }
 
-        path_list: List[str] = list_azure_keys(
+        path_list: list[str] = list_azure_keys(
             azure=self._azure,
             query_options=query_options,
             recursive=True,

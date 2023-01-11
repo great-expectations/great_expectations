@@ -231,7 +231,7 @@ def _suite_new_workflow(
     no_jupyter: bool,
     usage_event: str,
     batch_request: Optional[
-        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+        Union[str, dict[str, Union[str, int, dict[str, Any]]]]
     ] = None,
 ) -> None:
     try:
@@ -239,7 +239,7 @@ def _suite_new_workflow(
         data_asset_name: Optional[str] = None
 
         additional_batch_request_args: Optional[
-            Dict[str, Union[str, int, Dict[str, Any]]]
+            dict[str, Union[str, int, dict[str, Any]]]
         ] = {"limit": 1000}
 
         if interactive_mode.value["interactive_flag"]:
@@ -561,7 +561,7 @@ def suite_edit(
     )
 
     additional_batch_request_args: Optional[
-        Dict[str, Union[str, int, Dict[str, Any]]]
+        dict[str, Union[str, int, dict[str, Any]]]
     ] = {"limit": 1000}
 
     _suite_edit_workflow(
@@ -715,10 +715,10 @@ def _suite_edit_workflow(  # noqa: C901 - 19
     create_if_not_exist: bool = False,
     datasource_name: Optional[str] = None,
     batch_request: Optional[
-        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+        Union[str, dict[str, Union[str, int, dict[str, Any]]]]
     ] = None,
     additional_batch_request_args: Optional[
-        Dict[str, Union[str, int, Dict[str, Any]]]
+        dict[str, Union[str, int, dict[str, Any]]]
     ] = None,
     suppress_usage_message: bool = False,
     assume_yes: bool = False,
@@ -741,7 +741,7 @@ def _suite_edit_workflow(  # noqa: C901 - 19
             batch_request_from_citation_is_up_to_date: bool = True
 
             batch_request_from_citation: Optional[
-                Union[str, Dict[str, Union[str, Dict[str, Any]]]]
+                Union[str, dict[str, Union[str, dict[str, Any]]]]
             ] = toolkit.get_batch_request_from_citations(expectation_suite=suite)
 
             if batch_request is not None and isinstance(batch_request, str):
@@ -892,7 +892,7 @@ def suite_delete(ctx: click.Context, suite: str) -> None:
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
     try:
-        suite_names: List[str] = context.list_expectation_suite_names()
+        suite_names: list[str] = context.list_expectation_suite_names()
     except Exception as e:
         send_usage_message(
             data_context=context,
@@ -941,7 +941,7 @@ def suite_list(ctx: click.Context) -> None:
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
     try:
-        suite_names: List[str] = context.list_expectation_suite_names()
+        suite_names: list[str] = context.list_expectation_suite_names()
     except Exception as e:
         send_usage_message(
             data_context=context,
@@ -950,7 +950,7 @@ def suite_list(ctx: click.Context) -> None:
         )
         raise e
 
-    suite_names_styled: List[str] = [
+    suite_names_styled: list[str] = [
         f" - <cyan>{suite_name}</cyan>" for suite_name in suite_names
     ]
     if len(suite_names_styled) == 0:

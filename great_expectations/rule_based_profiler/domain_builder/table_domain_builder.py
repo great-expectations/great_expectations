@@ -45,7 +45,7 @@ class TableDomainBuilder(DomainBuilder):
         self,
         rule_name: str,
         variables: Optional[ParameterContainer] = None,
-    ) -> List[Domain]:
+    ) -> list[Domain]:
         other_table_name: Optional[str]
         try:
             # Obtain table from "rule state" (i.e., variables and parameters); from instance variable otherwise.
@@ -59,7 +59,7 @@ class TableDomainBuilder(DomainBuilder):
         except KeyError:
             other_table_name = None
 
-        domains: List[Domain]
+        domains: list[Domain]
         if other_table_name:
             domains = [
                 Domain(

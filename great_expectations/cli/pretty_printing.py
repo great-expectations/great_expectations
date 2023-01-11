@@ -39,7 +39,7 @@ def display_not_implemented_message_and_exit() -> None:
 
 
 def cli_message_list(
-    string_list: List[str], list_intro_string: Optional[str] = None
+    string_list: list[str], list_intro_string: Optional[str] = None
 ) -> None:
     """Simple util function for displaying simple lists in cli"""
     if list_intro_string:

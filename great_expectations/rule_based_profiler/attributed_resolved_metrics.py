@@ -103,14 +103,14 @@ class AttributedResolvedMetrics(SerializableDictDot):
     with uniquely identifiable attribution object so that receivers can filter them from overall resolved metrics.
     """
 
-    batch_ids: Optional[List[str]] = None
+    batch_ids: Optional[list[str]] = None
     metric_attributes: Optional[Attributes] = None
-    metric_values_by_batch_id: Optional[Dict[str, MetricValue]] = None
+    metric_values_by_batch_id: Optional[dict[str, MetricValue]] = None
 
     @staticmethod
     def get_conditioned_attributed_metric_values_from_attributed_metric_values(
-        attributed_metric_values: Dict[str, MetricValues]
-    ) -> Dict[str, MetricValues]:
+        attributed_metric_values: dict[str, MetricValues]
+    ) -> dict[str, MetricValues]:
         """
         Converts "attributed_metric_values" to Numpy array for each "batch_id" key (recursively, wherever possible).
         """
@@ -126,7 +126,7 @@ class AttributedResolvedMetrics(SerializableDictDot):
 
     @staticmethod
     def get_conditioned_metric_values_from_attributed_metric_values(
-        attributed_metric_values: Dict[str, MetricValue]
+        attributed_metric_values: dict[str, MetricValue]
     ) -> Optional[MetricValues]:
         """
         Converts all "attributed_metric_values" as list (together) to Numpy array (recursively, wherever possible).
@@ -156,7 +156,7 @@ class AttributedResolvedMetrics(SerializableDictDot):
         return self.metric_attributes.to_id()
 
     @property
-    def attributed_metric_values(self) -> Optional[Dict[str, MetricValue]]:
+    def attributed_metric_values(self) -> Optional[dict[str, MetricValue]]:
         if self.metric_values_by_batch_id is None or self.batch_ids is None:
             return None
 
@@ -168,7 +168,7 @@ class AttributedResolvedMetrics(SerializableDictDot):
         }
 
     @property
-    def conditioned_attributed_metric_values(self) -> Dict[str, MetricValues]:
+    def conditioned_attributed_metric_values(self) -> dict[str, MetricValues]:
         if self.attributed_metric_values is None:
             return {}
 

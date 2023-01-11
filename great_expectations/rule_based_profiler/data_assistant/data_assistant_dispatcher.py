@@ -22,7 +22,7 @@ class DataAssistantDispatcher:
     associated "DataAssistantRunner" objects, which process invocations of calls to "DataAssistant" "run()" methods.
     """
 
-    _registered_data_assistants: Dict[str, Type[DataAssistant]] = {}
+    _registered_data_assistants: dict[str, Type[DataAssistant]] = {}
 
     def __init__(self, data_context: AbstractDataContext) -> None:
         """
@@ -116,7 +116,7 @@ class DataAssistantDispatcher:
 
         return cls._registered_data_assistants.get(name)
 
-    def __dir__(self) -> List[str]:
+    def __dir__(self) -> list[str]:
         """
         This custom magic method is used to enable tab completion on "DataAssistantDispatcher" objects.
         """

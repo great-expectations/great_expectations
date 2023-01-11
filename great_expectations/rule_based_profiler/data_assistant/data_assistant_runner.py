@@ -142,7 +142,7 @@ class DataAssistantRunner:
             directives: dict = deep_filter_properties_iterable(
                 properties=kwargs,
             )
-            rule_based_profiler_domain_type_attributes: List[
+            rule_based_profiler_domain_type_attributes: list[
                 str
             ] = self._get_rule_based_profiler_domain_type_attributes()
             variables_directives_kwargs: dict = dict(
@@ -159,14 +159,14 @@ class DataAssistantRunner:
                     directives.items(),
                 )
             )
-            variables_directives_list: List[
+            variables_directives_list: list[
                 RuntimeEnvironmentVariablesDirectives
             ] = build_variables_directives(
                 exact_estimation=(estimation == NumericRangeEstimatorType.EXACT),
                 rules=self._profiler.rules,
                 **variables_directives_kwargs,
             )
-            domain_type_directives_list: List[
+            domain_type_directives_list: list[
                 RuntimeEnvironmentDomainTypeDirectives
             ] = build_domain_type_directives(**domain_type_directives_kwargs)
             data_assistant_result: DataAssistantResult = data_assistant.run(
@@ -175,7 +175,7 @@ class DataAssistantRunner:
             )
             return data_assistant_result
 
-        parameters: List[Parameter] = [
+        parameters: list[Parameter] = [
             Parameter(
                 name="batch_request",
                 kind=Parameter.POSITIONAL_OR_KEYWORD,
@@ -247,8 +247,8 @@ class DataAssistantRunner:
 
     def _get_method_signature_parameters_for_variables_directives(
         self,
-    ) -> List[Parameter]:
-        parameters: List[Parameter] = []
+    ) -> list[Parameter]:
+        parameters: list[Parameter] = []
 
         rule: Rule
         for rule in self._profiler.rules:
@@ -265,15 +265,15 @@ class DataAssistantRunner:
 
     def _get_method_signature_parameters_for_domain_type_directives(
         self,
-    ) -> List[Parameter]:
-        parameters: List[Parameter] = []
+    ) -> list[Parameter]:
+        parameters: list[Parameter] = []
 
-        domain_type_attribute_name_to_parameter_map: Dict[str, Parameter] = {}
-        conflicting_domain_type_attribute_names: List[str] = []
+        domain_type_attribute_name_to_parameter_map: dict[str, Parameter] = {}
+        conflicting_domain_type_attribute_names: list[str] = []
 
         rule: Rule
         domain_builder: Optional[DomainBuilder]
-        domain_builder_attributes: List[str]
+        domain_builder_attributes: list[str]
         key: str
         accessor_method: Callable
         accessor_method_return_type: Type
@@ -325,9 +325,9 @@ class DataAssistantRunner:
 
     def _get_rule_based_profiler_domain_type_attributes(
         self, rule: Optional[Rule] = None
-    ) -> List[str]:
+    ) -> list[str]:
         if rule is None:
-            domain_type_attributes: List[str] = []
+            domain_type_attributes: list[str] = []
             for rule in self._profiler.rules:
                 domain_type_attributes.extend(
                     self._get_rule_domain_type_attributes(rule=rule)
@@ -338,10 +338,10 @@ class DataAssistantRunner:
         return self._get_rule_domain_type_attributes(rule=rule)
 
     @staticmethod
-    def _get_rule_domain_type_attributes(rule: Rule) -> List[str]:
+    def _get_rule_domain_type_attributes(rule: Rule) -> list[str]:
         klass: type = rule.domain_builder.__class__
         sig: Signature = signature(obj=klass.__init__)  # type: ignore[misc] # mypy does not like direct __init__ access
-        parameters: Dict[str, Parameter] = dict(sig.parameters)
+        parameters: dict[str, Parameter] = dict(sig.parameters)
 
         domain_builder = rule.domain_builder
         assert (
@@ -349,7 +349,7 @@ class DataAssistantRunner:
         ), f"The underlying domain_builder on rule {rule.name} must be non-null"
         exclude_field_names = domain_builder.exclude_field_names
 
-        attribute_names: List[str] = list(
+        attribute_names: list[str] = list(
             filter(
                 lambda element: element not in exclude_field_names,
                 list(parameters.keys())[1:],

@@ -28,14 +28,14 @@ class RuleBasedProfilerResult(SerializableDictDot):
     (which represents configuration of effective Rule-Based Profiler, with all run-time overrides properly reconciled).
     """
 
-    fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]]
+    fully_qualified_parameter_names_by_domain: dict[Domain, list[str]]
     parameter_values_for_fully_qualified_parameter_names_by_domain: Optional[
-        Dict[Domain, Dict[str, ParameterNode]]
+        dict[Domain, dict[str, ParameterNode]]
     ]
-    expectation_configurations: List[ExpectationConfiguration]
+    expectation_configurations: list[ExpectationConfiguration]
     citation: dict
-    rule_domain_builder_execution_time: Dict[str, float]
-    rule_execution_time: Dict[str, float]
+    rule_domain_builder_execution_time: dict[str, float]
+    rule_execution_time: dict[str, float]
     # Reference to  "UsageStatisticsHandler" object for this "RuleBasedProfilerResult" object (if configured).
     _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
 
@@ -44,11 +44,11 @@ class RuleBasedProfilerResult(SerializableDictDot):
         Returns: This RuleBasedProfilerResult as dictionary (JSON-serializable for RuleBasedProfilerResult objects).
         """
         domain: Domain
-        fully_qualified_parameter_names: List[str]
-        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
+        fully_qualified_parameter_names: list[str]
+        parameter_values_for_fully_qualified_parameter_names: dict[str, ParameterNode]
         expectation_configuration: ExpectationConfiguration
-        parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
-            Domain, Dict[str, ParameterNode]
+        parameter_values_for_fully_qualified_parameter_names_by_domain: dict[
+            Domain, dict[str, ParameterNode]
         ] = (self.parameter_values_for_fully_qualified_parameter_names_by_domain or {})
         return {
             "fully_qualified_parameter_names_by_domain": [

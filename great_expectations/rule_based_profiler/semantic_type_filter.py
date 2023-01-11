@@ -11,14 +11,14 @@ class SemanticTypeFilter(ABC):
     def parse_semantic_domain_type_argument(
         self,
         semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+            Union[str, SemanticDomainTypes, list[Union[str, SemanticDomainTypes]]]
         ] = None,
-    ) -> List[SemanticDomainTypes]:
+    ) -> list[SemanticDomainTypes]:
         pass
 
     @property
     @abstractmethod
     def table_column_name_to_inferred_semantic_domain_type_map(
         self,
-    ) -> Dict[str, SemanticDomainTypes]:
+    ) -> dict[str, SemanticDomainTypes]:
         pass

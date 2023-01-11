@@ -13,8 +13,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
-    List,
     Mapping,
     MutableMapping,
     Optional,
@@ -301,7 +299,7 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 28
         return new_dict
 
     if isinstance(data, (list, tuple, set)):
-        new_list: List[JSONValues] = []
+        new_list: list[JSONValues] = []
         for val in data:
             new_list.append(convert_to_json_serializable(val))
 
@@ -761,7 +759,7 @@ def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
 
 # noinspection PyPep8Naming
 def get_or_create_spark_application(
-    spark_config: Optional[Dict[str, str]] = None,
+    spark_config: Optional[dict[str, str]] = None,
     force_reuse_spark_context: bool = False,
 ) -> Any:
     # Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
@@ -815,7 +813,7 @@ def get_or_create_spark_application(
 
 # noinspection PyPep8Naming
 def get_or_create_spark_session(
-    spark_config: Optional[Dict[str, str]] = None,
+    spark_config: Optional[dict[str, str]] = None,
 ):
     # Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
     # Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
@@ -855,7 +853,7 @@ def get_or_create_spark_session(
 
 
 def spark_restart_required(
-    current_spark_config: List[Tuple[str, str]], desired_spark_config: dict
+    current_spark_config: list[Tuple[str, str]], desired_spark_config: dict
 ) -> bool:
 
     # we can't change spark context config values within databricks runtimes

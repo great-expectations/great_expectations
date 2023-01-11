@@ -17,7 +17,7 @@ checking and updating these static lists.
 """
 import pathlib
 import re
-from typing import Dict, List, Set
+from typing import Set
 
 
 class GXDependencies:
@@ -30,7 +30,7 @@ class GXDependencies:
     """
 
     """This list should be kept in sync with our requirements.txt file."""
-    GX_REQUIRED_DEPENDENCIES: List[str] = sorted(
+    GX_REQUIRED_DEPENDENCIES: list[str] = sorted(
         [
             "altair",
             "Click",
@@ -65,7 +65,7 @@ class GXDependencies:
     )
 
     """This list should be kept in sync with our requirements-dev*.txt files."""
-    ALL_GX_DEV_DEPENDENCIES: List[str] = sorted(
+    ALL_GX_DEV_DEPENDENCIES: list[str] = sorted(
         [
             "PyMySQL",
             "azure-identity",
@@ -124,7 +124,7 @@ class GXDependencies:
         ]
     )
 
-    GX_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING: List[str] = [
+    GX_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING: list[str] = [
         # requirements-dev-contrib.txt:
         "black",
         "flake8",
@@ -226,7 +226,7 @@ class GXDependencies:
     def __init__(self) -> None:
         self._requirements_paths = self._init_requirements_paths()
 
-    def _init_requirements_paths(self) -> Dict[str, pathlib.Path]:
+    def _init_requirements_paths(self) -> dict[str, pathlib.Path]:
         project_root = pathlib.Path(__file__).parents[3]
         reqs_dir = project_root.joinpath("reqs")
         assert project_root.exists() and reqs_dir.exists()
@@ -240,7 +240,7 @@ class GXDependencies:
 
         return req_dict
 
-    def get_required_dependency_names(self) -> List[str]:
+    def get_required_dependency_names(self) -> list[str]:
         """Sorted list of required GX dependencies"""
         return self.GX_REQUIRED_DEPENDENCIES
 
@@ -248,7 +248,7 @@ class GXDependencies:
         """Set of dev GX dependencies"""
         return self.GX_DEV_DEPENDENCIES
 
-    def get_required_dependency_names_from_requirements_file(self) -> List[str]:
+    def get_required_dependency_names_from_requirements_file(self) -> list[str]:
         """Get unique names of required dependencies.
 
         Returns:
@@ -262,19 +262,19 @@ class GXDependencies:
             )
         )
 
-    def get_dev_dependency_names_from_requirements_file(self) -> List[str]:
+    def get_dev_dependency_names_from_requirements_file(self) -> list[str]:
         """Get unique names of dependencies from all dev requirements files.
         Returns:
             List of string names of dev dependencies.
         """
         dev_dependency_names: Set[str] = set()
-        dev_dependency_paths: List[pathlib.Path] = [
+        dev_dependency_paths: list[pathlib.Path] = [
             path
             for name, path in self._requirements_paths.items()
             if name.startswith(self.DEV_REQUIREMENTS_PREFIX)
         ]
         for dev_dependency_path in dev_dependency_paths:
-            dependency_names: List[
+            dependency_names: list[
                 str
             ] = self._get_dependency_names_from_requirements_file(
                 dev_dependency_path.absolute()
@@ -284,7 +284,7 @@ class GXDependencies:
 
     def _get_dependency_names_from_requirements_file(
         self, filepath: pathlib.Path
-    ) -> List[str]:
+    ) -> list[str]:
         """Load requirements file and parse to retrieve dependency names.
 
         Args:
@@ -297,7 +297,7 @@ class GXDependencies:
             dependencies_with_versions = f.read().splitlines()
             return self._get_dependency_names(dependencies_with_versions)
 
-    def _get_dependency_names(self, dependencies: List[str]) -> List[str]:
+    def _get_dependency_names(self, dependencies: list[str]) -> list[str]:
         """Parse dependency names from a list of strings.
 
         List of strings typically from a requirements*.txt file.
@@ -311,7 +311,7 @@ class GXDependencies:
         dependency_matches = [
             re.search(r"^(?!--requirement)([\w\-.]+)", s) for s in dependencies
         ]
-        dependency_names: List[str] = []
+        dependency_names: list[str] = []
         for match in dependency_matches:
             if match is not None:
                 dependency_names.append(match.group(0))

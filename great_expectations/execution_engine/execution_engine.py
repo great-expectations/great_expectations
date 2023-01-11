@@ -97,7 +97,7 @@ class MetricComputationConfiguration(DictDot):
 
 
 class DataConnectorStorageDataReferenceResolver:
-    DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP: Dict[str, str] = {
+    DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP: dict[str, str] = {
         "InferredAssetS3DataConnector": "S3",
         "ConfiguredAssetS3DataConnector": "S3",
         "InferredAssetGCSDataConnector": "GCS",
@@ -107,7 +107,7 @@ class DataConnectorStorageDataReferenceResolver:
         "InferredAssetDBFSDataConnector": "DBFS",
         "ConfiguredAssetDBFSDataConnector": "DBFS",
     }
-    STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS: Dict[
+    STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS: dict[
         Tuple[str, str], Callable
     ] = {
         (
@@ -266,7 +266,7 @@ class ExecutionEngine(ABC):
         return self._batch_manager
 
     def _load_batch_data_from_dict(
-        self, batch_data_dict: Dict[str, BatchDataType]
+        self, batch_data_dict: dict[str, BatchDataType]
     ) -> None:
         """
         Loads all data in batch_data_dict using cache_batch_data
@@ -302,9 +302,9 @@ class ExecutionEngine(ABC):
     def resolve_metrics(
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Optional[Dict[Tuple[str, str, str], MetricValue]] = None,
+        metrics: Optional[dict[Tuple[str, str, str], MetricValue]] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> Dict[Tuple[str, str, str], MetricValue]:
+    ) -> dict[Tuple[str, str, str], MetricValue]:
         """resolve_metrics is the main entrypoint for an execution engine. The execution engine will compute the value
         of the provided metrics.
 
@@ -319,8 +319,8 @@ class ExecutionEngine(ABC):
         if not metrics_to_resolve:
             return metrics or {}
 
-        metric_fn_direct_configurations: List[MetricComputationConfiguration]
-        metric_fn_bundle_configurations: List[MetricComputationConfiguration]
+        metric_fn_direct_configurations: list[MetricComputationConfiguration]
+        metric_fn_bundle_configurations: list[MetricComputationConfiguration]
         (
             metric_fn_direct_configurations,
             metric_fn_bundle_configurations,
@@ -336,7 +336,7 @@ class ExecutionEngine(ABC):
 
     def resolve_metric_bundle(
         self, metric_fn_bundle
-    ) -> Dict[Tuple[str, str, str], MetricValue]:
+    ) -> dict[Tuple[str, str, str], MetricValue]:
         """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
         raise NotImplementedError
 
@@ -430,11 +430,11 @@ class ExecutionEngine(ABC):
     def _build_direct_and_bundled_metric_computation_configurations(
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Optional[Dict[Tuple[str, str, str], MetricValue]] = None,
+        metrics: Optional[dict[Tuple[str, str, str], MetricValue]] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> Tuple[
-        List[MetricComputationConfiguration],
-        List[MetricComputationConfiguration],
+        list[MetricComputationConfiguration],
+        list[MetricComputationConfiguration],
     ]:
         """
         This method organizes "metrics_to_resolve" ("MetricConfiguration" objects) into two lists: direct and bundled.
@@ -449,8 +449,8 @@ class ExecutionEngine(ABC):
         Returns:
             Tuple with two elements: directly-computable and bundled "MetricComputationConfiguration" objects
         """
-        metric_fn_direct_configurations: List[MetricComputationConfiguration] = []
-        metric_fn_bundle_configurations: List[MetricComputationConfiguration] = []
+        metric_fn_direct_configurations: list[MetricComputationConfiguration] = []
+        metric_fn_bundle_configurations: list[MetricComputationConfiguration] = []
 
         if not metrics_to_resolve:
             return (
@@ -461,7 +461,7 @@ class ExecutionEngine(ABC):
         if metrics is None:
             metrics = {}
 
-        resolved_metric_dependencies_by_metric_name: Dict[
+        resolved_metric_dependencies_by_metric_name: dict[
             str, Union[MetricValue, Tuple[Any, dict, dict]]
         ]
         metric_class: MetricProvider
@@ -546,8 +546,8 @@ class ExecutionEngine(ABC):
     def _get_computed_metric_evaluation_dependencies_by_metric_name(
         self,
         metric_to_resolve: MetricConfiguration,
-        metrics: Dict[Tuple[str, str, str], MetricValue],
-    ) -> Dict[str, Union[MetricValue, Tuple[Any, dict, dict]]]:
+        metrics: dict[Tuple[str, str, str], MetricValue],
+    ) -> dict[str, Union[MetricValue, Tuple[Any, dict, dict]]]:
         """
         Gathers resolved (already computed) evaluation dependencies of metric-to-resolve (not yet computed)
         "MetricConfiguration" object by "metric_name" property of resolved "MetricConfiguration" objects.
@@ -559,7 +559,7 @@ class ExecutionEngine(ABC):
         Returns:
             Dictionary keyed by "metric_name" with values as computed metric or partial bundling information tuple
         """
-        metric_dependencies_by_metric_name: Dict[
+        metric_dependencies_by_metric_name: dict[
             str, Union[MetricValue, Tuple[Any, dict, dict]]
         ] = {}
 
@@ -586,9 +586,9 @@ class ExecutionEngine(ABC):
 
     def _process_direct_and_bundled_metric_computation_configurations(
         self,
-        metric_fn_direct_configurations: List[MetricComputationConfiguration],
-        metric_fn_bundle_configurations: List[MetricComputationConfiguration],
-    ) -> Dict[Tuple[str, str, str], MetricValue]:
+        metric_fn_direct_configurations: list[MetricComputationConfiguration],
+        metric_fn_bundle_configurations: list[MetricComputationConfiguration],
+    ) -> dict[Tuple[str, str, str], MetricValue]:
         """
         This method processes directly-computable and bundled "MetricComputationConfiguration" objects.
 
@@ -599,7 +599,7 @@ class ExecutionEngine(ABC):
         Returns:
             resolved_metrics (Dict): a dictionary with the values for the metrics that have just been resolved.
         """
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+        resolved_metrics: dict[Tuple[str, str, str], MetricValue] = {}
 
         metric_computation_configuration: MetricComputationConfiguration
 
@@ -620,7 +620,7 @@ class ExecutionEngine(ABC):
 
         try:
             # an engine-specific way of computing metrics together
-            resolved_metric_bundle: Dict[
+            resolved_metric_bundle: dict[
                 Tuple[str, str, str], MetricValue
             ] = self.resolve_metric_bundle(
                 metric_fn_bundle=metric_fn_bundle_configurations
@@ -642,7 +642,7 @@ class ExecutionEngine(ABC):
 
     def _split_domain_kwargs(
         self,
-        domain_kwargs: Dict[str, Any],
+        domain_kwargs: dict[str, Any],
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> SplitDomainKwargs:
@@ -699,7 +699,7 @@ class ExecutionEngine(ABC):
             )
         else:
             compute_domain_kwargs = copy.deepcopy(domain_kwargs)
-            accessor_domain_kwargs: Dict[str, Any] = {}
+            accessor_domain_kwargs: dict[str, Any] = {}
             split_domain_kwargs = SplitDomainKwargs(
                 compute_domain_kwargs, accessor_domain_kwargs
             )

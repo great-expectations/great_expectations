@@ -138,7 +138,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         )
         return GCSBatchSpec(batch_spec)
 
-    def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
+    def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> list[str]:
         query_options: dict = {
             "bucket_or_name": self._bucket_or_name,
             "prefix": self._prefix,
@@ -156,7 +156,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
             if asset.max_results:
                 query_options["max_results"] = asset.max_results
 
-        path_list: List[str] = [
+        path_list: list[str] = [
             key
             for key in list_gcs_keys(
                 gcs=self._gcs,

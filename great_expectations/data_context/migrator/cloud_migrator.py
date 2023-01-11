@@ -93,7 +93,7 @@ class CloudMigrator:
 
         self._session = create_session(access_token=cloud_access_token)
 
-        self._unsuccessful_validations: Dict[str, dict] = {}
+        self._unsuccessful_validations: dict[str, dict] = {}
 
     @classmethod
     def migrate(
@@ -246,7 +246,7 @@ class CloudMigrator:
             self._print_object_summary(obj_name=name, obj_collection=collection)  # type: ignore[arg-type]
 
     def _print_object_summary(
-        self, obj_name: str, obj_collection: List[AbstractConfig]
+        self, obj_name: str, obj_collection: list[AbstractConfig]
     ) -> None:
         length = len(obj_collection)
 
@@ -271,7 +271,7 @@ class CloudMigrator:
         serialized_bundle = serializer.serialize(configuration_bundle)
         return serialized_bundle
 
-    def _prepare_validation_results(self, serialized_bundle: dict) -> Dict[str, dict]:
+    def _prepare_validation_results(self, serialized_bundle: dict) -> dict[str, dict]:
         print("[Step 2/4]: Preparing validation results")
         return serialized_bundle.pop("validation_results")
 
@@ -302,7 +302,7 @@ class CloudMigrator:
 
     def _send_validation_results(
         self,
-        serialized_validation_results: Dict[str, dict],
+        serialized_validation_results: dict[str, dict],
         test_migrate: bool,
     ) -> None:
         print("[Step 4/4]: Sending validation results")
@@ -312,7 +312,7 @@ class CloudMigrator:
         )
 
     def _process_validation_results(
-        self, serialized_validation_results: Dict[str, dict], test_migrate: bool
+        self, serialized_validation_results: dict[str, dict], test_migrate: bool
     ) -> None:
         # 20220928 - Chetan - We want to use the static lookup tables in GXCloudStoreBackend
         # to ensure the appropriate URL and payload shape. This logic should be moved to

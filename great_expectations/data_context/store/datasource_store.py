@@ -52,11 +52,11 @@ class DatasourceStore(Store):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def list_keys(self) -> List[str]:  # type: ignore[override]
+    def list_keys(self) -> list[str]:  # type: ignore[override]
         """
         See parent 'Store.list_keys()' for more information
         """
-        keys_without_store_backend_id: List[str] = list(
+        keys_without_store_backend_id: list[str] = list(
             filter(
                 lambda k: k != StoreBackend.STORE_BACKEND_ID_KEY,
                 self._store_backend.list_keys(),

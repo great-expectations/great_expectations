@@ -1,11 +1,5 @@
 from __future__ import annotations
 
-###
-# These schemas are used to ensure that we *never* take unexpected usage stats message and provide full transparency
-# about usage statistics. Please reach out to the Great Expectations with any questions!
-###
-from typing import List
-
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
@@ -16,8 +10,14 @@ from great_expectations.core.usage_statistics.execution_environment import (
     InstallEnvironment,
 )
 
+###
+# These schemas are used to ensure that we *never* take unexpected usage stats message and provide full transparency
+# about usage statistics. Please reach out to the Great Expectations with any questions!
+###
+
+
 SCHEMA: str = "https://json-schema.org/draft/2020-12/schema"
-ALLOWED_VERSIONS: List[str] = ["1.0.0", "1.0.1"]
+ALLOWED_VERSIONS: list[str] = ["1.0.0", "1.0.1"]
 
 anonymized_string_schema = {
     "$schema": SCHEMA,

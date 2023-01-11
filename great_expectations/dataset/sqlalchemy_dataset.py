@@ -259,7 +259,7 @@ class MetaSqlAlchemyDataset(Dataset):
                 # we will instruct the result formatting method to skip this step.
                 result_format["partial_unexpected_count"] = 0
 
-            ignore_values_conditions: List[BinaryExpression] = []
+            ignore_values_conditions: list[BinaryExpression] = []
             if (
                 len(ignore_values) > 0
                 and None not in ignore_values
@@ -635,7 +635,7 @@ class MetaSqlAlchemyDataset(Dataset):
             )
             temp_table_obj.create(self.engine, checkfirst=True)
 
-            count_case_statement: List[sa.sql.elements.Label] = [
+            count_case_statement: list[sa.sql.elements.Label] = [
                 sa.case(
                     [
                         (
@@ -997,7 +997,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def get_column_count(self):
         return len(self.columns)
 
-    def get_table_columns(self) -> List[str]:
+    def get_table_columns(self) -> list[str]:
         return [col["name"] for col in self.columns]
 
     def get_column_nonnull_count(self, column):
@@ -1209,7 +1209,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def _get_column_quantiles_mssql(self, column: str, quantiles: Iterable) -> list:
         # mssql requires over(), so we add an empty over() clause
-        selects: List[WithinGroup] = [
+        selects: list[WithinGroup] = [
             sa.func.percentile_disc(quantile)
             .within_group(sa.column(column).asc())
             .over()
@@ -1255,7 +1255,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def _get_column_quantiles_bigquery(self, column: str, quantiles: Iterable) -> list:
         # BigQuery does not support "WITHIN", so we need a special case for it
-        selects: List[WithinGroup] = [
+        selects: list[WithinGroup] = [
             sa.func.percentile_disc(sa.column(column), quantile).over()
             for quantile in quantiles
         ]
@@ -1285,7 +1285,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             .cte("t")
         )
 
-        selects: List[WithinGroup] = []
+        selects: list[WithinGroup] = []
         for idx, quantile in enumerate(quantiles):
             # pymysql cannot handle conversion of numpy float64 to float; convert just in case
             if np.issubdtype(type(quantile), np.float_):
@@ -1345,8 +1345,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         else:
             table_row_count = 0
 
-        offsets: List[int] = [quantile * table_row_count - 1 for quantile in quantiles]
-        quantile_queries: List[Select] = [
+        offsets: list[int] = [quantile * table_row_count - 1 for quantile in quantiles]
+        quantile_queries: list[Select] = [
             sa.select([sa.column(column)])
             .order_by(sa.column(column).asc())
             .offset(offset)
@@ -1358,7 +1358,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         quantile_result: Row
         quantile_query: Select
         try:
-            quantiles_results: List[Row] = [
+            quantiles_results: list[Row] = [
                 self.engine.execute(quantile_query).fetchone()
                 for quantile_query in quantile_queries
             ]
@@ -1377,7 +1377,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def _get_column_quantiles_generic_sqlalchemy(
         self, column: str, quantiles: Iterable, allow_relative_error: bool
     ) -> list:
-        selects: List[WithinGroup] = [
+        selects: list[WithinGroup] = [
             sa.func.percentile_disc(quantile).within_group(sa.column(column).asc())
             for quantile in quantiles
         ]
@@ -1394,7 +1394,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 sql_approx: str = get_approximate_percentile_disc_sql(
                     selects=selects, sql_engine_dialect=self.sql_engine_dialect
                 )
-                selects_approx: List[TextClause] = [sa.text(sql_approx)]
+                selects_approx: list[TextClause] = [sa.text(sql_approx)]
                 quantiles_query_approx: Select = sa.select(selects_approx).select_from(
                     self._table
                 )
@@ -1742,7 +1742,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def column_reflection_fallback(self):
         """If we can't reflect the table, use a query to at least get column names."""
-        col_info_dict_list: List[Dict]
+        col_info_dict_list: list[Dict]
         if self.sql_engine_dialect.name.lower() == GXSqlDialect.MSSQL:
             type_module = self._get_dialect_type_module()
             # Get column names and types from the database
@@ -2370,7 +2370,7 @@ WHERE
             return False
 
         if hasattr(sa.column(column_A), "is_not"):
-            conditions: List[BinaryExpression] = [
+            conditions: list[BinaryExpression] = [
                 sa.and_(
                     sa.and_(
                         sa.column(column_A) == value[0],
@@ -2384,7 +2384,7 @@ WHERE
                 for value in parsed_value_set
             ]
         else:
-            conditions: List[BinaryExpression] = [
+            conditions: list[BinaryExpression] = [
                 sa.and_(
                     sa.and_(
                         sa.column(column_A) == value[0],

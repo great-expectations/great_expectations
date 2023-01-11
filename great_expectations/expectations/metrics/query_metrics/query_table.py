@@ -33,9 +33,9 @@ class QueryTable(QueryMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
-    ) -> List[dict]:
+    ) -> list[dict]:
         query: Optional[str] = metric_value_kwargs.get(
             "query"
         ) or cls.default_kwarg_values.get("query")
@@ -61,7 +61,7 @@ class QueryTable(QueryMetricProvider):
             query = query.format(active_batch=f"({selectable})")  # type: ignore[union-attr] # could be none
 
         engine: sqlalchemy_engine_Engine = execution_engine.engine
-        result: List[sqlalchemy_engine_Row] = engine.execute(sa.text(query)).fetchall()
+        result: list[sqlalchemy_engine_Row] = engine.execute(sa.text(query)).fetchall()
 
         return [dict(element) for element in result]
         # </snippet>
@@ -72,9 +72,9 @@ class QueryTable(QueryMetricProvider):
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
-    ) -> List[dict]:
+    ) -> list[dict]:
         query: Optional[str] = metric_value_kwargs.get(
             "query"
         ) or cls.default_kwarg_values.get("query")
@@ -88,6 +88,6 @@ class QueryTable(QueryMetricProvider):
         query = query.format(active_batch="tmp_view")  # type: ignore[union-attr] # could be none
 
         engine: pyspark_sql_SparkSession = execution_engine.spark
-        result: List[pyspark_sql_Row] = engine.sql(query).collect()
+        result: list[pyspark_sql_Row] = engine.sql(query).collect()
 
         return [element.asDict() for element in result]

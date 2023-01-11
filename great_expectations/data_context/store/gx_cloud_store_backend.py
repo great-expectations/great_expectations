@@ -31,7 +31,7 @@ class ErrorDetail(TypedDict):
 
 
 class ErrorPayload(TypedDict):
-    errors: List[ErrorDetail]
+    errors: list[ErrorDetail]
 
 
 class PayloadDataField(TypedDict):
@@ -107,7 +107,7 @@ def get_user_friendly_error_message(
 
 
 class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
-    PAYLOAD_ATTRIBUTES_KEYS: Dict[GXCloudRESTResource, str] = {
+    PAYLOAD_ATTRIBUTES_KEYS: dict[GXCloudRESTResource, str] = {
         GXCloudRESTResource.CHECKPOINT: "checkpoint_config",
         GXCloudRESTResource.DATASOURCE: "datasource_config",
         GXCloudRESTResource.DATA_CONTEXT: "data_context_config",
@@ -119,7 +119,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         GXCloudRESTResource.VALIDATION_RESULT: "result",
     }
 
-    ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE: Dict[GXCloudRESTResource, Set[str]] = {
+    ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE: dict[GXCloudRESTResource, Set[str]] = {
         GXCloudRESTResource.EXPECTATION_SUITE: {"clause_id"},
         GXCloudRESTResource.RENDERED_DATA_DOC: {"source_type", "source_id"},
         GXCloudRESTResource.VALIDATION_RESULT: {
@@ -400,7 +400,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def ge_cloud_credentials(self) -> dict:
         return self._ge_cloud_credentials
 
-    def list_keys(self, prefix: Tuple = ()) -> List[Tuple[GXCloudRESTResource, str, Optional[str]]]:  # type: ignore[override]
+    def list_keys(self, prefix: Tuple = ()) -> list[Tuple[GXCloudRESTResource, str, Optional[str]]]:  # type: ignore[override]
         url = construct_url(
             base_url=self.ge_cloud_base_url,
             organization_id=self.ge_cloud_credentials["organization_id"],

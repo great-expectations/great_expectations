@@ -4,7 +4,7 @@ import errno
 import os
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from typing import Any, Dict, Optional, Type, cast
+from typing import Any, Optional, Type, cast
 
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -18,14 +18,14 @@ class _AbstractConfigurationProvider(ABC):
         self._substitutor = _ConfigurationSubstitutor()
 
     @abstractmethod
-    def get_values(self) -> Dict[str, str]:
+    def get_values(self) -> dict[str, str]:
         """
         Retrieve any configuration variables relevant to the provider's environment.
         """
         pass
 
     def substitute_config(
-        self, config: Any, config_values: Optional[Dict[str, str]] = None
+        self, config: Any, config_values: Optional[dict[str, str]] = None
     ) -> Any:
         """
         Utilizes the underlying ConfigurationSubstitutor instance to substitute any
@@ -89,14 +89,14 @@ class _ConfigurationProvider(_AbstractConfigurationProvider):
         """
         return self._providers.get(type_)
 
-    def get_values(self) -> Dict[str, str]:
+    def get_values(self) -> dict[str, str]:
         """
         Iterates through all registered providers to aggregate a list of configuration values.
 
         Values are generated based on the order of registration; if there is a conflict,
         subsequent providers will overwrite existing values.
         """
-        values: Dict[str, str] = {}
+        values: dict[str, str] = {}
         for provider in self._providers.values():
             values.update(provider.get_values())
         return values
@@ -107,11 +107,11 @@ class _RuntimeEnvironmentConfigurationProvider(_AbstractConfigurationProvider):
     Responsible for the management of the runtime_environment dictionary provided at runtime.
     """
 
-    def __init__(self, runtime_environment: Dict[str, str]) -> None:
+    def __init__(self, runtime_environment: dict[str, str]) -> None:
         self._runtime_environment = runtime_environment
         super().__init__()
 
-    def get_values(self) -> Dict[str, str]:
+    def get_values(self) -> dict[str, str]:
         return self._runtime_environment
 
 
@@ -123,7 +123,7 @@ class _EnvironmentConfigurationProvider(_AbstractConfigurationProvider):
     def __init__(self) -> None:
         super().__init__()
 
-    def get_values(self) -> Dict[str, str]:
+    def get_values(self) -> dict[str, str]:
         return dict(os.environ)
 
 
@@ -141,7 +141,7 @@ class _ConfigurationVariablesConfigurationProvider(_AbstractConfigurationProvide
         self._root_directory = root_directory
         super().__init__()
 
-    def get_values(self) -> Dict[str, str]:
+    def get_values(self) -> dict[str, str]:
         env_vars = dict(os.environ)
         try:
             # If the user specifies the config variable path with an environment variable, we want to substitute it
@@ -159,7 +159,7 @@ class _ConfigurationVariablesConfigurationProvider(_AbstractConfigurationProvide
 
             variables = dict(yaml.load(contents)) or {}
             return cast(
-                Dict[str, str],
+                dict[str, str],
                 self._substitutor.substitute_all_config_variables(variables, env_vars),
             )
 
@@ -180,7 +180,7 @@ class _CloudConfigurationProvider(_AbstractConfigurationProvider):
     def __init__(self, cloud_config: GXCloudConfig) -> None:
         self._cloud_config = cloud_config
 
-    def get_values(self) -> Dict[str, str]:
+    def get_values(self) -> dict[str, str]:
         from great_expectations.data_context.cloud_constants import (
             GXCloudEnvironmentVariable,
         )
@@ -189,7 +189,7 @@ class _CloudConfigurationProvider(_AbstractConfigurationProvider):
         access_token = self._cloud_config.access_token
         organization_id = self._cloud_config.organization_id
 
-        cloud_values: Dict[str, str] = {
+        cloud_values: dict[str, str] = {
             GXCloudEnvironmentVariable.BASE_URL: base_url,
             GXCloudEnvironmentVariable.ACCESS_TOKEN: access_token,
             # <GX_RENAME> Deprecated as of 0.15.37

@@ -101,7 +101,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
             self.upgrade_log["skipped_checkpoint_store_upgrade"] = True
 
     def _process_checkpoint_config_for_checklist(self) -> None:
-        legacy_checkpoints: List[Union[Checkpoint, LegacyCheckpoint]] = []
+        legacy_checkpoints: list[Union[Checkpoint, LegacyCheckpoint]] = []
         checkpoint: Union[Checkpoint, LegacyCheckpoint]
         checkpoint_name: str
         try:

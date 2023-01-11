@@ -8,14 +8,14 @@ access to features of new package versions.
 
     Typical usage example:
         ge_execution_environment = GXExecutionEnvironment()
-        dependencies: List[PackageInfo] = ge_execution_environment.dependencies
+        dependencies: list[PackageInfo] = ge_execution_environment.dependencies
 
 """
 
 import enum
 import sys
 from dataclasses import dataclass
-from typing import Iterable, List, Optional, cast
+from typing import Iterable, Optional, cast
 
 from marshmallow import Schema, fields
 from packaging import version
@@ -62,15 +62,15 @@ class GXExecutionEnvironment:
 
     def __init__(self) -> None:
         self._ge_dependencies = GXDependencies()
-        self._all_installed_packages: List[str] = []
+        self._all_installed_packages: list[str] = []
         self._get_all_installed_packages()
 
-        self._dependencies: List[PackageInfo] = []
+        self._dependencies: list[PackageInfo] = []
         self._build_required_dependencies()
         self._build_dev_dependencies()
 
     @property
-    def dependencies(self) -> List[PackageInfo]:
+    def dependencies(self) -> list[PackageInfo]:
         """The list of GX dependencies with version and install information.
 
         This does not return any dependencies that are not specified directly in
@@ -81,20 +81,20 @@ class GXExecutionEnvironment:
         return self._dependencies
 
     def _build_required_dependencies(self) -> None:
-        dependency_list: List[PackageInfo] = self._build_dependencies_info(
+        dependency_list: list[PackageInfo] = self._build_dependencies_info(
             self._ge_dependencies.get_required_dependency_names(),
             install_environment=InstallEnvironment.REQUIRED,
         )
         self._dependencies.extend(dependency_list)
 
     def _build_dev_dependencies(self) -> None:
-        dependency_list: List[PackageInfo] = self._build_dependencies_info(
+        dependency_list: list[PackageInfo] = self._build_dependencies_info(
             self._ge_dependencies.get_dev_dependency_names(),
             install_environment=InstallEnvironment.DEV,
         )
         self._dependencies.extend(dependency_list)
 
-    def _get_all_installed_packages(self) -> List[str]:
+    def _get_all_installed_packages(self) -> list[str]:
         """Get all installed packages. Used to check if dependency is installed or not.
 
         Returns:
@@ -113,7 +113,7 @@ class GXExecutionEnvironment:
         self,
         dependency_names: Iterable[str],
         install_environment: InstallEnvironment,
-    ) -> List[PackageInfo]:
+    ) -> list[PackageInfo]:
         """Build list of info about dependencies including version and install status.
 
         Args:
@@ -124,7 +124,7 @@ class GXExecutionEnvironment:
             List of PackageInfo objects for each dependency including version,
             install status, install environment.
         """
-        dependencies: List[PackageInfo] = []
+        dependencies: list[PackageInfo] = []
         for dependency_name in dependency_names:
 
             package_version: Optional[version.Version]

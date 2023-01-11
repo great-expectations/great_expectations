@@ -155,7 +155,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         self,
         column_name: str,
         batch_identifiers: dict,
-        date_parts: Union[List[DatePart], List[str]],
+        date_parts: Union[list[DatePart], list[str]],
     ) -> Union[BinaryExpression, BooleanClauseList]:
         """Split on date_part values in column_name.
 
@@ -311,7 +311,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     @staticmethod
     def split_on_multi_column_values(
-        column_names: List[str],
+        column_names: list[str],
         batch_identifiers: dict,
     ) -> bool:
         """Split on the joint values in the named columns"""
@@ -346,7 +346,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         table_name: str,
         splitter_method_name: str,
         splitter_kwargs: dict,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """Build data used to construct batch identifiers for the input table using the provided splitter config.
 
         Sql splitter configurations yield the unique values that comprise a batch by introspecting your data.
@@ -363,7 +363,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         processed_splitter_method_name: str = self._get_splitter_method_name(
             splitter_method_name
         )
-        batch_identifiers_list: List[dict]
+        batch_identifiers_list: list[dict]
         if self._is_datetime_splitter(processed_splitter_method_name):
             splitter_fn_name: str = self.DATETIME_SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING[
                 processed_splitter_method_name
@@ -401,7 +401,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         execution_engine: SqlAlchemyExecutionEngine,
         table_name: str,
         column_name: str,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """Build batch_identifiers from a column split on year.
 
         This method builds a query to select the unique date_parts from the
@@ -427,7 +427,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         execution_engine: SqlAlchemyExecutionEngine,
         table_name: str,
         column_name: str,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """Build batch_identifiers from a column split on year and month.
 
         This method builds a query to select the unique date_parts from the
@@ -453,7 +453,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         execution_engine: SqlAlchemyExecutionEngine,
         table_name: str,
         column_name: str,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """Build batch_identifiers from a column split on year and month and day.
 
         This method builds a query to select the unique date_parts from the
@@ -478,7 +478,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         self,
         table_name: str,
         column_name: str,
-        date_parts: Union[List[DatePart], List[str]],
+        date_parts: Union[list[DatePart], list[str]],
     ) -> Selectable:
         """Build a split query to retrieve batch_identifiers info from a column split on a list of date parts.
 
@@ -576,8 +576,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
         execution_engine: SqlAlchemyExecutionEngine,
         table_name: str,
         column_name: str,
-        date_parts: Union[List[DatePart], List[str]],
-    ) -> List[dict]:
+        date_parts: Union[list[DatePart], list[str]],
+    ) -> list[dict]:
         """Build batch_identifiers from a column split on a list of date parts.
 
         This method builds a query to select the unique date_parts from the
@@ -600,7 +600,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
             )
         )
 
-        result: List[LegacyRow] = self._execute_split_query(
+        result: list[LegacyRow] = self._execute_split_query(
             execution_engine, split_query
         )
 
@@ -612,7 +612,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
     def _execute_split_query(
         execution_engine: SqlAlchemyExecutionEngine,
         split_query: Selectable,
-    ) -> List[LegacyRow]:
+    ) -> list[LegacyRow]:
         """Use the provided execution engine to run the split query and fetch all of the results.
 
         Args:
@@ -627,9 +627,9 @@ class SqlAlchemyDataSplitter(DataSplitter):
     def _get_params_for_batch_identifiers_from_date_part_splitter(
         self,
         column_name: str,
-        result: List[LegacyRow],
-        date_parts: List[DatePart] | List[str],
-    ) -> List[dict]:
+        result: list[LegacyRow],
+        date_parts: list[DatePart] | list[str],
+    ) -> list[dict]:
         """Get parameters used to build BatchIdentifiers from the results of a get_data_for_batch_identifiers_for_split_on_date_parts
 
         Args:
@@ -643,7 +643,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         """
         date_parts = self._convert_date_parts(date_parts)
 
-        data_for_batch_identifiers: List[dict] = [
+        data_for_batch_identifiers: list[dict] = [
             {
                 column_name: {
                     date_part.value: getattr(row, date_part.value)
@@ -655,8 +655,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
         return data_for_batch_identifiers
 
     @staticmethod
-    def _get_column_names_from_splitter_kwargs(splitter_kwargs) -> List[str]:
-        column_names: List[str] = []
+    def _get_column_names_from_splitter_kwargs(splitter_kwargs) -> list[str]:
+        column_names: list[str] = []
 
         if "column_names" in splitter_kwargs:
             column_names = splitter_kwargs["column_names"]
@@ -671,7 +671,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         table_name: str,
         splitter_method_name: str,
         splitter_kwargs: dict,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """Build data used to construct batch identifiers for the input table using the provided splitter config.
 
         Sql splitter configurations yield the unique values that comprise a batch by introspecting your data.
@@ -694,8 +694,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
         split_query: Selectable = getattr(self, get_split_query_method_name)(
             table_name=table_name, **splitter_kwargs
         )
-        rows: List[LegacyRow] = self._execute_split_query(execution_engine, split_query)
-        column_names: List[str] = self._get_column_names_from_splitter_kwargs(
+        rows: list[LegacyRow] = self._execute_split_query(execution_engine, split_query)
+        column_names: list[str] = self._get_column_names_from_splitter_kwargs(
             splitter_kwargs
         )
         return self._get_params_for_batch_identifiers_from_non_date_part_splitters(
@@ -727,9 +727,9 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     @staticmethod
     def _get_params_for_batch_identifiers_from_non_date_part_splitters(
-        column_names: List[str],
-        rows: List[LegacyRow],
-    ) -> List[dict]:
+        column_names: list[str],
+        rows: list[LegacyRow],
+    ) -> list[dict]:
         """Get params used in batch identifiers from output of executing query for non date part splitters.
 
         Args:
@@ -890,7 +890,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
     @staticmethod
     def get_split_query_for_data_for_batch_identifiers_for_split_on_multi_column_values(
         table_name: str,
-        column_names: List[str],
+        column_names: list[str],
     ) -> Selectable:
         """Split on the joint values in the named columns"""
         return (

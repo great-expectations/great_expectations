@@ -26,7 +26,7 @@ LOGGER = logging.getLogger(__name__)
 
 _ZEP_STYLE_DESCRIPTION: Final[str] = "ZEP Experimental Datasources"
 
-_MISSING_XDATASOURCES_ERRORS: Final[List[PydanticErrorDict]] = [
+_MISSING_XDATASOURCES_ERRORS: Final[list[PydanticErrorDict]] = [
     {
         "loc": ("xdatasources",),
         "msg": "field required",
@@ -38,10 +38,10 @@ _MISSING_XDATASOURCES_ERRORS: Final[List[PydanticErrorDict]] = [
 class GxConfig(ExperimentalBaseModel):
     """Represents the full new-style/experimental configuration file."""
 
-    xdatasources: Dict[str, Datasource] = Field(..., description=_ZEP_STYLE_DESCRIPTION)
+    xdatasources: dict[str, Datasource] = Field(..., description=_ZEP_STYLE_DESCRIPTION)
 
     @property
-    def datasources(self) -> Dict[str, Datasource]:
+    def datasources(self) -> dict[str, Datasource]:
         return self.xdatasources
 
     class Config:
@@ -49,9 +49,9 @@ class GxConfig(ExperimentalBaseModel):
 
     @validator("xdatasources", pre=True)
     @classmethod
-    def _load_datasource_subtype(cls, v: Dict[str, dict]):
+    def _load_datasource_subtype(cls, v: dict[str, dict]):
         LOGGER.info(f"Loading 'datasources' ->\n{pf(v, depth=2)}")
-        loaded_datasources: Dict[str, Datasource] = {}
+        loaded_datasources: dict[str, Datasource] = {}
 
         for ds_name, config in v.items():
             ds_type_name: str = config.get("type", "")
@@ -97,7 +97,7 @@ class GxConfig(ExperimentalBaseModel):
             try:
                 super().parse_yaml(f)
             except ValidationError as validation_err:
-                errors_list: List[PydanticErrorDict] = validation_err.errors()
+                errors_list: list[PydanticErrorDict] = validation_err.errors()
                 LOGGER.info(
                     f"{cls.__name__}.parse_yaml() failed with errors - {errors_list}"
                 )

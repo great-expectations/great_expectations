@@ -69,15 +69,15 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
         if assets is None:
             assets = {}
-        _assets: Dict[str, Union[dict, Asset]] = assets
+        _assets: dict[str, Union[dict, Asset]] = assets
         self._assets = _assets
         self._build_assets_from_config(config=assets)
 
     @property
-    def assets(self) -> Dict[str, Union[dict, Asset]]:
+    def assets(self) -> dict[str, Union[dict, Asset]]:
         return self._assets
 
-    def _build_assets_from_config(self, config: Dict[str, dict]) -> None:
+    def _build_assets_from_config(self, config: dict[str, dict]) -> None:
         for name, asset_config in config.items():
             if asset_config is None:
                 asset_config = {}
@@ -88,7 +88,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             )
             self.assets[name] = new_asset
 
-    def get_available_data_asset_names(self) -> List[str]:
+    def get_available_data_asset_names(self) -> list[str]:
         """
         Return the list of asset names known by this DataConnector.
 
@@ -108,7 +108,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             for data_reference in self._get_data_reference_list(
                 data_asset_name=data_asset_name
             ):
-                mapped_batch_definition_list: List[
+                mapped_batch_definition_list: list[
                     BatchDefinition
                 ] = self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
                     data_reference=data_reference,
@@ -120,13 +120,13 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
-    ) -> List[str]:
+    ) -> list[str]:
         """
         List objects in the underlying data store to create a list of data_references.
         This method is used to refresh the cache.
         """
         asset: Optional[Asset] = self._get_asset(data_asset_name=data_asset_name)
-        path_list: List[str] = self._get_data_reference_list_for_asset(asset=asset)
+        path_list: list[str] = self._get_data_reference_list_for_asset(asset=asset)
         return path_list
 
     def get_data_reference_list_count(self) -> int:
@@ -144,7 +144,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
         return total_references
 
-    def get_unmatched_data_references(self) -> List[str]:
+    def get_unmatched_data_references(self) -> list[str]:
         """
         Returns the list of data_references unmatched by configuration by looping through items in _data_references_cache
         and returning data_reference that do not have an associated data_asset.
@@ -152,7 +152,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         Returns:
             list of data_references that are not matched by configuration.
         """
-        unmatched_data_references: List[str] = []
+        unmatched_data_references: list[str] = []
         for (
             data_asset_name,
             data_reference_sub_cache,
@@ -163,8 +163,8 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
         return unmatched_data_references
 
-    def _get_batch_definition_list_from_cache(self) -> List[BatchDefinition]:
-        batch_definition_list: List[BatchDefinition] = [
+    def _get_batch_definition_list_from_cache(self) -> list[BatchDefinition]:
+        batch_definition_list: list[BatchDefinition] = [
             batch_definitions[0]
             for data_reference_sub_cache in self._data_references_cache.values()
             for batch_definitions in data_reference_sub_cache.values()
@@ -203,7 +203,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             asset = self.assets[data_asset_name]  # type: ignore[assignment]
         return asset
 
-    def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
+    def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> list[str]:
         raise NotImplementedError
 
     def _get_full_file_path_for_asset(self, path: str, asset: Optional[Asset]) -> str:

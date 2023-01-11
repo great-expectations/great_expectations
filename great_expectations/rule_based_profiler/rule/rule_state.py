@@ -23,9 +23,9 @@ class RuleState:
     def __init__(
         self,
         rule: Optional[Rule] = None,
-        domains: Optional[List[Domain]] = None,
+        domains: Optional[list[Domain]] = None,
         variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        parameters: Optional[dict[str, ParameterContainer]] = None,
     ) -> None:
         """
         Args:
@@ -60,11 +60,11 @@ class RuleState:
         self._rule = value
 
     @property
-    def domains(self) -> List[Domain]:
+    def domains(self) -> list[Domain]:
         return self._domains
 
     @domains.setter
-    def domains(self, value: List[Domain]) -> None:
+    def domains(self, value: list[Domain]) -> None:
         self._domains = value
 
     @property
@@ -76,11 +76,11 @@ class RuleState:
         self._variables = value
 
     @property
-    def parameters(self) -> Dict[str, ParameterContainer]:
+    def parameters(self) -> dict[str, ParameterContainer]:
         return self._parameters
 
     @parameters.setter
-    def parameters(self, value: Dict[str, ParameterContainer]) -> None:
+    def parameters(self, value: dict[str, ParameterContainer]) -> None:
         self._parameters = value
 
     @property
@@ -132,7 +132,7 @@ or call "RuleState.remove_domain_if_exists()" with Domain having ID equal to "{d
             self.domains.remove(domain)
             self.remove_domain_if_exists(domain=domain)
 
-    def get_domains_as_dict(self) -> Dict[str, Domain]:
+    def get_domains_as_dict(self) -> dict[str, Domain]:
         domain: Domain
         return {domain.id: domain for domain in self.domains}
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import copy
 import logging
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, Optional, Set, Union
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
@@ -33,8 +33,8 @@ class BatchRequestAnonymizer(BaseAnonymizer):
 
     def anonymize(
         self, obj: Optional[object] = None, **kwargs
-    ) -> Dict[str, Union[dict, List[str]]]:
-        anonymized_batch_request_properties_dict: Dict[str, Union[dict, List[str]]] = {}
+    ) -> dict[str, Union[dict, list[str]]]:
+        anonymized_batch_request_properties_dict: dict[str, Union[dict, list[str]]] = {}
 
         # noinspection PyBroadException
         try:
@@ -62,10 +62,10 @@ class BatchRequestAnonymizer(BaseAnonymizer):
             )
 
             anonymized_batch_request_required_top_level_properties: dict = {}
-            batch_request_optional_top_level_keys: List[str] = []
-            batch_spec_passthrough_keys: List[str] = []
-            data_connector_query_keys: List[str] = []
-            runtime_parameters_keys: List[str] = []
+            batch_request_optional_top_level_keys: list[str] = []
+            batch_spec_passthrough_keys: list[str] = []
+            data_connector_query_keys: list[str] = []
+            runtime_parameters_keys: list[str] = []
 
             anonymized_batch_request_properties_dict = {
                 "anonymized_batch_request_required_top_level_properties": (
@@ -136,7 +136,7 @@ class BatchRequestAnonymizer(BaseAnonymizer):
 
     def _build_anonymized_batch_request(
         self,
-        destination: Optional[Dict[str, Union[Dict[str, str], List[str]]]],
+        destination: Optional[dict[str, Union[dict[str, str], list[str]]]],
         source: Optional[Any] = None,
     ) -> None:
         if isinstance(source, dict):

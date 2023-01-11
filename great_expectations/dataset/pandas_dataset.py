@@ -454,7 +454,7 @@ Notes:
     def get_column_count(self):
         return self.shape[1]
 
-    def get_table_columns(self) -> List[str]:
+    def get_table_columns(self) -> list[str]:
         return list(self.columns)
 
     def get_column_sum(self, column):
@@ -1888,7 +1888,7 @@ Notes:
         column_list, and equal to the specific value, sum_total.
 
         Args:
-            column_list (List[str]): \
+            column_list (list[str]): \
                 Set of columns to be checked
             sum_total (int): \
                 expected sum of columns

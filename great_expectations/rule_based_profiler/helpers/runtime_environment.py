@@ -19,7 +19,7 @@ logger.setLevel(logging.INFO)
 @dataclass
 class RuntimeEnvironmentVariablesDirectives(SerializableDictDot):
     rule_name: str
-    variables: Optional[Dict[str, Any]] = None
+    variables: Optional[dict[str, Any]] = None
 
     def to_dict(self) -> dict:
         """
@@ -37,7 +37,7 @@ class RuntimeEnvironmentVariablesDirectives(SerializableDictDot):
 @dataclass
 class RuntimeEnvironmentDomainTypeDirectives(SerializableDictDot):
     domain_type: MetricDomainTypes
-    directives: Dict[str, Any]
+    directives: dict[str, Any]
 
     def to_dict(self) -> dict:
         """
@@ -54,18 +54,18 @@ class RuntimeEnvironmentDomainTypeDirectives(SerializableDictDot):
 
 def build_variables_directives(
     exact_estimation: bool,
-    rules: List[Rule],
+    rules: list[Rule],
     **kwargs: dict,
-) -> List[RuntimeEnvironmentVariablesDirectives]:
+) -> list[RuntimeEnvironmentVariablesDirectives]:
     """
     This method makes best-effort attempt to identify directives, supplied in "kwargs", as "variables", referenced by
     components of "Rule" objects, identified by respective "rule_name" property as indicated, and return each of these
     directives as part of dedicated "RuntimeEnvironmentVariablesDirectives" typed object for every "rule_name" (string).
     """
-    directives: Dict[str, Dict[str, Any]]
+    directives: dict[str, dict[str, Any]]
     if exact_estimation:
         directives = {}
-        rule_variables_configs: Optional[Dict[str, Any]]
+        rule_variables_configs: Optional[dict[str, Any]]
         rule: Rule
         for rule in rules:
             rule_variables_configs = convert_variables_to_dict(variables=rule.variables)
@@ -94,13 +94,13 @@ def build_variables_directives(
 
 def build_domain_type_directives(
     **kwargs: dict,
-) -> List[RuntimeEnvironmentDomainTypeDirectives]:
+) -> list[RuntimeEnvironmentDomainTypeDirectives]:
     """
     This method makes best-effort attempt to identify directives, supplied in "kwargs", as supported properties,
     corresponnding to "DomainBuilder" classes, associated with every "MetricDomainTypes", and return each of these
     directives as part of dedicated "RuntimeEnvironmentDomainTypeDirectives" typed object for every "MetricDomainTypes".
     """
-    domain_type_directives_list: List[RuntimeEnvironmentDomainTypeDirectives] = []
+    domain_type_directives_list: list[RuntimeEnvironmentDomainTypeDirectives] = []
 
     column_domain_type_directives: RuntimeEnvironmentDomainTypeDirectives = (
         RuntimeEnvironmentDomainTypeDirectives(

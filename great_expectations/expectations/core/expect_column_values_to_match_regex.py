@@ -117,7 +117,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             evaluation_parameter_builder_configs=None,
         )
     )
-    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
+    validation_parameter_builder_configs: list[ParameterBuilderConfig] = [
         regex_pattern_string_parameter_builder_config
     ]
     default_profiler_config = RuleBasedProfilerConfig(

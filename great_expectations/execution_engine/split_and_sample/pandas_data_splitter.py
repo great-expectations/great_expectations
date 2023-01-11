@@ -102,7 +102,7 @@ class PandasDataSplitter(DataSplitter):
         df: pd.DataFrame,
         column_name: str,
         batch_identifiers: dict,
-        date_parts: Union[List[DatePart], List[str]],
+        date_parts: Union[list[DatePart], list[str]],
     ) -> pd.DataFrame:
         """Split on date_part values in column_name.
 
@@ -210,7 +210,7 @@ class PandasDataSplitter(DataSplitter):
 
     @staticmethod
     def split_on_multi_column_values(
-        df, column_names: List[str], batch_identifiers: dict
+        df, column_names: list[str], batch_identifiers: dict
     ) -> pd.DataFrame:
         """Split on the joint values in the named columns"""
 

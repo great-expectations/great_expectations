@@ -355,7 +355,7 @@ illegal.  Please check your config."""
 
     def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
         # Note this is to get a batch from tables in AWS Glue Data Catalog by its partitions
-        partitions: Optional[List[str]] = batch_spec.get("partitions")
+        partitions: Optional[list[str]] = batch_spec.get("partitions")
         if partitions:
             batch_data = self._data_splitter.split_on_multi_column_values(
                 df=batch_data,
@@ -489,7 +489,7 @@ illegal.  Please check your config."""
                 )
 
         # Filtering by filter_conditions
-        filter_conditions: List[RowCondition] = domain_kwargs.get(
+        filter_conditions: list[RowCondition] = domain_kwargs.get(
             "filter_conditions", []
         )
         if len(filter_conditions) > 0:
@@ -565,7 +565,7 @@ illegal.  Please check your config."""
         return data
 
     @staticmethod
-    def _combine_row_conditions(row_conditions: List[RowCondition]) -> RowCondition:
+    def _combine_row_conditions(row_conditions: list[RowCondition]) -> RowCondition:
         """Combine row conditions using AND if condition_type is SPARK_SQL
 
         Note, although this method does not currently use `self` internally we
@@ -582,7 +582,7 @@ illegal.  Please check your config."""
             condition.condition_type == RowConditionParserType.SPARK_SQL
             for condition in row_conditions
         ), "All row conditions must have type SPARK_SQL"
-        conditions: List[str] = [
+        conditions: list[str] = [
             row_condition.condition for row_condition in row_conditions
         ]
         joined_condition: str = " AND ".join(conditions)
@@ -641,7 +641,7 @@ illegal.  Please check your config."""
         else:
             column = domain_kwargs["column"]
 
-        filter_conditions: List[RowCondition] = []
+        filter_conditions: list[RowCondition] = []
         if filter_null:
             filter_conditions.append(
                 RowCondition(
@@ -669,7 +669,7 @@ illegal.  Please check your config."""
     def resolve_metric_bundle(
         self,
         metric_fn_bundle: Iterable[MetricComputationConfiguration],
-    ) -> Dict[Tuple[str, str, str], MetricValue]:
+    ) -> dict[Tuple[str, str, str], MetricValue]:
         """For every metric in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds
         bundles of the metrics into one large query dictionary so that they are all executed simultaneously. Will fail
         if bundling the metrics together is not possible.
@@ -683,11 +683,11 @@ illegal.  Please check your config."""
             Returns:
                 A dictionary of "MetricConfiguration" IDs and their corresponding fully resolved values for domains.
         """
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+        resolved_metrics: dict[Tuple[str, str, str], MetricValue] = {}
 
-        res: List[Row]
+        res: list[Row]
 
-        aggregates: Dict[Tuple[str, str, str], dict] = {}
+        aggregates: dict[Tuple[str, str, str], dict] = {}
 
         aggregate: dict
 

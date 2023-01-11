@@ -174,7 +174,7 @@ def datasource_list(ctx: click.Context) -> None:
         return
 
 
-def _build_datasource_intro_string(datasources: List[dict]) -> str:
+def _build_datasource_intro_string(datasources: list[dict]) -> str:
     datasource_count = len(datasources)
     if datasource_count == 0:
         return "No Datasources found"
@@ -791,7 +791,7 @@ SQLYAMLHelpers: TypeAlias = Union[
 def _get_sql_yaml_helper_class(
     selected_database: SupportedDatabaseBackends, datasource_name: Optional[str]
 ) -> SQLYAMLHelpers:
-    helper_class_by_backend: Dict[SupportedDatabaseBackends, Type[SQLYAMLHelpers]] = {
+    helper_class_by_backend: dict[SupportedDatabaseBackends, Type[SQLYAMLHelpers]] = {
         SupportedDatabaseBackends.POSTGRES: PostgresCredentialYamlHelper,
         SupportedDatabaseBackends.MYSQL: MySQLCredentialYamlHelper,
         SupportedDatabaseBackends.REDSHIFT: RedshiftCredentialYamlHelper,
@@ -822,7 +822,7 @@ What are you processing your files with?
 def _get_files_helper(
     selection: str, context_root_dir: str, datasource_name: Optional[str] = None
 ) -> Union[PandasYamlHelper, SparkYamlHelper]:
-    helper_class_by_selection: Dict[
+    helper_class_by_selection: dict[
         str, Union[Type[PandasYamlHelper], Type[SparkYamlHelper]]
     ] = {
         "1": PandasYamlHelper,

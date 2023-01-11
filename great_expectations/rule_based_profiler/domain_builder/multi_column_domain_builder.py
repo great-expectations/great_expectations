@@ -40,7 +40,7 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
 
     def __init__(
         self,
-        include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+        include_column_names: Optional[Union[str, Optional[list[str]]]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -68,7 +68,7 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
         self,
         rule_name: str,
         variables: Optional[ParameterContainer] = None,
-    ) -> List[Domain]:
+    ) -> list[Domain]:
         """Return domains matching the specified tolerance limits.
 
         Args:
@@ -78,11 +78,11 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
         Returns:
             List of domains that match the desired tolerance limits.
         """
-        batch_ids: List[str] = self.get_batch_ids(variables=variables)  # type: ignore[assignment] # could None
+        batch_ids: list[str] = self.get_batch_ids(variables=variables)  # type: ignore[assignment] # could None
 
         validator: Validator = self.get_validator(variables=variables)  # type: ignore[assignment] # could be None
 
-        effective_column_names: List[str] = self.get_effective_column_names(
+        effective_column_names: list[str] = self.get_effective_column_names(
             batch_ids=batch_ids,
             validator=validator,
             variables=variables,
@@ -94,14 +94,14 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
             )
 
         column_name: str
-        semantic_types_by_column_name: Dict[str, SemanticDomainTypes] = {
+        semantic_types_by_column_name: dict[str, SemanticDomainTypes] = {
             column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[  # type: ignore[union-attr] # could be None
                 column_name
             ]
             for column_name in effective_column_names
         }
 
-        domains: List[Domain] = [
+        domains: list[Domain] = [
             Domain(
                 domain_type=self.domain_type,
                 domain_kwargs={

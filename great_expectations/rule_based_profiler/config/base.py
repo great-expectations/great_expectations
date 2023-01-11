@@ -146,7 +146,7 @@ class DomainBuilderConfig(SerializableDictDot):
             inplace=True,
         )
 
-        keys: List[str] = sorted(list(json_dict.keys()))
+        keys: list[str] = sorted(list(json_dict.keys()))
 
         key: str
         sorted_json_dict: dict = {key: json_dict[key] for key in keys}
@@ -229,7 +229,7 @@ class ParameterBuilderConfig(SerializableDictDot):
             inplace=True,
         )
 
-        keys: List[str] = sorted(list(json_dict.keys()))
+        keys: list[str] = sorted(list(json_dict.keys()))
 
         key: str
         sorted_json_dict: dict = {key: json_dict[key] for key in keys}
@@ -328,7 +328,7 @@ class ExpectationConfigurationBuilderConfig(SerializableDictDot):
             inplace=True,
         )
 
-        keys: List[str] = sorted(list(json_dict.keys()))
+        keys: list[str] = sorted(list(json_dict.keys()))
 
         key: str
         sorted_json_dict: dict = {key: json_dict[key] for key in keys}
@@ -389,11 +389,11 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
 class RuleConfig(SerializableDictDot):
     def __init__(
         self,
-        variables: Optional[Dict[str, Any]] = None,
+        variables: Optional[dict[str, Any]] = None,
         domain_builder: Optional[dict] = None,  # see DomainBuilderConfig
-        parameter_builders: Optional[List[dict]] = None,  # see ParameterBuilderConfig
+        parameter_builders: Optional[list[dict]] = None,  # see ParameterBuilderConfig
         expectation_configuration_builders: Optional[
-            List[dict]
+            list[dict]
         ] = None,  # see ExpectationConfigurationBuilderConfig
     ) -> None:
         self.variables = variables
@@ -427,7 +427,7 @@ class RuleConfig(SerializableDictDot):
             inplace=True,
         )
 
-        keys: List[str] = sorted(list(json_dict.keys()))
+        keys: list[str] = sorted(list(json_dict.keys()))
 
         key: str
         sorted_json_dict: dict = {key: json_dict[key] for key in keys}
@@ -489,9 +489,9 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         self,
         name: str,
         config_version: float,
-        rules: Dict[str, dict],  # see RuleConfig
+        rules: dict[str, dict],  # see RuleConfig
         id: Optional[str] = None,
-        variables: Optional[Dict[str, Any]] = None,
+        variables: Optional[dict[str, Any]] = None,
         commented_map: Optional[CommentedMap] = None,
     ) -> None:
         self.module_name = "great_expectations.rule_based_profiler"
@@ -560,7 +560,7 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
             inplace=True,
         )
 
-        keys: List[str] = sorted(list(json_dict.keys()))
+        keys: list[str] = sorted(list(json_dict.keys()))
 
         key: str
         sorted_json_dict: dict = {key: json_dict[key] for key in keys}
@@ -581,8 +581,8 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
     def resolve_config_using_acceptable_arguments(
         cls,
         profiler: RuleBasedProfiler,
-        variables: Optional[Dict[str, Any]] = None,
-        rules: Optional[Dict[str, Dict[str, Any]]] = None,
+        variables: Optional[dict[str, Any]] = None,
+        rules: Optional[dict[str, dict[str, Any]]] = None,
     ) -> RuleBasedProfilerConfig:
         """Reconciles variables/rules by taking into account runtime overrides and variable substitution.
 
@@ -603,19 +603,19 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         ] = profiler.reconcile_profiler_variables(
             variables=variables,
         )
-        runtime_variables: Optional[Dict[str, Any]] = convert_variables_to_dict(
+        runtime_variables: Optional[dict[str, Any]] = convert_variables_to_dict(
             variables=effective_variables
         )
 
-        effective_rules: List[Rule] = profiler.reconcile_profiler_rules(
+        effective_rules: list[Rule] = profiler.reconcile_profiler_rules(
             rules=rules,
         )
 
         rule: Rule
-        effective_rules_dict: Dict[str, Rule] = {
+        effective_rules_dict: dict[str, Rule] = {
             rule.name: rule for rule in effective_rules
         }
-        runtime_rules: Dict[str, dict] = {
+        runtime_rules: dict[str, dict] = {
             name: RuleBasedProfilerConfig._substitute_variables_in_config(
                 rule=rule,
                 variables_container=effective_variables,  # type: ignore[arg-type] # could be None

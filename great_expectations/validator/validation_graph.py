@@ -64,7 +64,7 @@ class ValidationGraph:
     def __init__(
         self,
         execution_engine: ExecutionEngine,
-        edges: Optional[List[MetricEdge]] = None,
+        edges: Optional[list[MetricEdge]] = None,
     ) -> None:
         self._execution_engine = execution_engine
 
@@ -80,7 +80,7 @@ class ValidationGraph:
         return self.edge_ids == other.edge_ids
 
     @property
-    def edges(self) -> List[MetricEdge]:
+    def edges(self) -> list[MetricEdge]:
         """Returns "MetricEdge" objects, contained within this "ValidationGraph" object (as list)."""
         return self._edges
 
@@ -181,18 +181,18 @@ class ValidationGraph:
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
         show_progress_bars: bool = True,
     ) -> Tuple[
-        Dict[Tuple[str, str, str], MetricValue],
-        Dict[
+        dict[Tuple[str, str, str], MetricValue],
+        dict[
             Tuple[str, str, str],
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+            dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ],
     ]:
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+        resolved_metrics: dict[Tuple[str, str, str], MetricValue] = {}
 
         # updates graph with aborted metrics
-        aborted_metrics_info: Dict[
+        aborted_metrics_info: dict[
             Tuple[str, str, str],
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+            dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ] = self._resolve(
             metrics=resolved_metrics,
             runtime_configuration=runtime_configuration,
@@ -204,13 +204,13 @@ class ValidationGraph:
 
     def _resolve(  # noqa: C901 - complexity 16
         self,
-        metrics: Dict[Tuple[str, str, str], MetricValue],
+        metrics: dict[Tuple[str, str, str], MetricValue],
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,  # Set to low number (e.g., 3) to suppress progress bar for small graphs.
         show_progress_bars: bool = True,
-    ) -> Dict[
+    ) -> dict[
         Tuple[str, str, str],
-        Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
     ]:
         if metrics is None:
             metrics = {}
@@ -223,13 +223,13 @@ class ValidationGraph:
         else:
             catch_exceptions = False
 
-        failed_metric_info: Dict[
+        failed_metric_info: dict[
             Tuple[str, str, str],
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+            dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ] = {}
-        aborted_metrics_info: Dict[
+        aborted_metrics_info: dict[
             Tuple[str, str, str],
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+            dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ] = {}
 
         ready_metrics: Set[MetricConfiguration]
@@ -320,7 +320,7 @@ class ValidationGraph:
 
     def _parse(
         self,
-        metrics: Dict[Tuple[str, str, str], MetricValue],
+        metrics: dict[Tuple[str, str, str], MetricValue],
     ) -> Tuple[Set[MetricConfiguration], Set[MetricConfiguration]]:
         """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
         validation graph (a graph structure of metric ids) edges"""
@@ -396,16 +396,16 @@ class ExpectationValidationGraph:
 
     def get_exception_info(
         self,
-        metric_info: Dict[
+        metric_info: dict[
             Tuple[str, str, str],
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+            dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ],
     ) -> Set[ExceptionInfo]:
         metric_info = self._filter_metric_info_in_graph(metric_info=metric_info)
         metric_exception_info: Set[ExceptionInfo] = set()
         metric_id: Tuple[str, str, str]
         metric_info_item: Union[MetricConfiguration, Set[ExceptionInfo], int]
-        for metric_id, metric_info_item in metric_info.items():  # type: ignore[assignment]  # Incorrect flagging of 'Incompatible types in assignment (expression has type "Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]]", variable has type "Union[MetricConfiguration, Set[ExceptionInfo], int]")' in deep "Union" structure.
+        for metric_id, metric_info_item in metric_info.items():  # type: ignore[assignment]  # Incorrect flagging of 'Incompatible types in assignment (expression has type "dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]]", variable has type "Union[MetricConfiguration, Set[ExceptionInfo], int]")' in deep "Union" structure.
             # noinspection PyUnresolvedReferences
             metric_exception_info.update(
                 cast(Set[ExceptionInfo], metric_info_item["exception_info"])  # type: ignore[index]  # Incorrect flagging of 'Value of type "Union[MetricConfiguration, Set[ExceptionInfo], int]" is not indexable' in deep "Union" structure.
@@ -415,15 +415,15 @@ class ExpectationValidationGraph:
 
     def _filter_metric_info_in_graph(
         self,
-        metric_info: Dict[
+        metric_info: dict[
             Tuple[str, str, str],
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+            dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ],
-    ) -> Dict[
+    ) -> dict[
         Tuple[str, str, str],
-        Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
     ]:
-        graph_metric_ids: List[Tuple[str, str, str]] = []
+        graph_metric_ids: list[Tuple[str, str, str]] = []
         edge: MetricEdge
         vertex: MetricConfiguration
         for edge in self.graph.edges:
@@ -432,7 +432,7 @@ class ExpectationValidationGraph:
                     graph_metric_ids.append(vertex.id)
 
         metric_id: Tuple[str, str, str]
-        metric_info_item: Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]]
+        metric_info_item: dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]]
         return {
             metric_id: metric_info_item
             for metric_id, metric_info_item in metric_info.items()

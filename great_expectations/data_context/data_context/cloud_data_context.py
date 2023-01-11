@@ -305,7 +305,7 @@ class CloudDataContext(SerializableDataContext):
         cloud_base_url: Optional[str] = None,
         cloud_access_token: Optional[str] = None,
         cloud_organization_id: Optional[str] = None,
-    ) -> Dict[GXCloudEnvironmentVariable, Optional[str]]:
+    ) -> dict[GXCloudEnvironmentVariable, Optional[str]]:
         cloud_base_url = (
             cloud_base_url
             or cls._get_cloud_env_var(
@@ -387,7 +387,7 @@ class CloudDataContext(SerializableDataContext):
         )
         self._datasource_store = datasource_store
 
-    def list_expectation_suite_names(self) -> List[str]:
+    def list_expectation_suite_names(self) -> list[str]:
         """
         Lists the available expectation suite names. If in ge_cloud_mode, a list of
         GX Cloud ids is returned instead.
@@ -487,7 +487,7 @@ class CloudDataContext(SerializableDataContext):
             )
         elif expectation_suite_name in existing_suite_names and overwrite_existing:
             identifiers: Optional[
-                Union[List[str], List[GXCloudIdentifier]]
+                Union[list[str], list[GXCloudIdentifier]]
             ] = self.list_expectation_suites()
             if identifiers:
                 for cloud_identifier in identifiers:
@@ -663,19 +663,19 @@ class CloudDataContext(SerializableDataContext):
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[list[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
-        profilers: Optional[List[dict]] = None,
+        validations: Optional[list[dict]] = None,
+        profilers: Optional[list[dict]] = None,
         # Next two fields are for LegacyCheckpoint configuration
         validation_operator_name: Optional[str] = None,
-        batches: Optional[List[dict]] = None,
+        batches: Optional[list[dict]] = None,
         # the following four arguments are used by SimpleCheckpoint
-        site_names: Optional[Union[str, List[str]]] = None,
+        site_names: Optional[Union[str, list[str]]] = None,
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
-        notify_with: Optional[Union[str, List[str]]] = None,
+        notify_with: Optional[Union[str, list[str]]] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
@@ -724,10 +724,10 @@ class CloudDataContext(SerializableDataContext):
         )
         return checkpoint
 
-    def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+    def list_checkpoints(self) -> Union[list[str], list[ConfigurationIdentifier]]:
         return self.checkpoint_store.list_checkpoints(ge_cloud_mode=True)
 
-    def list_profilers(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+    def list_profilers(self) -> Union[list[str], list[ConfigurationIdentifier]]:
         return RuleBasedProfiler.list_profilers(
             profiler_store=self.profiler_store,
             ge_cloud_mode=True,

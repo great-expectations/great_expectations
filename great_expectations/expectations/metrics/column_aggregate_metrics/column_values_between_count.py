@@ -35,7 +35,7 @@ class ColumnValuesBetweenCount(MetricProvider):
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
     ):
         min_value = metric_value_kwargs.get("min_value")
@@ -89,7 +89,7 @@ class ColumnValuesBetweenCount(MetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
     ):
         min_value = metric_value_kwargs.get("min_value")
@@ -204,7 +204,7 @@ class ColumnValuesBetweenCount(MetricProvider):
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
     ):
         min_value = metric_value_kwargs.get("min_value")

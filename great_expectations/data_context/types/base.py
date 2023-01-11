@@ -308,14 +308,14 @@ class AssetConfig(SerializableDictDot):
         delimiter: Optional[str] = None,
         max_keys: Optional[int] = None,
         schema_name: Optional[str] = None,
-        batch_spec_passthrough: Optional[Dict[str, Any]] = None,
-        batch_identifiers: Optional[List[str]] = None,
+        batch_spec_passthrough: Optional[dict[str, Any]] = None,
+        batch_identifiers: Optional[list[str]] = None,
         splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[Dict[str, str]] = None,
+        splitter_kwargs: Optional[dict[str, str]] = None,
         sorters: Optional[dict] = None,
         sampling_method: Optional[str] = None,
-        sampling_kwargs: Optional[Dict[str, str]] = None,
-        reader_options: Optional[Dict[str, Any]] = None,
+        sampling_kwargs: Optional[dict[str, str]] = None,
+        reader_options: Optional[dict[str, Any]] = None,
         **kwargs: Optional[dict],
     ) -> None:
         if name is not None:
@@ -2323,8 +2323,8 @@ class DataContextConfig(BaseYamlConfig):
         config_version: Optional[float] = None,
         datasources: Optional[
             Union[
-                Dict[str, DatasourceConfig],
-                Dict[str, Dict[str, Union[Dict[str, str], str, dict]]],
+                dict[str, DatasourceConfig],
+                dict[str, dict[str, Union[dict[str, str], str, dict]]],
             ]
         ] = None,
         xdatasources: Optional[dict] = None,
@@ -2465,7 +2465,7 @@ class DataContextConfig(BaseYamlConfig):
             inplace=True,
         )
 
-        keys: List[str] = sorted(list(json_dict.keys()))
+        keys: list[str] = sorted(list(json_dict.keys()))
 
         key: str
         sorted_json_dict: dict = {key: json_dict[key] for key in keys}
@@ -2681,14 +2681,14 @@ class CheckpointConfig(BaseYamlConfig):
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[list[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[CheckpointValidationConfig]] = None,
+        validations: Optional[list[CheckpointValidationConfig]] = None,
         default_validation_id: Optional[str] = None,
-        profilers: Optional[List[dict]] = None,
+        profilers: Optional[list[dict]] = None,
         validation_operator_name: Optional[str] = None,
-        batches: Optional[List[dict]] = None,
+        batches: Optional[list[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
         ge_cloud_id: Optional[Union[UUID, str]] = None,
         # the following four args are used by SimpleCheckpoint
@@ -2748,11 +2748,11 @@ class CheckpointConfig(BaseYamlConfig):
         self._validation_operator_name = value  # type: ignore[has-type]
 
     @property
-    def batches(self) -> List[dict]:
+    def batches(self) -> list[dict]:
         return self._batches  # type: ignore[has-type]
 
     @batches.setter
-    def batches(self, value: List[dict]) -> None:
+    def batches(self, value: list[dict]) -> None:
         self._batches = value  # type: ignore[has-type]
 
     @property
@@ -2796,11 +2796,11 @@ class CheckpointConfig(BaseYamlConfig):
         self._config_version = value
 
     @property
-    def validations(self) -> List[CheckpointValidationConfig]:
+    def validations(self) -> list[CheckpointValidationConfig]:
         return self._validations
 
     @validations.setter
-    def validations(self, value: List[CheckpointValidationConfig]) -> None:
+    def validations(self, value: list[CheckpointValidationConfig]) -> None:
         self._validations = value
 
     @property
@@ -2812,11 +2812,11 @@ class CheckpointConfig(BaseYamlConfig):
         self._default_validation_id = validation_id
 
     @property
-    def profilers(self) -> List[dict]:
+    def profilers(self) -> list[dict]:
         return self._profilers
 
     @profilers.setter
-    def profilers(self, value: List[dict]) -> None:
+    def profilers(self, value: list[dict]) -> None:
         self._profilers = value
 
     @property
@@ -2860,19 +2860,19 @@ class CheckpointConfig(BaseYamlConfig):
         self._expectation_suite_name = value
 
     @property
-    def action_list(self) -> List[dict]:
+    def action_list(self) -> list[dict]:
         return self._action_list
 
     @action_list.setter
-    def action_list(self, value: List[dict]) -> None:
+    def action_list(self, value: list[dict]) -> None:
         self._action_list = value
 
     @property
-    def site_names(self) -> List[str]:
+    def site_names(self) -> list[str]:
         return self._site_names  # type: ignore[return-value]
 
     @site_names.setter
-    def site_names(self, value: List[str]) -> None:
+    def site_names(self, value: list[str]) -> None:
         self._site_names = value
 
     @property
@@ -2958,7 +2958,7 @@ class CheckpointConfig(BaseYamlConfig):
             inplace=True,
         )
 
-        keys: List[str] = sorted(list(json_dict.keys()))
+        keys: list[str] = sorted(list(json_dict.keys()))
 
         key: str
         sorted_json_dict: dict = {key: json_dict[key] for key in keys}
@@ -2983,11 +2983,11 @@ class CheckpointConfig(BaseYamlConfig):
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[list[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[CheckpointValidationConfig]] = None,
-        profilers: Optional[List[dict]] = None,
+        validations: Optional[list[CheckpointValidationConfig]] = None,
+        profilers: Optional[list[dict]] = None,
         run_id: Optional[Union[str, RunIdentifier]] = None,
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,

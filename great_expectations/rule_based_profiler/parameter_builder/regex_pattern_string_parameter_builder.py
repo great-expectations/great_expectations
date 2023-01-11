@@ -65,7 +65,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         threshold: Union[str, float] = 1.0,
         candidate_regexes: Optional[Union[str, Iterable[str]]] = None,
         evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
+            list[ParameterBuilderConfig]
         ] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
@@ -114,14 +114,14 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
     @property
     def candidate_regexes(
         self,
-    ) -> Union[str, Union[List[str], Set[str]]]:
+    ) -> Union[str, Union[list[str], Set[str]]]:
         return self._candidate_regexes
 
     def _build_parameters(
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        parameters: Optional[dict[str, ParameterContainer]] = None,
         recompute_existing_parameter_values: bool = False,
     ) -> Attributes:
         """
@@ -171,7 +171,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
         # Obtain candidate_regexes from "rule state" (i.e, variables and parameters); from instance variable otherwise.
         candidate_regexes: Union[
-            List[str],
+            list[str],
             Set[str],
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
@@ -187,7 +187,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
         # Gather "metric_value_kwargs" for all candidate "regex" strings.
         regex_string: str
-        match_regex_metric_value_kwargs_list: List[dict] = []
+        match_regex_metric_value_kwargs_list: list[dict] = []
         match_regex_metric_value_kwargs: dict
         for regex_string in candidate_regexes:
             if self.metric_value_kwargs:

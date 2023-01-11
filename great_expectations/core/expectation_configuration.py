@@ -4,17 +4,7 @@ import copy
 import json
 import logging
 from copy import deepcopy
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    Dict,
-    List,
-    Mapping,
-    Optional,
-    Type,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, Mapping, Optional, Type, Union
 
 import jsonpatch
 from marshmallow import Schema, ValidationError, fields, post_dump, post_load
@@ -980,7 +970,7 @@ class ExpectationConfiguration(SerializableDictDot):
         success_on_last_run: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_context: Optional[ExpectationContext] = None,
-        rendered_content: Optional[List[RenderedAtomicContent]] = None,
+        rendered_content: Optional[list[RenderedAtomicContent]] = None,
     ) -> None:
         if not isinstance(expectation_type, str):
             raise InvalidExpectationConfigurationError(
@@ -1094,11 +1084,11 @@ class ExpectationConfiguration(SerializableDictDot):
         self._kwargs = value
 
     @property
-    def rendered_content(self) -> Optional[List[RenderedAtomicContent]]:
+    def rendered_content(self) -> Optional[list[RenderedAtomicContent]]:
         return self._rendered_content
 
     @rendered_content.setter
-    def rendered_content(self, value: Optional[List[RenderedAtomicContent]]) -> None:
+    def rendered_content(self, value: Optional[list[RenderedAtomicContent]]) -> None:
         self._rendered_content = value
 
     def _get_default_custom_kwargs(self) -> KWargDetailsDict:
@@ -1418,7 +1408,7 @@ class ExpectationConfiguration(SerializableDictDot):
 
     def metrics_validate(
         self,
-        metrics: Dict,
+        metrics: dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         **kwargs: dict,

@@ -99,7 +99,7 @@ def column_function_partial(
                 execution_engine: PandasExecutionEngine,
                 metric_domain_kwargs: dict,
                 metric_value_kwargs: dict,
-                metrics: Dict[str, Any],
+                metrics: dict[str, Any],
                 runtime_configuration: dict,
             ):
                 (
@@ -158,7 +158,7 @@ def column_function_partial(
                 execution_engine: SqlAlchemyExecutionEngine,
                 metric_domain_kwargs: dict,
                 metric_value_kwargs: dict,
-                metrics: Dict[str, Any],
+                metrics: dict[str, Any],
                 runtime_configuration: dict,
             ):
                 filter_column_isnull = kwargs.get(
@@ -228,7 +228,7 @@ def column_function_partial(
                 execution_engine: SparkDFExecutionEngine,
                 metric_domain_kwargs: dict,
                 metric_value_kwargs: dict,
-                metrics: Dict[str, Any],
+                metrics: dict[str, Any],
                 runtime_configuration: dict,
             ):
                 filter_column_isnull = kwargs.get(
@@ -323,7 +323,7 @@ def column_condition_partial(
                 execution_engine: PandasExecutionEngine,
                 metric_domain_kwargs: dict,
                 metric_value_kwargs: dict,
-                metrics: Dict[str, Any],
+                metrics: dict[str, Any],
                 runtime_configuration: dict,
             ):
                 (
@@ -389,7 +389,7 @@ def column_condition_partial(
                 execution_engine: SqlAlchemyExecutionEngine,
                 metric_domain_kwargs: dict,
                 metric_value_kwargs: dict,
-                metrics: Dict[str, Any],
+                metrics: dict[str, Any],
                 runtime_configuration: dict,
             ):
                 (
@@ -472,7 +472,7 @@ def column_condition_partial(
                 execution_engine: SparkDFExecutionEngine,
                 metric_domain_kwargs: dict,
                 metric_value_kwargs: dict,
-                metrics: Dict[str, Any],
+                metrics: dict[str, Any],
                 runtime_configuration: dict,
             ):
                 (
@@ -571,7 +571,7 @@ def column_pair_function_partial(
                 execution_engine: PandasExecutionEngine,
                 metric_domain_kwargs: dict,
                 metric_value_kwargs: dict,
-                metrics: Dict[str, Any],
+                metrics: dict[str, Any],
                 runtime_configuration: dict,
             ):
                 (
@@ -587,7 +587,7 @@ def column_pair_function_partial(
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_names: List[Union[str, quoted_name]] = [
+                column_names: list[Union[str, quoted_name]] = [
                     column_A_name,
                     column_B_name,
                 ]
@@ -633,7 +633,7 @@ def column_pair_function_partial(
                 execution_engine: SqlAlchemyExecutionEngine,
                 metric_domain_kwargs: dict,
                 metric_value_kwargs: dict,
-                metrics: Dict[str, Any],
+                metrics: dict[str, Any],
                 runtime_configuration: dict,
             ):
                 (
@@ -649,7 +649,7 @@ def column_pair_function_partial(
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_names: List[Union[str, quoted_name]] = [
+                column_names: list[Union[str, quoted_name]] = [
                     column_A_name,
                     column_B_name,
                 ]
@@ -699,7 +699,7 @@ def column_pair_function_partial(
                 execution_engine: SparkDFExecutionEngine,
                 metric_domain_kwargs: dict,
                 metric_value_kwargs: dict,
-                metrics: Dict[str, Any],
+                metrics: dict[str, Any],
                 runtime_configuration: dict,
             ):
                 (
@@ -715,7 +715,7 @@ def column_pair_function_partial(
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_names: List[Union[str, quoted_name]] = [
+                column_names: list[Union[str, quoted_name]] = [
                     column_A_name,
                     column_B_name,
                 ]
@@ -791,7 +791,7 @@ def column_pair_condition_partial(
                 execution_engine: PandasExecutionEngine,
                 metric_domain_kwargs: dict,
                 metric_value_kwargs: dict,
-                metrics: Dict[str, Any],
+                metrics: dict[str, Any],
                 runtime_configuration: dict,
             ):
                 (
@@ -807,7 +807,7 @@ def column_pair_condition_partial(
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_names: List[Union[str, quoted_name]] = [
+                column_names: list[Union[str, quoted_name]] = [
                     column_A_name,
                     column_B_name,
                 ]
@@ -860,7 +860,7 @@ def column_pair_condition_partial(
                 execution_engine: SqlAlchemyExecutionEngine,
                 metric_domain_kwargs: dict,
                 metric_value_kwargs: dict,
-                metrics: Dict[str, Any],
+                metrics: dict[str, Any],
                 runtime_configuration: dict,
             ):
                 (
@@ -876,7 +876,7 @@ def column_pair_condition_partial(
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_names: List[Union[str, quoted_name]] = [
+                column_names: list[Union[str, quoted_name]] = [
                     column_A_name,
                     column_B_name,
                 ]
@@ -937,7 +937,7 @@ def column_pair_condition_partial(
                 execution_engine: SparkDFExecutionEngine,
                 metric_domain_kwargs: dict,
                 metric_value_kwargs: dict,
-                metrics: Dict[str, Any],
+                metrics: dict[str, Any],
                 runtime_configuration: dict,
             ):
                 (
@@ -953,7 +953,7 @@ def column_pair_condition_partial(
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_names: List[Union[str, quoted_name]] = [
+                column_names: list[Union[str, quoted_name]] = [
                     column_A_name,
                     column_B_name,
                 ]
@@ -1025,7 +1025,7 @@ def multicolumn_function_partial(
                 execution_engine: PandasExecutionEngine,
                 metric_domain_kwargs: dict,
                 metric_value_kwargs: dict,
-                metrics: Dict[str, Any],
+                metrics: dict[str, Any],
                 runtime_configuration: dict,
             ):
                 (
@@ -1036,7 +1036,7 @@ def multicolumn_function_partial(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+                column_list: list[Union[str, quoted_name]] = accessor_domain_kwargs[
                     "column_list"
                 ]
 
@@ -1080,7 +1080,7 @@ def multicolumn_function_partial(
                 execution_engine: SqlAlchemyExecutionEngine,
                 metric_domain_kwargs: dict,
                 metric_value_kwargs: dict,
-                metrics: Dict[str, Any],
+                metrics: dict[str, Any],
                 runtime_configuration: dict,
             ):
                 (
@@ -1091,7 +1091,7 @@ def multicolumn_function_partial(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+                column_list: list[Union[str, quoted_name]] = accessor_domain_kwargs[
                     "column_list"
                 ]
 
@@ -1152,7 +1152,7 @@ def multicolumn_function_partial(
                 execution_engine: SparkDFExecutionEngine,
                 metric_domain_kwargs: dict,
                 metric_value_kwargs: dict,
-                metrics: Dict[str, Any],
+                metrics: dict[str, Any],
                 runtime_configuration: dict,
             ):
                 (
@@ -1163,7 +1163,7 @@ def multicolumn_function_partial(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+                column_list: list[Union[str, quoted_name]] = accessor_domain_kwargs[
                     "column_list"
                 ]
 
@@ -1237,7 +1237,7 @@ def multicolumn_condition_partial(
                 execution_engine: PandasExecutionEngine,
                 metric_domain_kwargs: dict,
                 metric_value_kwargs: dict,
-                metrics: Dict[str, Any],
+                metrics: dict[str, Any],
                 runtime_configuration: dict,
             ):
                 (
@@ -1248,7 +1248,7 @@ def multicolumn_condition_partial(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+                column_list: list[Union[str, quoted_name]] = accessor_domain_kwargs[
                     "column_list"
                 ]
 
@@ -1299,7 +1299,7 @@ def multicolumn_condition_partial(
                 execution_engine: SqlAlchemyExecutionEngine,
                 metric_domain_kwargs: dict,
                 metric_value_kwargs: dict,
-                metrics: Dict[str, Any],
+                metrics: dict[str, Any],
                 runtime_configuration: dict,
             ):
                 (
@@ -1310,7 +1310,7 @@ def multicolumn_condition_partial(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+                column_list: list[Union[str, quoted_name]] = accessor_domain_kwargs[
                     "column_list"
                 ]
 
@@ -1372,7 +1372,7 @@ def multicolumn_condition_partial(
                 execution_engine: SparkDFExecutionEngine,
                 metric_domain_kwargs: dict,
                 metric_value_kwargs: dict,
-                metrics: Dict[str, Any],
+                metrics: dict[str, Any],
                 runtime_configuration: dict,
             ):
                 (
@@ -1383,7 +1383,7 @@ def multicolumn_condition_partial(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+                column_list: list[Union[str, quoted_name]] = accessor_domain_kwargs[
                     "column_list"
                 ]
 
@@ -1418,7 +1418,7 @@ def _pandas_map_condition_unexpected_count(
     execution_engine: PandasExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """Returns unexpected count for MapExpectations"""
@@ -1430,7 +1430,7 @@ def _pandas_column_map_condition_values(
     execution_engine: PandasExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
@@ -1484,7 +1484,7 @@ def _pandas_column_pair_map_condition_values(
     execution_engine: PandasExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
@@ -1512,7 +1512,7 @@ def _pandas_column_pair_map_condition_values(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_names: List[Union[str, quoted_name]] = [
+    column_names: list[Union[str, quoted_name]] = [
         column_A_name,
         column_B_name,
     ]
@@ -1546,7 +1546,7 @@ def _pandas_column_pair_map_condition_filtered_row_count(
     execution_engine: PandasExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
@@ -1570,7 +1570,7 @@ def _pandas_column_pair_map_condition_filtered_row_count(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_names: List[Union[str, quoted_name]] = [column_A_name, column_B_name]
+    column_names: list[Union[str, quoted_name]] = [column_A_name, column_B_name]
     verify_column_names_exist(
         column_names=column_names, batch_columns_list=metrics["table.columns"]
     )
@@ -1583,7 +1583,7 @@ def _pandas_multicolumn_map_condition_values(
     execution_engine: PandasExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
@@ -1606,7 +1606,7 @@ def _pandas_multicolumn_map_condition_values(
 """
         )
 
-    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
+    column_list: list[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
 
     column_list = get_dbms_compatible_column_names(
         column_names=column_list,
@@ -1631,7 +1631,7 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
     execution_engine: PandasExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
@@ -1650,7 +1650,7 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
 """
         )
 
-    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
+    column_list: list[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
     verify_column_names_exist(
         column_names=column_list, batch_columns_list=metrics["table.columns"]
     )
@@ -1664,7 +1664,7 @@ def _pandas_column_map_series_and_domain_values(
     execution_engine: PandasExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
@@ -1736,9 +1736,9 @@ def _pandas_map_condition_index(
     execution_engine: PandasExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
-) -> Union[List[int], List[Dict[str, Any]]]:
+) -> Union[list[int], list[dict[str, Any]]]:
     (
         boolean_mapped_unexpected_values,
         compute_domain_kwargs,
@@ -1776,7 +1776,7 @@ def _pandas_map_condition_index(
             ]
 
     elif "column_list" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+        column_list: list[Union[str, quoted_name]] = accessor_domain_kwargs[
             "column_list"
         ]
         verify_column_names_exist(
@@ -1788,7 +1788,7 @@ def _pandas_map_condition_index(
     expectation_domain_column_name: Union[str, None] = domain_kwargs.get("column")
 
     unexpected_index_list: Union[
-        List[int], List[Dict[str, Any]]
+        list[int], list[dict[str, Any]]
     ] = compute_unexpected_pandas_indices(
         domain_records_df=domain_records_df,
         result_format=result_format,
@@ -1807,9 +1807,9 @@ def _pandas_map_condition_query(
     execution_engine: PandasExecutionEngine,
     metric_domain_kwargs: Dict,
     metric_value_kwargs: Dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
-) -> Optional[List[Any]]:
+) -> Optional[list[Any]]:
     """
     Returns query that will return all rows which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation. For Pandas, this is currently the full set of unexpected_indices.
@@ -1852,7 +1852,7 @@ def _pandas_map_condition_query(
             ]
 
     elif "column_list" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+        column_list: list[Union[str, quoted_name]] = accessor_domain_kwargs[
             "column_list"
         ]
         verify_column_names_exist(
@@ -1867,7 +1867,7 @@ def _pandas_column_map_condition_value_counts(
     execution_engine: PandasExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """Returns respective value counts for distinct column values"""
@@ -1934,7 +1934,7 @@ def _pandas_map_condition_rows(
     execution_engine: PandasExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """Return values from the specified domain (ignoring the column constraint) that match the map-style metric in the metrics dictionary."""
@@ -1971,7 +1971,7 @@ def _pandas_map_condition_rows(
             df = df[df[column_name].notnull()]
 
     elif "column_list" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+        column_list: list[Union[str, quoted_name]] = accessor_domain_kwargs[
             "column_list"
         ]
         verify_column_names_exist(
@@ -1993,7 +1993,7 @@ def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
     execution_engine: SqlAlchemyExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """Returns unexpected count for MapExpectations"""
@@ -2018,7 +2018,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
     execution_engine: SqlAlchemyExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """Returns unexpected count for MapExpectations. This is a *value* metric, which is useful for
@@ -2035,7 +2035,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
     selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     # The integral values are cast to SQL Numeric in order to avoid a bug in AWS Redshift (converted to integer later).
-    count_case_statement: List[Label] = sa.case(
+    count_case_statement: list[Label] = sa.case(
         [
             (
                 unexpected_condition,
@@ -2114,7 +2114,7 @@ def _sqlalchemy_column_map_condition_values(
     execution_engine: SqlAlchemyExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """
@@ -2173,7 +2173,7 @@ def _sqlalchemy_column_pair_map_condition_values(
     execution_engine: SqlAlchemyExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
@@ -2194,7 +2194,7 @@ def _sqlalchemy_column_pair_map_condition_values(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_names: List[Union[str, quoted_name]] = [
+    column_names: list[Union[str, quoted_name]] = [
         column_A_name,
         column_B_name,
     ]
@@ -2231,7 +2231,7 @@ def _sqlalchemy_column_pair_map_condition_filtered_row_count(
     execution_engine: SqlAlchemyExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
@@ -2248,7 +2248,7 @@ def _sqlalchemy_column_pair_map_condition_filtered_row_count(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_names: List[Union[str, quoted_name]] = [column_A_name, column_B_name]
+    column_names: list[Union[str, quoted_name]] = [column_A_name, column_B_name]
     verify_column_names_exist(
         column_names=column_names, batch_columns_list=metrics["table.columns"]
     )
@@ -2263,7 +2263,7 @@ def _sqlalchemy_multicolumn_map_condition_values(
     execution_engine: SqlAlchemyExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
@@ -2286,7 +2286,7 @@ def _sqlalchemy_multicolumn_map_condition_values(
 """
         )
 
-    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
+    column_list: list[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
 
     column_list = get_dbms_compatible_column_names(
         column_names=column_list,
@@ -2312,7 +2312,7 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
     execution_engine: SqlAlchemyExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
@@ -2331,7 +2331,7 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
 """
         )
 
-    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
+    column_list: list[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
     verify_column_names_exist(
         column_names=column_list, batch_columns_list=metrics["table.columns"]
     )
@@ -2348,7 +2348,7 @@ def _sqlalchemy_column_map_condition_value_counts(
     execution_engine: SqlAlchemyExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """
@@ -2395,7 +2395,7 @@ def _sqlalchemy_map_condition_rows(
     execution_engine: SqlAlchemyExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """
@@ -2436,7 +2436,7 @@ def _sqlalchemy_map_condition_query(
     execution_engine: SqlAlchemyExecutionEngine,
     metric_domain_kwargs: Dict,
     metric_value_kwargs: Dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ) -> Optional[str]:
     """
@@ -2462,9 +2462,9 @@ def _sqlalchemy_map_condition_query(
     if return_unexpected_index_query is False:
         return
 
-    column_selector: List[sa.Column] = [sa.column(domain_kwargs["column"])]
-    all_table_columns: List[str] = metrics.get("table.columns")
-    unexpected_index_column_names: List[str] = result_format.get(
+    column_selector: list[sa.Column] = [sa.column(domain_kwargs["column"])]
+    all_table_columns: list[str] = metrics.get("table.columns")
+    unexpected_index_column_names: list[str] = result_format.get(
         "unexpected_index_column_names"
     )
     for column_name in unexpected_index_column_names:
@@ -2502,9 +2502,9 @@ def _sqlalchemy_map_condition_index(
     execution_engine: SqlAlchemyExecutionEngine,
     metric_domain_kwargs: Dict,
     metric_value_kwargs: Dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """
     Returns indices of the metric values which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation.
@@ -2521,10 +2521,10 @@ def _sqlalchemy_map_condition_index(
     domain_kwargs: dict = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     result_format: dict = metric_value_kwargs["result_format"]
 
-    column_selector: List[sa.Column] = []
-    all_table_columns: List[str] = metrics.get("table.columns")
+    column_selector: list[sa.Column] = []
+    all_table_columns: list[str] = metrics.get("table.columns")
 
-    unexpected_index_column_names: Optional[List[str]] = result_format.get(
+    unexpected_index_column_names: Optional[list[str]] = result_format.get(
         "unexpected_index_column_names"
     )
 
@@ -2558,12 +2558,12 @@ def _sqlalchemy_map_condition_index(
             domain_records_as_selectable
         ).limit(result_format["partial_unexpected_count"])
     )
-    query_result: List[tuple] = execution_engine.engine.execute(final_query).fetchall()
+    query_result: list[tuple] = execution_engine.engine.execute(final_query).fetchall()
 
-    unexpected_index_list: Optional[List[Dict[str, Any]]] = []
+    unexpected_index_list: Optional[list[dict[str, Any]]] = []
 
     for row in query_result:
-        primary_key_dict: Dict[str, Any] = {}
+        primary_key_dict: dict[str, Any] = {}
         # add the actual unexpected value
         primary_key_dict[expectation_domain_column_name] = row[-1]
         for index in range(len(unexpected_index_column_names)):
@@ -2579,7 +2579,7 @@ def _spark_map_condition_unexpected_count_aggregate_fn(
     execution_engine: SparkDFExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
@@ -2597,7 +2597,7 @@ def _spark_map_condition_unexpected_count_value(
     execution_engine: SparkDFExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     # fn_domain_kwargs maybe updated to reflect null filtering
@@ -2623,7 +2623,7 @@ def _spark_column_map_condition_values(
     execution_engine: SparkDFExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
@@ -2672,7 +2672,7 @@ def _spark_column_map_condition_value_counts(
     execution_engine: SparkDFExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
@@ -2714,7 +2714,7 @@ def _spark_map_condition_rows(
     execution_engine: SparkDFExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
@@ -2744,9 +2744,9 @@ def _spark_map_condition_index(
     execution_engine: SparkDFExecutionEngine,
     metric_domain_kwargs: Dict,
     metric_value_kwargs: Dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
-) -> Union[List[Dict[str, Any]], None]:
+) -> Union[list[dict[str, Any]], None]:
     """
     Returns indices of the metric values which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation.
@@ -2785,12 +2785,12 @@ def _spark_map_condition_index(
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
-    unexpected_index_list: Optional[List[Dict[str, Any]]] = []
+    unexpected_index_list: Optional[list[dict[str, Any]]] = []
 
-    unexpected_index_column_names: List[str] = result_format[
+    unexpected_index_column_names: list[str] = result_format[
         "unexpected_index_column_names"
     ]
-    columns_to_keep: List[str] = [column for column in unexpected_index_column_names]
+    columns_to_keep: list[str] = [column for column in unexpected_index_column_names]
     columns_to_keep.append(domain_column)
 
     # check that column name is in row
@@ -2817,7 +2817,7 @@ def _spark_map_condition_query(
     execution_engine: SparkDFExecutionEngine,
     metric_domain_kwargs: Dict,
     metric_value_kwargs: Dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ) -> Union[str, None]:
     """
@@ -2859,7 +2859,7 @@ def _spark_column_pair_map_condition_values(
     execution_engine: SparkDFExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
@@ -2880,7 +2880,7 @@ def _spark_column_pair_map_condition_values(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_names: List[Union[str, quoted_name]] = [
+    column_names: list[Union[str, quoted_name]] = [
         column_A_name,
         column_B_name,
     ]
@@ -2924,7 +2924,7 @@ def _spark_column_pair_map_condition_filtered_row_count(
     execution_engine: SparkDFExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
@@ -2941,7 +2941,7 @@ def _spark_column_pair_map_condition_filtered_row_count(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_names: List[Union[str, quoted_name]] = [column_A_name, column_B_name]
+    column_names: list[Union[str, quoted_name]] = [column_A_name, column_B_name]
     verify_column_names_exist(
         column_names=column_names, batch_columns_list=metrics["table.columns"]
     )
@@ -2954,7 +2954,7 @@ def _spark_multicolumn_map_condition_values(
     execution_engine: SqlAlchemyExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
@@ -2977,7 +2977,7 @@ def _spark_multicolumn_map_condition_values(
 """
         )
 
-    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
+    column_list: list[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
 
     column_list = get_dbms_compatible_column_names(
         column_names=column_list,
@@ -3016,7 +3016,7 @@ def _spark_multicolumn_map_condition_filtered_row_count(
     execution_engine: SparkDFExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     **kwargs,
 ):
     """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
@@ -3035,7 +3035,7 @@ def _spark_multicolumn_map_condition_filtered_row_count(
 """
         )
 
-    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
+    column_list: list[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
     verify_column_names_exist(
         column_names=column_list, batch_columns_list=metrics["table.columns"]
     )

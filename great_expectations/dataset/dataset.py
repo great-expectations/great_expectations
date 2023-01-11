@@ -257,8 +257,8 @@ class Dataset(MetaDataset):
         """Returns: int, table column count"""
         raise NotImplementedError
 
-    def get_table_columns(self) -> List[str]:
-        """Returns: List[str], list of column names"""
+    def get_table_columns(self) -> list[str]:
+        """Returns: list[str], list of column names"""
         raise NotImplementedError
 
     def get_column_nonnull_count(self, column) -> None:
@@ -303,7 +303,7 @@ class Dataset(MetaDataset):
         raise NotImplementedError
 
     def get_column_modes(self, column) -> None:
-        """Returns: List[Any], list of modes (ties OK)"""
+        """Returns: list[Any], list of modes (ties OK)"""
         raise NotImplementedError
 
     def get_column_median(self, column) -> None:
@@ -312,7 +312,7 @@ class Dataset(MetaDataset):
 
     def get_column_quantiles(
         self, column, quantiles, allow_relative_error=False
-    ) -> List[Any]:
+    ) -> list[Any]:
         """Get the values in column closest to the requested quantiles
         Args:
             column (string): name of column
@@ -320,7 +320,7 @@ class Dataset(MetaDataset):
             *must* be a tuple to ensure caching is possible
 
         Returns:
-            List[Any]: the nearest values in the dataset to those quantiles
+            list[Any]: the nearest values in the dataset to those quantiles
         """
         raise NotImplementedError
 
@@ -392,7 +392,7 @@ class Dataset(MetaDataset):
             column: the column for which to generate the histogram
             bins (tuple): the bins to slice the histogram. bins *must* be a tuple to ensure caching is possible
 
-        Returns: List[int], a list of counts corresponding to bins"""
+        Returns: list[int], a list of counts corresponding to bins"""
         raise NotImplementedError
 
     def get_column_count_in_range(
@@ -589,7 +589,7 @@ class Dataset(MetaDataset):
     @DataAsset.expectation(["column_set", "exact_match"])
     def expect_table_columns_to_match_set(
         self,
-        column_set: Optional[Union[Set[str], List[str]]],
+        column_set: Optional[Union[Set[str], list[str]]],
         exact_match: bool = True,
         result_format=None,
         include_config=True,
@@ -4792,7 +4792,7 @@ class Dataset(MetaDataset):
             Fail on row 2
 
         Args:
-            column_list (List[str]): \
+            column_list (list[str]): \
                 Set of columns to be checked
             sum_total (int): \
                 expected sum of columns

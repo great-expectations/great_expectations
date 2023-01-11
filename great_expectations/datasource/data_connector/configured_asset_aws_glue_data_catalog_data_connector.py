@@ -46,8 +46,8 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
         catalog_id: Optional[str] = None,
-        partitions: Optional[List[str]] = None,
-        assets: Optional[Dict[str, dict]] = None,
+        partitions: Optional[list[str]] = None,
+        assets: Optional[dict[str, dict]] = None,
         boto3_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
@@ -94,10 +94,10 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         self._catalog_id = catalog_id
         self._partitions = partitions
 
-        self._assets: Dict[str, dict] = {}
+        self._assets: dict[str, dict] = {}
         self._refresh_data_assets_cache(assets=assets)
 
-        self._data_references_cache: Dict[str, List[dict]] = {}
+        self._data_references_cache: dict[str, list[dict]] = {}
 
     @property
     def catalog_id(self) -> Optional[str]:
@@ -108,11 +108,11 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         return self._glue_client
 
     @property
-    def assets(self) -> Dict[str, dict]:
+    def assets(self) -> dict[str, dict]:
         return self._assets
 
     @property
-    def partitions(self) -> Optional[List[str]]:
+    def partitions(self) -> Optional[list[str]]:
         return self._partitions
 
     def build_batch_spec(
@@ -153,7 +153,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
 
         return GlueDataCatalogBatchSpec(batch_spec)
 
-    def get_available_data_asset_names(self) -> List[str]:
+    def get_available_data_asset_names(self) -> list[str]:
         """
         Return the list of asset names known by this DataConnector.
 
@@ -162,7 +162,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         """
         return list(self.assets.keys())
 
-    def get_unmatched_data_references(self) -> List[str]:
+    def get_unmatched_data_references(self) -> list[str]:
         """
         Returns the list of data_references unmatched by configuration by looping through items in _data_references_cache
         and returning data_reference that do not have an associated data_asset.
@@ -193,7 +193,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
 
-        batch_definition_list: List[BatchDefinition] = []
+        batch_definition_list: list[BatchDefinition] = []
         try:
             sub_cache = self._get_data_reference_list_from_cache_by_data_asset_name(
                 data_asset_name=batch_request.data_asset_name
@@ -267,7 +267,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
     def _get_glue_paginator_kwargs(self) -> dict:
         return {"CatalogId": self.catalog_id} if self.catalog_id else {}
 
-    def _get_table_partitions(self, database_name: str, table_name: str) -> List[str]:
+    def _get_table_partitions(self, database_name: str, table_name: str) -> list[str]:
         paginator_kwargs = self._get_glue_paginator_kwargs()
         paginator_kwargs["DatabaseName"] = database_name
         paginator_kwargs["Name"] = table_name
@@ -280,10 +280,10 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
             )
 
     def _get_batch_identifiers(
-        self, partition_keys: List[str], database_name: str, table_name: str
-    ) -> List[dict]:
-        batch_identifiers: List[dict] = []
-        table_partitions: List[str] = self._get_table_partitions(
+        self, partition_keys: list[str], database_name: str, table_name: str
+    ) -> list[dict]:
+        batch_identifiers: list[dict] = []
+        table_partitions: list[str] = self._get_table_partitions(
             database_name=database_name, table_name=table_name
         )
 
@@ -307,12 +307,12 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
 
     def _get_batch_identifiers_list_from_data_asset_config(
         self, data_asset_config: dict
-    ) -> List[dict]:
+    ) -> list[dict]:
         table_name: str = data_asset_config["table_name"]
         database_name: str = data_asset_config["database_name"]
         partitions: Optional[list] = data_asset_config.get("partitions")
 
-        batch_identifiers_list: Optional[List[dict]] = None
+        batch_identifiers_list: Optional[list[dict]] = None
         if partitions:
             batch_identifiers_list = self._get_batch_identifiers(
                 partition_keys=partitions,
@@ -327,7 +327,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
 
         for data_asset_name in self.assets:
             data_asset_config: dict = self.assets[data_asset_name]
-            batch_identifiers_list: List[
+            batch_identifiers_list: list[
                 dict
             ] = self._get_batch_identifiers_list_from_data_asset_config(
                 data_asset_config=data_asset_config
@@ -336,7 +336,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
 
     def _get_data_reference_list_from_cache_by_data_asset_name(
         self, data_asset_name: str
-    ) -> List[dict]:
+    ) -> list[dict]:
         return self._data_references_cache[data_asset_name]
 
     def _update_data_asset_name_from_config(
@@ -357,7 +357,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
 
     def _map_data_reference_to_batch_definition_list(
         self, data_reference, data_asset_name: Optional[str] = None
-    ) -> Optional[List[BatchDefinition]]:
+    ) -> Optional[list[BatchDefinition]]:
         # Note: data references *are* dictionaries, allowing us to invoke `IDDict(data_reference)`
         return [
             BatchDefinition(
@@ -392,7 +392,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         }
 
     def _refresh_data_assets_cache(
-        self, assets: Optional[Dict[str, dict]] = None
+        self, assets: Optional[dict[str, dict]] = None
     ) -> None:
         # Clear assets already stored in memory.
         self._assets = {}

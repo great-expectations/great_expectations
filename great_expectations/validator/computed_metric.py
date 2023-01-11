@@ -7,7 +7,7 @@ import pandas as pd
 
 MetricValue = Union[
     Any,  # Encompasses deferred-query/execution plans ("SQLAlchemy" and "Spark") conditions and aggregation functions.
-    List[Any],
+    list[Any],
     Set[Any],
     Tuple[Any, ...],
     pd.DataFrame,
@@ -17,5 +17,5 @@ MetricValue = Union[
     str,
     float,
     bool,
-    Dict[str, Any],
+    dict[str, Any],
 ]

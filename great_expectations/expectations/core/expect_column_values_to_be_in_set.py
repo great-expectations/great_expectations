@@ -148,7 +148,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             evaluation_parameter_builder_configs=None,
         )
     )
-    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
+    validation_parameter_builder_configs: list[ParameterBuilderConfig] = [
         value_set_estimator_parameter_builder_config,
     ]
     default_profiler_config = RuleBasedProfilerConfig(
@@ -247,7 +247,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> List[RenderedStringTemplateContent]:
+    ) -> list[RenderedStringTemplateContent]:
         renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,

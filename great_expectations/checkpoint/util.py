@@ -416,7 +416,7 @@ def substitute_runtime_config(source_config: dict, runtime_kwargs: dict) -> dict
 
 def get_updated_action_list(
     base_action_list: list, other_action_list: list
-) -> List[dict]:
+) -> list[dict]:
     if base_action_list is None:
         base_action_list = []
 
@@ -446,7 +446,7 @@ def get_updated_action_list(
 
 
 def batch_request_in_validations_contains_batch_data(
-    validations: Optional[List[dict]] = None,
+    validations: Optional[list[dict]] = None,
 ) -> bool:
     if validations is not None:
         for idx, val in enumerate(validations):

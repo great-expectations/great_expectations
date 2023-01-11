@@ -197,7 +197,7 @@ class SlackRenderer(Renderer):
             )
         return report_element
 
-    def create_failed_expectations_text(self, validation_results: List[dict]) -> str:
+    def create_failed_expectations_text(self, validation_results: list[dict]) -> str:
         failed_expectations_str = "\n*Failed Expectations*:\n"
         for expectation in validation_results:
             if not expectation["success"]:
