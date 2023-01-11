@@ -17,7 +17,7 @@ except ImportError:
 
 from ruamel.yaml import YAML
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
@@ -532,7 +532,7 @@ def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and
         },
     }
     batch_request = RuntimeBatchRequest(**batch_request)
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         # noinspection PyUnusedLocal
         batch_list: List[
             Batch
@@ -562,7 +562,7 @@ def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and
         },
     }
     batch_request = RuntimeBatchRequest(**batch_request)
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         # noinspection PyUnusedLocal
         batch_list: List[
             Batch

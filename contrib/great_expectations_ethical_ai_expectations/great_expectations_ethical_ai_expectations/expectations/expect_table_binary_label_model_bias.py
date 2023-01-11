@@ -9,6 +9,7 @@ from aequitas.group import Group
 from aequitas.preprocessing import preprocess_input_df
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
@@ -17,7 +18,6 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.expectations.metrics.metric_provider import (
     MetricConfiguration,
-    MetricDomainTypes,
     metric_value,
 )
 from great_expectations.expectations.metrics.table_metric_provider import (

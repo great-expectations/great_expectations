@@ -163,7 +163,8 @@ class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
                 {
                     "backend": "sqlalchemy",
                     "dialects": ["sqlite"],
-                }
+                },
+                {"backend": "spark", "dialects": None},
             ],
         }
     ]

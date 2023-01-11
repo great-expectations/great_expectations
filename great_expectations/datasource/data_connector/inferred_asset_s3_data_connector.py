@@ -1,7 +1,7 @@
 import logging
 from typing import List, Optional
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
 from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
@@ -164,4 +164,4 @@ def _check_valid_s3_path(
         )
         if "*" in bad_chars:
             msg += "Note: `*` is internally used to replace the regex for `.`."
-        raise ge_exceptions.ParserError(msg)
+        raise gx_exceptions.ParserError(msg)

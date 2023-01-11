@@ -21,7 +21,7 @@ if not ATHENA_STAGING_S3:
 connection_string = f"awsathena+rest://@athena.us-east-1.amazonaws.com/{ATHENA_DB_NAME}?s3_staging_dir={ATHENA_STAGING_S3}"
 
 # create datasource and add to DataContext
-context = gx.data_context.DataContext()
+context = gx.get_context()
 datasource_yaml = f"""
 name: my_awsathena_datasource
 class_name: Datasource

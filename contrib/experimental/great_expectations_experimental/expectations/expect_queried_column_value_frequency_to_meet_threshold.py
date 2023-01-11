@@ -178,7 +178,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
                     "in": {
                         "column": "col2",
                         "value": ["a", "b"],
-                        "threshold": [0.6, 0.4],
+                        "threshold": [0.5, 0.5],
                         "row_condition": 'col("col1")==2',
                         "condition_parser": "great_expectations__experimental__",
                     },
@@ -192,7 +192,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "tags": ["query-based"],
-        "contributors": ["@joegargery"],
+        "contributors": ["@joegargery", "@mkopec87"],
     }
 
 

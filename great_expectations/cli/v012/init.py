@@ -4,7 +4,7 @@ import sys
 import click
 
 from great_expectations import DataContext
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as gx_exceptions
 from great_expectations.cli.v012 import toolkit
 from great_expectations.cli.v012.cli_messages import (
     BUILD_DOCS_PROMPT,
@@ -39,7 +39,7 @@ try:
 except ImportError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through
-    SQLAlchemyError = ge_exceptions.ProfilerError
+    SQLAlchemyError = gx_exceptions.ProfilerError
 
 
 @click.command()  # noqa: C901 - 21
@@ -191,7 +191,7 @@ def init(target_directory, view, usage_stats) -> None:  # noqa: C901 - 21
                 sys.exit(0)
     except (
         DataContextError,
-        ge_exceptions.ProfilerError,
+        gx_exceptions.ProfilerError,
         OSError,
         SQLAlchemyError,
     ) as e:
