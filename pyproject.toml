@@ -155,7 +155,6 @@ exclude = [
     'render/view/view\.py',  # 11
     'rule_based_profiler/data_assistant_result/data_assistant_result\.py',  # 63
     'rule_based_profiler/data_assistant_result/plot_components\.py', # 12
-    'rule_based_profiler/data_assistant/data_assistant\.py',  # 15
     'rule_based_profiler/domain_builder/categorical_column_domain_builder\.py',  # 18
     'rule_based_profiler/domain_builder/map_metric_column_domain_builder\.py',  # 8
     'rule_based_profiler/estimators/bootstrap_numeric_range_estimator\.py',  # 8
