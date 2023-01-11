@@ -7,7 +7,7 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 from uuid import UUID
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import (
@@ -153,7 +153,7 @@ class BaseCheckpoint(ConfigPeer):
         validations = cast(list, substituted_runtime_config.get("validations") or [])
 
         if len(validations) == 0 and not batch_request:
-            raise ge_exceptions.CheckpointError(
+            raise gx_exceptions.CheckpointError(
                 f'Checkpoint "{self.name}" must contain either a batch_request or validations.'
             )
 
@@ -259,7 +259,7 @@ class BaseCheckpoint(ConfigPeer):
             template_config: dict = checkpoint.config.to_json_dict()
 
             if template_config["config_version"] != source_config["config_version"]:
-                raise ge_exceptions.CheckpointError(
+                raise gx_exceptions.CheckpointError(
                     f"Invalid template '{template_name}' (ver. {template_config['config_version']}) for Checkpoint "
                     f"'{source_config}' (ver. {source_config['config_version']}. Checkpoints can only use templates with the same config_version."
                 )
@@ -399,11 +399,11 @@ class BaseCheckpoint(ConfigPeer):
             )
             async_validation_operator_results.append(async_validation_operator_result)
         except (
-            ge_exceptions.CheckpointError,
-            ge_exceptions.ExecutionEngineError,
-            ge_exceptions.MetricError,
+            gx_exceptions.CheckpointError,
+            gx_exceptions.ExecutionEngineError,
+            gx_exceptions.MetricError,
         ) as e:
-            raise ge_exceptions.CheckpointError(
+            raise gx_exceptions.CheckpointError(
                 f"Exception occurred while running validation[{idx}] of Checkpoint '{self.name}': {e.message}."
             ) from e
 
@@ -705,12 +705,12 @@ constructor arguments.
 
         # DataFrames shouldn't be saved to CheckpointStore
         if batch_request_contains_batch_data(batch_request=batch_request):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 f'batch_data found in batch_request cannot be saved to CheckpointStore "{checkpoint_store_name}"'
             )
 
         if batch_request_in_validations_contains_batch_data(validations=validations):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 f'batch_data found in validations cannot be saved to CheckpointStore "{checkpoint_store_name}"'
             )
 
@@ -936,13 +936,13 @@ class LegacyCheckpoint(Checkpoint):
         result_format = result_format or {"result_format": "SUMMARY"}
 
         if not assets_to_validate:
-            raise ge_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(
                 "No batches of data were passed in. These are required"
             )
 
         for batch in assets_to_validate:
             if not isinstance(batch, (tuple, DataAsset, Validator)):
-                raise ge_exceptions.DataContextError(
+                raise gx_exceptions.DataContextError(
                     "Batches are required to be of type DataAsset or Validator"
                 )
 

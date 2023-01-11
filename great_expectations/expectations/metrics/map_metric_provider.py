@@ -6,19 +6,20 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 import numpy as np
 import pandas as pd
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import (
+    MetricFunctionTypes,
+    MetricPartialFunctionTypes,
+    MetricPartialFunctionTypeSuffixes,
+)
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import (
-    MetricDomainTypes,
-    MetricFunctionTypes,
-    MetricPartialFunctionTypes,
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
@@ -1918,7 +1919,7 @@ def _pandas_column_map_condition_value_counts(
             pass
 
     if not value_counts:
-        raise ge_exceptions.MetricComputationError("Unable to compute value counts")
+        raise gx_exceptions.MetricComputationError("Unable to compute value counts")
 
     if result_format["result_format"] == "COMPLETE":
         return value_counts
@@ -2099,7 +2100,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
 
     except OperationalError as oe:
         exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
-        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+        raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=exception_message
         )
 
@@ -2423,7 +2424,7 @@ def _sqlalchemy_map_condition_rows(
         return execution_engine.engine.execute(query).fetchall()
     except OperationalError as oe:
         exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
-        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+        raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=exception_message
         )
 
@@ -2466,7 +2467,7 @@ def _sqlalchemy_map_condition_query(
     )
     for column_name in unexpected_index_column_names:
         if column_name not in all_table_columns:
-            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The unexpected_index_column: "{column_name}" in does not exist in SQL Table. '
                 f"Please check your configuration and try again."
             )
@@ -2527,7 +2528,7 @@ def _sqlalchemy_map_condition_index(
 
     for column_name in unexpected_index_column_names:
         if column_name not in all_table_columns:
-            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The unexpected_index_column: "{column_name}" in does not exist in SQL Table. '
                 f"Please check your configuration and try again."
             )
@@ -2775,7 +2776,7 @@ def _spark_map_condition_index(
 
     result_format = metric_value_kwargs["result_format"]
     if not result_format.get("unexpected_index_column_names"):
-        raise ge_exceptions.MetricResolutionError(
+        raise gx_exceptions.MetricResolutionError(
             "unexpected_indices cannot be returned without 'unexpected_index_column_names'. Please check your configuration."
         )
 
@@ -2793,7 +2794,7 @@ def _spark_map_condition_index(
     # check that column name is in row
     for col_name in columns_to_keep:
         if col_name not in filtered.columns:
-            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 f"Error: The unexpected_index_column '{col_name}' does not exist in Spark DataFrame. Please check your configuration and try again."
             )
 
@@ -3107,7 +3108,7 @@ class MapMetricProvider(MetricProvider):
                 )
                 if issubclass(engine, PandasExecutionEngine):
                     register_metric(
-                        metric_name=f"{metric_name}.condition",
+                        metric_name=f"{metric_name}.{metric_fn_type.metric_suffix}",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
@@ -3210,7 +3211,7 @@ class MapMetricProvider(MetricProvider):
                         )
                 elif issubclass(engine, SqlAlchemyExecutionEngine):
                     register_metric(
-                        metric_name=f"{metric_name}.condition",
+                        metric_name=f"{metric_name}.{metric_fn_type.metric_suffix}",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
@@ -3249,7 +3250,7 @@ class MapMetricProvider(MetricProvider):
                         if domain_type == MetricDomainTypes.COLUMN:
                             register_metric(
                                 metric_name=metric_name
-                                + f".unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+                                + f".unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
                                 metric_domain_keys=metric_domain_keys,
                                 metric_value_keys=metric_value_keys,
                                 execution_engine=engine,
@@ -3347,7 +3348,7 @@ class MapMetricProvider(MetricProvider):
                         )
                 elif issubclass(engine, SparkDFExecutionEngine):
                     register_metric(
-                        metric_name=f"{metric_name}.condition",
+                        metric_name=f"{metric_name}.{metric_fn_type.metric_suffix}",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
@@ -3386,7 +3387,7 @@ class MapMetricProvider(MetricProvider):
                         if domain_type == MetricDomainTypes.COLUMN:
                             register_metric(
                                 metric_name=metric_name
-                                + f".unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+                                + f".unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
                                 metric_domain_keys=metric_domain_keys,
                                 metric_value_keys=metric_value_keys,
                                 execution_engine=engine,
@@ -3497,7 +3498,7 @@ class MapMetricProvider(MetricProvider):
                 metric_domain_keys = cls.function_domain_keys
                 metric_value_keys = cls.function_value_keys
                 register_metric(
-                    metric_name=f"{metric_name}.map",
+                    metric_name=f"{metric_name}.{metric_fn_type.metric_suffix}",
                     metric_domain_keys=metric_domain_keys,
                     metric_value_keys=metric_value_keys,
                     execution_engine=engine,
@@ -3524,28 +3525,28 @@ class MapMetricProvider(MetricProvider):
         if metric_name.endswith(metric_suffix):
             try:
                 _ = get_metric_provider(
-                    f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+                    f"{metric_name}.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
                     execution_engine,
                 )
                 has_aggregate_fn = True
-            except ge_exceptions.MetricProviderError:
+            except gx_exceptions.MetricProviderError:
                 has_aggregate_fn = False
             if has_aggregate_fn:
                 dependencies["metric_partial_fn"] = MetricConfiguration(
-                    metric_name=f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+                    metric_name=f"{metric_name}.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
                     metric_domain_kwargs=metric.metric_domain_kwargs,
                     metric_value_kwargs=base_metric_value_kwargs,
                 )
             else:
                 dependencies["unexpected_condition"] = MetricConfiguration(
-                    metric_name=f"{metric_name[:-len(metric_suffix)]}.condition",
+                    metric_name=f"{metric_name[:-len(metric_suffix)]}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
                     metric_domain_kwargs=metric.metric_domain_kwargs,
                     metric_value_kwargs=base_metric_value_kwargs,
                 )
 
         # MapMetric uses "condition" metric to build "unexpected_count.aggregate_fn" and other listed metrics as well.
         for metric_suffix in [
-            f".unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+            f".unexpected_count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
             ".unexpected_value_counts",
             ".unexpected_index_query",
             ".unexpected_index_list",
@@ -3555,7 +3556,7 @@ class MapMetricProvider(MetricProvider):
         ]:
             if metric_name.endswith(metric_suffix):
                 dependencies["unexpected_condition"] = MetricConfiguration(
-                    metric_name=f"{metric_name[:-len(metric_suffix)]}.condition",
+                    metric_name=f"{metric_name[:-len(metric_suffix)]}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
                     metric_domain_kwargs=metric.metric_domain_kwargs,
                     metric_value_kwargs=base_metric_value_kwargs,
                 )
