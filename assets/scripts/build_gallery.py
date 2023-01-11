@@ -299,7 +299,6 @@ def build_gallery(
         # Temp
         if expectation in [
             "expect_column_kl_divergence_to_be_less_than",  # Infinity values break JSON
-            "expect_column_values_to_be_valid_arn",  # Contrib Expectation where pretty much no test passes on any backend
         ]:
             continue
         group = requirements_dict[expectation]["group"]
