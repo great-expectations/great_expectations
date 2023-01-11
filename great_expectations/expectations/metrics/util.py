@@ -689,7 +689,7 @@ def get_dbms_compatible_column_names(
     typed_column_names_list: List[str | sqlalchemy.sql.quoted_name]
     if isinstance(execution_engine, SqlAlchemyExecutionEngine):
         column_name: str
-        batch_columns_dict: Dict[str, str] = {
+        batch_columns_dict: Dict[str, str | sqlalchemy.sql.quoted_name] = {
             str(column_name): column_name for column_name in batch_columns_list
         }
         typed_column_names_list = [
