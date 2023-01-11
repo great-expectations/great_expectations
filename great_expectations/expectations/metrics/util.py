@@ -1146,6 +1146,8 @@ def get_unexpected_indices_for_single_pandas_named_index(
         List of Dicts that contain ID/PK values
 
     """
+    if not expectation_domain_column_name:
+        return []
     unexpected_index_values_by_named_index: List[int | str] = list(
         domain_records_df.index
     )
@@ -1192,8 +1194,11 @@ def compute_unexpected_pandas_indices(
         list of unexpected_index_list values. It can either be a list of dicts or a list of numbers (if using default index).
 
     """
+    if not expectation_domain_column_name:
+        return []
+    unexpected_index_column_names: List[str] | None = None
     if domain_records_df.index.name is not None:
-        unexpected_index_column_names: List[str] = result_format.get(
+        unexpected_index_column_names = result_format.get(
             "unexpected_index_column_names", [domain_records_df.index.name]
         )
         unexpected_index_list: Optional[
@@ -1205,7 +1210,7 @@ def compute_unexpected_pandas_indices(
         )
     # multiple named indices
     elif domain_records_df.index.names[0] is not None:
-        unexpected_index_column_names: List[str] | None = result_format.get(
+        unexpected_index_column_names = result_format.get(
             "unexpected_index_column_names", list(domain_records_df.index.names)
         )
         unexpected_index_list: Optional[
@@ -1217,7 +1222,7 @@ def compute_unexpected_pandas_indices(
         )
     # named columns
     elif result_format.get("unexpected_index_column_names"):
-        unexpected_index_column_names: List[str] = result_format.get(
+        unexpected_index_column_names = result_format.get(
             "unexpected_index_column_names"
         )
         unexpected_index_list: Optional[List[Dict[str, Any]]] = []
