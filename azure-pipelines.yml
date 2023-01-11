@@ -15,10 +15,10 @@ schedules:
     - develop
   always: false # Will only trigger if the state of the codebase has changed since the last scheduled run
 
-trigger:
-  tags:
-    include:
-      - '*' # Should be SemVer for a successful release but any tag will trigger the build
+# trigger:
+#   tags:
+#     include:
+#       - '*' # Should be SemVer for a successful release but any tag will trigger the build
 
 resources:
   containers:
