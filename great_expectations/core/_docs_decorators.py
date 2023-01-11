@@ -1,12 +1,12 @@
 from textwrap import dedent
 from typing import Any, Callable, TypeVar
 
-from docstring_parser import DocstringStyle
-
 try:
     import docstring_parser
+    from docstring_parser import DocstringStyle
 except ImportError:
     docstring_parser = None
+    DocstringStyle = None
 
 WHITELISTED_TAG = "--Public API--"
 
