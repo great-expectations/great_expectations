@@ -84,7 +84,7 @@ class ExpectQueriedColumnToHaveNDistinctValuesWithCondition(QueryExpectation):
                 "success": False,
                 "result": {
                     "info": f"Expected {expected_num_of_distinct_values} but found {actual_num_of_distinct_values} distinct values",
-                    "observed_value": [list(row) for row in query_result],
+                    "observed_value": query_result,
                 },
             }
 

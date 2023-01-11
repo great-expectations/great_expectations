@@ -2,7 +2,7 @@ import json
 import logging
 from typing import Any, List, Optional
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.datasource.data_connector.sorter import Sorter
 
@@ -38,7 +38,7 @@ class DictionarySorter(Sorter):
         elif order_keys_by == "desc":
             reverse_keys = True
         else:
-            raise ge_exceptions.SorterError(
+            raise gx_exceptions.SorterError(
                 f'Illegal key sort order "{order_keys_by}" for attribute "{name}".'
             )
         self._reverse_keys = reverse_keys

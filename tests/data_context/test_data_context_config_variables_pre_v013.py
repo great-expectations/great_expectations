@@ -46,10 +46,10 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     expected_config_commented_map.pop("anonymous_usage_statistics")
 
     # instantiate data_context twice to go through cycle of loading config from file then saving
-    context = gx.data_context.DataContext(context_path)
+    context = gx.get_context(context_root_dir=context_path)
     context._save_project_config()
     context_config_commented_map = dataContextConfigSchema.dump(
-        gx.data_context.DataContext(context_path)._project_config
+        gx.get_context(context_root_dir=context_path)._project_config
     )
     context_config_commented_map.pop("anonymous_usage_statistics")
 

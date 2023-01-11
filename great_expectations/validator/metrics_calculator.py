@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -104,7 +104,7 @@ class MetricsCalculator:
             rows: List[Dict[str, Any]] = [datum.asDict() for datum in data]
             df = pd.DataFrame(data=rows)
         else:
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 "Unsupported or unknown ExecutionEngine type encountered in Validator class."
             )
 

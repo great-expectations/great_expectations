@@ -6,7 +6,7 @@ from typing import List, Optional
 
 import click
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_logging import _set_up_logger
@@ -189,7 +189,7 @@ def cli(
             ctx.obj.get_data_context_from_config_file().get_config().config_version  # type: ignore[union-attr]  # config_version
         )
         if ge_config_version >= FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE:
-            raise ge_exceptions.InvalidDataContextConfigError(
+            raise gx_exceptions.InvalidDataContextConfigError(
                 f"Using the legacy v2 (Batch Kwargs) API with a recent config version ({ge_config_version}) is illegal."
             )
 
