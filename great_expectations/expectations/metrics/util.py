@@ -3,13 +3,12 @@ from __future__ import annotations
 import logging
 import re
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, overload
 
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from packaging import version
-from typing_extensions import reveal_type
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.execution_engine import (
@@ -626,6 +625,26 @@ def column_reflection_fallback(
         col_names: List[str] = result_object._metadata.keys
         col_info_dict_list = [{"name": col_name} for col_name in col_names]
     return col_info_dict_list
+
+
+@overload
+def get_dbms_compatible_column_names(
+    column_names: str,
+    batch_columns_list: List[str],
+    execution_engine: ExecutionEngine,
+    error_message_template: str = ...,
+) -> str:
+    ...
+
+
+@overload
+def get_dbms_compatible_column_names(
+    column_names: List[str],
+    batch_columns_list: List[str],
+    execution_engine: ExecutionEngine,
+    error_message_template: str = ...,
+) -> List[str]:
+    ...
 
 
 def get_dbms_compatible_column_names(
