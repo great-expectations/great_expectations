@@ -1239,10 +1239,8 @@ def compute_unexpected_pandas_indices(
         )
     # named columns
     elif result_format.get("unexpected_index_column_names"):
-        unexpected_index_column_names: List[str] = result_format[
-            "unexpected_index_column_names"
-        ]
-        unexpected_index_list: List[Dict[str, Any]] = []
+        unexpected_index_column_names = result_format["unexpected_index_column_names"]
+        unexpected_index_list = []
         unexpected_indices: List[int | str] = list(domain_records_df.index)
         for index in unexpected_indices:
             primary_key_dict: Dict[str, Any] = dict()
