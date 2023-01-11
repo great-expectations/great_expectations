@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Event names for use in sending usage stats events.
 
 This module contains an enum with all event names and methods to retrieve

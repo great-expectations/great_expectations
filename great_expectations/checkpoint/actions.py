@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 An action is a way to take an arbitrary method and make it configurable and runnable within a Data Context.
 

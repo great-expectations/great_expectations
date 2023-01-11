@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Rendering utility"""
 import copy
 import decimal

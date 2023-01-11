@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import itertools
 import logging
 from typing import Callable, Dict, List, Optional, Union

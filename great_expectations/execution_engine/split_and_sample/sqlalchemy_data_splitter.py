@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Create queries for use in sql data splitting.
 
 This module contains utilities for generating queries used by execution engines

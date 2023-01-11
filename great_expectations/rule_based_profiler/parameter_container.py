@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional, Set, TypeVar, Union

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import traceback
 from typing import Any, Callable, Dict, Optional, Type, Union

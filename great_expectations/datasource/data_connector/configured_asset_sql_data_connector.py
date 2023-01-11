@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from copy import deepcopy
 from typing import Dict, Iterator, List, Optional, Tuple, Union, cast
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Identify installed package dependencies.
 
 This module contains utilities for identifying installed package dependencies

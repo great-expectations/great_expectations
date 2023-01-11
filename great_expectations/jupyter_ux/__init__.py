@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Utility functions for working with great_expectations within jupyter notebooks or jupyter lab.
 """
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """This module contains shared TypeAliases"""
 
 import pathlib

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Serialize Datasource Configurations.
 
 Serializers determine how to write an object to disk, json, etc.

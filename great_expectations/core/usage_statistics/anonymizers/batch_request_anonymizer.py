@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import logging
 from typing import Any, Dict, List, Optional, Set, Union

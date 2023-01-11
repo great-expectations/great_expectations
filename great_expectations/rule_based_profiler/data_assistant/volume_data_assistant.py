@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig

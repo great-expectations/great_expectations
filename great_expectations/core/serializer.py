@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Serializer class interface definition.
 
 Serializers determine how to write an object to disk, json, etc.

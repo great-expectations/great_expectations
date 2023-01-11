@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """TODO: Add docstring"""
 from __future__ import annotations
 

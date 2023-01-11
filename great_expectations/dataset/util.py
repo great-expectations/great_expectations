@@ -1,4 +1,4 @@
-# Utility methods for dealing with Dataset objects
+from __future__ import annotations
 
 import logging
 import warnings
@@ -7,6 +7,9 @@ from typing import Any, List, Optional, Union
 import numpy as np
 import pandas as pd
 from scipy import stats
+
+# Utility methods for dealing with Dataset objects
+
 
 logger = logging.getLogger(__name__)
 

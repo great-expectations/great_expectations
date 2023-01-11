@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from great_expectations.core import (
@@ -120,7 +122,7 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs
+        **kwargs,
     ) -> None:
         runtime_configuration = runtime_configuration or {}
         include_column_name = (

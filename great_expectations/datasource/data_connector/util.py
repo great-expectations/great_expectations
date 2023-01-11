@@ -1,4 +1,4 @@
-# Utility methods for dealing with DataConnector objects
+from __future__ import annotations
 
 import copy
 import logging
@@ -17,6 +17,9 @@ from great_expectations.data_context.types.base import assetConfigSchema
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.sorter import Sorter
+
+# Utility methods for dealing with DataConnector objects
+
 
 if TYPE_CHECKING:
     from great_expectations.datasource import DataConnector

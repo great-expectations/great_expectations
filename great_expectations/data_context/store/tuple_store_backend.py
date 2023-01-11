@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
 import functools
 import logging

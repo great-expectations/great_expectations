@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 The CloudMigrator is reponsible for collecting elements of user's project config,
 bundling them, and sending that bundle to the GX Cloud backend.

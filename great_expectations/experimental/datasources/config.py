@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """POC for loading config."""
 from __future__ import annotations
 

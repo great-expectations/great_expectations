@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import click
 
 from great_expectations.cli.v012 import toolkit

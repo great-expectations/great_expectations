@@ -1,4 +1,4 @@
-# Utility methods for dealing with DataAsset objects
+from __future__ import annotations
 
 import datetime
 import decimal
@@ -10,6 +10,8 @@ import pandas as pd
 
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.types import SerializableDictDot, SerializableDotDict
+
+# Utility methods for dealing with DataAsset objects
 
 
 def parse_result_format(result_format):

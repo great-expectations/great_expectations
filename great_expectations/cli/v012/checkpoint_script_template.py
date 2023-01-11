@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 This is a basic generated Great Expectations script that runs a checkpoint.
 

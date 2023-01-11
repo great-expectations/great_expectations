@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, List, Optional, Tuple, Union
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer

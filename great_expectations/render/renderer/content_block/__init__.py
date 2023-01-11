@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from great_expectations.render.renderer.content_block.validation_results_table_content_block import (
     ValidationResultsTableContentBlockRenderer,
 )
