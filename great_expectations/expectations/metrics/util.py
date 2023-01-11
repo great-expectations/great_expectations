@@ -1083,7 +1083,7 @@ def get_sqlalchemy_source_table_and_schema(
     """
     assert isinstance(
         engine.batch_manager.active_batch_data, SqlAlchemyBatchData
-    ), "`active_batch_data` tot a SqlAlchemyBatchData"
+    ), "`active_batch_data` not SqlAlchemyBatchData"
 
     schema_name = engine.batch_manager.active_batch_data.source_schema_name
     table_name = engine.batch_manager.active_batch_data.source_table_name
