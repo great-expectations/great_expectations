@@ -257,7 +257,8 @@ class SlackNotificationAction(ValidationAction):
             isinstance(validation_result_suite_identifier, GXCloudIdentifier)
             and validation_result_suite_identifier.cloud_id
         ):
-            validation_result_url = f"https://app.greatexpectations.io/?validationResultId={validation_result_suite_identifier.cloud_id}"
+            cloud_base_url: str = self.data_context.ge_cloud_config.base_url
+            validation_result_url = f"{cloud_base_url}/?validationResultId={validation_result_suite_identifier.cloud_id}"
             validation_result_urls.append(validation_result_url)
 
         if (

@@ -80,7 +80,7 @@ class SlackRenderer(Renderer):
             if validation_result_urls:
                 # This adds hyperlinks for defined URL
                 if len(validation_result_urls) == 1:
-                    title_hlink = f"*<Validation Result | {validation_result_urls[0]}>*"
+                    title_hlink = f"*<{validation_result_urls[0]} | Validation Result>*"
                 else:
                     title_hlink = f"*Validation Result*"
                 batch_validation_status_hlinks = "".join(
