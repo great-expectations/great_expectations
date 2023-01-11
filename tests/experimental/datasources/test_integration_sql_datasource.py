@@ -66,9 +66,7 @@ def test_run_checkpoint_and_data_doc(empty_data_context, include_rendered_conten
     # Define a batch request and inspect the batches
     batch_request = asset.get_batch_request({"year": 2019, "month": 1})
     batches = datasource.get_batch_list_from_batch_request(batch_request=batch_request)
-    stdout = ""
-    for batch in batches:
-        stdout += pf(batch.head())
+    stdout = "".join(pf(batch.head()) for batch in batches)
     assert stdout == (
         "   vendor_id      pickup_datetime  ... total_amount  congestion_surcharge\n"
         "0          2  2019-01-05 06:36:51  ...        15.80                   NaN\n"
