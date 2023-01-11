@@ -3694,9 +3694,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 and avoids full rebuild.
             dry_run: a flag, if True, the method returns a structure containing the
                 URLs of the sites that *would* be built, but it does not build
-                these sites. The motivation for adding this flag was to allow
-                the CLI to display the the URLs before building and to let users
-                confirm.
+                these sites.
             build_index: a flag if False, skips building the index page
 
         Returns:
