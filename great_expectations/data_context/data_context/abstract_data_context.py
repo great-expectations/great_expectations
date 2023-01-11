@@ -1232,7 +1232,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         class_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[dict] = None,
+        batch_request: Optional[dict | BatchRequestBase] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -1240,7 +1240,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         profilers: Optional[List[dict]] = None,
         # Next two fields are for LegacyCheckpoint configuration
         validation_operator_name: Optional[str] = None,
-        batches: Optional[List[dict]] = None,
+        batches: Optional[List[dict] | List[Batch]] = None,
         # the following four arguments are used by SimpleCheckpoint
         site_names: Optional[Union[str, List[str]]] = None,
         slack_webhook: Optional[str] = None,
