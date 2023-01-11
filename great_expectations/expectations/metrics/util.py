@@ -686,7 +686,7 @@ def get_dbms_compatible_column_names(
         column_names_list = [column_names]
         is_list = False
 
-    typed_column_names_list: List[str]
+    typed_column_names_list: List[str | sqlalchemy.sql.quoted_name]
     if isinstance(execution_engine, SqlAlchemyExecutionEngine):
         column_name: str
         batch_columns_dict: Dict[str, str] = {
@@ -706,7 +706,7 @@ def get_dbms_compatible_column_names(
 
 def verify_column_names_exist(
     column_names: List[str] | str,
-    batch_columns_list: List[str | Any],
+    batch_columns_list: List[str | sqlalchemy.sql.quoted_name],
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
 ) -> None:
     """
