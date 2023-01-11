@@ -105,7 +105,7 @@ function parseFile (file) {
 
   const length = snippets.length
   if (length) {
-    // console.log(`Collected ${length} reference(s) from ${file}`)
+    console.log(`Collected ${length} reference(s) from ${file}`)
   }
   return snippets
 }
@@ -174,7 +174,7 @@ function main () {
     delete snippet.file // Remove duplicate filename to clean up stdout
     out[file].push(snippet)
   }
-  // console.log(out)
+  console.log(out)
 }
 
 if (require.main === module) {
