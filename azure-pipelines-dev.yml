@@ -84,7 +84,7 @@ stages:
                 requirements*
                 reqs/*.txt
                 constraints-test/*.txt
-                azure/*.yml
+                _azure/*.yml
                 assets/scripts/**
                 scripts/*.py
                 scripts/*.sh
