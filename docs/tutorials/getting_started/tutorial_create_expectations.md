@@ -18,9 +18,9 @@ The <TechnicalTag relative="../../" tag="cli" text="CLI" /> will help you create
 
 ### Create an Expectation Suite using the CLI
 
-Since we are using the CLI, you will want to return to your console and the `ge_tutorials` folder.  Remember: This is where we initialized our <TechnicalTag relative="../../" tag="data_context" text="Data Context" />, and the Data Context is our access point to everything else in Great Expectations!
+Since we are using the CLI, you will want to return to your console and the `gx_tutorials` folder.  Remember: This is where we initialized our <TechnicalTag relative="../../" tag="data_context" text="Data Context" />, and the Data Context is our access point to everything else in Great Expectations!
 
-From the `ge_tutorials` folder, type the following into your terminal:
+From the `gx_tutorials` folder, type the following into your terminal:
 
 ```console
 great_expectations suite new
@@ -72,7 +72,7 @@ generate expectations about them to demonstrate some examples of assertions you 
 
 When you run this notebook, Great Expectations will store these expectations in a new Expectation Suite "Name the new Expectation Suite [yellow_tripdata_sample_2019-01.csv.warning]: getting_started_expectation_suite_taxi.demo" here:
 
-  <Path of your project folder>/ge_tutorials/great_expectations/expectations/Name the new Expectation Suite [yellow_tripdata_sample_2019-01/csv/warning]: getting_started_expectation_suite_taxi/demo.json
+  <Path of your project folder>/gx_tutorials/great_expectations/expectations/Name the new Expectation Suite [yellow_tripdata_sample_2019-01/csv/warning]: getting_started_expectation_suite_taxi/demo.json
 
 Would you like to proceed? [Y/n]: Y
 ```

@@ -65,7 +65,7 @@ def _compare_select_statement_with_converted_string(engine) -> None:
         engine=engine, select_statement=select_statement
     )
     assert returned_string == (
-        "SELECT a.id, a.data \n" "FROM a \n" "WHERE a.data = '00000000'"
+        "SELECT a.id, a.data \n" "FROM a \n" "WHERE a.data = '00000000';"
     )
 
 
@@ -151,7 +151,7 @@ def test_sql_statement_conversion_to_string_bigquery(test_backends):
         assert returned_string == (
             "SELECT `a`.`id`, `a`.`data` \n"
             "FROM `a` \n"
-            "WHERE `a`.`data` = '00000000'"
+            "WHERE `a`.`data` = '00000000';"
         )
     else:
         pytest.skip(f"skipping sql statement conversion test for : bigquery")
