@@ -112,6 +112,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> None:
         validation_parameter_builders: List[ParameterBuilder] = (
             self.validation_parameter_builders or []
@@ -127,6 +128,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
                 batch_list=batch_list,
                 batch_request=batch_request,
                 recompute_existing_parameter_values=recompute_existing_parameter_values,
+                runtime_configuration=runtime_configuration,
             )
 
     @abstractmethod

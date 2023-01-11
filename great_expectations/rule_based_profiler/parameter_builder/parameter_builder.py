@@ -137,6 +137,7 @@ class ParameterBuilder(ABC, Builder):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> None:
         """
         Args:
@@ -147,6 +148,7 @@ class ParameterBuilder(ABC, Builder):
             batch_list: Explicit list of "Batch" objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
             recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
         """
         fully_qualified_parameter_names: List[
             str
@@ -173,6 +175,7 @@ class ParameterBuilder(ABC, Builder):
                 parameters=parameters,
                 fully_qualified_parameter_names=fully_qualified_parameter_names,
                 recompute_existing_parameter_values=recompute_existing_parameter_values,
+                runtime_configuration=runtime_configuration,
             )
 
             if parameter_computation_impl is None:
@@ -204,6 +207,7 @@ class ParameterBuilder(ABC, Builder):
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         fully_qualified_parameter_names: Optional[List[str]] = None,
         recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> None:
         """
         This method computes ("resolves") pre-requisite ("evaluation") dependencies (i.e., results of executing other
@@ -249,6 +253,7 @@ class ParameterBuilder(ABC, Builder):
                     variables=variables,
                     parameters=parameters,
                     recompute_existing_parameter_values=recompute_existing_parameter_values,
+                    runtime_configuration=runtime_configuration,
                 )
 
     @abstractmethod
