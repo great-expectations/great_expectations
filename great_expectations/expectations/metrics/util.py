@@ -1137,7 +1137,6 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(
     unexpected_index_list: List[Dict[str, Any]] = list()
 
     for index in unexpected_indices:
-        # if isinstance(index, tuple):
         primary_key_dict: Dict[str, Any] = dict()
         # domain column first
         primary_key_dict[expectation_domain_column_name] = domain_records_df.at[
