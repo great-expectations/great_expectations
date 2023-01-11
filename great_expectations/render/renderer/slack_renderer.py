@@ -17,7 +17,7 @@ class SlackRenderer(Renderer):
         data_docs_pages=None,
         notify_with=None,
         show_failed_expectations: bool = False,
-        validation_result_urls: List[str] = None,
+        validation_result_urls: List[str] = [],
     ):
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
