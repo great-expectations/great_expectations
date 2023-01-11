@@ -11,18 +11,7 @@ import warnings
 from collections import defaultdict, namedtuple
 from collections.abc import Hashable
 from dataclasses import dataclass, field
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Sequence,
-    Set,
-    Tuple,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence, Set, Tuple, Union
 
 from dateutil.parser import parse
 from marshmallow import ValidationError

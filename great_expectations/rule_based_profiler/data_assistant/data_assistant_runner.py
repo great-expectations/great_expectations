@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from enum import Enum
 from inspect import Parameter, Signature, getattr_static, signature
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, Optional, Type, Union
 
 from makefun import create_function
 

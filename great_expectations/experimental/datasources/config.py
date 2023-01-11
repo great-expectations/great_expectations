@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 import pathlib
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Dict, List, Type, Union
+from typing import TYPE_CHECKING, Type, Union
 
 from pydantic import Extra, Field, ValidationError, validator
 from typing_extensions import Final
