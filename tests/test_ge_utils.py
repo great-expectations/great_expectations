@@ -855,7 +855,8 @@ def test_convert_ndarray_float_to_datetime_tuple(
     with pytest.raises(TypeError) as e:
         _ = convert_ndarray_float_to_datetime_tuple(data=datetime_array)
 
-    assert str(e.value) == "an integer is required (got type datetime.datetime)"
+    # Error message varies based on version but mainly looking to validate type error by not using integer
+    assert all(string in str(e.value) for string in ("datetime.datetime", "integer"))
 
 
 @pytest.mark.unit
