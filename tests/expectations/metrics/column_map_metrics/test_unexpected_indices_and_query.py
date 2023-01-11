@@ -3,6 +3,9 @@ from typing import Dict, Tuple
 import pandas as pd
 import pytest
 
+from great_expectations.core.metric_function_types import (
+    MetricPartialFunctionTypeSuffixes,
+)
 from great_expectations.exceptions import MetricResolutionError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -86,7 +89,7 @@ def _build_table_columns_and_unexpected(
 
     # unexpected_condition metric
     unexpected_condition_metric: MetricConfiguration = MetricConfiguration(
-        metric_name="column_values.in_set.condition",
+        metric_name=f"column_values.in_set.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "animals"},
         metric_value_kwargs=metric_value_kwargs,
     )
