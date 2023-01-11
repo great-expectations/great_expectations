@@ -52,7 +52,7 @@ class ColumnSplitter:
     method_name: str
     param_names: Sequence[str]
 
-    def param_defaults(self, table_asset: TableAsset) -> dict[str, List]:
+    def param_defaults(self, table_asset: TableAsset) -> Dict[str, List]:
         raise NotImplementedError
 
     @pydantic.validator("method_name")
@@ -83,11 +83,11 @@ class DatetimeRange(NamedTuple):
 @pydantic_dc.dataclass(frozen=True)
 class SqlYearMonthSplitter(ColumnSplitter):
     method_name: Literal["split_on_year_and_month"] = "split_on_year_and_month"
-    param_names: list[Literal["year", "month"]] = pydantic.Field(
+    param_names: List[Literal["year", "month"]] = pydantic.Field(
         default_factory=lambda: ["year", "month"]
     )
 
-    def param_defaults(self, table_asset: TableAsset) -> dict[str, List]:
+    def param_defaults(self, table_asset: TableAsset) -> Dict[str, List]:
         """Query sql database to get the years and months to split over.
 
         Args:
@@ -104,7 +104,7 @@ def _query_for_year_and_month(
     query_datetime_range: Callable[
         [sqlalchemy.engine.base.Connection, str, str], DatetimeRange
     ],
-) -> dict[str, List]:
+) -> Dict[str, List]:
     # We should make an assertion about the execution_engine earlier. Right now it is assigned to
     # after construction. We may be able to use a hook in a property setter.
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
@@ -119,8 +119,8 @@ def _query_for_year_and_month(
             table_asset.table_name,
             column_name,
         )
-    year: list[int] = list(range(datetimes.min.year, datetimes.max.year + 1))
-    month: list[int]
+    year: List[int] = list(range(datetimes.min.year, datetimes.max.year + 1))
+    month: List[int]
     if datetimes.min.year == datetimes.max.year:
         month = list(range(datetimes.min.month, datetimes.max.month + 1))
     else:
@@ -142,16 +142,16 @@ class BatchSorter:
     reverse: bool = False
 
 
-BatchSortersDefinition: TypeAlias = Union[list[BatchSorter], list[str]]
+BatchSortersDefinition: TypeAlias = Union[List[BatchSorter], List[str]]
 
 
-def _batch_sorter_from_list(sorters: BatchSortersDefinition) -> list[BatchSorter]:
+def _batch_sorter_from_list(sorters: BatchSortersDefinition) -> List[BatchSorter]:
     if len(sorters) == 0 or isinstance(sorters[0], BatchSorter):
         # mypy gets confused here. Since BatchSortersDefinition has all elements of the
         # same type in the list so if the first on is BatchSorter so are the others.
-        return cast(list[BatchSorter], sorters)
-    # Likewise, sorters must be list[str] here.
-    return [_batch_sorter_from_str(sorter) for sorter in cast(list[str], sorters)]
+        return cast(List[BatchSorter], sorters)
+    # Likewise, sorters must be List[str] here.
+    return [_batch_sorter_from_str(sorter) for sorter in cast(List[str], sorters)]
 
 
 def _batch_sorter_from_str(sort_key: str) -> BatchSorter:
@@ -176,7 +176,7 @@ class TableAsset(DataAsset):
     table_name: str
     column_splitter: Optional[SqlYearMonthSplitter] = None
     name: str
-    order_by: list[BatchSorter] = Field(default_factory=list)
+    order_by: List[BatchSorter] = Field(default_factory=list)
 
     @pydantic.validator("order_by", pre=True, each_item=True)
     @classmethod
@@ -280,7 +280,7 @@ class TableAsset(DataAsset):
         )
         return self
 
-    def _fully_specified_batch_requests(self, batch_request) -> list[BatchRequest]:
+    def _fully_specified_batch_requests(self, batch_request) -> List[BatchRequest]:
         """Populates a batch requests unspecified params producing a list of batch requests."""
         if self.column_splitter is None:
             # Currently batch_request.options is complete determined by the presence of a
@@ -305,7 +305,7 @@ class TableAsset(DataAsset):
 
         # Make a list of the all possible batch_request.options by expanding out the unspecified
         # options
-        batch_requests: list[BatchRequest] = []
+        batch_requests: List[BatchRequest] = []
 
         if not unspecified_options:
             batch_requests.append(batch_request)
@@ -334,7 +334,7 @@ class TableAsset(DataAsset):
                 )
         return batch_requests
 
-    def _sort_batches(self, batch_list: list[Batch]) -> None:
+    def _sort_batches(self, batch_list: List[Batch]) -> None:
         """Sorts batch_list in place.
 
         Args:
@@ -354,7 +354,7 @@ class TableAsset(DataAsset):
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
-    ) -> list[Batch]:
+    ) -> List[Batch]:
         """A list of batches that match the BatchRequest.
 
         Args:
@@ -367,7 +367,7 @@ class TableAsset(DataAsset):
         # We translate the batch_request into a BatchSpec to hook into GX core.
         self._validate_batch_request(batch_request)
 
-        batch_list: list[Batch] = []
+        batch_list: List[Batch] = []
         column_splitter = self.column_splitter
         for request in self._fully_specified_batch_requests(batch_request):
             batch_metadata = copy.deepcopy(request.options)
@@ -434,13 +434,13 @@ class SQLDatasource(Datasource):
     """
 
     # class var definitions
-    asset_types: ClassVar[list[Type[DataAsset]]] = [TableAsset]
+    asset_types: ClassVar[List[Type[DataAsset]]] = [TableAsset]
 
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
     type: Literal["sql"] = "sql"
     connection_string: str
-    assets: dict[str, TableAsset] = {}
+    assets: Dict[str, TableAsset] = {}
 
     def execution_engine_type(self) -> Type[ExecutionEngine]:
         """Returns the default execution engine type."""
@@ -482,7 +482,7 @@ class SQLDatasource(Datasource):
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
-    ) -> list[Batch]:
+    ) -> List[Batch]:
         """A list of batches that match the BatchRequest.
 
         Args:

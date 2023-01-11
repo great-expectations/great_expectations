@@ -25,7 +25,7 @@ class SuiteProfileNotebookRenderer(SuiteEditNotebookRenderer):
         context: AbstractDataContext,
         expectation_suite_name: str,
         profiler_name: str,
-        batch_request: Optional[Union[str, dict[str, Any]]] = None,
+        batch_request: Optional[Union[str, Dict[str, Any]]] = None,
     ) -> None:
         super().__init__(context=context)
 
@@ -85,7 +85,7 @@ This process helps you avoid writing lots of boilerplate when authoring suites b
 
     def add_footer(
         self,
-        batch_request: Optional[Union[str, dict[str, Any]]] = None,
+        batch_request: Optional[Union[str, Dict[str, Any]]] = None,
     ) -> None:
         self.add_markdown_cell(
             markdown="""# Save & review your new Expectation Suite
@@ -330,7 +330,7 @@ Performance considerations:
         )
 
     def _add_available_columns_list(self) -> None:
-        column_names: list[str]
+        column_names: List[str]
         column_name: str
         column_names = [
             f'    "{column_name}",\n' for column_name in self._validator.columns()

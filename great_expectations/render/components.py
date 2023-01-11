@@ -630,8 +630,8 @@ class RenderedAtomicValue(DictDot):
         header: Optional[RenderedAtomicValue] = None,
         template: Optional[str] = None,
         params: Optional[dict] = None,
-        header_row: Optional[list[RendererTableValue]] = None,
-        table: Optional[list[list[RendererTableValue]]] = None,
+        header_row: Optional[List[RendererTableValue]] = None,
+        table: Optional[List[List[RendererTableValue]]] = None,
         graph: Optional[dict] = None,
         meta_notes: Optional[MetaNotes] = None,
     ) -> None:
@@ -643,8 +643,8 @@ class RenderedAtomicValue(DictDot):
         self.params: Optional[dict] = params
 
         # TableType
-        self.header_row: Optional[list[RendererTableValue]] = header_row
-        self.table: Optional[list[list[RendererTableValue]]] = table
+        self.header_row: Optional[List[RendererTableValue]] = header_row
+        self.table: Optional[List[List[RendererTableValue]]] = table
 
         # GraphType
         self.graph = RenderedAtomicValueGraph(graph=graph)

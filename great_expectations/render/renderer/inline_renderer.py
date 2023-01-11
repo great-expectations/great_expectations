@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import logging
 from typing import TYPE_CHECKING, Callable, List, Optional, Union
 
@@ -53,7 +51,7 @@ class InlineRenderer(Renderer):
     def _get_atomic_rendered_content_for_object(
         self,
         render_object: Union[ExpectationConfiguration, ExpectationValidationResult],
-    ) -> list[RenderedAtomicContent]:
+    ) -> List[RenderedAtomicContent]:
         """Gets RenderedAtomicContent for a given ExpectationConfiguration or ExpectationValidationResult.
 
         Args:
@@ -63,7 +61,7 @@ class InlineRenderer(Renderer):
             A list of RenderedAtomicContent objects for a given ExpectationConfiguration or ExpectationValidationResult.
         """
         expectation_type: str
-        renderer_typs: list[AtomicRendererType]
+        renderer_typs: List[AtomicRendererType]
         if isinstance(render_object, ExpectationConfiguration):
             expectation_type = render_object.expectation_type
             renderer_types = [AtomicRendererType.PRESCRIPTIVE]
@@ -83,14 +81,14 @@ class InlineRenderer(Renderer):
                 f"InlineRenderer._get_atomic_rendered_content_for_object can only be used with an ExpectationConfiguration or ExpectationValidationResult, but {type(render_object)} was used."
             )
 
-        renderer_names: list[
+        renderer_names: List[
             Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]
         ] = get_renderer_names_with_renderer_types(
             expectation_or_metric_type=expectation_type,
             renderer_types=renderer_types,
         )
 
-        rendered_content: list[
+        rendered_content: List[
             RenderedAtomicContent
         ] = self._get_atomic_rendered_content_from_renderer_names(
             render_object=render_object,
@@ -103,12 +101,12 @@ class InlineRenderer(Renderer):
     def _get_atomic_rendered_content_from_renderer_names(
         self,
         render_object: Union[ExpectationConfiguration, ExpectationValidationResult],
-        renderer_names: list[
+        renderer_names: List[
             Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]
         ],
         expectation_type: str,
-    ) -> list[RenderedAtomicContent]:
-        try_renderer_names: list[
+    ) -> List[RenderedAtomicContent]:
+        try_renderer_names: List[
             Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]
         ] = [
             renderer_name
@@ -121,7 +119,7 @@ class InlineRenderer(Renderer):
         ]
 
         renderer_rendered_content: RenderedAtomicContent
-        rendered_content: list[RenderedAtomicContent] = []
+        rendered_content: List[RenderedAtomicContent] = []
         for renderer_name in try_renderer_names:
             try:
                 renderer_rendered_content = self._get_renderer_atomic_rendered_content(
@@ -189,7 +187,7 @@ class InlineRenderer(Renderer):
 
     def get_rendered_content(
         self,
-    ) -> list[RenderedAtomicContent]:
+    ) -> List[RenderedAtomicContent]:
         """Gets RenderedAtomicContent for a given object.
 
         Returns:
@@ -203,20 +201,20 @@ class InlineRenderer(Renderer):
 
     @staticmethod
     def replace_or_keep_existing_rendered_content(
-        existing_rendered_content: Optional[list[RenderedAtomicContent]],
-        new_rendered_content: list[RenderedAtomicContent],
+        existing_rendered_content: Optional[List[RenderedAtomicContent]],
+        new_rendered_content: List[RenderedAtomicContent],
         failed_renderer_type: Union[
             AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType
         ],
-    ) -> list[RenderedAtomicContent]:
-        new_rendered_content_block_names: list[
+    ) -> List[RenderedAtomicContent]:
+        new_rendered_content_block_names: List[
             Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]
         ] = [
             rendered_content_block.name
             for rendered_content_block in new_rendered_content
         ]
 
-        existing_rendered_content_block_names: list[
+        existing_rendered_content_block_names: List[
             Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]
         ] = []
         if existing_rendered_content is not None:

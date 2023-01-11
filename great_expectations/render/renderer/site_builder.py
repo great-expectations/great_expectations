@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import logging
 import os
 import traceback
@@ -817,7 +815,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
     def _build_validation_and_profiling_result_site_keys(
         self, skip_and_clean_missing: bool
-    ) -> list[ValidationResultIdentifier]:
+    ) -> List[ValidationResultIdentifier]:
         validation_and_profiling_result_site_keys = []
         validations = self.site_section_builders_config.get("validations", "None")
         profiling = self.site_section_builders_config.get("profiling", "None")
@@ -863,7 +861,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
     def _add_profiling_to_index_links(
         self,
         index_links_dict: OrderedDict,
-        validation_and_profiling_result_site_keys: list[ValidationResultIdentifier],
+        validation_and_profiling_result_site_keys: List[ValidationResultIdentifier],
     ) -> None:
         profiling = self.site_section_builders_config.get("profiling", "None")
         if profiling and profiling not in FALSEY_YAML_STRINGS:
@@ -909,7 +907,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
     def _add_validations_to_index_links(
         self,
         index_links_dict: OrderedDict,
-        validation_and_profiling_result_site_keys: list[ValidationResultIdentifier],
+        validation_and_profiling_result_site_keys: List[ValidationResultIdentifier],
     ) -> None:
         validations = self.site_section_builders_config.get("validations", "None")
         if validations and validations not in FALSEY_YAML_STRINGS:

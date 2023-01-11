@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import json
 import logging
 from typing import Any, List, Optional
@@ -21,7 +19,7 @@ class CustomListSorter(Sorter):
         self,
         name: str,
         orderby: str = "asc",
-        reference_list: Optional[list[str]] = None,
+        reference_list: Optional[List[str]] = None,
     ) -> None:
         super().__init__(name=name, orderby=orderby)
 
@@ -31,8 +29,8 @@ class CustomListSorter(Sorter):
 
     @staticmethod
     def _validate_reference_list(
-        reference_list: Optional[list[str]] = None,
-    ) -> list[str]:
+        reference_list: Optional[List[str]] = None,
+    ) -> List[str]:
         if not (reference_list and isinstance(reference_list, list)):
             raise gx_exceptions.SorterError(
                 "CustomListSorter requires reference_list which was not provided."

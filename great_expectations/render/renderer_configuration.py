@@ -7,8 +7,10 @@ from numbers import Number
 from typing import (
     TYPE_CHECKING,
     Any,
+    Dict,
     Generic,
     Iterable,
+    List,
     Optional,
     Tuple,
     Type,
@@ -101,7 +103,7 @@ class _RendererValueBase(BaseModel):
 
 RendererParams = TypeVar("RendererParams", bound=_RendererValueBase)
 
-RendererValueTypes: TypeAlias = Union[RendererValueType, list[RendererValueType]]
+RendererValueTypes: TypeAlias = Union[RendererValueType, List[RendererValueType]]
 
 AddParamArgs: TypeAlias = Tuple[Tuple[str, RendererValueTypes], ...]
 
@@ -124,7 +126,7 @@ class MetaNotes(TypedDict):
     """Notes that can be added to the meta field of an Expectation."""
 
     format: MetaNotesFormat
-    content: list[str]
+    content: List[str]
 
 
 class RendererConfiguration(GenericModel, Generic[RendererParams]):
@@ -144,8 +146,8 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         MetaNotes(format=MetaNotesFormat.STRING, content=[]), allow_mutation=False
     )
     template_str: str = Field("", allow_mutation=True)
-    header_row: list[RendererTableValue] = Field([], allow_mutation=True)
-    table: list[list[RendererTableValue]] = Field([], allow_mutation=True)
+    header_row: List[RendererTableValue] = Field([], allow_mutation=True)
+    table: List[List[RendererTableValue]] = Field([], allow_mutation=True)
     graph: dict = Field({}, allow_mutation=True)
     include_column_name: bool = Field(True, allow_mutation=False)
     _raw_kwargs: dict = Field({}, allow_mutation=False)
@@ -251,8 +253,8 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
     @staticmethod
     def _get_evaluation_parameter_params_from_raw_kwargs(
-        raw_kwargs: dict[str, Any]
-    ) -> dict[str, RendererConfiguration._RendererParamArgs]:
+        raw_kwargs: Dict[str, Any]
+    ) -> Dict[str, RendererConfiguration._RendererParamArgs]:
         evaluation_parameter_count = 0
         renderer_params_args = {}
         for key, value in raw_kwargs.items():
@@ -287,7 +289,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                     for key, value in raw_configuration.kwargs.items()
                     if (key, value) not in values["kwargs"].items()
                 }
-                renderer_params_args: dict[
+                renderer_params_args: Dict[
                     str, RendererConfiguration._RendererParamArgs
                 ] = RendererConfiguration._get_evaluation_parameter_params_from_raw_kwargs(
                     raw_kwargs=values["_raw_kwargs"]
@@ -315,11 +317,11 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     @staticmethod
     def _get_row_condition_params(
         row_condition_str: str,
-    ) -> dict[str, RendererConfiguration._RendererParamArgs]:
+    ) -> Dict[str, RendererConfiguration._RendererParamArgs]:
         row_condition_str = RendererConfiguration._parse_row_condition_str(
             row_condition_str=row_condition_str
         )
-        row_conditions_list: list[
+        row_conditions_list: List[
             str
         ] = RendererConfiguration._get_row_conditions_list_from_row_condition_str(
             row_condition_str=row_condition_str
@@ -335,7 +337,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
     @root_validator()
     def _validate_for_row_condition(cls, values: dict) -> dict:
-        kwargs: dict[str, Any]
+        kwargs: Dict[str, Any]
         if (
             "result" in values
             and values["result"] is not None
@@ -347,7 +349,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
         values["_row_condition"] = kwargs.get("row_condition", "")
         if values["_row_condition"]:
-            renderer_params_args: dict[
+            renderer_params_args: Dict[
                 str, RendererConfiguration._RendererParamArgs
             ] = RendererConfiguration._get_row_condition_params(
                 row_condition_str=values["_row_condition"],
@@ -376,10 +378,10 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     def _validate_for_params(cls, values: dict) -> dict:
         if not values["params"]:
             _params: Optional[
-                dict[str, dict[str, Union[str, dict[str, RendererValueType]]]]
+                Dict[str, Dict[str, Union[str, Dict[str, RendererValueType]]]]
             ] = values.get("_params")
             if _params:
-                renderer_param_definitions: dict[str, Any] = {}
+                renderer_param_definitions: Dict[str, Any] = {}
                 for name in _params:
                     renderer_param_type: Type[
                         BaseModel
@@ -403,7 +405,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     @staticmethod
     def _get_row_conditions_list_from_row_condition_str(
         row_condition_str: str,
-    ) -> list[str]:
+    ) -> List[str]:
         # divide the whole condition into smaller parts
         row_conditions_list = re.split(r"AND|OR|NOT(?! in)|\(|\)", row_condition_str)
         row_conditions_list = [
@@ -439,7 +441,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         row_condition_str = RendererConfiguration._parse_row_condition_str(
             row_condition_str=row_condition_str
         )
-        row_conditions_list: list[
+        row_conditions_list: List[
             str
         ] = RendererConfiguration._get_row_conditions_list_from_row_condition_str(
             row_condition_str=row_condition_str
@@ -468,7 +470,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
     @staticmethod
     def _choose_param_type_for_value(
-        param_types: list[RendererValueType], value: Any
+        param_types: List[RendererValueType], value: Any
     ) -> RendererValueType:
         for param_type in param_types:
             try:
@@ -515,7 +517,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         renderer_param: Type[
             BaseModel
         ] = RendererConfiguration._get_renderer_value_base_model_type(name=name)
-        renderer_param_definition: dict[str, Any] = {
+        renderer_param_definition: Dict[str, Any] = {
             name: (Optional[renderer_param], ...)
         }
 
@@ -535,7 +537,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 param_types=param_type, value=value
             )
 
-        renderer_params_args: dict[str, Optional[Any]]
+        renderer_params_args: Dict[str, Optional[Any]]
         if value is None:
             renderer_params_args = {
                 **self.params.dict(exclude_none=False),

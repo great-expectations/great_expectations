@@ -18,7 +18,7 @@ class CheckpointNewNotebookRenderer(BaseNotebookRenderer):
         self.context = context
         self.checkpoint_name = checkpoint_name
 
-    def _find_datasource_with_asset(self) -> dict[str, str]:
+    def _find_datasource_with_asset(self) -> Dict[str, str]:
         """
         Find a Datasource with a configured Asset.
 

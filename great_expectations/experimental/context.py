@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, ClassVar, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Union
 
 from pydantic import DirectoryPath, validate_arguments
 
@@ -27,7 +27,7 @@ class DataContext:
     _context: ClassVar[Optional[DataContext]] = None
     _config: ClassVar[Optional[GxConfig]] = None  # (kilo59) should this live  here?
 
-    _datasources: dict[str, Datasource]
+    _datasources: Dict[str, Datasource]
     root_directory: Union[DirectoryPath, str, None]
 
     @classmethod
@@ -55,7 +55,7 @@ class DataContext:
     def __init__(self, context_root_dir: Optional[DirectoryPath] = None) -> None:
         self.root_directory = context_root_dir
         self._sources: _SourceFactories = _SourceFactories(self)
-        self._datasources: dict[str, Datasource] = {}
+        self._datasources: Dict[str, Datasource] = {}
         LOGGER.info(f"4a. Available Factories - {self._sources.factories}")
         LOGGER.debug(f"4b. `type_lookup` mapping ->\n{pf(self._sources.type_lookup)}")
 

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import logging
 import os
 from collections import OrderedDict, defaultdict
@@ -72,7 +70,7 @@ class ValidationResultsPageRenderer(Renderer):
 
     def render_validation_operator_result(
         self, validation_operator_result: ValidationOperatorResult
-    ) -> list[RenderedDocumentContent]:
+    ) -> List[RenderedDocumentContent]:
         """
         Render a ValidationOperatorResult which can have multiple ExpectationSuiteValidationResult
 
@@ -80,7 +78,7 @@ class ValidationResultsPageRenderer(Renderer):
             validation_operator_result: ValidationOperatorResult
 
         Returns:
-            list[RenderedDocumentContent]
+            List[RenderedDocumentContent]
         """
         return [
             self.render(validation_result)
@@ -180,7 +178,7 @@ class ValidationResultsPageRenderer(Renderer):
         self,
         validation_results: ExpectationSuiteValidationResult,
         expectation_suite_name: str,
-    ) -> dict[str, list]:
+    ) -> Dict[str, list]:
         columns = defaultdict(list)
         try:
             suite_meta = (
@@ -207,7 +205,7 @@ class ValidationResultsPageRenderer(Renderer):
 
     def _generate_collapse_content_block(
         self,
-        collapse_content_blocks: list[RenderedTableContent],
+        collapse_content_blocks: List[RenderedTableContent],
         validation_results: ExpectationSuiteValidationResult,
     ) -> CollapseContent:
 
@@ -243,10 +241,10 @@ class ValidationResultsPageRenderer(Renderer):
     def _collect_rendered_document_content_sections(
         self,
         validation_results: ExpectationSuiteValidationResult,
-        overview_content_blocks: list[RenderedComponentContent],
-        collapse_content_blocks: list[RenderedTableContent],
-        columns: dict[str, list],
-    ) -> list[RenderedSectionContent]:
+        overview_content_blocks: List[RenderedComponentContent],
+        collapse_content_blocks: List[RenderedTableContent],
+        columns: Dict[str, list],
+    ) -> List[RenderedSectionContent]:
         ordered_columns = Renderer._get_column_list_from_evrs(validation_results)
         sections = [
             RenderedSectionContent(

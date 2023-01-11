@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """Config Validator for YAML based configs.
 
 This validator evaluates YAML configurations of core Great Expectations components to give feedback on

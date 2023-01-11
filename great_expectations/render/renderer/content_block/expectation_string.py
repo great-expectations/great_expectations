@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import List, Optional
 
 from great_expectations.core import (
@@ -21,7 +19,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
-    ) -> list[RenderedStringTemplateContent]:
+    ) -> List[RenderedStringTemplateContent]:
         renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,

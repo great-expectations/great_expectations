@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """Create queries for use in sql data splitting.
 
 This module contains utilities for generating queries used by execution engines
@@ -15,10 +13,9 @@ not by itself.
             splitter = self._sqlalchemy_data_splitter._get_splitter_method()
             split_query_or_clause = splitter()
 """
-
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.execution_engine.split_and_sample.data_splitter import (

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import logging
 import traceback
 from typing import Any, Callable, Dict, Optional, Type, Union
@@ -30,7 +28,7 @@ class ContentBlockRenderer(Renderer):
     _rendered_component_type: Type[RenderedComponentContent] = TextContent
     _default_header = ""
 
-    _default_content_block_styling: dict[str, JSONValues] = {"classes": ["col-12"]}
+    _default_content_block_styling: Dict[str, JSONValues] = {"classes": ["col-12"]}
 
     _default_element_styling = {}
 

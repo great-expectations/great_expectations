@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """Rendering utility"""
 import copy
 import decimal
@@ -217,8 +215,8 @@ def handle_strict_min_max(params: dict) -> (str, str):
 
 
 def build_count_table(
-    partial_unexpected_counts: list[dict], unexpected_count: int
-) -> Tuple[list[str], list[list[Any]]]:
+    partial_unexpected_counts: List[dict], unexpected_count: int
+) -> Tuple[List[str], List[List[Any]]]:
     """
     Used by _diagnostic_unexpected_table_renderer() method in Expectation to render
     Unexpected Counts table.
@@ -231,7 +229,7 @@ def build_count_table(
         List of strings that will be rendered into DataDocs
 
     """
-    table_rows: list[list[str]] = []
+    table_rows: List[List[str]] = []
     total_count: int = 0
 
     for unexpected_count_dict in partial_unexpected_counts:
@@ -256,12 +254,12 @@ def build_count_table(
 
 
 def build_count_and_index_table(
-    partial_unexpected_counts: list[dict],
-    unexpected_index_list: list[dict],
+    partial_unexpected_counts: List[dict],
+    unexpected_index_list: List[dict],
     unexpected_count: int,
-    unexpected_list: Optional[list[dict]] = None,
-    unexpected_index_column_names: Optional[list[str]] = None,
-) -> Tuple[list[str], list[list[Any]]]:
+    unexpected_list: Optional[List[dict]] = None,
+    unexpected_index_column_names: Optional[List[str]] = None,
+) -> Tuple[List[str], List[List[Any]]]:
     """
     Used by _diagnostic_unexpected_table_renderer() method in Expectation to render
     Unexpected Counts and Indices table for ID/PK.
@@ -277,7 +275,7 @@ def build_count_and_index_table(
         List of strings that will be rendered into DataDocs
 
     """
-    table_rows: list[list[str]] = []
+    table_rows: List[List[str]] = []
     total_count: int = 0
 
     unexpected_index_df = _convert_unexpected_indices_to_df(
@@ -296,7 +294,7 @@ def build_count_and_index_table(
         if count:
             total_count += count
 
-        row_list: list[Union[str, int]] = []
+        row_list: List[Union[str, int]] = []
         if value is not None and value != "":
             row_list.append(value)
             row_list.append(count)
@@ -328,10 +326,10 @@ def build_count_and_index_table(
 
 
 def _convert_unexpected_indices_to_df(
-    unexpected_index_list: list[Union[dict, int]],
-    partial_unexpected_counts: list[dict],
-    unexpected_index_column_names: Optional[list[str]] = None,
-    unexpected_list: Optional[list[Any]] = None,
+    unexpected_index_list: List[Union[dict, int]],
+    partial_unexpected_counts: List[dict],
+    unexpected_index_column_names: Optional[List[str]] = None,
+    unexpected_list: Optional[List[Any]] = None,
 ) -> Optional[pd.DataFrame]:
     """
     Helper method to convert the list of unexpected indices into a DataFrame that can be used to
@@ -381,7 +379,7 @@ def _convert_unexpected_indices_to_df(
             value="null"
         )
         domain_column_name: str = "Value"
-        unexpected_index_column_names: list[str] = ["Index"]
+        unexpected_index_column_names: List[str] = ["Index"]
     else:
         return None
 
@@ -391,7 +389,7 @@ def _convert_unexpected_indices_to_df(
     ).agg(lambda y: list(y))
 
     # filter all_unexpected_indices according to partial_unexpected_counts, since it has a maximum of 20 values by default
-    values_we_have_counts_for: list[str] = list(
+    values_we_have_counts_for: List[str] = list(
         pd.DataFrame(partial_unexpected_counts)["value"]
     )
     # list comprehension to replace None with 'null'
@@ -414,7 +412,7 @@ def _convert_unexpected_indices_to_df(
 
 
 def truncate_list_of_indices(
-    indices: list[Union[int, str]], max_index: int = 10
+    indices: List[Union[int, str]], max_index: int = 10
 ) -> str:
     """
     Lambda function used to take unexpected_indices and turn into a string that can be rendered in DataDocs.

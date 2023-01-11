@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Callable, Type, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Type, Union
 
 from typing_extensions import ClassVar
 
@@ -34,7 +34,7 @@ class _SourceFactories:
 
     # TODO (kilo59): split DataAsset & Datasource lookups
     type_lookup: ClassVar = TypeLookup()
-    __source_factories: ClassVar[dict[str, SourceFactoryFn]] = {}
+    __source_factories: ClassVar[Dict[str, SourceFactoryFn]] = {}
 
     _data_context: Union[DataContext, GXDataContext]
 
@@ -117,7 +117,7 @@ class _SourceFactories:
     @classmethod
     def _register_assets(cls, ds_type: Type[Datasource], asset_type_lookup: TypeLookup):
 
-        asset_types: list[Type[DataAsset]] = ds_type.asset_types
+        asset_types: List[Type[DataAsset]] = ds_type.asset_types
 
         if not asset_types:
             LOGGER.warning(
@@ -141,7 +141,7 @@ class _SourceFactories:
                 ) from bad_field_exc
 
     @property
-    def factories(self) -> list[str]:
+    def factories(self) -> List[str]:
         return list(self.__source_factories.keys())
 
     def __getattr__(self, attr_name: str):
@@ -159,6 +159,6 @@ class _SourceFactories:
         except KeyError:
             raise AttributeError(f"No factory {attr_name} in {self.factories}")
 
-    def __dir__(self) -> list[str]:
+    def __dir__(self) -> List[str]:
         """Preserves autocompletion for dynamic attributes."""
         return [*self.factories, *super().__dir__()]

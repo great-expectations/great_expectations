@@ -1,12 +1,10 @@
-from __future__ import annotations
-
 """POC for loading config."""
 from __future__ import annotations
 
 import logging
 import pathlib
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Type, Union
+from typing import TYPE_CHECKING, Dict, List, Type, Union
 
 from pydantic import Extra, Field, ValidationError, validator
 from typing_extensions import Final
@@ -26,7 +24,7 @@ LOGGER = logging.getLogger(__name__)
 
 _ZEP_STYLE_DESCRIPTION: Final[str] = "ZEP Experimental Datasources"
 
-_MISSING_XDATASOURCES_ERRORS: Final[list[PydanticErrorDict]] = [
+_MISSING_XDATASOURCES_ERRORS: Final[List[PydanticErrorDict]] = [
     {
         "loc": ("xdatasources",),
         "msg": "field required",
@@ -38,10 +36,10 @@ _MISSING_XDATASOURCES_ERRORS: Final[list[PydanticErrorDict]] = [
 class GxConfig(ExperimentalBaseModel):
     """Represents the full new-style/experimental configuration file."""
 
-    xdatasources: dict[str, Datasource] = Field(..., description=_ZEP_STYLE_DESCRIPTION)
+    xdatasources: Dict[str, Datasource] = Field(..., description=_ZEP_STYLE_DESCRIPTION)
 
     @property
-    def datasources(self) -> dict[str, Datasource]:
+    def datasources(self) -> Dict[str, Datasource]:
         return self.xdatasources
 
     class Config:
@@ -49,9 +47,9 @@ class GxConfig(ExperimentalBaseModel):
 
     @validator("xdatasources", pre=True)
     @classmethod
-    def _load_datasource_subtype(cls, v: dict[str, dict]):
+    def _load_datasource_subtype(cls, v: Dict[str, dict]):
         LOGGER.info(f"Loading 'datasources' ->\n{pf(v, depth=2)}")
-        loaded_datasources: dict[str, Datasource] = {}
+        loaded_datasources: Dict[str, Datasource] = {}
 
         for ds_name, config in v.items():
             ds_type_name: str = config.get("type", "")
@@ -97,7 +95,7 @@ class GxConfig(ExperimentalBaseModel):
             try:
                 super().parse_yaml(f)
             except ValidationError as validation_err:
-                errors_list: list[PydanticErrorDict] = validation_err.errors()
+                errors_list: List[PydanticErrorDict] = validation_err.errors()
                 LOGGER.info(
                     f"{cls.__name__}.parse_yaml() failed with errors - {errors_list}"
                 )
