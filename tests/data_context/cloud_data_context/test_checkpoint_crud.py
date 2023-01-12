@@ -129,20 +129,22 @@ def mocked_get_by_name_response(
 
         return mock_response_factory(
             {
-                "data": [{
-                    "attributes": {
-                        "checkpoint_config": checkpoint_config_with_ids,
-                        "class_name": "Checkpoint",
-                        "created_by_id": created_by_id,
-                        "default_validation_id": "4cb29141-db66-4dac-a74b-8360779e3da3",
-                        "description": "My First checkpoint.",
+                "data": [
+                    {
+                        "attributes": {
+                            "checkpoint_config": checkpoint_config_with_ids,
+                            "class_name": "Checkpoint",
+                            "created_by_id": created_by_id,
+                            "default_validation_id": "4cb29141-db66-4dac-a74b-8360779e3da3",
+                            "description": "My First checkpoint.",
+                            "id": checkpoint_id,
+                            "name": "oss_test_checkpoint",
+                            "organization_id": f"{organization_id}",
+                        },
                         "id": checkpoint_id,
-                        "name": "oss_test_checkpoint",
-                        "organization_id": f"{organization_id}",
-                    },
-                    "id": checkpoint_id,
-                    "type": "checkpoint",
-                }],
+                        "type": "checkpoint",
+                    }
+                ],
             },
             200,
         )

@@ -151,7 +151,7 @@ def mocked_get_response(
                         },
                     },
                     "id": suite_id,
-                    'type': 'expectation_suite'
+                    "type": "expectation_suite",
                 }
             },
             200,
@@ -170,27 +170,29 @@ def mocked_get_by_name_response(
     def _mocked_get_by_name_response(*args, **kwargs):
         return mock_response_factory(
             {
-                "data": [{
-                    "attributes": {
-                        "created_by_id": "67dce9ed-9c41-4607-9f22-15c14cc82ac0",
-                        "organization_id": "c8f9f2d0-fb5c-464b-bcc9-8a45b8144f44",
-                        "suite": {
-                            "data_asset_type": None,
-                            "expectation_suite_name": "my_mock_suite",
-                            "expectations": [
-                                {
-                                    "expectation_type": "expect_column_to_exist",
-                                    "ge_cloud_id": "869771ee-a728-413d-96a6-8efc4dc70318",
-                                    "kwargs": {"column": "infinities"},
-                                    "meta": {},
-                                },
-                            ],
-                            "ge_cloud_id": suite_id,
+                "data": [
+                    {
+                        "attributes": {
+                            "created_by_id": "67dce9ed-9c41-4607-9f22-15c14cc82ac0",
+                            "organization_id": "c8f9f2d0-fb5c-464b-bcc9-8a45b8144f44",
+                            "suite": {
+                                "data_asset_type": None,
+                                "expectation_suite_name": "my_mock_suite",
+                                "expectations": [
+                                    {
+                                        "expectation_type": "expect_column_to_exist",
+                                        "ge_cloud_id": "869771ee-a728-413d-96a6-8efc4dc70318",
+                                        "kwargs": {"column": "infinities"},
+                                        "meta": {},
+                                    },
+                                ],
+                                "ge_cloud_id": suite_id,
+                            },
                         },
-                    },
-                    "id": suite_id,
-                    'type': 'expectation_suite'
-                }]
+                        "id": suite_id,
+                        "type": "expectation_suite",
+                    }
+                ]
             },
             200,
         )
@@ -395,7 +397,7 @@ def test_get_expectation_suite_by_name_retrieves_suite_from_cloud(
     suite_1: SuiteIdentifierTuple,
     mocked_get_by_name_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
-    ge_cloud_organization_id: str
+    ge_cloud_organization_id: str,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
     suite_id = suite_1.id
@@ -407,7 +409,7 @@ def test_get_expectation_suite_by_name_retrieves_suite_from_cloud(
         mock_get.assert_called_with(
             mock.ANY,
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/expectation-suites",
-            params={"name": suite_1.name}
+            params={"name": suite_1.name},
         )
 
     assert str(suite.ge_cloud_id) == str(suite_id)
