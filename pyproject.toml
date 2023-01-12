@@ -134,7 +134,6 @@ exclude = [
     'expectations/metrics/column_aggregate_metrics/column_most_common_value\.py', # 4
     'expectations/metrics/column_aggregate_metrics/column_median\.py', # 1
     'expectations/metrics/map_metric_provider\.py',  # 57
-    'expectations/metrics/util\.py', # 11
     'expectations/regex_based_column_map_expectation\.py',  # 3
     'expectations/row_conditions\.py',  # 4
     'expectations/set_based_column_map_expectation\.py',  # 3
