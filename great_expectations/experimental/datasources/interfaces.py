@@ -17,6 +17,7 @@ from typing import (
 )
 
 import pydantic
+from pydantic import root_validator
 from typing_extensions import ClassVar, TypeAlias
 
 from great_expectations.experimental.datasources.experimental_base_model import (
@@ -32,7 +33,7 @@ if TYPE_CHECKING:
     import pandas as pd
 
     from great_expectations.core.batch import (
-        BatchDataType,
+        BatchData,
         BatchDefinition,
         BatchMarkers,
         BatchSpec,
@@ -284,101 +285,54 @@ class BatchError(Exception):
     pass
 
 
-class Batch:
+class Batch(ExperimentalBaseModel):
+    """This represents a batch of data.
+
+    This is usually not the data itself but a hook to the data on an external datastore such as
+    a spark or a sql database. An exception exists for pandas or any in-memory datastore.
+    """
+
     # Instance variable declarations
-    _datasource: Datasource
-    _data_asset: DataAsset
-    _batch_request: BatchRequest
-    _data: BatchDataType
-    _id: str
+    datasource: Datasource
+    data_asset: DataAsset
+    batch_request: BatchRequest
+    # data: BatchData
+    id: str
     # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata
     # to a batch so developers may want to namespace any custom metadata they add.
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any] = {}
 
     # TODO: These legacy fields are currently required. They are only used in usage stats so we
     #       should figure out a better way to anonymize and delete them.
-    _legacy_batch_markers: BatchMarkers
-    _legacy_batch_spec: BatchSpec
-    _legacy_batch_definition: BatchDefinition
+    legacy_batch_markers: BatchMarkers
+    legacy_batch_spec: BatchSpec
+    legacy_batch_definition: BatchDefinition
 
-    def __init__(
-        self,
-        datasource: Datasource,
-        data_asset: DataAsset,
-        batch_request: BatchRequest,
-        # BatchDataType is Union[core.batch.BatchData, pd.DataFrame, SparkDataFrame].  core.batch.Batchdata is the
-        # implicit interface that Datasource implementers can use. We can make this explicit if needed.
-        data: BatchDataType,
-        # Legacy values that should be removed in the future.
-        legacy_batch_markers: BatchMarkers,
-        legacy_batch_spec: BatchSpec,
-        legacy_batch_definition: BatchDefinition,
-        # Optional arguments
-        metadata: Optional[Dict[str, Any]] = None,
-    ) -> None:
-        """This represents a batch of data.
+    class Config:
+        allow_mutation = False
+        arbitrary_types_allowed = True
+        extra = pydantic.Extra.forbid
+        validate_assignment = True
 
-        This is usually not the data itself but a hook to the data on an external datastore such as
-        a spark or a sql database. An exception exists for pandas or any in-memory datastore.
-        """
-        # These properties are intended to be READ-ONLY
-        self._datasource: Datasource = datasource
-        self._data_asset: DataAsset = data_asset
-        self._batch_request: BatchRequest = batch_request
-        self._data: BatchDataType = data
-        self.metadata = metadata or {}
-
-        self._legacy_batch_markers = legacy_batch_markers
-        self._legacy_batch_spec = legacy_batch_spec
-        self._legacy_batch_definition = legacy_batch_definition
-
-        # computed property
-        # We need to unique identifier. This will likely change as I get more input
+    @root_validator()
+    def _set_id(cls, values: dict) -> dict:
+        # We need to unique identifier. This will likely change as we get more input
         options_list = []
-        for k, v in batch_request.options.items():
+        for k, v in values["batch_request"].options.items():
             options_list.append(f"{k}_{v}")
+        values["id"]: str = "-".join(
+            [values["datasource"].name, values["data_asset"].name, *options_list]
+        )
+        return values
 
-        self._id: str = "-".join([datasource.name, data_asset.name, *options_list])
-
-    @property
-    def datasource(self) -> Datasource:
-        return self._datasource
-
-    @property
-    def data_asset(self) -> DataAsset:
-        return self._data_asset
-
-    @property
-    def batch_request(self) -> BatchRequest:
-        return self._batch_request
-
-    @property
-    def id(self) -> str:
-        return self._id
-
-    @property
-    def data(self) -> BatchDataType:
-        return self._data
-
-    @property
-    def execution_engine(self) -> ExecutionEngine:
-        return self.datasource.execution_engine
-
-    @property
-    def batch_markers(self) -> BatchMarkers:
-        return self._legacy_batch_markers
-
-    @property
-    def batch_spec(self) -> BatchSpec:
-        return self._legacy_batch_spec
-
-    @property
-    def batch_definition(self) -> BatchDefinition:
-        return self._legacy_batch_definition
+    def __init__(self, **values):
+        # This is required due to circular imports if BatchData references aren't in "if TYPE_CHECKING" block
+        self.update_forward_refs()
+        super().__init__(**values)
 
     def head(self, n_rows: int = 5) -> pd.DataFrame:
         if n_rows and n_rows > 0:
-            self._data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
+            self.data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
             metric = MetricConfiguration(
                 metric_name="table.head",
                 metric_domain_kwargs={"batch_id": self.id},
@@ -386,9 +340,7 @@ class Batch:
             )
             resolved_metrics: dict[
                 tuple[str, str, str], MetricValue
-            ] = self._data.execution_engine.resolve_metrics(
-                metrics_to_resolve=(metric,)
-            )
+            ] = self.data.execution_engine.resolve_metrics(metrics_to_resolve=(metric,))
             return resolved_metrics[metric.id]
         else:
             raise BatchError(
