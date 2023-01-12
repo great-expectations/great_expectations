@@ -114,6 +114,7 @@ class ExpectYesterdayCountComparedToAvgEquivalentDaysOfWeek(ColumnExpectation):
                 ),
             },
             # "column_b": [today, yesterday, yesterday, two_days_ago]},
+            "only_for": ["sqlite"],
             "tests": [
                 {
                     "title": "positive test",
@@ -136,12 +137,6 @@ class ExpectYesterdayCountComparedToAvgEquivalentDaysOfWeek(ColumnExpectation):
                     },
                     "out": {"success": False},
                 },
-            ],
-            "test_backends": [
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite"],
-                }
             ],
         }
     ]
