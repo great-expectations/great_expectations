@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -15,6 +15,10 @@ from great_expectations.render import (
     RenderedStringTemplateContent,
 )
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -32,6 +36,9 @@ from great_expectations.rule_based_profiler.parameter_container import (
     PARAMETER_KEY,
     VARIABLES_KEY,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 try:
     import sqlalchemy as sa  # noqa: F401
@@ -184,78 +191,43 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("column", RendererValueType.STRING),
+            ("regex", RendererValueType.STRING),
+            ("mostly", RendererValueType.NUMBER),
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            ["column", "regex", "mostly", "row_condition", "condition_parser"],
-        )
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "regex": {"schema": {"type": "string"}, "value": params.get("regex")},
-            "mostly": {
-                "schema": {"type": "number"},
-                "value": params.get("mostly"),
-            },
-            "mostly_pct": {
-                "schema": {"type": "string"},
-                "value": params.get("mostly_pct"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-        }
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
-        if not params.get("regex"):
+        params = renderer_configuration.params
+
+        if not params.regex:
             template_str = (
                 "values must not match a regular expression but none was specified."
             )
         else:
-            if params["mostly"] is not None and params["mostly"] < 1.0:
-                params_with_json_schema["mostly_pct"]["value"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
+            if renderer_configuration.include_column_name:
+                template_str = (
+                    "$column values must not match this regular expression: $regex"
                 )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-                if include_column_name:
-                    template_str = "$column values must not match this regular expression: $regex, at least $mostly_pct % of the time."
-                else:
-                    template_str = "values must not match this regular expression: $regex, at least $mostly_pct % of the time."
             else:
-                if include_column_name:
-                    template_str = (
-                        "$column values must not match this regular expression: $regex."
-                    )
-                else:
-                    template_str = (
-                        "values must not match this regular expression: $regex."
-                    )
+                template_str = "values must not match this regular expression: $regex"
 
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
-            )
-            template_str = f"{conditional_template_str}, then {template_str}"
-            params_with_json_schema.update(conditional_params)
+            if params.mostly and params.mostly.value < 1.0:
+                renderer_configuration = cls._add_mostly_pct_param(
+                    renderer_configuration=renderer_configuration
+                )
+                template_str += ", at least $mostly_pct % of the time."
+            else:
+                template_str += "."
 
-        return template_str, params_with_json_schema, None, styling
+        renderer_configuration.template_str = template_str
+
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)

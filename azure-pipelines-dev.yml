@@ -65,16 +65,28 @@ stages:
                 tests/integration/docusaurus/**
                 tests/integration/fixtures/**
                 tests/test_sets/**
+                examples/expectations/*.py
+                static/_redirects
+                static/index.html
+                /*.js
+                /*.json
+                yarn.lock
 
                 [GXChanged]
                 great_expectations/**/*.py
                 pyproject.toml
                 setup.cfg
+                setup.py
+                MANIFEST.in
                 tests/**
                 /*.txt
                 /*.yml
                 requirements*
-                azure-pipelines*
+                reqs/*.txt
+                azure/**/*.yml
+                assets/scripts/**
+                scripts/*.py
+                scripts/*.sh
 
   - stage: lint
     dependsOn: scope_check
@@ -213,10 +225,11 @@ stages:
 
           - script: |
               # Run unit-tests
-              invoke tests --ci --cloud --timeout=3.0
+              if $(run_unit_tests); then
+                invoke tests --ci --cloud --timeout=3.0
+              fi
 
             displayName: 'Unit Tests'
-            condition: ${{ eq(variables.run_unit_tests, true) }}
             env:
               GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 

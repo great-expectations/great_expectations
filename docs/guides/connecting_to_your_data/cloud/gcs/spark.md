@@ -31,7 +31,7 @@ This will allow you to <TechnicalTag tag="validation" text="Validate" /> and exp
 
 Import these necessary packages and modules.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py#L6-L13
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py imports"
 ```
 
 <SparkDataContextNote />
@@ -52,7 +52,7 @@ Using this example configuration, add in your GCS bucket and path to a directory
 
 <TabItem value="yaml">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py#L27-L45
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py datasource_yaml"
 ```
 
 :::info Authentication
@@ -69,7 +69,7 @@ For more details regarding authentication, please visit the following:
 
 Run this code to test your configuration.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py#L56
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py test_yaml_config"
 ```
 
 </TabItem>
@@ -106,7 +106,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 <TabItem value="yaml">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py#L60
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py add_datasource"
 ```
 
 </TabItem>
@@ -135,12 +135,12 @@ Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading d
 
 Add the GCS path to your CSV in the `path` key under `runtime_parameters` in your `RuntimeBatchRequest`.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py#L65-L71
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py runtime_batch_request"
 ```
 
 Then load data into the `Validator`.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py#L81-L87
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py validator_creation"
 ```
 
 </TabItem>
@@ -149,12 +149,12 @@ Then load data into the `Validator`.
 
 Add the name of the <TechnicalTag tag="data_asset" text="Data Asset" /> to the `data_asset_name` in your `BatchRequest`.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py#L96-L101
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py batch_request"
 ```
 
 Then load data into the `Validator`.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py#L111-L117
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py validator_creation_2"
 ```
 
 </TabItem>

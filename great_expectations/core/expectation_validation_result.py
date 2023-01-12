@@ -5,18 +5,12 @@ import json
 import logging
 from copy import deepcopy
 from typing import TYPE_CHECKING, List, Optional
-
-try:
-    from typing import TypedDict
-except ImportError:
-    # Fallback for python < 3.8
-    from typing_extensions import TypedDict
-
 from uuid import UUID
 
 from marshmallow import Schema, fields, post_dump, post_load, pre_dump
+from typing_extensions import TypedDict
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
 from great_expectations.core.batch import BatchDefinition, BatchMarkers
 from great_expectations.core.expectation_configuration import (
@@ -41,6 +35,9 @@ from great_expectations.render import (
 from great_expectations.types import SerializableDictDot
 
 if TYPE_CHECKING:
+    from great_expectations.core.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
 
 logger = logging.getLogger(__name__)
@@ -68,7 +65,7 @@ class ExpectationValidationResult(SerializableDictDot):
     def __init__(
         self,
         success: Optional[bool] = None,
-        expectation_config: Optional["ExpectationConfiguration"] = None,  # noqa: F821
+        expectation_config: Optional[ExpectationConfiguration] = None,
         result: Optional[dict] = None,
         meta: Optional[dict] = None,
         exception_info: Optional[dict] = None,
@@ -76,7 +73,7 @@ class ExpectationValidationResult(SerializableDictDot):
         **kwargs: dict,
     ) -> None:
         if result and not self.validate_result_dict(result):
-            raise ge_exceptions.InvalidCacheValueError(result)
+            raise gx_exceptions.InvalidCacheValueError(result)
         self.success = success
         self.expectation_config = expectation_config
         # TODO: re-add
@@ -217,7 +214,7 @@ class ExpectationValidationResult(SerializableDictDot):
         - atomic diagnostic renderer for the expectation configuration associated with this
           ExpectationValidationResult to self.rendered_content.
         """
-        inline_renderer_config: "InlineRendererConfig" = {  # type: ignore[assignment]
+        inline_renderer_config: InlineRendererConfig = {
             "class_name": "InlineRenderer",
             "render_object": self,
         }
@@ -258,12 +255,10 @@ class ExpectationValidationResult(SerializableDictDot):
             if content_block.name.startswith(AtomicRendererType.PRESCRIPTIVE)
         ]
 
-        self.expectation_config.rendered_content = (
-            inline_renderer.replace_or_keep_existing_rendered_content(
-                existing_rendered_content=self.expectation_config.rendered_content,
-                new_rendered_content=prescriptive_rendered_content,
-                failed_renderer_type=AtomicPrescriptiveRendererType.FAILED,
-            )
+        self.expectation_config.rendered_content = inline_renderer.replace_or_keep_existing_rendered_content(  # type: ignore[union-attr] # config could be None
+            existing_rendered_content=self.expectation_config.rendered_content,  # type: ignore[union-attr] # config could be None
+            new_rendered_content=prescriptive_rendered_content,
+            failed_renderer_type=AtomicPrescriptiveRendererType.FAILED,
         )
 
     @staticmethod
@@ -311,7 +306,7 @@ class ExpectationValidationResult(SerializableDictDot):
 
     def get_metric(self, metric_name, **kwargs):
         if not self.expectation_config:
-            raise ge_exceptions.UnavailableMetricError(
+            raise gx_exceptions.UnavailableMetricError(
                 "No ExpectationConfig found in this ExpectationValidationResult. Unable to "
                 "return a metric."
             )
@@ -324,20 +319,20 @@ class ExpectationValidationResult(SerializableDictDot):
                 metric_name, self.expectation_config.kwargs
             )
             if metric_kwargs_id != curr_metric_kwargs:
-                raise ge_exceptions.UnavailableMetricError(
+                raise gx_exceptions.UnavailableMetricError(
                     "Requested metric_kwargs_id (%s) does not match the configuration of this "
                     "ExpectationValidationResult (%s)."
                     % (metric_kwargs_id or "None", curr_metric_kwargs or "None")
                 )
             if len(metric_name_parts) < 2:
-                raise ge_exceptions.UnavailableMetricError(
+                raise gx_exceptions.UnavailableMetricError(
                     "Expectation-defined metrics must include a requested metric."
                 )
             elif len(metric_name_parts) == 2:
                 if metric_name_parts[1] == "success":
                     return self.success
                 else:
-                    raise ge_exceptions.UnavailableMetricError(
+                    raise gx_exceptions.UnavailableMetricError(
                         "Metric name must have more than two parts for keys other than "
                         "success."
                     )
@@ -348,11 +343,11 @@ class ExpectationValidationResult(SerializableDictDot):
                     elif metric_name_parts[2] == "details":
                         return self.result["details"].get(metric_name_parts[3])
                 except KeyError:
-                    raise ge_exceptions.UnavailableMetricError(
+                    raise gx_exceptions.UnavailableMetricError(
                         "Unable to get metric {} -- KeyError in "
                         "ExpectationValidationResult.".format(metric_name)
                     )
-        raise ge_exceptions.UnavailableMetricError(
+        raise gx_exceptions.UnavailableMetricError(
             f"Unrecognized metric name {metric_name}"
         )
 
@@ -360,14 +355,14 @@ class ExpectationValidationResult(SerializableDictDot):
 class ExpectationValidationResultSchema(Schema):
     success = fields.Bool(required=False, allow_none=True)
     expectation_config = fields.Nested(
-        lambda: ExpectationConfigurationSchema, required=False, allow_none=True
+        lambda: ExpectationConfigurationSchema, required=False, allow_none=True  # type: ignore[arg-type,return-value]
     )
     result = fields.Dict(required=False, allow_none=True)
     meta = fields.Dict(required=False, allow_none=True)
     exception_info = fields.Dict(required=False, allow_none=True)
     rendered_content = fields.List(
         fields.Nested(
-            lambda: RenderedAtomicContentSchema, required=False, allow_none=True
+            lambda: RenderedAtomicContentSchema, required=False, allow_none=True  # type: ignore[arg-type,return-value]
         )
     )
 
@@ -419,7 +414,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         results: Optional[list] = None,
         evaluation_parameters: Optional[dict] = None,
         statistics: Optional[dict] = None,
-        meta: Optional[ExpectationSuiteValidationResultMeta] = None,
+        meta: Optional[ExpectationSuiteValidationResultMeta | dict] = None,
         ge_cloud_id: Optional[UUID] = None,
     ) -> None:
         self.success = success
@@ -438,7 +433,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             meta
         )  # We require meta information to be serializable.
         self.meta = meta
-        self._metrics = {}
+        self._metrics: dict = {}
 
     def __eq__(self, other):
         """ExpectationSuiteValidationResult equality ignores instance identity, relying only on properties."""
@@ -483,7 +478,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             if len(metric_name_parts) == 2:
                 return self.statistics.get(metric_name_parts[1])
             else:
-                raise ge_exceptions.UnavailableMetricError(
+                raise gx_exceptions.UnavailableMetricError(
                     f"Unrecognized metric {metric_name}"
                 )
 
@@ -501,13 +496,13 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
                         ):
                             metric_value = result.get_metric(metric_name, **kwargs)
                             break
-                    except ge_exceptions.UnavailableMetricError:
+                    except gx_exceptions.UnavailableMetricError:
                         pass
                 if metric_value is not None:
                     self._metrics[(metric_name, metric_kwargs_id)] = metric_value
                     return metric_value
 
-        raise ge_exceptions.UnavailableMetricError(
+        raise gx_exceptions.UnavailableMetricError(
             "Metric {} with metric_kwargs_id {} is not available.".format(
                 metric_name, metric_kwargs_id
             )

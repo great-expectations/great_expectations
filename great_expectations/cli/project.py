@@ -5,8 +5,7 @@ from typing import TYPE_CHECKING, Optional, Tuple
 
 import click
 
-from great_expectations import DataContext
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as gx_exceptions
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.pretty_printing import cli_colorize_string, cli_message
@@ -15,6 +14,7 @@ from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.types.base import CURRENT_GX_CONFIG_VERSION
+from great_expectations.util import get_context
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
@@ -78,7 +78,7 @@ def do_config_check(
     upgrade_message: str = ""
     context: Optional[AbstractDataContext]
     try:
-        context = DataContext(context_root_dir=target_directory)
+        context = get_context(context_root_dir=target_directory)
         ge_config_version: int = context.get_config().config_version  # type: ignore[union-attr] # could be dict, str
         if int(ge_config_version) < CURRENT_GX_CONFIG_VERSION:
             is_config_ok = False
@@ -88,7 +88,7 @@ upgrade your Great Expectations configuration to version {float(CURRENT_GX_CONFI
 """
             context = None
         elif int(ge_config_version) > CURRENT_GX_CONFIG_VERSION:
-            raise ge_exceptions.UnsupportedConfigVersionError(
+            raise gx_exceptions.UnsupportedConfigVersionError(
                 f"""Invalid config version ({ge_config_version}).\n    The maximum valid version is \
 {CURRENT_GX_CONFIG_VERSION}.
 """
@@ -117,15 +117,15 @@ Great Expectations configuration in order to take advantage of the latest capabi
 """
                     context = None
     except (
-        ge_exceptions.InvalidConfigurationYamlError,
-        ge_exceptions.InvalidTopLevelConfigKeyError,
-        ge_exceptions.MissingTopLevelConfigKeyError,
-        ge_exceptions.InvalidConfigValueTypeError,
-        ge_exceptions.UnsupportedConfigVersionError,
-        ge_exceptions.DataContextError,
-        ge_exceptions.PluginClassNotFoundError,
-        ge_exceptions.PluginModuleNotFoundError,
-        ge_exceptions.GreatExpectationsError,
+        gx_exceptions.InvalidConfigurationYamlError,
+        gx_exceptions.InvalidTopLevelConfigKeyError,
+        gx_exceptions.MissingTopLevelConfigKeyError,
+        gx_exceptions.InvalidConfigValueTypeError,
+        gx_exceptions.UnsupportedConfigVersionError,
+        gx_exceptions.DataContextError,
+        gx_exceptions.PluginClassNotFoundError,
+        gx_exceptions.PluginModuleNotFoundError,
+        gx_exceptions.GreatExpectationsError,
     ) as err:
         is_config_ok = False
         upgrade_message = err.message

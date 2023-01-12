@@ -48,12 +48,12 @@ bigquery://<GCP_PROJECT>/<BIGQUERY_DATASET>
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L2-L7
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py imports"
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L24
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py get_context"
 ```
 
 ### 5. Configure your Datasource
@@ -70,12 +70,12 @@ Load your DataContext into memory using the `get_context()` method.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L28-L42
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py datasource_yaml"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L53
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py test_yaml_config"
 ```
 
 </TabItem>
@@ -84,12 +84,12 @@ Run this code to test your configuration.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L24-L41
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py datasource_config"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L49
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py test_yaml_config"
 ```
 
 </TabItem>
@@ -120,14 +120,14 @@ In order to support tables that are created as the result of queries in BigQuery
 
 <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L57
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py add_datasource"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L53
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py add_datasource"
 ```
 
 </TabItem>
@@ -149,7 +149,7 @@ Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading d
 
 Here is an example of loading data by specifying a SQL query.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L62-L76
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py runtime_batch_request"
 ```
 
 </TabItem>
@@ -158,7 +158,7 @@ Here is an example of loading data by specifying a SQL query.
 
 Here is an example of loading data by specifying an existing table name.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L78-L89
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py batch_request"
 ```
 
 </TabItem>

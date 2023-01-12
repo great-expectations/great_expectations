@@ -4,7 +4,6 @@ import copy
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass
-from enum import Enum
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -18,9 +17,13 @@ from typing import (
     Union,
 )
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import (
+    MetricFunctionTypes,
+    MetricPartialFunctionTypes,
+)
 from great_expectations.core.util import (
     AzureUrl,
     DBFSPath,
@@ -70,40 +73,6 @@ class NoOpDict:
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def update(self, value):
         return None
-
-
-class MetricFunctionTypes(Enum):
-    VALUE = "value"
-    MAP_VALUES = "value"  # "map_values"
-    WINDOW_VALUES = "value"  # "window_values"
-    AGGREGATE_VALUE = "value"  # "aggregate_value"
-
-
-class MetricPartialFunctionTypes(Enum):
-    MAP_FN = "map_fn"
-    MAP_SERIES = "map_series"
-    MAP_CONDITION_FN = "map_condition_fn"
-    MAP_CONDITION_SERIES = "map_condition_series"
-    WINDOW_FN = "window_fn"
-    WINDOW_CONDITION_FN = "window_condition_fn"
-    AGGREGATE_FN = "aggregate_fn"
-
-    @property
-    def metric_suffix(self) -> str:
-        if self.name in ["MAP_FN", "MAP_SERIES", "WINDOW_FN"]:
-            return "map"
-
-        if self.name in [
-            "MAP_CONDITION_FN",
-            "MAP_CONDITION_SERIES",
-            "WINDOW_CONDITION_FN",
-        ]:
-            return "condition"
-
-        if self.name in ["AGGREGATE_FN"]:
-            return "aggregate_fn"
-
-        return ""
 
 
 @dataclass(frozen=True)
@@ -428,7 +397,7 @@ class ExecutionEngine(ABC):
             return domain_kwargs
 
         if filter_nan:
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 "Base ExecutionEngine does not support adding nan condition filters"
             )
 
@@ -529,7 +498,7 @@ class ExecutionEngine(ABC):
                         "metric_partial_fn"
                     )
                 except KeyError as e:
-                    raise ge_exceptions.MetricError(
+                    raise gx_exceptions.MetricError(
                         message=f'Missing metric dependency: {str(e)} for metric "{metric_to_resolve.metric_name}".'
                     )
 
@@ -609,7 +578,7 @@ class ExecutionEngine(ABC):
                     metric_configuration.id
                 ]
             else:
-                raise ge_exceptions.MetricError(
+                raise gx_exceptions.MetricError(
                     message=f'Missing metric dependency: "{metric_name}" for metric "{metric_to_resolve.metric_name}".'
                 )
 
@@ -642,7 +611,7 @@ class ExecutionEngine(ABC):
                     **metric_computation_configuration.metric_provider_kwargs
                 )
             except Exception as e:
-                raise ge_exceptions.MetricResolutionError(
+                raise gx_exceptions.MetricResolutionError(
                     message=str(e),
                     failed_metrics=(
                         metric_computation_configuration.metric_configuration,
@@ -658,7 +627,7 @@ class ExecutionEngine(ABC):
             )
             resolved_metrics.update(resolved_metric_bundle)
         except Exception as e:
-            raise ge_exceptions.MetricResolutionError(
+            raise gx_exceptions.MetricResolutionError(
                 message=str(e),
                 failed_metrics=[
                     metric_computation_configuration.metric_configuration
@@ -810,7 +779,7 @@ class ExecutionEngine(ABC):
         accessor_domain_kwargs: Dict = {}
 
         if "column" not in compute_domain_kwargs:
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 "Column not provided in compute_domain_kwargs"
             )
 
@@ -842,7 +811,7 @@ class ExecutionEngine(ABC):
         accessor_domain_kwargs: Dict = {}
 
         if not ("column_A" in domain_kwargs and "column_B" in domain_kwargs):
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 "column_A or column_B not found within domain_kwargs"
             )
 
@@ -875,14 +844,14 @@ class ExecutionEngine(ABC):
         accessor_domain_kwargs: Dict = {}
 
         if "column_list" not in domain_kwargs:
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 "column_list not found within domain_kwargs"
             )
 
         column_list = compute_domain_kwargs.pop("column_list")
 
         if len(column_list) < 2:
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 "column_list must contain at least 2 columns"
             )
 

@@ -99,19 +99,15 @@ def mocked_get_response(
                 "data": {
                     "attributes": {
                         "checkpoint_config": checkpoint_config_with_ids,
-                        "created_at": "2022-08-02T17:55:45.107550",
+                        "class_name": "Checkpoint",
                         "created_by_id": created_by_id,
-                        "deleted": False,
-                        "deleted_at": None,
-                        "desc": None,
+                        "default_validation_id": "4cb29141-db66-4dac-a74b-8360779e3da3",
+                        "description": "My First checkpoint.",
+                        "id": checkpoint_id,
                         "name": "oss_test_checkpoint",
                         "organization_id": f"{organization_id}",
-                        "updated_at": "2022-08-02T17:55:45.107550",
                     },
                     "id": checkpoint_id,
-                    "links": {
-                        "self": f"/organizations/{organization_id}/checkpoints/{checkpoint_id}"
-                    },
                     "type": "checkpoint",
                 },
             },
@@ -119,6 +115,81 @@ def mocked_get_response(
         )
 
     return _mocked_get_response
+
+
+@pytest.fixture
+def mocked_get_by_name_response(
+    mock_response_factory: Callable,
+    checkpoint_config_with_ids: dict,
+    checkpoint_id: str,
+) -> Callable[[], MockResponse]:
+    def _mocked_get_by_name_response(*args, **kwargs):
+        created_by_id = "c06ac6a2-52e0-431e-b878-9df624edc8b8"
+        organization_id = "046fe9bc-c85b-4e95-b1af-e4ce36ba5384"
+
+        return mock_response_factory(
+            {
+                "data": [
+                    {
+                        "attributes": {
+                            "checkpoint_config": checkpoint_config_with_ids,
+                            "class_name": "Checkpoint",
+                            "created_by_id": created_by_id,
+                            "default_validation_id": "4cb29141-db66-4dac-a74b-8360779e3da3",
+                            "description": "My First checkpoint.",
+                            "id": checkpoint_id,
+                            "name": "oss_test_checkpoint",
+                            "organization_id": f"{organization_id}",
+                        },
+                        "id": checkpoint_id,
+                        "type": "checkpoint",
+                    }
+                ],
+            },
+            200,
+        )
+
+    return _mocked_get_by_name_response
+
+
+@pytest.mark.cloud
+@pytest.mark.integration
+def test_cloud_backed_data_context_get_checkpoint_by_name(
+    empty_cloud_data_context: CloudDataContext,
+    checkpoint_id: str,
+    validation_ids: Tuple[str, str],
+    checkpoint_config: dict,
+    mocked_get_by_name_response: Callable[[], MockResponse],
+    ge_cloud_base_url: str,
+    ge_cloud_organization_id: str,
+) -> None:
+    """
+    A Cloud-backed context should get from a Cloud-backed CheckpointStore when calling `get_checkpoint`.
+    When provided only a name, it should hit ".../checkpoints?name=my-checkpoint-name"
+    """
+    context = empty_cloud_data_context
+
+    validation_id_1, validation_id_2 = validation_ids
+
+    with mock.patch(
+        "requests.Session.get", autospec=True, side_effect=mocked_get_by_name_response
+    ) as mock_get:
+        checkpoint = context.get_checkpoint(name=checkpoint_config["name"])
+
+        mock_get.assert_called_with(
+            mock.ANY,  # requests.Session object
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints",
+            params={"name": checkpoint_config["name"]},
+        )
+
+    assert checkpoint.ge_cloud_id == checkpoint_id
+    assert checkpoint.config.ge_cloud_id == checkpoint_id
+
+    assert checkpoint.config.validations[0]["id"] == validation_id_1
+    assert checkpoint.validations[0]["id"] == validation_id_1
+
+    assert checkpoint.config.validations[1]["id"] == validation_id_2
+    assert checkpoint.validations[1]["id"] == validation_id_2
 
 
 @pytest.mark.cloud
@@ -345,7 +416,7 @@ def test_cloud_data_context_run_checkpoint_e2e():
     checkpoint = context.add_checkpoint(**config)
     ```
     """
-    context = DataContext(cloud_mode=True)
+    context = get_context(cloud_mode=True)
 
     checkpoint_name = "OSS_E2E_run_checkpoint"
 
