@@ -583,16 +583,19 @@ class ExecutionEngine(ABC):
                     metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE
                 )
                 if isinstance(
-                    metric_fn_type, MetricFunctionTypes
+                    metric_fn_type, (MetricFunctionTypes, MetricPartialFunctionTypes)
                 ) and metric_fn_type not in [
                     MetricPartialFunctionTypes.MAP_FN,
                     MetricPartialFunctionTypes.MAP_SERIES,
+                    MetricPartialFunctionTypes.WINDOW_FN,
                     MetricPartialFunctionTypes.MAP_CONDITION_FN,
                     MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
-                    MetricPartialFunctionTypes.WINDOW_FN,
                     MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
                     MetricPartialFunctionTypes.AGGREGATE_FN,
                     MetricFunctionTypes.VALUE,
+                    MetricFunctionTypes.MAP_VALUES,
+                    MetricFunctionTypes.MAP_VALUES,
+                    MetricFunctionTypes.AGGREGATE_VALUE,
                 ]:
                     logger.warning(
                         f'Unrecognized metric function type while trying to resolve "{metric_to_resolve.id}".'
@@ -814,6 +817,59 @@ class ExecutionEngine(ABC):
             )
             self._computed_metrics_store.set(key=key, value=computed_metric)
 
+    def _is_metric_persistable(self, metric_name: str) -> bool:
+        non_persistable: bool = (
+            metric_name in IN_MEMORY_STORE_BACKEND_TABLE_METRICS
+            or metric_name.endswith(MetricPartialFunctionTypeSuffixes.CONDITION.value)
+            or metric_name.endswith(
+                MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value
+            )
+        )
+        if non_persistable:
+            return False
+
+        return self._is_metric_provider_persistable(metric_name=metric_name)
+
+    # TODO: <Alex>ALEX</Alex>
+    # def _get_queryable_computed_metrics_store_compatible_metrics(
+    #     self,
+    #     metrics_to_resolve: Iterable[MetricConfiguration],
+    # ) -> Dict[Tuple[str, str, str], MetricValue]:
+    #     metrics_to_resolve = filter(
+    #         lambda element: not (element.metric_name in IN_MEMORY_STORE_BACKEND_TABLE_METRICS or element.metric_name.endswith(MetricPartialFunctionTypeSuffixes.CONDITION.value)) and self._is_metric_provider_persistable(metric_name=element.metric_name),
+    #         metrics_to_resolve,
+    #     )
+    #     aggregate_partial_function_metrics: Iterable[MetricConfiguration] = filter(
+    #         lambda element: element.metric_name.endswith(MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value),
+    #         metrics_to_resolve,
+    #     )
+    #
+    #     try:
+    #         return get_metric_provider(metric_name=metric_name, execution_engine=self)[
+    #             0
+    #         ].is_persistable()
+    #     except gx_exceptions.MetricProviderError:
+    #         pass
+    #
+    #     return True
+    #     metrics_to_resolve = filter(
+    #         lambda element: self._is_metric_persistable(
+    #             metric_name=element.metric_name
+    #         ),
+    #         metrics_to_resolve,
+    #     )
+    # TODO: <Alex>ALEX</Alex>
+
+    def _is_metric_provider_persistable(self, metric_name: str) -> bool:
+        try:
+            return get_metric_provider(metric_name=metric_name, execution_engine=self)[
+                0
+            ].is_persistable()
+        except gx_exceptions.MetricProviderError:
+            pass
+
+        return True
+
     def _split_domain_kwargs(
         self,
         domain_kwargs: Dict[str, Any],
@@ -879,26 +935,6 @@ class ExecutionEngine(ABC):
             )
 
         return split_domain_kwargs
-
-    def _is_metric_persistable(self, metric_name: str) -> bool:
-        non_persistable: bool = (
-            metric_name in IN_MEMORY_STORE_BACKEND_TABLE_METRICS
-            or metric_name.endswith(MetricPartialFunctionTypeSuffixes.CONDITION.value)
-            or metric_name.endswith(
-                MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value
-            )
-        )
-        if non_persistable:
-            return False
-
-        try:
-            return get_metric_provider(metric_name=metric_name, execution_engine=self)[
-                0
-            ].is_persistable()
-        except gx_exceptions.MetricProviderError:
-            pass
-
-        return True
 
     @staticmethod
     def _split_table_metric_domain_kwargs(

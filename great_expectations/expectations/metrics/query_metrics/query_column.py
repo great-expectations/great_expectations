@@ -64,8 +64,6 @@ class QueryColumn(QueryMetricProvider):
 
         engine: sqlalchemy_engine_Engine = execution_engine.engine
         result: List[sqlalchemy_engine_Row] = engine.execute(sa.text(query)).fetchall()
-        # print(f'\n[ALEX_TEST] [WOUTPUT] WOUTPUT-RESULT:\n{result} ; TYPE: {str(type(result))}')
-        # print(f'\n[ALEX_TEST] [WOUTPUT] WOUTPUT-RESULT[0]:\n{result[0]} ; TYPE: {str(type(result[0]))}')
 
         return [dict(element) for element in result]
 

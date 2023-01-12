@@ -28,7 +28,11 @@ class MetricPartialFunctionTypes(enum.Enum):
 
     @property
     def metric_suffix(self) -> str:
-        if self.name in ["MAP_FN", "MAP_SERIES", "WINDOW_FN"]:
+        if self.name in [
+            "MAP_FN",
+            "MAP_SERIES",
+            "WINDOW_FN",
+        ]:
             return MetricPartialFunctionTypeSuffixes.MAP.value
 
         if self.name in [
@@ -38,7 +42,9 @@ class MetricPartialFunctionTypes(enum.Enum):
         ]:
             return MetricPartialFunctionTypeSuffixes.CONDITION.value
 
-        if self.name in ["AGGREGATE_FN"]:
+        if self.name in [
+            "AGGREGATE_FN",
+        ]:
             return MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value
 
         return ""

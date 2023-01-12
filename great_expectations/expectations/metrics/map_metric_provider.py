@@ -3082,8 +3082,8 @@ class MapMetricProvider(MetricProvider):
                 )
 
             if metric_fn_type in [
-                MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
                 MetricPartialFunctionTypes.MAP_CONDITION_FN,
+                MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
                 MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
             ]:
                 if not hasattr(cls, "condition_metric_name"):
@@ -3116,6 +3116,8 @@ class MapMetricProvider(MetricProvider):
                         metric_provider=condition_provider,
                         metric_fn_type=metric_fn_type,
                     )
+                    a = f"{metric_name}.{metric_fn_type.metric_suffix}"
+
                     register_metric(
                         metric_name=f"{metric_name}.unexpected_count",
                         metric_domain_keys=metric_domain_keys,
@@ -3484,8 +3486,8 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
             elif metric_fn_type in [
-                MetricPartialFunctionTypes.MAP_SERIES,
                 MetricPartialFunctionTypes.MAP_FN,
+                MetricPartialFunctionTypes.MAP_SERIES,
                 MetricPartialFunctionTypes.WINDOW_FN,
             ]:
                 if not hasattr(cls, "function_metric_name"):

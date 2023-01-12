@@ -115,7 +115,8 @@ class MetricProvider(metaclass=MetaMetricProvider):
             ):
                 # This is not a metric or renderer
                 continue
-            elif hasattr(attr_obj, "metric_engine"):
+
+            if hasattr(attr_obj, "metric_engine"):
                 engine = getattr(attr_obj, "metric_engine")
                 if not issubclass(engine, ExecutionEngine):
                     raise ValueError(
@@ -210,22 +211,21 @@ class MetricProvider(metaclass=MetaMetricProvider):
         dependencies = {}
         if execution_engine is not None:
             metric_name = metric.metric_name
-            for metric_fn_type in MetricPartialFunctionTypes:
-                metric_suffix = f".{metric_fn_type.metric_suffix}"
-                try:
-                    _ = get_metric_provider(
-                        metric_name + metric_suffix, execution_engine
-                    )
-                    has_aggregate_fn = True
-                except gx_exceptions.MetricProviderError:
-                    has_aggregate_fn = False
+            try:
+                _ = get_metric_provider(
+                    f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+                    execution_engine,
+                )
+                has_aggregate_fn = True
+            except gx_exceptions.MetricProviderError:
+                has_aggregate_fn = False
 
-                if has_aggregate_fn:
-                    dependencies["metric_partial_fn"] = MetricConfiguration(
-                        metric_name=metric_name + metric_suffix,
-                        metric_domain_kwargs=metric.metric_domain_kwargs,
-                        metric_value_kwargs=metric.metric_value_kwargs,
-                    )
+            if has_aggregate_fn:
+                dependencies["metric_partial_fn"] = MetricConfiguration(
+                    metric_name=f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+                    metric_domain_kwargs=metric.metric_domain_kwargs,
+                    metric_value_kwargs=metric.metric_value_kwargs,
+                )
 
         return dependencies
 
