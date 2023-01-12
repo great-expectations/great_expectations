@@ -159,10 +159,11 @@ def file_relative_path(
     This has been modified from Dagster's utils:
     H/T https://github.com/dagster-io/dagster/blob/8a250e9619a49e8bff8e9aa7435df89c2d2ea039/python_modules/dagster/dagster/utils/__init__.py#L34
     """
-    p = pathlib.Path(source_path).joinpath(relative_path).absolute()
+    abs_path = pathlib.Path(source_path).joinpath(relative_path).absolute()
+    str_path = abs_path.as_posix()
     if strict:
-        assert p.exists(), f"The target relative path {p} does not exist!"
-    return p.as_posix()
+        assert abs_path.exists(), f"The target relative path {str_path} does not exist!"
+    return str_path
 
 
 def parse_substitution_variable(substitution_variable: str) -> Optional[str]:
