@@ -7,8 +7,10 @@ from __future__ import annotations
 
 import logging
 import warnings
-from typing import TYPE_CHECKING, Dict, Final, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 from urllib.parse import urljoin
+
+from typing_extensions import Final
 
 from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.data_context.cloud_constants import CLOUD_APP_DEFAULT_BASE_URL
