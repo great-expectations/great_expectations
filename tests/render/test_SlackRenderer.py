@@ -1,3 +1,5 @@
+import pytest
+
 from great_expectations.core.batch import BatchDefinition, IDDict
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -5,8 +7,55 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.render.renderer import SlackRenderer
 
 
-def test_SlackRenderer_validation_results_with_datadocs():
-    validation_result_suite = ExpectationSuiteValidationResult(
+@pytest.fixture
+def failed_expectation_suite_validation_result():
+    return ExpectationSuiteValidationResult(
+        results=[
+            {
+                "exception_info": {
+                    "raised_exception": False,
+                    "exception_traceback": None,
+                    "exception_message": None,
+                },
+                "success": False,
+                "meta": {},
+                "result": {"observed_value": 8565},
+                "expectation_config": {
+                    "meta": {},
+                    "kwargs": {
+                        "column": "my_column",
+                        "max_value": 10000,
+                        "min_value": 10000,
+                        "batch_id": "b9e06d3884bbfb6e3352ced3836c3bc8",
+                    },
+                    "expectation_type": "expect_column_values_to_be_between",
+                },
+            }
+        ],
+        success=False,
+        statistics={
+            "evaluated_expectations": 0,
+            "successful_expectations": 0,
+            "unsuccessful_expectations": 0,
+            "success_percent": None,
+        },
+        meta={
+            "great_expectations_version": "v0.8.0__develop",
+            "batch_kwargs": {"data_asset_name": "x/y/z"},
+            "data_asset_name": {
+                "datasource": "x",
+                "generator": "y",
+                "generator_asset": "z",
+            },
+            "expectation_suite_name": "default",
+            "run_id": "2019-09-25T060538.829112Z",
+        },
+    )
+
+
+@pytest.fixture
+def success_expectation_suite_validation_result():
+    return ExpectationSuiteValidationResult(
         results=[],
         success=True,
         statistics={
@@ -27,6 +76,12 @@ def test_SlackRenderer_validation_results_with_datadocs():
             "run_id": "2019-09-25T060538.829112Z",
         },
     )
+
+
+def test_SlackRenderer_validation_results_with_datadocs(
+    success_expectation_suite_validation_result,
+):
+    validation_result_suite = success_expectation_suite_validation_result
 
     rendered_output = SlackRenderer().render(validation_result_suite)
 
@@ -367,56 +422,33 @@ def test_create_failed_expectations_text():
     )
 
 
-def test_SlackRenderer_show_failed_expectations():
-    validation_result = ExpectationSuiteValidationResult(
-        results=[
-            {
-                "exception_info": {
-                    "raised_exception": False,
-                    "exception_traceback": None,
-                    "exception_message": None,
-                },
-                "success": False,
-                "meta": {},
-                "result": {"observed_value": 8565},
-                "expectation_config": {
-                    "meta": {},
-                    "kwargs": {
-                        "column": "my_column",
-                        "max_value": 10000,
-                        "min_value": 10000,
-                        "batch_id": "b9e06d3884bbfb6e3352ced3836c3bc8",
-                    },
-                    "expectation_type": "expect_column_values_to_be_between",
-                },
-            }
-        ],
-        success=False,
-        statistics={
-            "evaluated_expectations": 0,
-            "successful_expectations": 0,
-            "unsuccessful_expectations": 0,
-            "success_percent": None,
-        },
-        meta={
-            "great_expectations_version": "v0.8.0__develop",
-            "batch_kwargs": {"data_asset_name": "x/y/z"},
-            "data_asset_name": {
-                "datasource": "x",
-                "generator": "y",
-                "generator_asset": "z",
-            },
-            "expectation_suite_name": "default",
-            "run_id": "2019-09-25T060538.829112Z",
-        },
-    )
+def test_SlackRenderer_show_failed_expectations(
+    failed_expectation_suite_validation_result,
+):
     slack_renderer = SlackRenderer()
     rendered_msg = slack_renderer.render(
-        validation_result, show_failed_expectations=True
+        validation_result=failed_expectation_suite_validation_result,
+        show_failed_expectations=True,
     )
 
     assert (
         """*Failed Expectations*:
 :x:expect_column_values_to_be_between (my_column)"""
         in rendered_msg["blocks"][0]["text"]["text"]
+    )
+
+
+def test_slack_renderer_shows_gx_cloud_url(failed_expectation_suite_validation_result):
+    slack_renderer = SlackRenderer()
+    cloud_url = "app.greatexpectations.io/?validationResultId=123-456-789"
+    rendered_msg = slack_renderer.render(
+        validation_result=failed_expectation_suite_validation_result,
+        show_failed_expectations=True,
+        validation_result_urls=[cloud_url],
+    )
+
+    assert (
+        ""
+        f"*<{cloud_url} | Failed :x:>*"
+        "" in rendered_msg["blocks"][0]["text"]["text"]
     )
