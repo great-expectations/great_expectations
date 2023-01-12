@@ -1,6 +1,6 @@
 import logging
 from functools import wraps
-from typing import Callable, Dict, Optional, Tuple, Type, Union, cast
+from typing import Callable, Dict, Optional, Tuple, Type, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration
@@ -101,19 +101,20 @@ class MetricProvider(metaclass=MetaMetricProvider):
     @classmethod
     def _register_metric_functions(cls) -> None:
         metric_name = getattr(cls, "metric_name", None)
-        metric_domain_keys = cls.domain_keys
-        metric_value_keys = cls.value_keys
-
-        if metric_name is None:
+        if not metric_name:
             # No metric name has been defined
             return
 
+        metric_domain_keys = cls.domain_keys
+        metric_value_keys = cls.value_keys
+
         for attr_name in dir(cls):
             attr_obj = getattr(cls, attr_name)
-            if not hasattr(attr_obj, "metric_engine") and not hasattr(
-                attr_obj, "_renderer_type"
+            if not (
+                hasattr(attr_obj, "metric_engine")
+                or hasattr(attr_obj, "_renderer_type")
             ):
-                # This is not a metric or renderer
+                # This is not a metric or renderer.
                 continue
 
             if hasattr(attr_obj, "metric_engine"):
@@ -134,8 +135,19 @@ class MetricProvider(metaclass=MetaMetricProvider):
                     Union[MetricFunctionTypes, MetricPartialFunctionTypes]
                 ] = getattr(metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE)
 
-                if metric_fn_type is None:
+                if not metric_fn_type:
+                    # This is not a metric (valid metrics possess exectly one metric function).
                     return
+
+                if metric_fn_type not in [
+                    MetricFunctionTypes.VALUE,
+                    MetricPartialFunctionTypes.AGGREGATE_FN,
+                ]:
+                    raise ValueError(
+                        f"""Basic metric implementations (defined by specifying "metric_name" class variable) only \
+support "{MetricFunctionTypes.VALUE}" and "{MetricPartialFunctionTypes.AGGREGATE_FN}" for "metric_value" \
+"metric_fn_type" property."""
+                    )
 
                 if metric_fn_type == MetricFunctionTypes.VALUE:
                     register_metric(
@@ -149,11 +161,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                     )
                 else:
                     register_metric(
-                        metric_name=declared_metric_name
-                        + "."
-                        + cast(
-                            MetricPartialFunctionTypes, metric_fn_type
-                        ).metric_suffix,  # this will be a MetricPartial
+                        metric_name=f"{declared_metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
