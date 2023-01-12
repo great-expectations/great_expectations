@@ -9,13 +9,13 @@ from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
+    BatchRequestError,
     BatchRequestOptions,
 )
 from great_expectations.experimental.datasources.postgres_datasource import (
     PostgresDatasource,
 )
 from great_expectations.experimental.datasources.sql_datasource import (
-    BatchRequestError,
     BatchSorter,
     SqlYearMonthSplitter,
     TableAsset,
