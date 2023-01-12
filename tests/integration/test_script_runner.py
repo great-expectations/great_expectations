@@ -357,6 +357,10 @@ local_tests = [
         user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py",
         extra_backend_dependencies=BackendDependencies.SPARK,
     ),
+    IntegrationTestFixture(
+        name="how_to_configure_result_format_parameter",
+        user_flow_script="tests/integration/docusaurus/reference/core_concepts/result_format.py",
+    ),
 ]
 
 dockerized_db_tests = [
