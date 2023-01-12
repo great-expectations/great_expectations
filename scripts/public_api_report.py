@@ -537,6 +537,18 @@ class CodeReferenceFilter:
                 "great_expectations/datasource/batch_kwargs_generator/table_batch_kwargs_generator.py"
             ),
         ),
+        IncludeExcludeDefinition(
+            reason="Validation Operators are now run from Checkpoints: https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#manually-migrate-v2-checkpoints-to-v3-checkpoints",
+            filepath=pathlib.Path(
+                "great_expectations/validation_operators/types/validation_operator_result.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Operators are now run from Checkpoints: https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#manually-migrate-v2-checkpoints-to-v3-checkpoints",
+            filepath=pathlib.Path(
+                "great_expectations/validation_operators/validation_operators.py"
+            ),
+        ),
     ]
 
     def __init__(
