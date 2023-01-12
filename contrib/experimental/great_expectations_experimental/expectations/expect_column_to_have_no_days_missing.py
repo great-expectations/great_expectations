@@ -31,6 +31,8 @@ class ColumnDistinctDates(ColumnAggregateMetricProvider):
         metrics,
         runtime_configuration,
     ):
+        from datetime import date
+
         (
             selectable,
             compute_domain_kwargs,
@@ -46,6 +48,12 @@ class ColumnDistinctDates(ColumnAggregateMetricProvider):
         # get all unique dates from timestamp
         query = sa.select([sa.func.Date(column).distinct()]).select_from(selectable)
         all_unique_dates = [i[0] for i in sqlalchemy_engine.execute(query).fetchall()]
+
+        # Only sqlite returns as strings, so make date objects be strings
+        if all_unique_dates and isinstance(all_unique_dates[0], date):
+            all_unique_dates = [
+                unique_date.strftime("%Y-%m-%d") for unique_date in all_unique_dates
+            ]
         return all_unique_dates
 
 
@@ -89,12 +97,6 @@ class ExpectColumnToHaveNoDaysMissing(ColumnExpectation):
                     "in": {"column": "column_b", "threshold": 2},
                     "out": {"success": True},
                 },
-            ],
-            "test_backends": [
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite"],
-                }
             ],
         }
     ]
