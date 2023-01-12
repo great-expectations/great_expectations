@@ -659,6 +659,72 @@ class CodeReferenceFilter:
                 "great_expectations/data_context/data_context/file_data_context.py"
             ),
         ),
+        IncludeExcludeDefinition(
+            reason="False match for python dict `.get()`",
+            name="get",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/_store_backend.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python `set()`",
+            name="set",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/_store_backend.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python `set()`",
+            name="set",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/datasource_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python dict `.get()`",
+            name="get",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/expectations_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python dict `.get()`",
+            name="get",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/html_site_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python `set()`",
+            name="set",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/html_site_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python dict `.get()`",
+            name="get",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/query_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python `set()`",
+            name="set",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/query_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python dict `.get()`",
+            name="get",
+            filepath=pathlib.Path("great_expectations/data_context/store/store.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python `set()`",
+            name="set",
+            filepath=pathlib.Path("great_expectations/data_context/store/store.py"),
+        ),
     ]
 
     def __init__(
