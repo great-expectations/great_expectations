@@ -280,6 +280,10 @@ class Datasource(
     # End Abstract Methods
 
 
+class BatchError(Exception):
+    pass
+
+
 class Batch:
     # Instance variable declarations
     _datasource: Datasource
@@ -373,13 +377,20 @@ class Batch:
         return self._legacy_batch_definition
 
     def head(self, n_rows: int = 5) -> pd.DataFrame:
-        self._data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
-        metric = MetricConfiguration(
-            metric_name="table.head",
-            metric_domain_kwargs={"batch_id": self.id},
-            metric_value_kwargs={"n_rows": n_rows, "fetch_all": False},
-        )
-        resolved_metrics: dict[
-            tuple[str, str, str], MetricValue
-        ] = self._data.execution_engine.resolve_metrics(metrics_to_resolve=(metric,))
-        return resolved_metrics[metric.id]
+        if n_rows and n_rows > 0:
+            self._data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
+            metric = MetricConfiguration(
+                metric_name="table.head",
+                metric_domain_kwargs={"batch_id": self.id},
+                metric_value_kwargs={"n_rows": n_rows, "fetch_all": False},
+            )
+            resolved_metrics: dict[
+                tuple[str, str, str], MetricValue
+            ] = self._data.execution_engine.resolve_metrics(
+                metrics_to_resolve=(metric,)
+            )
+            return resolved_metrics[metric.id]
+        else:
+            raise BatchError(
+                f"n_rows must be a positive integer, but {n_rows} was passed."
+            )
