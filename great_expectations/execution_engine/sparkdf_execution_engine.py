@@ -5,7 +5,18 @@ import datetime
 import logging
 import warnings
 from functools import reduce
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+)
 
 from dateutil.parser import parse
 
@@ -50,6 +61,9 @@ from great_expectations.expectations.row_conditions import (
 )
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
+
+if TYPE_CHECKING:
+    from great_expectations.validator.metric_configuration import MetricConfigurationID
 
 logger = logging.getLogger(__name__)
 
@@ -669,7 +683,7 @@ illegal.  Please check your config."""
     def resolve_metric_bundle(
         self,
         metric_fn_bundle: Iterable[MetricComputationConfiguration],
-    ) -> Dict[Tuple[str, str, str], MetricValue]:
+    ) -> dict[MetricConfigurationID, MetricValue]:
         """For every metric in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds
         bundles of the metrics into one large query dictionary so that they are all executed simultaneously. Will fail
         if bundling the metrics together is not possible.
@@ -683,7 +697,7 @@ illegal.  Please check your config."""
             Returns:
                 A dictionary of "MetricConfiguration" IDs and their corresponding fully resolved values for domains.
         """
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+        resolved_metrics: dict[MetricConfigurationID, MetricValue] = {}
 
         res: List[Row]
 

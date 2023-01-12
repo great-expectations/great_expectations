@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from great_expectations.expectations.expectation import Expectation
     from great_expectations.expectations.metrics.metric_provider import MetricProvider
     from great_expectations.render import RenderedAtomicContent, RenderedContent
+    from great_expectations.validator.metric_configuration import MetricConfigurationID
 
 logger = logging.getLogger(__name__)
 
@@ -331,12 +332,15 @@ def get_metric_kwargs(
 
 
 def get_domain_metrics_dict_by_name(
-    metrics: Dict[Tuple[str, str, str], MetricValue], metric_domain_kwargs: IDDict
+    metrics: dict[str, MetricValue], metric_domain_kwargs: IDDict
 ):
+    metric_configuration_id: MetricConfigurationID
+    metric_value: MetricValue
     return {
-        metric_edge_key_id_tuple[0]: metric_value
-        for metric_edge_key_id_tuple, metric_value in metrics.items()
-        if metric_edge_key_id_tuple[1] == metric_domain_kwargs.to_id()
+        metric_configuration_id.metric_name: metric_value
+        for metric_configuration_id, metric_value in metrics.items()
+        if metric_configuration_id.metric_domain_kwargs_id
+        == metric_domain_kwargs.to_id()
     }
 
 

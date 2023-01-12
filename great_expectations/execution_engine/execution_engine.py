@@ -337,7 +337,7 @@ class ExecutionEngine(ABC):
 
     def resolve_metric_bundle(
         self, metric_fn_bundle
-    ) -> Dict[Tuple[str, str, str], MetricValue]:
+    ) -> dict[MetricConfigurationID, MetricValue]:
         """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
         raise NotImplementedError
 
@@ -431,7 +431,7 @@ class ExecutionEngine(ABC):
     def _build_direct_and_bundled_metric_computation_configurations(
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Optional[Dict[Tuple[str, str, str], MetricValue]] = None,
+        metrics: Optional[dict[MetricConfigurationID, MetricValue]] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> Tuple[
         List[MetricComputationConfiguration],
@@ -547,7 +547,7 @@ class ExecutionEngine(ABC):
     def _get_computed_metric_evaluation_dependencies_by_metric_name(
         self,
         metric_to_resolve: MetricConfiguration,
-        metrics: Dict[Tuple[str, str, str], MetricValue],
+        metrics: dict[MetricConfigurationID, MetricValue],
     ) -> Dict[str, Union[MetricValue, Tuple[Any, dict, dict]]]:
         """
         Gathers resolved (already computed) evaluation dependencies of metric-to-resolve (not yet computed)
@@ -589,7 +589,7 @@ class ExecutionEngine(ABC):
         self,
         metric_fn_direct_configurations: List[MetricComputationConfiguration],
         metric_fn_bundle_configurations: List[MetricComputationConfiguration],
-    ) -> Dict[Tuple[str, str, str], MetricValue]:
+    ) -> dict[MetricConfigurationID, MetricValue]:
         """
         This method processes directly-computable and bundled "MetricComputationConfiguration" objects.
 
@@ -600,7 +600,7 @@ class ExecutionEngine(ABC):
         Returns:
             resolved_metrics (Dict): a dictionary with the values for the metrics that have just been resolved.
         """
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+        resolved_metrics: dict[MetricConfigurationID, MetricValue] = {}
 
         metric_computation_configuration: MetricComputationConfiguration
 
