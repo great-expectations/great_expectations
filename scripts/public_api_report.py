@@ -575,11 +575,16 @@ class CodeReferenceFilter:
             ),
         ),
         IncludeExcludeDefinition(
-            reason="False match for validator.get_metric",
+            reason="False match for validator.get_metric()",
             name="get_metric",
             filepath=pathlib.Path(
                 "great_expectations/core/expectation_validation_result.py"
             ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for context.get_expectation_suite()",
+            name="get_expectation_suite",
+            filepath=pathlib.Path("great_expectations/data_asset/data_asset.py"),
         ),
     ]
 
