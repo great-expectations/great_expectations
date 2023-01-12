@@ -141,7 +141,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "tags": ["query-based"],
-        "contributors": ["@joegargery"],
+        "contributors": ["@austiezr"],
     }
 
 
