@@ -4,10 +4,10 @@ import nbformat
 import pytest
 from nbconvert.preprocessors import ExecutePreprocessor
 
-from great_expectations import DataContext
 from great_expectations.render.renderer.suite_scaffold_notebook_renderer import (
     SuiteScaffoldNotebookRenderer,
 )
+from great_expectations.util import get_context
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 
 
@@ -83,7 +83,7 @@ def test_notebook_execution_with_pandas_backend(
         nbformat.write(nb, f)
 
     # Assertions about output
-    context = DataContext(root_dir)
+    context = get_context(context_root_dir=root_dir)
     obs_validation_result = context.get_validation_result(suite_name)
     assert obs_validation_result.statistics == {
         "evaluated_expectations": 2,

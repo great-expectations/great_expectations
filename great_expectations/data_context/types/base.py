@@ -39,7 +39,7 @@ from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.run_identifier import RunIdentifier
@@ -103,12 +103,12 @@ class BaseYamlConfig(SerializableDictDot):
     @classmethod
     def _get_schema_instance(cls: Type[BYC]) -> Schema:
         if not issubclass(cls.get_schema_class(), Schema):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 "Invalid type: A configuration schema class needs to inherit from the Marshmallow Schema class."
             )
 
         if not issubclass(cls.get_config_class(), BaseYamlConfig):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 "Invalid type: A configuration class needs to inherit from the BaseYamlConfig class."
             )
 
@@ -730,7 +730,7 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
                 "ConfiguredAssetDBFSDataConnector",
             ]
         ):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector that are required only by a
 subclass of the FilePathDataConnector class (your data connector is "{data['class_name']}").  Please update your
 configuration to continue.
@@ -745,7 +745,7 @@ configuration to continue.
                 "ConfiguredAssetDBFSDataConnector",
             ]
         ):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector that are required only by a
 filesystem type of the data connector (your data connector is "{data['class_name']}").  Please update your
 configuration to continue.
@@ -760,7 +760,7 @@ configuration to continue.
                 "ConfiguredAssetAzureDataConnector",
             ]
         ):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
 S3/Azure type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration \
 to continue.
@@ -775,7 +775,7 @@ to continue.
                 "ConfiguredAssetGCSDataConnector",
             ]
         ):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
 S3/GCS type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
@@ -788,7 +788,7 @@ continue.
                 "ConfiguredAssetS3DataConnector",
             ]
         ):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
 S3 type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
@@ -803,7 +803,7 @@ continue.
                 "ConfiguredAssetAzureDataConnector",
             ]
         ):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
 Azure type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
@@ -815,7 +815,7 @@ continue.
         ]:
             azure_options = data["azure_options"]
             if not (("conn_str" in azure_options) ^ ("account_url" in azure_options)):
-                raise ge_exceptions.InvalidConfigError(
+                raise gx_exceptions.InvalidConfigError(
                     """Your current configuration is either missing methods of authentication or is using too many for \
 the Azure type of data connector. You must only select one between `conn_str` or `account_url`. Please update your \
 configuration to continue.
@@ -830,7 +830,7 @@ configuration to continue.
                 "ConfiguredAssetGCSDataConnector",
             ]
         ):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector that are required only by a
 GCS type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
@@ -842,7 +842,7 @@ continue.
         ]:
             gcs_options = data["gcs_options"]
             if "filename" in gcs_options and "info" in gcs_options:
-                raise ge_exceptions.InvalidConfigError(
+                raise gx_exceptions.InvalidConfigError(
                     """Your current configuration can only use a single method of authentication for the GCS type of \
 data connector. You must only select one between `filename` (from_service_account_file) and `info` \
 (from_service_account_info). Please update your configuration to continue.
@@ -862,7 +862,7 @@ data connector. You must only select one between `filename` (from_service_accoun
                 "ConfiguredAssetSqlDataConnector",
             ]
         ):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
 SQL type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
@@ -882,7 +882,7 @@ continue.
                 "ConfiguredAssetAWSGlueDataCatalogDataConnector",
             ]
         ):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
 SQL/GlueCatalog type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
@@ -900,7 +900,7 @@ continue.
                 "ConfiguredAssetAWSGlueDataCatalogDataConnector",
             ]
         ):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
 GlueCatalog type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
@@ -1035,7 +1035,7 @@ class ExecutionEngineConfigSchema(Schema):
         if ("connection_string" in data or "credentials" in data) and not (
             data["class_name"] == "SqlAlchemyExecutionEngine"
         ):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 f"""Your current configuration uses the "connection_string" key in an execution engine, but only
 SqlAlchemyExecutionEngine requires this attribute (your execution engine is "{data['class_name']}").  Please update your
 configuration to continue.
@@ -1044,7 +1044,7 @@ configuration to continue.
         if "spark_config" in data and not (
             data["class_name"] == "SparkDFExecutionEngine"
         ):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 f"""Your current configuration uses the "spark_config" key in an execution engine, but only
 SparkDFExecutionEngine requires this attribute (your execution engine is "{data['class_name']}").  Please update your
 configuration to continue.
@@ -1231,7 +1231,7 @@ class DatasourceConfigSchema(AbstractConfigSchema):
     @validates_schema
     def validate_schema(self, data, **kwargs):
         if "generators" in data:
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 'Your current configuration uses the "generators" key in a datasource, but in version 0.10 of '
                 'GX that key is renamed to "batch_kwargs_generators". Please update your configuration to continue.'
             )
@@ -1251,7 +1251,7 @@ class DatasourceConfigSchema(AbstractConfigSchema):
                 "SimpleSqlalchemyDatasource",
             ]
         ):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data source that are required only by a
 sqlalchemy data source (your data source is "{data['class_name']}").  Please update your configuration to continue.
                 """
@@ -1310,7 +1310,7 @@ class AnonymizedUsageStatisticsConfig(DictDot):
         try:
             uuid.UUID(data_context_id)
         except ValueError:
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 "data_context_id must be a valid uuid"
             )
 
@@ -1667,7 +1667,7 @@ class DataContextConfigSchema(Schema):
             f"Error while processing DataContextConfig: {' '.join(exc.messages)}"
         )
         logger.error(message)
-        raise ge_exceptions.InvalidDataContextConfigError(
+        raise gx_exceptions.InvalidDataContextConfigError(
             message=message,
         )
 
@@ -1675,13 +1675,13 @@ class DataContextConfigSchema(Schema):
     @validates_schema
     def validate_schema(self, data, **kwargs) -> None:
         if "config_version" not in data:
-            raise ge_exceptions.InvalidDataContextConfigError(
+            raise gx_exceptions.InvalidDataContextConfigError(
                 "The key `config_version` is missing; please check your config file.",
                 validation_error=ValidationError(message="no config_version key"),
             )
 
         if not isinstance(data["config_version"], (int, float)):
-            raise ge_exceptions.InvalidDataContextConfigError(
+            raise gx_exceptions.InvalidDataContextConfigError(
                 "The key `config_version` must be a number. Please check your config file.",
                 validation_error=ValidationError(message="config version not a number"),
             )
@@ -1693,12 +1693,12 @@ class DataContextConfigSchema(Schema):
                 for store_config in data["stores"].values()
             ]
         ):
-            raise ge_exceptions.UnsupportedConfigVersionError(
+            raise gx_exceptions.UnsupportedConfigVersionError(
                 "You appear to be using a config version from the 0.7.x series. This version is no longer supported."
             )
 
         if data["config_version"] < MINIMUM_SUPPORTED_CONFIG_VERSION:
-            raise ge_exceptions.UnsupportedConfigVersionError(
+            raise gx_exceptions.UnsupportedConfigVersionError(
                 "You appear to have an invalid config version ({}).\n    The version number must be at least {}. "
                 "Please see the migration guide at https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api".format(
                     data["config_version"], MINIMUM_SUPPORTED_CONFIG_VERSION
@@ -1706,7 +1706,7 @@ class DataContextConfigSchema(Schema):
             )
 
         if data["config_version"] > CURRENT_GX_CONFIG_VERSION:
-            raise ge_exceptions.InvalidDataContextConfigError(
+            raise gx_exceptions.InvalidDataContextConfigError(
                 "You appear to have an invalid config version ({}).\n    The maximum valid version is {}.".format(
                     data["config_version"], CURRENT_GX_CONFIG_VERSION
                 ),
@@ -1722,7 +1722,7 @@ class DataContextConfigSchema(Schema):
                 ]
             )
         ):
-            raise ge_exceptions.InvalidDataContextConfigError(
+            raise gx_exceptions.InvalidDataContextConfigError(
                 "You appear to be using a Checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a Checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a Checkpoint store.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.".format(
                     data["config_version"], float(CURRENT_GX_CONFIG_VERSION)
                 ),
@@ -2633,7 +2633,7 @@ class CheckpointConfigSchema(Schema):
         if not (
             "name" in data or "validation_operator_name" in data or "batches" in data
         ):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 """Your current Checkpoint configuration is incomplete.  Please update your Checkpoint configuration to
                 continue.
                 """
@@ -2641,7 +2641,7 @@ class CheckpointConfigSchema(Schema):
 
         if data.get("config_version"):
             if "name" not in data:
-                raise ge_exceptions.InvalidConfigError(
+                raise gx_exceptions.InvalidConfigError(
                     """Your Checkpoint configuration requires the "name" field.  Please update your current Checkpoint
                     configuration to continue.
                     """
@@ -3044,7 +3044,7 @@ class CheckpointConfig(BaseYamlConfig):
         validations = substituted_runtime_config.get("validations") or []
         batch_request = substituted_runtime_config.get("batch_request")
         if len(validations) == 0 and not batch_request:
-            raise ge_exceptions.CheckpointError(
+            raise gx_exceptions.CheckpointError(
                 f'Checkpoint "{checkpoint.name}" must contain either a batch_request or validations.'
             )
 

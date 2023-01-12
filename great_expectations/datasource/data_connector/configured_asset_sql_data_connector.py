@@ -1,7 +1,7 @@
 from copy import deepcopy
 from typing import Dict, Iterator, List, Optional, Tuple, Union, cast
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
@@ -339,7 +339,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 splitter_method_name
             ]
         except KeyError:
-            raise ge_exceptions.SorterError(
+            raise gx_exceptions.SorterError(
                 f"No Sorter is defined in ConfiguredAssetSqlDataConnector.SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING for splitter_method: {splitter_method_name}"
             )
 
@@ -394,13 +394,13 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                         for sorter_name in sorters.keys()
                     ]
                 ):
-                    raise ge_exceptions.DataConnectorError(
+                    raise gx_exceptions.DataConnectorError(
                         f"""DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
 keys used for splitting.
                         """
                     )
                 if len(splitter_group_names) < len(sorters):
-                    raise ge_exceptions.DataConnectorError(
+                    raise gx_exceptions.DataConnectorError(
                         f"""DataConnector "{self.name}" is configured with {len(splitter_group_names)} splitter groups;
 this is fewer than number of sorters specified, which is {len(sorters)}.
                         """

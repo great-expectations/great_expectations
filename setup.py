@@ -82,7 +82,9 @@ config = {
     "cmdclass": versioneer.get_cmdclass(),
     "install_requires": required,
     "extras_require": get_extras_require(),
-    "packages": find_packages(exclude=["contrib*", "docs*", "tests*", "examples*"]),
+    "packages": find_packages(
+        exclude=["contrib*", "docs*", "tests*", "examples*", "scripts*"]
+    ),
     "entry_points": {
         "console_scripts": ["great_expectations=great_expectations.cli:main"]
     },
@@ -104,6 +106,7 @@ config = {
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
 }
 
