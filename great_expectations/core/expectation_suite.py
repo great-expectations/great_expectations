@@ -329,6 +329,11 @@ class ExpectationSuite(SerializableDictDot):
         self.expectations.append(expectation_config)
 
     @public_api
+    @new_argument(
+        argument_name="ge_cloud_id",
+        version="0.13.33",
+        message="Used in cloud deployments.",
+    )
     def remove_expectation(
         self,
         expectation_configuration: Optional[ExpectationConfiguration] = None,
