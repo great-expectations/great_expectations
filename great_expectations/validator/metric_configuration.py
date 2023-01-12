@@ -1,10 +1,16 @@
 import json
-from typing import Optional, Tuple
+from typing import NamedTuple, Optional, Tuple
 
 from great_expectations.core.domain import Domain
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
+
+
+class MetricConfigurationID(NamedTuple):
+    metric_name: str
+    metric_domain_kwargs_id: str
+    metric_value_kwargs_id: str
 
 
 class MetricConfiguration:
@@ -130,11 +136,11 @@ class MetricConfiguration:
         return MetricDomainTypes.TABLE
 
     @property
-    def id(self) -> Tuple[str, str, str]:
-        return (
-            self.metric_name,
-            self.metric_domain_kwargs_id,
-            self.metric_value_kwargs_id,
+    def id(self) -> MetricConfigurationID:
+        return MetricConfigurationID(
+            metric_name=self.metric_name,
+            metric_domain_kwargs_id=self.metric_domain_kwargs_id,
+            metric_value_kwargs_id=self.metric_value_kwargs_id,
         )
 
     def to_json_dict(self) -> dict:
