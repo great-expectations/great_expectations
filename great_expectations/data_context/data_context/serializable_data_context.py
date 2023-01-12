@@ -33,7 +33,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 if TYPE_CHECKING:
-    from great_expectations.alias_types import PathStr
+    from great_expectations.alias_types import JSONValues, PathStr
 
 
 class SerializableDataContext(AbstractDataContext):
@@ -93,15 +93,10 @@ class SerializableDataContext(AbstractDataContext):
                     logger.info(
                         f"Saving {len(self.zep_config.datasources)} ZEP Datasources to {config_filepath}"
                     )
-                    yaml.dump(
-                        {
-                            **self.config.commented_map,
-                            **self.zep_config._json_dict(),
-                        },
-                        outfile,
-                    )
-                else:
-                    self.config.to_yaml(outfile)
+                    zep_json_dict: dict[str, JSONValues] = self.zep_config._json_dict()
+                    self.config._commented_map.update(zep_json_dict)
+
+                self.config.to_yaml(outfile)
         except PermissionError as e:
             logger.warning(f"Could not save project config to disk: {e}")
 
