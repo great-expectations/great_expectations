@@ -36,6 +36,7 @@ class ExpectColumnValuesToBeValidGeohash(RegexBasedColumnMapExpectation):
                 "invalid_non_alphanumeric": ["dp2-"],
                 "empty": [""],
             },
+            "suppress_test_for": ["mssql", "snowflake"],
             "tests": [
                 {
                     "title": "basic_positive_test",

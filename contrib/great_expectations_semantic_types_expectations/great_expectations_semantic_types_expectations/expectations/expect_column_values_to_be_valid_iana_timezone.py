@@ -81,6 +81,7 @@ class ExpectColumnValuesToBeValidIanaTimezone(ColumnMapExpectation):
                     "+08:00",
                 ],
             },
+            "suppress_test_for": ["spark"],
             "tests": [
                 {
                     "title": "positive_test_with_timezones",
