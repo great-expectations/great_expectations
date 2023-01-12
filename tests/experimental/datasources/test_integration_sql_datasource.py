@@ -63,7 +63,7 @@ def test_run_checkpoint_and_data_doc(empty_data_context, include_rendered_conten
     suite_name = "my_suite"
     context.create_expectation_suite(expectation_suite_name=suite_name)
 
-    # Define a batch request and inspect the batches
+    # Define a batch request and inspect the batch(es)
     batch_request = asset.get_batch_request({"year": 2019, "month": 1})
     batches = datasource.get_batch_list_from_batch_request(batch_request=batch_request)
     stdout = "".join(pf(batch.head(2)) for batch in batches)
