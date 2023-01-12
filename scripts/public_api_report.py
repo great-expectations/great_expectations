@@ -779,6 +779,11 @@ class CodeReferenceFilter:
                 "great_expectations/data_context/store/validations_store.py"
             ),
         ),
+        IncludeExcludeDefinition(
+            reason="False match for yaml.dump()",
+            name="dump",
+            filepath=pathlib.Path("great_expectations/data_context/templates.py"),
+        ),
     ]
 
     def __init__(
