@@ -574,6 +574,13 @@ class CodeReferenceFilter:
                 "great_expectations/data_context/config_validator/yaml_config_validator.py"
             ),
         ),
+        IncludeExcludeDefinition(
+            reason="False match for validator.get_metric",
+            name="get_metric",
+            filepath=pathlib.Path(
+                "great_expectations/core/expectation_validation_result.py"
+            ),
+        ),
     ]
 
     def __init__(
