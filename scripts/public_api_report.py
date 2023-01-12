@@ -725,6 +725,20 @@ class CodeReferenceFilter:
             name="set",
             filepath=pathlib.Path("great_expectations/data_context/store/store.py"),
         ),
+        IncludeExcludeDefinition(
+            reason="False match for context.add_checkpoint()",
+            name="add_checkpoint",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/checkpoint_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for context.list_checkpoints()",
+            name="list_checkpoints",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/checkpoint_store.py"
+            ),
+        ),
     ]
 
     def __init__(
