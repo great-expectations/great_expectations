@@ -1,7 +1,6 @@
 import copy
 import inspect
 import logging
-import os
 import pathlib
 import warnings
 from typing import TYPE_CHECKING, Any, Optional
@@ -10,6 +9,7 @@ from urllib.parse import urlparse
 import pyparsing as pp
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.alias_types import PathStr
 from great_expectations.types import safe_deep_copy
 from great_expectations.util import load_class, verify_dynamic_loading_support
 
@@ -145,8 +145,8 @@ def format_dict_for_error_message(dict_):
 
 
 def file_relative_path(
-    source_path: str,
-    relative_path: str,
+    source_path: PathStr,
+    relative_path: PathStr,
 ) -> str:
     """
     This function is useful when one needs to load a file that is
@@ -161,8 +161,7 @@ def file_relative_path(
     H/T https://github.com/dagster-io/dagster/blob/8a250e9619a49e8bff8e9aa7435df89c2d2ea039/python_modules/dagster/dagster/utils/__init__.py#L34
     """
     dir_path = pathlib.Path(source_path).parent
-    abs_path = dir_path.joinpath(relative_path).resolve()
-    assert abs_path.exists(), f"The target relative path {abs_path} does not exist!"
+    abs_path = dir_path.joinpath(relative_path).resolve(strict=True)
     return abs_path.as_posix()
 
 
