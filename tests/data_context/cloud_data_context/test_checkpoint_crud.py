@@ -174,11 +174,6 @@ def test_cloud_backed_data_context_get_checkpoint_by_name(
     ) as mock_get:
         checkpoint = context.get_checkpoint(name=checkpoint_config["name"])
 
-        # Round trip through schema to mimic updates made during store serialization process
-        expected_checkpoint_config = checkpointConfigSchema.dump(
-            CheckpointConfig(**checkpoint_config)
-        )
-
         mock_get.assert_called_with(
             mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints",
