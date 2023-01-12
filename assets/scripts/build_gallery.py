@@ -296,11 +296,6 @@ def build_gallery(
         logger.info("Done finding contrib modules")
 
     for expectation in sorted(requirements_dict):
-        # Temp
-        if expectation in [
-            "expect_column_kl_divergence_to_be_less_than",  # Infinity values break JSON
-        ]:
-            continue
         group = requirements_dict[expectation]["group"]
         print(f"\n\n\n=== {expectation} ({group}) ===")
         requirements = requirements_dict[expectation].get("requirements", [])
