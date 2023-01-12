@@ -15,13 +15,12 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    cast,
 )
 
 import pydantic
 from pydantic import Field
 from pydantic import dataclasses as pydantic_dc
-from typing_extensions import ClassVar, TypeAlias
+from typing_extensions import ClassVar, TypeAlias, TypeGuard
 
 from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,
@@ -70,13 +69,32 @@ class BatchSorter:
 BatchSortersDefinition: TypeAlias = Union[List[BatchSorter], List[str]]
 
 
-def _batch_sorter_from_list(sorters: BatchSortersDefinition) -> List[BatchSorter]:
+def _is_batch_sorter_list(
+    sorters: BatchSortersDefinition,
+) -> TypeGuard[list[BatchSorter]]:
     if len(sorters) == 0 or isinstance(sorters[0], BatchSorter):
-        # mypy gets confused here. Since BatchSortersDefinition has all elements of the
-        # same type in the list so if the first on is BatchSorter so are the others.
-        return cast(List[BatchSorter], sorters)
-    # Likewise, sorters must be List[str] here.
-    return [_batch_sorter_from_str(sorter) for sorter in cast(List[str], sorters)]
+        return True
+    return False
+
+
+def _is_str_sorter_list(sorters: BatchSortersDefinition) -> TypeGuard[list[str]]:
+    if len(sorters) > 0 and isinstance(sorters[0], str):
+        return True
+    return False
+
+
+def _batch_sorter_from_list(sorters: BatchSortersDefinition) -> List[BatchSorter]:
+    if _is_batch_sorter_list(sorters):
+        return sorters
+    # mypy doesn't successfully type-narrow sorters to a List[str] here so we use
+    # another TypeGuard. We could cast instead which may be slightly faster.
+    if _is_str_sorter_list(sorters):
+        return [_batch_sorter_from_str(sorter) for sorter in sorters]
+    # This should never be reached because of static typing but is necessary because
+    # mypy doesn't know of the if conditions must evaluate to True.
+    raise ValueError(
+        f"sorters is a not a BatchSortersDefinition but is a {type(sorters)}"
+    )
 
 
 def _batch_sorter_from_str(sort_key: str) -> BatchSorter:
