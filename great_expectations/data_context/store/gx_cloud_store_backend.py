@@ -488,11 +488,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response.raise_for_status()
             return True
         except requests.HTTPError as http_exc:
-            # TODO: GG 20220819 should we raise an error here instead of returning False
-            logger.warning(
+            logger.exception(http_exc)
+            raise StoreBackendError(
                 f"Unable to delete object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
             )
-            return False
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
             raise StoreBackendError(
