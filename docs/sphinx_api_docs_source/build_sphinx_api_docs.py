@@ -23,8 +23,10 @@ Typical usage example:
 import ast
 import importlib
 import logging
+import os
 import pathlib
 import shutil
+import urllib
 from typing import Tuple
 from urllib.parse import urlparse
 
@@ -171,6 +173,15 @@ class SphinxInvokeDocsBuilder:
 
                     external_ref.string = formatted_text
 
+                # Process internal links
+                # Note: Currently the docusaurus link checker does not work well with
+                # anchor links, so we need to make these links absolute.
+                internal_refs = doc.find_all(class_="reference internal")
+                for internal_ref in internal_refs:
+                    href = internal_ref["href"]
+                    absolute_href = self._get_base_url() + href
+                    internal_ref["href"] = absolute_href
+
                 doc_str = str(doc)
 
                 # Add front matter
@@ -192,6 +203,16 @@ class SphinxInvokeDocsBuilder:
                     fout.write(doc_str)
 
         logger.info("Created mdx files for serving with docusaurus.")
+
+    def _get_base_url(self) -> str:
+        """The base url for use in generating absolute links.
+
+        Note, this will need to be modified if we begin to nest
+        directories inside of /docs/reference/api/
+        """
+        # URL is an environment variable provided by Netlify
+        base_url = os.getenv("URL", "https://localhost:3000")
+        return f"{base_url}/docs/reference/api/"
 
     def _remove_temp_html(self) -> None:
         """Remove the Sphinx-generated temporary html files + related files."""
