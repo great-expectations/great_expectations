@@ -44,11 +44,13 @@ class CheckpointStore(ConfigurationStore):
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object
         """
-        cp_data: Union[dict, list] = response_json["data"]
-        if isinstance(cp_data, list):
-            if len(cp_data) == 0:
+        cp_data: dict
+        if isinstance(response_json["data"], list):
+            if len(response_json["data"]) == 0:
                 return None
-            cp_data = cp_data[0]
+            cp_data = response_json["data"][0]
+        else:
+            cp_data = response_json["data"]
         ge_cloud_checkpoint_id: str = cp_data["id"]
         checkpoint_config_dict: dict = cp_data["attributes"]["checkpoint_config"]
         checkpoint_config_dict["ge_cloud_id"] = ge_cloud_checkpoint_id
