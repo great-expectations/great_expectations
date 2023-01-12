@@ -35,6 +35,7 @@ class ExpectColumnValuesToHaveValidICD10CodeFormat(RegexBasedColumnMapExpectatio
                 "valid_icd10": ["Z99.0", "Z08", "J09.X2", "S22.000A"],
                 "invalid_icd10": ["XXX.X", "AA2.01", "2A", "S22.0000A"],
             },
+            "suppress_test_for": ["bigquery", "redshift", "snowflake"],
             "tests": [
                 {
                     "title": "positive_test",
@@ -48,13 +49,6 @@ class ExpectColumnValuesToHaveValidICD10CodeFormat(RegexBasedColumnMapExpectatio
                     "exact_match_out": False,
                     "in": {"column": "invalid_icd10"},
                     "out": {"success": False, "unexpected_index_list": [0, 1, 2, 3]},
-                },
-            ],
-            "test_backends": [
-                {"backend": "pandas", "dialects": None},
-                {
-                    "backend": "spark",
-                    "dialects": None,
                 },
             ],
         }

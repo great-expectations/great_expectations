@@ -116,6 +116,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
                     },
                 },
             ],
+            "suppress_test_for": ["bigquery", "trino", "snowflake"],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -127,7 +128,6 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
                         "threshold": 0.6,
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite", "spark"],
                 },
                 {
                     "title": "basic_negative_test",
@@ -139,7 +139,6 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
                         "threshold": 1,
                     },
                     "out": {"success": False},
-                    "only_for": ["sqlite", "spark"],
                 },
                 {
                     "title": "multi_value_positive_test",
@@ -151,7 +150,6 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
                         "threshold": [0.6, 0.4],
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite", "spark"],
                 },
                 {
                     "title": "multi_value_positive_test_static_data_asset",
@@ -169,7 +167,6 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
                                  """,
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite"],
                 },
                 {
                     "title": "multi_value_positive_test_row_condition",
@@ -183,7 +180,6 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
                         "condition_parser": "great_expectations__experimental__",
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite", "spark"],
                 },
             ],
         },
