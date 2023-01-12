@@ -252,8 +252,8 @@ def get_substituted_batch_request(
         batch_request=substituted_runtime_batch_request
     )
 
-    for key, value in validation_batch_request.items():
-        substituted_value = substituted_runtime_batch_request.get(key)
+    for key, value in validation_batch_request.items():  # type: ignore[union-attr] # get_batch_request_as_dict needs overloads
+        substituted_value = substituted_runtime_batch_request.get(key)  # type: ignore[union-attr] # get_batch_request_as_dict
         if value is not None and substituted_value is not None:
             raise gx_exceptions.CheckpointError(
                 f'BatchRequest attribute "{key}" was specified in both validation and top-level CheckpointConfig.'
@@ -263,7 +263,7 @@ def get_substituted_batch_request(
         **substituted_runtime_batch_request, **validation_batch_request
     )
 
-    return materialize_batch_request(batch_request=effective_batch_request)
+    return materialize_batch_request(batch_request=effective_batch_request)  # type: ignore[return-value] # see materialize_batch_request
 
 
 def substitute_template_config(source_config: dict, template_config: dict) -> dict:
