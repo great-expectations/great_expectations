@@ -73,6 +73,7 @@ class TestMetaDatasource:
             asset_types: ClassVar[List[Type[DataAsset]]] = []
             type: str = "my_test"
 
+            @property
             def execution_engine_type(self) -> Type[ExecutionEngine]:
                 return DummyExecutionEngine
 
@@ -95,6 +96,7 @@ class TestMetaDatasource:
             asset_types: ClassVar[List[Type[DataAsset]]] = []
             type: str = "my_test"
 
+            @property
             def execution_engine_type(self) -> Type[ExecutionEngine]:
                 return DummyExecutionEngine
 
@@ -121,6 +123,7 @@ class TestMetaDatasource:
             asset_types: ClassVar = [FooAsset, BarAsset]
             type: str = "foo_bar"
 
+            @property
             def execution_engine_type(self) -> Type[ExecutionEngine]:
                 return DummyExecutionEngine
 
@@ -146,6 +149,7 @@ class TestMisconfiguredMetaDatasource:
         ):
 
             class MissingTypeDatasource(Datasource):
+                @property
                 def execution_engine_type(self) -> Type[ExecutionEngine]:
                     return DummyExecutionEngine
 
@@ -175,6 +179,7 @@ class TestMisconfiguredMetaDatasource:
                 type: str = "valid"
                 asset_types: ClassVar = [MissingTypeAsset]
 
+                @property
                 def execution_engine_type(self) -> Type[ExecutionEngine]:
                     return DummyExecutionEngine
 
@@ -195,6 +200,7 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
         asset_types = [RedAsset, BlueAsset]
         type: str = "purple"
 
+        @property
         def execution_engine_type(self) -> Type[ExecutionEngine]:
             return DummyExecutionEngine
 
