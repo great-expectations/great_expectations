@@ -567,6 +567,13 @@ class CodeReferenceFilter:
             name="is_subset",
             filepath=pathlib.Path("great_expectations/core/domain.py"),
         ),
+        IncludeExcludeDefinition(
+            reason="Already captured in the Data Context",
+            name="test_yaml_config",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/config_validator/yaml_config_validator.py"
+            ),
+        ),
     ]
 
     def __init__(
