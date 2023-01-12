@@ -17,7 +17,6 @@ from typing import (
 )
 
 import pydantic
-from pydantic import Field
 from pydantic import dataclasses as pydantic_dc
 from typing_extensions import ClassVar, Literal, TypeAlias
 
@@ -26,6 +25,7 @@ from great_expectations.experimental.datasources.interfaces import (
     Batch,
     BatchRequest,
     BatchRequestOptions,
+    BatchSortersDefinition,
     DataAsset,
     Datasource,
 )
@@ -130,58 +130,12 @@ def _get_sql_datetime_range(
     return DatetimeRange(min=min_max_dt[0], max=min_max_dt[1])
 
 
-@pydantic_dc.dataclass(frozen=True)
-class BatchSorter:
-    metadata_key: str
-    reverse: bool = False
-
-
-BatchSortersDefinition: TypeAlias = Union[List[BatchSorter], List[str]]
-
-
-def _batch_sorter_from_list(sorters: BatchSortersDefinition) -> List[BatchSorter]:
-    if len(sorters) == 0 or isinstance(sorters[0], BatchSorter):
-        # mypy gets confused here. Since BatchSortersDefinition has all elements of the
-        # same type in the list so if the first on is BatchSorter so are the others.
-        return cast(List[BatchSorter], sorters)
-    # Likewise, sorters must be List[str] here.
-    return [_batch_sorter_from_str(sorter) for sorter in cast(List[str], sorters)]
-
-
-def _batch_sorter_from_str(sort_key: str) -> BatchSorter:
-    """Convert a list of strings to BatchSorters
-
-    Args:
-        sort_key: A batch metadata key which will be used to sort batches on a data asset.
-                  This can be prefixed with a + or - to indicate increasing or decreasing
-                  sorting. If not specified, defaults to increasing order.
-    """
-    if sort_key[0] == "-":
-        return BatchSorter(metadata_key=sort_key[1:], reverse=True)
-    elif sort_key[0] == "+":
-        return BatchSorter(metadata_key=sort_key[1:], reverse=False)
-    else:
-        return BatchSorter(metadata_key=sort_key, reverse=False)
-
-
 class TableAsset(DataAsset):
     # Instance fields
     type: Literal["table"] = "table"
     table_name: str
     column_splitter: Optional[SqlYearMonthSplitter] = None
     name: str
-    order_by: List[BatchSorter] = Field(default_factory=list)
-
-    @pydantic.validator("order_by", pre=True, each_item=True)
-    @classmethod
-    def _parse_order_by_sorter(
-        cls, v: Union[str, BatchSorter]
-    ) -> Union[BatchSorter, dict]:
-        if isinstance(v, str):
-            if not v:
-                raise ValueError("empty string")
-            return _batch_sorter_from_str(v)
-        return v
 
     def batch_request_options_template(
         self,
@@ -196,12 +150,6 @@ class TableAsset(DataAsset):
         if not self.column_splitter:
             return template
         return {p: None for p in self.column_splitter.param_names}
-
-    def add_sorters(self, sorters: BatchSortersDefinition) -> TableAsset:
-        # NOTE: (kilo59) we could use pydantic `validate_assignment` for this
-        # https://docs.pydantic.dev/usage/model_config/#options
-        self.order_by = _batch_sorter_from_list(sorters)
-        return self
 
     # This asset type will support a variety of splitters
     def add_year_and_month_splitter(
@@ -275,24 +223,6 @@ class TableAsset(DataAsset):
                 )
         return batch_requests
 
-    def _sort_batches(self, batch_list: List[Batch]) -> None:
-        """Sorts batch_list in place.
-
-        Args:
-            batch_list: The list of batches to sort in place.
-        """
-        for sorter in reversed(self.order_by):
-            try:
-                batch_list.sort(
-                    key=lambda b: b.metadata[sorter.metadata_key],
-                    reverse=sorter.reverse,
-                )
-            except KeyError as e:
-                raise KeyError(
-                    f"Trying to sort {self.name} table asset batches on key {sorter.metadata_key} "
-                    "which isn't available on all batches."
-                ) from e
-
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> List[Batch]:
@@ -359,7 +289,7 @@ class TableAsset(DataAsset):
                     legacy_batch_definition=batch_definition,
                 )
             )
-        self._sort_batches(batch_list)
+        self.sort_batches(batch_list)
         return batch_list
 
 
@@ -409,6 +339,6 @@ class SQLDatasource(Datasource):
             name=name,
             table_name=table_name,
             order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
-            # see TableAsset._parse_order_by_sorter()
+            # see DataAsset._parse_order_by_sorter()
         )
         return self.add_asset(asset)
