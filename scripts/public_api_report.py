@@ -591,6 +591,11 @@ class CodeReferenceFilter:
             name="save_expectation_suite",
             filepath=pathlib.Path("great_expectations/data_asset/data_asset.py"),
         ),
+        IncludeExcludeDefinition(
+            reason="False match for validator.validate()",
+            name="validate",
+            filepath=pathlib.Path("great_expectations/data_asset/data_asset.py"),
+        ),
     ]
 
     def __init__(
