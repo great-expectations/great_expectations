@@ -2,6 +2,7 @@ import copy
 import inspect
 import logging
 import os
+import pathlib
 import warnings
 from typing import TYPE_CHECKING, Any, Optional
 from urllib.parse import urlparse
@@ -143,7 +144,9 @@ def format_dict_for_error_message(dict_):
     return "\n\t".join("\t\t".join((str(key), str(dict_[key]))) for key in dict_)
 
 
-def file_relative_path(dunderfile, relative_path):
+def file_relative_path(
+    source_path: str, relative_path: str, strict: bool = True
+) -> str:
     """
     This function is useful when one needs to load a file that is
     relative to the position of the current file. (Such as when
@@ -153,9 +156,13 @@ def file_relative_path(dunderfile, relative_path):
     It is meant to be used like the following:
     file_relative_path(__file__, 'path/relative/to/file')
 
+    This has been modified from Dagster's utils:
     H/T https://github.com/dagster-io/dagster/blob/8a250e9619a49e8bff8e9aa7435df89c2d2ea039/python_modules/dagster/dagster/utils/__init__.py#L34
     """
-    return os.path.join(os.path.dirname(dunderfile), relative_path)
+    p = pathlib.Path(source_path).joinpath(relative_path).absolute()
+    if strict:
+        assert p.exists(), f"The target relative path {p} does not exist!"
+    return p.as_posix()
 
 
 def parse_substitution_variable(substitution_variable: str) -> Optional[str]:
