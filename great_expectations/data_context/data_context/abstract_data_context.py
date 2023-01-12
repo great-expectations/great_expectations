@@ -648,6 +648,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._cached_datasources[datasource_name] = updated_datasource
         return updated_datasource
 
+    @public_api
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE,
         args_payload_fn=add_datasource_usage_statistics,
@@ -659,16 +660,20 @@ class AbstractDataContext(ConfigPeer, ABC):
         save_changes: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
-        """Add a new datasource to the data context, with configuration provided as kwargs.
+        """Add a new Datasource to the data context, with configuration provided as kwargs.
+
+        --Documentation--
+            - https://docs.greatexpectations.io/docs/terms/datasource
+
         Args:
-            name: the name for the new datasource to add
-            initialize: if False, add the datasource to the config, but do not
+            name: the name of the new Datasource to add
+            initialize: if False, add the Datasource to the config, but do not
                 initialize it, for example if a user needs to debug database connectivity.
-            save_changes (bool): should GX save the Datasource config?
-            kwargs (keyword arguments): the configuration for the new datasource
+            save_changes: should GX save the Datasource config?
+            kwargs: the configuration for the new Datasource
 
         Returns:
-            datasource (Datasource)
+            Datasource instance added.
         """
         save_changes = self._determine_save_changes_flag(save_changes)
 
@@ -3683,6 +3688,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS,
     )
+    @public_api
     def build_data_docs(
         self,
         site_names=None,
@@ -3690,33 +3696,31 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         dry_run=False,
         build_index: bool = True,
     ):
-        """
-        Build Data Docs for your project.
+        """Build Data Docs for your project.
 
-        These make it simple to visualize data quality in your project. These
-        include Expectations, Validations & Profiles. The are built for all
-        Datasources from JSON artifacts in the local repo including validations
-        & profiles from the uncommitted directory.
+        --Documentation--
+            - https://docs.greatexpectations.io/docs/terms/data_docs/
 
-        :param site_names: if specified, build data docs only for these sites, otherwise,
-                            build all the sites specified in the context's config
-        :param resource_identifiers: a list of resource identifiers (ExpectationSuiteIdentifier,
-                            ValidationResultIdentifier). If specified, rebuild HTML
-                            (or other views the data docs sites are rendering) only for
-                            the resources in this list. This supports incremental build
-                            of data docs sites (e.g., when a new validation result is created)
-                            and avoids full rebuild.
-        :param dry_run: a flag, if True, the method returns a structure containing the
-                            URLs of the sites that *would* be built, but it does not build
-                            these sites. The motivation for adding this flag was to allow
-                            the CLI to display the the URLs before building and to let users
-                            confirm.
-
-        :param build_index: a flag if False, skips building the index page
+        Args:
+            site_names: if specified, build data docs only for these sites, otherwise,
+                build all the sites specified in the context's config
+            resource_identifiers: a list of resource identifiers (ExpectationSuiteIdentifier,
+                ValidationResultIdentifier). If specified, rebuild HTML
+                (or other views the data docs sites are rendering) only for
+                the resources in this list. This supports incremental build
+                of data docs sites (e.g., when a new validation result is created)
+                and avoids full rebuild.
+            dry_run: a flag, if True, the method returns a structure containing the
+                URLs of the sites that *would* be built, but it does not build
+                these sites.
+            build_index: a flag if False, skips building the index page
 
         Returns:
             A dictionary with the names of the updated data documentation sites as keys and the the location info
             of their index.html files as values
+
+        Raises:
+            ClassInstantiationError: Site config in your Data Context config is not valid.
         """
         logger.debug("Starting DataContext.build_data_docs")
 
