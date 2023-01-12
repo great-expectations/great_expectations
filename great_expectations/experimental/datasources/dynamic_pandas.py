@@ -23,13 +23,15 @@ def _extract_io_signatures(
 ) -> List[inspect.Signature]:
     signatures = []
     for name, method in io_methods:
-        signatures.append(inspect.signature(method))
+        sig = inspect.signature(method)
+        print(f"  {name}\n{sig}\n")
+        signatures.append(sig)
     return signatures
 
 
 if __name__ == "__main__":
-    io_methods = _extract_io_methods()[:2]
+    io_methods = _extract_io_methods()[:]
     print(f"  IO Methods\n{pf(io_methods)}\n")
 
     io_method_sigs = _extract_io_signatures(io_methods)
-    print(f"  IO Method Signatures\n{pf(io_method_sigs)}")
+    # print(f"  IO Method Signatures\n{pf(io_method_sigs)}")
