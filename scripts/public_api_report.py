@@ -538,16 +538,21 @@ class CodeReferenceFilter:
             ),
         ),
         IncludeExcludeDefinition(
-            reason="Validation Operators are now run from Checkpoints: https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#manually-migrate-v2-checkpoints-to-v3-checkpoints",
+            reason="ValidationOperators are now run from Checkpoints: https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#manually-migrate-v2-checkpoints-to-v3-checkpoints",
             filepath=pathlib.Path(
                 "great_expectations/validation_operators/types/validation_operator_result.py"
             ),
         ),
         IncludeExcludeDefinition(
-            reason="Validation Operators are now run from Checkpoints: https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#manually-migrate-v2-checkpoints-to-v3-checkpoints",
+            reason="ValidationOperators are now run from Checkpoints: https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#manually-migrate-v2-checkpoints-to-v3-checkpoints",
             filepath=pathlib.Path(
                 "great_expectations/validation_operators/validation_operators.py"
             ),
+        ),
+        IncludeExcludeDefinition(
+            reason="ValidationActions are now run from Checkpoints: https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#manually-migrate-v2-checkpoints-to-v3-checkpoints",
+            name="run",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
         ),
     ]
 
