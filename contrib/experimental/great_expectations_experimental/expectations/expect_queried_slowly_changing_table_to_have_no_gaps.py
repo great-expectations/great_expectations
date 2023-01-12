@@ -177,7 +177,13 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
                     },
                 },
             ],
-            "suppress_test_for": ["mysql", "mssql", "postgresql", "bigquery", "snowflake"],
+            "suppress_test_for": [
+                "mysql",
+                "mssql",
+                "postgresql",
+                "bigquery",
+                "snowflake",
+            ],
             "tests": [
                 {
                     "title": "basic_positive_test",
