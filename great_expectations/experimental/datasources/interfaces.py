@@ -21,7 +21,7 @@ from typing import (
 import pydantic
 from pydantic import Field
 from pydantic import dataclasses as pydantic_dc
-from typing_extensions import ClassVar, Self, TypeAlias
+from typing_extensions import ClassVar, TypeAlias
 
 from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,

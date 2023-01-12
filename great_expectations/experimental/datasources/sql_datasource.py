@@ -12,13 +12,12 @@ from typing import (
     Optional,
     Sequence,
     Type,
-    Union,
     cast,
 )
 
 import pydantic
 from pydantic import dataclasses as pydantic_dc
-from typing_extensions import ClassVar, Literal, TypeAlias
+from typing_extensions import ClassVar, Literal
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.experimental.datasources.interfaces import (
