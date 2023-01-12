@@ -562,6 +562,11 @@ class CodeReferenceFilter:
             reason="CLI internal methods should not be part of the public API",
             filepath=pathlib.Path("great_expectations/cli/toolkit.py"),
         ),
+        IncludeExcludeDefinition(
+            reason="False match for from datasource_configuration_test_utilities import is_subset",
+            name="is_subset",
+            filepath=pathlib.Path("great_expectations/core/domain.py"),
+        ),
     ]
 
     def __init__(
