@@ -1057,7 +1057,9 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_true
 ):
     ge_dir = empty_context.root_directory
     empty_context.add_datasource("arthur", **{"class_name": "PandasDatasource"})
-    assert FileDataContext.does_project_have_a_datasource_in_config_file(ge_dir) == True
+    assert (
+        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) == True
+    )
 
 
 def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_it_does_not_have_a_datasource_configured_in_yml_file_on_disk(
@@ -1065,7 +1067,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
 ):
     ge_dir = empty_context.root_directory
     assert (
-        FileDataContext.does_project_have_a_datasource_in_config_file(ge_dir) == False
+        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) == False
     )
 
 
@@ -1075,7 +1077,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     ge_dir = empty_context.root_directory
     safe_remove(os.path.join(ge_dir, empty_context.GX_YML))
     assert (
-        FileDataContext.does_project_have_a_datasource_in_config_file(ge_dir) == False
+        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) == False
     )
 
 
@@ -1085,7 +1087,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     ge_dir = empty_context.root_directory
     safe_remove(os.path.join(ge_dir))
     assert (
-        FileDataContext.does_project_have_a_datasource_in_config_file(ge_dir) == False
+        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) == False
     )
 
 
@@ -1096,7 +1098,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     with open(os.path.join(ge_dir, FileDataContext.GX_YML), "w") as yml:
         yml.write("this file: is not a valid ge config")
     assert (
-        FileDataContext.does_project_have_a_datasource_in_config_file(ge_dir) == False
+        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) == False
     )
 
 
@@ -1350,7 +1352,7 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
 
 def test_scaffold_directories(tmp_path_factory):
     empty_directory = str(tmp_path_factory.mktemp("test_scaffold_directories"))
-    FileDataContext.scaffold_directories(empty_directory)
+    FileDataContext._scaffold_directories(empty_directory)
 
     assert set(os.listdir(empty_directory)) == {
         "plugins",
