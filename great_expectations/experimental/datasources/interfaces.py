@@ -227,7 +227,7 @@ class Datasource(
 
     def _execution_engine_type(self) -> Type[ExecutionEngine]:
         """Returns the execution engine to be used"""
-        return self.execution_engine_override or self.execution_engine_type()
+        return self.execution_engine_override or self.execution_engine_type
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
@@ -267,6 +267,7 @@ class Datasource(
         return asset
 
     # Abstract Methods
+    @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
         """Return the ExecutionEngine type use for this Datasource"""
         raise NotImplementedError(
