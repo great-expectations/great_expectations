@@ -219,6 +219,8 @@ def test_add_and_save_zep_datasource(
 
     assert datasource_name == ds.name
     assert datasource_name in final_yaml
+    # ensure comments preserved
+    assert "# Welcome to Great Expectations!" in final_yaml
 
 
 if __name__ == "__main__":
