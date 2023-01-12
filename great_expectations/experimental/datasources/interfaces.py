@@ -38,6 +38,7 @@ if TYPE_CHECKING:
         BatchSpec,
     )
     from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.validator.computed_metric import MetricValue
 
 # BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
 # Batches one wants returned. The keys represent dimensions one can slice the data along
@@ -271,5 +272,7 @@ class Batch:
             metric_domain_kwargs={"batch_id": self.id},
             metric_value_kwargs={"n_rows": n_rows, "fetch_all": False},
         )
-        df = self._data.execution_engine.resolve_metrics((metric,))[metric.id]
-        return df
+        resolved_metrics: dict[
+            tuple[str, str, str], MetricValue
+        ] = self._data.execution_engine.resolve_metrics(metrics_to_resolve=(metric,))
+        return resolved_metrics[metric.id]
