@@ -94,9 +94,7 @@ class SerializableDataContext(AbstractDataContext):
                         f"Saving {len(self.zep_config.datasources)} ZEP Datasources to {config_filepath}"
                     )
                     zep_json_dict: dict[str, JSONValues] = self.zep_config._json_dict()
-                    self.config.commented_map["xdatasources"] = zep_json_dict[
-                        "xdatasources"
-                    ]
+                    self.config._commented_map.update(zep_json_dict)
 
                 self.config.to_yaml(outfile)
         except PermissionError as e:
