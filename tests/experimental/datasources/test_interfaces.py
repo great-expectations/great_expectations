@@ -8,10 +8,13 @@ import pytest
 
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.experimental.datasources import PandasDatasource
-from great_expectations.experimental.datasources.interfaces import Batch, BatchRequest
+from great_expectations.experimental.datasources.interfaces import (
+    Batch,
+    BatchError,
+    BatchRequest,
+)
 
 if TYPE_CHECKING:
-    from great_expectations.experimental.datasources.interfaces import BatchError
     from great_expectations.experimental.datasources.pandas_datasource import CSVAsset
 
 
@@ -43,7 +46,7 @@ def pandas_batch() -> Batch:
         (
             None,
             False,
-            ("n_rows must be a positive integer, but None was passed."),
+            "n_rows must be a positive integer, but None was passed.",
         ),
         (
             3,
@@ -76,7 +79,7 @@ def pandas_batch() -> Batch:
         (
             -1,
             False,
-            ("n_rows must be a positive integer, but -1 was passed."),
+            "n_rows must be a positive integer, but -1 was passed.",
         ),
     ],
 )
