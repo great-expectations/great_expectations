@@ -158,7 +158,7 @@ class ConfigurationStore(Store):
         ), "Must provide either name or ge_cloud_id."
 
         key: Union[GXCloudIdentifier, ConfigurationIdentifier]
-        if self.ge_cloud_mode:
+        if ge_cloud_id or self.ge_cloud_mode:
             key = GXCloudIdentifier(
                 resource_type=GXCloudRESTResource.CHECKPOINT,
                 cloud_id=ge_cloud_id,
