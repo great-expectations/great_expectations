@@ -59,7 +59,7 @@ class RendererImpl(NamedTuple):
 
 def register_renderer(
     object_name: str,
-    parent_class: Type[Expectation],
+    parent_class: Union[Type[Expectation], Type[MetricProvider]],
     renderer_fn: Callable[..., Union[RenderedAtomicContent, RenderedContent]],
 ):
     # noinspection PyUnresolvedReferences

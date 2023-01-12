@@ -134,7 +134,6 @@ exclude = [
     'expectations/metrics/column_aggregate_metrics/column_most_common_value\.py', # 4
     'expectations/metrics/column_aggregate_metrics/column_median\.py', # 1
     'expectations/metrics/map_metric_provider\.py',  # 57
-    'expectations/metrics/metric_provider\.py',  # 12
     'expectations/metrics/util\.py', # 11
     'expectations/regex_based_column_map_expectation\.py',  # 3
     'expectations/row_conditions\.py',  # 4
@@ -154,9 +153,8 @@ exclude = [
     'render/renderer/v3/suite_profile_notebook_renderer\.py',  # 4
     'render/util\.py',  # 2
     'render/view/view\.py',  # 11
-    'rule_based_profiler/data_assistant_result/data_assistant_result\.py',  # 71
+    'rule_based_profiler/data_assistant_result/data_assistant_result\.py',  # 63
     'rule_based_profiler/data_assistant_result/plot_components\.py', # 12
-    'rule_based_profiler/data_assistant/data_assistant\.py',  # 15
     'rule_based_profiler/domain_builder/categorical_column_domain_builder\.py',  # 18
     'rule_based_profiler/domain_builder/map_metric_column_domain_builder\.py',  # 8
     'rule_based_profiler/estimators/bootstrap_numeric_range_estimator\.py',  # 8
