@@ -739,6 +739,13 @@ class CodeReferenceFilter:
                 "great_expectations/data_context/store/checkpoint_store.py"
             ),
         ),
+        IncludeExcludeDefinition(
+            reason="False match for datasource self_check",
+            name="self_check",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/configuration_store.py"
+            ),
+        ),
     ]
 
     def __init__(
