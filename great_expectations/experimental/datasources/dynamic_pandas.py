@@ -18,5 +18,18 @@ def _extract_io_methods() -> List[Tuple[str, DataFrameFactoryFn]]:
     return [t for t in member_functions if t[0].startswith("read_")]
 
 
+def _extract_io_signatures(
+    io_methods: List[Tuple[str, DataFrameFactoryFn]]
+) -> List[inspect.Signature]:
+    signatures = []
+    for name, method in io_methods:
+        signatures.append(inspect.signature(method))
+    return signatures
+
+
 if __name__ == "__main__":
-    print(f"  IO Methods\n{pf(_extract_io_methods())}")
+    io_methods = _extract_io_methods()[:2]
+    print(f"  IO Methods\n{pf(io_methods)}\n")
+
+    io_method_sigs = _extract_io_signatures(io_methods)
+    print(f"  IO Method Signatures\n{pf(io_method_sigs)}")
