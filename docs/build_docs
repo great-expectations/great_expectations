@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Build API docs then build docusaurus docs.
+# Currently used in our netlify pipeline.
+# Note: Will be modified to build API docs on latest tagged release.
+
+echo "Installing dev dependencies"
+pip install -c constraints-dev.txt -e ".[test]"
+
+echo "Installing dev dependencies"
+(cd docs/sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt)
+
+echo "Building sphinx API docs."
+(cd docs/sphinx_api_docs_source; invoke docs)
+
+echo "Building docusaurus docs."
+yarn build

@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -67,10 +67,10 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args: List[AddParamArgs] = [
+        add_param_args: AddParamArgs = (
             ("column_A", RendererValueType.STRING),
             ("column_B", RendererValueType.STRING),
-        ]
+        )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
@@ -96,9 +96,7 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        _ = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs, ["column_A", "column_B"]

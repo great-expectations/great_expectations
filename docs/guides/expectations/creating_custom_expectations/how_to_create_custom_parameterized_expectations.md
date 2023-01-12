@@ -66,7 +66,7 @@ Now for `expect_column_values_to_be_in_set`.
 
 In this case, we will only be changing our `value_set`:
 
-```python file=../../../../tests/expectations/core/test_expect_column_values_to_be_in_set.py#L13-L18
+```python name="tests/expectations/core/test_expect_column_values_to_be_in_set.py ExpectColumnValuesToBeTwoLetterCountryCode_class_def"
 ```
 
 That's all there is to it - really!

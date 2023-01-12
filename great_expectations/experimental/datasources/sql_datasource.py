@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 import copy
-import dataclasses
 import itertools
 from datetime import datetime
-from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     Callable,
@@ -39,10 +37,6 @@ if TYPE_CHECKING:
 
 
 class SQLDatasourceError(Exception):
-    pass
-
-
-class BatchRequestError(Exception):
     pass
 
 
@@ -189,59 +183,6 @@ class TableAsset(DataAsset):
             return _batch_sorter_from_str(v)
         return v
 
-    def get_batch_request(
-        self, options: Optional[BatchRequestOptions] = None
-    ) -> BatchRequest:
-        """A batch request that can be used to obtain batches for this DataAsset.
-
-        Args:
-            options: A dict that can be used to limit the number of batches returned from the asset.
-                The dict structure depends on the asset type. A template of the dict can be obtained by
-                calling batch_request_options_template.
-
-        Returns:
-            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
-            get_batch_list_from_batch_request method.
-        """
-        if options is not None and not self._valid_batch_request_options(options):
-            raise BatchRequestError(
-                "Batch request options should have a subset of keys:\n"
-                f"{list(self.batch_request_options_template().keys())}\n"
-                f"but actually has the form:\n{pf(options)}\n"
-            )
-        return BatchRequest(
-            datasource_name=self._datasource.name,
-            data_asset_name=self.name,
-            options=options or {},
-        )
-
-    def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
-        return set(options.keys()).issubset(
-            set(self.batch_request_options_template().keys())
-        )
-
-    def _validate_batch_request(self, batch_request: BatchRequest) -> None:
-        """Validates the batch_request has the correct form.
-
-        Args:
-            batch_request: A batch request object to be validated.
-        """
-        if not (
-            batch_request.datasource_name == self.datasource.name
-            and batch_request.data_asset_name == self.name
-            and self._valid_batch_request_options(batch_request.options)
-        ):
-            expect_batch_request_form = BatchRequest(
-                datasource_name=self.datasource.name,
-                data_asset_name=self.name,
-                options=self.batch_request_options_template(),
-            )
-            raise BatchRequestError(
-                "BatchRequest should have form:\n"
-                f"{pf(dataclasses.asdict(expect_batch_request_form))}\n"
-                f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
-            )
-
     def batch_request_options_template(
         self,
     ) -> BatchRequestOptions:
@@ -364,7 +305,6 @@ class TableAsset(DataAsset):
         Returns:
             A list of batches that match the options specified in the batch request.
         """
-        # We translate the batch_request into a BatchSpec to hook into GX core.
         self._validate_batch_request(batch_request)
 
         batch_list: List[Batch] = []
@@ -387,6 +327,7 @@ class TableAsset(DataAsset):
                 cast(Dict, batch_spec_kwargs["batch_identifiers"]).update(
                     {column_splitter.column_name: request.options}
                 )
+            # Creating the batch_spec is our hook into the execution engine.
             batch_spec = SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
             data, markers = self.datasource.execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
@@ -427,7 +368,7 @@ class SQLDatasource(Datasource):
 
     Args:
         name: The name of this datasource
-        connection_str: The SQLAlchemy connection string used to connect to the database.
+        connection_string: The SQLAlchemy connection string used to connect to the database.
             For example: "postgresql+psycopg2://postgres:@localhost/test_database"
         assets: An optional dictionary whose keys are TableAsset names and whose values
             are TableAsset objects.
@@ -470,28 +411,4 @@ class SQLDatasource(Datasource):
             order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
             # see TableAsset._parse_order_by_sorter()
         )
-        # TODO (kilo59): custom init for `DataAsset` to accept datasource in constructor?
-        # Will most DataAssets require a `Datasource` attribute?
-        asset._datasource = self
-        self.assets[name] = asset
-        return asset
-
-    def get_asset(self, asset_name: str) -> TableAsset:
-        """Returns the TableAsset referred to by name"""
-        return super().get_asset(asset_name)
-
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> List[Batch]:
-        """A list of batches that match the BatchRequest.
-
-        Args:
-            batch_request: A batch request for this asset. Usually obtained by calling
-                get_batch_request on the asset.
-
-        Returns:
-            A list of batches that match the options specified in the batch request.
-        """
-        # We translate the batch_request into a BatchSpec to hook into GX core.
-        data_asset = self.get_asset(batch_request.data_asset_name)
-        return data_asset.get_batch_list_from_batch_request(batch_request)
+        return self.add_asset(asset)
