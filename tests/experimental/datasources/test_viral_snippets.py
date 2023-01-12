@@ -52,8 +52,8 @@ def zep_config_dict(db_file) -> dict:
                             "param_names": ["year", "month"],
                         },
                         "order_by": [
-                            {"metadata_key": "year"},
-                            {"metadata_key": "month"},
+                            {"key": "year"},
+                            {"key": "month"},
                         ],
                     },
                 },
