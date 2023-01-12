@@ -85,8 +85,7 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
         # Only sqlite returns as strings, so make date objects be strings
         if results and isinstance(results[0][0], date):
             results = [
-                (result[0].strftime("%Y-%m-%d"), result[1])
-                for result in results
+                (result[0].strftime("%Y-%m-%d"), result[1]) for result in results
             ]
 
         return results
