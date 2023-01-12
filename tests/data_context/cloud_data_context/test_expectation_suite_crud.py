@@ -134,13 +134,8 @@ def mocked_get_response(
             {
                 "data": {
                     "attributes": {
-                        "clause_id": "3199e1eb-3f68-473a-aca5-5e12324c3b92",
-                        "created_at": "2021-12-02T16:53:31.015139",
                         "created_by_id": "67dce9ed-9c41-4607-9f22-15c14cc82ac0",
-                        "deleted": False,
-                        "deleted_at": None,
                         "organization_id": "c8f9f2d0-fb5c-464b-bcc9-8a45b8144f44",
-                        "rendered_data_doc_id": None,
                         "suite": {
                             "data_asset_type": None,
                             "expectation_suite_name": "my_mock_suite",
@@ -156,6 +151,7 @@ def mocked_get_response(
                         },
                     },
                     "id": suite_id,
+                    'type': 'expectation_suite'
                 }
             },
             200,
