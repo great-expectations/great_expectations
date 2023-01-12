@@ -162,8 +162,8 @@ def test_cloud_backed_data_context_get_checkpoint_by_name(
     ge_cloud_organization_id: str,
 ) -> None:
     """
-    A Cloud-backed context should save to a Cloud-backed CheckpointStore when calling `add_checkpoint`.
-    When saving, it should use the id from the response to create the checkpoint.
+    A Cloud-backed context should get from a Cloud-backed CheckpointStore when calling `get_checkpoint`.
+    When provided only a name, it should hit ".../checkpoints?name=my-checkpoint-name"
     """
     context = empty_cloud_data_context
 
