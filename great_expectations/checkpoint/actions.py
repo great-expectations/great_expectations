@@ -10,7 +10,10 @@ import warnings
 from typing import TYPE_CHECKING, Dict, Optional, Union
 from urllib.parse import urljoin
 
+from typing_extensions import Final
+
 from great_expectations.core import ExpectationSuiteValidationResult
+from great_expectations.data_context.cloud_constants import CLOUD_APP_DEFAULT_BASE_URL
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 
 try:
@@ -152,7 +155,6 @@ class SlackNotificationAction(ValidationAction):
             module_name: great_expectations.render.renderer.slack_renderer
             class_name: SlackRenderer
           show_failed_expectations: *Optional* (boolean) shows a list of failed expectation types. default is false.
-
     """
 
     def __init__(
@@ -236,12 +238,31 @@ class SlackNotificationAction(ValidationAction):
 
         validation_success = validation_result_suite.success
         data_docs_pages = None
-
         if payload:
             # process the payload
             for action_names in payload.keys():
                 if payload[action_names]["class"] == "UpdateDataDocsAction":
                     data_docs_pages = payload[action_names]
+
+        # Assemble complete GX Cloud URL for a specific validation result
+        data_docs_urls: list[
+            dict[str, str | None]
+        ] = self.data_context.get_docs_sites_urls(
+            resource_identifier=validation_result_suite_identifier
+        )
+
+        validation_result_urls: list[str] = [
+            data_docs_url["site_url"]
+            for data_docs_url in data_docs_urls
+            if data_docs_url["site_url"]
+        ]
+        if (
+            isinstance(validation_result_suite_identifier, GXCloudIdentifier)
+            and validation_result_suite_identifier.cloud_id
+        ):
+            cloud_base_url: Final[str] = CLOUD_APP_DEFAULT_BASE_URL
+            validation_result_url = f"{cloud_base_url}?validationResultId={validation_result_suite_identifier.cloud_id}"
+            validation_result_urls.append(validation_result_url)
 
         if (
             self.notify_on == "all"
@@ -255,6 +276,7 @@ class SlackNotificationAction(ValidationAction):
                 data_docs_pages,
                 self.notify_with,
                 self.show_failed_expectations,
+                validation_result_urls,
             )
 
             # this will actually send the POST request to the Slack webapp server
