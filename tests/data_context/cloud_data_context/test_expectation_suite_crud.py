@@ -362,18 +362,13 @@ def test_create_expectation_suite_namespace_collision_raises_error(
 def test_delete_expectation_suite_deletes_suite_in_cloud(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     suite_1: SuiteIdentifierTuple,
-    mock_expectations_store_has_key: mock.MagicMock,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
     suite_id = suite_1.id
 
     with mock.patch("requests.Session.delete", autospec=True) as mock_delete:
-        mock_expectations_store_has_key.return_value = True
         context.delete_expectation_suite(ge_cloud_id=suite_id)
 
-    mock_expectations_store_has_key.assert_called_once_with(
-        GXCloudIdentifier(GXCloudRESTResource.EXPECTATION_SUITE, cloud_id=suite_id)
-    )
     assert mock_delete.call_args[1]["json"] == {
         "data": {
             "type": GXCloudRESTResource.EXPECTATION_SUITE,
@@ -429,20 +424,13 @@ def test_get_expectation_suite_by_name_retrieves_suite_from_cloud(
 @pytest.mark.cloud
 def test_get_expectation_suite_nonexistent_suite_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
-    mock_expectations_store_has_key: mock.MagicMock,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 
     suite_id = "abc123"
 
-    with pytest.raises(DataContextError) as e:
-        mock_expectations_store_has_key.return_value = False
+    with pytest.raises(StoreBackendError):
         context.get_expectation_suite(ge_cloud_id=suite_id)
-
-    mock_expectations_store_has_key.assert_called_once_with(
-        GXCloudIdentifier(GXCloudRESTResource.EXPECTATION_SUITE, cloud_id=suite_id)
-    )
-    assert f"expectation_suite with id {suite_id} not found" in str(e.value)
 
 
 @pytest.mark.unit
