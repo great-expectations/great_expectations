@@ -610,6 +610,55 @@ class CodeReferenceFilter:
             name="validate",
             filepath=pathlib.Path("great_expectations/data_asset/data_asset.py"),
         ),
+        IncludeExcludeDefinition(
+            reason="Captured in AbstractDataContext",
+            name="add_checkpoint",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/cloud_data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Captured in AbstractDataContext",
+            name="create_expectation_suite",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/cloud_data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Captured in AbstractDataContext",
+            name="get_expectation_suite",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/cloud_data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Captured in AbstractDataContext",
+            name="list_checkpoints",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/cloud_data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Captured in AbstractDataContext",
+            name="list_expectation_suite_names",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/cloud_data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Captured in AbstractDataContext",
+            name="save_expectation_suite",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/cloud_data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Captured in AbstractDataContext",
+            name="add_store",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/file_data_context.py"
+            ),
+        ),
     ]
 
     def __init__(
