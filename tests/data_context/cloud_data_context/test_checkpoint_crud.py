@@ -117,6 +117,39 @@ def mocked_get_response(
     return _mocked_get_response
 
 
+@pytest.fixture
+def mocked_get_by_name_response(
+    mock_response_factory: Callable,
+    checkpoint_config_with_ids: dict,
+    checkpoint_id: str,
+) -> Callable[[], MockResponse]:
+    def _mocked_get_by_name_response(*args, **kwargs):
+        created_by_id = "c06ac6a2-52e0-431e-b878-9df624edc8b8"
+        organization_id = "046fe9bc-c85b-4e95-b1af-e4ce36ba5384"
+
+        return mock_response_factory(
+            {
+                "data": [{
+                    "attributes": {
+                        "checkpoint_config": checkpoint_config_with_ids,
+                        "class_name": "Checkpoint",
+                        "created_by_id": created_by_id,
+                        "default_validation_id": "4cb29141-db66-4dac-a74b-8360779e3da3",
+                        "description": "My First checkpoint.",
+                        "id": checkpoint_id,
+                        "name": "oss_test_checkpoint",
+                        "organization_id": f"{organization_id}",
+                    },
+                    "id": checkpoint_id,
+                    "type": "checkpoint",
+                }],
+            },
+            200,
+        )
+
+    return _mocked_get_by_name_response
+
+
 @pytest.mark.cloud
 @pytest.mark.integration
 def test_cloud_backed_data_context_add_checkpoint(
