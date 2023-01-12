@@ -746,6 +746,39 @@ class CodeReferenceFilter:
                 "great_expectations/data_context/store/configuration_store.py"
             ),
         ),
+        IncludeExcludeDefinition(
+            reason="False match for datasource self_check",
+            name="self_check",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/expectations_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for datasource self_check",
+            name="self_check",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/html_site_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for datasource self_check",
+            name="self_check",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/json_site_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for datasource self_check",
+            name="self_check",
+            filepath=pathlib.Path("great_expectations/data_context/store/store.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for datasource self_check",
+            name="self_check",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/validations_store.py"
+            ),
+        ),
     ]
 
     def __init__(
