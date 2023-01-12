@@ -83,7 +83,7 @@ stages:
 
     jobs:
       - job: build_gallery
-        timeoutInMinutes: 300
+        timeoutInMinutes: 420
         variables:
           python.version: '3.8'
           GE_pytest_opts: ''
