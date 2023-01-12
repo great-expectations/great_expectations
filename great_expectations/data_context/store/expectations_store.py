@@ -170,6 +170,7 @@ class ExpectationsStore(Store):
         if isinstance(suite_data, list):
             if len(suite_data) == 0:
                 return None
+            suite_data: dict = suite_data[0]
         ge_cloud_suite_id: str = suite_data["id"]
         suite_dict: dict = suite_data["attributes"]["suite"]
         suite_dict["ge_cloud_id"] = ge_cloud_suite_id
