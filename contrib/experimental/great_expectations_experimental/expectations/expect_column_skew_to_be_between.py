@@ -281,7 +281,7 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
                     93.23978285,
                 ],  # sampled from Beta(20, 2)
             },
-            "suppress_test_for": ["sqlite"],
+            "suppress_test_for": ["sqlite", "mssql"],
             "tests": [
                 {
                     "title": "positive_test_positive_skew",

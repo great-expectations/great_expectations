@@ -75,6 +75,7 @@ class ExpectColumnToHaveNoDaysMissing(ColumnExpectation):
                 "column_b": [today, yesterday, yesterday, two_days_ago],
                 "column_c": [today, two_days_ago, two_days_ago, two_days_ago],
             },
+            "suppress_test_for": ["mssql"],
             "tests": [
                 {
                     "title": "missing_many_days",

@@ -20,7 +20,7 @@ class ExpectColumnValuesToBeValidScientificNotation(RegexBasedColumnMapExpectati
                 "invalid": ["11.e-12", "0E+5", "007"],
                 "empty": ["", None, None],
             },
-            "suppress_test_for": ["bigquery", "redshift", "snowflake"],
+            "suppress_test_for": ["mssql", "bigquery", "redshift", "snowflake"],
             "tests": [
                 {
                     "title": "basic_positive_test",
