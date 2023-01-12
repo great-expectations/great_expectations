@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import Dict, List, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -81,6 +81,14 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
             .limit(30)
         )
         results = sqlalchemy_engine.execute(query).fetchall()
+
+        # Only sqlite returns as strings, so make date objects be strings
+        if results and isinstance(results[0][0], date):
+            results = [
+                (result[0].strftime("%Y-%m-%d"), result[1])
+                for result in results
+            ]
+
         return results
 
 
@@ -114,7 +122,7 @@ class ExpectYesterdayCountComparedToAvgEquivalentDaysOfWeek(ColumnExpectation):
                 ),
             },
             # "column_b": [today, yesterday, yesterday, two_days_ago]},
-            "only_for": ["sqlite"],
+            "suppress_test_for": ["mssql"],
             "tests": [
                 {
                     "title": "positive test",
