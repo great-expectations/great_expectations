@@ -395,9 +395,7 @@ def test_delete_expectation_suite_nonexistent_suite_raises_error(
 
     with pytest.raises(StoreBackendError):
         with mock.patch(
-            "requests.Session.delete",
-            autospec=True,
-            side_effect=mocked_404_response
+            "requests.Session.delete", autospec=True, side_effect=mocked_404_response
         ):
             context.delete_expectation_suite(ge_cloud_id=suite_id)
 
