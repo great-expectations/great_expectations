@@ -452,7 +452,21 @@ class CodeReferenceFilter:
             reason="Referenced via legacy docs, will likely need to be included in the public API. Added here as an example include.",
             name="remove_expectation",
             filepath=pathlib.Path("great_expectations/core/expectation_suite.py"),
-        )
+        ),
+        IncludeExcludeDefinition(
+            reason="Part of our API, but typically we now use get_context().",
+            name="DataContext",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Part of our API, but typically we now use get_context().",
+            name="BaseDataContext",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/base_data_context.py"
+            ),
+        ),
     ]
 
     DEFAULT_EXCLUDES: List[IncludeExcludeDefinition] = [
