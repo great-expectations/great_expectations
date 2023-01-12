@@ -178,6 +178,7 @@ class PandasDatasource(Datasource):
     name: str
     assets: Dict[str, CSVAsset] = {}
 
+    @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
         """Return the PandasExecutionEngine unless the override is set"""
         from great_expectations.execution_engine.pandas_execution_engine import (
