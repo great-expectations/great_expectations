@@ -203,7 +203,7 @@ def get_substituted_validation_dict(
         )
         or substituted_runtime_config.get("expectation_suite_ge_cloud_id"),
         "action_list": get_updated_action_list(
-            base_action_list=substituted_runtime_config.get("action_list"),
+            base_action_list=substituted_runtime_config.get("action_list", []),
             other_action_list=validation_dict.get("action_list", {}),
         ),
         "evaluation_parameters": nested_update(
@@ -536,7 +536,8 @@ def send_sns_notification(
     sns = session.client("sns")
     try:
         response = sns.publish(**message_dict)
-    except sns.exceptions.InvalidParameterException:
+    except sns.exceptions.InvalidParameterException as err:
         logger.error(f"Received invalid for message: {validation_results}")
+        return err.__class__.__name__
     else:
         return f"Successfully posted results to {response['MessageId']} with Subject {sns_subject}"
