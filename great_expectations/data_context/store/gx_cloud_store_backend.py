@@ -225,7 +225,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 and len(response_json["data"]) == 0
             ):
                 raise StoreBackendError(
-                    f"Unable to get object in GX Cloud Store Backend: Object does not exist."
+                    "Unable to get object in GX Cloud Store Backend: Object does not exist."
                 )
             return cast(ResponsePayload, response.json())
         except json.JSONDecodeError as jsonError:
