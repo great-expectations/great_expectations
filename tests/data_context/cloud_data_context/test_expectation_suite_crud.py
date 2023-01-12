@@ -161,6 +161,44 @@ def mocked_get_response(
 
 
 @pytest.fixture
+def mocked_get_by_name_response(
+    mock_response_factory: Callable,
+    suite_1: SuiteIdentifierTuple,
+) -> Callable[[], MockResponse]:
+    suite_id = suite_1.id
+
+    def _mocked_get_by_name_response(*args, **kwargs):
+        return mock_response_factory(
+            {
+                "data": [{
+                    "attributes": {
+                        "created_by_id": "67dce9ed-9c41-4607-9f22-15c14cc82ac0",
+                        "organization_id": "c8f9f2d0-fb5c-464b-bcc9-8a45b8144f44",
+                        "suite": {
+                            "data_asset_type": None,
+                            "expectation_suite_name": "my_mock_suite",
+                            "expectations": [
+                                {
+                                    "expectation_type": "expect_column_to_exist",
+                                    "ge_cloud_id": "869771ee-a728-413d-96a6-8efc4dc70318",
+                                    "kwargs": {"column": "infinities"},
+                                    "meta": {},
+                                },
+                            ],
+                            "ge_cloud_id": suite_id,
+                        },
+                    },
+                    "id": suite_id,
+                    'type': 'expectation_suite'
+                }]
+            },
+            200,
+        )
+
+    return _mocked_get_by_name_response
+
+
+@pytest.fixture
 def mock_list_expectation_suite_names() -> mock.MagicMock:
     """
     Expects a return value to be set within the test function.
