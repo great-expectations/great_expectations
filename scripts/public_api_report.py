@@ -489,6 +489,54 @@ class CodeReferenceFilter:
                 "great_expectations/datasource/batch_kwargs_generator/batch_kwargs_generator.py"
             ),
         ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/databricks_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/glob_reader_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/manual_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/query_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/s3_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/s3_subdir_reader_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/subdir_reader_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/table_batch_kwargs_generator.py"
+            ),
+        ),
     ]
 
     def __init__(
