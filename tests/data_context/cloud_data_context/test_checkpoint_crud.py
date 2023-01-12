@@ -99,19 +99,15 @@ def mocked_get_response(
                 "data": {
                     "attributes": {
                         "checkpoint_config": checkpoint_config_with_ids,
-                        "created_at": "2022-08-02T17:55:45.107550",
+                        "class_name": "Checkpoint",
                         "created_by_id": created_by_id,
-                        "deleted": False,
-                        "deleted_at": None,
-                        "desc": None,
+                        "default_validation_id": "4cb29141-db66-4dac-a74b-8360779e3da3",
+                        "description": "My First checkpoint.",
+                        "id": checkpoint_id,
                         "name": "oss_test_checkpoint",
                         "organization_id": f"{organization_id}",
-                        "updated_at": "2022-08-02T17:55:45.107550",
                     },
                     "id": checkpoint_id,
-                    "links": {
-                        "self": f"/organizations/{organization_id}/checkpoints/{checkpoint_id}"
-                    },
                     "type": "checkpoint",
                 },
             },
