@@ -312,6 +312,7 @@ class SQLDatasource(Datasource):
     connection_string: str
     assets: Dict[str, TableAsset] = {}
 
+    @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
         """Returns the default execution engine type."""
         from great_expectations.execution_engine import SqlAlchemyExecutionEngine
