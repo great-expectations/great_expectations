@@ -390,24 +390,26 @@ def test_delete_expectation_suite_nonexistent_suite_raises_error(
 
 @pytest.mark.unit
 @pytest.mark.cloud
-def test_get_expectation_suite_retrieves_suite_from_cloud(
+def test_get_expectation_suite_by_name_retrieves_suite_from_cloud(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     suite_1: SuiteIdentifierTuple,
-    mocked_get_response: Callable[[], MockResponse],
-    mock_expectations_store_has_key: mock.MagicMock,
+    mocked_get_by_name_response: Callable[[], MockResponse],
+    ge_cloud_base_url: str,
+    ge_cloud_organization_id: str
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
     suite_id = suite_1.id
 
     with mock.patch(
-        "requests.Session.get", autospec=True, side_effect=mocked_get_response
-    ):
-        mock_expectations_store_has_key.return_value = True
-        suite = context.get_expectation_suite(ge_cloud_id=suite_id)
+        "requests.Session.get", autospec=True, side_effect=mocked_get_by_name_response
+    ) as mock_get:
+        suite = context.get_expectation_suite(expectation_suite_name=suite_1.name)
+        mock_get.assert_called_with(
+            mock.ANY,
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/expectation-suites",
+            params={"name": suite_1.name}
+        )
 
-    mock_expectations_store_has_key.assert_called_once_with(
-        GXCloudIdentifier(GXCloudRESTResource.EXPECTATION_SUITE, cloud_id=suite_id)
-    )
     assert str(suite.ge_cloud_id) == str(suite_id)
 
 
