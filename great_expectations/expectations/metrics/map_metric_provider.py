@@ -3082,8 +3082,8 @@ class MapMetricProvider(MetricProvider):
                 )
 
             if metric_fn_type in [
-                MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
                 MetricPartialFunctionTypes.MAP_CONDITION_FN,
+                MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
                 MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
             ]:
                 if not hasattr(cls, "condition_metric_name"):
@@ -3484,8 +3484,8 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
             elif metric_fn_type in [
-                MetricPartialFunctionTypes.MAP_SERIES,
                 MetricPartialFunctionTypes.MAP_FN,
+                MetricPartialFunctionTypes.MAP_SERIES,
                 MetricPartialFunctionTypes.WINDOW_FN,
             ]:
                 if not hasattr(cls, "function_metric_name"):
@@ -3519,13 +3519,13 @@ class MapMetricProvider(MetricProvider):
         base_metric_value_kwargs = {
             k: v for k, v in metric.metric_value_kwargs.items() if k != "result_format"
         }
-        dependencies = {}
+        dependencies: Dict[str, MetricConfiguration] = {}
 
         metric_suffix = ".unexpected_count"
         if metric_name.endswith(metric_suffix):
             try:
                 _ = get_metric_provider(
-                    f"{metric_name}.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
+                    f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
                     execution_engine,
                 )
                 has_aggregate_fn = True
@@ -3533,7 +3533,7 @@ class MapMetricProvider(MetricProvider):
                 has_aggregate_fn = False
             if has_aggregate_fn:
                 dependencies["metric_partial_fn"] = MetricConfiguration(
-                    metric_name=f"{metric_name}.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
+                    metric_name=f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
                     metric_domain_kwargs=metric.metric_domain_kwargs,
                     metric_value_kwargs=base_metric_value_kwargs,
                 )
