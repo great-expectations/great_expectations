@@ -82,7 +82,7 @@ class SlackRenderer(Renderer):
                 if len(validation_result_urls) == 1:
                     title_hlink = f"*<{validation_result_urls[0]} | Validation Result>*"
                 else:
-                    title_hlink = f"*Validation Result*"
+                    title_hlink = "*Validation Result*"
                 batch_validation_status_hlinks = "".join(
                     f"*Batch Validation Status*: *<{validation_result_url} | {status}>*"
                     for validation_result_url in validation_result_urls
