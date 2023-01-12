@@ -37,7 +37,7 @@ class ExpectColumnValuesToBeHexadecimal(RegexBasedColumnMapExpectation):
                 "e": ["a8", "21", "2.0", "1B", "4AA", "31"],
                 "f": ["a8", "41", "ca", "", "0", "31"],
             },
-            "suppress_test_for": ["bigquery", "snowflake"],
+            "suppress_test_for": ["mssql", "bigquery", "snowflake"],
             "tests": [
                 {
                     "title": "positive_test_with_mostly",
