@@ -181,13 +181,13 @@ class ValidationGraph:
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
         show_progress_bars: bool = True,
     ) -> Tuple[
-        Dict[Tuple[str, str, str], MetricValue],
+        dict[MetricConfigurationID, MetricValue],
         Dict[
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ],
     ]:
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+        resolved_metrics: dict[MetricConfigurationID, MetricValue] = {}
 
         # updates graph with aborted metrics
         aborted_metrics_info: Dict[
@@ -204,7 +204,7 @@ class ValidationGraph:
 
     def _resolve(  # noqa: C901 - complexity 16
         self,
-        metrics: Dict[Tuple[str, str, str], MetricValue],
+        metrics: dict[MetricConfigurationID, MetricValue],
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,  # Set to low number (e.g., 3) to suppress progress bar for small graphs.
         show_progress_bars: bool = True,
@@ -320,7 +320,7 @@ class ValidationGraph:
 
     def _parse(
         self,
-        metrics: Dict[Tuple[str, str, str], MetricValue],
+        metrics: dict[MetricConfigurationID, MetricValue],
     ) -> Tuple[Set[MetricConfiguration], Set[MetricConfiguration]]:
         """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
         validation graph (a graph structure of metric ids) edges"""

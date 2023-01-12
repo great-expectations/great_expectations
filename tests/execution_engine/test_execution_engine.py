@@ -178,10 +178,10 @@ def test_resolve_metrics_with_aggregates_and_column_map():
     df = pd.DataFrame({"a": [1, 2, 3, None]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
 
-    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+    metrics: dict[MetricConfigurationID, MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: Dict[Tuple[str, str, str], MetricValue]
+    results: dict[MetricConfigurationID, MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
 
@@ -262,10 +262,10 @@ def test_resolve_metrics_with_extraneous_value_key():
     df = pd.DataFrame({"a": [1, 2, 3, None]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
 
-    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+    metrics: dict[MetricConfigurationID, MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: Dict[Tuple[str, str, str], MetricValue]
+    results: dict[MetricConfigurationID, MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
 

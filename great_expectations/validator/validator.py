@@ -354,7 +354,7 @@ class Validator:
         self,
         metric_configurations: List[MetricConfiguration],
         runtime_configuration: Optional[dict] = None,
-    ) -> Dict[Tuple[str, str, str], MetricValue]:
+    ) -> dict[MetricConfigurationID, MetricValue]:
         """
         Convenience method that computes requested metrics (specified as elements of "MetricConfiguration" list).
 
@@ -1007,7 +1007,7 @@ class Validator:
             )
         )
 
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
+        resolved_metrics: dict[MetricConfigurationID, MetricValue]
 
         try:
             (
@@ -1160,12 +1160,12 @@ class Validator:
         processed_configurations: List[ExpectationConfiguration],
         show_progress_bars: bool,
     ) -> Tuple[
-        Dict[Tuple[str, str, str], MetricValue],
+        dict[MetricConfigurationID, MetricValue],
         List[ExpectationValidationResult],
         List[ExpectationConfiguration],
     ]:
         # Resolve overall suite-level graph and process any MetricResolutionError type exceptions that might occur.
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
+        resolved_metrics: dict[MetricConfigurationID, MetricValue]
         aborted_metrics_info: Dict[
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
@@ -1930,7 +1930,7 @@ class Validator:
     @staticmethod
     def _parse_validation_graph(
         validation_graph: ValidationGraph,
-        metrics: Dict[Tuple[str, str, str], MetricValue],
+        metrics: dict[MetricConfigurationID, MetricValue],
     ) -> Tuple[Set[MetricConfiguration], Set[MetricConfiguration]]:
         """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
         validation graph (a graph structure of metric ids) edges"""

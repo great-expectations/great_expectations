@@ -319,7 +319,7 @@ def get_parameter_value(
 def get_resolved_metrics_by_key(
     validator: Validator,
     metric_configurations_by_key: Dict[str, List[MetricConfiguration]],
-) -> Dict[str, Dict[Tuple[str, str, str], MetricValue]]:
+) -> Dict[str, dict[MetricConfigurationID, MetricValue]]:
     """
     Compute (resolve) metrics for every column name supplied on input.
 
@@ -332,7 +332,7 @@ def get_resolved_metrics_by_key(
 
     Returns:
         Dictionary of the form {
-            "my_key": Dict[Tuple[str, str, str], MetricValue],
+            "my_key": dict[MetricConfigurationID, MetricValue],
         }
     """
     key: str
@@ -398,7 +398,7 @@ def get_resolved_metrics_by_key(
         )
     ]
 
-    resolved_metrics_by_key: Dict[str, Dict[Tuple[str, str, str], MetricValue]] = {
+    resolved_metrics_by_key: Dict[str, dict[MetricConfigurationID, MetricValue]] = {
         key: {
             metric_configuration.id: resolved_metrics[metric_configuration.id]
             for metric_configuration in metric_configurations_by_key[key]

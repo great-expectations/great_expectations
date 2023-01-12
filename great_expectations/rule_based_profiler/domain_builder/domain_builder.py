@@ -118,13 +118,13 @@ class DomainBuilder(ABC, Builder):
         }
 
         resolved_metrics_by_batch_id: Dict[
-            str, Dict[Tuple[str, str, str], MetricValue]
+            str, dict[MetricConfigurationID, MetricValue]
         ] = get_resolved_metrics_by_key(
             validator=validator,  # type: ignore[arg-type] # could be None
             metric_configurations_by_key=metric_configurations_by_batch_id,
         )
 
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
+        resolved_metrics: dict[MetricConfigurationID, MetricValue]
         metric_value: Any
         table_row_count_lists_by_batch_id: Dict[str, List[int]] = {
             batch_id: [metric_value for metric_value in resolved_metrics.values()]  # type: ignore[misc] # incompatible values

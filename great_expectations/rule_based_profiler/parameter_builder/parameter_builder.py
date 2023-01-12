@@ -472,7 +472,7 @@ specified (empty "metric_name" value detected)."""
             )
         )
 
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
+        resolved_metrics: dict[MetricConfigurationID, MetricValue]
         aborted_metrics_info: Dict[
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],

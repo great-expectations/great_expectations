@@ -148,7 +148,7 @@ class MetricsCalculator:
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
-    ) -> Dict[Tuple[str, str, str], MetricValue]:
+    ) -> dict[MetricConfigurationID, MetricValue]:
         """
         Args:
             metric_configurations: List of desired MetricConfiguration objects to be resolved.
@@ -162,7 +162,7 @@ class MetricsCalculator:
             metric_configurations=metric_configurations,
             runtime_configuration=runtime_configuration,
         )
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
+        resolved_metrics: dict[MetricConfigurationID, MetricValue]
         aborted_metrics_info: Dict[
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
@@ -213,7 +213,7 @@ class MetricsCalculator:
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
     ) -> Tuple[
-        Dict[Tuple[str, str, str], MetricValue],
+        dict[MetricConfigurationID, MetricValue],
         Dict[
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
@@ -228,7 +228,7 @@ class MetricsCalculator:
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
         """
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
+        resolved_metrics: dict[MetricConfigurationID, MetricValue]
         aborted_metrics_info: Dict[
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
@@ -256,7 +256,7 @@ class MetricsCalculator:
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
     ) -> Tuple[
-        Dict[Tuple[str, str, str], MetricValue],
+        dict[MetricConfigurationID, MetricValue],
         Dict[
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
@@ -274,7 +274,7 @@ class MetricsCalculator:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
             Aborted metrics information, with metric ID as key.
         """
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
+        resolved_metrics: dict[MetricConfigurationID, MetricValue]
         aborted_metrics_info: Dict[
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],

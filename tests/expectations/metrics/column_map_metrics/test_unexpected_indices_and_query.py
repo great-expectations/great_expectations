@@ -79,11 +79,11 @@ def _build_table_columns_and_unexpected(
         Tuple with MetricConfigurations corresponding to unexpected_condition and table_columns metric, as well as metrics dict.
 
     """
-    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+    metrics: dict[MetricConfigurationID, MetricValue] = {}
 
     # get table_columns_metric
     table_columns_metric: MetricConfiguration
-    results: Dict[Tuple[str, str, str], MetricValue]
+    results: dict[MetricConfigurationID, MetricValue]
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
@@ -132,7 +132,7 @@ def test_pd_unexpected_index_list_metric_without_id_pk(animal_table_df):
         "unexpected_condition": unexpected_columns_metric,
         "table.columns": table_columns_metric,
     }
-    results: Dict[Tuple[str, str, str], MetricValue] = engine.resolve_metrics(
+    results: dict[MetricConfigurationID, MetricValue] = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
     for (key, val) in results.items():
@@ -162,7 +162,7 @@ def test_pd_unexpected_index_list_metric_with_id_pk(
         "unexpected_condition": unexpected_columns_metric,
         "table.columns": table_columns_metric,
     }
-    results: Dict[Tuple[str, str, str], MetricValue] = engine.resolve_metrics(
+    results: dict[MetricConfigurationID, MetricValue] = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_index_list,), metrics=metrics
     )
     for (key, val) in results.items():
@@ -196,7 +196,7 @@ def test_sa_unexpected_index_list_metric_with_id_pk(
         "unexpected_condition": unexpected_columns_metric,
         "table.columns": table_columns_metric,
     }
-    results: Dict[Tuple[str, str, str], MetricValue] = engine.resolve_metrics(
+    results: dict[MetricConfigurationID, MetricValue] = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_index_list,), metrics=metrics
     )
     for (key, val) in results.items():
@@ -237,7 +237,7 @@ def test_sa_unexpected_index_list_metric_without_id_pk(sa, animal_table_df):
         "table.columns": table_columns_metric,
     }
     with pytest.raises(MetricResolutionError):
-        results: Dict[Tuple[str, str, str], MetricValue] = engine.resolve_metrics(
+        results: dict[MetricConfigurationID, MetricValue] = engine.resolve_metrics(
             metrics_to_resolve=(unexpected_index_list,), metrics=metrics
         )
 
@@ -264,7 +264,7 @@ def test_sa_unexpected_index_query_metric_with_id_pk(
         "unexpected_condition": unexpected_columns_metric,
         "table.columns": table_columns_metric,
     }
-    results: Dict[Tuple[str, str, str], MetricValue] = engine.resolve_metrics(
+    results: dict[MetricConfigurationID, MetricValue] = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_index_query,), metrics=metrics
     )
     for (key, val) in results.items():
@@ -304,6 +304,6 @@ def test_sa_unexpected_index_query_metric_without_id_pk(sa, animal_table_df):
         "table.columns": table_columns_metric,
     }
     with pytest.raises(MetricResolutionError):
-        results: Dict[Tuple[str, str, str], MetricValue] = engine.resolve_metrics(
+        results: dict[MetricConfigurationID, MetricValue] = engine.resolve_metrics(
             metrics_to_resolve=(unexpected_index_query,), metrics=metrics
         )
