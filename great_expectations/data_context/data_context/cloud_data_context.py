@@ -526,10 +526,6 @@ class CloudDataContext(SerializableDataContext):
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             cloud_id=ge_cloud_id,
         )
-        if not self.expectations_store.has_key(key):  # noqa: W601
-            raise gx_exceptions.DataContextError(
-                f"expectation_suite with id {ge_cloud_id} does not exist."
-            )
 
         return self.expectations_store.remove_key(key)
 
