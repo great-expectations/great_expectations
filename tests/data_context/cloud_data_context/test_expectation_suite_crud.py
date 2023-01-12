@@ -10,7 +10,7 @@ from great_expectations.data_context.data_context.cloud_data_context import (
 )
 from great_expectations.data_context.types.base import DataContextConfig, GXCloudConfig
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
-from great_expectations.exceptions.exceptions import DataContextError
+from great_expectations.exceptions.exceptions import DataContextError, StoreBackendError
 from great_expectations.util import get_context
 from tests.data_context.conftest import MockResponse
 
@@ -155,6 +155,19 @@ def mocked_get_response(
                 }
             },
             200,
+        )
+
+    return _mocked_get_response
+
+
+@pytest.fixture
+def mocked_404_response(
+    mock_response_factory: Callable,
+) -> Callable[[], MockResponse]:
+    def _mocked_get_response(*args, **kwargs):
+        return mock_response_factory(
+            {},
+            404,
         )
 
     return _mocked_get_response
@@ -375,19 +388,18 @@ def test_delete_expectation_suite_deletes_suite_in_cloud(
 def test_delete_expectation_suite_nonexistent_suite_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     suite_1: SuiteIdentifierTuple,
-    mock_expectations_store_has_key: mock.MagicMock,
+    mocked_404_response,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
     suite_id = suite_1.id
 
-    with pytest.raises(DataContextError) as e:
-        mock_expectations_store_has_key.return_value = False
-        context.delete_expectation_suite(ge_cloud_id=suite_id)
-
-    mock_expectations_store_has_key.assert_called_once_with(
-        GXCloudIdentifier(GXCloudRESTResource.EXPECTATION_SUITE, cloud_id=suite_id)
-    )
-    assert f"expectation_suite with id {suite_id} does not exist" in str(e.value)
+    with pytest.raises(StoreBackendError):
+        with mock.patch(
+            "requests.Session.delete",
+            autospec=True,
+            side_effect=mocked_404_response
+        ):
+            context.delete_expectation_suite(ge_cloud_id=suite_id)
 
 
 @pytest.mark.unit
