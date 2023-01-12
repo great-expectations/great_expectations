@@ -1,6 +1,6 @@
 import random
 import uuid
-from typing import Dict
+from typing import Dict, Union
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_suite import ExpectationSuiteSchema
@@ -166,11 +166,15 @@ class ExpectationsStore(Store):
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object
         """
-        ge_cloud_expectation_suite_id = response_json["data"]["id"]
-        expectation_suite_dict = response_json["data"]["attributes"]["suite"]
-        expectation_suite_dict["ge_cloud_id"] = ge_cloud_expectation_suite_id
+        suite_data: Union[dict, list] = response_json["data"]
+        if isinstance(suite_data, list):
+            if len(suite_data) == 0:
+                return None
+        ge_cloud_suite_id: str = suite_data["id"]
+        suite_dict: dict = suite_data["attributes"]["suite"]
+        suite_dict["ge_cloud_id"] = ge_cloud_suite_id
 
-        return expectation_suite_dict
+        return suite_dict
 
     def get(self, key) -> ExpectationSuite:
         return super().get(key)  # type: ignore[return-value]
