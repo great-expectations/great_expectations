@@ -9,7 +9,7 @@ from typing import (
     Dict,
     Generic,
     List,
-    Mapping,
+    MutableMapping,
     Optional,
     Set,
     Type,
@@ -57,7 +57,17 @@ class BatchRequest:
     options: BatchRequestOptions
 
 
+class BatchRequestError(Exception):
+    pass
+
+
 class DataAsset(ExperimentalBaseModel):
+    # To subclass a DataAsset one must define `type` as a Class literal explicitly on the sublass
+    # as well as implementing the methods in the `Abstract Methods` section below.
+    # Some examples:
+    # * type: Literal["MyAssetTypeID"] = "MyAssetTypeID",
+    # * type: Literal["table"] = "table"
+    # * type: Literal["csv"] = "csv"
     name: str
     type: str
 
@@ -69,21 +79,103 @@ class DataAsset(ExperimentalBaseModel):
         return self._datasource
 
     # TODO (kilo): remove setter and add custom init for DataAsset to inject datasource in constructor??
+    # This setter is non-functional: https://github.com/pydantic/pydantic/issues/3395
+    # There is some related discussion linked from that ticket which may be a workaround.
     @datasource.setter
     def datasource(self, ds: Datasource):
         assert isinstance(ds, Datasource)
         self._datasource = ds
 
-    def get_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
+    # Abstract Methods
+    def batch_request_options_template(
+        self,
+    ) -> BatchRequestOptions:
+        """A BatchRequestOptions template for get_batch_request.
+
+        Returns:
+            A BatchRequestOptions dictionary with the correct shape that get_batch_request
+            will understand. All the option values are defaulted to None.
+        """
         raise NotImplementedError
 
+    def get_batch_list_from_batch_request(
+        self, batch_request: BatchRequest
+    ) -> List[Batch]:
+        raise NotImplementedError
 
+    # End Abstract Methods
+
+    def get_batch_request(
+        self, options: Optional[BatchRequestOptions] = None
+    ) -> BatchRequest:
+        """A batch request that can be used to obtain batches for this DataAsset.
+
+        Args:
+            options: A dict that can be used to limit the number of batches returned from the asset.
+                The dict structure depends on the asset type. A template of the dict can be obtained by
+                calling batch_request_options_template.
+
+        Returns:
+            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
+            get_batch_list_from_batch_request method.
+        """
+        if options is not None and not self._valid_batch_request_options(options):
+            raise BatchRequestError(
+                "Batch request options should have a subset of keys:\n"
+                f"{list(self.batch_request_options_template().keys())}\n"
+                f"but actually has the form:\n{pf(options)}\n"
+            )
+        return BatchRequest(
+            datasource_name=self._datasource.name,
+            data_asset_name=self.name,
+            options=options or {},
+        )
+
+    def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
+        return set(options.keys()).issubset(
+            set(self.batch_request_options_template().keys())
+        )
+
+    def _validate_batch_request(self, batch_request: BatchRequest) -> None:
+        """Validates the batch_request has the correct form.
+
+        Args:
+            batch_request: A batch request object to be validated.
+        """
+        if not (
+            batch_request.datasource_name == self.datasource.name
+            and batch_request.data_asset_name == self.name
+            and self._valid_batch_request_options(batch_request.options)
+        ):
+            expect_batch_request_form = BatchRequest(
+                datasource_name=self.datasource.name,
+                data_asset_name=self.name,
+                options=self.batch_request_options_template(),
+            )
+            raise BatchRequestError(
+                "BatchRequest should have form:\n"
+                f"{pf(dataclasses.asdict(expect_batch_request_form))}\n"
+                f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
+            )
+
+
+# If a Datasource can have more than 1 DataAssetType, this will need to change.
 DataAssetType = TypeVar("DataAssetType", bound=DataAsset)
 
 
 class Datasource(
     ExperimentalBaseModel, Generic[DataAssetType], metaclass=MetaDatasource
 ):
+    # To subclass Datasource one needs to define:
+    # asset_types
+    # type
+    # assets
+    #
+    # The important part of defining `assets` is setting the Dict type correctly.
+    # In addition, one must define the methods in the `Abstract Methods` section below.
+    # If one writes a class level docstring, this will become the documenation for the
+    # data context method `data_context.sources.add_my_datasource` method.
+
     # class attrs
     asset_types: ClassVar[List[Type[DataAsset]]] = []
     # Datasource instance attrs but these will be fed into the `execution_engine` constructor
@@ -100,7 +192,7 @@ class Datasource(
     # instance attrs
     type: str
     name: str
-    assets: Mapping[str, DataAssetType] = {}
+    assets: MutableMapping[str, DataAssetType] = {}
     _execution_engine: ExecutionEngine = pydantic.PrivateAttr()
 
     def __init__(self, **kwargs):
@@ -141,26 +233,20 @@ class Datasource(
         """Returns the execution engine to be used"""
         return self.execution_engine_override or self.execution_engine_type()
 
-    def execution_engine_type(self) -> Type[ExecutionEngine]:
-        """Return the ExecutionEngine type use for this Datasource"""
-        raise NotImplementedError(
-            "One needs to implement 'execution_engine_type' on a Datasource subclass"
-        )
-
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> List[Batch]:
-        """Processes a batch request and returns a list of batches.
+        """A list of batches that correspond to the BatchRequest.
 
         Args:
-            batch_request: contains parameters necessary to retrieve batches.
+            batch_request: A batch request for this asset. Usually obtained by calling
+                get_batch_request on the asset.
 
         Returns:
-            A list of batches. The list may be empty.
+            A list of batches that match the options specified in the batch request.
         """
-        raise NotImplementedError(
-            f"{self.__class__.__name__} must implement `.get_batch_list_from_batch_request()`"
-        )
+        data_asset = self.get_asset(batch_request.data_asset_name)
+        return data_asset.get_batch_list_from_batch_request(batch_request)
 
     def get_asset(self, asset_name: str) -> DataAssetType:
         """Returns the DataAsset referred to by name"""
@@ -171,6 +257,27 @@ class Datasource(
             raise LookupError(
                 f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
             ) from exc
+
+    def add_asset(self, asset: DataAssetType) -> DataAssetType:
+        """Adds an asset to a datasource
+
+        Args:
+            asset: The DataAsset to be added to this datasource.
+        """
+        # The setter for datasource is non-functional so we access _datasource directly.
+        # See the comment in DataAsset for more information.
+        asset._datasource = self
+        self.assets[asset.name] = asset
+        return asset
+
+    # Abstract Methods
+    def execution_engine_type(self) -> Type[ExecutionEngine]:
+        """Return the ExecutionEngine type use for this Datasource"""
+        raise NotImplementedError(
+            "One needs to implement 'execution_engine_type' on a Datasource subclass"
+        )
+
+    # End Abstract Methods
 
 
 class Batch:
