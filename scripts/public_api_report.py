@@ -586,6 +586,11 @@ class CodeReferenceFilter:
             name="get_expectation_suite",
             filepath=pathlib.Path("great_expectations/data_asset/data_asset.py"),
         ),
+        IncludeExcludeDefinition(
+            reason="False match for context.save_expectation_suite() and validator.save_expectation_suite()",
+            name="save_expectation_suite",
+            filepath=pathlib.Path("great_expectations/data_asset/data_asset.py"),
+        ),
     ]
 
     def __init__(
