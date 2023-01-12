@@ -423,14 +423,17 @@ def test_get_expectation_suite_by_name_retrieves_suite_from_cloud(
 @pytest.mark.unit
 @pytest.mark.cloud
 def test_get_expectation_suite_nonexistent_suite_raises_error(
-    empty_base_data_context_in_cloud_mode: CloudDataContext,
+    empty_base_data_context_in_cloud_mode: CloudDataContext, mocked_404_response
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 
     suite_id = "abc123"
 
     with pytest.raises(StoreBackendError):
-        context.get_expectation_suite(ge_cloud_id=suite_id)
+        with mock.patch(
+            "requests.Session.get", autospec=True, side_effect=mocked_404_response
+        ):
+            context.get_expectation_suite(ge_cloud_id=suite_id)
 
 
 @pytest.mark.unit
