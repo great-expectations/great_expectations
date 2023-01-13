@@ -12,8 +12,8 @@ try:
 except ImportError:
     sqlalchemy = None
     create_engine = None
-    Engine = None
     Connection = None
+    Engine = None
     SQLAlchemyError = None
     logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
 
