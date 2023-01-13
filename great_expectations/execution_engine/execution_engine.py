@@ -441,6 +441,8 @@ class ExecutionEngine(ABC):
         Directly-computable "MetricConfiguration" must have non-NULL metric function ("metric_fn").  Aggregate metrics
         have NULL metric function, but non-NULL partial metric function ("metric_partial_fn"); aggregates are bundled.
 
+        See documentation in "MetricProvider._register_metric_functions()" for in-depth description of this mechanism.
+
         Args:
             metrics_to_resolve: the metrics to evaluate
             metrics: already-computed metrics currently available to the engine
@@ -466,7 +468,7 @@ class ExecutionEngine(ABC):
         ]
         metric_class: MetricProvider
         metric_fn: Union[Callable, None]
-        metric_partial_aggregate_fn: sa.func | F
+        metric_aggregate_fn: sa.func | F
         metric_provider_kwargs: dict
         compute_domain_kwargs: dict
         accessor_domain_kwargs: dict
@@ -492,7 +494,7 @@ class ExecutionEngine(ABC):
             if metric_fn is None:
                 try:
                     (
-                        metric_partial_aggregate_fn,
+                        metric_aggregate_fn,
                         compute_domain_kwargs,
                         accessor_domain_kwargs,
                     ) = resolved_metric_dependencies_by_metric_name.pop(
@@ -506,7 +508,7 @@ class ExecutionEngine(ABC):
                 metric_fn_bundle_configurations.append(
                     MetricComputationConfiguration(
                         metric_configuration=metric_to_resolve,
-                        metric_fn=metric_partial_aggregate_fn,
+                        metric_fn=metric_aggregate_fn,
                         metric_provider_kwargs=metric_provider_kwargs,
                         compute_domain_kwargs=compute_domain_kwargs,
                         accessor_domain_kwargs=accessor_domain_kwargs,

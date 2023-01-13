@@ -139,6 +139,30 @@ class MetricProvider(metaclass=MetaMetricProvider):
                     # This is not a metric (valid metrics possess exectly one metric function).
                     return
 
+                """
+                Basic metric implementations (defined by specifying "metric_name" class variable in "metric_class") use
+                either "@metric_value" decorator (with default "metric_fn_type" set to "MetricFunctionTypes.VALUE"); or
+                "@metric_partial" decorator with specification "partial_fn_type=MetricPartialFunctionTypes.AGGREGATE_FN"
+                (which ultimately sets "metric_fn_type" of inner function to this value); or "@column_aggregate_value"
+                decorator (with default "metric_fn_type" set to "MetricFunctionTypes.VALUE"); or (applicable for column
+                domain metrics only) "column_aggregate_partial" decorator with "partial_fn_type" explicitly set to
+                "MetricPartialFunctionTypes.AGGREGATE_FN".  When "metric_fn_type" of metric implementation function is
+                of "aggregate partial" type ("MetricPartialFunctionTypes.AGGREGATE_FN"), underlying backend (e.g., SQL
+                or Spark) employs "deferred execution" (gather computation needs to build execution plan, then execute
+                all computations combined).  Deferred aggregate function calls are bundled (applies to SQL and Spark).
+                To instruct "ExecutionEngine" accordingly, original metric is registered with its "declared" name, but
+                with "metric_provider" function omitted (set to "None"), and additional "AGGREGATE_FN" metric, with its
+                "metric_provider" set to (decorated) implementation function, defined in metric class, is registered.
+                Then "AGGREGATE_FN" metric can specified with key "metric_partial_fn" as evaluation metric dependency.
+                By convention, aggregate partial metric implementation functions return three-valued tuple, containing
+                deferred execution metric implementation function of corresponding "ExecutionEngine" backend (called
+                "metric_aggregate") as well as "compute_domain_kwargs" and "accessor_domain_kwargs", which are relevant
+                for bundled computation and result access, respectively.  When "ExecutionEngine.resolve_metrics()" finds
+                no "metric_provider" (metric_fn being "None"), it then obtains this three-valued tuple from dictionary
+                of "resolved_metric_dependencies_by_metric_name" using previously declared "metric_partial_fn" key (as
+                described above), composes full metric execution configuration structure, and adds this configuration
+                to list of metrics to be resolved as one bundle (specifics pertaining to "ExecutionEngine" subclasses).
+                """
                 if metric_fn_type not in [
                     MetricFunctionTypes.VALUE,
                     MetricPartialFunctionTypes.AGGREGATE_FN,
@@ -217,22 +241,26 @@ support "{MetricFunctionTypes.VALUE}" and "{MetricPartialFunctionTypes.AGGREGATE
         runtime_configuration: Optional[dict] = None,
     ):
         dependencies: Dict[str, MetricConfiguration] = {}
-        if execution_engine is not None:
-            metric_name = metric.metric_name
-            try:
-                _ = get_metric_provider(
-                    f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
-                    execution_engine,
-                )
-                has_aggregate_fn = True
-            except gx_exceptions.MetricProviderError:
-                has_aggregate_fn = False
 
-            if has_aggregate_fn:
-                dependencies["metric_partial_fn"] = MetricConfiguration(
-                    metric_name=f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
-                    metric_domain_kwargs=metric.metric_domain_kwargs,
-                    metric_value_kwargs=metric.metric_value_kwargs,
-                )
+        if execution_engine is None:
+            return dependencies
+
+        metric_name = metric.metric_name
+        try:
+            _ = get_metric_provider(
+                f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+                execution_engine,
+            )
+            has_aggregate_fn = True
+        except gx_exceptions.MetricProviderError:
+            has_aggregate_fn = False
+
+        # Documentation in "MetricProvider._register_metric_functions()" explains registration/dependency protocol.
+        if has_aggregate_fn:
+            dependencies["metric_partial_fn"] = MetricConfiguration(
+                metric_name=f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+                metric_value_kwargs=metric.metric_value_kwargs,
+            )
 
         return dependencies
