@@ -657,11 +657,15 @@ def test_site_builder_usage_statistics_enabled(
     index_page_path = site_builder_return_obj[0]
     links_dict = site_builder_return_obj[1]
     expectation_suite_pages = [
-        file_relative_path(index_page_path, expectation_suite_link_dict["filepath"])
+        file_relative_path(
+            index_page_path, expectation_suite_link_dict["filepath"], strict=False
+        )
         for expectation_suite_link_dict in links_dict["expectations_links"]
     ]
     profiling_results_pages = [
-        file_relative_path(index_page_path, profiling_link_dict["filepath"])
+        file_relative_path(
+            index_page_path, profiling_link_dict["filepath"], strict=False
+        )
         for profiling_link_dict in links_dict["profiling_links"]
     ]
 
@@ -708,11 +712,15 @@ def test_site_builder_usage_statistics_disabled(
     index_page_path = site_builder_return_obj[0]
     links_dict = site_builder_return_obj[1]
     expectation_suite_pages = [
-        file_relative_path(index_page_path, expectation_suite_link_dict["filepath"])
+        file_relative_path(
+            index_page_path, expectation_suite_link_dict["filepath"], strict=False
+        )
         for expectation_suite_link_dict in links_dict["expectations_links"]
     ]
     profiling_results_pages = [
-        file_relative_path(index_page_path, profiling_link_dict["filepath"])
+        file_relative_path(
+            index_page_path, profiling_link_dict["filepath"], strict=False
+        )
         for profiling_link_dict in links_dict["profiling_links"]
     ]
 
