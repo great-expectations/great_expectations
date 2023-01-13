@@ -160,6 +160,9 @@ class CSVAsset(DataAsset):
 
             batch_metadata = copy.deepcopy(request.options)
             batch_metadata["path"] = path
+
+            # These pydantic annotations are postponed due to circular imports. This will set the annotations before we
+            # instantiate the Batch class since we can import them above.
             Batch.update_forward_refs(
                 BatchData=BatchData,
                 BatchDefinition=BatchDefinition,
