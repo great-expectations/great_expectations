@@ -389,9 +389,9 @@ class Batch(ExperimentalBaseModel):
 
     # TODO: These legacy fields are currently required. They are only used in usage stats so we
     #       should figure out a better way to anonymize and delete them.
-    legacy_batch_markers: BatchKwargs  # Due to circular imports we can't use BatchMarkers
-    legacy_batch_spec: BatchSpec
-    legacy_batch_definition: SerializableDictDot  # Due to circular imports we can't use BatchDefinition
+    batch_markers: BatchKwargs  # Due to circular imports we can't use BatchMarkers
+    batch_spec: BatchSpec
+    batch_definition: SerializableDictDot  # Due to circular imports we can't use BatchDefinition
 
     class Config:
         allow_mutation = False
