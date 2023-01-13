@@ -22,6 +22,9 @@ from great_expectations.data_context.types.resource_identifiers import (
     ComputedMetricIdentifier,
 )
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.self_check.sqlalchemy_connection_manager import (
+    connection_manager,
+)
 from great_expectations.util import (
     filter_properties_dict,
     get_sqlalchemy_url,
@@ -51,33 +54,6 @@ except ImportError:
     scoped_session = None
     sessionmaker = None
     AlembicConfig = None
-
-
-# TODO: <Alex>ALEX</Alex>
-class SqlAlchemyConnectionManager:
-    def __init__(self) -> None:
-        self.lock = threading.Lock()
-        self._connections: Dict[str, "Connection"] = {}  # noqa: F821
-
-    def get_engine(self, connection_string):
-        if sa is not None:
-            with self.lock:
-                if connection_string not in self._connections:
-                    try:
-                        engine = sa.create_engine(connection_string)
-                        conn = engine.connect()
-                        self._connections[connection_string] = conn
-                    except (ImportError, SQLAlchemyError) as e:
-                        print(
-                            f'Unable to establish connection with {connection_string} -- exception "{e}" occurred.'
-                        )
-                        raise
-                return self._connections[connection_string]
-        return None
-
-
-connection_manager = SqlAlchemyConnectionManager()
-# TODO: <Alex>ALEX</Alex>
 
 
 class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
