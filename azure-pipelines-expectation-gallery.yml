@@ -8,7 +8,7 @@
 # to ensure that the gallery is kept to-up-date with change.
 
 schedules:
-- cron: 0 1 * * *
+- cron: 0 7 * * *
   displayName: Scheduled Runs
   branches:
     include:

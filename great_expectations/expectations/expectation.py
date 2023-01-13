@@ -1303,6 +1303,7 @@ class Expectation(metaclass=MetaExpectation):
         raise_exceptions_for_backends: bool = False,
         ignore_suppress: bool = False,
         ignore_only_for: bool = False,
+        for_gallery: bool = False,
         debug_logger: Optional[logging.Logger] = None,
         only_consider_these_backends: Optional[List[str]] = None,
         context: Optional[AbstractDataContext] = None,
@@ -1453,6 +1454,14 @@ class Expectation(metaclass=MetaExpectation):
             for test_result in test_results
             if test_result.error_diagnostics
         ]
+
+        # If run for the gallery, don't include a bunch of stuff
+        if for_gallery:
+            examples = []
+            gallery_examples = []
+            renderers = []
+            test_results = []
+            errors = []
 
         return ExpectationDiagnostics(
             library_metadata=library_metadata,

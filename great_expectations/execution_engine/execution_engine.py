@@ -58,6 +58,10 @@ from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
+    # noinspection PyPep8Naming
+    import pyspark.sql.functions as F
+    import sqlalchemy as sa
+
     from great_expectations.core.batch import (
         BatchData,
         BatchDataType,
@@ -98,7 +102,7 @@ class MetricComputationConfiguration(DictDot):
     """
 
     metric_configuration: MetricConfiguration
-    metric_fn: Any
+    metric_fn: sa.func | F
     metric_provider_kwargs: dict
     compute_domain_kwargs: Optional[dict] = None
     accessor_domain_kwargs: Optional[dict] = None
@@ -493,6 +497,8 @@ class ExecutionEngine(ABC):
         Directly-computable "MetricConfiguration" must have non-NULL metric function ("metric_fn").  Aggregate metrics
         have NULL metric function, but non-NULL partial metric function ("metric_partial_fn"); aggregates are bundled.
 
+        See documentation in "MetricProvider._register_metric_functions()" for in-depth description of this mechanism.
+
         Args:
             metrics_to_resolve: the metrics to evaluate
             metrics: already-computed metrics currently available to the engine
@@ -534,7 +540,8 @@ class ExecutionEngine(ABC):
             str, Union[MetricValue, Tuple[Any, dict, dict]]
         ]
         metric_class: MetricProvider
-        metric_fn: Any
+        metric_fn: Union[Callable, None]
+        metric_aggregate_fn: sa.func | F
         metric_provider_kwargs: dict
         compute_domain_kwargs: dict
         accessor_domain_kwargs: dict
@@ -564,10 +571,10 @@ class ExecutionEngine(ABC):
             if metric_fn is None:
                 try:
                     (
-                        metric_fn,
+                        metric_aggregate_fn,
                         compute_domain_kwargs,
                         accessor_domain_kwargs,
-                    ) = resolved_metric_dependencies_by_metric_name.pop(  # type: ignore[misc,assignment]
+                    ) = resolved_metric_dependencies_by_metric_name.pop(
                         "metric_partial_fn"
                     )
                 except KeyError as e:
@@ -588,47 +595,13 @@ class ExecutionEngine(ABC):
                 metric_fn_bundle_configurations.append(
                     MetricComputationConfiguration(
                         metric_configuration=metric_to_resolve,
-                        metric_fn=metric_fn,
+                        metric_fn=metric_aggregate_fn,
                         metric_provider_kwargs=metric_provider_kwargs,
                         compute_domain_kwargs=compute_domain_kwargs,
                         accessor_domain_kwargs=accessor_domain_kwargs,
                     )
                 )
             else:
-                # TODO: <Alex>ALEX</Alex>
-                # metric_fn_type: Union[MetricFunctionTypes, MetricPartialFunctionTypes] = getattr(metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE)
-                # TODO: <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX</Alex>
-                # metric_fn_type: Union[
-                #     MetricFunctionTypes, MetricPartialFunctionTypes
-                # ] = getattr(metric_fn, "metric_fn_type")
-                # TODO: <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX</Alex>
-                # if not metric_fn_type:
-                #     print(f'\n[ALEX_TEST] [ExecutionEngine._build_direct_and_bundled_metric_computation_configurations()] VALUE_OR_AGGREGATE_METRIC_FN_TYPE-NOTHING!!!!!!!!!!!: {metric_fn_type} ; TYPE: {str(type(metric_fn_type))}')
-                #     metric_fn_type = MetricFunctionTypes.VALUE
-                # print(f'\n[ALEX_TEST] [ExecutionEngine._build_direct_and_bundled_metric_computation_configurations()] VALUE_OR_AGGREGATE_METRIC_FN_TYPE: {metric_fn_type} ; TYPE: {str(type(metric_fn_type))}')
-                # TODO: <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX</Alex>
-                # if isinstance(
-                #     metric_fn_type, (MetricFunctionTypes, MetricPartialFunctionTypes)
-                # ) and metric_fn_type not in [
-                #     MetricPartialFunctionTypes.MAP_FN,
-                #     MetricPartialFunctionTypes.MAP_SERIES,
-                #     MetricPartialFunctionTypes.WINDOW_FN,
-                #     MetricPartialFunctionTypes.MAP_CONDITION_FN,
-                #     MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
-                #     MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
-                #     MetricPartialFunctionTypes.AGGREGATE_FN,
-                #     MetricFunctionTypes.VALUE,
-                #     MetricFunctionTypes.MAP_VALUES,
-                #     MetricFunctionTypes.MAP_VALUES,
-                #     MetricFunctionTypes.AGGREGATE_VALUE,
-                # ]:
-                #     logger.warning(
-                #         f'Unrecognized metric function type while trying to resolve "{metric_to_resolve.id}".'
-                #     )
-                # TODO: <Alex>ALEX</Alex>
                 metric_fn_direct_configurations.append(
                     MetricComputationConfiguration(
                         metric_configuration=metric_to_resolve,
