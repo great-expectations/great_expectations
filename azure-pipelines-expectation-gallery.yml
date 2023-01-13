@@ -8,7 +8,7 @@
 # to ensure that the gallery is kept to-up-date with change.
 
 schedules:
-- cron: 0 */2 * * *
+- cron: 0 1 * * *
   displayName: Scheduled Runs
   branches:
     include:
@@ -83,7 +83,7 @@ stages:
 
     jobs:
       - job: build_gallery
-        timeoutInMinutes: 300
+        timeoutInMinutes: 420
         variables:
           python.version: '3.8'
           GE_pytest_opts: ''

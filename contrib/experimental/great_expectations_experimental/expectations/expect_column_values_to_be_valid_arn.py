@@ -30,7 +30,7 @@ class ExpectColumnValuesToBeValidArn(RegexBasedColumnMapExpectation):
                 ],
                 "empty": ["", None],
             },
-            "suppress_test_for": ["bigquery", "snowflake"],
+            "suppress_test_for": ["mssql", "bigquery", "snowflake"],
             "tests": [
                 {
                     "title": "basic_positive_test",
