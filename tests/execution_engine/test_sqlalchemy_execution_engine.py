@@ -12,6 +12,7 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
+    MetricPartialFunctionTypes,
     MetricPartialFunctionTypeSuffixes,
 )
 from great_expectations.data_context.util import file_relative_path
@@ -172,7 +173,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     metrics.update(results)
 
     aggregate_fn_metric_1 = MetricConfiguration(
-        metric_name=f"column.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
+        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -180,7 +181,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
         "table.columns": table_columns_metric,
     }
     aggregate_fn_metric_2 = MetricConfiguration(
-        metric_name=f"column.min.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
+        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -188,7 +189,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
         "table.columns": table_columns_metric,
     }
     aggregate_fn_metric_3 = MetricConfiguration(
-        metric_name=f"column.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
+        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
@@ -196,7 +197,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
         "table.columns": table_columns_metric,
     }
     aggregate_fn_metric_4 = MetricConfiguration(
-        metric_name=f"column.min.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
+        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
@@ -861,7 +862,7 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(sa)
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
-        metric_name=f"column_values.length.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
+        metric_name=f"column_values.length.max.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={
             "column": "names",
             "batch_id": "1234",

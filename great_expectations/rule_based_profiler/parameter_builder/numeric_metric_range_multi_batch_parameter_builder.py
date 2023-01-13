@@ -314,7 +314,7 @@ detected.
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -357,7 +357,7 @@ detected.
                 variables=variables,
                 parameters=parameters,
                 parameter_computation_impl=super()._build_parameters,
-                recompute_existing_parameter_values=recompute_existing_parameter_values,
+                runtime_configuration=runtime_configuration,
             )
             parameter_reference = self.raw_fully_qualified_parameter_name
 
