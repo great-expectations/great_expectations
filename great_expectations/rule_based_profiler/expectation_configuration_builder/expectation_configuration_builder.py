@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
