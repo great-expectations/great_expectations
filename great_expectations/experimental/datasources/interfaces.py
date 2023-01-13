@@ -18,8 +18,9 @@ from typing import (
 )
 
 import pydantic
-from pydantic import Field, root_validator
+from pydantic import Field
 from pydantic import dataclasses as pydantic_dc
+from pydantic import root_validator
 from typing_extensions import ClassVar, TypeAlias, TypeGuard
 
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec
@@ -382,7 +383,6 @@ class Batch(ExperimentalBaseModel):
     a spark or a sql database. An exception exists for pandas or any in-memory datastore.
     """
 
-    # Instance variable declarations
     datasource: Datasource
     data_asset: DataAsset
     batch_request: BatchRequest
