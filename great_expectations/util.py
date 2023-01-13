@@ -95,9 +95,11 @@ if TYPE_CHECKING:
     import numpy.typing as npt
 
     from great_expectations.alias_types import PathStr
-    from great_expectations.data_context import FileDataContext
-    from great_expectations.data_context.data_context.abstract_data_context import (
+    from great_expectations.data_context import (
         AbstractDataContext,
+        CloudDataContext,
+        EphemeralDataContext,
+        FileDataContext,
     )
     from great_expectations.data_context.types.base import DataContextConfig
 
@@ -1749,6 +1751,24 @@ def get_context(
 
 @overload
 def get_context(
+    project_config: Union[DataContextConfig, Mapping] = ...,  # non-null
+    context_root_dir: None = ...,  # null
+    runtime_environment: Optional[dict] = ...,
+    cloud_base_url: None = ...,
+    cloud_access_token: None = ...,
+    cloud_organization_id: None = ...,
+    cloud_mode: Optional[Literal[False]] = ...,
+    # <GX_RENAME> Deprecated as of 0.15.37
+    ge_cloud_base_url: None = ...,
+    ge_cloud_access_token: None = ...,
+    ge_cloud_organization_id: None = ...,
+    ge_cloud_mode: Optional[Literal[False]] = ...,
+) -> EphemeralDataContext:
+    ...
+
+
+@overload
+def get_context(
     project_config: Optional[Union[DataContextConfig, Mapping]] = ...,
     context_root_dir: Optional[PathStr] = ...,
     runtime_environment: Optional[dict] = ...,
@@ -1783,7 +1803,7 @@ def get_context(
     ge_cloud_access_token: Optional[str] = None,
     ge_cloud_organization_id: Optional[str] = None,
     ge_cloud_mode: Optional[bool] = None,
-) -> AbstractDataContext:
+) -> Union[CloudDataContext, FileDataContext, EphemeralDataContext]:
     """Method to return the appropriate Data Context depending on parameters and environment.
 
     Usage:
