@@ -1,11 +1,20 @@
 import inspect
+import logging
 from pprint import pformat as pf
-from typing import Callable, List, Sequence, Tuple
+from typing import Callable, Dict, List, NamedTuple, Sequence, Tuple, Type, Union
 
 import pandas as pd
+import pydantic
 from typing_extensions import TypeAlias, reveal_type
 
+logger = logging.getLogger(__file__)
+
 DataFrameFactoryFn: TypeAlias = Callable[..., pd.DataFrame]
+
+
+class _FieldSpec(NamedTuple):
+    type: Type
+    default_value: object  # ... for required value
 
 
 def _public_dir(obj: object) -> List[str]:
@@ -27,15 +36,56 @@ def _extract_io_signatures(
     signatures = []
     for name, method in io_methods:
         sig = inspect.signature(method)
-        print(f"  {name} -> {sig.return_annotation}\n{sig}\n")
+        # print(f"  {name} -> {sig.return_annotation}\n{sig}\n")
         signatures.append(sig)
     return signatures
 
 
-def _to_pydantic_fields(signatures: Sequence[inspect.Signature]):
-    for sig in signatures:
-        for param_name, param in sig.parameters.items():
-            print(type(param), param)
+def _get_default_value(
+    param: inspect.Parameter,
+) -> object:
+    if param.default is inspect._empty:
+        default = ...
+    else:
+        default = param.default
+    return default
+
+
+def _get_annotation_type(param: inspect.Parameter) -> Type:
+    # TODO: parse the annotation string
+    annotation = param.annotation
+    print("_get_annotation_type", type(annotation), annotation)
+    return annotation
+
+
+def _to_pydantic_fields(
+    signature: inspect.Signature,
+) -> Dict[str, _FieldSpec]:
+    """
+    Extract the parameter details in a structure that can be easily unpacked to
+    `pydantic.create_model()` as field arguments
+    """
+    fields_dict: Dict[str, _FieldSpec] = {}
+    for param_name, param in signature.parameters.items():
+        # print(type(param), param)
+
+        no_annotation: bool = param.annotation is inspect._empty
+        if no_annotation:
+            logger.warning(f"`{param_name}` has no type annotation")
+            continue
+
+        fields_dict[param_name] = _FieldSpec(
+            type=_get_annotation_type(param), default_value=_get_default_value(param)
+        )
+
+    return fields_dict
+
+
+def _create_pandas_asset_model(
+    model_name: str, fields_dict: Dict[str, _FieldSpec]
+) -> pydantic.BaseModel:
+    model = pydantic.create_model(model_name, **fields_dict)
+    return model
 
 
 if __name__ == "__main__":
@@ -45,4 +95,8 @@ if __name__ == "__main__":
     io_method_sigs = _extract_io_signatures(io_methods)
     # print(f"  IO Method Signatures\n{pf(io_method_sigs)}")
 
-    fields = _to_pydantic_fields(io_method_sigs)
+    fields = _to_pydantic_fields(io_method_sigs[0])
+    print(f"  Pydantic Field Specs\n{pf(fields)}")
+
+    model = _create_pandas_asset_model("POCAssetModel", fields)
+    print(model)
