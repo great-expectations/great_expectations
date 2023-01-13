@@ -44,7 +44,7 @@ def _extract_io_signatures(
 def _get_default_value(
     param: inspect.Parameter,
 ) -> object:
-    if param.default is inspect._empty:
+    if param.default is inspect.Parameter.empty:
         default = ...
     else:
         default = param.default
