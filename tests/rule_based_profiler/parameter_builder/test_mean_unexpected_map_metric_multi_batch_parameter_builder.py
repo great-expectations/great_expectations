@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 import numpy as np
 import pytest
@@ -157,12 +157,14 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
     my_null_count_metric_multi_batch_parameter_builder.build_parameters(
         domain=domain,
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     mean_unexpected_map_metric_multi_batch_parameter_builder.build_parameters(
@@ -170,6 +172,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     expected_parameter_value: float = 0.0
@@ -269,6 +272,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     expected_parameter_value: float = 0.0
@@ -369,6 +373,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     mean_unexpected_map_metric_multi_batch_parameter_builder.build_parameters(
@@ -376,6 +381,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     expected_parameter_value: float = 0.0
@@ -475,12 +481,14 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
     my_null_count_metric_multi_batch_parameter_builder.build_parameters(
         domain=domain,
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     mean_unexpected_map_metric_multi_batch_parameter_builder.build_parameters(
@@ -488,6 +496,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     expected_parameter_value: float = 3.89e-3
@@ -587,6 +596,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     expected_parameter_value: float = 3.89e-3
@@ -687,6 +697,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     mean_unexpected_map_metric_multi_batch_parameter_builder.build_parameters(
@@ -694,6 +705,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     expected_parameter_value: float = 3.89e-3

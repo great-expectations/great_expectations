@@ -135,12 +135,14 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         self,
         rule_name: str,
         variables: Optional[ParameterContainer] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
         """Return domains matching the specified tolerance limits.
 
         Args:
             rule_name: name of Rule object, for which "Domain" objects are obtained.
             variables: Optional variables to substitute when evaluating.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
 
         Returns:
             List of domains that match the desired tolerance limits.
@@ -200,6 +202,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             validator=validator,
             batch_ids=batch_ids,
             variables=variables,
+            runtime_configuration=runtime_configuration,
         )
         mean_table_row_count_as_float: float = (
             1.0 * sum(table_row_counts.values()) / num_batch_ids
@@ -285,6 +288,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         mean_table_row_count_as_float: float,
         max_unexpected_ratio: float,
         min_max_unexpected_values_proportion: float,
+        runtime_configuration: Optional[dict] = None,
     ) -> List[str]:
         """
         Compute figures of merit and return column names satisfying tolerance limits.
@@ -295,6 +299,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             mean_table_row_count_as_float: average number of records over available Batch objects.
             max_unexpected_ratio: maximum "unexpected_count" value of "map_metric_name" averaged over numbers of records
             min_max_unexpected_values_proportion: minimum fraction of Batch objects adhering to "max_unexpected_ratio"
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
 
         Returns:
             List of column names satisfying tolerance limits.
@@ -307,6 +312,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         ] = get_resolved_metrics_by_key(
             validator=validator,
             metric_configurations_by_key=metric_configurations_by_column_name,
+            runtime_configuration=runtime_configuration,
         )
 
         metric_value: Any
