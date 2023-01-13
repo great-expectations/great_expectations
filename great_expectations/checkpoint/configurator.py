@@ -1,8 +1,9 @@
 import copy
 import logging
-from typing import Dict, List, Optional, Union
+from typing import Any, ClassVar, List, Optional, Union
 
 from ruamel.yaml.comments import CommentedMap
+from typing_extensions import NotRequired, TypedDict
 
 from great_expectations.checkpoint.util import (
     batch_request_in_validations_contains_batch_data,
@@ -21,22 +22,36 @@ from great_expectations.util import is_list_of_strings, is_sane_slack_webhook
 logger = logging.getLogger(__name__)
 
 
+class ActionDetails(TypedDict):
+    class_name: str
+    site_names: NotRequired[List[str]]
+    slack_webhook: NotRequired[Any]
+    notify_on: NotRequired[Any]
+    notify_with: NotRequired[Union[List[str], str, None]]
+    renderer: NotRequired[dict]
+
+
+class ActionDict(TypedDict):
+    name: str
+    action: ActionDetails
+
+
 class ActionDicts:
-    STORE_VALIDATION_RESULT = {
+    STORE_VALIDATION_RESULT: ClassVar[ActionDict] = {
         "name": "store_validation_result",
         "action": {"class_name": "StoreValidationResultAction"},
     }
-    STORE_EVALUATION_PARAMS = {
+    STORE_EVALUATION_PARAMS: ClassVar[ActionDict] = {
         "name": "store_evaluation_params",
         "action": {"class_name": "StoreEvaluationParametersAction"},
     }
-    UPDATE_DATA_DOCS = {
+    UPDATE_DATA_DOCS: ClassVar[ActionDict] = {
         "name": "update_data_docs",
         "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
     }
 
     @staticmethod
-    def build_slack_action(webhook, notify_on, notify_with):
+    def build_slack_action(webhook, notify_on, notify_with) -> ActionDict:
         return {
             "name": "send_slack_notification",
             "action": {
@@ -174,27 +189,29 @@ class SimpleCheckpointConfigurator:
         return CheckpointConfig(**config_kwargs)
 
     @staticmethod
-    def _default_action_list() -> List[Dict]:
+    def _default_action_list() -> List[ActionDict]:
         return [
             ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.STORE_EVALUATION_PARAMS,
         ]
 
-    def _add_update_data_docs_action(self, action_list) -> List[Dict]:
+    def _add_update_data_docs_action(
+        self, action_list: List[ActionDict]
+    ) -> List[ActionDict]:
         update_docs_action = copy.deepcopy(ActionDicts.UPDATE_DATA_DOCS)
         if isinstance(self.site_names, list):
             update_docs_action["action"]["site_names"] = self.site_names
         action_list.append(update_docs_action)
         return action_list
 
-    def _add_slack_action(self, action_list: List[Dict]) -> List[Dict]:
+    def _add_slack_action(self, action_list: List[ActionDict]) -> List[ActionDict]:
         """
         The underlying SlackNotificationAction and SlackRenderer default to
         including links to all sites if the key notify_with is not present. We
         are intentionally hiding this from users of SimpleCheckpoint by having a
         default of "all" that sets the configuration appropriately.
         """
-        _notify_with = self.notify_with
+        _notify_with: Optional[Union[str, List[str]]] = self.notify_with
         if self.notify_with == "all":
             _notify_with = None
         action_list.append(
