@@ -107,7 +107,7 @@ def pandas_batch() -> Batch:
     ],
 )
 def test_batch_head(
-    pandas_batch: Batch, n_rows: int | None | str, success: bool, stdout: str
+    pandas_batch: Batch, n_rows: int | str | None, success: bool, stdout: str
 ) -> None:
     if success:
         if n_rows:
