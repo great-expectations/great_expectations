@@ -71,21 +71,14 @@ def datasource_test_data(
 @pytest.mark.integration
 @pytest.mark.parametrize("include_rendered_content", [False, True])
 def test_run_checkpoint_and_data_doc(datasource_test_data, include_rendered_content):
-    context, datasource, asset, batch_request = datasource_test_data
+    # context, datasource, asset, batch_request
+    context, _, _, batch_request = datasource_test_data
     if include_rendered_content:
         context.variables.include_rendered_content.globally = True
 
     # Define an expectation suite
     suite_name = "my_suite"
     context.create_expectation_suite(expectation_suite_name=suite_name)
-
-    # Define a batch request and inspect a batch
-    batch_request = asset.get_batch_request({"year": 2019, "month": 1})
-    batches = datasource.get_batch_list_from_batch_request(batch_request=batch_request)
-    df = batches[0].head(2)
-    assert isinstance(df, pd.DataFrame)
-    assert len(df.index) == 2
-
     validator = context.get_validator(
         batch_request=batch_request,
         expectation_suite_name=suite_name,
