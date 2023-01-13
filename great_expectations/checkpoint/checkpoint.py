@@ -209,9 +209,9 @@ class BaseCheckpoint(ConfigPeer):
                 validation_result: Optional[ExpectationSuiteValidationResult]
                 meta: ExpectationSuiteValidationResultMeta
                 for run_result in run_results.values():
-                    validation_result = run_result.get("validation_result")
+                    validation_result = run_result.get("validation_result")  # type: ignore[assignment] # could be dict
                     if validation_result:
-                        meta = validation_result.meta
+                        meta = validation_result.meta  # type: ignore[assignment] # could be dict
                         id = str(self.ge_cloud_id) if self.ge_cloud_id else None
                         meta["checkpoint_id"] = id
 
