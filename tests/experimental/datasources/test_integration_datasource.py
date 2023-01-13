@@ -1,10 +1,16 @@
+import pathlib
 from typing import Tuple
 
-from great_expectations import DataContext
+import pytest
+
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.data_context.types.base import IncludeRenderedContentConfig
-from great_expectations.experimental.datasources.interfaces import BatchRequest
+from great_expectations.data_context import AbstractDataContext
+from great_expectations.experimental.datasources.interfaces import (
+    BatchRequest,
+    DataAsset,
+    Datasource,
+)
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
@@ -14,11 +20,58 @@ from great_expectations.rule_based_profiler.data_assistant_result import (
 )
 
 
-def run_checkpoint_and_datadoc_on_taxi_data_2019_01(
-    context: DataContext,
-    include_rendered_content: IncludeRenderedContentConfig,
-    batch_request: BatchRequest,
-):
+def sql_data(
+    context: AbstractDataContext,
+) -> Tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+    db_file = (
+        pathlib.Path(__file__)
+        / "../../../test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db"
+    ).resolve()
+    datasource = context.sources.add_sqlite(
+        name="test_datasource",
+        connection_string=f"sqlite:///{db_file}",
+    )
+    asset = (
+        datasource.add_table_asset(
+            name="my_asset",
+            table_name="yellow_tripdata_sample_2019_01",
+        )
+        .add_year_and_month_splitter(column_name="pickup_datetime")
+        .add_sorters(["year", "month"])
+    )
+    batch_request = asset.get_batch_request({"year": 2019, "month": 1})
+    return context, datasource, asset, batch_request
+
+
+def pandas_data(
+    context: AbstractDataContext,
+) -> Tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+    csv_path = (
+        pathlib.Path(__file__) / "../../../test_sets/taxi_yellow_tripdata_samples"
+    ).resolve()
+    panda_ds = context.sources.add_pandas(name="my_pandas")
+    asset = panda_ds.add_csv_asset(
+        name="csv_asset",
+        data_path=csv_path,
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+        order_by=["year", "month"],
+    )
+    batch_request = asset.get_batch_request({"year": "2019", "month": "01"})
+    return context, panda_ds, asset, batch_request
+
+
+@pytest.fixture(params=[sql_data, pandas_data])
+def datasource_test_data(
+    empty_data_context, request
+) -> Tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+    return request.param(empty_data_context)
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("include_rendered_content", [False, True])
+def test_run_checkpoint_and_data_doc(datasource_test_data, include_rendered_content):
+    # context, datasource, asset, batch_request
+    context, _, _, batch_request = datasource_test_data
     if include_rendered_content:
         context.variables.include_rendered_content.globally = True
 
@@ -137,11 +190,11 @@ def run_checkpoint_and_datadoc_on_taxi_data_2019_01(
     assert "ge-failed-icon" not in data_doc_index
 
 
-def run_data_assistant_and_checkpoint_on_month_of_taxi_data(
-    context: DataContext,
-    batch_request: BatchRequest,
-):
-    data_assistant_result, checkpoint_result = configure_and_run_data_assistant(
+@pytest.mark.integration
+@pytest.mark.slow  # sql: 7s  # pandas: 4s
+def test_run_data_assistant_and_checkpoint(datasource_test_data):
+    context, _, _, batch_request = datasource_test_data
+    data_assistant_result, checkpoint_result = _configure_and_run_data_assistant(
         context, batch_request
     )
     batch_num = len(
@@ -165,11 +218,59 @@ def run_data_assistant_and_checkpoint_on_month_of_taxi_data(
     )
 
 
-def run_multibatch_data_assistant_and_checkpoint_on_year_of_taxi_data(
-    context: DataContext,
-    batch_request: BatchRequest,
-):
-    data_assistant_result, checkpoint_result = configure_and_run_data_assistant(
+def multibatch_sql_data(
+    context: AbstractDataContext,
+) -> Tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+    db_file = (
+        pathlib.Path(__file__)
+        / "../../../test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata_sample_2020_all_months_combined.db"
+    ).resolve()
+    datasource = context.sources.add_sqlite(
+        name="test_datasource",
+        connection_string=f"sqlite:///{db_file}",
+    )
+    asset = (
+        datasource.add_table_asset(
+            name="my_asset",
+            table_name="yellow_tripdata_sample_2020",
+        )
+        .add_year_and_month_splitter(column_name="pickup_datetime")
+        .add_sorters(["year", "month"])
+    )
+    batch_request = asset.get_batch_request({"year": 2020})
+    return context, datasource, asset, batch_request
+
+
+def multibatch_pandas_data(
+    context: AbstractDataContext,
+) -> Tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+    csv_path = (
+        pathlib.Path(__file__) / "../../../test_sets/taxi_yellow_tripdata_samples"
+    ).resolve()
+    panda_ds = context.sources.add_pandas(name="my_pandas")
+    asset = panda_ds.add_csv_asset(
+        name="csv_asset",
+        data_path=csv_path,
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+        order_by=["year", "month"],
+    )
+    batch_request = asset.get_batch_request({"year": "2020"})
+    return context, panda_ds, asset, batch_request
+
+
+@pytest.fixture(params=[multibatch_sql_data, multibatch_pandas_data])
+def multibatch_datasource_test_data(
+    empty_data_context, request
+) -> Tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+    return request.param(empty_data_context)
+
+
+@pytest.mark.integration
+@pytest.mark.slow  # sql: 33s  # pandas: 9s
+def test_run_multibatch_data_assistant_and_checkpoint(multibatch_datasource_test_data):
+    """Test using data assistants to create expectation suite using multiple batches and to run checkpoint"""
+    context, _, _, batch_request = multibatch_datasource_test_data
+    data_assistant_result, checkpoint_result = _configure_and_run_data_assistant(
         context, batch_request
     )
     # Assert multiple batches were processed
@@ -192,8 +293,8 @@ def run_multibatch_data_assistant_and_checkpoint_on_year_of_taxi_data(
     )
 
 
-def configure_and_run_data_assistant(
-    context: DataContext,
+def _configure_and_run_data_assistant(
+    context: AbstractDataContext,
     batch_request: BatchRequest,
 ) -> Tuple[DataAssistantResult, CheckpointResult]:
     expectation_suite_name = "my_onboarding_assistant_suite"
