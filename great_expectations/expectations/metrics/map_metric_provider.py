@@ -3586,20 +3586,22 @@ class MapMetricProvider(MetricProvider):
 
         metric_name: str = metric.metric_name
 
-        metric_suffix: str
+        metric_suffix: str = ".unexpected_count"
 
-        metric_suffix = ".unexpected_count"
+        # Documentation in "MetricProvider._register_metric_functions()" explains registration/dependency protocol.
         if metric_name.endswith(metric_suffix):
-            try:
-                _ = get_metric_provider(
-                    f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
-                    execution_engine,
-                )
-                has_aggregate_fn = True
-            except gx_exceptions.MetricProviderError:
-                has_aggregate_fn = False
+            has_aggregate_fn: bool = False
 
-            # Documentation in "MetricProvider._register_metric_functions()" explains registration/dependency protocol.
+            if execution_engine is not None:
+                try:
+                    _ = get_metric_provider(
+                        f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+                        execution_engine,
+                    )
+                    has_aggregate_fn = True
+                except gx_exceptions.MetricProviderError:
+                    pass
+
             if has_aggregate_fn:
                 dependencies["metric_partial_fn"] = MetricConfiguration(
                     metric_name=f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
@@ -3614,15 +3616,22 @@ class MapMetricProvider(MetricProvider):
                 )
 
         # MapMetric uses "condition" metric to build "unexpected_count.aggregate_fn" and other listed metrics as well.
-        for metric_suffix in [
-            f".unexpected_count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
-            ".unexpected_value_counts",
-            ".unexpected_index_query",
-            ".unexpected_index_list",
-            ".filtered_row_count",
-            ".unexpected_values",
-            ".unexpected_rows",
-        ]:
+        unexpected_condition_dependent_metric_name_suffixes: List[str] = list(
+            filter(
+                lambda element: metric_name.endswith(element),
+                [
+                    f".unexpected_count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
+                    ".unexpected_value_counts",
+                    ".unexpected_index_query",
+                    ".unexpected_index_list",
+                    ".filtered_row_count",
+                    ".unexpected_values",
+                    ".unexpected_rows",
+                ],
+            )
+        )
+        if len(unexpected_condition_dependent_metric_name_suffixes) == 1:
+            metric_suffix = unexpected_condition_dependent_metric_name_suffixes[0]
             if metric_name.endswith(metric_suffix):
                 dependencies["unexpected_condition"] = MetricConfiguration(
                     metric_name=f"{metric_name[:-len(metric_suffix)]}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",

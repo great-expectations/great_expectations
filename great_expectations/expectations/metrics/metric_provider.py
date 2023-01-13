@@ -242,9 +242,11 @@ support "{MetricFunctionTypes.VALUE}" and "{MetricPartialFunctionTypes.AGGREGATE
     ):
         dependencies: Dict[str, MetricConfiguration] = {}
 
-        metric_name: str = metric.metric_name
+        if execution_engine is None:
+            return dependencies
 
         try:
+            metric_name: str = metric.metric_name
             _ = get_metric_provider(
                 f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
                 execution_engine,
