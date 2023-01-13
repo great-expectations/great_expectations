@@ -17,10 +17,11 @@ from typing import (
     Union,
 )
 
+import pandas as pd
 import pydantic
 from pydantic import Field
 from pydantic import dataclasses as pydantic_dc
-from pydantic import root_validator
+from pydantic import root_validator, validate_arguments
 from typing_extensions import ClassVar, TypeAlias, TypeGuard
 
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec
@@ -35,8 +36,6 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 LOGGER = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    import pandas as pd
-
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.validator.computed_metric import MetricValue
 
@@ -372,10 +371,6 @@ class Datasource(
     # End Abstract Methods
 
 
-class BatchError(Exception):
-    pass
-
-
 class Batch(ExperimentalBaseModel):
     """This represents a batch of data.
 
@@ -415,19 +410,29 @@ class Batch(ExperimentalBaseModel):
         )
         return values
 
+    @validate_arguments()
     def head(self, n_rows: int = 5) -> pd.DataFrame:
-        if n_rows and n_rows > 0:
-            self.data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
-            metric = MetricConfiguration(
-                metric_name="table.head",
-                metric_domain_kwargs={"batch_id": self.id},
-                metric_value_kwargs={"n_rows": n_rows, "fetch_all": False},
-            )
-            resolved_metrics: dict[
-                tuple[str, str, str], MetricValue
-            ] = self.data.execution_engine.resolve_metrics(metrics_to_resolve=(metric,))
-            return resolved_metrics[metric.id]
-        else:
-            raise BatchError(
-                f"n_rows must be a positive integer, but {n_rows} was passed."
-            )
+        """Return the first n rows of this Batch.
+
+        This method returns the first n rows for the Batch based on position.
+
+        For negative values of n, this method returns all rows except the last n rows.
+
+        If n is larger than the number of rows, this method returns all rows.
+
+        Parameters
+            n_rows: The number of rows to return.
+
+        Returns
+            A Pandas DataFrame containing the first n rows of the Batch.
+        """
+        self.data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
+        metric = MetricConfiguration(
+            metric_name="table.head",
+            metric_domain_kwargs={"batch_id": self.id},
+            metric_value_kwargs={"n_rows": n_rows, "fetch_all": False},
+        )
+        resolved_metrics: dict[
+            tuple[str, str, str], MetricValue
+        ] = self.data.execution_engine.resolve_metrics(metrics_to_resolve=(metric,))
+        return resolved_metrics[metric.id]

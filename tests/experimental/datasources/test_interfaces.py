@@ -5,14 +5,11 @@ from pprint import pformat as pf
 from typing import TYPE_CHECKING
 
 import pytest
+from pydantic import ValidationError
 
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.experimental.datasources import PandasDatasource
-from great_expectations.experimental.datasources.interfaces import (
-    Batch,
-    BatchError,
-    BatchRequest,
-)
+from great_expectations.experimental.datasources.interfaces import Batch, BatchRequest
 
 if TYPE_CHECKING:
     from great_expectations.experimental.datasources.pandas_datasource import CSVAsset
@@ -45,8 +42,17 @@ def pandas_batch() -> Batch:
     [
         (
             None,
-            False,
-            "n_rows must be a positive integer, but None was passed.",
+            True,
+            (
+                "   vendor_id      pickup_datetime  ... total_amount  congestion_surcharge\n"
+                "0          2  2018-01-11 18:24:44  ...        12.36                   NaN\n"
+                "1          2  2018-01-05 15:31:57  ...         7.88                   NaN\n"
+                "2          2  2018-01-01 05:07:32  ...        17.76                   NaN\n"
+                "3          2  2018-01-11 13:35:39  ...        13.56                   NaN\n"
+                "4          1  2018-01-01 12:49:52  ...        11.80                   NaN\n"
+                "\n"
+                "[5 rows x 18 columns]"
+            ),
         ),
         (
             3,
@@ -77,19 +83,38 @@ def pandas_batch() -> Batch:
             ),
         ),
         (
-            -1,
+            -9996,
+            True,
+            (
+                "   vendor_id      pickup_datetime  ... total_amount  congestion_surcharge\n"
+                "0          2  2018-01-11 18:24:44  ...        12.36                   NaN\n"
+                "1          2  2018-01-05 15:31:57  ...         7.88                   NaN\n"
+                "2          2  2018-01-01 05:07:32  ...        17.76                   NaN\n"
+                "3          2  2018-01-11 13:35:39  ...        13.56                   NaN\n"
+                "\n"
+                "[4 rows x 18 columns]"
+            ),
+        ),
+        (
+            "invalid_value",
             False,
-            "n_rows must be a positive integer, but -1 was passed.",
+            (
+                "1 validation error for Head\n"
+                "n_rows\n"
+                "  value is not a valid integer (type=type_error.integer)"
+            ),
         ),
     ],
 )
 def test_batch_head(
-    pandas_batch: Batch, n_rows: int | None, success: bool, stdout: str
+    pandas_batch: Batch, n_rows: int | None | str, success: bool, stdout: str
 ) -> None:
     if success:
-        assert pf(pandas_batch.head(n_rows=n_rows)) == stdout
+        if n_rows:
+            assert pf(pandas_batch.head(n_rows=n_rows)) == stdout
+        else:
+            assert pf(pandas_batch.head()) == stdout
     else:
-        with pytest.raises(BatchError) as e:
+        with pytest.raises(ValidationError) as e:
             pandas_batch.head(n_rows=n_rows)
-        assert type(e.value) is BatchError
         assert str(e.value) == stdout
