@@ -121,18 +121,19 @@ def _to_pydantic_fields(
 def _create_pandas_asset_model(
     model_name: str, fields_dict: Dict[str, _FieldSpec]
 ) -> pydantic.BaseModel:
+    """https://docs.pydantic.dev/usage/models/#dynamic-model-creation"""
     model = pydantic.create_model(model_name, **fields_dict)
     return model
 
 
 if __name__ == "__main__":
-    io_methods = _extract_io_methods()[1:2]
+    io_methods = _extract_io_methods()[:]
     print(f"  IO Methods\n{pf(io_methods)}\n")
 
     io_method_sigs = _extract_io_signatures(io_methods)
-    # print(f"  IO Method Signatures\n{pf(io_method_sigs)}")
+    print(f"  IO Method Signatures\n{pf(io_method_sigs)}")
 
-    fields = _to_pydantic_fields(io_method_sigs[0])
+    fields = _to_pydantic_fields(io_method_sigs[1])
     print(f"  Pydantic Field Specs\n{pf(fields)}")
 
     model = _create_pandas_asset_model("POCAssetModel", fields)
