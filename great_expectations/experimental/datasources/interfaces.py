@@ -20,11 +20,13 @@ import pydantic
 from pydantic import root_validator
 from typing_extensions import ClassVar, TypeAlias
 
+from great_expectations.core.id_dict import BatchKwargs, BatchSpec
 from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,
 )
 from great_expectations.experimental.datasources.metadatasource import MetaDatasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
+from great_expectations.types import SerializableDictDot
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 LOGGER = logging.getLogger(__name__)
@@ -290,7 +292,7 @@ class Batch(ExperimentalBaseModel):
     datasource: Datasource
     data_asset: DataAsset
     batch_request: BatchRequest
-    data: Any
+    data: Any  # Due to circular imports we can't use: PandasBatchData | SqlAlchemyBatchData | SparkDFBatchData
     id: str
     # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata
     # to a batch so developers may want to namespace any custom metadata they add.
@@ -298,9 +300,9 @@ class Batch(ExperimentalBaseModel):
 
     # TODO: These legacy fields are currently required. They are only used in usage stats so we
     #       should figure out a better way to anonymize and delete them.
-    legacy_batch_markers: Any
-    legacy_batch_spec: Any
-    legacy_batch_definition: Any
+    legacy_batch_markers: BatchKwargs  # Due to circular imports we can't use BatchMarkers
+    legacy_batch_spec: BatchSpec
+    legacy_batch_definition: SerializableDictDot  # Due to circular imports we can't use BatchDefinition
 
     class Config:
         allow_mutation = False
