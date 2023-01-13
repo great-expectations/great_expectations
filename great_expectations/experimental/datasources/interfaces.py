@@ -32,12 +32,6 @@ LOGGER = logging.getLogger(__name__)
 if TYPE_CHECKING:
     import pandas as pd
 
-    from great_expectations.core.batch import (
-        BatchData,
-        BatchDefinition,
-        BatchMarkers,
-        BatchSpec,
-    )
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.validator.computed_metric import MetricValue
 
@@ -296,7 +290,7 @@ class Batch(ExperimentalBaseModel):
     datasource: Datasource
     data_asset: DataAsset
     batch_request: BatchRequest
-    # data: BatchData
+    data: Any
     id: str
     # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata
     # to a batch so developers may want to namespace any custom metadata they add.
@@ -304,9 +298,9 @@ class Batch(ExperimentalBaseModel):
 
     # TODO: These legacy fields are currently required. They are only used in usage stats so we
     #       should figure out a better way to anonymize and delete them.
-    legacy_batch_markers: BatchMarkers
-    legacy_batch_spec: BatchSpec
-    legacy_batch_definition: BatchDefinition
+    legacy_batch_markers: Any
+    legacy_batch_spec: Any
+    legacy_batch_definition: Any
 
     class Config:
         allow_mutation = False
@@ -314,7 +308,7 @@ class Batch(ExperimentalBaseModel):
         extra = pydantic.Extra.forbid
         validate_assignment = True
 
-    @root_validator()
+    @root_validator(pre=True)
     def _set_id(cls, values: dict) -> dict:
         # We need to unique identifier. This will likely change as we get more input
         options_list = []
@@ -324,11 +318,6 @@ class Batch(ExperimentalBaseModel):
             [values["datasource"].name, values["data_asset"].name, *options_list]
         )
         return values
-
-    def __init__(self, **values):
-        # This is required due to circular imports if BatchData references aren't in "if TYPE_CHECKING" block
-        self.update_forward_refs()
-        super().__init__(**values)
 
     def head(self, n_rows: int = 5) -> pd.DataFrame:
         if n_rows and n_rows > 0:
