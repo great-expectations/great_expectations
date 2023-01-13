@@ -854,6 +854,178 @@ class CodeReferenceFilter:
             name="dump",
             filepath=pathlib.Path("great_expectations/data_context/templates.py"),
         ),
+        IncludeExcludeDefinition(
+            reason="Helper method used in tests, not part of public API",
+            name="file_relative_path",
+            filepath=pathlib.Path("great_expectations/data_context/util.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="expect_column_values_to_be_between",
+            filepath=pathlib.Path("great_expectations/dataset/dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="expect_column_values_to_not_be_null",
+            filepath=pathlib.Path("great_expectations/dataset/dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="expect_table_row_count_to_be_between",
+            filepath=pathlib.Path("great_expectations/dataset/dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="expect_column_values_to_be_between",
+            filepath=pathlib.Path("great_expectations/dataset/pandas_dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="expect_column_values_to_not_be_null",
+            filepath=pathlib.Path("great_expectations/dataset/pandas_dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="expect_column_values_to_be_between",
+            filepath=pathlib.Path("great_expectations/dataset/sparkdf_dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="expect_column_values_to_not_be_null",
+            filepath=pathlib.Path("great_expectations/dataset/sparkdf_dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="head",
+            filepath=pathlib.Path("great_expectations/dataset/sparkdf_dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="expect_column_values_to_be_between",
+            filepath=pathlib.Path("great_expectations/dataset/sqlalchemy_dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="expect_column_values_to_not_be_null",
+            filepath=pathlib.Path("great_expectations/dataset/sqlalchemy_dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="head",
+            filepath=pathlib.Path("great_expectations/dataset/sqlalchemy_dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="self_check is mentioned but in the docs we currently recommend using test_yaml_config which uses self_check under the hood. E.g. https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config/#steps",
+            name="self_check",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/data_connector/data_connector.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="self_check is mentioned but in the docs we currently recommend using test_yaml_config which uses self_check under the hood. E.g. https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config/#steps",
+            name="self_check",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/data_connector/runtime_data_connector.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="self_check is mentioned but in the docs we currently recommend using test_yaml_config which uses self_check under the hood. E.g. https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config/#steps",
+            name="self_check",
+            filepath=pathlib.Path("great_expectations/datasource/new_datasource.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for dict `.update()` method.",
+            name="update",
+            filepath=pathlib.Path(
+                "great_expectations/execution_engine/execution_engine.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Included in Validator public api",
+            name="head",
+            filepath=pathlib.Path(
+                "great_expectations/execution_engine/sparkdf_execution_engine.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Currently only used in testing code, not referenced in docs.",
+            name="close",
+            filepath=pathlib.Path(
+                "great_expectations/execution_engine/sqlalchemy_execution_engine.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for Python `dict`",
+            name="dict",
+            filepath=pathlib.Path(
+                "great_expectations/render/renderer_configuration.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for context.get_validator()",
+            name="get_validator",
+            filepath=pathlib.Path(
+                "great_expectations/rule_based_profiler/domain_builder/domain_builder.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for context.get_validator()",
+            name="get_validator",
+            filepath=pathlib.Path(
+                "great_expectations/rule_based_profiler/helpers/util.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for context.get_validator()",
+            name="get_validator",
+            filepath=pathlib.Path(
+                "great_expectations/rule_based_profiler/parameter_builder/parameter_builder.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Not used directly but from Data Assistant or RuleBasedProfiler",
+            name="run",
+            filepath=pathlib.Path(
+                "great_expectations/rule_based_profiler/rule/rule.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="self_check is mentioned but in the docs we currently recommend using test_yaml_config which uses self_check under the hood. E.g. https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config/#steps",
+            name="self_check",
+            filepath=pathlib.Path(
+                "great_expectations/rule_based_profiler/rule_based_profiler.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="read_csv",
+            filepath=pathlib.Path("great_expectations/util.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="validate",
+            filepath=pathlib.Path("great_expectations/util.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Included in Validator public api",
+            name="get_metric",
+            filepath=pathlib.Path("great_expectations/validator/metrics_calculator.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Included in Validator public api",
+            name="head",
+            filepath=pathlib.Path("great_expectations/validator/metrics_calculator.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for Python `Set.add()`",
+            name="add",
+            filepath=pathlib.Path("great_expectations/validator/validation_graph.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for Python dict `.update()`",
+            name="update",
+            filepath=pathlib.Path("great_expectations/validator/validation_graph.py"),
+        ),
     ]
 
     def __init__(
