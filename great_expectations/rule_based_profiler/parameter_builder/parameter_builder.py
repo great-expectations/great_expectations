@@ -136,7 +136,6 @@ class ParameterBuilder(ABC, Builder):
         parameter_computation_impl: Optional[Callable] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        recompute_existing_parameter_values: bool = False,
         runtime_configuration: Optional[dict] = None,
     ) -> None:
         """
@@ -147,9 +146,10 @@ class ParameterBuilder(ABC, Builder):
             parameter_computation_impl: Object containing desired "ParameterBuilder" implementation.
             batch_list: Explicit list of "Batch" objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
-            recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.
             runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
         """
+        runtime_configuration = runtime_configuration or {}
+
         fully_qualified_parameter_names: List[
             str
         ] = get_fully_qualified_parameter_names(
@@ -157,6 +157,12 @@ class ParameterBuilder(ABC, Builder):
             variables=variables,
             parameters=parameters,
         )
+
+        # recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.
+        recompute_existing_parameter_values: bool = runtime_configuration.get(
+            "recompute_existing_parameter_values", False
+        )
+
         if (
             recompute_existing_parameter_values
             or self.raw_fully_qualified_parameter_name
@@ -174,7 +180,6 @@ class ParameterBuilder(ABC, Builder):
                 variables=variables,
                 parameters=parameters,
                 fully_qualified_parameter_names=fully_qualified_parameter_names,
-                recompute_existing_parameter_values=recompute_existing_parameter_values,
                 runtime_configuration=runtime_configuration,
             )
 
@@ -185,7 +190,7 @@ class ParameterBuilder(ABC, Builder):
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
-                recompute_existing_parameter_values=recompute_existing_parameter_values,
+                runtime_configuration=runtime_configuration,
             )
 
             parameter_values: Dict[str, Any] = {
@@ -206,14 +211,12 @@ class ParameterBuilder(ABC, Builder):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         fully_qualified_parameter_names: Optional[List[str]] = None,
-        recompute_existing_parameter_values: bool = False,
         runtime_configuration: Optional[dict] = None,
     ) -> None:
         """
         This method computes ("resolves") pre-requisite ("evaluation") dependencies (i.e., results of executing other
         "ParameterBuilder" objects), whose output(s) are needed by specified "ParameterBuilder" object to operate.
         """
-
         # Step-1: Check if any "evaluation_parameter_builders" are configured for specified "ParameterBuilder" object.
         evaluation_parameter_builders: List[
             ParameterBuilder
@@ -252,7 +255,6 @@ class ParameterBuilder(ABC, Builder):
                     domain=domain,
                     variables=variables,
                     parameters=parameters,
-                    recompute_existing_parameter_values=recompute_existing_parameter_values,
                     runtime_configuration=runtime_configuration,
                 )
 
@@ -262,7 +264,6 @@ class ParameterBuilder(ABC, Builder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
         runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """

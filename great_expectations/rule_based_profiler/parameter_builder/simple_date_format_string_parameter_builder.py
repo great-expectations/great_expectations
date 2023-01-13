@@ -173,7 +173,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
         runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """

@@ -319,6 +319,7 @@ def get_parameter_value(
 def get_resolved_metrics_by_key(
     validator: Validator,
     metric_configurations_by_key: Dict[str, List[MetricConfiguration]],
+    runtime_configuration: Optional[dict] = None,
 ) -> Dict[str, Dict[Tuple[str, str, str], MetricValue]]:
     """
     Compute (resolve) metrics for every column name supplied on input.
@@ -329,6 +330,7 @@ def get_resolved_metrics_by_key(
         Dictionary of the form {
             "my_key": List[MetricConfiguration],  # examples of "my_key" are: "my_column_name", "my_batch_id", etc.
         }
+        runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
 
     Returns:
         Dictionary of the form {
@@ -349,7 +351,7 @@ def get_resolved_metrics_by_key(
             for key, metric_configurations_for_key in metric_configurations_by_key.items()
             for metric_configuration in metric_configurations_for_key
         ],
-        runtime_configuration=None,
+        runtime_configuration=runtime_configuration,
         min_graph_edges_pbar_enable=0,
     )
 

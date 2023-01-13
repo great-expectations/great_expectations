@@ -114,7 +114,6 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
         runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
@@ -129,7 +128,6 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             variables=variables,
             parameters=parameters,
             parameter_computation_impl=super()._build_parameters,
-            recompute_existing_parameter_values=recompute_existing_parameter_values,
             runtime_configuration=runtime_configuration,
         )
 
