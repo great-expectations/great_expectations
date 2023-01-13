@@ -63,6 +63,10 @@ def pandas_batch() -> Batch:
             "invalid_value",
             False,
         ),
+        (
+            1.5,
+            False,
+        ),
     ],
 )
 def test_batch_head(
@@ -81,7 +85,6 @@ def test_batch_head(
             head_df = pandas_batch.head()
             assert isinstance(head_df, pd.DataFrame)
             assert len(head_df.index) == 5
-
     else:
         with pytest.raises(ValidationError) as e:
             pandas_batch.head(n_rows=n_rows)

@@ -19,7 +19,7 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from pydantic import Field
+from pydantic import Field, StrictInt
 from pydantic import dataclasses as pydantic_dc
 from pydantic import root_validator, validate_arguments
 from typing_extensions import ClassVar, TypeAlias, TypeGuard
@@ -398,12 +398,11 @@ class Batch(ExperimentalBaseModel):
     class Config:
         allow_mutation = False
         arbitrary_types_allowed = True
-        strict_types = True
         validate_assignment = True
 
     @root_validator(pre=True)
     def _set_id(cls, values: dict) -> dict:
-        # We need to unique identifier. This will likely change as we get more input
+        # We need a unique identifier. This will likely change as we get more input.
         options_list = []
         for k, v in values["batch_request"].options.items():
             options_list.append(f"{k}_{v}")
@@ -412,8 +411,8 @@ class Batch(ExperimentalBaseModel):
         )
         return values
 
-    @validate_arguments()
-    def head(self, n_rows: int = 5) -> pd.DataFrame:
+    @validate_arguments
+    def head(self, n_rows: StrictInt = 5) -> pd.DataFrame:
         """Return the first n rows of this Batch.
 
         This method returns the first n rows for the Batch based on position.
