@@ -3580,37 +3580,38 @@ class MapMetricProvider(MetricProvider):
     ):
         dependencies: Dict[str, MetricConfiguration] = {}
 
-        metric_name: str = metric.metric_name
-
         base_metric_value_kwargs = {
             k: v for k, v in metric.metric_value_kwargs.items() if k != "result_format"
         }
 
-        if execution_engine is not None:
-            metric_suffix = ".unexpected_count"
-            if metric_name.endswith(metric_suffix):
-                try:
-                    _ = get_metric_provider(
-                        f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
-                        execution_engine,
-                    )
-                    has_aggregate_fn = True
-                except gx_exceptions.MetricProviderError:
-                    has_aggregate_fn = False
+        metric_name: str = metric.metric_name
 
-                # Documentation in "MetricProvider._register_metric_functions()" explains registration/dependency protocol.
-                if has_aggregate_fn:
-                    dependencies["metric_partial_fn"] = MetricConfiguration(
-                        metric_name=f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
-                        metric_domain_kwargs=metric.metric_domain_kwargs,
-                        metric_value_kwargs=base_metric_value_kwargs,
-                    )
-                else:
-                    dependencies["unexpected_condition"] = MetricConfiguration(
-                        metric_name=f"{metric_name[:-len(metric_suffix)]}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
-                        metric_domain_kwargs=metric.metric_domain_kwargs,
-                        metric_value_kwargs=base_metric_value_kwargs,
-                    )
+        metric_suffix: str
+
+        metric_suffix = ".unexpected_count"
+        if metric_name.endswith(metric_suffix):
+            try:
+                _ = get_metric_provider(
+                    f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+                    execution_engine,
+                )
+                has_aggregate_fn = True
+            except gx_exceptions.MetricProviderError:
+                has_aggregate_fn = False
+
+            # Documentation in "MetricProvider._register_metric_functions()" explains registration/dependency protocol.
+            if has_aggregate_fn:
+                dependencies["metric_partial_fn"] = MetricConfiguration(
+                    metric_name=f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+                    metric_domain_kwargs=metric.metric_domain_kwargs,
+                    metric_value_kwargs=base_metric_value_kwargs,
+                )
+            else:
+                dependencies["unexpected_condition"] = MetricConfiguration(
+                    metric_name=f"{metric_name[:-len(metric_suffix)]}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
+                    metric_domain_kwargs=metric.metric_domain_kwargs,
+                    metric_value_kwargs=base_metric_value_kwargs,
+                )
 
         # MapMetric uses "condition" metric to build "unexpected_count.aggregate_fn" and other listed metrics as well.
         for metric_suffix in [

@@ -242,9 +242,6 @@ support "{MetricFunctionTypes.VALUE}" and "{MetricPartialFunctionTypes.AGGREGATE
     ):
         dependencies: Dict[str, MetricConfiguration] = {}
 
-        if execution_engine is None:
-            return dependencies
-
         metric_name: str = metric.metric_name
 
         try:
@@ -252,16 +249,12 @@ support "{MetricFunctionTypes.VALUE}" and "{MetricPartialFunctionTypes.AGGREGATE
                 f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
                 execution_engine,
             )
-            has_aggregate_fn = True
-        except gx_exceptions.MetricProviderError:
-            has_aggregate_fn = False
-
-        # Documentation in "MetricProvider._register_metric_functions()" explains registration/dependency protocol.
-        if has_aggregate_fn:
             dependencies["metric_partial_fn"] = MetricConfiguration(
                 metric_name=f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
                 metric_domain_kwargs=metric.metric_domain_kwargs,
                 metric_value_kwargs=metric.metric_value_kwargs,
             )
+        except gx_exceptions.MetricProviderError:
+            pass
 
         return dependencies
