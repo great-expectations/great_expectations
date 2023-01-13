@@ -452,7 +452,21 @@ class CodeReferenceFilter:
             reason="Referenced via legacy docs, will likely need to be included in the public API. Added here as an example include.",
             name="remove_expectation",
             filepath=pathlib.Path("great_expectations/core/expectation_suite.py"),
-        )
+        ),
+        IncludeExcludeDefinition(
+            reason="Part of our API, but typically we now use get_context().",
+            name="DataContext",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Part of our API, but typically we now use get_context().",
+            name="BaseDataContext",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/base_data_context.py"
+            ),
+        ),
     ]
 
     DEFAULT_EXCLUDES: List[IncludeExcludeDefinition] = [
@@ -573,6 +587,202 @@ class CodeReferenceFilter:
             filepath=pathlib.Path(
                 "great_expectations/data_context/config_validator/yaml_config_validator.py"
             ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for validator.get_metric()",
+            name="get_metric",
+            filepath=pathlib.Path(
+                "great_expectations/core/expectation_validation_result.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for context.get_expectation_suite()",
+            name="get_expectation_suite",
+            filepath=pathlib.Path("great_expectations/data_asset/data_asset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for context.save_expectation_suite() and validator.save_expectation_suite()",
+            name="save_expectation_suite",
+            filepath=pathlib.Path("great_expectations/data_asset/data_asset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for validator.validate()",
+            name="validate",
+            filepath=pathlib.Path("great_expectations/data_asset/data_asset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Captured in AbstractDataContext",
+            name="add_checkpoint",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/cloud_data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Captured in AbstractDataContext",
+            name="create_expectation_suite",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/cloud_data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Captured in AbstractDataContext",
+            name="get_expectation_suite",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/cloud_data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Captured in AbstractDataContext",
+            name="list_checkpoints",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/cloud_data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Captured in AbstractDataContext",
+            name="list_expectation_suite_names",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/cloud_data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Captured in AbstractDataContext",
+            name="save_expectation_suite",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/cloud_data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Captured in AbstractDataContext",
+            name="add_store",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/file_data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python dict `.get()`",
+            name="get",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/_store_backend.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python `set()`",
+            name="set",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/_store_backend.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python `set()`",
+            name="set",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/datasource_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python dict `.get()`",
+            name="get",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/expectations_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python dict `.get()`",
+            name="get",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/html_site_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python `set()`",
+            name="set",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/html_site_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python dict `.get()`",
+            name="get",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/query_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python `set()`",
+            name="set",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/query_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python dict `.get()`",
+            name="get",
+            filepath=pathlib.Path("great_expectations/data_context/store/store.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python `set()`",
+            name="set",
+            filepath=pathlib.Path("great_expectations/data_context/store/store.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for context.add_checkpoint()",
+            name="add_checkpoint",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/checkpoint_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for context.list_checkpoints()",
+            name="list_checkpoints",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/checkpoint_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for datasource self_check",
+            name="self_check",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/configuration_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for datasource self_check",
+            name="self_check",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/expectations_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for datasource self_check",
+            name="self_check",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/html_site_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for datasource self_check",
+            name="self_check",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/json_site_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for datasource self_check",
+            name="self_check",
+            filepath=pathlib.Path("great_expectations/data_context/store/store.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for datasource self_check",
+            name="self_check",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/validations_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for yaml.dump()",
+            name="dump",
+            filepath=pathlib.Path("great_expectations/data_context/templates.py"),
         ),
     ]
 
