@@ -3588,11 +3588,11 @@ class MapMetricProvider(MetricProvider):
 
         metric_suffix: str = ".unexpected_count"
 
+        # Documentation in "MetricProvider._register_metric_functions()" explains registration/dependency protocol.
         if metric_name.endswith(metric_suffix):
             has_aggregate_fn: bool = False
 
             if execution_engine is not None:
-                # Documentation in "MetricProvider._register_metric_functions()" explains registration/dependency protocol.
                 try:
                     _ = get_metric_provider(
                         f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
