@@ -421,7 +421,7 @@ class Batch(ExperimentalBaseModel):
         If n is larger than the number of rows, this method returns all rows.
 
         Parameters
-            n_rows: The number of rows to return.
+            n_rows: The number of rows to return from the Batch.
 
         Returns
             A Pandas DataFrame containing the first n rows of the Batch.
