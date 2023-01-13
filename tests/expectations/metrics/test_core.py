@@ -10,6 +10,7 @@ import pytest
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import Batch
 from great_expectations.core.metric_function_types import (
+    MetricPartialFunctionTypes,
     MetricPartialFunctionTypeSuffixes,
 )
 from great_expectations.execution_engine import (
