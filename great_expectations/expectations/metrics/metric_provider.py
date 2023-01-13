@@ -1,6 +1,6 @@
 import logging
 from functools import wraps
-from typing import Callable, Optional, Tuple, Type, Union
+from typing import Callable, Dict, Optional, Tuple, Type, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration
@@ -33,9 +33,9 @@ def metric_value(
         def inner_func(*args, **kwargs):
             return metric_fn(*args, **kwargs)
 
-        inner_func.metric_engine = engine
-        inner_func.metric_fn_type = MetricFunctionTypes(metric_fn_type)
-        inner_func.metric_definition_kwargs = kwargs
+        inner_func.metric_engine = engine  # type: ignore[attr-defined]
+        inner_func.metric_fn_type = MetricFunctionTypes(metric_fn_type)  # type: ignore[attr-defined]
+        inner_func.metric_definition_kwargs = kwargs  # type: ignore[attr-defined]
         return inner_func
 
     return wrapper
@@ -54,12 +54,12 @@ def metric_partial(
         def inner_func(*args, **kwargs):
             return metric_fn(*args, **kwargs)
 
-        inner_func.metric_engine = engine
-        inner_func.metric_fn_type = MetricPartialFunctionTypes(
+        inner_func.metric_engine = engine  # type: ignore[attr-defined]
+        inner_func.metric_fn_type = MetricPartialFunctionTypes(  # type: ignore[attr-defined]
             partial_fn_type
         )  # raises ValueError if unknown type
-        inner_func.domain_type = MetricDomainTypes(domain_type)
-        inner_func.metric_definition_kwargs = kwargs
+        inner_func.domain_type = MetricDomainTypes(domain_type)  # type: ignore[attr-defined]
+        inner_func.metric_definition_kwargs = kwargs  # type: ignore[attr-defined]
         return inner_func
 
     return wrapper
@@ -96,30 +96,33 @@ class MetricProvider(metaclass=MetaMetricProvider):
 
     domain_keys: Tuple[str, ...] = tuple()
     value_keys: Tuple[str, ...] = tuple()
-    default_kwarg_values = {}
+    default_kwarg_values: dict = {}
 
     @classmethod
     def _register_metric_functions(cls) -> None:
         metric_name = getattr(cls, "metric_name", None)
+        if not metric_name:
+            # No metric name has been defined
+            return
+
         metric_domain_keys = cls.domain_keys
         metric_value_keys = cls.value_keys
 
         for attr_name in dir(cls):
             attr_obj = getattr(cls, attr_name)
-            if not hasattr(attr_obj, "metric_engine") and not hasattr(
-                attr_obj, "_renderer_type"
+            if not (
+                hasattr(attr_obj, "metric_engine")
+                or hasattr(attr_obj, "_renderer_type")
             ):
-                # This is not a metric or renderer
+                # This is not a metric or renderer.
                 continue
-            elif hasattr(attr_obj, "metric_engine"):
+
+            if hasattr(attr_obj, "metric_engine"):
                 engine = getattr(attr_obj, "metric_engine")
                 if not issubclass(engine, ExecutionEngine):
                     raise ValueError(
                         "metric functions must be defined with an Execution Engine"
                     )
-                if metric_name is None:
-                    # No metric name has been defined
-                    continue
 
                 metric_fn = attr_obj
                 metric_definition_kwargs = getattr(
@@ -128,9 +131,24 @@ class MetricProvider(metaclass=MetaMetricProvider):
                 declared_metric_name = metric_name + metric_definition_kwargs.get(
                     "metric_name_suffix", ""
                 )
-                metric_fn_type = getattr(
-                    metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE
-                )
+                metric_fn_type: Optional[
+                    Union[MetricFunctionTypes, MetricPartialFunctionTypes]
+                ] = getattr(metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE)
+
+                if not metric_fn_type:
+                    # This is not a metric (valid metrics possess exectly one metric function).
+                    return
+
+                if metric_fn_type not in [
+                    MetricFunctionTypes.VALUE,
+                    MetricPartialFunctionTypes.AGGREGATE_FN,
+                ]:
+                    raise ValueError(
+                        f"""Basic metric implementations (defined by specifying "metric_name" class variable) only \
+support "{MetricFunctionTypes.VALUE}" and "{MetricPartialFunctionTypes.AGGREGATE_FN}" for "metric_value" \
+"metric_fn_type" property."""
+                    )
+
                 if metric_fn_type == MetricFunctionTypes.VALUE:
                     register_metric(
                         metric_name=declared_metric_name,
@@ -143,9 +161,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                     )
                 else:
                     register_metric(
-                        metric_name=declared_metric_name
-                        + "."
-                        + metric_fn_type.metric_suffix,  # this will be a MetricPartial
+                        metric_name=f"{declared_metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
@@ -200,19 +216,21 @@ class MetricProvider(metaclass=MetaMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        metric_name = metric.metric_name
-        dependencies = {}
-        for metric_fn_type in MetricPartialFunctionTypes:
-            metric_suffix = f".{metric_fn_type.metric_suffix}"
+        dependencies: Dict[str, MetricConfiguration] = {}
+        if execution_engine is not None:
+            metric_name = metric.metric_name
             try:
-                _ = get_metric_provider(metric_name + metric_suffix, execution_engine)
+                _ = get_metric_provider(
+                    f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+                    execution_engine,
+                )
                 has_aggregate_fn = True
             except gx_exceptions.MetricProviderError:
                 has_aggregate_fn = False
 
             if has_aggregate_fn:
                 dependencies["metric_partial_fn"] = MetricConfiguration(
-                    metric_name=metric_name + metric_suffix,
+                    metric_name=f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
                     metric_domain_kwargs=metric.metric_domain_kwargs,
                     metric_value_kwargs=metric.metric_value_kwargs,
                 )
