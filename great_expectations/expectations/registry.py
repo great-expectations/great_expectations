@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-IN_MEMORY_STORE_BACKEND_TABLE_METRICS: set = {
+IN_MEMORY_STORE_BACKEND_ONLY_PERSISTABLE_METRICS: set = {
     "table.column_types",
     "table.head",
 }

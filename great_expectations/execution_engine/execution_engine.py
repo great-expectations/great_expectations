@@ -15,6 +15,7 @@ from typing import (
     Optional,
     Set,
     Tuple,
+    Type,
     Union,
 )
 from uuid import UUID
@@ -44,7 +45,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ComputedMetricIdentifier,
 )
 from great_expectations.expectations.registry import (
-    IN_MEMORY_STORE_BACKEND_TABLE_METRICS,
+    IN_MEMORY_STORE_BACKEND_ONLY_PERSISTABLE_METRICS,
     get_metric_provider,
 )
 from great_expectations.expectations.row_conditions import (
@@ -538,6 +539,9 @@ class ExecutionEngine(ABC):
         compute_domain_kwargs: dict
         accessor_domain_kwargs: dict
         for metric_to_resolve in metrics_to_resolve:
+            # print(f'\n[ALEX_TEST] [ExecutionEngine._build_direct_and_bundled_metric_computation_configurations()] metric_to_resolve.metric_name: {metric_to_resolve.metric_name} ; TYPE: {str(type(metric_to_resolve.metric_name))}')
+            # print(f'\n[ALEX_TEST] [ExecutionEngine._build_direct_and_bundled_metric_computation_configurations()] metric_to_resolve.metric_domain_kwargs: {metric_to_resolve.metric_domain_kwargs} ; TYPE: {str(type(metric_to_resolve.metric_domain_kwargs))}')
+            # print(f'\n[ALEX_TEST] [ExecutionEngine._build_direct_and_bundled_metric_computation_configurations()] metric_to_resolve.metric_value_kwargs: {metric_to_resolve.metric_value_kwargs} ; TYPE: {str(type(metric_to_resolve.metric_value_kwargs))}')
             resolved_metric_dependencies_by_metric_name = (
                 self._get_computed_metric_evaluation_dependencies_by_metric_name(
                     metric_to_resolve=metric_to_resolve,
@@ -547,6 +551,8 @@ class ExecutionEngine(ABC):
             metric_class, metric_fn = get_metric_provider(
                 metric_name=metric_to_resolve.metric_name, execution_engine=self
             )
+            # print(f'\n[ALEX_TEST] [ExecutionEngine._build_direct_and_bundled_metric_computation_configurations()] METRIC_CLASS: {metric_class} ; TYPE: {str(type(metric_class))}')
+            # print(f'\n[ALEX_TEST] [ExecutionEngine._build_direct_and_bundled_metric_computation_configurations()] METRIC_FN: {metric_fn} ; TYPE: {str(type(metric_fn))}')
             metric_provider_kwargs = {
                 "cls": metric_class,
                 "execution_engine": self,
@@ -569,6 +575,16 @@ class ExecutionEngine(ABC):
                         message=f'Missing metric dependency: {str(e)} for metric "{metric_to_resolve.metric_name}".'
                     )
 
+                # TODO: <Alex>ALEX</Alex>
+                # print(f'\n[ALEX_TEST] [ExecutionEngine._build_direct_and_bundled_metric_computation_configurations()] PARTIAL_FOR_SURE_METRIC_FN: {metric_fn} ; TYPE: {str(type(metric_fn))}')
+                # TODO: <Alex>ALEX</Alex>
+                ## metric_fn_type: Union[MetricFunctionTypes, MetricPartialFunctionTypes] = getattr(metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE)
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                ## metric_fn_type: Union[MetricFunctionTypes, MetricPartialFunctionTypes] = getattr(metric_fn, "metric_fn_type")
+                # TODO: <Alex>ALEX</Alex>
+                ## print(f'\n[ALEX_TEST] [ExecutionEngine._build_direct_and_bundled_metric_computation_configurations()] PARTIAL_FOR_SURE_METRIC_FN_TYPE: {metric_fn_type} ; TYPE: {str(type(metric_fn_type))}')
+                # TODO: <Alex>ALEX</Alex>
                 metric_fn_bundle_configurations.append(
                     MetricComputationConfiguration(
                         metric_configuration=metric_to_resolve,
@@ -579,27 +595,40 @@ class ExecutionEngine(ABC):
                     )
                 )
             else:
-                metric_fn_type: MetricFunctionTypes = getattr(
-                    metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE
-                )
-                if isinstance(
-                    metric_fn_type, (MetricFunctionTypes, MetricPartialFunctionTypes)
-                ) and metric_fn_type not in [
-                    MetricPartialFunctionTypes.MAP_FN,
-                    MetricPartialFunctionTypes.MAP_SERIES,
-                    MetricPartialFunctionTypes.WINDOW_FN,
-                    MetricPartialFunctionTypes.MAP_CONDITION_FN,
-                    MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
-                    MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
-                    MetricPartialFunctionTypes.AGGREGATE_FN,
-                    MetricFunctionTypes.VALUE,
-                    MetricFunctionTypes.MAP_VALUES,
-                    MetricFunctionTypes.MAP_VALUES,
-                    MetricFunctionTypes.AGGREGATE_VALUE,
-                ]:
-                    logger.warning(
-                        f'Unrecognized metric function type while trying to resolve "{metric_to_resolve.id}".'
-                    )
+                # TODO: <Alex>ALEX</Alex>
+                # metric_fn_type: Union[MetricFunctionTypes, MetricPartialFunctionTypes] = getattr(metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE)
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                metric_fn_type: Union[
+                    MetricFunctionTypes, MetricPartialFunctionTypes
+                ] = getattr(metric_fn, "metric_fn_type")
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                # if not metric_fn_type:
+                #     print(f'\n[ALEX_TEST] [ExecutionEngine._build_direct_and_bundled_metric_computation_configurations()] VALUE_OR_AGGREGATE_METRIC_FN_TYPE-NOTHING!!!!!!!!!!!: {metric_fn_type} ; TYPE: {str(type(metric_fn_type))}')
+                #     metric_fn_type = MetricFunctionTypes.VALUE
+                # print(f'\n[ALEX_TEST] [ExecutionEngine._build_direct_and_bundled_metric_computation_configurations()] VALUE_OR_AGGREGATE_METRIC_FN_TYPE: {metric_fn_type} ; TYPE: {str(type(metric_fn_type))}')
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                # if isinstance(
+                #     metric_fn_type, (MetricFunctionTypes, MetricPartialFunctionTypes)
+                # ) and metric_fn_type not in [
+                #     MetricPartialFunctionTypes.MAP_FN,
+                #     MetricPartialFunctionTypes.MAP_SERIES,
+                #     MetricPartialFunctionTypes.WINDOW_FN,
+                #     MetricPartialFunctionTypes.MAP_CONDITION_FN,
+                #     MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
+                #     MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
+                #     MetricPartialFunctionTypes.AGGREGATE_FN,
+                #     MetricFunctionTypes.VALUE,
+                #     MetricFunctionTypes.MAP_VALUES,
+                #     MetricFunctionTypes.MAP_VALUES,
+                #     MetricFunctionTypes.AGGREGATE_VALUE,
+                # ]:
+                #     logger.warning(
+                #         f'Unrecognized metric function type while trying to resolve "{metric_to_resolve.id}".'
+                #     )
+                # TODO: <Alex>ALEX</Alex>
                 metric_fn_direct_configurations.append(
                     MetricComputationConfiguration(
                         metric_configuration=metric_to_resolve,
@@ -817,18 +846,52 @@ class ExecutionEngine(ABC):
             )
             self._computed_metrics_store.set(key=key, value=computed_metric)
 
+    # TODO: <Alex>ALEX</Alex>
+    # def _is_metric_persistable(self, metric_name: str) -> bool:
+    #     non_persistable: bool = (
+    #         metric_name in IN_MEMORY_STORE_BACKEND_ONLY_PERSISTABLE_METRICS
+    #         or metric_name.endswith(MetricPartialFunctionTypeSuffixes.CONDITION.value)
+    #         or metric_name.endswith(
+    #             MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value
+    #         )
+    #     )
+    #     if non_persistable:
+    #         return False
+    #
+    #     return self._is_metric_provider_persistable(metric_name=metric_name)
+    # TODO: <Alex>ALEX</Alex>
+
+    # TODO: <Alex>ALEX</Alex>
     def _is_metric_persistable(self, metric_name: str) -> bool:
-        non_persistable: bool = (
-            metric_name in IN_MEMORY_STORE_BACKEND_TABLE_METRICS
-            or metric_name.endswith(MetricPartialFunctionTypeSuffixes.CONDITION.value)
-            or metric_name.endswith(
-                MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value
-            )
-        )
-        if non_persistable:
+        if metric_name in IN_MEMORY_STORE_BACKEND_ONLY_PERSISTABLE_METRICS:
             return False
 
-        return self._is_metric_provider_persistable(metric_name=metric_name)
+        metric_class: Type[MetricProvider]
+        metric_fn: Optional[Callable]
+        metric_class, metric_fn = get_metric_provider(
+            metric_name=metric_name, execution_engine=self
+        )
+
+        if not metric_class.is_persistable():
+            return False
+
+        metric_fn_type: MetricFunctionTypes | MetricPartialFunctionTypes | None = (
+            getattr(metric_fn, "metric_fn_type", None)
+        )
+
+        persistable: bool = (
+            metric_fn
+            and metric_fn_type
+            and metric_fn_type
+            in [
+                MetricFunctionTypes.VALUE,
+                MetricPartialFunctionTypes.AGGREGATE_FN,
+            ]
+        )
+
+        return persistable
+
+    # TODO: <Alex>ALEX</Alex>
 
     # TODO: <Alex>ALEX</Alex>
     # def _get_queryable_computed_metrics_store_compatible_metrics(
@@ -836,7 +899,7 @@ class ExecutionEngine(ABC):
     #     metrics_to_resolve: Iterable[MetricConfiguration],
     # ) -> Dict[Tuple[str, str, str], MetricValue]:
     #     metrics_to_resolve = filter(
-    #         lambda element: not (element.metric_name in IN_MEMORY_STORE_BACKEND_TABLE_METRICS or element.metric_name.endswith(MetricPartialFunctionTypeSuffixes.CONDITION.value)) and self._is_metric_provider_persistable(metric_name=element.metric_name),
+    #         lambda element: not (element.metric_name in IN_MEMORY_STORE_BACKEND_ONLY_PERSISTABLE_METRICS or element.metric_name.endswith(MetricPartialFunctionTypeSuffixes.CONDITION.value)) and self._is_metric_provider_persistable(metric_name=element.metric_name),
     #         metrics_to_resolve,
     #     )
     #     aggregate_partial_function_metrics: Iterable[MetricConfiguration] = filter(
@@ -860,15 +923,17 @@ class ExecutionEngine(ABC):
     #     )
     # TODO: <Alex>ALEX</Alex>
 
-    def _is_metric_provider_persistable(self, metric_name: str) -> bool:
-        try:
-            return get_metric_provider(metric_name=metric_name, execution_engine=self)[
-                0
-            ].is_persistable()
-        except gx_exceptions.MetricProviderError:
-            pass
-
-        return True
+    # TODO: <Alex>ALEX</Alex>
+    # def _is_metric_provider_persistable(self, metric_name: str) -> bool:
+    #     try:
+    #         return get_metric_provider(metric_name=metric_name, execution_engine=self)[
+    #             0
+    #         ].is_persistable()
+    #     except gx_exceptions.MetricProviderError:
+    #         pass
+    #
+    #     return True
+    # TODO: <Alex>ALEX</Alex>
 
     def _split_domain_kwargs(
         self,
