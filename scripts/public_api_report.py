@@ -467,6 +467,76 @@ class CodeReferenceFilter:
                 "great_expectations/data_context/data_context/base_data_context.py"
             ),
         ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="ValidationAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="run",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="_run",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="SlackNotificationAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="PagerdutyAlertAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="MicrosoftTeamsNotificationAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="OpsgenieAlertAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="EmailAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="StoreValidationResultAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="StoreEvaluationParametersAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="StoreMetricsAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="UpdateDataDocsAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="CloudNotificationAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="SNSNotificationAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
     ]
 
     DEFAULT_EXCLUDES: List[IncludeExcludeDefinition] = [
