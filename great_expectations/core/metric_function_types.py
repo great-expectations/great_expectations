@@ -42,9 +42,7 @@ class MetricPartialFunctionTypes(enum.Enum):
         ]:
             return MetricPartialFunctionTypeSuffixes.CONDITION.value
 
-        if self.name in [
-            "AGGREGATE_FN",
-        ]:
+        if self.name == "AGGREGATE_FN":
             return MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value
 
         return ""

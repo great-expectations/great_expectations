@@ -765,7 +765,7 @@ configuration included.
         rules=rules,
         batch_list=batch_list,
         batch_request=batch_request,
-        recompute_existing_parameter_values=False,
+        runtime_configuration=None,
         reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
         variables_directives_list=variables_directives_list,
         domain_type_directives_list=domain_type_directives_list,

@@ -68,7 +68,6 @@ class MetricMultiBatchValuesCalculator:
                     parameter_computation_impl=None,
                     batch_list=list(self._validator.batches.values()),
                     batch_request=None,
-                    recompute_existing_parameter_values=False,
                     runtime_configuration=runtime_configuration,
                 )
 

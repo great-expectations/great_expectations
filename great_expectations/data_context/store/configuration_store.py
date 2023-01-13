@@ -150,18 +150,19 @@ class ConfigurationStore(Store):
     def serialization_self_check(self, pretty_print: bool) -> None:
         raise NotImplementedError
 
-    @staticmethod
     def determine_key(
-        name: Optional[str], ge_cloud_id: Optional[str]
+        self, name: Optional[str], ge_cloud_id: Optional[str]
     ) -> Union[GXCloudIdentifier, ConfigurationIdentifier]:
         assert bool(name) ^ bool(
             ge_cloud_id
         ), "Must provide either name or ge_cloud_id."
 
         key: Union[GXCloudIdentifier, ConfigurationIdentifier]
-        if ge_cloud_id:
+        if ge_cloud_id or self.ge_cloud_mode:
             key = GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.CHECKPOINT, cloud_id=ge_cloud_id
+                resource_type=GXCloudRESTResource.CHECKPOINT,
+                cloud_id=ge_cloud_id,
+                resource_name=name,
             )
         else:
             key = ConfigurationIdentifier(configuration_key=name)  # type: ignore[arg-type]
