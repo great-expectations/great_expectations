@@ -398,6 +398,7 @@ class Batch(ExperimentalBaseModel):
     class Config:
         allow_mutation = False
         arbitrary_types_allowed = True
+        strict_types = True
         validate_assignment = True
 
     @root_validator(pre=True)
