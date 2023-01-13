@@ -35,6 +35,8 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 LOGGER = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    # TODO: When the Batch class is moved out of the experimental directory, we should try to import the annotations
+    #       from core.batch so we no longer need to call Batch.update_forward_refs() before instantiation.
     from great_expectations.core.batch import BatchData, BatchDefinition, BatchMarkers
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.validator.computed_metric import MetricValue
