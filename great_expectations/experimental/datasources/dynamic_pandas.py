@@ -1,10 +1,22 @@
 import inspect
 import logging
+import sys
 from pprint import pformat as pf
-from typing import Callable, Dict, List, NamedTuple, Sequence, Tuple, Type, Union
+from typing import (
+    Callable,
+    Dict,
+    List,
+    NamedTuple,
+    Sequence,
+    Tuple,
+    Type,
+    Union,
+    _eval_type,
+)
 
 import pandas as pd
 import pydantic
+from pydantic.typing import resolve_annotations
 from typing_extensions import TypeAlias, reveal_type
 
 logger = logging.getLogger(__file__)
@@ -51,11 +63,34 @@ def _get_default_value(
     return default
 
 
+def _evaluate_annotation_str(annotation_str: str) -> Type:
+    base_globals = None
+    try:
+        module = sys.modules["pandas.io.api"]
+    except KeyError:
+        # happens occasionally, see https://github.com/pydantic/pydantic/issues/2363
+        pass
+    else:
+        base_globals = module.__dict__
+    return _eval_type(annotation_str, base_globals, None)
+
+
 def _get_annotation_type(param: inspect.Parameter) -> Type:
+    """
+    https://docs.python.org/3/howto/annotations.html#manually-un-stringizing-stringized-annotations
+    """
     # TODO: parse the annotation string
     annotation = param.annotation
     print("_get_annotation_type", type(annotation), annotation)
-    return annotation
+    union_parts = annotation.split(" | ")
+    str_to_eval: Union[str, None] = None
+    if len(union_parts) > 1:
+        # print("Union", union_parts)
+        str_to_eval = f"Union[{', '.join(union_parts)}]"
+    else:
+        str_to_eval = union_parts[0]
+    print(f"{str_to_eval=}")
+    return _evaluate_annotation_str(str_to_eval)
 
 
 def _to_pydantic_fields(
