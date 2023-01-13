@@ -599,9 +599,9 @@ class ExecutionEngine(ABC):
                 # metric_fn_type: Union[MetricFunctionTypes, MetricPartialFunctionTypes] = getattr(metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE)
                 # TODO: <Alex>ALEX</Alex>
                 # TODO: <Alex>ALEX</Alex>
-                metric_fn_type: Union[
-                    MetricFunctionTypes, MetricPartialFunctionTypes
-                ] = getattr(metric_fn, "metric_fn_type")
+                # metric_fn_type: Union[
+                #     MetricFunctionTypes, MetricPartialFunctionTypes
+                # ] = getattr(metric_fn, "metric_fn_type")
                 # TODO: <Alex>ALEX</Alex>
                 # TODO: <Alex>ALEX</Alex>
                 # if not metric_fn_type:
@@ -880,14 +880,8 @@ class ExecutionEngine(ABC):
         )
 
         persistable: bool = (
-            metric_fn
-            and metric_fn_type
-            and metric_fn_type
-            in [
-                MetricFunctionTypes.VALUE,
-                MetricPartialFunctionTypes.AGGREGATE_FN,
-            ]
-        )
+            metric_fn and (metric_fn_type == MetricFunctionTypes.VALUE)
+        ) or (metric_fn is None)
 
         return persistable
 
