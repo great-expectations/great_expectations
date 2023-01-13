@@ -1605,7 +1605,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             # attr defined mypy error
             execution_engine = batch_list[-1].execution_engine
         else:
-            execution_engine = self.datasources[
+            execution_engine = self.datasources[  # type: ignore[union-attr]
                 batch_list[-1].batch_definition.datasource_name
             ].execution_engine
 
