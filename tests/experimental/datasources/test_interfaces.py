@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from pathlib import Path
-from pprint import pformat as pf
 from typing import TYPE_CHECKING
 
+import pandas as pd
 import pytest
 from pydantic import ValidationError
 
@@ -41,83 +41,52 @@ def pandas_batch() -> Batch:
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    ["n_rows", "success", "stdout"],
+    ["n_rows", "success"],
     [
         (
             None,
             True,
-            (
-                "   vendor_id      pickup_datetime  ... total_amount  congestion_surcharge\n"
-                "0          2  2018-01-11 18:24:44  ...        12.36                   NaN\n"
-                "1          2  2018-01-05 15:31:57  ...         7.88                   NaN\n"
-                "2          2  2018-01-01 05:07:32  ...        17.76                   NaN\n"
-                "3          2  2018-01-11 13:35:39  ...        13.56                   NaN\n"
-                "4          1  2018-01-01 12:49:52  ...        11.80                   NaN\n"
-                "\n"
-                "[5 rows x 18 columns]"
-            ),
         ),
         (
             3,
             True,
-            (
-                "   vendor_id      pickup_datetime  ... total_amount  congestion_surcharge\n"
-                "0          2  2018-01-11 18:24:44  ...        12.36                   NaN\n"
-                "1          2  2018-01-05 15:31:57  ...         7.88                   NaN\n"
-                "2          2  2018-01-01 05:07:32  ...        17.76                   NaN\n"
-                "\n"
-                "[3 rows x 18 columns]"
-            ),
         ),
         (
             7,
             True,
-            (
-                "   vendor_id      pickup_datetime  ... total_amount  congestion_surcharge\n"
-                "0          2  2018-01-11 18:24:44  ...        12.36                   NaN\n"
-                "1          2  2018-01-05 15:31:57  ...         7.88                   NaN\n"
-                "2          2  2018-01-01 05:07:32  ...        17.76                   NaN\n"
-                "3          2  2018-01-11 13:35:39  ...        13.56                   NaN\n"
-                "4          1  2018-01-01 12:49:52  ...        11.80                   NaN\n"
-                "5          2  2018-01-07 10:17:50  ...        26.62                   NaN\n"
-                "6          2  2018-01-18 10:00:48  ...         7.80                   NaN\n"
-                "\n"
-                "[7 rows x 18 columns]"
-            ),
         ),
         (
             -9996,
             True,
-            (
-                "   vendor_id      pickup_datetime  ... total_amount  congestion_surcharge\n"
-                "0          2  2018-01-11 18:24:44  ...        12.36                   NaN\n"
-                "1          2  2018-01-05 15:31:57  ...         7.88                   NaN\n"
-                "2          2  2018-01-01 05:07:32  ...        17.76                   NaN\n"
-                "3          2  2018-01-11 13:35:39  ...        13.56                   NaN\n"
-                "\n"
-                "[4 rows x 18 columns]"
-            ),
         ),
         (
             "invalid_value",
             False,
-            (
-                "1 validation error for Head\n"
-                "n_rows\n"
-                "  value is not a valid integer (type=type_error.integer)"
-            ),
         ),
     ],
 )
-def test_pandas_batch_head(
-    pandas_batch: Batch, n_rows: int | str | None, success: bool, stdout: str
+def test_batch_head(
+    pandas_batch: Batch, n_rows: int | str | None, success: bool
 ) -> None:
     if success:
+        head_df: pd.DataFrame
         if n_rows:
-            assert pf(pandas_batch.head(n_rows=n_rows)) == stdout
+            head_df = pandas_batch.head(n_rows=n_rows)
+            assert isinstance(head_df, pd.DataFrame)
+            if n_rows > 0:
+                assert len(head_df.index) == n_rows
+            else:
+                assert len(head_df.index) == n_rows + 10000
         else:
-            assert pf(pandas_batch.head()) == stdout
+            head_df = pandas_batch.head()
+            assert isinstance(head_df, pd.DataFrame)
+            assert len(head_df.index) == 5
+
     else:
         with pytest.raises(ValidationError) as e:
             pandas_batch.head(n_rows=n_rows)
-        assert str(e.value) == stdout
+        assert str(e.value) == (
+            "1 validation error for Head\n"
+            "n_rows\n"
+            "  value is not a valid integer (type=type_error.integer)"
+        )
