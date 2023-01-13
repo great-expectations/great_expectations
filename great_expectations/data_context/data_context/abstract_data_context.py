@@ -146,7 +146,6 @@ except ImportError:
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-    from great_expectations.core.batch import BatchDefinition
     from great_expectations.data_context.store import (
         CheckpointStore,
         EvaluationParameterStore,
@@ -1606,9 +1605,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             # attr defined mypy error
             execution_engine = batch_list[-1].execution_engine
         else:
-            # TODO: Remove this isinstance check once experimental.datasource.interfaces.Batch.batch_definition can be
-            #  annotated more narrowly as BatchDefinition.
-            assert isinstance(batch_list[-1].batch_definition, BatchDefinition)
             execution_engine = self.datasources[
                 batch_list[-1].batch_definition.datasource_name
             ].execution_engine

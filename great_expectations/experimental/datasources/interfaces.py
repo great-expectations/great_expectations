@@ -24,18 +24,18 @@ from pydantic import dataclasses as pydantic_dc
 from pydantic import root_validator, validate_arguments
 from typing_extensions import ClassVar, TypeAlias, TypeGuard
 
-from great_expectations.core.id_dict import BatchKwargs, BatchSpec
+from great_expectations.core.id_dict import BatchSpec
 from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,
 )
 from great_expectations.experimental.datasources.metadatasource import MetaDatasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
-from great_expectations.types import SerializableDictDot
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 LOGGER = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    from great_expectations.core.batch import BatchData, BatchDefinition, BatchMarkers
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.validator.computed_metric import MetricValue
 
@@ -381,7 +381,7 @@ class Batch(ExperimentalBaseModel):
     datasource: Datasource
     data_asset: DataAsset
     batch_request: BatchRequest
-    data: Any  # Due to circular imports we can't use: PandasBatchData | SqlAlchemyBatchData | SparkDFBatchData
+    data: "BatchData"
     id: str = ""
     # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata
     # to a batch so developers may want to namespace any custom metadata they add.
@@ -389,18 +389,13 @@ class Batch(ExperimentalBaseModel):
 
     # TODO: These legacy fields are currently required. They are only used in usage stats so we
     #       should figure out a better way to anonymize and delete them.
-    batch_markers: BatchKwargs = Field(
-        ..., alias="legacy_batch_markers"
-    )  # Due to circular imports we can't use BatchMarkers
+    batch_markers: "BatchMarkers" = Field(..., alias="legacy_batch_markers")
     batch_spec: BatchSpec = Field(..., alias="legacy_batch_spec")
-    batch_definition: SerializableDictDot = Field(
-        ..., alias="legacy_batch_definition"
-    )  # Due to circular imports we can't use BatchDefinition
+    batch_definition: "BatchDefinition" = Field(..., alias="legacy_batch_definition")
 
     class Config:
         allow_mutation = False
         arbitrary_types_allowed = True
-        extra = pydantic.Extra.forbid
         validate_assignment = True
 
     @root_validator(pre=True)

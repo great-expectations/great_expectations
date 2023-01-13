@@ -56,9 +56,6 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
 from great_expectations.util import camel_to_snake, measure_execution_time
 from great_expectations.validator.validator import Validator
 
-if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDefinition
-
 # noinspection PyMethodParameters
 
 
@@ -690,9 +687,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         batch_id: str
         batch: Batch
-        # TODO: Remove this isinstance check once experimental.datasource.interfaces.Batch.batch_definition can be
-        #  annotated more narrowly as BatchDefinition.
-        assert isinstance(batch.batch_definition, BatchDefinition)
         return {
             batch_id: set(
                 deep_convert_properties_iterable_to_id_dict(

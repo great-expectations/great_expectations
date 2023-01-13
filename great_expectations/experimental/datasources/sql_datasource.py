@@ -258,16 +258,23 @@ class TableAsset(DataAsset):
                 )
             # Creating the batch_spec is our hook into the execution engine.
             batch_spec = SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
-            data, markers = self.datasource.execution_engine.get_batch_data_and_markers(
-                batch_spec=batch_spec
-            )
 
             # batch_definition (along with batch_spec and markers) is only here to satisfy a
             # legacy constraint when computing usage statistics in a validator. We hope to remove
             # it in the future.
             # imports are done inline to prevent a circular dependency with core/batch.py
             from great_expectations.core import IDDict
-            from great_expectations.core.batch import BatchDefinition
+            from great_expectations.core.batch import (
+                BatchData,
+                BatchDefinition,
+                BatchMarkers,
+            )
+
+            data: BatchData
+            markers: BatchMarkers
+            data, markers = self.datasource.execution_engine.get_batch_data_and_markers(
+                batch_spec=batch_spec
+            )
 
             batch_definition = BatchDefinition(
                 datasource_name=self.datasource.name,
@@ -275,6 +282,11 @@ class TableAsset(DataAsset):
                 data_asset_name=self.name,
                 batch_identifiers=IDDict(batch_spec["batch_identifiers"]),
                 batch_spec_passthrough=None,
+            )
+            Batch.update_forward_refs(
+                BatchData=BatchData,
+                BatchDefinition=BatchDefinition,
+                BatchMarkers=BatchMarkers,
             )
             batch_list.append(
                 Batch(
