@@ -105,7 +105,7 @@ class BaseCheckpoint(ConfigPeer):
         profilers: Optional[List[dict]] = None,
         run_id: Optional[Union[str, RunIdentifier]] = None,
         run_name: Optional[str] = None,
-        run_time: Optional[Union[str, datetime.datetime]] = None,
+        run_time: Optional[datetime.datetime] = None,
         result_format: Optional[Union[str, dict]] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> CheckpointResult:
