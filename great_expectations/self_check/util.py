@@ -8,7 +8,6 @@ import platform
 import random
 import re
 import string
-import threading
 import time
 import traceback
 import warnings
@@ -68,6 +67,10 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.profile import ColumnsExistProfiler
+from great_expectations.self_check.sqlalchemy_connection_manager import (
+    LockingConnectionCheck,
+    connection_manager,
+)
 from great_expectations.util import (
     build_in_memory_runtime_context,
     import_library_module,
@@ -75,8 +78,6 @@ from great_expectations.util import (
 from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
-    from sqlalchemy.engine import Connection
-
     from great_expectations.data_context import AbstractDataContext
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
@@ -90,8 +91,6 @@ logger = logging.getLogger(__name__)
 try:
     import sqlalchemy as sqlalchemy
     from sqlalchemy import create_engine
-
-    # noinspection PyProtectedMember
     from sqlalchemy.engine import Engine
     from sqlalchemy.exc import SQLAlchemyError
 except ImportError:
@@ -511,52 +510,6 @@ BACKEND_TO_ENGINE_NAME_DICT = {
 }
 
 BACKEND_TO_ENGINE_NAME_DICT.update({name: "sqlalchemy" for name in SQL_DIALECT_NAMES})
-
-
-class SqlAlchemyConnectionManager:
-    def __init__(self) -> None:
-        self.lock = threading.Lock()
-        self._connections: Dict[str, "Connection"] = {}  # noqa: F821
-
-    def get_engine(self, connection_string):
-        if sqlalchemy is not None:
-            with self.lock:
-                if connection_string not in self._connections:
-                    try:
-                        engine = create_engine(connection_string)
-                        conn = engine.connect()
-                        self._connections[connection_string] = conn
-                    except (ImportError, SQLAlchemyError) as e:
-                        print(
-                            f'Unable to establish connection with {connection_string} -- exception "{e}" occurred.'
-                        )
-                        raise
-                return self._connections[connection_string]
-        return None
-
-
-connection_manager = SqlAlchemyConnectionManager()
-
-
-class LockingConnectionCheck:
-    def __init__(self, sa, connection_string) -> None:
-        self.lock = threading.Lock()
-        self.sa = sa
-        self.connection_string = connection_string
-        self._is_valid = None
-
-    def is_valid(self):
-        with self.lock:
-            if self._is_valid is None:
-                try:
-                    engine = self.sa.create_engine(self.connection_string)
-                    conn = engine.connect()
-                    conn.close()
-                    self._is_valid = True
-                except (ImportError, self.sa.exc.SQLAlchemyError) as e:
-                    print(f"{str(e)}")
-                    self._is_valid = False
-            return self._is_valid
 
 
 def get_sqlite_connection_url(sqlite_db_path):
