@@ -178,12 +178,6 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
                     "out": {"success": False},
                 },
             ],
-            "test_backends": [
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite"],
-                }
-            ],
         }
     ]
 

@@ -397,7 +397,7 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
                             "other": -7127504315667345025,
                         },
                     },
-                    "suppress_test_for": ["sqlite"],
+                    "only_for": ["bigquery"],
                 },
                 {
                     "title": "for bigquery - negative_test_with_checksum_not_equal",
@@ -415,16 +415,7 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
                             "other": -2656867619187774560,
                         },
                     },
-                    "suppress_test_for": ["sqlite"],
-                },
-            ],
-            "test_backends": [
-                {
-                    "backend": "sqlalchemy",
-                    # "dialects": ['sqlite', 'bigquery',],
-                    "dialects": [
-                        "sqlite",
-                    ],
+                    "only_for": ["bigquery"],
                 },
             ],
         }
