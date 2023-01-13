@@ -382,7 +382,7 @@ class Batch(ExperimentalBaseModel):
     data_asset: DataAsset
     batch_request: BatchRequest
     data: Any  # Due to circular imports we can't use: PandasBatchData | SqlAlchemyBatchData | SparkDFBatchData
-    id: str
+    id: Optional[str]
     # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata
     # to a batch so developers may want to namespace any custom metadata they add.
     metadata: Dict[str, Any] = {}
@@ -409,7 +409,7 @@ class Batch(ExperimentalBaseModel):
         options_list = []
         for k, v in values["batch_request"].options.items():
             options_list.append(f"{k}_{v}")
-        values["id"]: str = "-".join(
+        values["id"] = "-".join(
             [values["datasource"].name, values["data_asset"].name, *options_list]
         )
         return values

@@ -9,9 +9,10 @@ from pydantic import ValidationError
 
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.experimental.datasources import PandasDatasource
-from great_expectations.experimental.datasources.interfaces import Batch, BatchRequest
+from great_expectations.experimental.datasources.interfaces import BatchRequest
 
 if TYPE_CHECKING:
+    from great_expectations.experimental.datasources.interfaces import Batch
     from great_expectations.experimental.datasources.pandas_datasource import CSVAsset
 
 
