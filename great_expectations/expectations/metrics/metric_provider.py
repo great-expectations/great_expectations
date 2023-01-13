@@ -245,7 +245,8 @@ support "{MetricFunctionTypes.VALUE}" and "{MetricPartialFunctionTypes.AGGREGATE
         if execution_engine is None:
             return dependencies
 
-        metric_name = metric.metric_name
+        metric_name: str = metric.metric_name
+
         try:
             _ = get_metric_provider(
                 f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
