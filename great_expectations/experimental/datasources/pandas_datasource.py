@@ -17,6 +17,7 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     BatchRequestError,
     BatchRequestOptions,
+    BatchSortersDefinition,
     DataAsset,
     Datasource,
 )
@@ -164,8 +165,7 @@ class CSVAsset(DataAsset):
                     legacy_batch_definition=batch_definition,
                 )
             )
-        # TODO: implement sorters
-        # self._sort_batches(batch_list)
+        self.sort_batches(batch_list)
         return batch_list
 
 
@@ -178,6 +178,7 @@ class PandasDatasource(Datasource):
     name: str
     assets: Dict[str, CSVAsset] = {}
 
+    @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
         """Return the PandasExecutionEngine unless the override is set"""
         from great_expectations.execution_engine.pandas_execution_engine import (
@@ -187,7 +188,11 @@ class PandasDatasource(Datasource):
         return PandasExecutionEngine
 
     def add_csv_asset(
-        self, name: str, data_path: PathStr, regex: Union[str, re.Pattern]
+        self,
+        name: str,
+        data_path: PathStr,
+        regex: Union[str, re.Pattern],
+        order_by: Optional[BatchSortersDefinition] = None,
     ) -> CSVAsset:
         """Adds a csv asset to this pandas datasource
 
@@ -200,5 +205,6 @@ class PandasDatasource(Datasource):
             name=name,
             path=data_path,  # type: ignore[arg-type]  # str will be coerced to Path
             regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
+            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
         )
         return self.add_asset(asset)

@@ -516,16 +516,19 @@ class ExecutionEngine(ABC):
                     metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE
                 )
                 if isinstance(
-                    metric_fn_type, MetricFunctionTypes
+                    metric_fn_type, (MetricFunctionTypes, MetricPartialFunctionTypes)
                 ) and metric_fn_type not in [
                     MetricPartialFunctionTypes.MAP_FN,
                     MetricPartialFunctionTypes.MAP_SERIES,
+                    MetricPartialFunctionTypes.WINDOW_FN,
                     MetricPartialFunctionTypes.MAP_CONDITION_FN,
                     MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
-                    MetricPartialFunctionTypes.WINDOW_FN,
                     MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
                     MetricPartialFunctionTypes.AGGREGATE_FN,
                     MetricFunctionTypes.VALUE,
+                    MetricFunctionTypes.MAP_VALUES,
+                    MetricFunctionTypes.MAP_VALUES,
+                    MetricFunctionTypes.AGGREGATE_VALUE,
                 ]:
                     logger.warning(
                         f'Unrecognized metric function type while trying to resolve "{metric_to_resolve.id}".'

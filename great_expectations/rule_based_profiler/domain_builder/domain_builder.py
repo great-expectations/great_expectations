@@ -50,6 +50,7 @@ class DomainBuilder(ABC, Builder):
         variables: Optional[ParameterContainer] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
         """
         Args:
@@ -57,6 +58,7 @@ class DomainBuilder(ABC, Builder):
             variables: attribute name/value pairs
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
 
         Returns:
             List of Domain objects.
@@ -69,7 +71,11 @@ class DomainBuilder(ABC, Builder):
             batch_request=batch_request,
         )
 
-        return self._get_domains(rule_name=rule_name, variables=variables)
+        return self._get_domains(
+            rule_name=rule_name,
+            variables=variables,
+            runtime_configuration=runtime_configuration,
+        )
 
     @property
     @abstractmethod
@@ -81,6 +87,7 @@ class DomainBuilder(ABC, Builder):
         self,
         rule_name: str,
         variables: Optional[ParameterContainer] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
         """
         _get_domains is the primary workhorse for the DomainBuilder
@@ -93,6 +100,7 @@ class DomainBuilder(ABC, Builder):
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
         variables: Optional[ParameterContainer] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> Dict[str, int]:
         if validator is None:
             validator = self.get_validator(variables=variables)
@@ -122,6 +130,7 @@ class DomainBuilder(ABC, Builder):
         ] = get_resolved_metrics_by_key(
             validator=validator,  # type: ignore[arg-type] # could be None
             metric_configurations_by_key=metric_configurations_by_batch_id,
+            runtime_configuration=runtime_configuration,
         )
 
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
