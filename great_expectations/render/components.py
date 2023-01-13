@@ -742,11 +742,13 @@ class RenderedAtomicContent(RenderedContent):
         name: Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType],
         value: RenderedAtomicValue,
         value_type: Optional[str] = None,
+        exception: Optional[str] = None,
     ) -> None:
         # str conversion is performed to ensure Enum value is what is serialized
         self.name = str(name)
         self.value = value
         self.value_type = value_type
+        self.exception = exception
 
     def __repr__(self) -> str:
         return json.dumps(self.to_json_dict(), indent=2)
@@ -767,10 +769,25 @@ class RenderedAtomicContentSchema(Schema):
     name = fields.String(required=False, allow_none=True)
     value = fields.Nested(RenderedAtomicValueSchema(), required=True, allow_none=False)
     value_type = fields.String(required=True, allow_none=False)
+    exception = fields.String(required=False, allow_none=True)
+
+    REMOVE_KEYS_IF_NONE = [
+        "exception",
+    ]
 
     @post_load
     def make_rendered_atomic_content(self, data, **kwargs):
         return RenderedAtomicContent(**data)
+
+    @post_dump
+    def clean_null_attrs(self, data: dict, **kwargs: dict) -> dict:
+        """Removes the attributes in RenderedAtomicContentSchema.REMOVE_KEYS_IF_NONE during serialization if
+        their values are None."""
+        data = deepcopy(data)
+        for key in RenderedAtomicContentSchema.REMOVE_KEYS_IF_NONE:
+            if key in data and data[key] is None:
+                data.pop(key)
+        return data
 
 
 renderedAtomicValueSchema = RenderedAtomicValueSchema()
