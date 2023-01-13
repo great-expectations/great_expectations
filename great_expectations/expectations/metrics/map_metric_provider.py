@@ -3588,10 +3588,11 @@ class MapMetricProvider(MetricProvider):
 
         metric_suffix: str = ".unexpected_count"
 
-        has_aggregate_fn: bool = False
+        if metric_name.endswith(metric_suffix):
+            has_aggregate_fn: bool = False
 
-        if execution_engine is not None:
-            if metric_name.endswith(metric_suffix):
+            if execution_engine is not None:
+                # Documentation in "MetricProvider._register_metric_functions()" explains registration/dependency protocol.
                 try:
                     _ = get_metric_provider(
                         f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
@@ -3601,30 +3602,36 @@ class MapMetricProvider(MetricProvider):
                 except gx_exceptions.MetricProviderError:
                     pass
 
-        # Documentation in "MetricProvider._register_metric_functions()" explains registration/dependency protocol.
-        if has_aggregate_fn:
-            dependencies["metric_partial_fn"] = MetricConfiguration(
-                metric_name=f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
-                metric_domain_kwargs=metric.metric_domain_kwargs,
-                metric_value_kwargs=base_metric_value_kwargs,
-            )
-        else:
-            dependencies["unexpected_condition"] = MetricConfiguration(
-                metric_name=f"{metric_name[:-len(metric_suffix)]}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
-                metric_domain_kwargs=metric.metric_domain_kwargs,
-                metric_value_kwargs=base_metric_value_kwargs,
-            )
+            if has_aggregate_fn:
+                dependencies["metric_partial_fn"] = MetricConfiguration(
+                    metric_name=f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+                    metric_domain_kwargs=metric.metric_domain_kwargs,
+                    metric_value_kwargs=base_metric_value_kwargs,
+                )
+            else:
+                dependencies["unexpected_condition"] = MetricConfiguration(
+                    metric_name=f"{metric_name[:-len(metric_suffix)]}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
+                    metric_domain_kwargs=metric.metric_domain_kwargs,
+                    metric_value_kwargs=base_metric_value_kwargs,
+                )
 
         # MapMetric uses "condition" metric to build "unexpected_count.aggregate_fn" and other listed metrics as well.
-        for metric_suffix in [
-            f".unexpected_count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
-            ".unexpected_value_counts",
-            ".unexpected_index_query",
-            ".unexpected_index_list",
-            ".filtered_row_count",
-            ".unexpected_values",
-            ".unexpected_rows",
-        ]:
+        unexpected_condition_dependent_metric_name_suffixes: List[str] = list(
+            filter(
+                lambda element: metric_name.endswith(element),
+                [
+                    f".unexpected_count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
+                    ".unexpected_value_counts",
+                    ".unexpected_index_query",
+                    ".unexpected_index_list",
+                    ".filtered_row_count",
+                    ".unexpected_values",
+                    ".unexpected_rows",
+                ],
+            )
+        )
+        if len(unexpected_condition_dependent_metric_name_suffixes) == 1:
+            metric_suffix = unexpected_condition_dependent_metric_name_suffixes[0]
             if metric_name.endswith(metric_suffix):
                 dependencies["unexpected_condition"] = MetricConfiguration(
                     metric_name=f"{metric_name[:-len(metric_suffix)]}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
