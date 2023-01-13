@@ -67,12 +67,14 @@ def _evaluate_annotation_str(annotation_str: str) -> Type:
     base_globals = None
     try:
         module = sys.modules["pandas.io.api"]
-    except KeyError:
+    except KeyError as err:
         # happens occasionally, see https://github.com/pydantic/pydantic/issues/2363
-        pass
+        logger.error(f"{err.__class__.__name__}:{err}")
     else:
         base_globals = module.__dict__
-    return _eval_type(annotation_str, base_globals, None)
+    type_ = _eval_type(annotation_str, base_globals, None)
+    # assert not isinstance(type_, str), type(type_)
+    return type_
 
 
 def _get_annotation_type(param: inspect.Parameter) -> Type:
@@ -81,15 +83,15 @@ def _get_annotation_type(param: inspect.Parameter) -> Type:
     """
     # TODO: parse the annotation string
     annotation = param.annotation
-    print("_get_annotation_type", type(annotation), annotation)
+    print(type(annotation), annotation)
+
     union_parts = annotation.split(" | ")
-    str_to_eval: Union[str, None] = None
+    str_to_eval: str
     if len(union_parts) > 1:
-        # print("Union", union_parts)
         str_to_eval = f"Union[{', '.join(union_parts)}]"
     else:
         str_to_eval = union_parts[0]
-    print(f"{str_to_eval=}")
+    # print(f"{str_to_eval=}")
     return _evaluate_annotation_str(str_to_eval)
 
 
@@ -135,3 +137,5 @@ if __name__ == "__main__":
 
     model = _create_pandas_asset_model("POCAssetModel", fields)
     print(model)
+    # model.update_forward_refs()
+    # print(model(filepath_or_buffer=__file__))
