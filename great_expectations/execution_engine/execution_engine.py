@@ -495,7 +495,7 @@ class ExecutionEngine(ABC):
                         metric_partial_aggregate_fn,
                         compute_domain_kwargs,
                         accessor_domain_kwargs,
-                    ) = resolved_metric_dependencies_by_metric_name.pop(  # type: ignore[misc,assignment]
+                    ) = resolved_metric_dependencies_by_metric_name.pop(
                         "metric_partial_fn"
                     )
                 except KeyError as e:
