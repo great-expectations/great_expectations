@@ -242,7 +242,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
         variables_directives_list: Optional[
             List[RuntimeEnvironmentVariablesDirectives]
@@ -260,7 +260,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             rules: name/(configuration-dictionary) (overrides)
             batch_list: Explicit list of Batch objects to supply data at runtime
             batch_request: Explicit batch_request used to supply data at runtime
-            recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
             reconciliation_directives: directives for how each rule component should be overwritten
             variables_directives_list: additional/override runtime variables directives (modify "BaseRuleBasedProfiler")
             domain_type_directives_list: additional/override runtime domain directives (modify "BaseRuleBasedProfiler")
@@ -324,7 +324,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 variables=effective_variables,
                 batch_list=batch_list,
                 batch_request=batch_request,
-                recompute_existing_parameter_values=recompute_existing_parameter_values,
+                runtime_configuration=runtime_configuration,
                 reconciliation_directives=reconciliation_directives,
                 rule_state=RuleState(),
             )
@@ -1072,7 +1072,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             rules=rules,
             batch_list=batch_list,
             batch_request=batch_request,
-            recompute_existing_parameter_values=False,
+            runtime_configuration=None,
             reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
             variables_directives_list=None,
             domain_type_directives_list=None,
@@ -1105,7 +1105,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             rules=rules,
             batch_list=batch_list,
             batch_request=batch_request,
-            recompute_existing_parameter_values=False,
+            runtime_configuration=None,
             reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
             variables_directives_list=None,
             domain_type_directives_list=None,
