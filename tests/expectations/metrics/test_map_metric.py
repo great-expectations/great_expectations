@@ -9,6 +9,7 @@ from great_expectations.core import (
 from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.metric_function_types import (
+    MetricPartialFunctionTypes,
     MetricPartialFunctionTypeSuffixes,
 )
 from great_expectations.core.util import convert_to_json_serializable
@@ -298,7 +299,7 @@ def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_
     )
 
     metric = MetricConfiguration(
-        metric_name=f"column_values.nonnull.unexpected_count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
+        metric_name=f"column_values.nonnull.unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )

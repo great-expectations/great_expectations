@@ -348,6 +348,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> Optional[ExpectationConfiguration]:
         """Returns either and ExpectationConfiguration object or None depending on evaluation of condition"""
         parameter_name: str

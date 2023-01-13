@@ -117,10 +117,12 @@ def test_batches_are_accessible(
             )
         )
         assert metric_max == (total_batches + 1) - batch_num
-        metric_value_set = validator.get_metric(
-            MetricConfiguration(
-                "column.distinct_values",
-                metric_domain_kwargs={"column": "string_cardinality_3"},
+        metric_value_set = set(
+            validator.get_metric(
+                MetricConfiguration(
+                    "column.distinct_values",
+                    metric_domain_kwargs={"column": "string_cardinality_3"},
+                )
             )
         )
         assert metric_value_set == {"category0", "category1", "category2"}

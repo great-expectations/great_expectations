@@ -341,6 +341,7 @@ def build_gallery(
             diagnostics = impl().run_diagnostics(
                 ignore_suppress=ignore_suppress,
                 ignore_only_for=ignore_only_for,
+                for_gallery=True,
                 debug_logger=logger,
                 only_consider_these_backends=only_consider_these_backends,
                 context=context,

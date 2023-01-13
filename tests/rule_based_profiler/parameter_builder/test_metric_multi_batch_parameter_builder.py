@@ -54,7 +54,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_default(
         rule_name="my_rule",
     )
     parameter_container = ParameterContainer(parameter_nodes=None)
-    parameters: Dict[str, ParameterContainer] = {
+    parameters: Dict[str, ParameterContainer | None] = {
         domain.id: parameter_container,
     }
 
@@ -67,6 +67,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_default(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
@@ -137,7 +138,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_no(
         rule_name="my_rule",
     )
     parameter_container = ParameterContainer(parameter_nodes=None)
-    parameters: Dict[str, ParameterContainer] = {
+    parameters: Dict[str, ParameterContainer | None] = {
         domain.id: parameter_container,
     }
 
@@ -154,6 +155,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_no(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
@@ -224,7 +226,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_yes(
         rule_name="my_rule",
     )
     parameter_container = ParameterContainer(parameter_nodes=None)
-    parameters: Dict[str, ParameterContainer] = {
+    parameters: Dict[str, ParameterContainer | None] = {
         domain.id: parameter_container,
     }
 
@@ -241,6 +243,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_yes(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (

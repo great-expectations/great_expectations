@@ -90,6 +90,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     assert (
@@ -168,6 +169,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     assert (
@@ -246,6 +248,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     assert (
@@ -324,6 +327,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     assert (

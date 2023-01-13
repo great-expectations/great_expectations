@@ -380,9 +380,18 @@ class ColumnDomainBuilder(DomainBuilder):
         self,
         rule_name: str,
         variables: Optional[ParameterContainer] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
         """
         Obtains and returns domains for all columns of a table (or for configured columns, if they exist in the table).
+
+        Args:
+            rule_name: name of Rule object, for which "Domain" objects are obtained.
+            variables: Optional variables to substitute when evaluating.
+            runtime_configuration: Optional[dict] = None,
+
+        Returns:
+            List of domains that match the desired columns and filtering criteria.
         """
         batch_ids: List[str] = self.get_batch_ids(variables=variables)  # type: ignore[assignment] # could be None
 
