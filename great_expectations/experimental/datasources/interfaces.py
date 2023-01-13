@@ -14,11 +14,13 @@ from typing import (
     Set,
     Type,
     TypeVar,
+    Union,
 )
 
 import pydantic
-from pydantic import root_validator
-from typing_extensions import ClassVar, TypeAlias
+from pydantic import Field, root_validator
+from pydantic import dataclasses as pydantic_dc
+from typing_extensions import ClassVar, TypeAlias, TypeGuard
 
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec
 from great_expectations.experimental.datasources.experimental_base_model import (
@@ -58,6 +60,59 @@ class BatchRequestError(Exception):
     pass
 
 
+@pydantic_dc.dataclass(frozen=True)
+class BatchSorter:
+    key: str
+    reverse: bool = False
+
+
+BatchSortersDefinition: TypeAlias = Union[List[BatchSorter], List[str]]
+
+
+def _is_batch_sorter_list(
+    sorters: BatchSortersDefinition,
+) -> TypeGuard[list[BatchSorter]]:
+    if len(sorters) == 0 or isinstance(sorters[0], BatchSorter):
+        return True
+    return False
+
+
+def _is_str_sorter_list(sorters: BatchSortersDefinition) -> TypeGuard[list[str]]:
+    if len(sorters) > 0 and isinstance(sorters[0], str):
+        return True
+    return False
+
+
+def _batch_sorter_from_list(sorters: BatchSortersDefinition) -> List[BatchSorter]:
+    if _is_batch_sorter_list(sorters):
+        return sorters
+    # mypy doesn't successfully type-narrow sorters to a List[str] here so we use
+    # another TypeGuard. We could cast instead which may be slightly faster.
+    if _is_str_sorter_list(sorters):
+        return [_batch_sorter_from_str(sorter) for sorter in sorters]
+    # This should never be reached because of static typing but is necessary because
+    # mypy doesn't know of the if conditions must evaluate to True.
+    raise ValueError(
+        f"sorters is a not a BatchSortersDefinition but is a {type(sorters)}"
+    )
+
+
+def _batch_sorter_from_str(sort_key: str) -> BatchSorter:
+    """Convert a list of strings to BatchSorters
+
+    Args:
+        sort_key: A batch metadata key which will be used to sort batches on a data asset.
+                  This can be prefixed with a + or - to indicate increasing or decreasing
+                  sorting. If not specified, defaults to increasing order.
+    """
+    if sort_key[0] == "-":
+        return BatchSorter(key=sort_key[1:], reverse=True)
+    elif sort_key[0] == "+":
+        return BatchSorter(key=sort_key[1:], reverse=False)
+    else:
+        return BatchSorter(key=sort_key, reverse=False)
+
+
 class DataAsset(ExperimentalBaseModel):
     # To subclass a DataAsset one must define `type` as a Class literal explicitly on the sublass
     # as well as implementing the methods in the `Abstract Methods` section below.
@@ -67,6 +122,7 @@ class DataAsset(ExperimentalBaseModel):
     # * type: Literal["csv"] = "csv"
     name: str
     type: str
+    order_by: List[BatchSorter] = Field(default_factory=list)
 
     # non-field private attrs
     _datasource: Datasource = pydantic.PrivateAttr()
@@ -155,6 +211,43 @@ class DataAsset(ExperimentalBaseModel):
                 f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
             )
 
+    # Sorter methods
+    @pydantic.validator("order_by", pre=True, each_item=True)
+    def _parse_order_by_sorter(
+        cls, v: Union[str, BatchSorter]
+    ) -> Union[BatchSorter, dict]:
+        if isinstance(v, str):
+            if not v:
+                raise ValueError("empty string")
+            return _batch_sorter_from_str(v)
+        return v
+
+    def add_sorters(
+        self: DataAssetType, sorters: BatchSortersDefinition
+    ) -> DataAssetType:
+        # NOTE: (kilo59) we could use pydantic `validate_assignment` for this
+        # https://docs.pydantic.dev/usage/model_config/#options
+        self.order_by = _batch_sorter_from_list(sorters)
+        return self
+
+    def sort_batches(self, batch_list: List[Batch]) -> None:
+        """Sorts batch_list in place in the order configured in this DataAsset.
+
+        Args:
+            batch_list: The list of batches to sort in place.
+        """
+        for sorter in reversed(self.order_by):
+            try:
+                batch_list.sort(
+                    key=lambda b: b.metadata[sorter.key],
+                    reverse=sorter.reverse,
+                )
+            except KeyError as e:
+                raise KeyError(
+                    f"Trying to sort {self.name} table asset batches on key {sorter.key} "
+                    "which isn't available on all batches."
+                ) from e
+
 
 # If a Datasource can have more than 1 DataAssetType, this will need to change.
 DataAssetType = TypeVar("DataAssetType", bound=DataAsset)
@@ -228,7 +321,7 @@ class Datasource(
 
     def _execution_engine_type(self) -> Type[ExecutionEngine]:
         """Returns the execution engine to be used"""
-        return self.execution_engine_override or self.execution_engine_type()
+        return self.execution_engine_override or self.execution_engine_type
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
@@ -268,6 +361,7 @@ class Datasource(
         return asset
 
     # Abstract Methods
+    @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
         """Return the ExecutionEngine type use for this Datasource"""
         raise NotImplementedError(

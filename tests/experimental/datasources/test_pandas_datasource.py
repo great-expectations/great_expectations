@@ -1,6 +1,7 @@
 import os
 from dataclasses import dataclass
 from pathlib import Path
+from typing import List
 
 import pytest
 
@@ -133,7 +134,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
     # assert there are files that are not csv files
     assert any([not file.endswith("csv") for file in all_files])
     # assert there are 12 files from 2018
-    files_for_2018 = [file for file in all_files if file.find("2018") > 0]
+    files_for_2018 = [file for file in all_files if file.find("2018") >= 0]
     assert len(files_for_2018) == 12
 
     asset = pandas_datasource.add_csv_asset(
@@ -160,3 +161,79 @@ def test_get_batch_list_from_partially_specified_batch_request(
         for batch in batches
     }
     assert expected_year_month == batch_year_month
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "order_by",
+    [
+        ["+year", "month"],
+        ["+year", "+month"],
+        ["+year", "-month"],
+        ["year", "month"],
+        ["year", "+month"],
+        ["year", "-month"],
+        ["-year", "month"],
+        ["-year", "+month"],
+        ["-year", "-month"],
+        ["month", "+year"],
+        ["+month", "+year"],
+        ["-month", "+year"],
+        ["month", "year"],
+        ["+month", "year"],
+        ["-month", "year"],
+        ["month", "-year"],
+        ["+month", "-year"],
+        ["-month", "-year"],
+    ],
+)
+def test_pandas_sorter(pandas_datasource, csv_path, order_by):
+    # Verify test directory has files we expect
+    years = ["2018", "2019", "2020"]
+    months = [format(m, "02d") for m in range(1, 13)]
+    all_files = os.listdir(csv_path)
+    # assert there are 12 files for each year
+    for year in years:
+        files_for_year = [
+            file
+            for file in all_files
+            if file.find(f"yellow_tripdata_sample_{year}") == 0
+        ]
+        assert len(files_for_year) == 12
+
+    asset = pandas_datasource.add_csv_asset(
+        name="csv_asset",
+        data_path=csv_path,
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+        order_by=order_by,
+    )
+    batches = asset.get_batch_list_from_batch_request(asset.get_batch_request())
+    assert (len(batches)) == 36
+
+    @dataclass(frozen=True)
+    class TimeRange:
+        key: str
+        range: List[int]
+
+    ordered_years = reversed(years) if "-year" in order_by else years
+    ordered_months = reversed(months) if "-month" in order_by else months
+    if "year" in order_by[0]:
+        ordered = [
+            TimeRange(key="year", range=ordered_years),
+            TimeRange(key="month", range=ordered_months),
+        ]
+    else:
+        ordered = [
+            TimeRange(key="month", range=ordered_months),
+            TimeRange(key="year", range=ordered_years),
+        ]
+
+    batch_index = -1
+    for range1 in ordered[0].range:
+        key1 = ordered[0].key
+        for range2 in ordered[1].range:
+            key2 = ordered[1].key
+            batch_index += 1
+            metadata = batches[batch_index].metadata
+            assert metadata[key1] == range1
+            assert metadata[key2] == range2

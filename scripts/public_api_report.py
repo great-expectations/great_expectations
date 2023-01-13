@@ -489,6 +489,91 @@ class CodeReferenceFilter:
                 "great_expectations/datasource/batch_kwargs_generator/batch_kwargs_generator.py"
             ),
         ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/databricks_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/glob_reader_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/manual_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/query_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/s3_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/s3_subdir_reader_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/subdir_reader_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/table_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="ValidationOperators are now run from Checkpoints: https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#manually-migrate-v2-checkpoints-to-v3-checkpoints",
+            filepath=pathlib.Path(
+                "great_expectations/validation_operators/types/validation_operator_result.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="ValidationOperators are now run from Checkpoints: https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#manually-migrate-v2-checkpoints-to-v3-checkpoints",
+            filepath=pathlib.Path(
+                "great_expectations/validation_operators/validation_operators.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="ValidationActions are now run from Checkpoints: https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#manually-migrate-v2-checkpoints-to-v3-checkpoints",
+            name="run",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="CLI internal methods should not be part of the public API",
+            filepath=pathlib.Path("great_expectations/cli/datasource.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="CLI internal methods should not be part of the public API",
+            filepath=pathlib.Path("great_expectations/cli/toolkit.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for from datasource_configuration_test_utilities import is_subset",
+            name="is_subset",
+            filepath=pathlib.Path("great_expectations/core/domain.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Already captured in the Data Context",
+            name="test_yaml_config",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/config_validator/yaml_config_validator.py"
+            ),
+        ),
     ]
 
     def __init__(

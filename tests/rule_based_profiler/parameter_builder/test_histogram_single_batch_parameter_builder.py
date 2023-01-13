@@ -73,6 +73,7 @@ def test_histogram_single_batch_parameter_builder_alice(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     expected_parameter_node_as_dict: dict = {
@@ -147,6 +148,7 @@ def test_histogram_single_batch_parameter_builder_alice_null_bins(
                 variables=variables,
                 parameters=parameters,
                 batch_request=batch_request,
+                runtime_configuration=None,
             )
 
         assert (
@@ -209,6 +211,7 @@ def test_histogram_single_batch_parameter_builder_alice_nan_valued_bins(
             variables=variables,
             parameters=parameters,
             batch_request=batch_request,
+            runtime_configuration=None,
         )
 
         expected_parameter_node_as_dict: dict = {
@@ -275,6 +278,7 @@ def test_histogram_single_batch_parameter_builder_alice_wrong_type_bins(
             variables=variables,
             parameters=parameters,
             batch_request=batch_request,
+            runtime_configuration=None,
         )
 
     assert (
@@ -367,6 +371,7 @@ def test_histogram_single_batch_parameter_builder_alice_reduced_bins_count(
             variables=variables,
             parameters=parameters,
             batch_request=batch_request,
+            runtime_configuration=None,
         )
 
         expected_parameter_node_as_dict = {

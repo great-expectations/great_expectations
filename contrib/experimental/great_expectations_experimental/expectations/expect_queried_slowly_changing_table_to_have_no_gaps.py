@@ -177,6 +177,13 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
                     },
                 },
             ],
+            "suppress_test_for": [
+                "mysql",
+                "mssql",
+                "postgresql",
+                "bigquery",
+                "snowflake",
+            ],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -205,13 +212,6 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
                     },
                     "out": {"success": False},
                 },
-            ],
-            "test_backends": [
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite"],
-                },
-                {"backend": "spark", "dialects": None},
             ],
         },
     ]
