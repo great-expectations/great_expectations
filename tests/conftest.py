@@ -7162,6 +7162,7 @@ def taxi_test_file():
         ),
     )
 
+
 @pytest.fixture
 def taxi_test_file_upcase():
     return file_relative_path(
