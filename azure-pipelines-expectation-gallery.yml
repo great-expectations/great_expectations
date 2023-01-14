@@ -52,31 +52,31 @@ variables:
   isManual: $[eq(variables['Build.Reason'], 'Manual')]
 
 stages:
-  - stage: scope_check
-    pool:
-      vmImage: 'ubuntu-20.04'
-    jobs:
-      - job: changes
-        steps:
-          - task: ChangedFiles@1
-            name: CheckChanges
-            inputs:
-              verbose: true
-              rules: |
-                [ContribChanged]
-                contrib/**
-
-                [GEChanged]
-                great_expectations/**/*.py
-                pyproject.toml
-                setup.cfg
-                tests/**
-
-                [ScriptsChanged]
-                assets/scripts/**
-
+  #  - stage: scope_check
+  #    pool:
+  #      vmImage: 'ubuntu-20.04'
+  #    jobs:
+  #      - job: changes
+  #        steps:
+  #          - task: ChangedFiles@1
+  #            name: CheckChanges
+  #            inputs:
+  #              verbose: true
+  #              rules: |
+  #                [ContribChanged]
+  #                contrib/**
+  #
+  #                [GEChanged]
+  #                great_expectations/**/*.py
+  #                pyproject.toml
+  #                setup.cfg
+  #                tests/**
+  #
+  #                [ScriptsChanged]
+  #                assets/scripts/**
+  #
   - stage: deploy_gallery_staging
-    dependsOn: scope_check
+    #    dependsOn: scope_check
     condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
     pool:
       vmImage: 'ubuntu-20.04'
