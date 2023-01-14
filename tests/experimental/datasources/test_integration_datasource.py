@@ -12,6 +12,7 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.expectations.metrics.import_manager import pyspark_sql_DataFrame
 from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     DataAsset,
@@ -405,7 +406,7 @@ def test_batch_head(
         if n_rows is not None:
             # if n_rows is not None we pass it to Batch.head()
             head_df = batch.head(n_rows=n_rows)
-            assert isinstance(head_df, pd.DataFrame)
+            assert isinstance(head_df, (pd.DataFrame, pyspark_sql_DataFrame))
 
             # compute the total number of rows
             resolved_metrics: dict[tuple[str, str, str], MetricValue] = {}
