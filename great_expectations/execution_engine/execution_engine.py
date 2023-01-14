@@ -29,7 +29,6 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     MetricFunctionTypes,
     MetricPartialFunctionTypes,
-    MetricPartialFunctionTypeSuffixes,
 )
 from great_expectations.core.util import (
     AzureUrl,
@@ -548,9 +547,6 @@ class ExecutionEngine(ABC):
         compute_domain_kwargs: dict
         accessor_domain_kwargs: dict
         for metric_to_resolve in metrics_to_resolve:
-            # print(f'\n[ALEX_TEST] [ExecutionEngine._build_direct_and_bundled_metric_computation_configurations()] metric_to_resolve.metric_name: {metric_to_resolve.metric_name} ; TYPE: {str(type(metric_to_resolve.metric_name))}')
-            # print(f'\n[ALEX_TEST] [ExecutionEngine._build_direct_and_bundled_metric_computation_configurations()] metric_to_resolve.metric_domain_kwargs: {metric_to_resolve.metric_domain_kwargs} ; TYPE: {str(type(metric_to_resolve.metric_domain_kwargs))}')
-            # print(f'\n[ALEX_TEST] [ExecutionEngine._build_direct_and_bundled_metric_computation_configurations()] metric_to_resolve.metric_value_kwargs: {metric_to_resolve.metric_value_kwargs} ; TYPE: {str(type(metric_to_resolve.metric_value_kwargs))}')
             resolved_metric_dependencies_by_metric_name = (
                 self._get_computed_metric_evaluation_dependencies_by_metric_name(
                     metric_to_resolve=metric_to_resolve,
@@ -560,8 +556,6 @@ class ExecutionEngine(ABC):
             metric_class, metric_fn = get_metric_provider(
                 metric_name=metric_to_resolve.metric_name, execution_engine=self
             )
-            # print(f'\n[ALEX_TEST] [ExecutionEngine._build_direct_and_bundled_metric_computation_configurations()] METRIC_CLASS: {metric_class} ; TYPE: {str(type(metric_class))}')
-            # print(f'\n[ALEX_TEST] [ExecutionEngine._build_direct_and_bundled_metric_computation_configurations()] METRIC_FN: {metric_fn} ; TYPE: {str(type(metric_fn))}')
             metric_provider_kwargs = {
                 "cls": metric_class,
                 "execution_engine": self,
@@ -584,9 +578,6 @@ class ExecutionEngine(ABC):
                         message=f'Missing metric dependency: {str(e)} for metric "{metric_to_resolve.metric_name}".'
                     )
 
-                # TODO: <Alex>ALEX</Alex>
-                # print(f'\n[ALEX_TEST] [ExecutionEngine._build_direct_and_bundled_metric_computation_configurations()] PARTIAL_FOR_SURE_METRIC_FN: {metric_fn} ; TYPE: {str(type(metric_fn))}')
-                # TODO: <Alex>ALEX</Alex>
                 metric_fn_bundle_configurations.append(
                     MetricComputationConfiguration(
                         metric_configuration=metric_to_resolve,
@@ -752,8 +743,10 @@ class ExecutionEngine(ABC):
                 ],
             ) from e
 
+        # TODO: <Alex>ALEX--Possibility for "computed_metrics_store" with "InMemoryStoreBackend" (more formal keys).
         if self._caching:
             self._metric_cache.update(resolved_metrics)
+        # TODO: <Alex>ALEX</Alex>
 
         return resolved_metrics
 
@@ -835,7 +828,6 @@ class ExecutionEngine(ABC):
         )
         return metric_fn_type == MetricFunctionTypes.VALUE
 
-    # TODO: <Alex>ALEX</Alex>
     @staticmethod
     def _is_metric_resolved(
         metric_configuration: MetricConfiguration,
@@ -859,8 +851,6 @@ class ExecutionEngine(ABC):
                 return True
 
         return False
-
-    # TODO: <Alex>ALEX</Alex>
 
     def _split_domain_kwargs(
         self,
