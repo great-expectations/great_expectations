@@ -391,7 +391,7 @@ def test_batch_head(
     datasource_test_data: tuple[
         AbstractDataContext, Datasource, DataAsset, BatchRequest
     ],
-    n_rows: int | str | None,
+    n_rows: int | float | str | None,
     success: bool,
 ) -> None:
     _, datasource, _, batch_request = datasource_test_data
