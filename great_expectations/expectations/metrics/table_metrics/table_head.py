@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Iterator
+from typing import TYPE_CHECKING, Any, Iterator
 
 import pandas as pd
 
@@ -19,6 +19,9 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
+if TYPE_CHECKING:
+    from great_expectations.expectations.metrics.import_manager import pyspark_sql_Row
+
 
 class TableHead(TableMetricProvider):
     metric_name = "table.head"
@@ -31,9 +34,9 @@ class TableHead(TableMetricProvider):
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
-    ):
+    ) -> pd.DataFrame:
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
@@ -47,9 +50,9 @@ class TableHead(TableMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
-    ):
+    ) -> pd.DataFrame:
         selectable, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
@@ -155,9 +158,9 @@ class TableHead(TableMetricProvider):
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
-    ):
+    ) -> list[pyspark_sql_Row]:
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
