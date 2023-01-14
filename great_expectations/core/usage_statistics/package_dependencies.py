@@ -212,6 +212,10 @@ class GXDependencies:
         "zipcodes",
         # requirements-dev-api-docs-test.txt
         "docstring-parser",
+        # reqs/requirements-dev-cms.txt
+        "alembic",
+        "inflect",
+        "inflection",
     ]
 
     GX_DEV_DEPENDENCIES: Set[str] = set(ALL_GX_DEV_DEPENDENCIES) - set(

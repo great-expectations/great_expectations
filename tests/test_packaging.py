@@ -76,7 +76,6 @@ def test_requirements_files():
 
     assert (
         req_set_dict["requirements.txt"]
-        | req_set_dict["requirements-ms.txt"]
         | req_set_dict["requirements-dev-contrib.txt"]
         | req_set_dict["requirements-dev-test.txt"]
         | req_set_dict["requirements-dev-sqlalchemy.txt"]
@@ -85,11 +84,11 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-excel.txt"]
         | req_set_dict["requirements-dev-pagerduty.txt"]
         | req_set_dict["requirements-dev-spark.txt"]
+        | req_set_dict["requirements-dev-cms.txt"]
     ) == req_set_dict["requirements-dev.txt"]
 
     assert req_set_dict["requirements-dev.txt"] - (
         req_set_dict["requirements.txt"]
-        | req_set_dict["requirements-ms.txt"]
         | req_set_dict["requirements-dev-lite.txt"]
         | req_set_dict["requirements-dev-contrib.txt"]
         | req_set_dict["requirements-dev-test.txt"]
@@ -110,4 +109,5 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-teradata.txt"]
         | req_set_dict["requirements-dev-trino.txt"]
         | req_set_dict["requirements-dev-vertica.txt"]
+        | req_set_dict["requirements-dev-cms.txt"]
     ) <= {"numpy>=1.21.0", "scipy>=1.7.0"}
