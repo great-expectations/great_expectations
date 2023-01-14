@@ -92,16 +92,14 @@ class TableHead(TableMetricProvider):
                     )
                 else:
                     n_rows: int = metric_value_kwargs["n_rows"]
-                    if n_rows < 0:
-                        n_rows *= -1
                     # passing chunksize causes the Iterator to be returned
                     df_chunk_iterator: Iterator[pd.DataFrame] = pd.read_sql_table(
                         table_name=getattr(selectable, "name", None),
                         schema=getattr(selectable, "schema", None),
                         con=execution_engine.engine,
-                        chunksize=n_rows,
+                        chunksize=abs(n_rows),
                     )
-                    if metric_value_kwargs["n_rows"] > 0:
+                    if n_rows > 0:
                         df = next(df_chunk_iterator)
                     else:
                         # if n_rows is negative, remove the last chunk
