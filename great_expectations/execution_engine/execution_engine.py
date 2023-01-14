@@ -26,7 +26,10 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.computed_metrics.computed_metric import ComputedMetric
 from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
+from great_expectations.core.metric_function_types import (
+    MetricFunctionTypes,
+    MetricPartialFunctionTypes,
+)
 from great_expectations.core.util import (
     AzureUrl,
     DBFSPath,
@@ -515,7 +518,8 @@ class ExecutionEngine(ABC):
         metrics_to_resolve = list(
             filter(
                 lambda metric_to_resolve: not self._is_metric_resolved(
-                    metric_configuration=metric_to_resolve, metrics=retrieved_metrics
+                    metric_configuration=metric_to_resolve,
+                    metrics=retrieved_metrics,
                 ),
                 metrics_to_resolve,
             )
