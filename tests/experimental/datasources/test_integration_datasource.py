@@ -386,6 +386,10 @@ def _configure_and_run_data_assistant(
             200000,
             True,
         ),
+        (
+            1,
+            True,
+        ),
     ],
 )
 def test_batch_head(
